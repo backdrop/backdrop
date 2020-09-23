@@ -2116,6 +2116,15 @@ function menu_local_tasks($level = 0) {
         }
         if ($item['access']) {
           $link = $item;
+
+          // Add some classes.
+          $class = str_replace('/%/', '-', $link['path']);
+          $class = str_replace('/', '-', $class);
+          $class_parts = explode('-', $class);
+          $general_class = end($class_parts);
+          $link['localized_options']['attributes']['class'][] = $class;
+          $link['localized_options']['attributes']['class'][] = $general_class;
+
           // The default task is always active. As tabs can be normal items
           // too, so bitmask with MENU_LINKS_TO_PARENT before checking.
           if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
