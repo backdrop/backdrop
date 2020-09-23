@@ -1146,6 +1146,42 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
     $this->assertText(t('The image was resized to fit within the maximum allowed height of 100 pixels.'), 'Image exceeding max height was properly resized.');
   }
+
+  /**
+   * Test for supported image types.
+   */
+  public function testTypeSupport() {
+    $field_name = strtolower($this->randomName());
+    $instance_settings = array(
+      'file_extensions' => 'jpg webp',
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    $path = backdrop_get_path('module', 'image') . '/tests/images';
+    $filename = 'testimage.webp';
+    $files = file_scan_directory($path, '/' . $filename . '/');
+    $webp_image = reset($files);
+    $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
+    $refused_message = t('The specified file %file could not be uploaded. Only files with the following extensions are allowed: %extensions.', array(
+      '%file' => $filename,
+      '%extensions' => 'jpg',
+    ));
+
+    if (version_compare(PHP_VERSION, '7.1.0', '<')) {
+      // PHP versions below 7.1.0 do not support webp.
+      $this->assertText(strip_tags($refused_message), 'Webp image type has been refused');
+      // Also check the field description.
+      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension');
+    }
+    else {
+      // Successful upload and node creation on newer PHP versions.
+      $this->assertNoText(strip_tags($refused_message), 'Webp image type has not been refused');
+      $node = node_load($nid);
+      $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
+      $this->assertEqual($uploaded_filename, $filename, 'New node contains the file');
+    }
+  }
+
 }
 
 /**
