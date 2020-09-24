@@ -8,28 +8,28 @@
     "user_empty_timezone_message": 0,
     "formats": {
         "long": {
-            "label": "Long Date",
+            "label": "Long date",
             "pattern": "l, F j, Y - g:ia",
             "module": "system"
         },
         "medium": {
-            "label": "Medium Date",
+            "label": "Medium date",
             "pattern": "D, m/d/Y - g:ia",
             "module": "system"
         },
         "short": {
-            "label": "Short Date",
+            "label": "Short date",
             "pattern": "m/d/Y - g:ia",
             "module": "system"
         },
         "html_datetime": {
-            "label": "HTML Datetime",
+            "label": "HTML datetime",
             "pattern": "Y-m-d\\TH:i:sO",
             "module": "system",
             "hidden": 1
         },
         "html_date": {
-            "label": "HTML Date",
+            "label": "HTML date",
             "pattern": "Y-m-d",
             "module": "system",
             "hidden": 1
