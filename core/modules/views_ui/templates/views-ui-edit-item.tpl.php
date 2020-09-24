@@ -1,7 +1,8 @@
 <?php
 /**
  * @file
- * This template handles the printing of fields/filters/sort criteria/arguments or relationships.
+ * This template handles the printing of fields/filters/sort criteria/arguments
+ * or relationships.
  */
 ?>
 <?php print $rearrange; ?>

@@ -322,12 +322,13 @@ function hook_user_view($account, $view_mode, $langcode) {
 /**
  * The user was built; the module may modify the structured content.
  *
- * This hook is called after the content has been assembled in a structured array
- * and may be used for doing processing which requires that the complete user
- * content structure has been built.
+ * This hook is called after the content has been assembled in a structured
+ * array and may be used for doing processing which requires that the complete
+ * user content structure has been built.
  *
  * If the module wishes to act on the rendered HTML of the user rather than the
- * structured content array, it may use this hook to add a #post_render callback.
+ * structured content array, it may use this hook to add a #post_render
+ * callback.
  * Alternatively, it could also implement hook_preprocess_user_profile(). See
  * backdrop_render() and theme() documentation respectively for details.
  *

@@ -88,8 +88,8 @@ abstract class BackdropTestCase {
    * This class is skipped when looking for the source of an assertion.
    *
    * When displaying which function an assert comes from, it's not too useful
-   * to see "backdropWebTestCase->backdropLogin()', we would like to see the test
-   * that called it. So we need to skip the classes defining these helper
+   * to see "backdropWebTestCase->backdropLogin()', we would like to see the
+   * test that called it. So we need to skip the classes defining these helper
    * methods.
    */
   protected $skipClasses = array(__CLASS__ => TRUE);
@@ -348,7 +348,8 @@ abstract class BackdropTestCase {
   }
 
   /**
-   * Check to see if a value is not false (not an empty string, 0, NULL, or FALSE).
+   * Check to see if a value is not false (not an empty string, 0, NULL, or
+   * FALSE).
    *
    * @param $value
    *   The value on which the assertion is to be done.
@@ -701,7 +702,8 @@ abstract class BackdropTestCase {
       'file' => $exception->getFile(),
     ));
     require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-    // The exception message is run through check_plain() by _backdrop_decode_exception().
+    // The exception message is run through check_plain() by
+    // _backdrop_decode_exception().
     $this->error(t('%type: !message in %function (line %line of %file).', _backdrop_decode_exception($exception)), 'Uncaught exception', _backdrop_get_last_caller($backtrace));
   }
 
@@ -964,14 +966,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $content;
 
   /**
-   * The content of the page currently loaded in the internal browser (plain text version).
+   * The content of the page currently loaded in the internal browser (plain
+   * text version).
    *
    * @var string
    */
   protected $plainTextContent;
 
   /**
-   * The value of the Backdrop.settings JavaScript variable for the page currently loaded in the internal browser.
+   * The value of the Backdrop.settings JavaScript variable for the page
+   * currently loaded in the internal browser.
    *
    * @var array
    */
@@ -1014,7 +1018,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $additionalCurlOptions = array();
 
   /**
-   * The original user, before it was changed to a clean uid = 1 for testing purposes.
+   * The original user, before it was changed to a clean uid = 1 for testing
+   * purposes.
    *
    * @var object
    */
@@ -1041,7 +1046,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalCleanUrl;
 
   /**
-   * The original shutdown handlers array, before it was cleaned for testing purposes.
+   * The original shutdown handlers array, before it was cleaned for testing
+   * purposes.
    *
    * @var array
    */
@@ -1208,7 +1214,8 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
 
-    // Reset permissions so that permissions for this content type are available.
+    // Reset permissions so that permissions for this content type are
+    // available.
     $this->checkPermissions(array(), TRUE);
 
     return $type;
@@ -1218,7 +1225,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Get a list files that can be used in tests.
    *
    * @param $type
-   *   File type, possible values: 'binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'.
+   *   File type, possible values: 'binary', 'html', 'image', 'javascript',
+   *   'php', 'sql', 'text'.
    * @param $size
    *   File size in bytes to match. Please check the tests/files folder.
    * @return
@@ -1412,8 +1420,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Please note that neither the global $user nor the passed-in user object is
    * populated with data of the logged in user. If you need full access to the
    * user object after logging in, it must be updated manually. If you also need
-   * access to the plain-text password of the user (set by backdropCreateUser()),
-   * e.g. to log in the same user again, then it must be re-assigned manually.
+   * access to the plain-text password of the user (set by
+   * backdropCreateUser()), e.g. to log in the same user again, then it must be
+   * re-assigned manually.
    * For example:
    * @code
    *   // Create a user.
@@ -1465,7 +1474,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /*
-   * Logs a user out of the internal browser, then check the login page to confirm logout.
+   * Logs a user out of the internal browser, then check the login page to
+   * confirm logout.
    */
   protected function backdropLogout() {
     // Make a request to the logout page, and redirect to the user page, the
@@ -1516,7 +1526,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Prepares the current environment for running the test.
    *
    * Backups various current environment variables and resets them, so they do
-   * not interfere with the Backdrop site installation in which tests are executed
+   * not interfere with the Backdrop site installation in which tests are
+   * executed
    * and can be restored in tearDown().
    *
    * Also sets up new resources for the testing environment, such as the public
@@ -1698,7 +1709,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
     // the parent site (executing the test) is registered, and the test
-    // profile's hook_install() and other hook implementations are never invoked.
+    // profile's hook_install() and other hook implementations are never
+    // invoked.
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
@@ -1819,13 +1831,13 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Refresh the in-memory set of variables and state values. Useful after a
    * page request is made that changes a variable in a different thread.
    *
-   * In other words calling a settings page with $this->backdropPost() with a changed
-   * value would update a variable to reflect that change, but in the thread that
-   * made the call (thread running the test) the changed variable would not be
-   * picked up.
+   * In other words calling a settings page with $this->backdropPost() with a
+   * changed value would update a variable to reflect that change, but in the
+   * thread that made the call (thread running the test) the changed variable
+   * would not be picked up.
    *
-   * This method clears the variables cache and loads a fresh copy from the database
-   * to ensure that the most up-to-date set of variables is loaded.
+   * This method clears the variables cache and loads a fresh copy from the
+   * database to ensure that the most up-to-date set of variables is loaded.
    */
   protected function refreshVariables() {
     global $conf;
@@ -1944,8 +1956,10 @@ class BackdropWebTestCase extends BackdropTestCase {
         CURLOPT_URL => $base_url,
         CURLOPT_FOLLOWLOCATION => FALSE,
         CURLOPT_RETURNTRANSFER => TRUE,
-        CURLOPT_SSL_VERIFYPEER => FALSE, // Required to make the tests run on HTTPS.
-        CURLOPT_SSL_VERIFYHOST => FALSE, // Required to make the tests run on HTTPS.
+        // Required to make the tests run on HTTPS.
+        CURLOPT_SSL_VERIFYPEER => FALSE,
+        // Required to make the tests run on HTTPS.
+        CURLOPT_SSL_VERIFYHOST => FALSE,
         CURLOPT_HEADERFUNCTION => array(&$this, 'curlHeaderCallback'),
         CURLOPT_USERAGENT => $this->databasePrefix,
       );
@@ -2155,7 +2169,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     // options set, it might change the GET into a POST. Make sure we clear out
     // previous options.
     $out = $this->curlExec(array(CURLOPT_HTTPGET => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_NOBODY => FALSE, CURLOPT_HTTPHEADER => $headers));
-    $this->refreshVariables(); // Ensure that any changes to variables in the other thread are picked up.
+    // Ensure that any changes to variables in the other thread are picked up.
+    $this->refreshVariables();
 
     // Replace original page output with new output from redirected page(s).
     if ($new = $this->checkForMetaRefresh()) {
@@ -2315,10 +2330,12 @@ class BackdropWebTestCase extends BackdropTestCase {
             $post = implode('&', $post) . $extra_post;
           }
           $out = $this->curlExec(array(CURLOPT_URL => $action, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_HTTPHEADER => $headers));
-          // Ensure that any changes to variables in the other thread are picked up.
+          // Ensure that any changes to variables in the other thread are picked
+          // up.
           $this->refreshVariables();
 
-          // Replace original page output with new output from redirected page(s).
+          // Replace original page output with new output from redirected
+          // page(s).
           if ($new = $this->checkForMetaRefresh()) {
             $out = $new;
           }
@@ -2385,8 +2402,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see ajax.js
    */
   protected function backdropPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = array(), array $headers = array(), $form_html_id = NULL, $ajax_settings = NULL) {
-    // Get the content of the initial page prior to calling backdropPost(), since
-    // backdropPost() replaces $this->content.
+    // Get the content of the initial page prior to calling backdropPost(),
+    // since backdropPost() replaces $this->content.
     if (isset($path)) {
       $this->backdropGet($path, $options);
     }
@@ -2563,8 +2580,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Check for meta refresh tag and if found call backdropGet() recursively. This
-   * function looks for the http-equiv attribute to be set to "Refresh"
+   * Check for meta refresh tag and if found call backdropGet() recursively.
+   * This function looks for the http-equiv attribute to be set to "Refresh"
    * and is case-sensitive.
    *
    * @return
@@ -2600,14 +2617,15 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function backdropHead($path, array $options = array(), array $headers = array()) {
     $options['absolute'] = TRUE;
     $out = $this->curlExec(array(CURLOPT_NOBODY => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_HTTPHEADER => $headers));
-    $this->refreshVariables(); // Ensure that any changes to variables in the other thread are picked up.
+    // Ensure that any changes to variables in the other thread are picked up.
+    $this->refreshVariables();
     return $out;
   }
 
   /**
-   * Handle form input related to backdropPost(). Ensure that the specified fields
-   * exist and attempt to create POST data in the correct manner for the particular
-   * field type.
+   * Handle form input related to backdropPost(). Ensure that the specified
+   * fields exist and attempt to create POST data in the correct manner for the
+   * particular field type.
    *
    * @param $post
    *   Reference to array of post values.
@@ -2824,8 +2842,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {
@@ -3100,7 +3118,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Gets the value of the Backdrop.settings JavaScript variable for the currently loaded page.
+   * Gets the value of the Backdrop.settings JavaScript variable for the
+   * currently loaded page.
    */
   protected function backdropGetSettings() {
     return $this->backdropSettings;
@@ -3110,7 +3129,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Gets an array containing all e-mails sent during this test case.
    *
    * @param $filter
-   *   An array containing key/value pairs used to filter the e-mails that are returned.
+   *   An array containing key/value pairs used to filter the e-mails that are
+   *   returned.
    * @return
    *   An array containing e-mail messages captured during the current test.
    */
@@ -3135,9 +3155,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    * outside of the internal browser and assertions need to be made on the
    * returned page.
    *
-   * A good example would be when testing backdrop_http_request(). After fetching
-   * the page the content can be set and page elements can be checked to ensure
-   * that the function worked properly.
+   * A good example would be when testing backdrop_http_request(). After
+   * fetching the page the content can be set and page elements can be checked
+   * to ensure that the function worked properly.
    */
   protected function backdropSetContent($content, $url = 'internal:') {
     $this->content = $content;
@@ -3151,7 +3171,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Sets the value of the Backdrop.settings JavaScript variable for the currently loaded page.
+   * Sets the value of the Backdrop.settings JavaScript variable for the
+   * currently loaded page.
    */
   protected function backdropSetSettings($settings) {
     $this->backdropSettings = $settings;
@@ -3203,8 +3224,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Pass if the raw text is NOT found on the loaded page, fail otherwise. Raw text
-   * refers to the raw HTML that the page generated.
+   * Pass if the raw text is NOT found on the loaded page, fail otherwise. Raw
+   * text refers to the raw HTML that the page generated.
    *
    * @param $raw
    *   Raw (HTML) string to look for.
@@ -3224,8 +3245,8 @@ class BackdropWebTestCase extends BackdropTestCase {
 
   /**
    * Pass if the text IS found on the text version of the page. The text version
-   * is the equivalent of what a user would see when viewing through a web browser.
-   * In other words the HTML has been filtered out of the contents.
+   * is the equivalent of what a user would see when viewing through a web
+   * browser. In other words the HTML has been filtered out of the contents.
    *
    * @param $text
    *   Plain text to look for.
@@ -3241,9 +3262,9 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Pass if the text is NOT found on the text version of the page. The text version
-   * is the equivalent of what a user would see when viewing through a web browser.
-   * In other words the HTML has been filtered out of the contents.
+   * Pass if the text is NOT found on the text version of the page. The text
+   * version is the equivalent of what a user would see when viewing through a
+   * web browser. In other words the HTML has been filtered out of the contents.
    *
    * @param $text
    *   Plain text to look for.
@@ -3336,7 +3357,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $group
    *   The group this message belongs to.
    * @param $be_unique
-   *   TRUE if this text should be found only once, FALSE if it should be found more than once.
+   *   TRUE if this text should be found only once, FALSE if it should be found
+   *   more than once.
    * @return
    *   TRUE on pass, FALSE on fail.
    */
@@ -3376,7 +3398,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Will trigger a pass if the perl regex pattern is not present in raw content.
+   * Will trigger a pass if the perl regex pattern is not present in raw
+   * content.
    *
    * @param $pattern
    *   Perl regex to look for including the regex delimiters.
@@ -3583,7 +3606,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that a field exists in the current page with the given name and value.
+   * Asserts that a field exists in the current page with the given name and
+   * value.
    *
    * @param $name
    *   Name of field to assert.
@@ -3632,7 +3656,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that a field exists in the current page with the given id and value.
+   * Asserts that a field exists in the current page with the given id and
+   * value.
    *
    * @param $id
    *   Id of field to assert.
@@ -3831,7 +3856,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Helper function: construct an XPath for the given set of attributes and value.
+   * Helper function: construct an XPath for the given set of attributes and
+   * value.
    *
    * @param $attribute
    *   Field attributes.
@@ -3886,7 +3912,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * The field in $name must have the content described in $value.
    *
    * @param $name
-   *   Name of field or message property to assert. Examples: subject, body, id, ...
+   *   Name of field or message property to assert. Examples: subject, body, id,
+   *   ...
    * @param $value
    *   Value of the field to assert.
    * @param $message

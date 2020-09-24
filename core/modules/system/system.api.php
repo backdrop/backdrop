@@ -70,8 +70,8 @@ function hook_hook_info_alter(&$hooks) {
  *
  * @return
  *   An associative array. For each item, the key is the path in question, in
- *   a format acceptable to backdrop_match_path(). The value for each item should
- *   be TRUE (for paths considered administrative) or FALSE (for non-
+ *   a format acceptable to backdrop_match_path(). The value for each item
+ *   should be TRUE (for paths considered administrative) or FALSE (for non-
  *   administrative paths).
  *
  * @see hook_menu()
@@ -222,12 +222,15 @@ function callback_queue_worker($queue_item_data) {
  *    (even if it's hidden).
  *  - "#process": array of callback functions taking $element, $form_state,
  *    and $complete_form.
- *  - "#after_build": array of callback functions taking $element and $form_state.
+ *  - "#after_build": array of callback functions taking $element and
+ *    $form_state.
  *  - "#validate": array of callback functions taking $form and $form_state.
  *  - "#element_validate": array of callback functions taking $element and
  *    $form_state.
- *  - "#pre_render": array of callback functions taking $element and $form_state.
- *  - "#post_render": array of callback functions taking $element and $form_state.
+ *  - "#pre_render": array of callback functions taking $element and
+ *    $form_state.
+ *  - "#post_render": array of callback functions taking $element and
+ *    $form_state.
  *  - "#submit": array of callback functions taking $form and $form_state.
  *  - "#title_display": optional string indicating if and how #title should be
  *    displayed, see theme_form_element() and theme_form_element_label().
@@ -273,8 +276,9 @@ function hook_element_info_alter(&$type) {
  * settings.php.
  *
  * @param $destination
- *   If this hook is invoked as part of a backdrop_goto() call, then this argument
- *   will be a fully-qualified URL that is the destination of the redirect.
+ *   If this hook is invoked as part of a backdrop_goto() call, then this
+ *   argument will be a fully-qualified URL that is the destination of the
+ *   redirect.
  */
 function hook_exit($destination = NULL) {
   db_update('counter')
@@ -408,7 +412,8 @@ function hook_library_info_alter(&$libraries, $module) {
  * Alter CSS files before they are output on the page.
  *
  * @param $css
- *   An array of all CSS items (files and inline CSS) being requested on the page.
+ *   An array of all CSS items (files and inline CSS) being requested on the
+ *   page.
  *
  * @see backdrop_add_css()
  * @see backdrop_get_css()
@@ -432,19 +437,21 @@ function hook_ajax_render_alter(&$commands) {
 }
 
 /**
- * Alter a menu router item right after it has been retrieved from the database or cache.
+ * Alter a menu router item right after it has been retrieved from the database
+ * or cache.
  *
- * This hook is invoked by menu_get_item() and allows for run-time alteration of router
- * information (page_callback, title, and so on) before it is translated and checked for
- * access. The passed-in $router_item is statically cached for the current request, so this
- * hook is only invoked once for any router item that is retrieved via menu_get_item().
+ * This hook is invoked by menu_get_item() and allows for run-time alteration of
+ * router information (page_callback, title, and so on) before it is translated
+ * and checked for access. The passed-in $router_item is statically cached for
+ * the current request, so this hook is only invoked once for any router item
+ * that is retrieved via menu_get_item().
  *
  * Usually, modules will only want to inspect the router item and conditionally
  * perform other actions (such as preparing a state for the current request).
  * Note that this hook is invoked for any router item that is retrieved by
- * menu_get_item(), which may or may not be called on the path itself, so implementations
- * should check the $path parameter if the alteration should fire for the current request
- * only.
+ * menu_get_item(), which may or may not be called on the path itself, so
+ * implementations should check the $path parameter if the alteration should
+ * fire for the current request only.
  *
  * @param $router_item
  *   The menu router item for $path.
@@ -534,8 +541,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * mymodule_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
  * arguments, in that order.
  *
- * Special care should be taken for the page callback backdrop_get_form(), because
- * your specific form callback function will always receive $form and
+ * Special care should be taken for the page callback backdrop_get_form(),
+ * because your specific form callback function will always receive $form and
  * &$form_state as the first function arguments:
  * @code
  *   function mymodule_abc_form($form, &$form_state) {
@@ -580,7 +587,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * load and return an "abc" object with internal id 123:
  * @code
  *   function mymodule_abc_load($abc_id) {
- *     return db_query("SELECT * FROM {mymodule_abc} WHERE abc_id = :abc_id", array(':abc_id' => $abc_id))->fetchObject();
+ *     return db_query("SELECT * FROM {mymodule_abc} WHERE abc_id = :abc_id",
+ *       array(':abc_id' => $abc_id))->fetchObject();
  *   }
  * @endcode
  * This 'abc' object will then be passed into the callback functions defined
@@ -665,9 +673,10 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     function, with path component substitution as described above.
  *   - "delivery callback": The function to call to package the result of the
  *     page callback function and send it to the browser. Defaults to
- *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
- *     item. Note that this function is called even if the access checks fail,
- *     so any custom delivery callback function should take that into account.
+ *     backdrop_deliver_html_page() unless a value is inherited from a parent
+ *     menu item. Note that this function is called even if the access checks
+ *     fail, so any custom delivery callback function should take that into
+ *     account.
  *     Backdrop includes the following delivery callbacks in core:
  *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
  *       Menu items with this callback may be wrapped in a layout template by
@@ -683,7 +692,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     - ajax_deliver_dialog: This delivery callback is used when the contents
  *       of a menu callback should be returned as AJAX commands to open as a
  *       dialog. This delivery callback is set automatically if the requesting
- *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
+ *       AJAX call requested a dialog. See
+ *       system_page_delivery_callback_alter().
  *   - "access callback": A function returning TRUE if the user has access
  *     rights to this menu item, and FALSE if not. It can also be a boolean
  *     constant instead of a function, and you can also use numeric values
@@ -814,7 +824,8 @@ function hook_menu() {
 }
 
 /**
- * Alter the data being saved to the {menu_router} table after hook_menu is invoked.
+ * Alter the data being saved to the {menu_router} table after hook_menu is
+ * invoked.
  *
  * This hook is invoked by menu_router_build(). The menu definitions are passed
  * in by reference. Each element of the $items array is one item returned
@@ -2653,8 +2664,8 @@ function hook_schema_alter(&$schema) {
 /**
  * Perform alterations to a structured query.
  *
- * Structured (aka dynamic) queries that have tags associated may be altered by any module
- * before the query is executed.
+ * Structured (aka dynamic) queries that have tags associated may be altered by
+ * any module before the query is executed.
  *
  * @param $query
  *   A Query object describing the composite parts of a SQL query.
@@ -2682,7 +2693,8 @@ function hook_query_alter(QueryAlterableInterface $query) {
  * @see SelectQueryInterface
  */
 function hook_query_TAG_alter(QueryAlterableInterface $query) {
-  // Skip the extra expensive alterations if site has no node access control modules.
+  // Skip the extra expensive alterations if site has no node access control
+  // modules.
   if (!node_access_view_all_nodes()) {
     // Prevent duplicates records.
     $query->distinct();
@@ -2695,7 +2707,8 @@ function hook_query_TAG_alter(QueryAlterableInterface $query) {
       // The node_access table has the access grants for any given node.
       $access_alias = $query->join('node_access', 'na', '%alias.nid = n.nid');
       $or = db_or();
-      // If any grant exists for the specified user, then user has access to the node for the specified operation.
+      // If any grant exists for the specified user, then user has access to the
+      // node for the specified operation.
       foreach (node_access_grants($op, $query->getMetaData('account')) as $realm => $gids) {
         foreach ($gids as $gid) {
           $or->condition(db_and()
@@ -2771,8 +2784,9 @@ function hook_install() {
  * @link http://drupal.org/node/150215 Schema API. @endlink
  *
  * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module. Backdrop core's updates are implemented
- * using the system module as a name and stored in database/updates.inc.
+ * the same directory as mymodule.module. Backdrop core's updates are
+ * implemented using the system module as a name and stored in
+ * database/updates.inc.
  *
  * Implementations of hook_update_N() are named (module name)_update_(number).
  * The numbers are composed of three parts:
@@ -2812,7 +2826,8 @@ function hook_install() {
  * name, you should never renumber update functions. It may result in updates
  * being either skipped or run twice.
  *
- * Not all module functions are available from within a hook_update_N() function.
+ * Not all module functions are available from within a hook_update_N()
+ * function.
  * In order to call a function from your mymodule.module or an include file,
  * you need to explicitly load that file first.
  *
@@ -2836,9 +2851,9 @@ function hook_install() {
  *   Stores information for multipass updates. See above for more information.
  *
  * @throws BackdropUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of BackdropUpdateException
- *   with a meaningful message for the user. If a database query fails for whatever
- *   reason, it will throw a PDOException.
+ *   In case of error, update hooks should throw an instance of
+ *   BackdropUpdateException with a meaningful message for the user. If a
+ *   database query fails for whatever reason, it will throw a PDOException.
  *
  * @return
  *   Optionally, update hooks may return a translated string that will be
@@ -3045,8 +3060,8 @@ function hook_disable() {
  *
  * Class names in Backdrop are typically CamelCase, with uppercase letters at
  * the start of each word (including the first letter) and no underscores.
- * The file names for classes are typically either [module_name].[class_name].inc
- * or [ModuleNameClassName].php.
+ * The file names for classes are typically either
+ * [module_name].[class_name].inc or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
  * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
@@ -3243,7 +3258,8 @@ function hook_install_tasks(&$install_state) {
     // function. Otherwise, return themed output that the user will see (for
     // example, a confirmation page explaining that your profile's tasks are
     // complete, with a link to reload the current page and therefore pass on
-    // to the final Backdrop installation tasks when the user is ready to do so).
+    // to the final Backdrop installation tasks when the user is ready to do
+    // so).
     'myprofile_final_site_setup' => array(
     ),
   );
@@ -3258,8 +3274,8 @@ function hook_install_tasks(&$install_state) {
  * @param $options
  *   An associative array of additional URL options to pass to url().
  * @param $http_response_code
- *   The HTTP status code to use for the redirection. See backdrop_goto() for more
- *   information.
+ *   The HTTP status code to use for the redirection. See backdrop_goto() for
+ *   more information.
  */
 function hook_backdrop_goto_alter(&$path, &$options, &$http_response_code) {
   // A good addition to misery module.
@@ -3389,9 +3405,9 @@ function hook_action_info_alter(&$actions) {
 /**
  * Declare archivers to the system.
  *
- * An archiver is a class that is able to package and unpackage one or more files
- * into a single possibly compressed file.  Common examples of such files are
- * zip files and tar.gz files.  All archiver classes must implement
+ * An archiver is a class that is able to package and unpackage one or more
+ * files into a single possibly compressed file.  Common examples of such files
+ * are zip files and tar.gz files.  All archiver classes must implement
  * ArchiverInterface.
  *
  * Each entry should be keyed on a unique value, and specify three
@@ -3427,7 +3443,8 @@ function hook_archiver_info_alter(&$info) {
 }
 
 /**
- * Alters the delivery callback used to send the result of the page callback to the browser.
+ * Alters the delivery callback used to send the result of the page callback to
+ * the browser.
  *
  * Called by backdrop_deliver_page() to allow modules to alter how the
  * page is delivered to the browser.

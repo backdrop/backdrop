@@ -79,7 +79,8 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
     // the parent site (executing the test) is registered, and the test
-    // profile's hook_install() and other hook implementations are never invoked.
+    // profile's hook_install() and other hook implementations are never
+    // invoked.
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
@@ -168,7 +169,9 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Alter tables to MyISAM engine to speed up tests.
    *
-   * MyISAM is faster to delete and copy tables. It gives small adventage when /var/lib/mysql on SHM (memory) device, but much bigger when tests run on regular device.
+   * MyISAM is faster to delete and copy tables. It gives small adventage when
+   * /var/lib/mysql on SHM (memory) device, but much bigger when tests run on
+   * regular device.
    */
   protected function alterToMyISAM() {
     if (Database::getConnection()->driver() != 'mysql') {

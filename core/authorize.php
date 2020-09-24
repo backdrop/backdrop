@@ -89,9 +89,9 @@ backdrop_load('module', 'system');
 backdrop_load('module', 'user');
 
 // We also want to have the language system available, but we do *NOT* want to
-// actually call backdrop_bootstrap(BACKDROP_BOOTSTRAP_LANGUAGE), since that would
-// also force us through the BACKDROP_BOOTSTRAP_PAGE_HEADER phase, which loads
-// all the modules, and that's exactly what we're trying to avoid.
+// actually call backdrop_bootstrap(BACKDROP_BOOTSTRAP_LANGUAGE), since that
+// would also force us through the BACKDROP_BOOTSTRAP_PAGE_HEADER phase, which
+// loads all the modules, and that's exactly what we're trying to avoid.
 backdrop_language_initialize();
 
 // Initialize the maintenance theme for this administrative script.

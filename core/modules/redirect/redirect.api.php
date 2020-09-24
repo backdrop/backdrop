@@ -92,9 +92,9 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
  * a given user has access to perform a given operation on a redirect.
  *
  * The administrative account (user ID #1) always passes any access check,
- * so this hook is not called in that case. Users with the "administer redirects"
- * permission may always update and delete redirects through the administrative
- * interface.
+ * so this hook is not called in that case. Users with the "administer
+ * redirects" permission may always update and delete redirects through the
+ * administrative interface.
  *
  * Note that not all modules will want to influence access on all redirect
  * types. If your module does not want to actively grant or block access,

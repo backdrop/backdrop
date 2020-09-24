@@ -2391,7 +2391,8 @@ function hook_field_display_alter(&$display, $context) {
 }
 
 /**
- * Alters the display settings of a field on a given entity type before it gets displayed.
+ * Alters the display settings of a field on a given entity type before it gets
+ * displayed.
  *
  * Modules can implement hook_field_display_ENTITY_TYPE_alter() to alter display
  * settings for fields on a specific entity type, rather than implementing

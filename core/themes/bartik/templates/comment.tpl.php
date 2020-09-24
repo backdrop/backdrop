@@ -6,8 +6,8 @@
  *
  * Available variables:
  * - $author: Comment author. Can be link or plain text.
- * - $content: An array of comment items. Use render($content) to print them all, or
- *   print a subset such as render($content['field_example']). Use
+ * - $content: An array of comment items. Use render($content) to print them
+ *   all, or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
  *   given element.
  * - $created: Formatted date and time for when the comment was created.
@@ -32,7 +32,8 @@
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
  *   The following applies only to viewers who are registered users:
- *   - comment-unpublished: An unpublished comment visible only to administrators.
+ *   - comment-unpublished: An unpublished comment visible only to
+ *     administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
  *   - comment-new: New comment since last the visit.
  * - $attributes: Array of additional HTML attributes that should be added to
