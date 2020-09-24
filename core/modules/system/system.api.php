@@ -587,8 +587,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * load and return an "abc" object with internal id 123:
  * @code
  *   function mymodule_abc_load($abc_id) {
- *     return db_query("SELECT * FROM {mymodule_abc} WHERE abc_id = :abc_id",
- *       array(':abc_id' => $abc_id))->fetchObject();
+ *     return db_query("SELECT * FROM {mymodule_abc} WHERE abc_id = :abc_id", array(':abc_id' => $abc_id))->fetchObject();
  *   }
  * @endcode
  * This 'abc' object will then be passed into the callback functions defined

@@ -3912,8 +3912,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * The field in $name must have the content described in $value.
    *
    * @param $name
-   *   Name of field or message property to assert. Examples: subject, body, id,
-   *   ...
+   *   Name of field or message property to assert. Examples: subject, body, id.
    * @param $value
    *   Value of the field to assert.
    * @param $message
