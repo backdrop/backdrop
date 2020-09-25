@@ -505,12 +505,20 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
     }
   }
 
-  form_set_value($element, $value, $form_state);
-
   // Unlike #type = 'url' validation, we allow both relative and absolute paths.
   if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
-    form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+    // We might need to encode some characters, but we only do this if
+    // transliteration is off and only for relative paths.
+    $encoded_value = backdrop_encode_path($value);
+    if (config_get('path.settings', 'transliterate') == FALSE && valid_url($encoded_value, FALSE)) {
+      $value = $encoded_value;
+    }
+    else {
+      form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+    }
   }
+  form_set_value($element, $value, $form_state);
+
 }
 
 /**
