@@ -160,6 +160,10 @@
   padding: 0 0.5em;
 }
 
+.comment-footer .links.inline a:hover{
+  text-decoration: underline;
+}
+
 [dir="rtl"] .comment-footer {
   float: left;
 }
