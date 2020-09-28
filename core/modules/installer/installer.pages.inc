@@ -651,7 +651,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     if ($project['type'] == 'module' && isset($modules[$project['name']])) {
       foreach ($modules as $module) {
         // Sort out modules without sub-modules or unrelated or hidden ones.
-        if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || empty($module->info['hidden'])) {
+        if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
           continue;
         }
         // Collect information about sub-modules.
