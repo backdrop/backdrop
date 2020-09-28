@@ -53,10 +53,10 @@ class Layout {
   /**
    * The storage state of the layout.
    *
-   * This is the machine-version of the $type variable, which represents whether
-   * this view is has a default, user-created, or overridden configuration.
-   * Possible values for this variable include the constants
-   * LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or LAYOUT_STORAGE_DEFAULT.
+   * This represents whether this layout is has a default, user-created, or
+   * overridden configuration. Possible values for this variable include the
+   * constants LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or 
+   * LAYOUT_STORAGE_DEFAULT.
    *
    * @var int
    */
