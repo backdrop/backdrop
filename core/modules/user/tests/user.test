@@ -1335,7 +1335,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     // Set the user's role to be the administrator role.
     $edit = array();
     $edit['user_admin_role'] = $this->role_name;
-    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save configuration'));
 
     // Enable book module and ensure the 'administer book outlines' permission
     // is assigned by default.
@@ -2211,7 +2211,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Change the role weight and submit the form.
     $edit = array('roles['. $role_name .'][weight]' => $old_weight + 1);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save configuration'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Retrieve the saved role and compare its weight.
