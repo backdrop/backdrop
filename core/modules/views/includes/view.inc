@@ -2009,8 +2009,8 @@ class view {
       // property set to FALSE, signifying localization should not occur.
       if (empty($this->localization_plugin)) {
         $this->localization_plugin = views_get_plugin('localization', 'none');
-        // If it is still NULL, not even plugin "none" is available. Only
-        // needed for edge cases, like core update.
+        // If it is still NULL, not even plugin "none" is available. Only needed
+        // for edge cases, like core update.
         if (is_null($this->localization_plugin)) {
           return FALSE;
         }
