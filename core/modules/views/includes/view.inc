@@ -1995,7 +1995,7 @@ class view {
    *
    * @return bool
    *   Whether the active plugin does handle translation or not. FALSE for the
-   *   the plugin "none", or if no plugin was available.
+   *   plugin "none", or if no plugin was available.
    *
    * @see unpack_options()
    */
