@@ -55,8 +55,8 @@ function user_unblock_user_action($account, &$context) {
  * @ingroup actions
  */
 function user_cancel_user_action($account, &$context) {
-  // Save the list of nodes to be deleted in the session. Append to the existing
-  // list if within the last minute, otherwise start a new list of nodes.
+  // Save the list of users to be deleted in the session. Append to the existing
+  // list if within the last minute, otherwise start a new list of users.
   $last_action_time = 0;
   if (isset($_SESSION['user_cancel_action'])) {
     $last_action_time = $_SESSION['user_cancel_action']['timestamp'];
