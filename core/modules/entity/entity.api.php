@@ -97,9 +97,9 @@
  *     on the requested display mode. An additional 'default' display mode is
  *     available for all entity types. This display mode is not intended for
  *     actual entity display, but holds default display settings. For each
- *     available display mode, administrators can configure whether it should use
- *     its own set of field display settings, or just replicate the settings of
- *     the 'default' display mode, thus reducing the amount of display
+ *     available display mode, administrators can configure whether it should
+ *     use its own set of field display settings, or just replicate the settings
+ *     of the 'default' display mode, thus reducing the amount of display
  *     configurations to keep track of. Keys of the array are display mode
  *     names. Each display mode is described by an array with the following
  *     key/value pairs:

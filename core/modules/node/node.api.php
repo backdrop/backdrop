@@ -864,16 +864,16 @@ function hook_ranking() {
     return array(
       'vote_average' => array(
         'title' => t('Average vote'),
-        // Note that we use i.sid, the search index's search item id, rather than
-        // n.nid.
+        // Note that we use i.sid, the search index's search item id, rather
+        // than n.nid.
         'join' => array(
           'type' => 'LEFT',
           'table' => 'vote_node_data',
           'alias' => 'vote_node_data',
           'on' => 'vote_node_data.nid = i.sid',
         ),
-        // The highest possible score should be 1, and the lowest possible score,
-        // always 0, should be 0.
+        // The highest possible score should be 1, and the lowest possible
+        // score, always 0, should be 0.
         'score' => 'vote_node_data.average / CAST(%f AS DECIMAL)',
         // Pass in the highest possible voting score as a decimal argument.
         'arguments' => array($config->get('vote_score_max')),

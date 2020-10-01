@@ -355,7 +355,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   }
 
   /**
-   * Build the part of the form that allows the user to select the view's filters.
+   * Build the part of the form that allows the user to select the view's
+   * filters.
    *
    * By default, this adds "of type" and "tagged with" filters (when they are
    * available).
@@ -365,7 +366,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $fields = views_fetch_fields($this->base_table, 'filter');
 
     $entity_info = $this->entity_info;
-    // If the current base table support bundles and has more than one (like user).
+    // If the current base table support bundles and has more than one (like
+    // user).
     if (isset($entity_info['bundle keys']) && isset($entity_info['bundles'])) {
       // Get all bundles and their human readable names.
       $options = array('all' => t('All'));
@@ -452,7 +454,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   }
 
   /**
-   * Build the part of the form that allows the user to select the view's sort order.
+   * Build the part of the form that allows the user to select the view's sort
+   * order.
    *
    * By default, this adds a "sorted by [date]" filter (when it is available).
    */
@@ -643,9 +646,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['style_plugin'] = 'default';
     $display_options['row_plugin'] = 'fields';
 
-    // Add a least one field so the view validates and the user has already a preview.
-    // Therefore the basefield could provide 'defaults][field]' in it's base settings.
-    // If there is nothing like this choose the first field with a field handler.
+    // Add a least one field so the view validates and the user has already a
+    // preview. Therefore the basefield could provide 'defaults][field]' in it's
+    // base settings. If there is nothing like this choose the first field with
+    // a field handler.
     $data = views_fetch_data($this->base_table);
     if (isset($data['table']['base']['defaults']['field'])) {
       $field = $data['table']['base']['defaults']['field'];
@@ -700,7 +704,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         }
       }
       $table_data = views_fetch_data($table);
-      // Check whether the entity key filter handler is or an child of it views_handler_filter_in_operator
+      // Check whether the entity key filter handler is or an child of it
+      // views_handler_filter_in_operator
       // If it's not just use a single value instead of an array.
       $handler = $table_data[$entity_key]['filter']['handler'];
       if ($handler == 'views_handler_filter_in_operator' || is_subclass_of($handler, 'views_handler_filter_in_operator')) {
@@ -759,7 +764,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
   protected function default_display_sorts_user($form, $form_state) {
     $sorts = array();
 
-    // Don't add a sort if there is no form value or the user selected none as sort.
+    // Don't add a sort if there is no form value or the user selected none as
+    // sort.
     if (!empty($form_state['values']['show']['sort']) && $form_state['values']['show']['sort'] != 'none') {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
       // Column either be a column-name or the table-columnn-ame.

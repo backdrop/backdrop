@@ -12,7 +12,8 @@
  * - $extras: A string of any extra info that should go at the bottom.
  * - $status: Whether the project is already installed, enabled, or not.
  * - $install: The add to install queue button/link.
- * These are defined in installer_browser_preprocess_installer_browser_project().
+ * These are defined in
+ * installer_browser_preprocess_installer_browser_project().
  *
  * @see installer_browser_preprocess_installer_browser_project().
  */

@@ -2,7 +2,8 @@
 
 /**
  * @file
- * Administrative page for handling updates from one Backdrop version to another.
+ * Administrative page for handling updates from one Backdrop version to
+ * another.
  *
  * Point your browser to "http://www.example.com/core/update.php" and follow the
  * instructions.
