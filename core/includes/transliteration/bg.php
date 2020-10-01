@@ -64,7 +64,6 @@ $overrides['bg'] = array(
   0x044A => 'y',
   0x044B => 'j',
   0x044C => 'j',
-  0x044D => 'e',
   0x044E => 'ju',
   0x044F => 'ja',
 );
