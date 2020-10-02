@@ -1,11 +1,11 @@
-/*
+/**
  * @file
  * CSS for the responsive menu toggle checkbox / button.
  */
 
- /**
-  * Menu toggle button
-  */
+/**
+ * Menu toggle button.
+ */
 .menu-toggle-button {
   position: relative;
   display: inline-block;
@@ -21,13 +21,6 @@
   }
 }
 
-@media (min-width: 48em) {  /* 768px @ 16px font size */
-  /* hide the button in desktop view */
-  .menu-toggle-button,
-  .menu-toggle-state {
-    display: none;
-  }
-}
 .menu-toggle-button-text {
   vertical-align: middle;
   padding: 0 .5em;
@@ -106,10 +99,4 @@
 }
 .menu-toggle-state:checked ~ .menu {
   display: block;
-}
-@media (min-width: 48em) {  /* 768px @ 16px font size. */
-  /* Always show the menu in desktop view. */
-  .menu-toggle-state:not(:checked) ~ .menu {
-    display: block;
-  }
 }

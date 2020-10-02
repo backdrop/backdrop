@@ -21,6 +21,7 @@ function system_menu_block_defaults($menu_name) {
     'style' => NULL,
     'expand_all' => FALSE,
     'clickdown' => FALSE,
+    'breakpoint' => '48em',
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -132,6 +133,23 @@ function system_menu_block_form($config) {
     '#default_value' => $config['toggle'],
     '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.'),
   );
+  $form['breakpoint'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Breakpoint'),
+    '#default_value' => $config['breakpoint'],
+    '#description' => t("The minimum-width that the menu will be displayed at. Below this, the toggle button will be displayed instead. E.g. '48em'."),
+    '#size' => 8,
+    '#states' => array(
+      // Display this field when either the 'Menu style' is 'dropdown', or the
+      // toggle button is enabled.
+      'visible' => array(
+        array(
+          array(':input[name="block_settings[style]"]' => array('value' => 'dropdown')),
+          array(':input[name="block_settings[toggle]"]' => array('checked' => TRUE)),
+        ),
+      ),
+    ),
+  );
 
   return $form;
 }
@@ -196,6 +214,9 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
+      $data['content']['#attached']['css'][backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.breakpoint.css'] = array(
+        'media' => 'all and (min-width: ' . check_plain($config['breakpoint']) . ')',
+      );
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
       }
@@ -205,6 +226,9 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
       $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
       $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
+      $data['content']['#attached']['css'][backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.breakpoint.css'] = array(
+        'media' => 'all and (min-width: ' . check_plain($config['breakpoint']) . ')',
+      );
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
