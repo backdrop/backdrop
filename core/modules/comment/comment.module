@@ -1869,7 +1869,7 @@ function comment_form($form, &$form_state, $comment) {
       '#default_value' => $author,
       '#maxlength' => 60,
       '#size' => 30,
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('user.role.anonymous', 'label'))),
       '#autocomplete_path' => 'user/autocomplete',
     );
   }
@@ -2062,7 +2062,7 @@ function comment_preview($comment) {
       $comment->picture = $account->picture;
     }
     elseif (empty($comment->name)) {
-      $comment->name = config_get('system.core', 'anonymous');
+      $comment->name = config_get('user.role.anonymous', 'label');
     }
 
     $comment->created = !empty($comment->created) ? $comment->created : REQUEST_TIME;
@@ -2150,7 +2150,7 @@ function comment_submit($comment) {
   // If the comment was posted by an anonymous user and no author name was
   // required, use "Anonymous" by default.
   if ($comment->is_anonymous && (!isset($comment->name) || $comment->name === '')) {
-    $comment->name = config_get('system.core', 'anonymous');
+    $comment->name = config_get('user.role.anonymous', 'label');
   }
 
   // Validate the comment's subject. If not specified, extract from comment body.

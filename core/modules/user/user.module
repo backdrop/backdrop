@@ -577,7 +577,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get_translated('system.core', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get_translated('user.role.anonymous', 'label'), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
@@ -1211,9 +1211,8 @@ function user_preprocess_block(&$variables) {
  * Format a username.
  *
  * By default, the passed-in object's 'name' property is used if it exists, or
- * else, the site-defined value for the 'anonymous' variable. However, a module
- * may override this by implementing
- * hook_user_format_name_alter(&$name, $account).
+ * else, the name of the 'anonymous' role. However, a module may override this
+ * by implementing hook_user_format_name_alter(&$name, $account).
  *
  * @see hook_user_format_name_alter()
  *
@@ -1226,7 +1225,7 @@ function user_preprocess_block(&$variables) {
  *   printed to the page.
  */
 function user_format_name($account) {
-  $name = !empty($account->name) ? $account->name : config_get('system.core', 'anonymous');
+  $name = !empty($account->name) ? $account->name : config_get('user.role.anonymous', 'label');
   backdrop_alter('user_format_name', $name, $account);
   return $name;
 }

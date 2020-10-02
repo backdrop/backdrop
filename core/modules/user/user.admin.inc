@@ -521,21 +521,6 @@ function user_admin_roles($form, $form_state) {
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
 
-  // Settings for anonymous users.
-  $form['anonymous_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Anonymous visitors'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#weight' => -10,
-  );
-  $form['anonymous_settings']['anonymous'] = array(
-    '#type' => 'textfield',
-    '#title' => t('The name you would like used for anonymous visitors to your site:'),
-    '#default_value' => $system_config->get('anonymous'),
-    '#required' => TRUE,
-  );
-
   $form['roles'] = array(
     '#tree' => TRUE,
   );

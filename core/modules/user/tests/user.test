@@ -790,7 +790,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
-    $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('system.core', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
+    $this->assertRaw(t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('user.role.anonymous', 'label'))), 'Informs that all content will be attributed to anonymous account.');
 
     // Confirm account cancellation.
     $timestamp = time();
@@ -2508,10 +2508,10 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   function testLabelCallback() {
     $this->assertEqual(entity_label('user', $this->account), $this->account->name, t('The username should be used as label'));
 
-    // Setup a random anonymous name to be sure the name is used.
+    // Setup a random anonymous role label to be sure the name is used.
     $name = $this->randomName();
-    config_set('system.core', 'anonymous', $name);
-    $this->assertEqual(entity_label('user', $this->anonymous), $name, t('The variable anonymous should be used for name of uid 0'));
+    config_set('user.role.anonymous', 'label', $name);
+    $this->assertEqual(entity_label('user', $this->anonymous), $name, t('The anonymous role label should be used for name of uid 0'));
   }
 
   /**
