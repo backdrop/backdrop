@@ -1282,6 +1282,10 @@ function system_library_info() {
     ),
     'css' => array(
       backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.breakpoint.css' => array(
+        'group' => CSS_DEFAULT,
+        'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint') . ')',
+      ),
     ),
   );
 

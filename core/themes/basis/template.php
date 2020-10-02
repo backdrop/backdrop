@@ -25,6 +25,13 @@ function basis_preprocess_page(&$variables) {
   if ($view) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
+
+  // Add breakpoint-specific CSS for dropdown menus.
+  backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
+    'group' => CSS_THEME,
+    'every_page' => TRUE,
+    'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint') . ')',
+  ));
 }
 
 /**

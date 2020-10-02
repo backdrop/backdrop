@@ -7,10 +7,6 @@
  * dropdowns).
  */
 
-* {
-  color: green;
-}
-
 /* Begin section that shouldn't be edited */
 .js .menu-dropdown ul {
   position: absolute;
