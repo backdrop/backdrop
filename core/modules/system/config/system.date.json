@@ -35,31 +35,31 @@
             "hidden": 1
         },
         "html_time": {
-            "label": "HTML Time",
+            "label": "HTML time",
             "pattern": "H:i:s",
             "module": "system",
             "hidden": 1
         },
         "html_yearless_date": {
-            "label": "HTML Yearless date",
+            "label": "HTML yearless date",
             "pattern": "m-d",
             "module": "system",
             "hidden": 1
         },
         "html_week": {
-            "label": "HTML Week",
+            "label": "HTML week",
             "pattern": "Y-\\WW",
             "module": "system",
             "hidden": 1
         },
         "html_month": {
-            "label": "HTML Month",
+            "label": "HTML month",
             "pattern": "Y-m",
             "module": "system",
             "hidden": 1
         },
         "html_year": {
-            "label": "HTML Year",
+            "label": "HTML year",
             "pattern": "Y",
             "module": "system",
             "hidden": 1
