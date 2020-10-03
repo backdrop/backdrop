@@ -1397,6 +1397,13 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
     $init = array();
     foreach ($files as $name => $file) {
       $init[$name] = backdrop_parse_info_file($file->uri);
+
+      // Skip modules or themes that have been placed in the wrong directory.
+      if (isset($init[$name]['type']) && $init[$name]['type'] != 'layout') {
+        unset($init[$name]);
+        continue;
+      }
+
       $init[$name]['path'] = dirname($file->uri);
       $init[$name]['title'] = $init[$name]['name'];
       $init[$name]['name'] = $name;

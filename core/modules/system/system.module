@@ -3034,6 +3034,12 @@ function _system_rebuild_theme_data() {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
+    // Skip modules or layouts that have been placed in the wrong directory.
+    if (isset($themes[$key]->info['type']) && $themes[$key]->info['type'] != 'theme') {
+      unset($themes[$key]);
+      continue;
+    }
+
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
