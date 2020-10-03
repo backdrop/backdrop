@@ -112,6 +112,7 @@ function system_themes_page() {
   uasort($themes, 'system_sort_modules_by_info_name');
 
   $theme_default = config_get('system.core', 'theme_default');
+  $admin_theme = config_get('system.core', 'admin_theme');
   $theme_groups  = array(
     'enabled' => array(),
     'disabled' => array(),
@@ -123,6 +124,7 @@ function system_themes_page() {
     }
     $admin_theme_options[$theme->name] = $theme->info['name'];
     $theme->is_default = ($theme->name == $theme_default);
+    $theme->is_admin = ($theme->name == $admin_theme);
 
     // Identify theme screenshot.
     $theme->screenshot = NULL;
@@ -202,6 +204,10 @@ function system_themes_page() {
     if ($theme->is_default) {
       $theme->classes[] = 'theme-default';
       $theme->notes[] = t('default theme');
+    }
+    if ($theme->is_admin) {
+      $theme->classes[] = 'admin-theme';
+      $theme->notes[] = t('admin theme');
     }
 
     // Sort enabled and disabled themes into their own groups.
@@ -731,6 +737,12 @@ function system_sort_themes($a, $b) {
     return -1;
   }
   if ($b->is_default) {
+    return 1;
+  }
+  if ($a->is_admin) {
+    return -1;
+  }
+  if ($b->is_admin) {
     return 1;
   }
   return strcasecmp($a->info['name'], $b->info['name']);
