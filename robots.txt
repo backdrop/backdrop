@@ -2,7 +2,7 @@
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
-# of your site by web crawlers and spiders run by sites like Yahoo!
+# of your site by web crawlers and spiders run by sites like Bing
 # and Google. By telling these "robots" where not to go on your site,
 # you save bandwidth and server resources.
 #
@@ -20,10 +20,11 @@ User-agent: *
 Crawl-delay: 10
 # Directories
 Disallow: /core/
-Disallow: /profiles/
+Disallow: /layouts/
+Disallow: /modules/
+Disallow: /themes/
 # Files
 Disallow: /README.md
-Disallow: /web.config
 # Paths (clean URLs)
 Disallow: /admin/
 Disallow: /comment/reply/
