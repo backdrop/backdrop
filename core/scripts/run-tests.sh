@@ -766,6 +766,7 @@ function simpletest_skip_list($test_class) {
   global $args;
 
   if ($skip_list === NULL) {
+    // Collect the raw list of tests to skip.
     $skip_list_raw = array();
     if ($args['skip']) {
       $skip_list_raw = array_merge($skip_list_raw, explode(',', $args['skip']));
@@ -777,23 +778,19 @@ function simpletest_skip_list($test_class) {
       $skip_list_raw = array_merge($skip_list_raw, file($args['skip-file']));
     }
     $skip_list_raw = array_map('trim', $skip_list_raw);
+
+    // Process the raw list to a keyed array that looks like
+    // 'TestClass1' => array( 'testCase1', 'testCase2' ), 'TestClass2' => TRUE.
     $skip_list = array();
     foreach ($skip_list_raw as $value) {
       if (strpos($value, '::')) {
         list($test_case, $test_name) = explode('::', $value, 2);
-      }
-      else {
-        $test_case = $value;
-        $test_name = TRUE;
-      }
-
-      if ($test_name === TRUE) {
-        $skip_list[$test_case] = TRUE;
-      }
-      else {
         if (!array_key_exists($test_case, $skip_list) || is_array($skip_list[$test_case])) {
           $skip_list[$test_case][] = $test_name;
         }
+      }
+      else {
+        $skip_list[$value] = TRUE;
       }
     }
   }
