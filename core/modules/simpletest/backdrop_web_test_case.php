@@ -612,7 +612,7 @@ abstract class BackdropTestCase {
         // If the current method starts with "test", run it - it's a test.
         if (strtolower(substr($method, 0, 4)) == 'test') {
           if ($this->skipTests === TRUE || in_array($method, $this->skipTests)) {
-            $this->assert('skip', t('Test @class::@method skipped.', array('@class' => $this->testId, '@method' => $method)));
+            $this->assert('skip', t('Test @class::@method() skipped.', array('@class' => $class, '@method' => $method)));
             continue;
           }
           // Insert a fail record. This will be deleted on completion to ensure
