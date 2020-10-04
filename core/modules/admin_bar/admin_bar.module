@@ -80,7 +80,7 @@ function admin_bar_config_info() {
  */
 function admin_bar_menu_alter(&$items) {
   // Flush client-side caches whenever the menu is rebuilt.
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
@@ -88,7 +88,7 @@ function admin_bar_menu_alter(&$items) {
  */
 function admin_bar_menu_link_insert($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
@@ -96,7 +96,7 @@ function admin_bar_menu_link_insert($link) {
  */
 function admin_bar_menu_link_update($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
@@ -104,63 +104,63 @@ function admin_bar_menu_link_update($link) {
  */
 function admin_bar_menu_link_delete($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_language_update().
  */
 function admin_bar_language_update() {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_language_delete().
  */
 function admin_bar_language_delete() {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_field_create_instance().
  */
 function admin_bar_field_create_instance($instance) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_field_update_instance().
  */
 function admin_bar_field_update_instance($instance, $prior_instance) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_field_delete_instance().
  */
 function admin_bar_field_delete_instance($instance) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_taxonomy_vocabulary_insert().
  */
 function admin_bar_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_taxonomy_vocabulary_update().
  */
 function admin_bar_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
  * Implements hook_taxonomy_vocabulary_delete().
  */
 function admin_bar_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
-  cache('admin_bar')->flush();
+  _admin_bar_cache_flush();
 }
 
 /**
@@ -179,7 +179,7 @@ function admin_bar_preprocess_page(&$variables) {
   // For the status report page, generate the admin bar from scratch to refresh
   // the site status indicator.
   if (strpos($_GET['q'], 'admin/reports/status') === 0) {
-    cache('admin_bar')->flush();
+    _admin_bar_cache_flush();
   }
 
   global $user, $language;
@@ -578,5 +578,12 @@ function admin_bar_form_alter(&$form, &$form_state, $form_id) {
  * Form submission handler to flush Administration bar caches.
  */
 function admin_bar_form_alter_flush_cache_submit($form, &$form_state) {
+  _admin_bar_cache_flush();
+}
+
+/**
+ * Flush the admin bar cache.
+ */
+function _admin_bar_cache_flush() {
   cache('admin_bar')->flush();
 }

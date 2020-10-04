@@ -804,7 +804,7 @@ function admin_bar_admin_bar_cache_info() {
 function _admin_bar_flush_cache($name = NULL) {
   switch ($name) {
     case 'admin_bar':
-      cache('admin_bar')->flush();
+      _admin_bar_cache_flush();
       break;
 
     case 'menu':
