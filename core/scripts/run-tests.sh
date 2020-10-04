@@ -60,9 +60,18 @@
  *
  *  --verbose   Output detailed assertion messages in addition to summary.
  *
- *  --skip [class,class,...]
+ *  --skip <class[::test]>[,class[::test],...]
  *
- *              Skip the listed classes, comma delimited.
+ *              Skip the listed tests and/or classes, comma delimited.  With just a
+ *              test class (e.g., TaxonomyTermTestCase), all the tests in that class
+ *              will be skipped.  A specific test in the test class can be specified
+ *              with TestClass::testName. To skip testTaxonomyGetTermByName, use
+ *              "--skip TaxonomyTermTestCase::testTaxonomyGetTermByName".
+ *
+ *  --skip-file <file>
+ *
+ *              Skip the tests and/or classes listed in <file>, one test per line. The
+ *              file .simpletestignore follows the same format and is always read.
  *
  *  --summary [file]
  *
@@ -300,6 +309,19 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
+  --skip <class[::test]>[,class[::test],...]
+
+              Skip the listed tests and/or classes, comma delimited.  With just a
+              test class (e.g., TaxonomyTermTestCase), all the tests in that class
+              will be skipped.  A specific test in the test class can be specified
+              with TestClass::testName. To skip testTaxonomyGetTermByName, use
+              "--skip TaxonomyTermTestCase::testTaxonomyGetTermByName".
+
+  --skip-file <file>
+
+              Skip the tests and/or classes listed in <file>, one test per line. The
+              file .simpletestignore follows the same format and is always read.
+
   --cache     Generate cache for instalation profiles to boost tests speed.
 
   --summary [file]
@@ -349,6 +371,7 @@ function simpletest_script_parse_args() {
     'verbose' => FALSE,
     'test_names' => array(),
     'skip' => '',
+    'skip-file' => '',
     // Used internally.
     'test-id' => 0,
     'execute-test' => '',
@@ -558,21 +581,16 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     backdrop_page_is_cacheable(TRUE);
 
     $info = simpletest_test_get_by_class($test_class);
-    if (simpletest_in_skip_list($test_class)) {
-      $status = 'skip';
-      $summary = 'skipped.';
-      simpletest_log_skipped_test($test_id, $test_class);
-    }
-    else {
-      include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
-      $test = new $test_class($test_id);
-      $test->run();
+    include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
+    $test = new $test_class($test_id);
+    $test->skipTests = simpletest_skip_list($test_class);
+    $test->run();
 
-      $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
-      $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
-      $status = ($had_fails || $had_exceptions ? 'fail' : 'pass');
-      $summary = _simpletest_format_summary_line($test->results);
-    }
+    $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
+    $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
+    $had_skipped = (!$had_fails && !$had_exceptions && $test->results['#skip'] > 0);
+    $status = ($had_fails || $had_exceptions ? 'fail' : ($had_skipped ? 'skip' : 'pass'));
+    $summary = _simpletest_format_summary_line($test->results);
     simpletest_script_print($info['group'] . ': ' . $info['name'] . ' (' . $test_class . ') ' . $summary . "\n", $status);
 
     // Finished, kill this runner.
@@ -601,6 +619,9 @@ function simpletest_script_command($test_id, $test_class) {
   }
   if ($args['skip']) {
     $command .= ' --skip ' . $args['skip'];
+  }
+  if ($args['skip-file']) {
+    $command .= ' --skip-file ' . $args['skip-file'];
   }
   $command .= " --php " . escapeshellarg($php) . " --test-id $test_id --execute-test $test_class";
   return $command;
@@ -722,57 +743,62 @@ function simpletest_script_get_test_list() {
 }
 
 /**
- * Maintain a list of test classes to skip.
+ * Maintain a list of tests to skip.
  *
- * The skip list is pulled from two places, a `.simpletestignore` file
- * in the directory the tests are being run, usually the BACKDROP_ROOT,
- * and the --skip command line option.
+ * The skip list is pulled from up to three places, a `.simpletestignore
+ * file in the directory the tests are being run, usually BACKDROP_ROOT,
+ * the --skip command line option, and the --skip-file command line
+ * option.
  *
- * The `.simpletestignore` file should have one test class per line,
- * the command line option should be comma delimited.
+ * The `.simpletestignore` file and the file specified by --skip-file
+ * should have one test class per line.  The command line option should
+ * be comma delimited.
  *
  * @param $test_class
  *  The name of the test class to run.
  *
  * @return
- *  TRUE if the test should be skipped, FALSE if not.
+ *  TRUE if the entire test class should be skipped or an array of
+ *  tests to skip, which may be an empty array.
  */
-function simpletest_in_skip_list($test_class) {
+function simpletest_skip_list($test_class) {
   static $skip_list = NULL;
   global $args;
 
   if ($skip_list === NULL) {
-    $skip_list = array();
+    $skip_list_raw = array();
     if ($args['skip']) {
-      $skip_list += explode(',', $args['skip']);
+      $skip_list_raw = array_merge($skip_list_raw, explode(',', $args['skip']));
     }
     if (file_exists('.simpletestignore')) {
-      $skip_list += file('.simpletestignore');
+      $skip_list_raw = array_merge($skip_list_raw, file('.simpletestignore'));
     }
-    $skip_list = array_map('trim', $skip_list);
+    if (file_exists($args['skip-file'])) {
+      $skip_list_raw = array_merge($skip_list_raw, file($args['skip-file']));
+    }
+    $skip_list_raw = array_map('trim', $skip_list_raw);
+    $skip_list = array();
+    foreach ($skip_list_raw as $value) {
+      if (strpos($value, '::')) {
+        list($test_case, $test_name) = explode('::', $value, 2);
+      }
+      else {
+        $test_case = $value;
+        $test_name = TRUE;
+      }
+
+      if ($test_name === TRUE) {
+        $skip_list[$test_case] = TRUE;
+      }
+      else {
+        if (!array_key_exists($test_case, $skip_list) || is_array($skip_list[$test_case])) {
+          $skip_list[$test_case][] = $test_name;
+        }
+      }
+    }
   }
 
-  return in_array($test_class, $skip_list);
-}
-
-/**
- * Insert a simpletest log entry for the test class that is skipped.
- *
- * @param $test_id
- *  The current test ID.
- * @param $test_class
- *  The name of the test class skipped.
- */
-function simpletest_log_skipped_test($test_id, $test_class) {
-  global $args;
-  if (strpos($args['skip'], $test_class) === FALSE) {
-    $message = 'Skipped, test class listed in .simpletestignore.';
-  }
-  else {
-    $message = 'Skipped, test class listed in --skip command line option.';
-  }
-  db_query("INSERT INTO {simpletest} (test_id, test_class, status, message, message_group) VALUES (:test_id, :test_class, 'skip', :message, 'Skipped Test')",
-    array(':test_id' => $test_id, ':test_class' => $test_class, ':message' => $message));
+  return array_key_exists($test_class, $skip_list) ? $skip_list[$test_class] : array();
 }
 
 /**
@@ -784,6 +810,7 @@ function simpletest_script_reporter_init() {
   $results_map = array(
     'pass' => 'Pass',
     'fail' => 'Fail',
+    'skip' => 'Skipped',
     'exception' => 'Exception'
   );
 

@@ -117,14 +117,15 @@ function _simpletest_format_summary_line($summary) {
   $args = array(
     '@pass' => format_plural(isset($summary['#pass']) ? $summary['#pass'] : 0, '1 pass', '@count passes'),
     '@fail' => format_plural(isset($summary['#fail']) ? $summary['#fail'] : 0, '1 fail', '@count fails'),
+    '@skip' => format_plural(isset($summary['#skip']) ? $summary['#skip'] : 0, '1 skipped', '@count skipped'),
     '@exception' => format_plural(isset($summary['#exception']) ? $summary['#exception'] : 0, '1 exception', '@count exceptions'),
   );
   if (!$summary['#debug']) {
-    $message = t('@pass, @fail, and @exception.', $args);
+    $message = t('@pass, @fail, @skip, and @exception.', $args);
   }
   else {
     $args['@debug'] = format_plural(isset($summary['#debug']) ? $summary['#debug'] : 0, '1 debug message', '@count debug messages');
-    $message = t('@pass, @fail, @exception, and @debug.', $args);
+    $message = t('@pass, @fail, @skip, @exception, and @debug.', $args);
   }
   if (isset($summary['#duration'])) {
     $message .= ' [' . $summary['#duration'] . 's]';
@@ -200,7 +201,7 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
     // First iteration: initialize working values.
     $test_list = $test_list_init;
     $context['sandbox']['max'] = count($test_list);
-    $test_results = array('#pass' => 0, '#fail' => 0, '#exception' => 0, '#debug' => 0, '#duration' => 0);
+    $test_results = array('#pass' => 0, '#fail' => 0, '#skip' => 0, '#exception' => 0, '#debug' => 0, '#duration' => 0);
   }
   else {
     // Nth iteration: get the current values where we last stored them.
