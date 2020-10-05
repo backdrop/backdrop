@@ -948,7 +948,18 @@ class FileUploadTransliterationTest extends FileTestCase {
     entity_get_controller('file')->resetCache();
     $now_transliterated_file = file_load($non_transliterated_fid);
     $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
-    $this->assertIdentical($now_transliterated_file->uri, 'temporary://ufail_a_fau.txt', 'File name transliterated and lower case after bulk updating.');
+
+    // On case insensitive file systems, the new file name will be incremented
+    //  before the old file is renamed, so we need to allow for that.
+    $testmixedcasepath = 'Core/Misc/Feed.png';
+    $testlowercasepath = file_destination($testmixedcasepath, FILE_EXISTS_RENAME);
+    if ($testmixedcasepath == $testlowercasepath) {
+      $lowercase_filename = 'temporary://ufail_a_fau.txt';
+    }
+    else {
+      $lowercase_filename = 'temporary://ufail_a_fau_0.txt';
+    }
+    $this->assertIdentical($now_transliterated_file->uri, $lowercase_filename, 'File name transliterated and lower case after bulk updating.');
   }
 }
 
