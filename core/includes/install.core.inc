@@ -1715,14 +1715,17 @@ function install_finished(&$install_state) {
     $thank_you_message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
     backdrop_set_message($thank_you_message);
 
+    $tips = array();
     if (module_exists('admin_bar')) {
-      $tip_message = st('<strong>Tip:</strong> You can use the admin menu at the top of the page, to navigate around the administrative interface.');
+      $tips[] = st('You can use the admin menu at the top of the page, to navigate around the administrative interface.');
     }
-    if module_exists('dashboard')) {
-      $tip_message .= st('If you are new to Backdrop, then <a href="@dashboard">the Dashboard</a> may be a good place to start.');
+    if (module_exists('dashboard')) {
+      $tips[] = st('If you are new to Backdrop, then <a href="@dashboard">the Dashboard</a> may be a good place to start.', array('@dashboard' => url('admin/dashboard')));
     }
-    if (is_set($tip_message)) {
-      backdrop_set_message($tip_message, 'info');
+    if (!empty($tips)) {
+      $tips_message = '<strong>' . format_plural(count($tips), 'Tip:', 'Tips:') . '</strong>';
+      $tips_message .= count($tips) == 1 ? $tips[0] : theme('item_list', array('items' => $tips));
+      backdrop_set_message($tips_message, 'info');
     }
 
     backdrop_goto('<front>');
