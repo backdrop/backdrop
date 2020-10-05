@@ -724,3 +724,21 @@ function menu_reset_item_confirm_submit($form, &$form_state) {
   backdrop_set_message(t('The menu link was reset to its default settings.'));
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $new_item['menu_name'];
 }
+
+/**
+ * Menu callback; global settings form for menus.
+ */
+function menu_settings_form($form, &$form_state) {
+  $form['#config'] = 'system.core';
+
+  $form['menu_breakpoint'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Breakpoint'),
+    '#description' => t("The minimum width at which menus will be displayed normally. Below this they may be dispayed differently, depending on the menu-specific settings. E.g.: '48em'."),
+    '#default_value' => config_get('system.core', 'menu_breakpoint'),
+    '#size' => 8,
+    '#field_prefix' => t('min-width:'),
+  );
+
+  return system_settings_form($form);
+}
