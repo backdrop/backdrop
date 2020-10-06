@@ -398,7 +398,10 @@ function file_test_file_url_alter(&$uri) {
       $path = str_replace('\\', '/', $path);
 
       // Generate a protocol-relative URL.
-      $uri = base_path() . $path;
+      //  //server.name/base_path/path
+
+      $protocol_path = substr($GLOBALS['base_url'], strpos($GLOBALS['base_url'], ':') + 1);
+      $uri = $protocol_path . '/' . $path;
     }
   }
 }
