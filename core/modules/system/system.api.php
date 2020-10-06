@@ -3615,7 +3615,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $name = ($node->uid == 0) ? config_get_translated('system.core', 'anonymous') : $node->name;
+          $name = ($node->uid == 0) ? config_get_translated('user.role.anonymous', 'label') : $node->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 
