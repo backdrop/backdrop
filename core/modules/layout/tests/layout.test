@@ -1467,6 +1467,47 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Tests current user custom field block
+   */
+  function testCurrentUser() {
+    $field_name = 'field_field1';
+
+    $field_info = array('field_name' => $field_name, 'type' => 'text');
+    $field = field_create_field($field_info);
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Field1',
+    );
+    field_create_instance($instance);
+
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // We should be taken to the layout content page next.
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
+
+    // Add a block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Field: Field1 (field_field1)'));
+    $edit = array();
+    $this->backdropPost(NULL, $edit, t('Add block'));
+  }
+
+  /**
    * Tests Taxonomy contexts within layouts.
    */
   function testTaxonomyContext() {

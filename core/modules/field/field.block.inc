@@ -80,8 +80,8 @@ class FieldBlock extends Block {
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
 
-    // Do not render if the entity is not found on this layout.
-    if (empty($entity)) {
+    // Do not proceed if the entity is not an EntityInterface object
+    if (!is_a($entity, 'EntityInterface')) {
       return NULL;
     }
 
