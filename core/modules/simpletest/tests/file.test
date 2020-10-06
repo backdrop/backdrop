@@ -2452,19 +2452,19 @@ class FileURLRewritingTest extends FileTestCase {
     state_set('file_test_hook_file_url_alter', 'root-relative');
     $filepath = 'core/misc/jquery.js';
     $url = file_create_url($filepath);
-    $this->assertEqual(base_path() . '/' . $filepath, $url, 'Correctly generated a root-relative URL for a shipped file.');
+    $this->assertEqual(base_path() . $filepath, $url, 'Correctly generated a root-relative URL for a shipped file.');
     $filepath = 'core/misc/favicon.ico';
     $url = file_create_url($filepath);
-    $this->assertEqual(base_path() . '/' . $filepath, $url, 'Correctly generated a root-relative URL for a shipped file.');
+    $this->assertEqual(base_path() . $filepath, $url, 'Correctly generated a root-relative URL for a shipped file.');
 
     // Test alteration of file URLs to use protocol-relative URLs.
     state_set('file_test_hook_file_url_alter', 'protocol-relative');
     $filepath = 'core/misc/jquery.js';
     $url = file_create_url($filepath);
-    $this->assertEqual('/' . base_path() . '/' . $filepath, $url, 'Correctly generated a protocol-relative URL for a shipped file.');
+    $this->assertEqual(base_path() . $filepath, $url, 'Correctly generated a protocol-relative URL for a shipped file.');
     $filepath = 'core/misc/favicon.ico';
     $url = file_create_url($filepath);
-    $this->assertEqual('/' . base_path() . '/' . $filepath, $url, 'Correctly generated a protocol-relative URL for a shipped file.');
+    $this->assertEqual(base_path() . $filepath, $url, 'Correctly generated a protocol-relative URL for a shipped file.');
   }
 
   /**
@@ -2484,13 +2484,13 @@ class FileURLRewritingTest extends FileTestCase {
     state_set('file_test_hook_file_url_alter', 'root-relative');
     $file = $this->createFile();
     $url = file_create_url($file->uri);
-    $this->assertEqual(base_path() . '/' . $public_directory_path . '/' . $file->filename, $url, 'Correctly generated a root-relative URL for a created file.');
+    $this->assertEqual(base_path() . $public_directory_path . '/' . $file->filename, $url, 'Correctly generated a root-relative URL for a created file.');
 
     // Test alteration of file URLs to use a protocol-relative URLs.
     state_set('file_test_hook_file_url_alter', 'protocol-relative');
     $file = $this->createFile();
     $url = file_create_url($file->uri);
-    $this->assertEqual('/' . base_path() . '/' . $public_directory_path . '/' . $file->filename, $url, 'Correctly generated a protocol-relative URL for a created file.');
+    $this->assertEqual(base_path() . $public_directory_path . '/' . $file->filename, $url, 'Correctly generated a protocol-relative URL for a created file.');
   }
 }
 
