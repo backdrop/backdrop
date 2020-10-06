@@ -390,7 +390,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -1079,7 +1079,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@id="layout-edit-main"]//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $old_content_block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
 
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1101,7 +1101,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $new_content_block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
 
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1124,7 +1124,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $default_content_block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
 
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1979,7 +1979,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $title_block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -2048,7 +2048,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $title_combo_block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -2299,7 +2299,7 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
       ':uuid' => $block_uuid,
     ));
-    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $remove_url_parts = backdrop_parse_url(internal_path($remove_link[0]['href']));
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -2608,7 +2608,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     state_set('layout_test', array());
     $this->backdropGet('admin/structure/layouts');
     $disable_link = $this->xpath('//*[contains(@class, "disable")]//a');
-    $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
+    $disable_url_parts = backdrop_parse_url(internal_path($disable_link[0]['href']));
     $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
     $this->assertHookMessageOrder(array(
       'layout_test_layout_disable called',
@@ -2619,7 +2619,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     // Re-enable the layout.
     $this->backdropGet('admin/structure/layouts/manage');
     $enable_link = $this->xpath('//li[contains(@class, "enable")]//a');
-    $enable_url_parts = backdrop_parse_url($enable_link[0]['href']);
+    $enable_url_parts = backdrop_parse_url(internal_path($enable_link[0]['href']));
     $this->backdropGet($enable_url_parts['path'], $enable_url_parts);
     $this->assertHookMessageOrder(array(
       'layout_test_layout_enable called',

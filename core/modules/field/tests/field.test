@@ -3693,7 +3693,7 @@ class FieldTokenTestCase extends FieldTestCase {
 
     $this->backdropGet('admin/structure/types/manage/post/display');
     list($enable_link) = $this->xpath('//tr[contains(@class, "view-mode--token")]//a');
-    $enable_href_parts = backdrop_parse_url($enable_link['href']);
+    $enable_href_parts = backdrop_parse_url(internal_path($enable_link['href']));
     $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
 
     // Create a text field.
