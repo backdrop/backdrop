@@ -472,6 +472,41 @@ function decode_entities($text) {
 }
 
 /**
+ * Returns the position of the first occurrence of a UTF-8 string
+ *  in another UTF-8 string.
+ *
+ * @param $haystack
+ *  The string to be searched.
+ *
+ * @param $needle
+ *  The string to find in $haystack.
+ *
+ * @param $offset
+ *  (optional) If specified, start the search at this number of characters from the beginning.
+ *  Defaults to 0.
+ *
+ * @return int|FALSE
+ *  The position where $needle occurs in $haystack, always relative to the beginning
+ *  (independent of $offset), or FALSE if not found.
+ *  Note that a return value of 0 is not the same as FALSE.
+ */
+function backdrop_strpos($haystack, $needle, $offset = 0) {
+  global $multibyte;
+
+  if ($multibyte == UNICODE_MULTIBYTE) {
+    return mb_strpos($haystack, $needle, $offset);
+  }
+  else {
+
+    // Remove Unicode continuation characters, to be compatible with
+    // backdrop_strlen() and backdrop_substr().
+    $haystack = preg_replace("/[\x80-\xBF]/", '', $haystack);
+    $needle = preg_replace("/[\x80-\xBF]/", '', $needle);
+    return strpos($haystack, $needle, $offset);
+  }
+}
+
+/**
  * Counts the number of characters in a UTF-8 string.
  *
  * This is less than or equal to the byte count.
