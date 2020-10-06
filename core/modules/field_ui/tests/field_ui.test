@@ -664,7 +664,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     // directly using XPath.
     $this->backdropGet('admin/structure/types/manage/' . $this->hyphen_type . '/display');
     list($enable_link) = $this->xpath('//tr[contains(@class, "view-mode--rss")]//a');
-    $enable_href_parts = backdrop_parse_url($enable_link['href']);
+    $enable_href_parts = backdrop_parse_url(internal_path($enable_link['href']));
     $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
     $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected in newly specialized 'rss' mode.");
 
@@ -978,7 +978,7 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     // Enable the view-mode on the page content type.
     $this->backdropGet('admin/structure/types/manage/page/display');
     list($enable_link) = $this->xpath('//tr[contains(@class, "view-mode--custom-1")]//a');
-    $enable_href_parts = backdrop_parse_url($enable_link['href']);
+    $enable_href_parts = backdrop_parse_url(internal_path($enable_link['href']));
     $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
     $this->assertViewModeExists('node', 'custom_1');
     $this->assertViewModeCustomDisplay('node', 'page', 'custom_1');
