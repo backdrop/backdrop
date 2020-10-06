@@ -3255,6 +3255,25 @@ function base_path() {
 }
 
 /**
+ * Returns an internal path without a leading '/'.
+ *
+ * @param $path
+ *  The path to be potentially transformed.
+ *
+ * @return
+ *  The provided path, with a leading base path removed if found.
+ */
+function internal_path($path) {
+  global $base_path;
+
+  if (backdrop_strpos($path, $base_path) === 0) {
+    $path = backdrop_substr($path, backdrop_strlen($base_path));
+  }
+
+  return $path;
+}
+
+/**
  * Adds a LINK tag with a distinct 'rel' attribute to the page's HEAD.
  *
  * This function can be called as long the HTML header hasn't been sent, which
