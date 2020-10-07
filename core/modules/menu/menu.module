@@ -127,6 +127,7 @@ function menu_menu() {
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'menu.admin.inc',
+    'weight' => 99,
   );
   return $items;
 }
