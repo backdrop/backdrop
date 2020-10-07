@@ -1480,6 +1480,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundle' => 'user',
       'label' => 'Field1',
     );
+      // 'settings' => array( 'user_register_form' => TRUE,),
     field_create_instance($instance);
 
     $this->backdropGet('admin/structure/layouts');
@@ -1505,6 +1506,22 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->clickLink(t('Field: Field1 (field_field1)'));
     $edit = array();
     $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Set a value for field1 for the current user.
+    $field_value = 'the expected value';
+
+    $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
+    $this->assertText($instance['label'], 'The field appears on user edit form');
+    $edit = array();
+    $edit[$field_name . '[' . LANGUAGE_NONE . '][0][value]'] = $field_value;
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Go to the new layout and check that the field value is displayed.
+    $this->backdropGet($layout_url);
+    $this->assertText($field_value, 'The field appears on the new layout page.');
   }
 
   /**
