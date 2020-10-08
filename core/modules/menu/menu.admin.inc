@@ -739,6 +739,27 @@ function menu_settings_form($form, &$form_state) {
     '#size' => 8,
     '#field_prefix' => t('min-width:'),
   );
+  $form['#submit'][] = 'menu_settings_form_submit';
 
   return system_settings_form($form);
+}
+
+/**
+ * Validate form values for the global settings form.
+ */
+function menu_settings_form_validate($form, &$form_state) {
+  // Do some basic validation of the menu breakpoint setting.
+  if (!preg_match('/^[0-9.]+[a-z%]+$/i', $form_state['values']['menu_breakpoint'])) {
+    form_set_error('menu_breakpoint', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
+      '@breakpoint' => $form_state['values']['menu_breakpoint'],
+    )));
+  }
+}
+
+/**
+ * Custom submission handler for the global settings form.
+ */
+function menu_settings_form_submit($form, &$form_state) {
+  // Flush page cache to allow new breakpoint to take effect immediately.
+  cache_flush('page');
 }
