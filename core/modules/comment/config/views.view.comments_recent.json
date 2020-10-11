@@ -3,7 +3,7 @@
     "name": "comments_recent",
     "description": "Contains a block and a page to list recent comments; the block will automatically link to the page, which displays the comment body as well as a link to the node.",
     "module": "comment",
-    "tag": "default",
+    "tag": "",
     "disabled": true,
     "base_table": "comment",
     "human_name": "Recent comments",
