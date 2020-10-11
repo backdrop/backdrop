@@ -460,7 +460,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       $this->randomName(),
     );
 
-    // Create an post with the first body input format set to "Full HTML".
+    // Create an post with the first body input format set to "RAW HTML".
     $title = $this->randomName();
     $edit = array(
       'title' => $title,
@@ -469,7 +469,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($title);
 
-    // Populate the body field: the first item gets the "Full HTML" input
+    // Populate the body field: the first item gets the "Raw HTML" input
     // format, the second one "Filtered HTML".
     $formats = array('full_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;

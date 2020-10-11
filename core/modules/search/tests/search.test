@@ -445,13 +445,13 @@ class SearchRankingTestCase extends BackdropWebTestCase {
     foreach ($shuffled_tags as $tag) {
       switch ($tag) {
         case 'a':
-          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => l('Backdrop Rocks', 'node'), 'format' => 'full_html')));
+          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => l('Backdrop Rocks', 'node'), 'format' => 'raw_html')));
           break;
         case 'notag':
           $settings['body'] = array(LANGUAGE_NONE => array(array('value' => 'Backdrop Rocks')));
           break;
         default:
-          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'full_html')));
+          $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'raw_html')));
           break;
       }
       $nodes[$tag] = $this->backdropCreateNode($settings);
@@ -484,7 +484,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
     // Test tags with the same weight against the sorted tags.
     $unsorted_tags = array('u', 'b', 'i', 'strong', 'em');
     foreach ($unsorted_tags as $tag) {
-      $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'full_html')));
+      $settings['body'] = array(LANGUAGE_NONE => array(array('value' => "<$tag>Backdrop Rocks</$tag>", 'format' => 'raw_html')));
       $node = $this->backdropCreateNode($settings);
 
       // Update the search index.
@@ -695,14 +695,14 @@ class SearchCommentTestCase extends BackdropWebTestCase {
         'comment_subject_field' => TRUE,
       ),
     ));
-    $full_html_format = (object) array(
-      'format' => 'full_html',
-      'name' => 'Full HTML',
+    $raw_html_format = (object) array(
+      'format' => 'raw_html',
+      'name' => 'Raw HTML',
       'weight' => 1,
       'editor' => NULL,
       'filters' => array(),
     );
-    filter_format_save($full_html_format);
+    filter_format_save($raw_html_format);
     $this->checkPermissions(array(), TRUE);
 
     $anonymous_permissions = array(
@@ -721,7 +721,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     // text format.
     $permissions = array(
       'administer filters',
-      filter_permission_name($full_html_format),
+      filter_permission_name($raw_html_format),
       'administer permissions',
       'create post content',
       'post comments',

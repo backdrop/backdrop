@@ -148,11 +148,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     // Create users.
     $filtered_html_format = filter_format_load('filtered_html');
-    $full_html_format = filter_format_load('full_html');
+    $raw_html_format = filter_format_load('raw_html');
     $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       filter_permission_name($filtered_html_format),
-      filter_permission_name($full_html_format),
+      filter_permission_name($raw_html_format),
     ));
 
     $this->web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
@@ -396,21 +396,21 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     ));
     $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with disabled format at bottom.');
 
-    // Allow authenticated users on full HTML.
+    // Allow authenticated users on raw HTML.
     $format = filter_format_load($full);
     $edit = array();
     $edit['roles[anonymous]'] = 0;
     $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully updated.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Raw HTML format successfully updated.');
 
     // Switch user.
     $this->backdropLogout();
     $this->backdropLogin($this->web_user);
 
     $this->backdropGet('node/add/page');
-    // Ensure Full HTML is allowed.
-    $this->assertRaw('<option value="' . $full . '">Full HTML</option>', 'Full HTML filter accessible.');
+    // Ensure Raw HTML is allowed.
+    $this->assertRaw('<option value="' . $full . '">Raw HTML</option>', 'Raw HTML filter accessible.');
 
     // Switch user.
     $this->backdropLogout();
@@ -425,11 +425,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
 
-    // Full HTML.
+    // Raw HTML.
     $edit = array();
     $edit['roles[authenticated]'] = FALSE;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully reverted.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Raw HTML format successfully reverted.');
     $this->backdropGet('admin/config/content/formats/' . $full);
     $this->assertFieldByName('roles[authenticated]', $edit['roles[authenticated]'], 'Changes reverted.');
 
