@@ -1480,7 +1480,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundle' => 'user',
       'label' => 'Field1',
     );
-      // 'settings' => array( 'user_register_form' => TRUE,),
     field_create_instance($instance);
 
     $this->backdropGet('admin/structure/layouts');
