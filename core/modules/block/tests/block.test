@@ -13,10 +13,10 @@ class BlockTestCase extends BackdropWebTestCase {
 
     // Create and log in an administrative user having access to the Full HTML
     // text format.
-    $full_html_format = filter_format_load('full_html');
+    $raw_html_format = filter_format_load('raw_html');
     $this->admin_user = $this->backdropCreateUser(array(
       'administer blocks',
-      filter_permission_name($full_html_format),
+      filter_permission_name($raw_html_format),
       'access administration pages',
       'administer layouts',
     ));
@@ -103,8 +103,8 @@ class BlockTestCase extends BackdropWebTestCase {
     $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = '<h1>Full HTML</h1>';
-    $full_html_format = filter_format_load('full_html');
-    $custom_block['body[format]'] = $full_html_format->format;
+    $raw_html_format = filter_format_load('raw_html');
+    $custom_block['body[format]'] = $raw_html_format->format;
     $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
 
     // Set the created custom block to a specific region.

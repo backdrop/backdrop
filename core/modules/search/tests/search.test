@@ -757,8 +757,8 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $edit_comment = array();
     $edit_comment['subject'] = 'Test comment subject';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
-    $full_html_format_id = 'full_html';
-    $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][format]'] = $full_html_format_id;
+    $raw_html_format_id = 'raw_html';
+    $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][format]'] = $raw_html_format_id;
     $this->backdropPost('comment/reply/' . $node->nid, $edit_comment, t('Save'));
 
     // Invoke search index update.

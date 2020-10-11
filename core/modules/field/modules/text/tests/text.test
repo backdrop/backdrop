@@ -393,15 +393,15 @@ class TextTranslationTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('locale', 'translation');
 
-    $full_html_format = filter_format_load('full_html');
-    $this->format = $full_html_format->format;
+    $raw_html_format = filter_format_load('raw_html');
+    $this->format = $raw_html_format->format;
     $this->admin = $this->backdropCreateUser(array(
       'administer languages',
       'administer content types',
       'access administration pages',
       'bypass node access',
       'administer fields',
-      filter_permission_name($full_html_format),
+      filter_permission_name($raw_html_format),
     ));
     $this->translator = $this->backdropCreateUser(array('create post content', 'edit own post content', 'translate content'));
 
@@ -471,7 +471,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
 
     // Populate the body field: the first item gets the "Raw HTML" input
     // format, the second one "Filtered HTML".
-    $formats = array('full_html', 'filtered_html');
+    $formats = array('raw_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {
       $edit = array(

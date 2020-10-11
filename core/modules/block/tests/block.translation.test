@@ -19,21 +19,21 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
     parent::setUp($modules);
 
     // Create a full HTML text format with no filters.
-    $full_html_format = array(
-      'format' => 'full_html',
-      'name' => 'Full HTML',
+    $raw_html_format = array(
+      'format' => 'raw_html',
+      'name' => 'Raw HTML',
       'weight' => 1,
       'editor' => NULL,
       'filters' => array(),
     );
-    $full_html_format = (object) $full_html_format;
-    filter_format_save($full_html_format);
+    $raw_html_format = (object) $raw_html_format;
+    filter_format_save($raw_html_format);
 
     // Create and log in an administrative user having access to the Full HTML
     // text format.
     $permissions = array(
       'administer blocks',
-      filter_permission_name($full_html_format),
+      filter_permission_name($raw_html_format),
       'access administration pages',
       'administer layouts',
       'administer languages',

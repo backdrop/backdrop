@@ -185,9 +185,9 @@ function hook_editor_info_alter(&$editors) {
  *   the text formats to which a user has access.
  */
 function hook_filter_js_settings_alter(&$settings) {
-  $settings['full_html']['allowed_tags'][] = 'strong';
-  $settings['full_html']['allowed_tags'][] = 'em';
-  $settings['full_html']['allowed_tags'][] = 'img';
+  $settings['raw_html']['allowed_tags'][] = 'strong';
+  $settings['raw_html']['allowed_tags'][] = 'em';
+  $settings['raw_html']['allowed_tags'][] = 'img';
 }
 
 /**
