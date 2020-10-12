@@ -39,6 +39,16 @@ function views_ui_update_1000() {
 }
 
 /**
+ * Add new default display(s) setting.
+ */
+function views_ui_update_1001() {
+  $config = config('views_ui.settings');
+  $config->set('wizard_default_display.page', 'page');
+  $config->set('wizard_default_display.block', 0);
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

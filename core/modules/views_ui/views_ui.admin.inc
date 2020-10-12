@@ -4436,6 +4436,17 @@ function views_ui_admin_settings_basic() {
   // will make it easier to change if we do.
   $form['basic'] = array();
 
+  $form['basic']['wizard_default_display'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Which display(s) to create by default'),
+    '#description' => t('When adding a view (at <code>/admin/structure/views/add</code>), which display(s) should be enabled by default?'),
+    '#options' => array(
+      'page' => t('Page'),
+      'block' => t('Block'),
+    ),
+    '#default_value' => $config->get('wizard_default_display'),
+  );
+
   $form['basic']['show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the <em>Master</em> display'),
