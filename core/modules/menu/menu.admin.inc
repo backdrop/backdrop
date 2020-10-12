@@ -732,12 +732,26 @@ function menu_settings_form($form, &$form_state) {
   $form['#config'] = 'system.core';
 
   $form['menu_breakpoint'] = array(
-    '#type' => 'textfield',
+    '#type' => 'radios',
     '#title' => t('Breakpoint'),
-    '#description' => t("The minimum width at which menus will be displayed normally. Below this they may be dispayed differently, depending on the menu-specific settings. E.g.: '48em'."),
+    '#description' => t("The minimum width at which menus will be displayed normally. Below this they may be dispayed differently, depending on the menu-specific settings."),
+    '#options' => array(
+      'default' => t('Default (48em)'),
+      'custom' => t('Custom'),
+    ),
     '#default_value' => config_get('system.core', 'menu_breakpoint'),
+  );
+  $form['menu_breakpoint_custom'] = array(
+    '#type' => 'textfield',
+    '#description' => t("Enter a valid CSS width value; a number followed by a unit (e.g.: '768px')."),
+    '#default_value' => config_get('system.core', 'menu_breakpoint_custom'),
     '#size' => 8,
     '#field_prefix' => t('min-width:'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="menu_breakpoint"]' => array('value' => 'custom'),
+      ),
+    ),
   );
   $form['#submit'][] = 'menu_settings_form_submit';
 
@@ -749,10 +763,12 @@ function menu_settings_form($form, &$form_state) {
  */
 function menu_settings_form_validate($form, &$form_state) {
   // Do some basic validation of the menu breakpoint setting.
-  if (!preg_match('/^[0-9.]+[a-z%]+$/i', $form_state['values']['menu_breakpoint'])) {
-    form_set_error('menu_breakpoint', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
-      '@breakpoint' => $form_state['values']['menu_breakpoint'],
-    )));
+  if ($form_state['values']['menu_breakpoint'] == 'custom') {
+    if (!preg_match('/^[0-9.]+[a-z%]+$/i', $form_state['values']['menu_breakpoint_custom'])) {
+      form_set_error('menu_breakpoint_custom', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
+        '@breakpoint' => $form_state['values']['menu_breakpoint_custom'],
+      )));
+    }
   }
 }
 

@@ -3143,7 +3143,7 @@ function system_update_1072() {
 function system_update_1073() {
   $config = config('system.core');
   if ($config->get('menu_breakpoint') == NULL) {
-    $config->set('menu_breakpoint', '48em');
+    $config->set('menu_breakpoint', 'default');
     $config->save();
   }
 }

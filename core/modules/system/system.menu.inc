@@ -204,10 +204,15 @@ function system_menu_block_build(array $config) {
       $id = backdrop_html_id('menu-toggle-state');
       $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
       $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
-      $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
-      $data['content']['#attached']['css'][backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.breakpoint.css'] = array(
-        'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint') . ')',
-      );
+      if (config_get('system.core', 'menu_breakpoint') == 'default') {
+        $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
+      }
+      else {
+        $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.breakpoint.css';
+        $data['content']['#attached']['css'][backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.breakpoint-queries.css'] = array(
+          'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint_custom') . ')',
+        );
+      }
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);

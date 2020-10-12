@@ -27,11 +27,23 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Add breakpoint-specific CSS for dropdown menus.
-  backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
-    'group' => CSS_THEME,
-    'every_page' => TRUE,
-    'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint') . ')',
-  ));
+  if (config_get('system.core', 'menu_breakpoint') == 'default') {
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.css', array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+    ));
+  }
+  else {
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+    ));
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint-queries.css', array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+      'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint_custom') . ')',
+    ));
+  }
 }
 
 /**
