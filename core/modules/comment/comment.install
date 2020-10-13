@@ -447,6 +447,17 @@ function comment_update_1006() {
 }
 
 /**
+ * Give access to the new 'Administer comment settings' permission as needed.
+ */
+function comment_update_1007() {
+  $roles = user_roles(FALSE, 'administer comments', TRUE);
+  foreach ($roles as $role) {
+    $role->permissions[] = 'administer comment settings';
+    user_role_save($role);
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
