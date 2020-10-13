@@ -35,7 +35,6 @@ function translation_update_1001() {
       if (isset($display_details['display_options']['filters'])) {
         foreach ($display_details['display_options']['filters'] as $key => $filter) {
           if ($filter['id'] == 'language') {
-            $config->set('display.' . $display . '.display_options.filters.' . $key . '.id', 'langcode');
             $config->set('display.' . $display . '.display_options.filters.' . $key . '.field', 'langcode');
           }
         }
@@ -43,7 +42,6 @@ function translation_update_1001() {
       if (isset($display_details['display_options']['fields'])) {
         foreach ($display_details['display_options']['fields'] as $key => $field) {
           if ($field['id'] == 'language') {
-            $config->set('display.' . $display . '.display_options.fields.' . $key . '.id', 'langcode');
             $config->set('display.' . $display . '.display_options.fields.' . $key . '.field', 'langcode');
           }
         }
