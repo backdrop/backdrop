@@ -33,7 +33,7 @@ function user_password_reject_weak($username) {
 function _user_password_policy_help() {
   $help = array();
   $help[] = t('The password cannot be the same as the username or e-mail address.');
-  $help[] = t('The password must be sufficiently long or complex: containing a number of lower- and uppercase letters, digits and punctuation.');
+  $help[] = t('The password must be sufficiently long or complex.');
   $variables = array(
     'items' => $help,
     'title' => '',
@@ -72,12 +72,6 @@ function _user_password_evaluate_strength($password, $username, $email) {
   $length = backdrop_strlen($password);
   $strength = (log($cardinality) / log(2)) * $length + 1;
 
-  $config = config('system.core');
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
-  if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    $strength = 5;
-  }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;
   }

@@ -68,8 +68,8 @@ class EntityLayoutContext extends LayoutContext {
     if (empty($form_state['values']['id'])) {
       form_set_error('id', t('An ID is required.'));
     }
-    $info = entity_get_info($this->entity_type);
-    if (!entity_load($this->entity_type, $form_state['values']['id'])) {
+    elseif (!entity_load($this->entity_type, $form_state['values']['id'])) {
+      $info = entity_get_info($this->entity_type);
       form_set_error('id', t('The selected @entity does not exist.', array('@entity' => $info['label'])));
     }
   }

@@ -53,10 +53,10 @@ class Layout {
   /**
    * The storage state of the layout.
    *
-   * This is the machine-version of the $type variable, which represents whether
-   * this view is has a default, user-created, or overridden configuration.
-   * Possible values for this variable include the constants
-   * LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or LAYOUT_STORAGE_DEFAULT.
+   * This represents whether this layout is has a default, user-created, or
+   * overridden configuration. Possible values for this variable include the
+   * constants LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or 
+   * LAYOUT_STORAGE_DEFAULT.
    *
    * @var int
    */
@@ -249,6 +249,11 @@ class Layout {
         }
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
+    }
+
+    // Ensure contexts is always set to an array.
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
     }
   }
 
@@ -769,6 +774,10 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
+    }
+
     // Load objects for stored contexts.
     foreach ($this->contexts as $key => $context) {
       if (!isset($context->position) && !is_object($context->data)) {
@@ -893,4 +902,3 @@ class Layout {
     return TRUE;
   }
 }
-

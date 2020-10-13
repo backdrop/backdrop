@@ -76,6 +76,11 @@ class FieldBlock extends Block {
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
 
+    // Do not render if the entity is not found on this layout.
+    if (empty($entity)) {
+      return NULL;
+    }
+
     // Load the entity type's information for this field.
     $field = field_info_instance($entity_type, $field_name, $entity->bundle());
 
