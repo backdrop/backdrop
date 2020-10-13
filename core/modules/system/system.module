@@ -1282,7 +1282,7 @@ function system_library_info() {
     ),
   );
   if (config_get('system.core', 'menu_breakpoint') == 'default') {
-    $libraries['backdrop.menus']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT);
+    $libraries['backdrop.menus']['css'][backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css'] = array('group' => CSS_DEFAULT);
   }
   else {
     $libraries['backdrop.menus']['css'] = array(
@@ -1292,7 +1292,7 @@ function system_library_info() {
         'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint_custom') . ')',
       ),
     );
-  )
+  }
 
   // jQuery.
   $libraries['jquery'] = array(
