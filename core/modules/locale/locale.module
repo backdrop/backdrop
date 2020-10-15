@@ -576,6 +576,10 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
           lock_release('locale_cache_' . $langcode);
         }
         catch (PDOException $e) {
+          // Throw exception for any problem except for missing database tables.
+          if ($e->getCode() !== '42S02') {
+            throw $e;
+          }
           return $string;
         }
       }
