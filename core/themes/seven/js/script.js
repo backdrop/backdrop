@@ -23,7 +23,6 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     var expandControlWidth;
     var activeTabNth = $('li.active', $primaryTabs).index();
     var expandedTabsHeaderPadding = 0;
-    var defaultHeaderPadding = '20px';
     var $mobileHeaderPadder = $('<div class="responsive-tabs-mobile-header-padder" style="height: ' + expandedTabsHeaderPadding + 'px"></div>');
     var $body = $('body');
     var tabsWrapperPadding = {
@@ -243,7 +242,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             var tabsTopDistance = $tabsWrapper.position().top;
             $primaryTabs.css('top', '-' + tabsOffset + 'px');
             if (tabsOffset > tabsTopDistance) {
-              expandedTabsHeaderPadding = tabsOffset - tabsTopDistance + defaultHeaderPadding;
+              expandedTabsHeaderPadding = tabsOffset - tabsTopDistance;
             }
 
             // Get the active tab's text.
