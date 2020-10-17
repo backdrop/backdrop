@@ -1627,15 +1627,19 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Recursively copy one directory to another.
    *
+   * @param string $src
+   *   Source directory to copy.
+   * @param string $dst
+   *   Destination directory to copy files to.
    */
   private function recursiveCopy($src, $dst) {
     $dir = opendir($src);
-    if(!file_exists($dst)){
+    if (!file_exists($dst)) {
       mkdir($dst);
     }
-    while(false !== ( $file = readdir($dir)) ) {
-      if (( $file != '.' ) && ( $file != '..' )) {
-        if ( is_dir($src . '/' . $file) ) {
+    while (FALSE !== ($file = readdir($dir))) {
+      if ($file != '.' && $file != '..' && $file != '.htaccess') {
+        if (is_dir($src . '/' . $file)) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
         }
         else {
