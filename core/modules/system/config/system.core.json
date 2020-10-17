@@ -83,7 +83,7 @@
     "user_password_reject_weak": false,
     "user_password_strength_threshold": 50,
     "user_password_reset_timeout": 86400,
-    "user_pictures": 1,
+    "user_pictures": 0,
     "user_picture_path": "pictures",
     "user_picture_default": "",
     "user_picture_style": "thumbnail",
