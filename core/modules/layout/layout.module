@@ -336,7 +336,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_context_add_form', 4),
     'type' => MENU_CALLBACK,
-    'file' => 'layout.admin.inc',
+    'file' => 'layout.context.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/context/edit/layout/%'] = array(
@@ -345,7 +345,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_context_add_form', 4, 8),
     'type' => MENU_CALLBACK,
-    'file' => 'layout.admin.inc',
+    'file' => 'layout.context.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(

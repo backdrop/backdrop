@@ -6,8 +6,6 @@
  * This provides the UI to list, create, edit and delete layouts.
  */
 
-module_load_include('inc', 'layout', 'layout.context.admin');
-
 /**
  * Output a list of pages that are managed.
  */
@@ -212,6 +210,7 @@ function layout_add_page() {
  */
 function layout_settings_form($form, &$form_state, Layout $layout) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
 
   $form_state['layout'] = &$layout;
   $form['#tree'] = TRUE;
