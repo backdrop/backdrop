@@ -251,7 +251,7 @@ function contact_mail($key, &$message, $params) {
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),
     '!sender-name' => user_format_name($params['sender']),
-    '!sender-phone' => $params['phone'],
+    '!sender-phone' => !empty($params['phone']) ? $params['phone'] : '',
     '!sender-url' => $params['sender']->uid ? url('user/' . $params['sender']->uid, array('absolute' => TRUE, 'language' => $language)) : $params['sender']->mail,
   );
 
