@@ -372,7 +372,7 @@ class views_handler_filter extends views_handler {
     $grouped_description = t('Grouped filters allow a choice between predefined operator|value pairs.');
     $form['group_button']['radios'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['group_button']['radios']['radios'] = array(
       '#title' => t('Filter type to expose'),
@@ -427,7 +427,7 @@ class views_handler_filter extends views_handler {
     // so it can replace the button.
     $form['expose_button']['checkbox'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
       '#title' => t('Expose this filter to visitors, to allow them to change it'),

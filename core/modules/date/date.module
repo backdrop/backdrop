@@ -529,22 +529,36 @@ function date_formatter_format($formatter, $settings, $granularity = array(), $l
 }
 
 /**
- * Helper function to get the right format for a format type.
+ * Helper function to get the right date format for a format type.
  *
- * Checks for locale-based format first.
+ * @param string $format_type
+ *   Name of the date format, for instance "short", "medium" or "long".
+ * @param string $langcode
+ *   Language code provided, for instance "en".
+ *
+ * @return string
+ *   PHP date format pattern for selected or current language, default pattern
+ *   if no localized variant exists.
  */
 function date_format_type_format($format_type, $langcode = NULL) {
   $static = &backdrop_static(__FUNCTION__);
   if (!isset($static[$langcode][$format_type])) {
     $date_format = system_date_format_load($format_type);
+
+    // Fallback to (undeletable) medium format if the requested one does not
+    // exist anymore.
+    if (!$date_format) {
+      $date_format = system_date_format_load('medium');
+    }
+
+    // If no langcode has been provided or only LANGUAGE_NONE, use the current
+    // language to determine the correct localized format.
+    if (!isset($langcode) || $langcode == LANGUAGE_NONE) {
+      global $language;
+      $langcode = $language->langcode;
+    }
+
     $format = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
-
-    // If locale enabled and $format_type inexistent in {date_format_locale}
-    // we receive (due to inconsistency of core api) an array of all (other)
-    // formats available for $langcode in locale table.
-    // However there's no guarantee that the key $format_type exists.
-    // See http://drupal.org/node/1302358.
-
     $static[$langcode][$format_type] = $format;
   }
   return $static[$langcode][$format_type];

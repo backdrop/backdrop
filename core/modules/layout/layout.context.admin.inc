@@ -1,6 +1,8 @@
 <?php
-module_load_include('inc', 'layout', 'layout.admin');
-
+/**
+ * @file
+ * Administrative functions for custom layout contexts.
+ */
 
 /**
  * Submit handler for layout_settings_form() that lets the user add a context.
@@ -27,6 +29,7 @@ function layout_settings_form_context_add($form, &$form_state) {
  * @ingroup forms
  */
 function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $context_id = NULL) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $is_new_context = TRUE;
@@ -145,6 +148,7 @@ function layout_context_add_load_context_nojs($form, &$form_state) {
  * Helper function to return a partial context settings form.
  */
 function layout_context_return_form($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   $layout = $form_state['layout'];
   
   // If no context has yet been selected, there is no sub-form to display.
