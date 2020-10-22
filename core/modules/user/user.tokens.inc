@@ -123,6 +123,10 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           $replacements[$original] = $sanitize ? check_plain($name) : $name;
           break;
 
+        case 'link':
+          $replacements[$original] = theme('username', array('account' => $account));
+          break;
+
         case 'mail':
           $replacements[$original] = $sanitize ? check_plain($account->mail) : $account->mail;
           break;
@@ -156,10 +160,6 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
         case 'edit-url':
           $replacements[$original] = !empty($account->uid) ? url("user/$account->uid/edit", $url_options) : t('not yet assigned');
-          break;
-
-        case 'link':
-          $replacements[$original] = theme('username', array('account' => $account));
           break;
 
       }
