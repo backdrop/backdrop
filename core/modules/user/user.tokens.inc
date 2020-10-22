@@ -27,6 +27,10 @@ function user_token_info() {
     'name' => t('Name'),
     'description' => t('The login name of the user account.'),
   );
+  $user['link'] = array(
+    'name' => t("Name (linked)"),
+    'description' => t("The login name of the user account (for users with the <em>View user profiles</em> permission it's displayed as a link to the profile page)."),
+  );
   $user['mail'] = array(
     'name' => t('Email'),
     'description' => t('The email address of the user account.'),
@@ -39,10 +43,6 @@ function user_token_info() {
     'name' => t('Roles'),
     'description' => t('The user roles associated with the user account.'),
     'type' => 'array',
-  );
-  $user['link'] = array(
-    'name' => t("Profile link"),
-    'description' => t("Link to account profile page based on the <em>View user profiles</em> permission."),
   );
 
   if (config_get('system.core', 'user_pictures')) {
