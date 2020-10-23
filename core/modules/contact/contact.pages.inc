@@ -78,10 +78,9 @@ function contact_site_form($form, &$form_state) {
   );
   if (!empty($config->get('phone'))) {
     $form['phone'] = array(
-      '#type' => 'textfield',
+      '#type' => 'tel',
       '#title' => t('Your phone number'),
       '#required' => $config->get('phone') == 'required',
-      '#size' => 20,
     );
   }
   $form['subject'] = array(
