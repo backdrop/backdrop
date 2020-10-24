@@ -76,11 +76,12 @@ function contact_site_form($form, &$form_state) {
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
-  if (!empty($config->get('phone'))) {
+  $phone = $config->get('phone');
+  if (!empty($phone)) {
     $form['phone'] = array(
       '#type' => 'tel',
       '#title' => t('Your phone number'),
-      '#required' => $config->get('phone') == 'required',
+      '#required' => $phone == 'required',
     );
   }
   $form['subject'] = array(
@@ -226,11 +227,12 @@ function contact_personal_form($form, &$form_state, $recipient) {
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
-  if (!empty($config->get('phone'))) {
+  $phone = $config->get('phone');
+  if (!empty($phone)) {
     $form['phone'] = array(
       '#type' => 'tel',
       '#title' => t('Your phone number'),
-      '#required' => $config->get('phone') == 'required',
+      '#required' => $phone == 'required',
     );
   }
   $form['to'] = array(
