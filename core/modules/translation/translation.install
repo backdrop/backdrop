@@ -5,6 +5,17 @@
  */
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function translation_update_dependencies() {
+  // Do not fix language fields until after Views are converted to config.
+  $dependencies['translation'][1001] = array(
+    'views' => 1001,
+  );
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
