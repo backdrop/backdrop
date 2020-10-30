@@ -11,7 +11,6 @@
  * @ingroup views_filter_handlers
  */
 class views_handler_filter_node_hidden_path extends views_handler_filter_boolean_operator {
-  function admin_summary() { }
   function operator_form(&$form, &$form_state) { }
 
   function query() {
