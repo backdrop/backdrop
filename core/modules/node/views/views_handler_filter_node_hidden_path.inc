@@ -13,7 +13,6 @@
 class views_handler_filter_node_hidden_path extends views_handler_filter_boolean_operator {
   function admin_summary() { }
   function operator_form(&$form, &$form_state) { }
-  function can_expose() { return FALSE; }
 
   function query() {
     $table = $this->ensure_my_table();
@@ -26,6 +25,12 @@ class views_handler_filter_node_hidden_path extends views_handler_filter_boolean
     $diff_types = $enabled_types;
     if (!$this->value) {
       $diff_types = array_diff_key($node_types, $enabled_types);
+    }
+
+    // No content type has the hidden_path setting turned on, no need to extend
+    // the query.
+    if (empty($diff_types)) {
+      return;
     }
 
     $types_names = array_map(function($val) {
