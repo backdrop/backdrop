@@ -11,13 +11,20 @@
  * @ingroup views_filter_handlers
  */
 class views_handler_filter_node_hidden_path extends views_handler_filter_boolean_operator {
-  function operator_form(&$form, &$form_state) { }
 
-  function query() {
+  /**
+   * {@inheritdoc}
+   */
+  public function operator_form(&$form, &$form_state) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public function query() {
     $table = $this->ensure_my_table();
     $node_types = node_type_get_types();
 
-    $enabled_types = array_filter($node_types, function($val) {
+    $enabled_types = array_filter($node_types, function ($val) {
       return $val->settings['hidden_path'];
     });
 
@@ -32,10 +39,11 @@ class views_handler_filter_node_hidden_path extends views_handler_filter_boolean
       return;
     }
 
-    $types_names = array_map(function($val) {
+    $types_names = array_map(function ($val) {
       return $val->type;
     }, $diff_types);
 
     $this->query->add_where_expression($this->options['group'], "$table.type IN (:types)", array(':types' => $types_names));
   }
+
 }
