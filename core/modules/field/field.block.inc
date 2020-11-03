@@ -44,7 +44,7 @@ class FieldBlock extends Block {
     $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
     $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+    $preview = '<p>' . t('Displays values of the %field field.', array('%field' => $field_name)) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
