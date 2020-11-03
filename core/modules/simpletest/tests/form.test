@@ -2108,8 +2108,8 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     }
 
     // Make sure that a single checkbox gets the correct value when set via
-    // $_GET parameters. The content overview page is a view with exposed form
-    // and change sorting via tablesort sets values with $_GET.
+    // $_GET parameters. The content overview page is a view with an exposed
+    // form, where changing the sorting via tablesort sets values with $_GET.
     $admin_user = $this->backdropCreateUser(array(
       'access content overview',
       'bypass node access',
