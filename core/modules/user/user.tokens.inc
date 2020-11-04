@@ -25,11 +25,11 @@ function user_token_info() {
   );
   $user['name'] = array(
     'name' => t('Name'),
-    'description' => t('The login name of the user account.'),
+    'description' => t('The account username.'),
   );
   $user['link'] = array(
     'name' => t("Name (linked)"),
-    'description' => t("The login name of the user account (for users with the <em>View user profiles</em> permission it's displayed as a link to the profile page)."),
+    'description' => t("The account username (for users with the <em>View user profiles</em> permission it's displayed as a link to the profile page)."),
   );
   $user['mail'] = array(
     'name' => t('Email'),
