@@ -1935,14 +1935,25 @@ function comment_form($form, &$form_state, $comment) {
     '#access' => $is_admin,
   );
 
-  $form['subject'] = array(
+  $form['author']['subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_subject_field'],
-    '#weight' => -1,
+    '#access' => $is_admin,
+    '#weight' => 0,
   );
+  
+  if (!$is_admin && $node_type->settings['comment_subject_field']) {
+    $form['subject'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title'),
+      '#maxlength' => 64,
+      '#default_value' => $comment->subject,
+      '#access' => $node_type->settings['comment_subject_field'],
+      '#weight' => -1,
+    );
+  }
 
   // Used for conditional validation of author fields.
   $form['is_anonymous'] = array(
