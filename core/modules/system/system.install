@@ -3138,6 +3138,15 @@ function system_update_1072() {
 }
 
 /**
+ * Add default values for message settings.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  $config->set('messages_dismissable', 0);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

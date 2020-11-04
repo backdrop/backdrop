@@ -1605,6 +1605,28 @@ function system_run_cron_submit($form, &$form_state) {
 }
 
 /**
+ * Form builder; Messages form.
+ *
+ * @ingroup forms
+ */
+function system_message_settings($form, &$form_state) {
+  $form['#config'] = 'system.core';
+
+  $form['messages'] = array(
+    '#title' => t('Message configuration'),
+    '#type' => 'fieldset',
+  );
+  $form['messages']['messages_dismissable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow messages to be dismissed'),
+    '#description' => t('A link will be added to all messages allowing users to manually dismiss them.'),
+    '#default_value' => config_get('system.core', 'messages_dismissable'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Form builder; Configure error reporting settings.
  *
  * @ingroup forms
