@@ -1992,6 +1992,12 @@ class view {
 
   /**
    * Find and initialize the localization plugin.
+   *
+   * @return bool
+   *   Whether the active plugin does handle translation or not. FALSE for the
+   *   plugin "none", or if no plugin was available.
+   *
+   * @see unpack_options()
    */
   public function init_localization() {
     // If the translate attribute isn't set, init the localization plugin.
@@ -2003,6 +2009,11 @@ class view {
       // property set to FALSE, signifying localization should not occur.
       if (empty($this->localization_plugin)) {
         $this->localization_plugin = views_get_plugin('localization', 'none');
+        // If it is still NULL, not even plugin "none" is available. Only needed
+        // for edge cases, like core update.
+        if (is_null($this->localization_plugin)) {
+          return FALSE;
+        }
       }
 
       // Init the plugin.

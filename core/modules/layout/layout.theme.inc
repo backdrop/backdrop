@@ -202,19 +202,21 @@ function theme_layout_settings_context_table($variables) {
   $header = array(
     t('Context'),
     t('Type'),
+    t('Operations'),
   );
   $rows = array();
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $row = array();
-    if (is_numeric($key)) {
-      $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
-      $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+    $row[] = backdrop_render($element[$key]['summary']);
+    $row[] = backdrop_render($element[$key]['plugin']);
+    if (isset($element[$key]['operations'])) {
+      $row[] = backdrop_render($element[$key]['operations']);
     }
     else {
-      $row[] = t('Special context: @key', array('@key' => $key));
+      $row[] = array();
     }
-    $row[] = backdrop_render($element[$key]);
+
     $rows[] = $row;
   }
   return theme('table', array(

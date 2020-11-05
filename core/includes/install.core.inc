@@ -1711,7 +1711,7 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);

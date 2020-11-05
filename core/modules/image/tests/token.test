@@ -1,0 +1,111 @@
+<?php
+/**
+ * @file
+ * Tests for image.module.
+ */
+
+/**
+ * Test the Image Style Token module.
+ */
+class ImageStyleTokenTests extends BackdropWebTestCase {
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp(array $modules = array()) {
+    parent::setUp($modules);
+
+    // Create an admin user and log them in.
+    $permissions = array(
+      'bypass node access',
+      'access content overview',
+      'administer nodes',
+    );
+    $admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($admin_user);
+
+    // Clear all of the token caches.
+    token_cache_clear();
+  }
+
+  /**
+   * Test that the image style tokens exist.
+   */
+  function testTokens() {
+    $bundle_label = 'Post';
+    $node_title = 'Test post';
+
+    // Load the node form.
+    $this->backdropGet('node/add/post');
+    $this->assertResponse(200, 'Loaded the Post node form.');
+    $this->assertText(strip_tags(t('Create @name', array('@name' => $bundle_label))));
+
+    // Generate an image file.
+    $image = $this->getTestImage();
+
+    // Submit the form.
+    $edit = array(
+      'title' => $node_title,
+      'body[und][0][value]' => 'Test post',
+      'body[und][0][format]' => 'filtered_html',
+      'files[field_image_und_0]' => backdrop_realpath($image->uri),
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $t_args = array('@type' => $bundle_label, '%title' => $node_title);
+    $this->assertText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
+    $matches = array();
+    if (preg_match('@node/(\d+)$@', $this->getUrl(), $matches)) {
+      $nid = end($matches);
+      $this->assertNotEqual($nid, 0, 'The node ID was extracted from the URL.');
+      $node = node_load($nid);
+      $this->assertNotEqual($node, NULL, 'The node was loaded successfully.');
+      $this->assertEqual($node->field_image[LANGUAGE_NONE][0]['filename'], $image->filename, 'The image was uploaded successfully.');
+
+      // Load the tokens for this object, verify the correct tokens exist.
+      $tokens = token_build_tree('node', array('data' => $node));
+      $this->assertTrue(isset($tokens['[node:field_image]']), 'The image field token exists.');
+      $this->assertTrue(isset($tokens['[node:field_image]']['children']), 'The image field token has child tokens.');
+      foreach (array('large', 'medium', 'thumbnail') as $style) {
+        $this->assertTrue(isset($tokens['[node:field_image]']['children']['[node:field_image:' . $style . ']']), 'The image style token exists.');
+        $this->assertTrue(isset($tokens['[node:field_image]']['children']['[node:field_image:' . $style . ']']['children']), 'The image style token has child tokens.');
+        $attributes = array(
+          'alt',
+          'extension',
+          'filesize',
+          'first',
+          'height',
+          'mimetype',
+          'path',
+          'render',
+          'second',
+          'style_name',
+          'third',
+          'title',
+          'uri',
+          'width',
+        );
+        foreach ($attributes as $attribute) {
+          $this->assertTrue(isset($tokens['[node:field_image]']['children']['[node:field_image:' . $style . ']']['children']['[node:field_image:' . $style . ':' . $attribute . ']']), 'The "' . $attribute . '" image style token exists.');
+        }
+      }
+    }
+  }
+
+  /**
+   * Generates a test image.
+   *
+   * @return stdClass
+   *   A file object.
+   */
+  function getTestImage() {
+    // Get a file to upload.
+    $file = current($this->backdropGetTestFiles('image'));
+
+    // Add a filesize property to files as would be read by file_load().
+    $file->filesize = filesize($file->uri);
+
+    return $file;
+  }
+
+}
