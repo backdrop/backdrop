@@ -243,20 +243,36 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
       '#default_value' => $settings['thousand_separator'],
     );
 
-    if ($display['type'] == 'number_decimal') {
-      $element['decimal_separator'] = array(
-        '#type' => 'select',
-        '#title' => t('Decimal marker'),
-        '#options' => array('.' => t('Decimal point'), ',' => t('Comma')),
-        '#default_value' => $settings['decimal_separator'],
-      );
-      $element['scale'] = array(
-        '#type' => 'select',
-        '#title' => t('Scale'),
-        '#options' => backdrop_map_assoc(range(0, 10)),
-        '#default_value' => $settings['scale'],
-        '#description' => t('The number of digits to the right of the decimal.'),
-      );
+    switch ($display['type']) {
+      case 'number_decimal':
+        $element['decimal_separator'] = array(
+          '#type' => 'select',
+          '#title' => t('Decimal marker'),
+          '#options' => array('.' => t('Decimal point'), ',' => t('Comma')),
+          '#default_value' => $settings['decimal_separator'],
+        );
+        $element['scale'] = array(
+          '#type' => 'select',
+          '#title' => t('Scale'),
+          '#options' => backdrop_map_assoc(range(0, 10)),
+          '#default_value' => $settings['scale'],
+          '#description' => t('The number of digits to the right of the decimal.'),
+        );
+        break;
+      // Set default values for the 'decimal_separator' and 'scale' settings for
+      // integer fields. These are not configurable through the admin UI; they
+      // are only present so that the 'number_integer' and 'number_decimal'
+      // formatters and field block summaries can use the same code.
+      case 'number_integer':
+        $element['decimal_separator'] = array(
+          '#type' => 'value',
+          '#value' => '',
+        );
+        $element['scale'] = array(
+          '#type' => 'value',
+          '#value' => 0,
+        );
+        break;
     }
 
     $element['prefix_suffix'] = array(
@@ -275,14 +291,6 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
 function number_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-
-  // Add dummy scale and decimal separator for integer number fields, to avoid
-  // php "undefined index" notices later, when we format the example number for
-  // the block summary.
-  if ($display['type'] == 'number_integer') {
-    $settings['scale'] = 0;
-    $settings['decimal_separator'] = '';
-  }
 
   $summary = array();
   if ($display['type'] == 'number_decimal' || $display['type'] == 'number_integer') {
