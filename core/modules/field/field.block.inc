@@ -43,7 +43,8 @@ class FieldBlock extends Block {
 
     $formatter_name = $this->settings['formatter'];
     $formatter = field_info_formatter_types($formatter_name);
-    $formatter_settings = $formatter['settings'];
+    $default_formatter_settings = $formatter['settings'];
+    $formatter_settings = array_merge($default_formatter_settings, $this->settings['formatter_settings']);
     $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
 
     $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
