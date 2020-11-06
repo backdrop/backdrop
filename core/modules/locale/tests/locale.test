@@ -1633,10 +1633,11 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Create a user with the admin/people/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
+    $password = $this->randomName(10);
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass' => $username,
+      'pass' => $password,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));

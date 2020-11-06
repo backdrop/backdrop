@@ -196,7 +196,7 @@ function system_token_info() {
   }
   $date['custom'] = array(
     'name' => t('Custom format'),
-    'description' => t("A date in a custom format. See !php-date for details.", array('!php-date' => l(t('the PHP documentation'), 'http://php.net/manual/en/function.date.php'))),
+    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     'dynamic' => TRUE,
   );
   $date['since'] = array(

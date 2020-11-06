@@ -53,7 +53,6 @@ $options = array(
   'account-mail' => 'admin@example.com',
   'account-name' => 'admin',
   'account-pass' => md5(microtime() . mt_rand()),
-  'site-name' => 'Backdrop',
   'clean-url' => '1',
   'db-prefix' => '',
   'db-url' => '',

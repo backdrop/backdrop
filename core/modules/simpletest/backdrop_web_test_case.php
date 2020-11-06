@@ -1575,10 +1575,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
-    $active_directory = config_get_config_directory('active');
-    $staging_directory = config_get_config_directory('staging');
-    file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
-    file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
+    config_get_config_storage('active')->initializeStorage();
+    config_get_config_storage('staging')->initializeStorage();
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1629,15 +1627,19 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Recursively copy one directory to another.
    *
+   * @param string $src
+   *   Source directory to copy.
+   * @param string $dst
+   *   Destination directory to copy files to.
    */
   private function recursiveCopy($src, $dst) {
     $dir = opendir($src);
-    if(!file_exists($dst)){
+    if (!file_exists($dst)) {
       mkdir($dst);
     }
-    while(false !== ( $file = readdir($dir)) ) {
-      if (( $file != '.' ) && ( $file != '..' )) {
-        if ( is_dir($src . '/' . $file) ) {
+    while (FALSE !== ($file = readdir($dir))) {
+      if ($file != '.' && $file != '..' && $file != '.htaccess') {
+        if (is_dir($src . '/' . $file)) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
         }
         else {

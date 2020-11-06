@@ -112,28 +112,30 @@ function dblog_update_1001() {
  * Convert the format for dates in the database log.
  */
 function dblog_update_1002() {
-  $t = get_t();
-  $config = config('system.core');
-  $log_format = $config->get('log_date_format');
+  // Removed. See https://github.com/backdrop/backdrop-issues/issues/4614
+}
 
-  // Look for a matching date format to use.
-  foreach (system_get_date_formats() as $date_format) {
-    if ($log_format == $date_format['pattern']) {
-      $config->set('log_date_format', $date_format['name']);
-      $config->save();
-      break;
-    }
+/**
+ * Restore the format for dates in the database log.
+ */
+function dblog_update_1003() {
+  // The "log_date_format" value may be a pattern or a named format.
+  $core_config = config('system.core');
+  $log_format = $core_config->get('log_date_format');
+
+  $date_format_config = config('system.date');
+  $date_formats = $date_format_config->get('formats');
+
+  // If a named pattern is in use, store its pattern directly.
+  if (isset($date_formats[$log_format])) {
+    $core_config->set('log_date_format', $date_formats[$log_format]['pattern']);
+    $core_config->save();
   }
 
-  // No matching date format found, so create a custom one.
-  if ($config->get('log_date_format') == $log_format) {
-    system_date_format_save(array(
-      'name' => 'dblog_date_format',
-      'label' => $t('Database log messages date'),
-      'pattern' => $log_format,
-      'module' => 'dblog',
-    ));
-    $config->set('log_date_format', 'dblog_date_format');
-    $config->save();
+  // Remove the previously created named format for logging.
+  if (isset($date_formats['dblog_date_format'])) {
+    unset($date_formats['dblog_date_format']);
+    $date_format_config->set('formats', $date_formats);
+    $date_format_config->save();
   }
 }

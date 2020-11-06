@@ -96,12 +96,67 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       'init_commands' => array(),
     );
     $connection_options['init_commands'] += array(
-      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER'",
+      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
       $this->exec($sql);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function prepareQuery($query) {
+    // DatabaseConnection::prepareQuery() is responsible for applying database
+    // table prefixes where curly brackets are around tables. Use this as an
+    // opportunity to apply backticks around table names.
+    $query = str_replace('{', '`{', $query);
+    $query = str_replace('}', '}`', $query);
+    return parent::prepareQuery($query);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeField($field) {
+    $field = parent::escapeField($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeAlias($field) {
+    $field = parent::escapeAlias($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * Quotes an identifier with backticks for MySQL 8 compatibility.
+   *
+   * Not all identifiers need quotes, only keywords, but we add them on all
+   * fields and table names for consistency and to ease compatibility in the
+   * future.
+   *
+   * @param string $identifier
+   *   The field to check.
+   *
+   * @return string
+   *   The identifier, quoted with backticks.
+   */
+  private function quoteIdentifier($identifier) {
+    // Some identifiers are empty, such as when doing expressions.
+    if (strlen($identifier) === 0) {
+      return $identifier;
+    }
+    // Identifiers that have both a table and field should quote both.
+    elseif (strpos($identifier, '.') !== FALSE) {
+      list($table, $identifier) = explode('.', $identifier, 2);
+      return "`$table`" . '.' . "`$identifier`";
+    }
+    // Otherwise quote just the field name.
+    return "`$identifier`";
   }
 
   public function __destruct() {
