@@ -130,7 +130,10 @@ function system_menu_block_form($config) {
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
-    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global <a href="/admin/structure/menu/settings" target="_blank">Menu settings</a>.'),
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global !link_tag_openMenu settings!link_tag_close.', array(
+      '!link_tag_open' => user_access('administer menu') ? '<a href="/admin/structure/menu/settings" target="_blank">' : '',
+      '!link_tag_close' => user_access('administer menu') ? '</a>' : '',
+    )),
   );
 
   return $form;
