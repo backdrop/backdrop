@@ -25,7 +25,11 @@ function user_token_info() {
   );
   $user['name'] = array(
     'name' => t('Name'),
-    'description' => t('The login name of the user account.'),
+    'description' => t('The account username.'),
+  );
+  $user['link'] = array(
+    'name' => t("Name (linked)"),
+    'description' => t("The account username (for users with the <em>View user profiles</em> permission it's displayed as a link to the profile page)."),
   );
   $user['mail'] = array(
     'name' => t('Email'),
@@ -117,6 +121,10 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
         case 'name':
           $name = user_format_name($account);
           $replacements[$original] = $sanitize ? check_plain($name) : $name;
+          break;
+
+        case 'link':
+          $replacements[$original] = theme('username', array('account' => $account));
           break;
 
         case 'mail':
