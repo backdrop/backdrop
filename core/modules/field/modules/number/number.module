@@ -264,13 +264,15 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
       // are only present so that the 'number_integer' and 'number_decimal'
       // formatters and field block summaries can use the same code.
       case 'number_integer':
+        $integer_formatter = field_info_formatter_types('number_integer');
+        $default_integer_formatter_settings = $integer_formatter['settings'];
         $element['decimal_separator'] = array(
           '#type' => 'value',
-          '#value' => '',
+          '#value' => $default_integer_formatter_settings['decimal_separator'],
         );
         $element['scale'] = array(
           '#type' => 'value',
-          '#value' => 0,
+          '#value' => $default_integer_formatter_settings['scale'],
         );
         break;
     }
