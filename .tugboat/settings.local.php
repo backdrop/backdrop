@@ -11,3 +11,4 @@ $config_directories['staging'] = 'files/config/staging';
 $settings['trusted_host_patterns'] = array('^.+\.tugboat\.qa$');
 
 // Miscellaneous.
+$config['system.core']['error_level'] = 'all';
