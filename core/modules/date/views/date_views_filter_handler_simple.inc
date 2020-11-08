@@ -283,7 +283,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    */
   function value_form(&$form, &$form_state) {
     // We use different values than the parent form, so we must
-    // Construct our own form element.
+    // construct our own form element.
     $form['value'] = array();
     $form['value']['#tree'] = TRUE;
     $form['value']['#id'] = 'date_views_exposed_filter-' . bin2hex(backdrop_random_bytes(16));
