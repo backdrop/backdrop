@@ -40,11 +40,15 @@ class FieldBlock extends Block {
 
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     $field = field_info_field($field_name);
-    $formatter = field_info_formatter_types($this->settings['formatter']);
-    $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
-    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+    $formatter_name = $this->settings['formatter'];
+    $formatter = field_info_formatter_types($formatter_name);
+    $default_formatter_settings = $formatter['settings'];
+    $formatter_settings = array_merge($default_formatter_settings, $this->settings['formatter_settings']);
+    $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
+
+    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
+    $preview = '<p>' . t('Displays values of the %field field.', array('%field' => $field_name)) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
