@@ -1127,7 +1127,10 @@ function node_update_1013() {
     $config->set('display.page.display_options.menu.title', 'Manage content');
   }
   $config->save();
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**

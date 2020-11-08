@@ -200,7 +200,10 @@ function comment_admin_overview_submit($form, &$form_state) {
   }
   backdrop_set_message(t('The update has been performed.'));
   $form_state['redirect'] = 'admin/content/comment';
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**
@@ -248,7 +251,10 @@ function comment_multiple_delete_confirm($form, &$form_state) {
 function comment_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     comment_delete_multiple(array_keys($form_state['values']['comments']));
-    cache_clear_all();
+    if (module_exists('layout')) {
+      cache_flush('layout_path');
+    }
+    cache_flush('page');
     $count = count($form_state['values']['comments']);
     watchdog('content', 'Deleted @count comments.', array('@count' => $count));
     backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));

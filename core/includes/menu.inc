@@ -3468,13 +3468,19 @@ function _menu_clear_page_cache() {
   // Clear the page and block caches, but at most twice, including at
   //  the end of the page load when there are multiple links saved or deleted.
   if ($cache_cleared == 0) {
-    cache_clear_all();
+    if (module_exists('layout')) {
+      cache_flush('layout_path');
+    }
+    cache_flush('page');
     // Keep track of which menus have expanded items.
     _menu_set_expanded_menus();
     $cache_cleared = 1;
   }
   elseif ($cache_cleared == 1) {
-    backdrop_register_shutdown_function('cache_clear_all');
+    if (module_exists('layout')) {
+      backdrop_register_shutdown_function('cache_flush', 'layout_path');
+    }
+    backdrop_register_shutdown_function('cache_flush', 'page');
     // Keep track of which menus have expanded items.
     backdrop_register_shutdown_function('_menu_set_expanded_menus');
     $cache_cleared = 2;

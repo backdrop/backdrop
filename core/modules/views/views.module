@@ -796,8 +796,11 @@ function views_invalidate_cache() {
   // Clear the views cache.
   cache('views')->flush();
 
-  // Clear the page and block cache.
-  cache_clear_all();
+  // Clear the layout and page cache.
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 
   // Set the menu as needed to be rebuilt.
   state_set('menu_rebuild_needed', TRUE);

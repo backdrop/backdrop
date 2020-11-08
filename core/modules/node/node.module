@@ -3361,7 +3361,10 @@ function node_access_rebuild($batch_mode = FALSE) {
   if (!isset($batch)) {
     backdrop_set_message(t('Content permissions have been rebuilt.'));
     node_access_needs_rebuild(FALSE);
-    cache_clear_all();
+    if (module_exists('layout')) {
+      cache_flush('layout_path');
+    }
+    cache_flush('page');
   }
 }
 
@@ -3421,7 +3424,10 @@ function _node_access_rebuild_batch_finished($success, $results, $operations) {
   else {
     backdrop_set_message(t('The content access permissions have not been properly rebuilt.'), 'error');
   }
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**

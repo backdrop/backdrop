@@ -383,8 +383,11 @@ function file_add_form_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
   }
 
-  // Clear the page and block caches.
-  cache_clear_all();
+  // Clear the layout and page caches.
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**
@@ -818,8 +821,11 @@ function file_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = 'admin/content/files';
 
-  // Clear the page and block caches.
-  cache_clear_all();
+  // Clear the layout and page caches.
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**
@@ -897,7 +903,10 @@ function file_multiple_delete_confirm($form, &$form_state) {
  */
 function file_multiple_delete_confirm_submit($form, &$form_state) {
   file_delete_multiple(array_keys($form_state['values']['files']));
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
   $count = count($form_state['values']['files']);
   watchdog('content', 'Administrator deleted @count files.', array('@count' => $count));
 

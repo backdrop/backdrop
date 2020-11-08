@@ -230,7 +230,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     foreach ($logs as $log) {
       $this->assertText($log, t('Log message found.'));
     }
- 
+
     // Confirm that this is the active revision.
     $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
 
@@ -243,7 +243,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     )), 'Revision reverted.');
     $reverted_node = node_load($node->nid);
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), 'Node reverted correctly.');
- 
+
     // Confirm that this is not the current version.
     $node = node_load($node->nid, $node->vid);
     $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
@@ -723,7 +723,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
-    // Test that a user with permissions to create, but not edit, can still 
+    // Test that a user with permissions to create, but not edit, can still
     // access preview.
     $no_edit_user = $this->backdropCreateUser(array(
       'create page content',
@@ -740,7 +740,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
 
-    // Test that a user with permissions to edit, but not create, can still 
+    // Test that a user with permissions to edit, but not create, can still
     // access preview.
     $no_create_user = $this->backdropCreateUser(array(
       'edit any page content',
@@ -1019,7 +1019,8 @@ class NodeBlockTestCase extends BackdropWebTestCase {
       'syndicate_settings' => 'page_content',
     );
     $layout->save();
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     $this->backdropGet('test-view-view');
     $elements = $this->xpath($syndicate_selector);
@@ -1035,7 +1036,8 @@ class NodeBlockTestCase extends BackdropWebTestCase {
       'syndicate_settings' => 'promoted',
     );
     $layout->save();
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     $this->backdropGet('test-view-view');
     $elements = $this->xpath($syndicate_selector);
@@ -2376,7 +2378,8 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $default_settings['type'] = 'page';
     $node4 = $this->backdropCreateNode($default_settings);
     // Clear page caches.
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     // Test that all four nodes are shown.
     $this->backdropGet('');

@@ -208,7 +208,10 @@ function node_multiple_delete_confirm($form, &$form_state) {
  */
 function node_multiple_delete_confirm_submit($form, &$form_state) {
   node_delete_multiple(array_keys($form_state['values']['nodes']));
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
   $count = count($form_state['values']['nodes']);
   watchdog('content', 'Deleted @count posts.', array('@count' => $count));
 

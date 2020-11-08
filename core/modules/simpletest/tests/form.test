@@ -1485,7 +1485,7 @@ class FormsFormCacheTestCase extends DrupalWebTestCase {
 
     // Clear expired entries from cache_form, which should include the entry we
     // just stored. Without this, the form will still be retrieved from cache.
-    cache_clear_all(NULL, 'cache_form');
+    cache('cache_form')->garbageCollection();
 
     $cached_form_state = array();
     $cached_form = form_get_cache($form['#build_id'], $cached_form_state);
