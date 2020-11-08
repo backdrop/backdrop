@@ -347,9 +347,10 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   // Set the step for floating point and decimal numbers.
   switch ($field['type']) {
     case 'number_decimal':
+      // Avoid small float as base in function pow() for better results
+      // regarding floating point precision.
       $scale = (int) $field['settings']['scale'];
-      // We round this to workaround the php floating point precision problem.
-      $element['#step'] = round(pow(0.1, $scale), $scale);
+      $element['#step'] = 1 / pow(10, $scale);
       break;
 
     case 'number_float':

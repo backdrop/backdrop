@@ -137,7 +137,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     // validation must pass.
     $valid_values = array(
       20.123456789,
-      0.1234567,
+      9999.1933172003,
       219.200005,
       199.200001,
     );
