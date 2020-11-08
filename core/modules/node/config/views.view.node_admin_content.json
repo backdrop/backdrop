@@ -461,24 +461,37 @@
                     }
                 },
                 "filters": {
-                    "status": {
-                        "id": "status",
+                    "status_extra": {
+                        "id": "status_extra",
                         "table": "node",
-                        "field": "status",
+                        "field": "status_extra",
                         "relationship": "none",
                         "group_type": "group",
                         "ui_name": "",
                         "operator": "=",
-                        "value": "All",
-                        "group": 1,
+                        "value": "",
+                        "group": "1",
+                        "exposed": false,
+                        "is_grouped": false
+                    },
+                    "title": {
+                        "id": "title",
+                        "table": "node",
+                        "field": "title",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "operator": "word",
+                        "value": "",
+                        "group": "1",
                         "exposed": true,
                         "expose": {
-                            "operator_id": "",
-                            "label": "Published",
+                            "operator_id": "title_op",
+                            "label": "Title contains",
                             "description": "",
-                            "use_operator": false,
-                            "operator": "status_op",
-                            "identifier": "status",
+                            "use_operator": 0,
+                            "operator": "title_op",
+                            "identifier": "title",
                             "required": 0,
                             "remember": 0,
                             "multiple": false,
@@ -520,24 +533,24 @@
                         },
                         "is_grouped": false
                     },
-                    "title": {
-                        "id": "title",
+                    "status": {
+                        "id": "status",
                         "table": "node",
-                        "field": "title",
+                        "field": "status",
                         "relationship": "none",
                         "group_type": "group",
                         "ui_name": "",
-                        "operator": "word",
-                        "value": "",
-                        "group": "1",
+                        "operator": "=",
+                        "value": "All",
+                        "group": 1,
                         "exposed": true,
                         "expose": {
-                            "operator_id": "title_op",
-                            "label": "Title contains",
+                            "operator_id": "",
+                            "label": "Published",
                             "description": "",
-                            "use_operator": 0,
-                            "operator": "title_op",
-                            "identifier": "title",
+                            "use_operator": false,
+                            "operator": "status_op",
+                            "identifier": "status",
                             "required": 0,
                             "remember": 0,
                             "multiple": false,
@@ -547,19 +560,6 @@
                                 "administrator": 0
                             }
                         },
-                        "is_grouped": false
-                    },
-                    "status_extra": {
-                        "id": "status_extra",
-                        "table": "node",
-                        "field": "status_extra",
-                        "relationship": "none",
-                        "group_type": "group",
-                        "ui_name": "",
-                        "operator": "=",
-                        "value": "",
-                        "group": "1",
-                        "exposed": false,
                         "is_grouped": false
                     },
                     "timestamp": {
