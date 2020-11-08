@@ -5,6 +5,17 @@
  */
 
 /**
+ * Implements hook_css_alter().
+ */
+function basis_css_alter(&$css) {
+  // Remove Basis' `/css/component/menu-dropdown.css` if using a custom
+  // breakpoint.
+  if (config_get('system.core', 'menu_breakpoint') != 'default') {
+    unset($css['core/themes/basis/css/component/menu-dropdown.css']);
+  }
+}
+
+/**
  * Prepares variables for page templates.
  *
  * @see page.tpl.php
@@ -27,13 +38,7 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Add breakpoint-specific CSS for dropdown menus.
-  if (config_get('system.core', 'menu_breakpoint') == 'default') {
-    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.css', array(
-      'group' => CSS_THEME,
-      'every_page' => TRUE,
-    ));
-  }
-  else {
+  if (config_get('system.core', 'menu_breakpoint') != 'default') {
     backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
