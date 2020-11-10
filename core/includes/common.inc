@@ -1452,9 +1452,8 @@ function valid_url($url, $absolute = FALSE) {
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
  */
 function valid_number_step($value, $step, $offset = 0.0) {
-  // Offset is the #min value of number fields, values smaller than that can
-  // never be valid. And avoid division by zero.
-  if ($value < $offset || $step == 0) {
+  // Avoid division by zero.
+  if ($step == 0) {
     return FALSE;
   }
 
@@ -1476,8 +1475,10 @@ function valid_number_step($value, $step, $offset = 0.0) {
   // values. Note: sprintf also rounds values but seems to give more reliable
   // results than number_format.
   // "10" is the maximum value allowed by the number widget, so higher scale
-  // values do not make sense.
-  $max_scale = 10;
+  // values do not make much sense.
+  // But as several (also unrelated) tests require a higher value, we have to
+  // provide at least a scale of 13 here.
+  $max_scale = 13;
   $step_string = rtrim(sprintf("%.{$max_scale}F", $step), '0');
   $value_string = rtrim(sprintf("%.{$max_scale}F", $value), '0');
 

@@ -2371,7 +2371,7 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     // Valid and very small float steps.
     $this->assertTrue(valid_number_step(1000.12345, 1e-10));
     $this->assertTrue(valid_number_step(1936.5, 3e-8));
-    $this->assertTrue(valid_number_step(3.9999999999, 1e-10));
+    $this->assertTrue(valid_number_step(3.9999999999999, 1e-13));
 
     // Invalid integer steps.
     $this->assertFalse(valid_number_step(100, 30));
