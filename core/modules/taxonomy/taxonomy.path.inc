@@ -20,10 +20,25 @@ function taxonomy_path_info() {
     'source prefix' => 'taxonomy/term/',
   );
   $vocabularies = taxonomy_get_vocabularies();
+  $languages = array();
+  if (module_exists('language')) {
+    $languages = array(LANGUAGE_NONE => (object) array(
+      'name' => t('Language neutral'),
+      'langcode' => LANGUAGE_NONE,
+    )) + language_list();
+  }
   if (count($vocabularies)) {
     $info['taxonomy_term']['pattern items'] = array();
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
-      $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+      if (count($languages) && !empty($vocabulary->language)) {
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for %vocab-name (applies to all %vocab-name categories with blank URL alias patterns below)', array('%vocab-name' => $vocabulary->name));
+        foreach ($languages as $langcode => $language) {
+          $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('URL alias pattern for all %vocab-name URLs in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
+        }
+      }
+      else {
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+      }
     }
   }
 

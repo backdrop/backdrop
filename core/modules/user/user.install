@@ -155,6 +155,10 @@ function user_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_user'] = $cache_schema;
+  $schema['cache_entity_user']['description'] = "Cache table used to store Users entity records.";
+
   return $schema;
 }
 
@@ -1189,6 +1193,39 @@ function user_update_1015() {
   if ($config->get('display.default.display_options.filters.name.expose.identifier') == 'name') {
     $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
   }
+  $config->save();
+}
+
+/**
+ * Creates the table to enable caching of User entities.
+ */
+function user_update_1016() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store User entity records.";
+  db_create_table('cache_entity_user', $table);
+}
+
+/**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
+  $config->save();
+}
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1018() {
+  $config = config('system.core');
+  $config->set('user_password_reject_weak', FALSE);
+  $config->set('user_password_strength_threshold', 50);
   $config->save();
 }
 

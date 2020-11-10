@@ -1,6 +1,7 @@
 
 #permissions td.module {
   font-weight: bold;
+  background: #dddddd;
 }
 #permissions td.permission {
   padding-left: 1.5em; /* LTR */
@@ -17,10 +18,16 @@
   font-size: 0.85em;
   padding-bottom: .5em;
 }
+#user-admin-settings .form-item-user-password-policy {
+  margin-bottom: 0;
+}
+#user-admin-settings .min-length-wrapper {
+  font-size: 0.923em;
+}
 
 /**
- * Override default textfield float to put the "Add role" button next to
- * the input textfield.
+ * Override default textfield float to put the "Add role" button next to the
+ * input textfield.
  */
 #user-admin-roles td.edit-name {
   clear: both;
@@ -44,10 +51,14 @@
   max-width: 100%;
 }
 .password-toggle {
-  right: 0;
   position: absolute;
-  font-size: 80%;
   top: -2em;
+  right: 0; /* LTR */
+  font-size: 80%;
+}
+[dir="rtl"] .password-toggle {
+  right: auto;
+  left: 0;
 }
 
 /**
@@ -66,6 +77,19 @@
 .password-strength.empty {
   visibility: hidden;
   display: none;
+}
+.password-strength-title {
+  float: left; /* LTR */
+}
+.password-strength-text {
+  padding-left: 5px; /* LTR */
+}
+[dir="rtl"] .password-strength-title {
+  float: right;
+}
+[dir="rtl"] .password-strength-text {
+  padding-left: 0;
+  padding-right: 5px;
 }
 .password-indicator {
   background-color: #EEE;

@@ -1,3 +1,9 @@
+[FilterResetTestCase]
+name = Filter modules and reset filter
+description = Filter the modules list, then reset the filter.
+group = Module
+file = tests/system.test
+
 [EnableDisableTestCase]
 name = Enable/disable modules
 description = Enable/disable core module and confirm table creation/deletion.
@@ -20,12 +26,6 @@ file = tests/system.test
 name = Module versions
 description = Check module version dependencies.
 group = Module
-file = tests/system.test
-
-[CronRunTestCase]
-name = Cron run
-description = Test cron run.
-group = System
 file = tests/system.test
 
 [CronRunTestCase]

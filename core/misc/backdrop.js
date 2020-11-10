@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -412,6 +412,23 @@ Backdrop.relativeUrl = function (url) {
   var port = window.location.port ? (':' + window.location.port) : '';
   return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
 };
+
+/**
+ * Sanitizes a URL for use with jQuery.ajax().
+ *
+ * @param url
+ *   The URL string to be sanitized.
+ *
+ * @return
+ *   The sanitized URL.
+ */
+Backdrop.sanitizeAjaxUrl = function (url) {
+  var regex = /\=\?(&|$)/;
+  while (url.match(regex)) {
+    url = url.replace(regex, '');
+  }
+  return url;
+}
 
 /**
  * Returns true if the URL is within Backdrop's base path.

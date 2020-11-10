@@ -22,6 +22,17 @@ function contact_settings_form($form, &$form_state) {
     '#collapsed' => FALSE,
     '#title' => t("Fields"),
   );
+  $form['fields']['phone'] = array(
+    '#type' => 'select',
+    '#title' => t('Phone number'),
+    '#description' => t('Allow users to enter their phone number.'),
+    '#options' => array(
+      'optional' => t('Optional'),
+      'required' => t('Required'),
+    ),
+    '#empty_value' => '',
+    '#default_value' => $config->get('phone'),
+  );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
     '#title' => t("Allow users to send themselves a copy of the submission."),
@@ -166,7 +177,7 @@ function contact_form_permissions() {
 function contact_category_list($form, $form_state) {
   $form['help'] = array(
     '#type' => 'markup',
-    '#markup' => t('Configure the categories shown in the <a href="!url">site-wide contact form</a> here. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#markup' => t('Configure the categories shown in the site-wide contact form available at <a href="!url">!url</a>. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
     '#weight' => -20,
   );
 
@@ -272,6 +283,10 @@ function contact_category_list_submit($form, &$form_state) {
  * @ingroup forms
  */
 function contact_category_edit_form($form, &$form_state, array $category = array()) {
+  if (empty($category)) {
+    backdrop_set_title(t('Add contact form category'));
+  }
+
   // If this is a new category, add the default values.
   $category += array(
     'category' => '',

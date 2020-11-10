@@ -415,9 +415,9 @@ class views_plugin_display_page extends views_plugin_display {
         }
         $form['menu']['weight'] = array(
           '#title' => t('Weight'),
-          '#type' => 'textfield',
+          '#type' => 'number',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
-          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
+          '#description' => t('This number sets the order of the menu item or tab, with lower weights coming first. Negative values are allowed.'),
           '#states' => array(
             'visible' => array(
               array(

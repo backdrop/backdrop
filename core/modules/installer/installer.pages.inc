@@ -20,7 +20,7 @@ function installer_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   installer_browser_check_zip_loaded();
 
-  // Show link to enable page if recently installed modules were not yet 
+  // Show link to enable page if recently installed modules were not yet
   // enabled.
   $recent_projects = installer_browser_get_installed_projects();
   foreach ($recent_projects as $project) {
@@ -302,7 +302,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
     if (count($releases_list) > 1) {
       $form['releases'][$project['name']]['selected_text']['#markup'] .=
-        ' (<a class="installer-browser-show-releases-link js-only" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
+        ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
     }
 
     // Update the project type based on the type of projects being selected.
@@ -319,7 +319,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     backdrop_goto('admin/installer/install/enable');
   }
 
-  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))), 'warning');
+  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'https://backdropcms.org/backups'))), 'warning');
 
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
@@ -592,7 +592,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
       '#submit' => array('installer_browser_installation_theme_finish'),
     );
   }
-  
+
   return $form;
 }
 
@@ -644,6 +644,22 @@ function installer_browser_installation_theme_set($form, &$form_state) {
  */
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
+
+  // Go through each of the installed projects and add any contained submodules
+  // that are not hidden to the list of projects.
+  foreach ($projects as $project) {
+    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
+      foreach ($modules as $module) {
+        if (isset($module->info['project']) && isset($modules[$project['name']]->info['project']) && $modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name && !$module->info['hidden']) {
+          $projects[$module->name] = array(
+            'type' => $module->info['type'],
+            'title' => $module->info['name'],
+            'name' => $module->name,
+          );
+        }
+      }
+    }
+  }
 
   $options = array();
   $missing = array();
@@ -925,7 +941,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'label' => t('Relevancy'), 'default_sort' => 'desc'),
+    'score' => array('method' => 'score', 'label' => t('Relevance'), 'default_sort' => 'desc'),
     'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
     'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
     'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),
@@ -997,7 +1013,7 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
       break;
 
     default:
-      return MENU_NOT_FOUND;    
+      return MENU_NOT_FOUND;
   }
 
   if ($method === 'ajax') {

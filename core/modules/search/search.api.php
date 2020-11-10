@@ -230,8 +230,8 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * Override the rendering of search results.
  *
  * A module that implements hook_search_info() to define a type of search may
- * implement this hook in order to override the default theming of its search
- * results, which is otherwise themed using theme('search_results').
+ * implement this hook in order to override the default markup of search
+ * results.
  *
  * @param $results
  *   An array of search results.
