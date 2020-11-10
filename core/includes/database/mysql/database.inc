@@ -107,18 +107,6 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * {@inheritdoc}
    */
-  public function prepareQuery($query) {
-    // DatabaseConnection::prepareQuery() is responsible for applying database
-    // table prefixes where curly brackets are around tables. Use this as an
-    // opportunity to apply backticks around table names.
-    $query = str_replace('{', '`{', $query);
-    $query = str_replace('}', '}`', $query);
-    return parent::prepareQuery($query);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function escapeField($field) {
     $field = parent::escapeField($field);
     return $this->quoteIdentifier($field);

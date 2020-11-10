@@ -434,9 +434,9 @@ abstract class DatabaseConnection extends PDO {
     }
     // Then replace remaining tables with the default prefix.
     $this->prefixSearch[] = '{';
-    $this->prefixReplace[] = $this->prefixes['default'];
+    $this->prefixReplace[] = '`' . $this->prefixes['default'];
     $this->prefixSearch[] = '}';
-    $this->prefixReplace[] = '';
+    $this->prefixReplace[] = '`';
   }
 
   /**
