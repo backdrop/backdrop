@@ -1330,7 +1330,15 @@ function _layout_include_files() {
 }
 
 /**
- * Load a layout-related information from modules.
+ * Load layout-related information from modules.
+ *
+ * @param  $data_type
+ *   Type of layout data to load Examples include:
+ *   - layout: layout template
+ *   - layout_context: context
+ *   - layout_access: visibility condition
+ *   - layout_style: style
+ *   - layout_renderer: renderer
  */
 function _layout_get_all_info($data_type, $init = array()) {
   $all_info = &backdrop_static(__FUNCTION__);
@@ -2072,6 +2080,10 @@ function layout_layout_info() {
         }
         $layouts[$flexible_template->name]['regions'][$row_name . '--' . $i] = $region_name;
       }
+    }
+
+    if (isset($flexible_template->default_region)) {
+      $layouts[$flexible_template->name]['default region'] = $flexible_template->default_region;
     }
   }
 
