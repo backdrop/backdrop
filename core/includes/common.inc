@@ -1450,32 +1450,45 @@ function valid_url($url, $absolute = FALSE) {
  *
  * @return bool
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
- *
- * @see http://opensource.apple.com/source/WebCore/WebCore-1298/html/NumberInputType.cpp
  */
 function valid_number_step($value, $step, $offset = 0.0) {
-  $double_value = (double) abs($value - $offset);
+  // Consider offset and get the unsigned values.
+  $value = (float) abs($value - $offset);
+  $step = abs($step);
 
-  // The fractional part of a double has 53 bits. The greatest number that could
-  // be represented with that is 2^53. If the given value is even bigger than
-  // $step * 2^53, then dividing by $step will result in a very small remainder.
-  // Since that remainder can't even be represented with a single precision
-  // float the following computation of the remainder makes no sense and we can
-  // safely ignore it instead.
-  if ($double_value / pow(2.0, 53) > $step) {
-    return TRUE;
+  // Avoid impossible combinations.
+  if ($step == 0 || $value < $step) {
+    return FALSE;
   }
 
-  // Now compute that remainder of a division by $step.
-  $remainder = (double) abs($double_value - $step * round($double_value / $step));
+  // Both numbers are integers - use modulo right away.
+  if (is_int($value) && is_int($step) && $value < PHP_INT_MAX) {
+    return $value % $step == 0;
+  }
 
-  // $remainder is a double precision floating point number. Remainders that
-  // can't be represented with single precision floats are acceptable. The
-  // fractional part of a float has 24 bits. That means remainders smaller than
-  // $step * 2^-24 are acceptable.
-  $computed_acceptable_error = (double)($step / pow(2.0, 24));
+  // Convert from possible exponent notation to decimal strings to get the scale
+  // values. Note: sprintf also rounds values but seems to give more reliable
+  // results than number_format.
+  // "10" is the maximum value allowed by the number widget, so higher scale
+  // values do not make sense.
+  $max_scale = 10;
+  $step_string = rtrim(sprintf("%.{$max_scale}F", $step), '0');
+  $value_string = rtrim(sprintf("%.{$max_scale}F", $value), '0');
 
-  return $computed_acceptable_error >= $remainder || $remainder >= ($step - $computed_acceptable_error);
+  // If the actual value has more significant decimals than expected, it has a
+  // higher precision than desired and is not divisible by the step.
+  $step_scale = strpos(strrev($step_string), '.');
+  $value_scale = strpos(strrev($value_string), '.');
+  if ($value_scale > $step_scale) {
+    return FALSE;
+  }
+
+  // Because of the floating point precision problem, fmod() has a high error
+  // rate. We convert the floats to integers instead by multiplying powers of 10
+  // and use the modulo operator.
+  $step_int = intval($step * pow(10, $step_scale));
+  $value_int = intval($value * pow(10, $step_scale));
+  return $value_int % $step_int == 0;
 }
 
 /**
