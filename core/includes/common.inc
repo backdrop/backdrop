@@ -1452,17 +1452,23 @@ function valid_url($url, $absolute = FALSE) {
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
  */
 function valid_number_step($value, $step, $offset = 0.0) {
-  // Consider offset and get the unsigned values.
-  $value = abs($value - $offset);
-  $step = abs($step);
-
-  // Avoid impossible combinations.
-  if ($step == 0 || $value < $step) {
+  // Offset is the #min value of number fields, values smaller than that can
+  // never be valid. And avoid division by zero.
+  if ($value < $offset || $step == 0) {
     return FALSE;
   }
 
+  // Consider offset, get absolute values.
+  $value = abs($value - $offset);
+  $step = abs($step);
+
+  // Value and step are the same, no need for math.
+  if ($value == $step) {
+    return TRUE;
+  }
+
   // Both numbers are integers - use modulo right away.
-  if (is_int($value) && is_int($step) && $value < PHP_INT_MAX) {
+  if ((int) $value == $value && (int) $step == $step && $value < PHP_INT_MAX) {
     return $value % $step == 0;
   }
 
