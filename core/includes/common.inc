@@ -1453,7 +1453,7 @@ function valid_url($url, $absolute = FALSE) {
  */
 function valid_number_step($value, $step, $offset = 0.0) {
   // Consider offset and get the unsigned values.
-  $value = (float) abs($value - $offset);
+  $value = abs($value - $offset);
   $step = abs($step);
 
   // Avoid impossible combinations.
