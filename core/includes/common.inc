@@ -1484,9 +1484,16 @@ function valid_number_step($value, $step, $offset = 0.0) {
 
   // If the actual value has more significant decimals than expected, it has a
   // higher precision than desired and is not divisible by the step.
+  // But if the scale value high, and the length of string (minus comma) is
+  // beyond the php setting for precision, it's more likely that the conversion
+  // to string caused a problem with rounding. It's a compromise to allow it,
+  // because there's no reliably way for php to handle it.
   $step_scale = strpos(strrev($step_string), '.');
   $value_scale = strpos(strrev($value_string), '.');
   if ($value_scale > $step_scale) {
+    if ($value_scale > 10 && strlen($value_string) - 1 > ini_get('precision')) {
+      return TRUE;
+    }
     return FALSE;
   }
 
