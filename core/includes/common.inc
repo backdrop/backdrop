@@ -1454,6 +1454,7 @@ function valid_url($url, $absolute = FALSE) {
  * @see http://opensource.apple.com/source/WebCore/WebCore-1298/html/NumberInputType.cpp
  */
 function valid_number_step($value, $step, $offset = 0.0) {
+  $step = (string) $step;
   $double_value = (double) abs($value - $offset);
 
   // The fractional part of a double has 53 bits. The greatest number that could
