@@ -111,7 +111,7 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
 Backdrop.behaviors.filterFieldsetSummaries = {
   attach: function (context) {
     $(context).find('fieldset.filter-wrapper').backdropSetSummary(function (element) {
-      var $summary = '';
+      var summary = '';
       // Look for a select list of text formats.
       var $select_list = $(element).find('select.filterEditors-processed :selected');
       // Otherwise look for a hidden input element (when the current user has
@@ -119,13 +119,13 @@ Backdrop.behaviors.filterFieldsetSummaries = {
       var $input_element = $(element).find('input.filterEditors-processed');
 
       if ($select_list.length) {
-        $summary = $select_list.text();
+        summary = $select_list.text();
       }
       else if ($input_element.length) {
-        $summary = $input_element.attr('data-text-format-name');
+        summary = $input_element.attr('data-text-format-name');
       }
 
-      return $summary;
+      return summary;
     });
   }
 };
