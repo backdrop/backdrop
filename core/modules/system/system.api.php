@@ -1818,6 +1818,7 @@ function hook_custom_theme() {
  *     - WATCHDOG_INFO: Informational messages.
  *     - WATCHDOG_DEBUG: Debug-level messages.
  *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
+ *     @see watchdog_severity_levels()
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1831,17 +1832,10 @@ function hook_custom_theme() {
 function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
-  $severity_list = array(
-    WATCHDOG_EMERGENCY  => t('Emergency'),
-    WATCHDOG_ALERT      => t('Alert'),
-    WATCHDOG_CRITICAL   => t('Critical'),
-    WATCHDOG_ERROR      => t('Error'),
-    WATCHDOG_WARNING    => t('Warning'),
-    WATCHDOG_NOTICE     => t('Notice'),
-    WATCHDOG_INFO       => t('Info'),
-    WATCHDOG_DEBUG      => t('Debug'),
-    WATCHDOG_DEPRECATED => t('Deprecated Use'),
-  );
+  $severity_list = array();
+  foreach (watchdog_severity_levels() as $level => $name) {
+    $severity_list[$level] = backdrop_ucfirst($name);
+  }
 
   $to = 'someone@example.com';
   $params = array();
