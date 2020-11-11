@@ -841,10 +841,10 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
-    $description = t('Provide a password for the new account.');
+    $description = '';
     // Provide different help text if weak passwords are rejected.
     if ($reject_weak) {
-      $description .= ' ' . t('Weak passwords will be rejected.');
+      $description = ' ' . t('Weak passwords will be rejected.');
       $description .= _user_password_policy_help();
     }
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {

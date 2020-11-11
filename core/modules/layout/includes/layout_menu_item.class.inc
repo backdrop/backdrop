@@ -137,6 +137,11 @@ class LayoutMenuItem {
     foreach ($this->conditions as $key => $condition) {
       $this->conditions[$key] = layout_create_handler('layout_access', $condition['plugin'], $condition['data']);
     }
+
+    // Ensure contexts is always set to an array.
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
+    }
   }
 
   /**
@@ -229,7 +234,12 @@ class LayoutMenuItem {
    * return LayoutContext[]
    */
   function getContexts() {
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
+    }
+
     $this->resetContexts();
+
     // Required contexts are generated on-demand.
     $contexts = layout_context_required_by_path($this->path);
     $path_parts = explode('/', $this->path);
