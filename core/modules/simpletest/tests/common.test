@@ -2393,6 +2393,9 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
 
     // Step mismatches very close to beeing valid.
     $this->assertFalse(valid_number_step(70 + 9e-7, 10 + 9e-7));
+    $this->assertFalse(valid_number_step(1109.87, 0.07));
+    $this->assertFalse(valid_number_step(41239412.11, 2));
+    $this->assertFalse(valid_number_step(13517283.0001, 3));
   }
 
   /**

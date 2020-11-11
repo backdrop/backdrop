@@ -1489,10 +1489,12 @@ function valid_number_step($value, $step, $offset = 0.0) {
   $step_scale = strpos(strrev($step_string), '.');
   $value_scale = strpos(strrev($value_string), '.');
   if ($value_scale > $step_scale) {
-    if ($value_scale > 10 && strlen($value_string) - 1 > ini_get('precision')) {
-      return TRUE;
+    if ($value_scale > 10 && $step_scale > 0 && strlen($value_string) - 1 > ini_get('precision')) {
+      $value = round($value, $step_scale);
     }
-    return FALSE;
+    else {
+      return FALSE;
+    }
   }
 
   // Because of the floating point precision problem, fmod() has a high error
