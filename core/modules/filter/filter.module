@@ -1353,7 +1353,7 @@ function filter_process_format($element) {
         'class' => array('filter-list'),
         // Add the human-readable name of the text format, so it can be used as
         // the fieldset summary.
-        'data-text-format-name' => array($options[$element['#format']]),
+        'data-text-format-name' => check_plain($options[$element['#format']]),
       ),
       '#parents' => array_merge($element['#parents'], array('format')),
     );
@@ -2652,5 +2652,4 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
-
 
