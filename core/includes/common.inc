@@ -1438,15 +1438,13 @@ function valid_url($url, $absolute = FALSE) {
  * The implementation assumes it is dealing with IEEE 754 double precision
  * floating point numbers that are used by PHP on most systems.
  *
- * This is based on the number/range verification methods of webkit.
- *
- * @param $value
- *   The value that needs to be checked.
- * @param $step
- *   The step scale factor. Must be positive.
- * @param $offset
+ * @param mixed $value
+ *   The numeric value that needs to be checked, integer or float.
+ * @param mixed $step
+ *   The step scale factor, integer or float. Must be positive.
+ * @param mixed $offset
  *   (optional) An offset, to which the difference must be a multiple of the
- *   given step.
+ *   given step, integer or float.
  *
  * @return bool
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
