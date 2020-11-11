@@ -8353,14 +8353,14 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
  */
 function watchdog_severity_levels() {
   return array(
-    WATCHDOG_EMERGENCY   => t('emergency'),
-    WATCHDOG_ALERT   => t('alert'),
-    WATCHDOG_CRITICAL    => t('critical'),
-    WATCHDOG_ERROR     => t('error'),
+    WATCHDOG_EMERGENCY => t('emergency'),
+    WATCHDOG_ALERT => t('alert'),
+    WATCHDOG_CRITICAL => t('critical'),
+    WATCHDOG_ERROR => t('error'),
     WATCHDOG_WARNING => t('warning'),
-    WATCHDOG_NOTICE  => t('notice'),
-    WATCHDOG_INFO    => t('info'),
-    WATCHDOG_DEBUG   => t('debug'),
+    WATCHDOG_NOTICE => t('notice'),
+    WATCHDOG_INFO => t('info'),
+    WATCHDOG_DEBUG => t('debug'),
     WATCHDOG_DEPRECATED => t('deprecated'),
   );
 }
