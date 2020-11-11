@@ -1467,7 +1467,7 @@ function valid_number_step($value, $step, $offset = 0.0) {
   }
 
   // Both numbers are integers - use modulo right away.
-  if ((int) $value == $value && (int) $step == $step && $value < PHP_INT_MAX) {
+  if ((int) $value == $value && (int) $step == $step) {
     return $value % $step == 0;
   }
 
