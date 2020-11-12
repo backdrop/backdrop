@@ -62,8 +62,8 @@ function translation_update_1001() {
   }
 }
 
- /*
-  * Add show translation link setting to each content type.
+/**
+ * Add show translation link setting to each content type.
  */
 function translation_update_1002() {
   $types = config_get_names_with_prefix('node.type.');
