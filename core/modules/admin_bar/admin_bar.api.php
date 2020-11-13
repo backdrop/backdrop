@@ -71,7 +71,7 @@ function hook_admin_bar_output_build(&$content) {
   }
 
   // Add new top-level item to the menu.
-  if (isset($content['menu'])) {
+  if (isset($content['menu']['menu'])) {
     $content['menu']['menu']['myitem'] = array(
       '#title' => t('My item'),
       // #attributes are used for list items (LI).
