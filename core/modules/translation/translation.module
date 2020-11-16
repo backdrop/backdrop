@@ -143,7 +143,7 @@ function translation_form_node_type_form_alter(&$form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Show content translation links'),
     '#description' => t('Show the links to translations in content body and teasers. If you uncheck this option, switching language will only be available from the language switcher block.'),
-    '#default_value' => (bool) $node_type->settings['show_translation_link'],
+    '#default_value' => (bool) $node_type->settings['show_translation_links'],
     '#states' => array(
       'visible' => array(
         ':input[name="language"]' => array('value' => TRANSLATION_ENABLED),
