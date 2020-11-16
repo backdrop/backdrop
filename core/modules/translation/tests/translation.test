@@ -183,7 +183,7 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     // Check that language switch links are not shown if hidden for this content
     // type.
-    config_set('node.type.' . $node->type, 'settings.show_translation_link', FALSE);
+    config_set('node.type.' . $node->type, 'settings.show_translation_links', FALSE);
     $this->assertLanguageSwitchLinks($node, $translation_es, FALSE, 'node');
   }
 
