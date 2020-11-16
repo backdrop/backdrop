@@ -63,14 +63,14 @@ function translation_update_1001() {
 }
 
 /**
- * Add "Show content translation link" setting to each content type.
+ * Add "Show content translation links" setting to each content type.
  */
 function translation_update_1002() {
   $types = config_get_names_with_prefix('node.type.');
   foreach ($types as $config_name) {
     $config = config($config_name);
-    if ($config->get('show_translation_link') === NULL) {
-      $config->set('show_translation_link', TRUE);
+    if ($config->get('show_translation_links') === NULL) {
+      $config->set('show_translation_links', TRUE);
       $config->save();
     }
   }
