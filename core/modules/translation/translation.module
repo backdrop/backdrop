@@ -262,8 +262,8 @@ function translation_node_view(Node $node, $view_mode) {
   // If the site has no translations or is not multilingual we have no content
   // translation links to display.
   // Also, don't display links if setting is disabled.
-  $show_translation_link = config_get('node.type.' . $node->type, 'settings.show_translation_link');
-  if ($show_translation_link && isset($node->tnid) && language_multilingual() && $translations = translation_node_get_translations($node->tnid)) {
+  $show_translation_links = config_get('node.type.' . $node->type, 'settings.show_translation_links');
+  if ($show_translation_links && isset($node->tnid) && language_multilingual() && $translations = translation_node_get_translations($node->tnid)) {
     $languages = language_list(TRUE);
 
     // There might be a language provider enabled defining custom language
