@@ -140,7 +140,7 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
     if (!empty($settings['max']) && $settings['max'] > $max_db_integer) {
       form_error($max, t('%max is greater than the largest value the database can save. Choose a value equal to or lower than %db_max.', array(
         '%max' => $settings['max'],
-        '%db_min' => $max_db_integer,
+        '%db_max' => $max_db_integer,
       )));
     }
   }
