@@ -659,6 +659,7 @@ fieldset {
   border: none;
   min-width: 0;
 }
+
 fieldset .fieldset-legend {
   display: block;
   box-sizing: border-box;
@@ -676,24 +677,12 @@ fieldset:not(.collapsible) .fieldset-legend,
 fieldset.collapsible:not(.collapsed) .fieldset-legend {
   border-bottom: none;
 }
-
 legend {
   font-size: 120%;
   font-weight: normal;
   width: 100%;
 }
-.fieldset-description {
-  margin-bottom: 1em;
-}
-fieldset fieldset {
-  background-color: #fff;
-}
-fieldset fieldset fieldset {
-  background-color: #f8f8f8;
-}
-/**
- * Collapsible Fieldsets
- */
+
 fieldset .fieldset-wrapper {
   padding: 15px 13px 13px 15px; /* LTR */
   border-radius: 0 0 4px 4px;
@@ -704,6 +693,32 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 15px 15px 13px 13px;
 }
+div.vertical-tabs fieldset .fieldset-wrapper
+/*,
+div.text-format-wrapper fieldset .fieldset-wrapper,
+div.text-format-wrapper fieldset .fieldset-legend*/
+ {
+  border: none;
+}
+
+/*div.text-format-wrapper fieldset span.fieldset-legend {
+  background: none;
+}*/
+
+.fieldset-description {
+  margin-bottom: 1em;
+}
+
+fieldset fieldset {
+  background-color: #fff;
+}
+fieldset fieldset fieldset {
+  background-color: #f8f8f8;
+}
+
+/**
+ * Collapsible Fieldsets
+ */
 .js fieldset.collapsible .fieldset-title {
   position: relative;
   z-index: 1;
@@ -882,16 +897,22 @@ td.checkbox .form-item input {
   border-style: none solid solid solid;
   border-radius: 0;
 }
-.js fieldset.filter-wrapper.collapsed {
-  padding: 1.2em 0;
-}
 .js fieldset.filter-wrapper.collapsible .fieldset-legend {
   font-size: .8333em;
   text-transform: none;
 }
+
+.filter-wrapper .fieldset-legend {
+  background: none;
+  border: none;
+}
+.filter-wrapper legend {
+  color: transparent;
+}
+
 .filter-wrapper .fieldset-wrapper {
   padding: .6em 2.3em;
-  margin-top: 30px;
+  border: none;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
