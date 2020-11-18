@@ -19,14 +19,7 @@ Requirements
 Installation
 ------------
 
-1. Create a new database, username, and password for Backdrop to use in MySQL.
-
-2. Point your browser at the URL of your Backdrop installation. You will be
-   redirected to the install screen. If you're not redirected, visit the install
-   URL. If Backdrop was installed at http://example.com/backdrop, the install
-   URL would be http://example.com/backdrop/core/install.php.
-
-3. Follow the instructions provided by the installer.
+- `composer create-project backdrop/backdrop /path/to/project>`
 
 Bug Reports and Feature Requests
 --------------------------------

@@ -1,0 +1,20 @@
+language: php
+dist: xenial
+php:
+  - 5.6
+  - 7.2
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/.composer/cache/repo
+services:
+  - docker
+before_install:
+  - composer install
+
+script:
+  # Check code standards
+  - vendor/bin/phpcs -n --standard=vendor/backdrop/coder/coder_sniffer/Backdrop --ignore="vendor/*,README.md" --extensions=install,module,php,inc,theme .
+
+  # Unit tests
+
