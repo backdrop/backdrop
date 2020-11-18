@@ -741,6 +741,12 @@ fieldset fieldset fieldset {
   left: auto;
   right: .8em;
 }
+.js fieldset.collapsible legend {
+  float: left;
+}
+.js[dir="rtl"] fieldset.collapsible legend {
+  float: right;
+}
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
@@ -883,7 +889,7 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  padding: 10px 2px;
+  padding: 0 2px;
   background-color: #f8f8f8;
   border: 1px #d1d1d1;
   border-style: none solid solid solid;
