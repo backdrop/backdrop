@@ -693,17 +693,9 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 15px 15px 13px 13px;
 }
-div.vertical-tabs fieldset .fieldset-wrapper
-/*,
-div.text-format-wrapper fieldset .fieldset-wrapper,
-div.text-format-wrapper fieldset .fieldset-legend*/
- {
+.vertical-tabs fieldset .fieldset-wrapper {
   border: none;
 }
-
-/*div.text-format-wrapper fieldset span.fieldset-legend {
-  background: none;
-}*/
 
 .fieldset-description {
   margin-bottom: 1em;
