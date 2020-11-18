@@ -12,6 +12,7 @@
 .form-type-file label,
 .form-type-password label,
 .form-type-select label,
+.form-type-tel label,
 .form-type-textarea label,
 .form-type-textfield label {
   display: block;

@@ -53,7 +53,6 @@ $options = array(
   'account-mail' => 'admin@example.com',
   'account-name' => 'admin',
   'account-pass' => md5(microtime() . mt_rand()),
-  'site-name' => 'Backdrop',
   'clean-url' => '1',
   'db-prefix' => '',
   'db-url' => '',
@@ -187,7 +186,6 @@ define('MAINTENANCE_MODE', 'install');
 
 require_once './core/includes/install.core.inc';
 try {
-  print "Installing Backdrop. This may take a moment...\n";
   install_backdrop($settings);
   config_set('system.core', 'site_mail', $options['site-mail']);
   print "Backdrop installed successfully.\n";

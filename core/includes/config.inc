@@ -1239,7 +1239,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
 
   /**
    * Create a configuration directory, if it does not already exist, and ensure
-   * it is writable by the site.
+   * it is writable by the site. Additionally, protect it with a .htaccess file.
    *
    * @return bool
    *   TRUE on success, FALSE in case of an error.
@@ -1251,6 +1251,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
       throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
         '@directory' => $this->directory,
       )));
+    }
+    // No need to create htaccess files if not running Apache.
+    if (backdrop_is_apache()) {
+      file_save_htaccess($this->directory);
     }
   }
 

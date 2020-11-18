@@ -37,8 +37,11 @@
   display: none;
 }
 .field-ui-overview tr.add-new td {
-  vertical-align: top;
+  vertical-align: bottom;
   white-space: nowrap;
+}
+.field-ui-overview tr.add-new td:nth-of-type(4) {
+  vertical-align: middle;
 }
 
 /* 'Manage displays' overview */

@@ -808,7 +808,16 @@ form.views-exposed-form {
 #autocomplete li {
   padding: 0 5px;
 }
-
+.autocomplete-description {
+  color: #666;
+  font-size: 80%;
+}
+#autocomplete li.selected .autocomplete-description {
+  color: #ddd;
+}
+[dir="rtl"] .autocomplete-suggestion {
+  float: right;
+}
 
 /**
  * Form elements.
@@ -1235,7 +1244,7 @@ div.filter-options select {
 /* Add special icons for admin/dashboard */
 
 .block-dashboard-welcome .block-title {
-  background-image: url('../images/hand-spock--black--64.png');
+  background-image: url('../images/backdrop-logo-mark--64.png');
 }
 .block-dashboard-create .block-title {
   background-image: url('../images/pencil-square-o--black--64.png');
@@ -1633,6 +1642,9 @@ div.add-or-remove-shortcuts {
 }
 #field-display-overview .field-formatter-settings-edit-form .form-item {
   margin: 10px 0;
+}
+#field-display-overview .field-formatter-settings-edit-form .form-item .form-item {
+  margin: 0;
 }
 #field-display-overview .field-formatter-settings-edit-form .form-submit {
   margin-bottom: 0;

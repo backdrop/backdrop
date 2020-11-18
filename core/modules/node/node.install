@@ -1989,6 +1989,115 @@ function node_update_1021() {
 }
 
 /**
+ * Update the admin content view with new/updated indicators and filter.
+ */
+function node_update_1022() {
+  $config = config('views.view.node_admin_content');
+  // Only update if the view is in the default state (VIEWS_STORAGE_DEFAULT).
+  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+    $config->set('display.default.display_options.fields.timestamp', array(
+      'id' => 'timestamp',
+      'table' => 'history',
+      'field' => 'timestamp',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'ui_name' => '',
+      'label' => '',
+      'exclude' => 0,
+      'alter' => array(
+        'alter_text' => 0,
+        'text' => '',
+        'make_link' => 0,
+        'path' => '',
+        'absolute' => 0,
+        'external' => 0,
+        'replace_spaces' => 0,
+        'path_case' => 'none',
+        'trim_whitespace' => 0,
+        'alt' => '',
+        'rel' => '',
+        'link_class' => '',
+        'prefix' => '',
+        'suffix' => '',
+        'target' => '',
+        'nl2br' => 0,
+        'max_length' => '',
+        'word_boundary' => 1,
+        'ellipsis' => 1,
+        'more_link' => 0,
+        'more_link_text' => '',
+        'more_link_path' => '',
+        'strip_tags' => 0,
+        'trim' => 0,
+        'preserve_tags' => '',
+        'html' => 0,
+      ),
+      'element_type' => '',
+      'element_class' => '',
+      'element_label_type' => '',
+      'element_label_class' => '',
+      'element_label_colon' => FALSE,
+      'element_wrapper_type' => '',
+      'element_wrapper_class' => '',
+      'element_default_classes' => 1,
+      'empty' => '',
+      'hide_empty' => 0,
+      'empty_zero' => 0,
+      'hide_alter_empty' => 1,
+      'link_to_node' => 0,
+      'comments' => FALSE,
+    ));
+    $config->set('display.default.display_options.filters.timestamp', array(
+      'id' => 'timestamp',
+      'table' => 'history',
+      'field' => 'timestamp',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'ui_name' => '',
+      'operator' => '=',
+      'value' => '',
+      'group' => '1',
+      'exposed' => TRUE,
+      'expose' => array(
+        'operator_id' => '',
+        'label' => 'New/updated content',
+        'description' => '',
+        'use_operator' => FALSE,
+        'operator' => 'timestamp_op',
+        'identifier' => 'timestamp',
+        'required' => FALSE,
+        'remember' => FALSE,
+        'multiple' => FALSE,
+        'remember_roles' => array(
+          'authenticated' => 'authenticated',
+          'anonymous' => 0,
+        ),
+      ),
+      'is_grouped' => FALSE,
+      'group_info' => array(
+        'label' => '',
+        'description' => '',
+        'identifier' => '',
+        'optional' => TRUE,
+        'widget' => 'select',
+        'multiple' => FALSE,
+        'remember' => 0,
+        'default_group' => 'All',
+        'default_group_multiple' => array(),
+        'group_items' => array(),
+      ),
+    ));
+    $config->set('display.default.style_options.columns.timestamp', 'title');
+    $config->set('display.default.style_options.info.timestamp', array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ));
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

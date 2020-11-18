@@ -232,9 +232,22 @@ function system_requirements($phase) {
 
   // Test the contents of the .htaccess files.
   if ($phase == 'runtime' && backdrop_is_apache()) {
+
+    // Check/create .htaccess files for active and staging config directories.
+    foreach (array('active', 'staging') as $type) {
+      $config_directory = config_get_config_directory($type);
+      file_save_htaccess($config_directory);
+
+      $htaccess_files[$config_directory . '/.htaccess'] = array(
+        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+        'directory' => $config_directory,
+      );
+    }
+
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
+
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
       'directory' => config_get('system.core', 'file_public_path'),
@@ -249,6 +262,7 @@ function system_requirements($phase) {
       'title' => $t('Temporary files directory'),
       'directory' => file_directory_temp(),
     );
+
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
       // in the latest security update.
@@ -2571,7 +2585,7 @@ function system_update_1035() {
   // This is in system module because Layout module was enabled earlier in the
   // upgrade path from D7. If it is in layout.install, it requires that
   // update.php be run twice when doing an upgrade.
-  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+  module_set_weight('layout', 60);
 }
 
 /**

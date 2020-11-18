@@ -34,12 +34,6 @@ description = Test cron run.
 group = System
 file = tests/system.test
 
-[CronRunTestCase]
-name = Cron run
-description = Test cron run.
-group = System
-file = tests/system.test
-
 [CronQueueTestCase]
 name = Cron queue functionality
 description = Tests the cron queue runner.

@@ -169,14 +169,6 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
-  // Enable user picture support and set the default to a square thumbnail option.
-  config('system.core')
-    ->set('user_pictures', '1')
-    ->set('user_picture_dimensions', '1024x1024')
-    ->set('user_picture_file_size', '800')
-    ->set('user_picture_style', 'thumbnail')
-    ->save();
-
   // Create an initial post to welcome users on install.
   $post = new Node(
     array(
