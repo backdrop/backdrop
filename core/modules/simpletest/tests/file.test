@@ -718,7 +718,7 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
-    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '.txt</em>';
+    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '_.txt</em>';
     $this->assertRaw($message, 'Dangerous file was renamed.');
     $this->assertRaw(t('File MIME type is text/plain.'), "Dangerous file's MIME type was changed.");
     $this->assertRaw(t('You WIN!'), 'Found the success message.');
@@ -784,8 +784,6 @@ class FileSaveUploadTest extends FileHookTestCase {
    * Test file munge handling.
    */
   function testHandleFileMunge() {
-    // Ensure insecure uploads are disabled for this test.
-    settings_set('allow_insecure_uploads', 0);
     $original_image_uri = $this->image->uri;
     $this->image = file_move($this->image, $this->image->uri . '.foo.' . $this->image_extension);
 
@@ -808,6 +806,13 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     // Check that the correct hooks were called.
     $this->assertFileHooksCalled(array('validate', 'insert'));
+
+    // Check again with the foo file extension not allowed.
+    $extensions = $this->image_extension;
+    $edit = array(
+      'files[file_test_upload]' => backdrop_realpath($this->image->uri),
+      'extensions' => $extensions,
+    );
 
     $munged_filename = $this->image->filename;
     $munged_filename = substr($munged_filename, 0, strrpos($munged_filename, '.'));
@@ -2331,7 +2336,7 @@ class FileValidateTest extends FileHookTestCase {
     file_test_reset();
 
     // Test that the 'allow_insecure_uploads' is respected.
-    variable_set('allow_insecure_uploads', 1);
+    $GLOBALS['settings']['allow_insecure_uploads'] = 1;
     $errors = file_validate($file, array());
     $this->assertEqual(array(), $errors);
     $this->assertFileHooksCalled(array('validate'));
