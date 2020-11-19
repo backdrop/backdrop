@@ -10,6 +10,3 @@ sites/*/settings*.php
 /private
 sites/*/files
 sites/*/private
-
-# Ignore composer dependencies
-vendor
