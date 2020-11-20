@@ -654,6 +654,12 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
           continue;
         }
+        // The type key is required, skip over the violating module, but log.
+        if (!isset($module->info['type'])) {
+          $message = t('Project %project is missing the required type key in its info file.');
+          watchdog('installer', $message, array('%project' => $module->info['name']), WATCHDOG_WARNING);
+          continue;
+        }
         // Collect information about sub-modules.
         if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name) {
           $projects[$module->name] = array(
