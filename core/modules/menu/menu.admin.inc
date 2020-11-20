@@ -734,7 +734,7 @@ function menu_settings_form($form, &$form_state) {
   $form['menu_breakpoint'] = array(
     '#type' => 'radios',
     '#title' => t('Breakpoint'),
-    '#description' => t("The minimum width at which menus will be displayed normally. Below this they may be dispayed differently, depending on the menu-specific settings."),
+    '#description' => t("The 'min-width' for the menu breakpoint. Screens smaller than this may display a menu toggle button, depending on the menu-specific settings."),
     '#options' => array(
       'default' => t('Default (48em)'),
       'custom' => t('Custom'),
