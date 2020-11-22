@@ -19,6 +19,9 @@ fieldset {
     vertical-align: top;
   }
 }
+details summary {
+  display: list-item;
+}
 form {
   margin: 0;
   padding: 0;
