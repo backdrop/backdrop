@@ -130,7 +130,7 @@ class views_handler_field_bulk_form extends views_handler_field {
     $form['header'][$this->options['id']]['action'] = array(
       '#type' => 'select',
       '#title' => t('Action'),
-      '#title_display' => 'none',
+      '#title_display' => 'invisible',
       '#options' => $this->get_bulk_options(),
       '#empty_option' => '- ' . t('Choose an action') . ' -',
       '#required' => TRUE,

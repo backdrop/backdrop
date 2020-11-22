@@ -39,37 +39,6 @@ function comment_admin($type = 'new') {
  * @see theme_comment_admin_overview()
  */
 function comment_admin_overview($form, &$form_state, $arg) {
-  // Build the 'Operations' form.
-  $form['operations'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Operations'),
-    '#prefix' => '<div class="container-inline">',
-    '#suffix' => '</div>',
-    '#attributes' => array(
-      'class' => array('comment-operations')
-    ),
-  );
-
-  if ($arg == 'approval') {
-    $options['publish'] = t('Publish the selected comments');
-  }
-  else {
-    $options['unpublish'] = t('Unpublish the selected comments');
-  }
-  $options['delete'] = t('Delete the selected comments');
-
-  $form['operations']['operation'] = array(
-    '#type' => 'select',
-    '#title' => t('Operations'),
-    '#title_display' => 'invisible',
-    '#options' => $options,
-    '#empty_option' => '- ' . t('Choose an action') . ' -',
-  );
-  $form['operations']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Execute'),
-  );
-
   // Load the comments that need to be displayed.
   $status = ($arg == 'approval') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
   $header = array(
@@ -91,10 +60,42 @@ function comment_admin_overview($form, &$form_state, $arg) {
     ->orderByHeader($header)
     ->execute();
 
-  $cids = array();
+  if (!empty($result)) {
+    // Build the 'Operations' form.
+    $form['operations'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Operations'),
+      '#prefix' => '<div class="container-inline">',
+      '#suffix' => '</div>',
+      '#attributes' => array(
+        'class' => array('comment-operations')
+      ),
+    );
+
+    if ($arg == 'approval') {
+      $options['publish'] = t('Publish the selected comments');
+    }
+    else {
+      $options['unpublish'] = t('Unpublish the selected comments');
+    }
+    $options['delete'] = t('Delete the selected comments');
+
+    $form['operations']['operation'] = array(
+      '#type' => 'select',
+      '#title' => t('Operations'),
+      '#title_display' => 'invisible',
+      '#options' => $options,
+      '#empty_option' => '- ' . t('Choose an action') . ' -',
+    );
+    $form['operations']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Apply to selected items'),
+    );
+  }
 
   // We collect a sorted list of node_titles during the query to attach to the
   // comments later.
+  $cids = array();
   foreach ($result as $row) {
     $cids[] = $row->cid;
     $node_titles[] = $row->node_title;

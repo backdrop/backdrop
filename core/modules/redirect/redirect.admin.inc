@@ -37,34 +37,6 @@ function redirect_list_form($form, &$form_state) {
   $keys = implode('/', $keys);
   $form['redirect_list_filter_form'] = redirect_list_filter_form($keys);
 
-  // Build the 'Operations' form.
-  $form['operations'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Operations'),
-    '#prefix' => '<div class="container-inline">',
-    '#suffix' => '</div>',
-    '#attributes' => array(
-      'class' => array('redirect-list-operations'),
-    ),
-  );
-  $operations = array();
-  foreach ($form['#operations'] as $key => $operation) {
-    $operations[$key] = $operation['action'];
-  }
-  $form['operations']['operation'] = array(
-    '#type' => 'select',
-    '#title' => 'Operations',
-    '#title_display' => 'invisible',
-    '#options' => $operations,
-    '#empty_option' => '- ' . t('Choose an action') . ' -',
-  );
-  $form['operations']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Execute'),
-    '#validate' => array('redirect_list_form_operations_validate'),
-    '#submit' => array('redirect_list_form_operations_submit'),
-  );
-
   // Building the SQL query and load the redirects.
   $query = db_select('redirect', 'r')->extend('TableSort')->extend('PagerDefault');
   $query->addField('r', 'rid');
@@ -76,6 +48,36 @@ function redirect_list_form($form, &$form_state) {
   redirect_build_filter_query($query, array('source', 'redirect'), $keys);
   $rids = $query->execute()->fetchCol();
   $redirects = redirect_load_multiple($rids);
+
+  if (!empty($redirects)) {
+    // Build the 'Operations' form.
+    $form['operations'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Operations'),
+      '#prefix' => '<div class="container-inline">',
+      '#suffix' => '</div>',
+      '#attributes' => array(
+        'class' => array('redirect-list-operations'),
+      ),
+    );
+    $operations = array();
+    foreach ($form['#operations'] as $key => $operation) {
+      $operations[$key] = $operation['action'];
+    }
+    $form['operations']['operation'] = array(
+      '#type' => 'select',
+      '#title' => 'Operations',
+      '#title_display' => 'invisible',
+      '#options' => $operations,
+      '#empty_option' => '- ' . t('Choose an action') . ' -',
+    );
+    $form['operations']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Apply to selected items'),
+      '#validate' => array('redirect_list_form_operations_validate'),
+      '#submit' => array('redirect_list_form_operations_submit'),
+    );
+  }
 
   $rows = array();
   foreach ($redirects as $rid => $redirect) {
