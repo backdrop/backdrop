@@ -3336,7 +3336,7 @@ class NodePageCacheTest extends NodeWebTestCase {
         'bulk_form[0]' => TRUE,
         'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Execute'));
+    $this->backdropPost(NULL, $edit, t('Apply to selected items'));
     $this->backdropPost(NULL, array(), t('Delete'));
 
     // Logout and check the node is not available.

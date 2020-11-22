@@ -612,7 +612,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'action' => 'path_node_update_action',
       'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'type', 'sort' => 'asc')));
+    $this->backdropPost('admin/content', $edit, t('Apply to selected items'), array('query' => array('order' => 'type', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item', array('%action' => 'Update content URL alias')));
 
     $this->assertEntityAlias('node', $node1, 'content/' . $node1->title);
@@ -696,7 +696,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'action' => 'path_user_update_action',
       $checkbox_name => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $this->backdropPost('admin/people', $edit, t('Apply to selected items'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item.', array('%action' => 'Update user URL alias')));
 
     $this->assertEntityAlias('user', $account, 'accounts/' . backdrop_strtolower($account->name));
