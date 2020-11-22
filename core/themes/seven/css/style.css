@@ -784,6 +784,36 @@ fieldset .fieldset-wrapper::before {
 }
 
 /**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
+}
+details.filter-wrapper summary {
+  font-size: .8333em;
+  padding: .5em;
+  text-transform: none;
+}
+details.filter-wrapper .details-child-wrapper,
+details.filter-wrapper .details-content-wrapper {
+   padding: .6em 2.3em;
+}
+
+/**
  * Views exposed form (matches fieldsets).
  */
 form.views-exposed-form {

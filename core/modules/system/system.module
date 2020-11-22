@@ -523,7 +523,12 @@ function system_element_info() {
     '#pre_render' => array('backdrop_pre_render_dropbutton'),
     '#theme' => 'links__dropbutton__operations',
   );
-
+  $types['details'] = array(
+    '#summary' => NULL,
+    '#details' => NULL,
+    '#open' => FALSE,
+    '#theme_wrappers' => array('details'),
+  );
   $types['container'] = array(
     '#theme_wrappers' => array('container'),
     '#process' => array('form_process_container'),
