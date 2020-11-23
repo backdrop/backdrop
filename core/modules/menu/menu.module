@@ -724,6 +724,24 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#options' => $options,
     '#attributes' => array('class' => array('menu-parent-select')),
   );
+  if (module_exists('language')) {
+    $form['menu']['link']['langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#default_value' => $link['langcode'],
+      '#options' => language_list(TRUE, TRUE),
+      '#empty_value' => LANGUAGE_NONE,
+      '#empty_option' => t('- All (always shown) -'),
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.')
+    );
+  }
+  else {
+    // Maintain langcode settings if Language module is not present.
+    $form['menu']['link']['langcode'] = array(
+      '#type' => 'value',
+      '#value' => $link['langcode'],
+    );
+  }
   $form['menu']['link']['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
