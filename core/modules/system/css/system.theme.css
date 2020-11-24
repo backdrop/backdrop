@@ -19,6 +19,9 @@ details summary {
 details summary:focus:not(:focus-visible) {
   outline: none;
 }
+details summary:focus {
+  outline: none;
+}
 form {
   margin: 0;
   padding: 0;
