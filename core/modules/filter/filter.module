@@ -1308,11 +1308,9 @@ function filter_process_format($element) {
 
   // Setup child container for the text format widget.
   $element['format'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'details',
     '#attributes' => array('class' => array('filter-wrapper')),
-    '#title' => t('Formatting options'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#summary' => t('Formatting options'),
   );
 
   // Prepare text format guidelines.
