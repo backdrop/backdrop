@@ -1705,7 +1705,7 @@ function taxonomy_allowed_values($field) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
         }
       }
     }
