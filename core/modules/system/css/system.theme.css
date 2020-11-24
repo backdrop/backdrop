@@ -22,6 +22,9 @@ fieldset {
 details summary {
   display: list-item;
 }
+details summary:focus {
+  outline: none;
+}
 form {
   margin: 0;
   padding: 0;
