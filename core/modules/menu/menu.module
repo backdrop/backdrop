@@ -555,7 +555,7 @@ function menu_node_save(Node $node) {
         $link['langcode'] = $node->langcode;
       }
       else {
-        $link['langcode'] = $link['langcode'];
+        $link['langcode'] = isset($link['langcode']) ? $link['langcode'] : LANGUAGE_NONE;
       }
       if (trim($link['description'])) {
         $link['options']['attributes']['title'] = trim($link['description']);
