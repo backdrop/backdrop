@@ -663,7 +663,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
         watchdog('database', 'Dropped empty, already existing table @name before recreating it.', array('@name' => $name));
       }
       else {
-        throw new DatabaseSchemaObjectExistsException(t('Table @name already exists and has data. Can\'t automatically recreate it.', array('@name' => $name)));
+        throw new DatabaseSchemaObjectExistsException(t("Table @name already exists and has data. Can't automatically recreate it.", array('@name' => $name)));
       }
     }
     $statements = $this->createTableSql($name, $table);
@@ -746,4 +746,3 @@ class DatabaseSchemaObjectDoesNotExistException extends Exception {}
 /**
  * @} End of "defgroup schemaapi".
  */
-
