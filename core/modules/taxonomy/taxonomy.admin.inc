@@ -844,7 +844,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   }
   foreach ($tree as $item) {
     if (!in_array($item->tid, $exclude)) {
-      $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
+      $options[$item->tid] = str_repeat('· ', $item->depth) . $item->name;
     }
   }
   $form['relations']['parent'] = array(
