@@ -917,7 +917,7 @@ function date_default_value_part($item, $field, $instance, $langcode, $part = 'v
 /**
  * Element value callback for date_popup element.
  */
-function date_popup_element_value_callback($element, $input = FALSE, &$form_state) {
+function date_popup_element_value_callback($element, $input, &$form_state) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   $date = NULL;
