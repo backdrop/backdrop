@@ -19,7 +19,7 @@ details summary {
 details summary:focus:not(:focus-visible) {
   outline: none;
 }
-details summary:focus {
+details summary:focus:not(:focus-visible) {
   outline: none;
 }
 form {
