@@ -323,10 +323,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   $form['more'] = array(
-    '#title' => t('More link options'),
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#summary' => t('More link options'),
+    '#type' => 'details',
   );
 
   $form['more']['target'] = array(
