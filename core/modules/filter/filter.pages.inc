@@ -323,8 +323,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   $form['more'] = array(
-    '#summary' => t('More link options'),
     '#type' => 'details',
+    '#summary' => t('More link options'),
   );
 
   $form['more']['target'] = array(

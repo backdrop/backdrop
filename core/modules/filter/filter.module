@@ -1309,8 +1309,8 @@ function filter_process_format($element) {
   // Setup child container for the text format widget.
   $element['format'] = array(
     '#type' => 'details',
-    '#attributes' => array('class' => array('filter-wrapper')),
     '#summary' => t('Formatting options'),
+    '#attributes' => array('class' => array('filter-wrapper')),
   );
 
   // Prepare text format guidelines.
