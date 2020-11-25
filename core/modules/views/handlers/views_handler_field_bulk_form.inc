@@ -157,6 +157,9 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#states' => array(
         'visible' => $no_items_selected,
       ),
+      '#attributes' => array(
+        'class' => array('no-js-hide'),
+      ),
     );
     $actions['submit']['select_actions'] = array(
       '#type' => 'submit',
@@ -165,6 +168,9 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#disabled' => TRUE,
       '#states' => array(
         'visible' => $items_selected_but_no_action,
+      ),
+      '#attributes' => array(
+        'class' => array('no-js-hide'),
       ),
     );
     // The actual submit button for bulk operations. Shown only if both of the

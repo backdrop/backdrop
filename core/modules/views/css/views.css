@@ -37,6 +37,10 @@
   margin-bottom: 1em;
 }
 
+html:not(.js) .views-bulk-form .no-js-hide {
+  display: none;
+}
+
 /* table style column align */
 .views-align-left {
   text-align: left;
