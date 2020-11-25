@@ -135,14 +135,12 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#required' => TRUE,
     );
 
-    // Compile the #states array for when items have been selected, but no
-    // action has.
+    // #states array for when items have been selected, but no action has.
     $items_selected_but_no_action = $at_least_one_item_selected;
-    foreach ($at_least_one_item_selected as $key => $condition) {
-      $items_selected_but_no_action[$key]['select[name="action"]'] = array('value' => '');
-    }
+    // #states array for when items as well as an action have been selected.
     $items_selected_and_action_selected = $at_least_one_item_selected;
     foreach ($at_least_one_item_selected as $key => $condition) {
+      $items_selected_but_no_action[$key]['select[name="action"]'] = array('value' => '');
       $items_selected_and_action_selected[$key]['select[name="action"]'] = array('!value' => '');
     }
     
