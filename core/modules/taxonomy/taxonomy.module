@@ -1700,12 +1700,21 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
  *   The array of valid terms for this field, keyed by term id.
  */
 function taxonomy_allowed_values($field) {
+  global $language;
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
-        foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
+          foreach ($terms as $term) {
+            if ($term->langcode == $language->langcode || $term->langcode == LANGUAGE_NONE) {
+              $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+            }
+          }
+        } else {
+          foreach ($terms as $term) {
+            $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+          }
         }
       }
     }
