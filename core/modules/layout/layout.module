@@ -796,7 +796,41 @@ function layout_block_info() {
     'class' => 'BlockHero',
   );
 
+  // TEMPORARY!! For testing relationships PR only!!
+  $blocks['relationships_tester_block'] = array(
+    'info' => t('User relationships test block'),
+    'description' => 'Displays node UID.',
+    'required contexts' => array('user' => 'user'),
+  );
+
   return $blocks;
+}
+
+// TEMPORARY!! For testing relationships PR only!!
+function layout_block_view($delta = '', $settings = array(), $contexts = array()) {
+  $block = array();
+
+  switch ($delta) {
+    case 'relationships_tester_block':
+      $block['subject'] = t('Test block for testing relationships');
+      if (isset($contexts['user'])) {
+        $author = $contexts['user'];
+        $block['content'] = array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            t('Name: !name', array('!name' => $author->name)),
+            t('UID: !uid', array('!uid' => $author->uid)),
+          ),
+          '#title' => t('The author of this node is:'),
+        );
+      }
+      else {
+        $block['content'] = 'The user context is not available on this path';
+      }
+      break;
+
+  }
+  return $block;
 }
 
 /**
@@ -847,6 +881,10 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+
+    // Relationships.
+    'LayoutRelationshipUserFromNode' => 'plugins/relationships/layout_relationships.inc',
+    'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
   );
 }
 
@@ -1264,6 +1302,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         }
       }
 
+      // Get contexts from relationships
+      $relationships = layout_context_get_relationships($contexts);
+      layout_get_context_from_relationships($relationships, $contexts);
+
       if (!$layout->disabled && $layout->checkAccess()) {
         $selected_layout = $layout;
         break;
@@ -1468,6 +1510,111 @@ function layout_get_layout_info($layout_name = NULL) {
  */
 function layout_get_context_info($plugin_name) {
   $info = _layout_get_all_info('layout_context');
+  return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
+}
+
+
+/**
+ * Fetch all relevant relationships.
+ *
+ * Relevant relationships are any relationship that can be created based upon
+ * the list of existing contexts. For example, the 'node author' relationship
+ * is relevant if there is a 'node' context, but makes no sense if there is
+ * not one.
+ *
+ * @param $contexts
+ *   An array of contexts used to figure out which relationships are relevant.
+ *
+ * @return
+ *   An array of relationship keys that are relevant for the given set of
+ *   contexts.
+ */
+function layout_context_get_relationships($contexts) {
+  $relevant = array();
+
+  foreach ($contexts as $context) {
+    $relationships = _layout_get_all_info('layout_relationship');
+    // Go through each relationship
+    foreach ($relationships as $rid => $relationship) {
+      // For each relationship, see if there is a context that satisfies it.
+      if ($relationship['context'] == $context->plugin) {
+        $relevant[$rid] = $relationship;
+      }
+    }
+  }
+
+  return $relevant;
+}
+
+
+/**
+ *
+ * @param $relationship
+ *   The configuration of a relationship. It must contain the following data:
+ *   - name: The name of the relationship plugin being used.
+ *   - relationship_settings: The configuration based upon the plugin forms.
+ *   - identifier: The human readable identifier for this relationship, usually
+ *     defined by the UI.
+ *   - keyword: The keyword used for this relationship for substitutions.
+ *
+ * @param $source_context
+ *   The context this relationship is based upon.
+ *
+ * @param $placeholders
+ *   If TRUE, placeholders are acceptable.
+ *
+ * @return
+ *   A context object if one can be loaded.
+ */
+function layout_get_context_from_relationship($relationship, $source_context) {
+  $relationship = layout_create_handler('layout_relationship', $relationship['name']);
+  $new_context = clone($source_context);
+  $context = $relationship->getContext($new_context);
+  if ($context) {
+    return $context;
+  }
+}
+
+/**
+ * Fetch all active relationships
+ *
+ * @param $relationships
+ *   An keyed array of relationship data including:
+ *   - name: name of relationship
+ *   - context: context id relationship belongs to. This will be used to
+ *     identify which context in the $contexts array to use to create the
+ *     relationship context.
+ *
+ * @param $contexts
+ *   A keyed array of contexts used to figure out which relationships
+ *   are relevant. New contexts will be added to this.
+ */
+function layout_get_context_from_relationships($relationships, &$contexts) {
+  $contexts_from_relationships_list = array();
+  foreach ($relationships as $rname => $rdata) {
+    foreach ($contexts as $context) {
+      if ($context->plugin == $rdata['context']) {
+        $key = 'relationship_' . $rname . '_' . $context->position;
+        $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
+      }
+    }
+  }
+  if($contexts_from_relationships_list) {
+    foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
+      if (is_object($context_from_relationships)) {
+        $contexts[$key] = $context_from_relationships;
+      }
+    }
+  }
+}
+
+/**
+ * Load all layout relationship information from modules.
+ *
+ * @return array
+ */
+function layout_get_relationship_info($plugin_name) {
+  $info = _layout_get_all_info('layout_relationship');
   return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
 }
 

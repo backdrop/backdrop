@@ -223,6 +223,11 @@ class Block extends LayoutHandler {
   function form(&$form, &$form_state) {
     $layout = $form_state['layout'];
     $contexts = $layout->getContexts();
+
+    // Get contexts from relationships
+    $relationships = layout_context_get_relationships($contexts);
+    layout_get_context_from_relationships($relationships, $contexts);
+
     $block_info = $this->getBlockInfo();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
 

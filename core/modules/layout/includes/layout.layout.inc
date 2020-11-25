@@ -77,6 +77,21 @@ function layout_layout_context_info() {
 }
 
 /**
+ * Implements hook_layout_relationship_info().
+ */
+function layout_layout_relationship_info() {
+  $info['user_from_node'] = array(
+    'title' => t('User from node'),
+    'class' => 'LayoutRelationshipUserFromNode',
+    'context' => 'node',
+    'load function' => 'user_from_node_context',
+    'description' => t('Creates the author of a node as a user context.'),
+  );
+
+  return $info;
+}
+
+/**
  * Implements hook_layout_access_info().
  */
 function layout_layout_access_info() {
