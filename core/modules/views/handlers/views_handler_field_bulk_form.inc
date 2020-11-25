@@ -95,6 +95,11 @@ class views_handler_field_bulk_form extends views_handler_field {
     // Add the tableselect javascript.
     $form['#attached']['js'][] = 'core/misc/tableselect.js';
 
+    // Ensure a consistent container for filters/operations in the view header.
+    $form['header'] = array(
+      '#weight' => -100,
+    );
+
     // Render checkboxes for all rows.
     $no_items_selected = array();
     $at_least_one_item_selected = array();
@@ -110,16 +115,10 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
         '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
-      // Compile the various #states arrays for the messages and the "Apply"
-      // button.
+      // Compile the various #states arrays, to be used in the "Apply" button.
       $no_items_selected[':input[name="bulk_form[' . $row_index . ']"]'] = array('checked' => FALSE);
       $at_least_one_item_selected[][':input[name="bulk_form[' . $row_index . ']"]'] = array('checked' => TRUE);
     }
-
-    // Ensure a consistent container for filters/operations in the view header.
-    $form['header'] = array(
-      '#weight' => -100,
-    );
 
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
@@ -142,43 +141,49 @@ class views_handler_field_bulk_form extends views_handler_field {
     foreach ($at_least_one_item_selected as $key => $condition) {
       $items_selected_but_no_action[$key]['select[name="action"]'] = array('value' => '');
     }
-
-    // #states cannot be applied to stand-alone #markup elements, so we wrap the
-    // messages in container (div) elements, and we show/hide those instead.
-    $form['select_items'] = array(
-      '#type' => 'container',
+    $items_selected_and_action_selected = $at_least_one_item_selected;
+    foreach ($at_least_one_item_selected as $key => $condition) {
+      $items_selected_and_action_selected[$key]['select[name="action"]'] = array('!value' => '');
+    }
+    
+    // #states does not allow changing the label of buttons, so we are using a
+    // set of two pseudo-submit buttons ('#disabled' => TRUE) + the actual
+    // submit button here. Then we use #states, to show/hide these buttons,
+    // leaving only one button shown at each given point. This creates the
+    // illusion that the label of the submit button is changing.
+    $actions['submit']['select_items'] = array(
+      '#type' => 'submit',
+      '#value' => t('No items selected'),
+      // Always disabled - not an actual submit button.
+      '#disabled' => TRUE,
       '#states' => array(
         'visible' => $no_items_selected,
       ),
     );
-    $form['select_items']['message'] = array(
-      '#type' => 'markup',
-      '#markup' => t('You need to select at least one item before any action may be applied.'),
-    );
-    $form['select_action'] = array(
-      '#type' => 'container',
+    $actions['submit']['select_actions'] = array(
+      '#type' => 'submit',
+      '#value' => t('No action selected'),
+      // Always disabled - not an actual submit button.
+      '#disabled' => TRUE,
       '#states' => array(
-        'visible' => array(
-          $items_selected_but_no_action,
-        ),
+        'visible' => $items_selected_but_no_action,
       ),
     );
-    $form['select_action']['message'] = array(
-      '#type' => 'markup',
-      '#markup' => t('No action selected.'),
-    );
-
-    // Set the form actions container in the header.
-    $actions['submit'] = array(
+    // The actual submit button for bulk operations. Shown only if both of the
+    // following are true:
+    // - at list one item is selected
+    // - a bulk action is selected
+    $actions['submit']['apply'] = array(
       '#type' => 'submit',
       '#value' => t('Apply to selected items'),
       '#states' => array(
-        'visible' => $at_least_one_item_selected,
+        'visible' => $items_selected_and_action_selected,
         'disabled' => array(
           'select[name="action"]' => array('value' => ''),
         ),
       ),
     );
+    // Set the form actions container in the header.
     $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
