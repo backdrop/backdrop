@@ -511,7 +511,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
     // transliteration is off and only for relative paths.
     $encoded_value = backdrop_encode_path($value);
     if (config_get('path.settings', 'transliterate') == FALSE && valid_url($encoded_value, FALSE)) {
-      $value = $encoded_value;
+      // Function url() takes care of base_path and language prefix.
+      $value = url($value);
     }
     else {
       form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
