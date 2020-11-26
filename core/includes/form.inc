@@ -3704,10 +3704,10 @@ function theme_details($variables) {
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
-  if (isset($element['#details'])) {
+  if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }
-  if (isset($element['#children'])) {
+  if (isset($element['#children']) && !empty($element['#children'])) {
     $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
   }
   $output .= '</details>';
