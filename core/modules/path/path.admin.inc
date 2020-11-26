@@ -682,7 +682,7 @@ function path_bulk_update_form($form, &$form_state) {
   );
   $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Execute'),
+    '#value' => t('Apply to selected items'),
     '#submit' => array('path_bulk_update_form_rebuild_submit'),
     '#validate' => array('path_bulk_update_form_validate'),
   );

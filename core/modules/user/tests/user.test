@@ -634,7 +634,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
       'action' => 'user_cancel_user_action',
       'bulk_form[0]' => TRUE,
     );
-    $this->backdropPost('admin/people', $edit, t('Execute'));
+    $this->backdropPost('admin/people', $edit, t('Apply to selected items'));
 
     // Verify that uid 1's account was not cancelled.
     $user1 = user_load(1, TRUE);
@@ -934,7 +934,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
       $position++;
       $edit['bulk_form[' . $position . ']'] = TRUE;
     }
-    $this->backdropPost('admin/people', $edit, t('Execute'));
+    $this->backdropPost('admin/people', $edit, t('Apply to selected items'));
     $this->assertText(t('Are you sure you want to cancel these user accounts?'), 'Confirmation form to cancel accounts displayed.');
     $this->assertText(t('When cancelling these accounts'), 'Allows to select account cancellation method.');
     $this->assertText(t('Require email confirmation to cancel account.'), 'Allows to send confirmation mail.');
@@ -1418,7 +1418,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['action'] = 'user_block_user_action';
     $edit[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $this->backdropPost('admin/people', $edit, t('Apply to selected items'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
@@ -1426,7 +1426,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $editunblock = array();
     $editunblock['action'] = 'user_unblock_user_action';
     $editunblock[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $this->backdropPost('admin/people', $editunblock, t('Apply to selected items'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");

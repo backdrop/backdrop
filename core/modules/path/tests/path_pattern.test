@@ -969,7 +969,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[user][base]' => TRUE,
       'operations[operation]' => 'generate',
     );
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users
 
     // Check that aliases have actually been created.
@@ -983,7 +983,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $this->nodes[$new_node->nid] = $new_node;
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
@@ -993,7 +993,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][base]' => TRUE,
       'operations[operation]' => 'delete',
     );
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     $this->backdropPost(NULL, array(), t('Delete URL aliases'));
     // Check that aliases have actually been deleted.
     foreach ($this->nodes as $node) {
@@ -1005,7 +1005,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][post]' => TRUE,
       'operations[operation]' => 'generate',
     );
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     // Check that aliases only now exists for post types.
     foreach ($this->nodes as $node) {
       if ($node->type == 'page') {
@@ -1026,7 +1026,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][post]' => TRUE,
       'operations[operation]' => 'update',
     );
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     foreach ($this->nodes as $node) {
       if ($node->type == 'page') {
         $this->assertNoEntityAliasExists('node', $node);
@@ -1042,7 +1042,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[taxonomy_term][tags]' => TRUE,
       'operations[operation]' => 'delete',
     );
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Apply to selected items'));
     $this->backdropPost(NULL, array(), t('Delete URL aliases'));
     // Check that all node aliases are again deleted.
     foreach ($this->nodes as $node) {
