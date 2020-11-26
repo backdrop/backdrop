@@ -1711,7 +1711,8 @@ function taxonomy_allowed_values($field) {
               $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
             }
           }
-        } else {
+        }
+        else {
           foreach ($terms as $term) {
             $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
           }
