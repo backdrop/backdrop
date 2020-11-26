@@ -18,6 +18,20 @@ function layout_settings_form_context_add($form, &$form_state) {
 }
 
 /**
+ * Submit handler for layout_settings_form() that lets the user add a context
+ * relationship.
+ */
+function layout_settings_form_context_relationship_add($form, &$form_state) {
+  // Remove destination flags when adding contexts, otherwise the user will
+  // be taken to the destination instead of adding a context. This only
+  // affects non-JS behavior.
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
+  }
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/add';
+}
+
+/**
  * Form callback; Displays form for adding new contexts to a layout.
  *
  * @param Layout $layout
@@ -77,6 +91,117 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
       $form['context']['#default_value'] = isset($handler->plugin) ? $handler->plugin : NULL;
     }
   }
+
+  $form['context_settings'] = array(
+    '#type' => 'container',
+    '#id' => 'context_settings',
+    '#parents' => array('context_settings'),
+  );
+  $form['context_settings']['content'] = layout_context_return_form($form['context_settings'], $form_state);
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['load_context_nojs'] = array(
+    '#type' => 'submit',
+    '#value' => t('Load context'),
+    '#submit' => array(
+      'layout_context_add_load_context_nojs',
+    ),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+  );
+  $form['actions']['add'] = array(
+    '#type' => 'submit',
+    '#value' => $is_new_context ? t('Add context') : t('Save context'),
+    '#submit' => array(
+      'layout_context_add_form_submit',
+    ),
+    '#validate' => array(
+      'layout_context_add_form_validate',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('layout_context_add_form_cancel'),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_context_cancel_dialog',
+    ),
+  );
+  return $form;
+}
+
+
+/**
+ * Form callback; Displays form for adding new contexts to a layout.
+ *
+ * @param Layout $layout
+ *   The layout to which a context is being added.
+ * @param int|null $context_id
+ *   The ID of the context being configured. If adding a new
+ *   context, no value will be passed in.
+ *
+ * @ingroup forms
+ */
+function layout_context_relationship_add_form($form, &$form_state, Layout $layout = NULL, $context_id = NULL) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $contexts = $layout->getContexts();
+
+  // Get contexts from relationships
+  $relationships = layout_context_get_relationships($contexts);
+  $relevant = array();
+  dpm($relationships);
+
+  // Go through each relationship
+  foreach ($relationships as $rid => $relationship) {
+    $relevant[$rid] = $relationship['title'];
+  }
+
+  $is_new_context = TRUE;
+  if (isset($context_id)) {
+    $is_new_context = FALSE;
+  }
+
+  // Ensure AJAX callbacks display the correct title by setting it here.
+  $form['#title'] = $is_new_context ? t('Add context') : t('Configure context');
+
+  $form_state['layout'] = $layout;
+  $form_state['context_id'] = $context_id;
+
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => 'Contexts provide additional information to blocks in the layout to display. For example, information from node 5, or the user "administrator" could be made available.',
+  );
+
+  $contexts = $layout->getContexts();
+  if (isset($contexts[$context_id])) {
+    $handler = $contexts[$context_id];
+    $form_state['handler'] = $handler;
+  }
+  else {
+    $handler = NULL;
+  }
+
+  $all_context_info = _layout_get_all_info('layout_context');
+  backdrop_sort($all_context_info, array('title'));
+  $form['context'] = array(
+    '#type' => 'select',
+    '#title' => t('Available contexts'),
+    '#options' => $relevant,
+    '#required' => TRUE,
+    '#parents' => array('context'),
+    '#ajax' => array(
+      'wrapper' => 'context_settings',
+      'callback' => 'layout_context_ajax_style',
+    ),
+  );
 
   $form['context_settings'] = array(
     '#type' => 'container',
