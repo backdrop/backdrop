@@ -296,7 +296,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $edit = array();
     $edit['operation'] = $operation;
     $edit['comments[' . $comment->id . ']'] = TRUE;
-    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Execute'));
+    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Apply to selected items'));
 
     if ($operation == 'delete') {
       $this->backdropPost(NULL, array(), t('Delete comments'));
