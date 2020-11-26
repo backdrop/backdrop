@@ -3650,13 +3650,13 @@ function theme_container($variables) {
 /**
  * Processes a details element.
  *
- * @param $element
+ * @param array $element
  *   An associative array containing the properties and children of the
  *   details.
- * @param $form_state
+ * @param array $form_state
  *   The $form_state array for the form this element belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_details($element, &$form_state) {
@@ -3674,10 +3674,13 @@ function form_process_details($element, &$form_state) {
  * renderable element, to surround it with a <details> tag and add attributes
  * such as classes or a HTML id.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #id, #attributes, #children, #summary, #details, #open.
+ *
+ * @return string
+ *   The rendered html output.
  *
  * @ingroup themeable
  */
