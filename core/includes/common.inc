@@ -1791,7 +1791,7 @@ function filter_xss($string, $allowed_tags = NULL) {
 
   // Defuse all HTML entities.
   $string = str_replace('&', '&amp;', $string);
-  // Change back only well-formed entities in our whitelist:
+  // Change back only well-formed entities in our allowlist:
   // Decimal numeric entities.
   $string = preg_replace('/&amp;#([0-9]+;)/', '&#\1', $string);
   // Hexadecimal numeric entities.
@@ -2765,7 +2765,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *   // will return an onmouseout attribute with JavaScript code that, when used
  *   // as attribute in a tag, will cause users to be redirected to another site.
  *   //
- *   // In this case, the 'onmouseout' attribute should not be whitelisted --
+ *   // In this case, the 'onmouseout' attribute should not be allowed --
  *   // you don't want users to have the ability to add this attribute or others
  *   // that take JavaScript commands.
  *   backdrop_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));

@@ -977,13 +977,13 @@ function image_style_path($style_name, $uri) {
 }
 
 /**
- * Add an image style URI to the whitelist.
+ * Add an image style URI to the allowlist.
  *
- * When added to the whitelist, and image style will be generated immediately
+ * When added to the allowlist, and image style will be generated immediately
  * upon request. This function is usually called by the request that prints out
- * the <img> tag with the image style in the src attribute. The whitelist is
+ * the <img> tag with the image style in the src attribute. The allowlist is
  * then loaded when serving the image if it needs to be generated. Image style
- * requests that are not in the whitelist are throttled in
+ * requests that are not in the allowlist are throttled in
  * image_style_deliver().
  *
  * @param $style_uri
@@ -991,7 +991,7 @@ function image_style_path($style_name, $uri) {
  *   e.g. public://styles/large/example.png.
  *
  * @return array
- *   The list of all images added to the whitelist this request. This list is
+ *   The list of all images added to the allowlist this request. This list is
  *   returned by reference to allow the list to be modified.
  *
  * @see image_style_get_allowed_uris()
@@ -1001,7 +1001,7 @@ function image_style_path($style_name, $uri) {
 function &image_style_add_allowed_uri($style_uri = NULL) {
   $added_uris = &backdrop_static('image_style_allowed_uris', array());
 
-  // It's likely that multiple images will be whitelisted during a single
+  // It's likely that multiple images will be allowed during a single
   // request, so we only save this list once at the end of the request.
   if ($style_uri && empty($added_uris)) {
     register_shutdown_function('image_style_save_allowed_uris');
@@ -1015,10 +1015,10 @@ function &image_style_add_allowed_uri($style_uri = NULL) {
 }
 
 /**
- * Get a list of all whitelisted URIs for image styles.
+ * Get a list of all allowed URIs for image styles.
  *
  * @return array
- *   An array of all whitelisted URIs.
+ *   An array of all allowed URIs.
  */
 function image_style_get_allowed_uris() {
   $added_uris = image_style_add_allowed_uri();
@@ -1026,13 +1026,13 @@ function image_style_get_allowed_uris() {
 }
 
 /**
- * Remove an image style URI from the whitelist.
+ * Remove an image style URI from the allowlist.
  *
  * This is usually called after an image has been generated and no longer needs
- * to be in the whitelist.
+ * to be in the allowlist.
  *
  * @param $style_uri
- *   The full URI to the image that should be removed from the whitelist.
+ *   The full URI to the image that should be removed from the allowlist.
  */
 function image_style_remove_allowed_uri($style_uri) {
   // Get the list of added URIs by reference and indicate removal with FALSE.
@@ -1041,7 +1041,7 @@ function image_style_remove_allowed_uri($style_uri) {
 }
 
 /**
- * Shutdown callback used to save the whitelist of requested image styles.
+ * Shutdown callback used to save the allowlist of requested image styles.
  *
  * @see image_style_add_allowed_uri()
  */
@@ -1050,7 +1050,7 @@ function image_style_save_allowed_uris() {
 
   // This is not a blocking lock. If the lock is not acquired immediately, it is
   // not worth making the page wait. Instead images will be generated using the
-  // throttled mode, or another page request will update the whitelist.
+  // throttled mode, or another page request will update the allowlist.
   if (count($added_uris) && lock_acquire('image_style_allowed_uris')) {
     $allowed_uris = (array) tempstore_get('image_style_allowed_uris', 'list');
     $allowed_uris = array_filter(array_merge($allowed_uris, $added_uris));
