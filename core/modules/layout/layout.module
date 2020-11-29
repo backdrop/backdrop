@@ -891,7 +891,7 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Relationships.
-    'LayoutRelationshipUserFromNode' => 'plugins/relationships/layout_relationships.inc',
+    'LayoutRelationshipUserFromNode' => 'plugins/relationships/user_from_node.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
   );
 }
@@ -1747,6 +1747,9 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       case 'layout_context':
         $broken_class = 'LayoutContextBroken';
         break;
+      case 'layout_relationship':
+        $broken_class = 'LayoutRelationshipBroken';
+        break;
       case 'layout_style':
         $broken_class = 'LayoutStyle';
         break;
@@ -1777,6 +1780,15 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
 function layout_create_handler($plugin_type, $plugin_name, array $config = array()) {
   $handler_name = layout_get_handler_name($plugin_type, $plugin_name);
   return new $handler_name($plugin_name, $config);
+}
+
+/**
+ * Helper function to create a Layout Context.
+ *
+ * @return LayoutContext
+ */
+function layout_create_relationship($context_plugin_name, $config = array()) {
+  return layout_create_handler('layout_relationship', $context_plugin_name, $config);
 }
 
 /**

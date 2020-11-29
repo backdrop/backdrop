@@ -73,6 +73,49 @@ abstract class LayoutRelationship {
   /**
    * Get the context from this relationship.
    */
-  function getContext() {}
+  function getContext($context) {}
+
+  /**
+   * Form.
+   */
+  function form(&$form, &$form_state) {
+    $contexts = $form_state['contexts'];
+    $type = $form_state['context_id'];
+    $relationships = layout_context_get_relationships($contexts);
+    $relationship = $relationships[$type];
+
+    $options = $this->filter_contexts($contexts, $type, $relationship);
+
+    $form['contexts'] = array(
+      '#type' => 'select',
+      '#default_value' => '',
+      '#options' => $options,
+      '#title' => $relationship['context_label'],
+    );
+  }
+
+  /**
+   * Form.
+   */
+  function filter_contexts($contexts, $type, $relationship) {
+    $options = array();
+
+    foreach ($contexts as $context) {
+      if ($context->plugin == $relationship['context']) {
+        $key = isset($context->name) ? $context->name : $context->plugin;
+        if (isset($context->position)) {
+          $label = $relationship['context_label'] . ' ' . t('at position') . ' ' . $context->position;
+        }
+        elseif (isset($context->settings['id'])) {
+          $label = $relationship['context_label'] . ' ' . t('ID') . ' ' . $context->settings['id'];
+        }
+        else {
+          $label = $relationship['context_label'];
+        }
+        $options[$key] = $label;
+      }
+    }
+    return $options;
+  }
 
 }

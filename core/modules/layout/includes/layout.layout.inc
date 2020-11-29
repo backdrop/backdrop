@@ -84,6 +84,7 @@ function layout_layout_relationship_info() {
     'title' => t('User from node'),
     'class' => 'LayoutRelationshipUserFromNode',
     'context' => 'node',
+    'context_label' => t('Node'),
     'load function' => 'user_from_node_context',
     'description' => t('Creates the author of a node as a user context.'),
   );

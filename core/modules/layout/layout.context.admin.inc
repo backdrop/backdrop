@@ -157,7 +157,6 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   // Get contexts from relationships
   $relationships = layout_context_get_relationships($contexts);
   $relevant = array();
-  dpm($relationships);
 
   // Go through each relationship
   foreach ($relationships as $rid => $relationship) {
@@ -173,24 +172,27 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   $form['#title'] = $is_new_context ? t('Add context') : t('Configure context');
 
   $form_state['layout'] = $layout;
-  $form_state['context_id'] = $context_id;
+  $form_state['contexts'] = $contexts;
+  if (!empty($context_id)) {
+    $form_state['context_id'] = $context_id;
+  }
+  elseif (isset($form_state['values']['context'])) {
+    $form_state['context_id'] = $form_state['values']['context'];
+  }
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => 'Contexts provide additional information to blocks in the layout to display. For example, information from node 5, or the user "administrator" could be made available.',
+    '#markup' => 'Relationships create contexts from data provided by existing contexts, like the author from node context.',
   );
 
-  $contexts = $layout->getContexts();
-  if (isset($contexts[$context_id])) {
-    $handler = $contexts[$context_id];
+  if (isset($relevant[$context_id])) {
+    $handler = $relevant[$context_id];
     $form_state['handler'] = $handler;
   }
   else {
     $handler = NULL;
   }
-
-  $all_context_info = _layout_get_all_info('layout_context');
-  backdrop_sort($all_context_info, array('title'));
+  backdrop_sort($relevant, array('title'));
   $form['context'] = array(
     '#type' => 'select',
     '#title' => t('Available contexts'),
@@ -208,7 +210,7 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
     '#id' => 'context_settings',
     '#parents' => array('context_settings'),
   );
-  $form['context_settings']['content'] = layout_context_return_form($form['context_settings'], $form_state);
+  $form['context_settings']['content'] = layout_context_relationship_return_form($form['context_settings'], $form_state);
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -283,6 +285,34 @@ function layout_context_return_form($form, &$form_state) {
 
   if (isset($form_state['values']['context'])) {
     $handler = layout_create_context($form_state['values']['context']);
+    $handler->is_new = TRUE;
+  }
+  else {
+    $handler = $form_state['handler'];
+  }
+
+  $form_state['layout'] = $layout;
+  $form_state['handler'] = $handler;
+  $handler->form($form, $form_state);
+
+  return $form;
+}
+
+
+/**
+ * Helper function to return a partial context settings form.
+ */
+function layout_context_relationship_return_form($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  $layout = $form_state['layout'];
+  
+  // If no context has yet been selected, there is no sub-form to display.
+  if (!isset($form_state['values']['context']) && !isset($form_state['handler'])) {
+    return array();
+  }
+
+  if (isset($form_state['values']['context'])) {
+    $handler = layout_create_relationship($form_state['values']['context']);
     $handler->is_new = TRUE;
   }
   else {
