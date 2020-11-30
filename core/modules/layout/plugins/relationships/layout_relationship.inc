@@ -8,7 +8,7 @@
  * stored directly within configuration. Instead contexts are determined based
  * on the Layout's path
  */
-abstract class LayoutRelationship {
+abstract class LayoutRelationship extends LayoutHandler{
   /**
    * The name of the plugin that provides this context.
    *
@@ -86,7 +86,7 @@ abstract class LayoutRelationship {
 
     $options = $this->filter_contexts($contexts, $type, $relationship);
 
-    $form['contexts'] = array(
+    $form['context_parent'] = array(
       '#type' => 'select',
       '#default_value' => '',
       '#options' => $options,
@@ -95,22 +95,41 @@ abstract class LayoutRelationship {
   }
 
   /**
-   * Form.
+   * Validate handler for the settings form for this context item.
+   */
+  function formValidate($form, &$form_state) {
+
+  }
+
+  /**
+   * Submit handler for the settings form for this context item.
+   */
+  function formSubmit($form, &$form_state) {
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
+    $settings = array_diff_key($form_state['values'], $excluded);
+    $this->name = $form_state['context_id'];
+    $this->settings = array_merge($this->settings, $settings);
+  }
+
+  /**
+   * Returns an array of appropriate contexts for this relationship.
    */
   function filter_contexts($contexts, $type, $relationship) {
     $options = array();
 
     foreach ($contexts as $context) {
       if ($context->plugin == $relationship['context']) {
-        $key = isset($context->name) ? $context->name : $context->plugin;
         if (isset($context->position)) {
           $label = $relationship['context_label'] . ' ' . t('at position') . ' ' . $context->position;
+          $key = 'position:' . $context->position;
         }
         elseif (isset($context->settings['id'])) {
           $label = $relationship['context_label'] . ' ' . t('ID') . ' ' . $context->settings['id'];
+          $key = 'id:' . $context->settings['id'];
         }
         else {
           $label = $relationship['context_label'];
+          $key = $context->plugin;
         }
         $options[$key] = $label;
       }

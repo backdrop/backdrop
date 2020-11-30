@@ -107,7 +107,7 @@ class Layout {
    *
    * @var array
    */
-  //var $relationship = array();
+  var $relationships = array();
 
   /**
    * A LayoutMenuItem containing menu properties for this layout.
@@ -240,6 +240,7 @@ class Layout {
       'content' => 'block',
       'conditions' => 'layout_access',
       'contexts' => 'layout_context',
+      'relationships' => 'layout_relationship',
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
@@ -293,6 +294,7 @@ class Layout {
       'settings' => $this->settings,
       'positions' => $this->positions,
       'contexts' => $this->contexts,
+      'relationships' => $this->relationships,
     );
 
     // Basic validation to prevent data corruption.
@@ -306,7 +308,7 @@ class Layout {
       'content',
       'conditions',
       'contexts',
-      // 'relationships',
+      'relationships',
     );
     foreach ($sub_parts as $config_type) {
       foreach ($this->$config_type as $config_type_key => $config_type_data) {

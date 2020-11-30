@@ -228,11 +228,11 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
     '#type' => 'submit',
     '#value' => $is_new_context ? t('Add context') : t('Save context'),
     '#submit' => array(
-      'layout_context_add_form_submit',
+      'layout_context_relationship_add_form_submit',
     ),
-    '#validate' => array(
-      'layout_context_add_form_validate',
-    ),
+    // '#validate' => array(
+      // 'layout_context_add_form_validate',
+    // ),
     '#ajax' => array(
       'callback' => 'layout_ajax_form_save_dialog',
     ),
@@ -364,6 +364,36 @@ function layout_context_add_form_submit($form, &$form_state) {
   $form_state['ajax_rebuild_args'] = array($layout);
   $form_state['ajax_update'] = array('context_wrapper');
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
+}
+
+/**
+ * Submit handler for layout_context_add_form().
+ *
+ * Saves a context into the layout.
+ */
+function layout_context_relationship_add_form_submit($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  /* @var Layout $layout */
+  $layout = $form_state['layout'];
+
+  if (!isset($form_state['handler'])) {
+    return;
+  }
+  /* @var LayoutAccess $handler */
+  $handler = $form_state['handler'];
+  $handler->formSubmit($form, $form_state);
+  if (!empty($handler->is_new)) {
+    $handler->is_new = FALSE;
+    $handler->storage = TRUE;
+    $layout->relationships[] = $handler;
+  }
+  // layout_set_layout_tempstore($layout);
+  dpm($layout);
+
+  $form_state['ajax_rebuild_form'] = 'layout_settings_form';
+  $form_state['ajax_rebuild_args'] = array($layout);
+  $form_state['ajax_update'] = array('context_wrapper');
+  // $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
 }
 
 /**
