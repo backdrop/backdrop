@@ -102,7 +102,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $custom_block['info'] = $this->randomName(8);
     $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName(8);
-    $custom_block['body[value]'] = '<h1>Full HTML</h1>';
+    $custom_block['body[value]'] = '<h1>Raw HTML</h1>';
     $raw_html_format = filter_format_load('raw_html');
     $custom_block['body[format]'] = $raw_html_format->format;
     $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
