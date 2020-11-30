@@ -2685,7 +2685,7 @@ function template_preprocess_header(&$variables) {
 /**
  * Preprocess variables for page.tpl.php
  *
- * @see system_elements()
+ * @see system_element_info()
  * @see page.tpl.php
  */
 function template_preprocess_page(&$variables) {
