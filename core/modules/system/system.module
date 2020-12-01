@@ -3745,8 +3745,8 @@ function system_image_toolkits() {
 /**
  * Implements hook_image_supported_extensions_alter().
  *
- * Add webp to supported file extensions if gd is the active image toolkit and
- * the gd version supports webp.
+ * Add webp to supported file extensions if GD is the active image toolkit and
+ * the GD version supports WebP.
  */
 function system_image_supported_extensions_alter(&$supported_extensions) {
   if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
