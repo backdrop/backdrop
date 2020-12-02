@@ -248,10 +248,13 @@ class Layout {
         if ($property_key == 'contexts') {
           $plugin_data['data']['storage'] = TRUE;
         }
+        if ($property_key == 'relationships') {
+        }
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
 
+dpm($this);
     // Ensure contexts is always set to an array.
     if (is_null($this->contexts)) {
       $this->contexts = array();

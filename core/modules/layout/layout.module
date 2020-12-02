@@ -1287,6 +1287,12 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     foreach ($layouts as $layout) {
       // Contexts must be set before the layout's access may be checked.
       $contexts = $layout->getContexts();
+
+      // Get contexts from relationships
+      $relationships = $layout->relationships;
+      // layout_get_context_from_relationships($relationships, $contexts);
+      // dpm($relationships);
+
       foreach ($contexts as $context) {
         if (isset($context->position)) {
 
@@ -1309,10 +1315,6 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
           }
         }
       }
-
-      // Get contexts from relationships
-      $relationships = layout_context_get_relationships($contexts);
-      layout_get_context_from_relationships($relationships, $contexts);
 
       if (!$layout->disabled && $layout->checkAccess()) {
         $selected_layout = $layout;

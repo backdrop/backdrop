@@ -40,7 +40,8 @@ abstract class LayoutRelationship extends LayoutHandler{
   /**
    * Constructor for LayoutContext objects.
    */
-  function __construct($plugin_name, $context) {
+  function __construct($plugin_name, $config) {
+    parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
     $properties = array(
       'name',
@@ -86,6 +87,7 @@ abstract class LayoutRelationship extends LayoutHandler{
 
     $options = $this->filter_contexts($contexts, $type, $relationship);
 
+    $form_state['relationship'] = $relationship;
     $form['context_parent'] = array(
       '#type' => 'select',
       '#default_value' => '',
@@ -107,8 +109,9 @@ abstract class LayoutRelationship extends LayoutHandler{
   function formSubmit($form, &$form_state) {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
     $settings = array_diff_key($form_state['values'], $excluded);
-    $this->name = $form_state['context_id'];
+    // $this->name = $form_state['context_id'];
     $this->settings = array_merge($this->settings, $settings);
+    $this->context = $form_state['relationship']['context'];
   }
 
   /**
@@ -135,6 +138,19 @@ abstract class LayoutRelationship extends LayoutHandler{
       }
     }
     return $options;
+  }
+
+
+  /**
+   * Convert the configuration of this relationship to an array for storage.
+   */
+  function toArray() {
+    $array = array(
+      'context' => $this->context,
+      'settings' => $this->settings,
+    );
+
+    return $array;
   }
 
 }

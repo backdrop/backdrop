@@ -385,10 +385,11 @@ function layout_context_relationship_add_form_submit($form, &$form_state) {
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
     $handler->storage = TRUE;
-    $layout->relationships[] = $handler;
+    $key = uniqid();
+    $layout->relationships[$key] = $handler;
   }
-  // layout_set_layout_tempstore($layout);
-  dpm($layout);
+  dpm($handler);
+  layout_set_layout_tempstore($layout);
 
   $form_state['ajax_rebuild_form'] = 'layout_settings_form';
   $form_state['ajax_rebuild_args'] = array($layout);

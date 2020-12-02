@@ -366,8 +366,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => count($contexts) > $built_in_contexts,
   );
 
-dpm($layout);
-dpm($contexts);
   foreach ($contexts as $context_key => $layout_context) {
     if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
       // Contexts that are locked to a particular position (such as node/%).
