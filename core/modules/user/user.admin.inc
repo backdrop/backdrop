@@ -515,7 +515,7 @@ function user_admin_roles($form, $form_state) {
   // administrator.
   unset($options[BACKDROP_ANONYMOUS_ROLE]);
   unset($options[BACKDROP_AUTHENTICATED_ROLE]);
-dpm();
+
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
