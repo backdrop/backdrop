@@ -471,7 +471,16 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   }
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save permissions')
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
@@ -500,6 +509,13 @@ function user_admin_permissions_submit($form, &$form_state) {
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
+  $options = array(0 => t('disabled'));
+  $options += user_roles();
+  // Do not allow the anonymous or authenticated roles to be set as the
+  // administrator.
+  unset($options[BACKDROP_ANONYMOUS_ROLE]);
+  unset($options[BACKDROP_AUTHENTICATED_ROLE]);
+dpm();
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
@@ -508,16 +524,11 @@ function user_admin_roles($form, $form_state) {
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
-  // Do not allow the anonymous or authenticated user roles as administrator.
-  $roles = user_roles();
-  unset($roles[BACKDROP_ANONYMOUS_ROLE]);
-  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role'),
-    '#options' => $roles,
+    '#options' => $options,
+    '#default_value' => $system_config->get('user_admin_role') == NULL ? $options[0] : $system_config->get('user_admin_role'),
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
 
@@ -556,12 +567,14 @@ function user_admin_roles($form, $form_state) {
     $links['configure'] = array(
       'title' => t('Configure role'),
       'href' => 'admin/config/people/roles/edit/' . $role_name,
-      'weight' => 0,
     );
     $links['permissions'] = array(
       'title' => t('Set permissions'),
       'href' => 'admin/config/people/permissions/' . $role_name,
-      'weight' => 5,
+    );
+    $links['clone'] = array(
+      'title' => t('Clone role'),
+      'href' => 'admin/config/people/roles/clone/' . $role_name,
     );
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -577,7 +590,6 @@ function user_admin_roles($form, $form_state) {
       $links['delete'] = array(
         'title' => t('Delete role'),
         'href' => 'admin/config/people/roles/delete/' . $role_name,
-        'weight' => 0,
       );
     }
     $form['roles'][$role_name]['operations'] = array(
@@ -693,6 +705,12 @@ function user_admin_role($form, &$form_state, $role) {
     '#type' => 'submit',
     '#value' => t('Save role'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
@@ -711,6 +729,84 @@ function user_admin_role_submit($form, &$form_state) {
 }
 
 /**
+ * Form to clone a role.
+ *
+ * @ingroup forms
+ * @see user_admin_role_clone_submit()
+ */
+function user_admin_role_clone($form, &$form_state, $role) {
+  backdrop_set_title(t('Clone %source_role role', array('%source_role' => $role->label)), PASS_THROUGH);
+  $form_state['source_role'] = $role;
+
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cloned role name'),
+    '#default_value' => 'Copy of ' . $role->label,
+    '#size' => 30,
+    '#required' => TRUE,
+    '#maxlength' => 64,
+    '#description' => t('The name for the cloned role. Example: "moderator", "editorial board", "site architect".'),
+  );
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#required' => TRUE,
+    '#size' => 32,
+    '#maxlength' => 64,
+    '#machine_name' => array(
+      'source' => array('label'),
+      'exists' => 'user_role_load',
+      'standalone' => TRUE,
+    ),
+    '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['clone'] = array(
+    '#type' => 'submit',
+    '#name' => 'clone',
+    '#value' => t('Clone role'),
+  );
+  $form['actions']['clone_and_edit_permissions'] = array(
+    '#type' => 'submit',
+    '#name' => 'clone_edit_permissions',
+    '#value' => t('Clone and configure permissions'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
+
+  return $form;
+}
+
+/**
+ * Form submit handler for the user_admin_role_clone() form.
+ */
+function user_admin_role_clone_submit($form, &$form_state) {
+  $source_role = $form_state['source_role'];
+  $clicked_button = $form_state['clicked_button']['#name'];
+
+  $cloned_role = (object) array(
+    'name' => $form_state['values']['name'],
+    'label' => $form_state['values']['label'],
+    'permissions' => $source_role->permissions,
+  );
+  user_role_save($cloned_role);
+
+  $substitutions = array('%source_role' => $source_role->label, '%cloned_role' => $cloned_role->label);
+  backdrop_set_message(t('The %cloned_role role has been created as a clone of the %source_role role.', $substitutions));
+  backdrop_set_message(t('All permissions have been copied from the %source_role role to the %cloned_role role.', $substitutions));
+
+  if ($clicked_button == 'clone') {
+    $form_state['redirect'] = 'admin/config/people/roles';
+  }
+  elseif ($clicked_button == 'clone_edit_permissions') {
+    $form_state['redirect'] = 'admin/config/people/permissions/' . $cloned_role->name;
+  }
+}
+
+/**
  * Form to confirm role delete operation.
  */
 function user_admin_role_delete_confirm($form, &$form_state, $role) {
@@ -725,9 +821,11 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
  * Form submit handler for user_admin_role_delete_confirm().
  */
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
-  $role = $form_state['values']['role_name'];
-  user_role_delete($role);
-  backdrop_set_message(t('The %role role has been deleted.', array('%role' => $role)));
+  $role_name = $form_state['values']['role_name'];
+  $role = user_role_load($role_name);
+
+  user_role_delete($role_name);
+  backdrop_set_message(t('The %role role has been deleted.', array('%role' => $role->label)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 

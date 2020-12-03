@@ -2133,7 +2133,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test adding, renaming and deleting roles.
+   * Test adding, renaming, cloning, and deleting roles.
    */
   function testRoleAdministration() {
     $this->backdropLogin($this->admin_user);
@@ -2179,23 +2179,59 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Set this as the administrator role.
     config_set('system.core', 'user_admin_role', $admin_role->name);
 
-    // Test cancel deleting a role.
-    $role_name = 'administrator';
-    $this->backdropGet("admin/config/people/roles/delete/$role_name");
-    $this->clickLink(t('Cancel'));
-    $this->assertResponse(200);
-    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after cancel.');
-
-    // Test deleting the default administrator role.
     $role_name = 'administrator';
     $role = user_role_load($role_name);
-    $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
-    $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
-    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
+
+    // Test canceling the various actions that can be performed on user roles.
+    $cancel_actions = array('edit', 'clone', 'delete');
+    foreach ($cancel_actions as $action) {
+      $this->backdropGet("admin/config/people/roles/$action/$role_name");
+      $this->clickLink(t('Cancel'));
+      $this->assertResponse(200);
+      $this->assertUrl('admin/config/people/roles', array(), "Redirected to correct URL after canceling $action role.");
+    }
+
+    // Test cloning the default administrator role.
+    $cloned_role = $this->randomString();
+    $cloned_role_name = $this->randomName();
+    $edit = array('label' => $cloned_role, 'name' => $cloned_role_name);
+    $this->backdropPost("admin/config/people/roles/clone/$role_name", $edit, t('Clone role'));
+    $this->assertText(t('The @cloned role has been created as a clone of the @source role.' array('@cloned' => $cloned_role, '@source' => $role->label)), 'The role has been cloned');
     backdrop_static_reset('user_roles');
-    $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
-    // Make sure this role is no longer configured as the administrator role.
-    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The administrator role is no longer configured as the administrator role.');
+    $this->assertTrue(user_role_load($cloned_role_name), 'The cloned role can be loaded.');
+    $this->assertLinkByHref("admin/config/people/roles/edit/$cloned_role_name", '"Configure role" link exists for the cloned role.');
+    $this->assertLinkByHref("admin/config/people/permissions/$cloned_role_name", '"Set permissions" link exists for the cloned role.');
+    $this->assertLinkByHref("admin/config/people/roles/clone/$cloned_role_name", '"Clone role" link exists for the cloned role.');
+    $this->assertLinkByHref("admin/config/development/configuration/single/export?group=User%20roles&name=user.role.$cloned_role_name", '"Export role" link exists for the cloned role.');
+    $this->assertLinkByHref("admin/config/people/roles/delete/$cloned_role_name", '"Delete role" link exists for the cloned role.');
+
+    // Test that the cloned role that was just created has the same permissions
+    // as the source role.
+    $source_role_permissions = $role->permissions;
+    $cloned_role = user_role_load($cloned_role_name);
+    $cloned_role_permissions = $cloned_role->permissions;
+    $this->assertTrue($source_role_permissions === $cloned_role_permissions, 'The cloned role has the same permissions as the source role.');
+
+    // Test that the 'administrator' role is still set to be THE administrator
+    // role (the role that will be automatically assigned new permissions
+    // whenever a module is enabled).
+    $this->assertEqual(config_get('system.core', 'user_admin_role'), $role->name, 'The "Administrator" role is still configured as the administrator role.');
+    // Set the cloned role as the administrator role.
+    $edit = array('user_admin_role' => $cloned_role->name);
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save configuration'));
+    $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
+    $this->assertEqual(config_get('system.core', 'user_admin_role'), $cloned_role->name, 'The cloned role has been set as the administrator role.');
+
+    // Test deleting the cloned role.
+    $this->backdropPost("admin/config/people/roles/delete/$cloned_role_name", array(), t('Delete'));
+    $this->assertText(t('The %cloned_role role has been deleted.' array('%cloned_role' => $cloned_role->label)), 'The role has been deleted');
+    $this->assertNoLinkByHref("admin/config/people/roles/edit/$cloned_role_name", 'Role edit link removed.');
+    backdrop_static_reset('user_roles');
+    $this->assertFalse(user_role_load($cloned_role_name), 'A deleted role can no longer be loaded.');
+    // Make sure that the cloned role is no longer set as the administrator
+    // role. Deleting the role that is set as administrator, disables the
+    // setting (removes the setting altogether from the config file).
+    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The cloned role is no longer configured as the administrator role.');
   }
 
   /**
