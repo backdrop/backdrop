@@ -893,6 +893,7 @@ function layout_autoload_info() {
     // Relationships.
     'LayoutRelationshipUserFromNode' => 'plugins/relationships/user_from_node.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
+    'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
 }
 
@@ -1290,10 +1291,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
       // Get contexts from relationships
       $relationships = $layout->relationships;
-      // layout_get_context_from_relationships($relationships, $contexts);
-      // dpm($relationships);
+      layout_get_context_from_relationships($relationships, $contexts);
+      dpm($contexts);
 
-      foreach ($contexts as $context) {
+      foreach ($contexts as $key => $context) {
         if (isset($context->position)) {
 
           // Check for an object loaded by the menu router. Use a preview from
@@ -1314,6 +1315,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
             }
           }
         }
+        $layout->setContexts($key, $context);
       }
 
       if (!$layout->disabled && $layout->checkAccess()) {
@@ -1321,6 +1323,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         break;
       }
     }
+dpm($selected_layout);
 
     // If no layout matches at the path, use the default layout.
     if (!$selected_layout) {
@@ -1577,7 +1580,7 @@ function layout_context_get_relationships($contexts) {
  *   A context object if one can be loaded.
  */
 function layout_get_context_from_relationship($relationship, $source_context) {
-  $relationship = layout_create_handler('layout_relationship', $relationship['name']);
+  //$relationship = layout_create_handler('layout_relationship', $relationship->name);
   $new_context = clone($source_context);
   $context = $relationship->getContext($new_context);
   if ($context) {
@@ -1603,13 +1606,15 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
   $contexts_from_relationships_list = array();
   foreach ($relationships as $rname => $rdata) {
     foreach ($contexts as $context) {
-      if ($context->plugin == $rdata['context']) {
-        $key = 'relationship_' . $rname . '_' . $context->position;
+      if ($context->plugin == $rdata->context) {
+        $key = 'relationship_' . $rname;
+        dpm($key);
         $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
       }
     }
   }
   if($contexts_from_relationships_list) {
+  dpm($contexts_from_relationships_list);
     foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
       if (is_object($context_from_relationships)) {
         $contexts[$key] = $context_from_relationships;

@@ -254,7 +254,6 @@ class Layout {
       }
     }
 
-dpm($this);
     // Ensure contexts is always set to an array.
     if (is_null($this->contexts)) {
       $this->contexts = array();

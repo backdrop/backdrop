@@ -154,3 +154,16 @@ abstract class LayoutRelationship extends LayoutHandler{
   }
 
 }
+
+/**
+ * A class to be used for contexts whose handler cannot be found.
+ */
+class LayoutRelationshipBroken extends LayoutRelationship {
+  function type() {
+    return 'broken';
+  }
+  function label() {
+    return t('Broken or missing relationship (@plugin)', array('@plugin' => $this->plugin));
+  }
+}
+
