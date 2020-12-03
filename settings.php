@@ -44,7 +44,7 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
  * config staging files each configuration sync, such as when the
  * configuration files in version control.
  */
-// $settings['skip_configuration_staging_directory_cleanup'] = TRUE;
+// $settings['configuration_skip_staging_cleanup'] = TRUE;
 
 /**
  * Access control for update.php script.
