@@ -875,14 +875,17 @@ class HWLDFWordAccumulator {
 
     foreach ($words as $word) {
       // new-line should only come as first char of word.
-      if ($word == '') {
+      if ($word === "") {
         continue;
       }
+
       if ($word[0] == "\n") {
+        $this->group .= " ";
         $this->flushLine($tag);
         $word = substr($word, 1);
       }
-      assert('!strstr( $word, "\n" )');
+
+      assert(!strstr($word, "\n"));
       $this->group .= $word;
     }
   }
