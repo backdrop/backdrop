@@ -54,6 +54,7 @@
 .js .js-show {
   display: block;
 }
+.js a.js-show,
 .js span.js-show {
   display: inline;
 }
