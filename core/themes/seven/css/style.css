@@ -677,6 +677,8 @@ fieldset:not(.collapsible) > legend > .fieldset-legend {
 fieldset:not(.collapsible) > legend > .fieldset-legend,
 fieldset.collapsible:not(.collapsed) > legend > .fieldset-legend {
   border-bottom: none;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 legend {
   font-size: 120%;
