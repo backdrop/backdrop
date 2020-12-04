@@ -667,33 +667,37 @@ fieldset .fieldset-legend {
   border-radius: 4px;
   background-color: #fff;
 }
-fieldset:not(.collapsible) .fieldset-legend {
+fieldset:not(.collapsible) > legend > .fieldset-legend {
   padding: .3em .3em .3em 1em; /* LTR */
 }
-[dir="rtl"] fieldset:not(.collapsible) .fieldset-legend {
+[dir="rtl"] fieldset:not(.collapsible) > legend > .fieldset-legend {
   padding: .3em 1em .3em .3em;
 }
-fieldset:not(.collapsible) .fieldset-legend,
-fieldset.collapsible:not(.collapsed) .fieldset-legend {
+
+fieldset:not(.collapsible) > legend > .fieldset-legend,
+fieldset.collapsible:not(.collapsed) > legend > .fieldset-legend {
   border-bottom: none;
 }
 legend {
   font-size: 120%;
   font-weight: normal;
   width: 100%;
+  float: left;
 }
-
+[dir="rtl"] legend {
+  float: right;
+}
 fieldset .fieldset-wrapper {
   padding: 15px 13px 13px 15px; /* LTR */
   border-radius: 0 0 4px 4px;
   border: 2px solid #EAEAEA;
   border-top: none;
-  margin-top: -2px;
+  clear: both;
 }
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 15px 15px 13px 13px;
 }
-.vertical-tabs fieldset .fieldset-wrapper {
+.vertical-tabs-pane > .fieldset-wrapper {
   border: none;
 }
 
