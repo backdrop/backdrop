@@ -696,6 +696,11 @@ fieldset .fieldset-wrapper {
   border-top: none;
   clear: both;
 }
+fieldset .fieldset-wrapper::after {
+  content: "";
+  display: table;
+  clear: both;
+}
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 15px 15px 13px 13px;
 }
