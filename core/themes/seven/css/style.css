@@ -659,7 +659,6 @@ fieldset {
   border: none;
   min-width: 0;
 }
-
 fieldset .fieldset-legend {
   display: block;
   box-sizing: border-box;
@@ -673,7 +672,6 @@ fieldset:not(.collapsible) > legend > .fieldset-legend {
 [dir="rtl"] fieldset:not(.collapsible) > legend > .fieldset-legend {
   padding: .3em 1em .3em .3em;
 }
-
 fieldset:not(.collapsible) > legend > .fieldset-legend,
 fieldset.collapsible:not(.collapsed) > legend > .fieldset-legend {
   border-bottom: none;
@@ -707,11 +705,9 @@ fieldset .fieldset-wrapper::after {
 .vertical-tabs-pane > .fieldset-wrapper {
   border: none;
 }
-
 .fieldset-description {
   margin-bottom: 1em;
 }
-
 fieldset fieldset {
   background-color: #fff;
 }
