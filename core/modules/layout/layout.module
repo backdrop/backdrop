@@ -812,41 +812,7 @@ function layout_block_info() {
     'class' => 'BlockHero',
   );
 
-  // TEMPORARY!! For testing relationships PR only!!
-  $blocks['relationships_tester_block'] = array(
-    'info' => t('User relationships test block'),
-    'description' => 'Displays node UID.',
-    'required contexts' => array('user' => 'user'),
-  );
-
   return $blocks;
-}
-
-// TEMPORARY!! For testing relationships PR only!!
-function layout_block_view($delta = '', $settings = array(), $contexts = array()) {
-  $block = array();
-
-  switch ($delta) {
-    case 'relationships_tester_block':
-      $block['subject'] = t('Test block for testing relationships');
-      if (isset($contexts['user'])) {
-        $author = $contexts['user'];
-        $block['content'] = array(
-          '#theme' => 'item_list',
-          '#items' => array(
-            t('Name: !name', array('!name' => $author->name)),
-            t('UID: !uid', array('!uid' => $author->uid)),
-          ),
-          '#title' => t('The author of this node is:'),
-        );
-      }
-      else {
-        $block['content'] = 'The user context is not available on this path';
-      }
-      break;
-
-  }
-  return $block;
 }
 
 /**
