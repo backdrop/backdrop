@@ -709,7 +709,7 @@ fieldset .fieldset-wrapper {
 fieldset .fieldset-wrapper::before {
   content: "";
   display: block;
-  height: 13px;
+  height: 1px;
 }
 .js fieldset.collapsible .fieldset-title {
   position: relative;
