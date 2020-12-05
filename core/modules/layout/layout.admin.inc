@@ -336,21 +336,25 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#suffix' => '</li></ul>',
   );
 
-  $form['context_wrapper']['context']['add_relationship'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add context relationship'),
-    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-    '#validate' => array(),
-    '#submit' => array(
-      'layout_settings_form_update_layout',
-      'layout_settings_form_context_relationship_add',
-    ),
-    '#ajax' => array(
-      'callback' => 'layout_ajax_form_open_dialog',
-    ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
-  );
+  // Get contexts from relationships
+  $relevant_relationships = layout_relationships_get_relevant_info($contexts);
+  if (!empty($relevant_relationships)) {
+    $form['context_wrapper']['context']['add_relationship'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add context relationship'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+      '#validate' => array(),
+      '#submit' => array(
+        'layout_settings_form_update_layout',
+        'layout_settings_form_context_relationship_add',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+      '#prefix' => '<ul class="action-links"><li>',
+      '#suffix' => '</li></ul>',
+    );
+  }
 
   $all_context_info = _layout_get_all_info('layout_context');
   $context_options = array();

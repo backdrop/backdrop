@@ -194,19 +194,26 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   else {
     $handler = NULL;
   }
-  backdrop_sort($relevant, array('title'));
-  $form['relationship'] = array(
-    '#type' => 'select',
-    '#title' => t('Available context relationships'),
-    '#options' => $relevant,
-    '#required' => TRUE,
-    '#default_value' => !empty($handler) ? $handler->plugin : NULL,
-    '#parents' => array('relationship'),
-    '#ajax' => array(
-      'wrapper' => 'context_settings',
-      'callback' => 'layout_context_ajax_style',
-    ),
-  );
+  if (!empty($relevant)) {
+    backdrop_sort($relevant, array('title'));
+    $form['relationship'] = array(
+      '#type' => 'select',
+      '#title' => t('Available context relationships'),
+      '#options' => $relevant,
+      '#required' => TRUE,
+      '#default_value' => !empty($handler) ? $handler->plugin : NULL,
+      '#parents' => array('relationship'),
+      '#ajax' => array(
+        'wrapper' => 'context_settings',
+        'callback' => 'layout_context_ajax_style',
+      ),
+    );
+  }
+  else {
+    $form['no_relationship'] = array(
+      '#markup' => t('No relevant relationships available'),
+    );
+  }
 
   $form['context_settings'] = array(
     '#type' => 'container',
@@ -229,6 +236,7 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
+    '#access' => !empty($relevant),
     '#value' => $is_new_context ? t('Add relationship') : t('Save relationship'),
     '#submit' => array(
       'layout_context_relationship_add_form_submit',
