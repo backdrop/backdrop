@@ -81,16 +81,15 @@ abstract class LayoutRelationship extends LayoutHandler{
    */
   function form(&$form, &$form_state) {
     $contexts = $form_state['contexts'];
-    $type = $form_state['context_id'];
-    $relationships = layout_context_get_relationships($contexts);
-    $relationship = $relationships[$type];
+    $relationships = layout_relationships_get_relevant_info($contexts);
+    $relationship = $relationships[$this->plugin];
 
-    $options = $this->filter_contexts($contexts, $type, $relationship);
+    $options = $this->filter_contexts($contexts, $relationship);
 
     $form_state['relationship'] = $relationship;
     $form['context_parent'] = array(
       '#type' => 'select',
-      '#default_value' => '',
+      '#default_value' => isset($this->settings) ? $this->settings['context_parent'] : '',
       '#options' => $options,
       '#title' => $relationship['context_label'],
     );
@@ -109,7 +108,6 @@ abstract class LayoutRelationship extends LayoutHandler{
   function formSubmit($form, &$form_state) {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
     $settings = array_diff_key($form_state['values'], $excluded);
-    // $this->name = $form_state['context_id'];
     $this->settings = array_merge($this->settings, $settings);
     $this->context = $form_state['relationship']['context'];
   }
@@ -117,7 +115,7 @@ abstract class LayoutRelationship extends LayoutHandler{
   /**
    * Returns an array of appropriate contexts for this relationship.
    */
-  function filter_contexts($contexts, $type, $relationship) {
+  function filter_contexts($contexts, $relationship) {
     $options = array();
 
     foreach ($contexts as $context) {

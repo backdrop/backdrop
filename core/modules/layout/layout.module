@@ -356,6 +356,14 @@ function layout_menu() {
     'file' => 'layout.context.admin.inc',
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/relationship/edit/layout/%'] = array(
+    'title' => 'Configure relationship',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_relationship_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
     'title' => 'Add visibility condition',
     'page callback' => 'backdrop_get_form',
@@ -1292,7 +1300,6 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       // Get contexts from relationships
       $relationships = $layout->relationships;
       layout_get_context_from_relationships($relationships, $contexts);
-      dpm($contexts);
 
       foreach ($contexts as $key => $context) {
         if (isset($context->position)) {
@@ -1323,7 +1330,6 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         break;
       }
     }
-dpm($selected_layout);
 
     // If no layout matches at the path, use the default layout.
     if (!$selected_layout) {
@@ -1542,7 +1548,7 @@ function layout_get_context_info($plugin_name) {
  *   An array of relationship keys that are relevant for the given set of
  *   contexts.
  */
-function layout_context_get_relationships($contexts) {
+function layout_relationships_get_relevant_info($contexts) {
   $relevant = array();
 
   foreach ($contexts as $context) {
@@ -1608,13 +1614,11 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
     foreach ($contexts as $context) {
       if ($context->plugin == $rdata->context) {
         $key = 'relationship_' . $rname;
-        dpm($key);
         $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
       }
     }
   }
   if($contexts_from_relationships_list) {
-  dpm($contexts_from_relationships_list);
     foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
       if (is_object($context_from_relationships)) {
         $contexts[$key] = $context_from_relationships;

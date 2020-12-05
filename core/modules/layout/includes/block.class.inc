@@ -225,7 +225,7 @@ class Block extends LayoutHandler {
     $contexts = $layout->getContexts();
 
     // Get contexts from relationships
-    $relationships = layout_context_get_relationships($contexts);
+    $relationships = layout_relationships_get_relevant_info($contexts);
     layout_get_context_from_relationships($relationships, $contexts);
 
     $block_info = $this->getBlockInfo();
