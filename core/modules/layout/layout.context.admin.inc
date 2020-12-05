@@ -169,7 +169,7 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   }
 
   // Ensure AJAX callbacks display the correct title by setting it here.
-  $form['#title'] = $is_new_context ? t('Add context') : t('Configure context');
+  $form['#title'] = $is_new_context ? t('Add relationship') : t('Configure relationship');
 
   $form_state['layout'] = $layout;
   $form_state['contexts'] = $contexts;
@@ -229,7 +229,7 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
-    '#value' => $is_new_context ? t('Add context') : t('Save context'),
+    '#value' => $is_new_context ? t('Add relationship') : t('Save relationship'),
     '#submit' => array(
       'layout_context_relationship_add_form_submit',
     ),
