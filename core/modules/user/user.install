@@ -1234,7 +1234,7 @@ function user_update_1018() {
  */
 function user_update_1018() {
   $config = config('system.core');
-  if ($config->get('user_admin_role') ==  NULL) {
+  if ($config->get('user_admin_role') == NULL) {
     $config->set('user_admin_role', 0);
     $config->save();
   }
