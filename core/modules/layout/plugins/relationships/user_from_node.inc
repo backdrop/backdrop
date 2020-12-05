@@ -27,4 +27,20 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
     return $user_context;
   }
 
+  /**
+   * Return a summary for this relationship.
+   */
+  function getAdminSummary() {
+    if (!empty($this->settings['context_parent'])) {
+      $parts = explode(':', $this->settings['context_parent']);
+      if ($parts[0] == 'position') {
+        return t('User from node in position ') . $parts[1] + 1;
+      }
+      else {
+        return t('User from node ') . $parts[1];
+      }
+    }
+    return t('User from node');
+  }
+
 }

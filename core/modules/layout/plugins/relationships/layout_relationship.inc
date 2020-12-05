@@ -151,6 +151,11 @@ abstract class LayoutRelationship extends LayoutHandler{
     return $array;
   }
 
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary() {}
+
 }
 
 /**
