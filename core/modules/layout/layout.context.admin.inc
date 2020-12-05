@@ -195,13 +195,13 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
     $handler = NULL;
   }
   backdrop_sort($relevant, array('title'));
-  $form['context'] = array(
+  $form['relationship'] = array(
     '#type' => 'select',
     '#title' => t('Available context relationships'),
     '#options' => $relevant,
     '#required' => TRUE,
     '#default_value' => !empty($handler) ? $handler->plugin : NULL,
-    '#parents' => array('context'),
+    '#parents' => array('relationship'),
     '#ajax' => array(
       'wrapper' => 'context_settings',
       'callback' => 'layout_context_ajax_style',
@@ -217,9 +217,9 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   $form['actions'] = array(
     '#type' => 'actions',
   );
-  $form['load_context_nojs'] = array(
+  $form['load_relationship_nojs'] = array(
     '#type' => 'submit',
-    '#value' => t('Load context'),
+    '#value' => t('Load relationship'),
     '#submit' => array(
       'layout_context_add_load_context_nojs',
     ),
@@ -310,12 +310,12 @@ function layout_context_relationship_return_form($form, &$form_state) {
   $layout = $form_state['layout'];
   
   // If no context has yet been selected, there is no sub-form to display.
-  if (!isset($form_state['values']['context']) && !isset($form_state['handler'])) {
+  if (!isset($form_state['values']['relationship']) && !isset($form_state['handler'])) {
     return array();
   }
 
-  if (isset($form_state['values']['context'])) {
-    $handler = layout_create_handler('layout_relationship', $form_state['values']['context']);
+  if (isset($form_state['values']['relationship'])) {
+    $handler = layout_create_handler('layout_relationship', $form_state['values']['relationship']);
     $handler->is_new = TRUE;
   }
   else {
@@ -440,8 +440,8 @@ function layout_settings_form_context_remove($form, &$form_state) {
  * Submit handler for layout_settings_form() that removes a relationship.
  */
 function layout_settings_form_context_relationship_remove($form, &$form_state) {
-  $removed_context = $form_state['clicked_button']['#array_parents'][3];
-  unset($form_state['layout']->relationships[$removed_context]);
+  $removed_relationship = $form_state['clicked_button']['#array_parents'][3];
+  unset($form_state['layout']->relationships[$removed_relationship]);
   layout_set_layout_tempstore($form_state['layout']);
 
   $form_state['ajax_update'] = array('context_wrapper');

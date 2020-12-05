@@ -84,7 +84,7 @@ abstract class LayoutRelationship extends LayoutHandler{
    * Submit handler for the settings form for this relationship item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_relationship_nojs'));
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
     $this->context = $form_state['relationship']['context'];

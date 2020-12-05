@@ -33,7 +33,7 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
         return t('User from node in position @position', array('@position' => $parts[1]+1));
       }
       else {
-        return t('User from node @id', array('@id' => $parts[0]));
+        return t('User from node @id', array('@id' => $parts[1]));
       }
     }
     return t('User from node');
