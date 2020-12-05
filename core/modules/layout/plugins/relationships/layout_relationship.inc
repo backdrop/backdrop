@@ -2,15 +2,11 @@
 
 /**
  * @file
- * Class that holds information relating to a layouts context.
- *
- * This class does not extend the LayoutHandler class because contexts are not
- * stored directly within configuration. Instead contexts are determined based
- * on the Layout's path
+ * Class that holds information relating to a layout's context relationships.
  */
 abstract class LayoutRelationship extends LayoutHandler{
   /**
-   * The name of the plugin that provides this context.
+   * The name of the plugin that provides this relationship.
    *
    * @var string
    */
@@ -24,7 +20,7 @@ abstract class LayoutRelationship extends LayoutHandler{
   var $name;
 
   /**
-   * The human-readable label for this context if available.
+   * The human-readable label for this relationship if available.
    *
    * @var string
    */
@@ -38,7 +34,7 @@ abstract class LayoutRelationship extends LayoutHandler{
   var $context;
 
   /**
-   * Constructor for LayoutContext objects.
+   * Constructor for LayoutRelationship objects.
    */
   function __construct($plugin_name, $config) {
     parent::__construct($plugin_name, $config);
@@ -58,23 +54,7 @@ abstract class LayoutRelationship extends LayoutHandler{
   /**
    * Assemble a human-readable label of this object.
    */
-  function label() {
-    if ($this->label) {
-      return $this->label;
-    }
-    $info = layout_get_context_info($this->plugin);
-    if (isset($this->position)) {
-      return t('@label from path (position @position)', array('@label' => $info['title'], '@position' => $this->position + 1));
-    }
-    else {
-      return check_plain($info['title']);
-    }
-  }
-
-  /**
-   * Get the context from this relationship.
-   */
-  function getContext($context) {}
+  function label() {}
 
   /**
    * Form.
@@ -96,14 +76,12 @@ abstract class LayoutRelationship extends LayoutHandler{
   }
 
   /**
-   * Validate handler for the settings form for this context item.
+   * Validate handler for the settings form for this relationship item.
    */
-  function formValidate($form, &$form_state) {
-
-  }
+  function formValidate($form, &$form_state) {}
 
   /**
-   * Submit handler for the settings form for this context item.
+   * Submit handler for the settings form for this relationship item.
    */
   function formSubmit($form, &$form_state) {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
@@ -152,14 +130,14 @@ abstract class LayoutRelationship extends LayoutHandler{
   }
 
   /**
-   * Return a summary for this context.
+   * Return a summary for this relationship.
    */
   function getAdminSummary() {}
 
 }
 
 /**
- * A class to be used for contexts whose handler cannot be found.
+ * A class to be used for relationships whose handler cannot be found.
  */
 class LayoutRelationshipBroken extends LayoutRelationship {
   function type() {

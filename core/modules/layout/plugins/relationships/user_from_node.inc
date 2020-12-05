@@ -2,11 +2,7 @@
 
 /**
  * @file
- * Class that holds information relating to a layouts context.
- *
- * This class does not extend the LayoutHandler class because contexts are not
- * stored directly within configuration. Instead contexts are determined based
- * on the Layout's path
+ * Class that holds information relating to the user from node relationship.
  */
 class LayoutRelationshipUserFromNode extends LayoutRelationship {
   /**
