@@ -659,7 +659,6 @@ fieldset {
   border: none;
   min-width: 0;
 }
-
 fieldset .fieldset-legend {
   display: block;
   box-sizing: border-box;
@@ -677,12 +676,24 @@ fieldset:not(.collapsible) .fieldset-legend,
 fieldset.collapsible:not(.collapsed) .fieldset-legend {
   border-bottom: none;
 }
+
 legend {
   font-size: 120%;
   font-weight: normal;
   width: 100%;
 }
-
+.fieldset-description {
+  margin-bottom: 1em;
+}
+fieldset fieldset {
+  background-color: #fff;
+}
+fieldset fieldset fieldset {
+  background-color: #f8f8f8;
+}
+/**
+ * Collapsible Fieldsets
+ */
 fieldset .fieldset-wrapper {
   padding: 15px 13px 13px 15px; /* LTR */
   border-radius: 0 0 4px 4px;
@@ -693,24 +704,6 @@ fieldset .fieldset-wrapper {
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 15px 15px 13px 13px;
 }
-.vertical-tabs fieldset .fieldset-wrapper {
-  border: none;
-}
-
-.fieldset-description {
-  margin-bottom: 1em;
-}
-
-fieldset fieldset {
-  background-color: #fff;
-}
-fieldset fieldset fieldset {
-  background-color: #f8f8f8;
-}
-
-/**
- * Collapsible Fieldsets
- */
 .js fieldset.collapsible .fieldset-title {
   position: relative;
   z-index: 1;
@@ -740,12 +733,6 @@ fieldset fieldset fieldset {
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   left: auto;
   right: .8em;
-}
-.js fieldset.collapsible legend {
-  float: left;
-}
-.js[dir="rtl"] fieldset.collapsible legend {
-  float: right;
 }
 .fieldset-legend span.summary {
   position: absolute;
@@ -889,28 +876,22 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  padding: 0 2px;
+  padding: 10px 2px;
   background-color: #f8f8f8;
   border: 1px #d1d1d1;
   border-style: none solid solid solid;
   border-radius: 0;
 }
+.js fieldset.filter-wrapper.collapsed {
+  padding: 1.2em 0;
+}
 .js fieldset.filter-wrapper.collapsible .fieldset-legend {
   font-size: .8333em;
   text-transform: none;
 }
-
-.filter-wrapper .fieldset-legend {
-  background: none;
-  border: none;
-}
-.filter-wrapper legend {
-  color: transparent;
-}
-
 .filter-wrapper .fieldset-wrapper {
   padding: .6em 2.3em;
-  border: none;
+  margin-top: 30px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
