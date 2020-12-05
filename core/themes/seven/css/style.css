@@ -716,13 +716,14 @@ fieldset .fieldset-wrapper::before {
   z-index: 1;
   display: block;
   padding: .3em .3em .3em 1.8em;
-  margin: 0 -.5em;
+  margin: 0 0 0 -.5em;
   border-radius: 4px;
   background: transparent;
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-title {
   background-image: none;
   padding: .3em 1.8em .3em .3em;
+  margin: 0 -.5em 0 0;
 }
 .js fieldset.collapsible .fieldset-legend {
   font-size: 1em;
