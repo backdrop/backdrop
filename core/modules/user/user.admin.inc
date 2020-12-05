@@ -513,7 +513,7 @@ function user_admin_roles($form, $form_state) {
   // administrator.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  // Add the "Disabled" option to the top of the roles list (makes sure that
+  // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
   array_unshift($roles, t('disabled'));
