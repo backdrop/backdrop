@@ -655,28 +655,34 @@ fieldset {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3em 0 0 0;
+  padding: 0;
   border-radius: 4px;
   background-color: #fff;
   border: 2px solid #EAEAEA;
   min-width: 0;
 }
 fieldset .fieldset-legend {
-  position: absolute;
+  position: relative;
   left: 0; /* LTR */
   top: 0;
+  display: block;
   width: 100%;
-  margin-top: .25em;
-  padding-left: 1em; /* LTR */
+  margin-top: .35em;
+  margin-bottom: .35em;
+  padding-left: 15px; /* LTR */
   box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
-  padding-right: 1em;
+  padding-right: 15px;
   padding-left: 0;
 }
 legend {
   font-size: 120%;
+  float: left;
+}
+[dir="rtl"] legend {
+  float: right;
 }
 .fieldset-description {
   margin-bottom: 1em;
@@ -695,16 +701,20 @@ fieldset fieldset fieldset {
 }
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
+  clear: both;
 }
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
+}
+fieldset .fieldset-wrapper::before {
+  content: "";
+  display: block;
+  height: 13px;
 }
 .js fieldset.collapsible .fieldset-title {
   position: relative;
   z-index: 1;
   display: block;
-  width: 94%; /* IE8 fallback */
-  width: calc(100% - 4em);
   padding: .3em .3em .3em 1.8em;
   margin: 0 -.5em;
   border-radius: 4px;
@@ -750,9 +760,6 @@ fieldset .fieldset-wrapper {
   }
 }
 /* Collapsed state styles */
-.js fieldset.collapsed {
-  padding: 1.6em 0;
-}
 .js fieldset.collapsed .fieldset-legend a:before {
   left: .8em;
   top: .75em;
@@ -871,22 +878,18 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  padding: 10px 2px;
+  padding: 0;
   background-color: #f8f8f8;
   border: 1px #d1d1d1;
   border-style: none solid solid solid;
   border-radius: 0;
-}
-.js fieldset.filter-wrapper.collapsed {
-  padding: 1.2em 0;
 }
 .js fieldset.filter-wrapper.collapsible .fieldset-legend {
   font-size: .8333em;
   text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: .6em 2.3em;
-  margin-top: 30px;
+  padding: 0 2.3em 2em;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
