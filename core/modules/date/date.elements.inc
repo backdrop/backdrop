@@ -1390,8 +1390,8 @@ function _date_popup_datepicker_format_replacements() {
  */
 function date_combo_element_process($element, &$form_state, $form) {
   if (date_hidden_element($element)) {
-    // A hidden value for a new entity that had its end date set to blank
-    // will not get processed later to populate the end date, so set it here.
+    // A hidden value for a new entity that had its 'End' date set to blank will
+    // not get processed later to populate the 'End' date, so set it here.
     if (isset($element['#value']['value2']) && empty($element['#value']['value2'])) {
       $element['#value']['value2'] = $element['#value']['value'];
     }
@@ -1407,15 +1407,14 @@ function date_combo_element_process($element, &$form_state, $form) {
   $from_field = 'value';
   $to_field = 'value2';
 
-  // Convert UTC dates to their local values in DATETIME format,
-  // and adjust the default values as specified in the field settings.
+  // Convert UTC dates to their local values in DATETIME format, and adjust the
+  // default values as specified in the field settings.
 
-  // It would seem to make sense to do this conversion when the data
-  // is loaded instead of when the form is created, but the loaded
-  // field data is cached and we can't cache dates that have been converted
-  // to the timezone of an individual user, so we cache the UTC values
-  // instead and do our conversion to local dates in the form and
-  // in the formatters.
+  // It would seem to make sense to do this conversion when the data is loaded
+  // instead of when the form is created, but the loaded field data is cached
+  // and we can't cache dates that have been converted to the timezone of an
+  // individual user, so we cache the UTC values instead and do our conversion
+  // to local dates in the form and in the formatters.
   $process = date_process_values($field, $instance);
   if (empty($element['#default_value'])) {
     $element['#default_value'] = array();
@@ -1428,8 +1427,9 @@ function date_combo_element_process($element, &$form_state, $form) {
     $element['#default_value'][$processed] = is_object($date) ? date_format($date, DATE_FORMAT_DATETIME) : '';
   }
 
-  // Blank out the end date for optional end dates that match the start date,
-  // except when this is a new node that has default values that should be honored.
+  // Blank out the 'End' date for optional 'End' dates that match the 'Start'
+  // date, except when this is a new node that has default values that should be
+  // honored.
   if (!$date_is_default && $field['settings']['todate'] != 'required'
   && !empty($element['#default_value'][$to_field])
   && $element['#default_value'][$to_field] == $element['#default_value'][$from_field]) {
@@ -1438,12 +1438,12 @@ function date_combo_element_process($element, &$form_state, $form) {
 
   $show_todate = !empty($form_state['values']['show_todate']) || !empty($element['#default_value'][$to_field]) || $field['settings']['todate'] == 'required';
   $element['show_todate'] = array(
-    '#title' => t('Show end date'),
     '#type' => 'checkbox',
+    '#title' => t('Show end date'),
     '#default_value' => $show_todate,
+    '#access' => $field['settings']['todate'] == 'optional',
     '#weight' => -20,
     '#attributes' => array('data-toggle-todate' => TRUE),
-    '#access' => $field['settings']['todate'] == 'optional',
   );
 
   $element[$from_field] = array(
@@ -1482,9 +1482,8 @@ function date_combo_element_process($element, &$form_state, $form) {
       break;
   }
 
-  // If this field uses the 'End', add matching element
-  // for the 'End' date, and adapt titles to make it clear which
-  // is the 'Start' and which is the 'End' .
+  // If this field uses the 'End', add matching element for the 'End' date, and
+  // adapt titles to make it clear which is the 'Start' and which is the 'End'.
   if (!empty($field['settings']['todate'])) {
     $element[$to_field] = $element[$from_field];
     $element[$from_field]['#wrapper_attributes']['class'][] = 'start-date-wrapper';
@@ -1530,7 +1529,7 @@ function date_combo_element_process($element, &$form_state, $form) {
       $element[$to_field]['#date_title_printed'] = TRUE;
     }
   }
-  // Single value with from and to dates.
+  // Single value with 'Start' and 'End' dates.
   elseif (!empty($field['settings']['todate'])) {
     $element[$from_field]['#title'] = t('@field_name start date', array('@field_name' => $instance['label']));
     $element[$from_field]['#date_title_printed'] = $element['#date_title_printed'];
