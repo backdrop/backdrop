@@ -1462,9 +1462,6 @@ function date_combo_element_process($element, &$form_state, $form) {
     '#date_label_position' => $instance['widget']['settings']['label_position'],
   );
 
-  $description = !empty($element['#description']) ? t($element['#description']) : '';
-  unset($element['#description']);
-
   switch ($instance['widget']['type']) {
     case 'date_select':
       $element[$from_field]['#type'] = 'date_select';
@@ -1499,8 +1496,28 @@ function date_combo_element_process($element, &$form_state, $form) {
     $element[$to_field]['#date_title'] = $instance['label'];
     $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date-range.js';
   }
-  else {
-    $element[$from_field]['#description'] = $description;
+
+  // With date fields that collect both a 'Start' and an 'End' date/time, there
+  // is a "Show end date" checkbox if the 'End' date/time is optional. In that
+  // case, if we add the help to the 'Start' date, it will be rendered between
+  // the 'Start' and the 'End' date/time fields when we tick the "Show end date"
+  // checkbox. If we add it to the 'End' date instead, it will be hidden along
+  // with it when the "Show end date" checkbox is unticked.
+  // #states visibility works on entire fields - not on their help text; so we
+  // render the help text as a separate help field, which makes it remain below
+  // whichever of the 'Start'/'End' field is the last one (independently of the
+  // state of the "Show end date" checkbox).
+  if (!empty($element['#description'])) {
+    $description = t($element['#description']);
+    unset($element['#description']);
+    $element['help'] = array(
+      '#type' => 'help',
+      '#markup' => $description,
+      // Ensure that the help text field is rendered after the 'Start' and 'End'
+      // date fields.
+      '#weight' => 99,
+      '#attributes' => array('class' => array('description')),
+    );
   }
 
   // Set labels for each field in a multiple value widget.
