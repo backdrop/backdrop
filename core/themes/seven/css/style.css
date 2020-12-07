@@ -670,7 +670,7 @@ fieldset .fieldset-legend {
   padding-left: 15px; /* LTR */
   box-sizing: border-box;
 }
-fieldset:not(.collapsible) .fieldset-legend {
+fieldset:not(.collapsible) > legend > .fieldset-legend {
   top: .35em;
 }
 [dir="rtl"] fieldset .fieldset-legend {
