@@ -477,6 +477,26 @@ function config_import_single_form_submit(array &$form, array &$form_state) {
 }
 
 /**
+ * Form builder for configuration sync settings.
+ *
+ * @see system_settings_form()
+ *
+ * @ingroup forms
+ */
+function config_settings_form($form, &$form_state) {
+  $config = config('system.core');
+  $form['#config'] = 'system.core';
+  $form['config_sync_clear_staging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Automatically clear the staging directory after importing configuration.'),
+    '#default_value' => $config->get('config_sync_clear_staging'),
+    '#description' => t('This setting is most commonly enabled when using the interface for importing configuration. Note that the imported configuration can override the setting here so ensure the settings are correct on the other site before importing here. You may want to disable this setting if the staging configuration files are in version control. Read more about <a href="!url">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Utility function to get the current diffs between active and staging.
  */
 function config_get_statuses() {

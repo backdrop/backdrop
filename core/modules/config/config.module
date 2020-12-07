@@ -78,6 +78,15 @@ function config_menu() {
     'file' => 'config.admin.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['admin/config/development/configuration/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('config_settings_form'),
+    'access arguments' => array('synchronize configuration'),
+    'file' => 'config.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
   return $items;
 }
 
