@@ -1504,21 +1504,38 @@ function date_combo_element_process($element, &$form_state, $form) {
   }
 
   // Set labels for each field in a multiple value widget.
+  $start_date_label = t('Start date');
+  $end_date_label = t('End date');
   if ($field['cardinality'] != 1) {
     $element[$from_field]['#title'] = t('Date');
     $element[$from_field]['#date_title_printed'] = TRUE;
     if (!empty($field['settings']['todate'])) {
-      $element[$from_field]['#title'] = t('Start date');
-      $element[$to_field]['#title'] = t('End date');
+      $element[$from_field]['#title'] = $start_date_label;
+      $element[$to_field]['#title'] = $end_date_label;
       $element[$to_field]['#date_title_printed'] = TRUE;
     }
   }
-  // Single value with from and to dates.
+  // Single value with 'Start' and 'End' dates.
   elseif (!empty($field['settings']['todate'])) {
-    $element[$from_field]['#title'] = t('@field_name start date', array('@field_name' => $instance['label']));
-    $element[$from_field]['#date_title_printed'] = $element['#date_title_printed'];
-    $element[$to_field]['#title'] = t('@field_name end date', array('@field_name' => $instance['label']));
-    $element[$to_field]['#date_title_printed'] = $element['#date_title_printed'];
+    $no_fieldset = $element['value']['#instance']['widget']['settings']['no_fieldset'];
+    if ($no_fieldset) {
+      // If the 'Start' and 'End' date parts are not being wrapped in a
+      // fieldset, indicate which is which. Also prepend the label of the parent
+      // date field to both of their lebels, to help distinguish multiple
+      // similar date fields on the same form.
+      $element[$from_field]['#title'] = t('@field_name start date', array('@field_name' => $instance['label']));
+      $element[$from_field]['#date_title_printed'] = $element['#date_title_printed'];
+      $element[$to_field]['#title'] = t('@field_name end date', array('@field_name' => $instance['label']));
+      $element[$to_field]['#date_title_printed'] = $element['#date_title_printed'];
+    }
+    else {
+      // If the 'Start' and 'End' date parts are being wrapped in a fieldset,
+      // the label of the parent date field is used as the fieldset legend. So
+      // we indicate which date part is which, but there is no need to prepend
+      // the label of the parent date field.
+      $element[$from_field]['#title'] = $start_date_label;
+      $element[$to_field]['#title'] = $end_date_label;
+    }
   }
   // Single value with just a single date.
   else {

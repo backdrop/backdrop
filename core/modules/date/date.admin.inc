@@ -592,6 +592,9 @@ function _date_field_settings_form($field, $instance, $has_data) {
  */
 function date_field_settings_validate(&$form, &$form_state) {
   $field = &$form_state['values']['field'];
+  $form_id = $form_state['values']['form_id'];
+  $instance = isset($form_state['values']['instance']);
+  $build_info = $form_state['build_info']['args'][0];
 
   if ($field['settings']['tz_handling'] == 'none') {
     form_set_value($form['timezone_db'], '', $form_state);
@@ -615,6 +618,15 @@ function date_field_settings_validate(&$form, &$form_state) {
   }
   else {
     $field['settings']['todate'] = '';
+  }
+
+  // This was the 1st step of the "Add field" process.
+  if ($form_id == 'field_ui_field_settings_form' && !$instance) {
+    $instance = field_read_instance($build_info['entity_type'], $build_info['field_name'], $build_info['bundle']);
+    // If an 'End' date is being collected, set the field instance to be wrapped
+    // in a fieldset by default; otherwise default to no fieldset.
+    $instance['widget']['settings']['no_fieldset'] = !$field['settings']['enddate_get'];
+    field_update_instance($instance);
   }
 
   // Don't save the pseudo values created in the UI.
