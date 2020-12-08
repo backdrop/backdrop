@@ -2190,7 +2190,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role_name = 'administrator';
     $role = user_role_load($role_name);
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
-    $this->assertText(t('The %role role has been deleted.', array('%role' => $role->label)), 'The role has been deleted');
+    $this->assertText(strip_tags(t('The %role role has been deleted.', array('%role' => $role->label))), 'The role has been deleted');
     $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
