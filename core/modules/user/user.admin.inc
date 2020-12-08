@@ -693,6 +693,12 @@ function user_admin_role($form, &$form_state, $role) {
     '#type' => 'submit',
     '#value' => t('Save role'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
