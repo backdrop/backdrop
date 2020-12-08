@@ -836,6 +836,8 @@ class CronQueueTestCase extends BackdropWebTestCase {
 }
 
 class MetaTagsTestCase extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+
   /**
    * Verify that the meta tag HTML is generated correctly.
    */
@@ -850,6 +852,20 @@ class MetaTagsTestCase extends BackdropWebTestCase {
     foreach ($meta_tags as $name => $metatag) {
       $this->assertRaw($metatag, 'Default meta tag "' . $name . '" displayed properly.', 'System');
     }
+
+    $node_type = $this->backdropCreateContentType();
+    $node = $this->backdropCreateNode(array(
+      'type' => $node_type->type,
+    ));
+    $node_path = 'node/' . $node->nid;
+    $home_url = $GLOBALS['base_url'] . '/';
+    config_set('system.core', 'site_frontpage', $node_path);
+
+    $this->backdropGet($node_path);
+    $this->assertRaw('<link rel="canonical" href="' . $home_url . '" />', 'Node canonical meta tag points at homepage.', 'System');
+
+    $this->backdropGet('');
+    $this->assertRaw('<link rel="canonical" href="' . $home_url . '" />', 'Homepage canonical meta tag is present.', 'System');
   }
 }
 

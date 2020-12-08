@@ -2604,6 +2604,24 @@ function url($path = NULL, array $options = array()) {
 
   global $base_url, $base_secure_url, $base_insecure_url;
 
+  // Cache the clean URLs and front page setting.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['cache'] = &backdrop_static(__FUNCTION__);
+  }
+  $front_page_path = &$backdrop_static_fast['cache']['front_page_path'];
+  $clean_urls_enabled = &$backdrop_static_fast['cache']['clean_urls_enabled'];
+  if (!isset($clean_urls_enabled)) {
+    try {
+      $front_page_path = config_get('system.core', 'site_frontpage');
+      $clean_urls_enabled = config_get('system.core', 'clean_url') ? TRUE : FALSE;
+    }
+    catch (ConfigException $e) {
+      $front_page_path = 'node';
+      $clean_urls_enabled = FALSE;
+    }
+  }
+
   // The base_url might be rewritten from the language rewrite in domain mode.
   if (!isset($options['base_url'])) {
     if (isset($options['https']) && settings_get('https', FALSE)) {
@@ -2622,7 +2640,7 @@ function url($path = NULL, array $options = array()) {
   }
 
   // The special path '<front>' links to the default front page.
-  if ($path == '<front>') {
+  if ($path == '<front>' || $path === $front_page_path) {
     $path = '';
   }
   elseif (!empty($path) && !$options['alias']) {
@@ -2638,21 +2656,6 @@ function url($path = NULL, array $options = array()) {
 
   $base = $options['absolute'] ? $options['base_url'] . '/' : base_path();
   $prefix = empty($path) ? rtrim($options['prefix'], '/') : $options['prefix'];
-
-  // Cache the clean URLs setting, as url() is called very frequently.
-  static $backdrop_static_fast;
-  if (!isset($backdrop_static_fast)) {
-    $backdrop_static_fast['clean_urls_enabled'] = &backdrop_static(__FUNCTION__);
-  }
-  $clean_urls_enabled = &$backdrop_static_fast['clean_urls_enabled'];
-  if (!isset($clean_urls_enabled)) {
-    try {
-      $clean_urls_enabled = config_get('system.core', 'clean_url') ? TRUE : FALSE;
-    }
-    catch (ConfigException $e) {
-      $clean_urls_enabled = FALSE;
-    }
-  }
 
   if (isset($options['clean'])) {
     $clean_url = $options['clean'];
