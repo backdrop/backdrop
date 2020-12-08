@@ -2488,7 +2488,7 @@ function user_role_load_by_name($role_name) {
 function user_role_save($role) {
   // Trim spaces from names.
   $role->name = trim($role->name);
-  $role->label = check_plain(trim($role->label));
+  $role->label = trim($role->label);
 
   if (!isset($role->weight)) {
     // Set a role weight to make this new role last.
