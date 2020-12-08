@@ -819,11 +819,9 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
  * Form submit handler for user_admin_role_delete_confirm().
  */
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
-  $role_name = $form_state['values']['role_name'];
-  $role = user_role_load($role_name);
-
-  user_role_delete($role_name);
-  backdrop_set_message(t('The %role role has been deleted.', array('%role' => $role->label)));
+  $role = $form_state['values']['role_name'];
+  user_role_delete($role);
+  backdrop_set_message(t('The %role role has been deleted.', array('%role' => $role)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 
