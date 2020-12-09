@@ -746,7 +746,7 @@ function menu_settings_form($form, &$form_state) {
     '#description' => t("Enter a valid CSS width value; a number followed by a unit (e.g.: '768px')."),
     '#default_value' => config_get('system.core', 'menu_breakpoint_custom'),
     '#size' => 8,
-    '#field_prefix' => t('min-width:'),
+    '#field_prefix' => 'min-width:',
     '#states' => array(
       'visible' => array(
         ':input[name="menu_breakpoint"]' => array('value' => 'custom'),
