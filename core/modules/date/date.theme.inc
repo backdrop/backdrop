@@ -460,7 +460,7 @@ function theme_date_display_remaining($variables) {
     $show_remaining_text = format_plural($remaining_days, '1 day remaining to event.', '@count days remaining to event.');
   }
   else {
-    $show_remaining_text = t('Less then 1 day remaining to event.');
+    $show_remaining_text = t('Less than 1 day remaining to event.');
   }
 
   return '<div class="date-display-remaining"><span class="date-display-remaining">' . $show_remaining_text . '</span></div>';
