@@ -23,6 +23,11 @@ class UserPermissionLayoutAccess extends LayoutAccess {
     }
 
     $permissions = module_invoke_all('permission');
+    if (!array_key_exists($this->settings['permission'], $permissions)) {
+      return t('User has missing "@permission" permission (not provided by any module).', array(
+        '@permission' => $this->settings['permission'],
+      ));
+    }
     return t('User has "@permission" permission.', array('@permission' => $permissions[$this->settings['permission']]['title']));
   }
 

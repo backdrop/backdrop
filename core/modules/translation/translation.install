@@ -5,6 +5,17 @@
  */
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function translation_update_dependencies() {
+  // Do not fix language fields until after Views are converted to config.
+  $dependencies['translation'][1001] = array(
+    'views' => 1001,
+  );
+  return $dependencies;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
@@ -19,6 +30,36 @@ function translation_update_1000() {
   $config->save();
 
   update_variable_del('translation_language_type');
+}
+
+/**
+ * Fix Views which still have the Drupal 7 version of the language field and
+ * filter. Change from "language" to "langcode".
+ */
+function translation_update_1001() {
+  $configs = config_get_names_with_prefix('views.view.');
+
+  foreach ($configs as $config_file) {
+    $config = config($config_file);
+    $displays = $config->get('display');
+    foreach ($displays as $display => $display_details) {
+      if (isset($display_details['display_options']['filters'])) {
+        foreach ($display_details['display_options']['filters'] as $key => $filter) {
+          if ($filter['id'] == 'language') {
+            $config->set('display.' . $display . '.display_options.filters.' . $key . '.field', 'langcode');
+          }
+        }
+      }
+      if (isset($display_details['display_options']['fields'])) {
+        foreach ($display_details['display_options']['fields'] as $key => $field) {
+          if ($field['id'] == 'language') {
+            $config->set('display.' . $display . '.display_options.fields.' . $key . '.field', 'langcode');
+          }
+        }
+      }
+    }
+    $config->save();
+  }
 }
 
 /**

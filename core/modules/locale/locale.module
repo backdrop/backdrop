@@ -563,12 +563,25 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         // Refresh database stored cache of translations for given language.
         // We only store short strings used in current version, to improve
         // performance and consume less memory.
-        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => BACKDROP_VERSION, ':length' => config_get('locale.settings', 'cache_length')));
-        foreach ($result as $data) {
-          $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+        try {
+          $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(
+            ':language' => $langcode,
+            ':version' => BACKDROP_VERSION,
+            ':length' => config_get('locale.settings', 'cache_length'),
+          ));
+          foreach ($result as $data) {
+            $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+          }
+          cache()->set('locale:' . $langcode, $locale_t[$langcode]);
+          lock_release('locale_cache_' . $langcode);
         }
-        cache()->set('locale:' . $langcode, $locale_t[$langcode]);
-        lock_release('locale_cache_' . $langcode);
+        catch (PDOException $e) {
+          // Throw exception for any problem except for missing database tables.
+          if ($e->getCode() !== '42S02') {
+            throw $e;
+          }
+          return $string;
+        }
       }
     }
   }

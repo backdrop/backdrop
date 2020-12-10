@@ -117,8 +117,8 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
     $result = backdrop_html_to_text($html, $allowed_tags);
     $pass = $this->assertEqual($result, $text, check_plain($message));
     $verbose = 'html = <pre>' . $this->stringToHtml($html)
-      . '</pre><br />' . 'result = <pre>' . $this->stringToHtml($result)
-      . '</pre><br />' . 'expected = <pre>' . $this->stringToHtml($text)
+      . '</pre><br />result = <pre>' . $this->stringToHtml($result)
+      . '</pre><br />expected = <pre>' . $this->stringToHtml($text)
       . '</pre>';
     $this->verbose($verbose);
     if (!$pass) {

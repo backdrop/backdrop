@@ -169,17 +169,13 @@ fieldset .fieldset-legend {
 
 .header-menu a:hover,
 .l-header a:active {
-  background: #114a75;
+  text-decoration: underline;
+  background: unset;
 }
 
 .block-system-header {
   /* Helps center .header-identity-wrapper on smaller screens */
   text-align: center;
-}
-
-.header-identity-wrapper {
-  /* BG color for slogan, and logo/site name if they don't have a bg */
-  background: #000000;
 }
 
 @media (min-width: 34em) {
@@ -240,6 +236,7 @@ fieldset .fieldset-legend {
 
 @media (min-width: 34em) {
   .header-site-name-link {
+    background: transparent;
     display: inline-block;
   }
 }
@@ -634,6 +631,8 @@ button.button-secondary[disabled] {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -649,6 +648,8 @@ textarea.form-textarea {
 
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -663,6 +664,8 @@ textarea.form-textarea:focus {
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -674,6 +677,8 @@ textarea.form-textarea:focus {
 input.form-autocomplete[disabled],
 input.form-text[disabled],
 input.form-tel[disabled],
+input.form-date[disabled],
+input.form-time[disabled],
 input.form-email[disabled],
 input.form-url[disabled],
 input.form-color[disabled],
@@ -689,6 +694,8 @@ select.form-select[disabled] {
 .form-error input.form-autocomplete,
 .form-error input.form-text,
 .form-error input.form-tel,
+.form-error input.form-date,
+.form-error input.form-time,
 .form-error input.form-email,
 .form-error input.form-url,
 .form-error input.form-color,
@@ -713,7 +720,7 @@ select.form-select[disabled] {
 }
 
 ul.action-links a {
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background-color: transparent;
   line-height: 1.875;
 }
 
@@ -747,10 +754,6 @@ ul.action-links a {
 .pager-item {
   background: #586172;
   color: #ffffff;
-}
-
-.pager-ellipsis {
-  color: #586172;
 }
 
 .pager-first a,

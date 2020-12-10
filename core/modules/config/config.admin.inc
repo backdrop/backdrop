@@ -542,6 +542,8 @@ function config_get_modified_times() {
  *
  * @return array
  *   An array of formatted strings showing the diffs between the two storages.
+ *
+ * @see config_diff_page()
  */
 function config_diff($name) {
   $active_storage = config_get_config_storage('active');

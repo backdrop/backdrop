@@ -290,6 +290,48 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
     $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
     $this->assertFalse(in_array('module_test perm', $role->permissions), 'Test module permission removed upon uninstall.');
   }
+
+  /**
+   * Tests that uninstalling locale does not cause problems.
+   */
+  public function testUninstallLocale() {
+    // Enable Locale with dependencies, add a language and set it to default.
+    module_enable(array('language', 'locale'), FALSE);
+    $language = (object) array(
+      'langcode' => 'fr',
+      'name' => 'French',
+      'direction' => LANGUAGE_LTR,
+      'enabled' => TRUE,
+    );
+    language_save($language);
+    config_set('system.core', 'language_default', 'fr');
+    $prefixes = array(
+      'en' => 'en',
+      'fr' => '',
+    );
+    config_set('locale.settings', 'language_negotiation_url_prefixes', $prefixes);
+    // Defaults to "en" otherwise.
+    global $language;
+    $language = language_load('fr');
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer modules',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+    module_disable(array('locale'), FALSE);
+    $edit = array(
+      'uninstall[locale]' => TRUE,
+    );
+    // This should not cause "PDOException: SQLSTATE[42S02]: Base table or view
+    // not found".
+    $this->backdropPost('admin/modules/uninstall', $edit, t('Uninstall'));
+    $this->backdropPost(NULL, array(), t('Uninstall'));
+
+    $this->backdropGet('admin/modules/uninstall');
+    $this->assertNoText('Uninstall Locale module', 'Module Locale has been successfully uninstalled');
+  }
+
 }
 
 /**

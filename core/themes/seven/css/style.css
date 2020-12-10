@@ -135,6 +135,12 @@ ul.menu li.expanded {
 .breadcrumb li a,
 .breadcrumb li span {
   vertical-align: middle;
+  float: left; /* LTR */
+}
+[dir="rtl"] .breadcrumb li,
+[dir="rtl"] .breadcrumb li a,
+[dir="rtl"] .breadcrumb li span {
+  float: right;
 }
 .breadcrumb li:after {
   content: '';
@@ -143,10 +149,14 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background-image: url(../images/chevron-right--gray--32.png); /* LTR */
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: 8px;
 }
-
+[dir="rtl"] .breadcrumb li:after {
+  background-image: url(../images/chevron-left--gray--32.png);
+}
 .breadcrumb li.last:after {
   display: none;
 }
@@ -501,14 +511,21 @@ table {
   border: 0;
 }
 tbody {
-  border-bottom: 1px solid #f7f7f7;
+  -webkit-box-shadow: inset 0 1px 0 0 #eee;
+  box-shadow: inset 0 1px 0 0 #eee;
 }
 tr.even,
 tr.odd {
-  border: 1px solid #f7f7f7;
-  border-top: 0;
-  border-bottom: 0;
+  border: 0;
   background: #f7f7f7;
+  -webkit-box-shadow:
+    inset -1px 0 0 #eee,
+    inset 0 -1px 0 0 #eee,
+    inset 1px 0 0 #eee;
+  box-shadow:
+    inset -1px 0 0 #eee,
+    inset 0 -1px 0 0 #eee,
+    inset 1px 0 0 #eee;
 }
 tr.odd {
   background: #fff;
@@ -580,6 +597,9 @@ td {
   border: 0;
   min-height: 14px;
 }
+tr.disabled td {
+  color: #999;
+}
 td.active {
   background: #e9e8e8;
 }
@@ -632,64 +652,70 @@ tr.selected td {
  *   to apply all padding to the inner .fieldset-wrapper instead.
  */
 fieldset {
-  position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3em 0 0 0;
-  border-radius: 4px;
+  padding: 0;
   background-color: #fff;
-  border: 2px solid #EAEAEA;
+  border: none;
   min-width: 0;
 }
+
 fieldset .fieldset-legend {
-  position: absolute;
-  left: 0; /* LTR */
-  top: 0;
-  width: 100%;
-  margin-top: .25em;
-  padding-left: 1em; /* LTR */
-  text-transform: uppercase;
+  display: block;
   box-sizing: border-box;
+  border: 2px solid #EAEAEA;
+  border-radius: 4px;
+  background-color: #fff;
 }
-[dir="rtl"] fieldset .fieldset-legend {
-  right: 0;
-  padding-right: 1em;
-  padding-left: 0;
+fieldset:not(.collapsible) .fieldset-legend {
+  padding: .3em .3em .3em 1em; /* LTR */
+}
+[dir="rtl"] fieldset:not(.collapsible) .fieldset-legend {
+  padding: .3em 1em .3em .3em;
+}
+fieldset:not(.collapsible) .fieldset-legend,
+fieldset.collapsible:not(.collapsed) .fieldset-legend {
+  border-bottom: none;
 }
 legend {
   font-size: 120%;
   font-weight: normal;
+  width: 100%;
 }
+
+fieldset .fieldset-wrapper {
+  padding: 15px 13px 13px 15px; /* LTR */
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  border-top: none;
+  margin-top: -2px;
+}
+[dir="rtl"] fieldset .fieldset-wrapper {
+  padding: 15px 15px 13px 13px;
+}
+.vertical-tabs fieldset .fieldset-wrapper {
+  border: none;
+}
+
 .fieldset-description {
   margin-bottom: 1em;
 }
+
 fieldset fieldset {
   background-color: #fff;
 }
 fieldset fieldset fieldset {
   background-color: #f8f8f8;
 }
+
 /**
  * Collapsible Fieldsets
  */
-.js fieldset.collapsible {
-  position: relative;
-}
-fieldset .fieldset-wrapper {
-  padding: 0 13px 13px 15px; /* LTR */
-}
-[dir="rtl"] fieldset .fieldset-wrapper {
-  padding: 0 15px 13px 13px;
-}
 .js fieldset.collapsible .fieldset-title {
   position: relative;
   z-index: 1;
   display: block;
-  width: 94%; /* IE8 fallback */
-  width: calc(100% - 4em);
   padding: .3em .3em .3em 1.8em;
-  margin: 0 -.5em;
-  border-radius: 4px;
   background: transparent;
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-title {
@@ -697,13 +723,14 @@ fieldset .fieldset-wrapper {
   padding: .3em 1.8em .3em .3em;
 }
 .js fieldset.collapsible .fieldset-legend {
+  border-radius: 4px 4px 0 0;
   font-size: 1em;
 }
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
-  left: .6em;
-  top: .8em;
+  left: .8em;
+  top: .9em;
   width: 0;
   height: 0;
   border: .32em solid transparent;
@@ -712,7 +739,13 @@ fieldset .fieldset-wrapper {
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   left: auto;
-  right: .6em;
+  right: .8em;
+}
+.js fieldset.collapsible legend {
+  float: left;
+}
+.js[dir="rtl"] fieldset.collapsible legend {
+  float: right;
 }
 .fieldset-legend span.summary {
   position: absolute;
@@ -733,17 +766,20 @@ fieldset .fieldset-wrapper {
 }
 /* Collapsed state styles */
 .js fieldset.collapsed {
-  padding: 1.6em 0;
+  padding: 0;
+}
+.js fieldset.collapsed .fieldset-legend {
+  border-radius: 4px;
 }
 .js fieldset.collapsed .fieldset-legend a:before {
-  left: .8em;
+  left: 1em;
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
   left: auto;
-  right: .8em;
+  right: 1em;
   border-left-color: transparent;
   border-right-color: black;
 }
@@ -785,7 +821,16 @@ form.views-exposed-form {
 #autocomplete li {
   padding: 0 5px;
 }
-
+.autocomplete-description {
+  color: #666;
+  font-size: 80%;
+}
+#autocomplete li.selected .autocomplete-description {
+  color: #ddd;
+}
+[dir="rtl"] .autocomplete-suggestion {
+  float: right;
+}
 
 /**
  * Form elements.
@@ -809,9 +854,6 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0 0 10px;
 }
-fieldset label {
-  font-weight: normal;
-}
 .field-label label {
   margin: 0;
   padding: 0;
@@ -828,6 +870,8 @@ fieldset label {
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -845,22 +889,28 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  padding: 10px 2px;
+  padding: 0 2px;
   background-color: #f8f8f8;
   border: 1px #d1d1d1;
   border-style: none solid solid solid;
   border-radius: 0;
 }
-.js fieldset.filter-wrapper.collapsed {
-  padding: 1.2em 0;
-}
 .js fieldset.filter-wrapper.collapsible .fieldset-legend {
   font-size: .8333em;
   text-transform: none;
 }
+
+.filter-wrapper .fieldset-legend {
+  background: none;
+  border: none;
+}
+.filter-wrapper legend {
+  color: transparent;
+}
+
 .filter-wrapper .fieldset-wrapper {
   padding: .6em 2.3em;
-  margin-top: 30px;
+  border: none;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
@@ -1020,6 +1070,8 @@ input.form-disabled:focus {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -1081,6 +1133,8 @@ select.filter-list {
 }
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -1207,6 +1261,10 @@ div.filter-options select {
 }
 
 /* Add special icons for admin/dashboard */
+
+.block-dashboard-welcome .block-title {
+  background-image: url('../images/backdrop-logo-mark--64.png');
+}
 .block-dashboard-create .block-title {
   background-image: url('../images/pencil-square-o--black--64.png');
 }
@@ -1218,6 +1276,9 @@ div.filter-options select {
 }
 .block-dashboard-updates .block-title {
   background-image: url('../images/info-circle--black--64.png');
+}
+.block-dashboard-news .block-title {
+  background-image: url('../images/bell--black--64.png');
 }
 
 /* admin/appearance */
@@ -1261,9 +1322,19 @@ div.filter-options select {
 }
 
 /**
+ * Flexible layout template configuration.
+ */
+#layout-flexible-content {
+  padding: 20px 0;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  border: 2px solid #EAEAEA;
+}
+
+/**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1274,6 +1345,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
   position: relative;
@@ -1290,10 +1362,15 @@ div.filter-options select {
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
+.form-item-region-style .form-type-radio label {
+  min-height: inherit;
+}
 .layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.form-item-region-style .form-type-radio:active label,
+.form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
 .layout-settings-page .layout-options .form-type-checkbox input:checked + label,
 .layout-settings-form .layout-options .form-type-radio:active label,
@@ -1301,6 +1378,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.form-item-region-style .form-type-radio input:focus + label,
+.form-item-region-style .form-type-radio input:hover + label,
+.form-item-region-style .form-type-radio:hover input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox input:focus + label,
 .layout-settings-page .layout-options .form-type-checkbox input:hover + label,
 .layout-settings-page .layout-options .form-type-checkbox:hover input:checked + label,
@@ -1581,6 +1661,9 @@ div.add-or-remove-shortcuts {
 }
 #field-display-overview .field-formatter-settings-edit-form .form-item {
   margin: 10px 0;
+}
+#field-display-overview .field-formatter-settings-edit-form .form-item .form-item {
+  margin: 0;
 }
 #field-display-overview .field-formatter-settings-edit-form .form-submit {
   margin-bottom: 0;

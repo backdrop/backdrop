@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.14.x-dev');
+define('BACKDROP_VERSION', '1.18.x-dev');
 
 /**
  * Core API compatibility.
@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
@@ -761,8 +762,11 @@ function backdrop_environment_initialize() {
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
- * @return
- *  TRUE if only containing valid characters, or FALSE otherwise.
+ * @param string $host
+ *   The host name to validate.
+ *
+ * @return bool
+ *   TRUE only if containing valid characters; FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
   // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
@@ -818,7 +822,7 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
   $settings = array();
 
@@ -2010,7 +2014,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -2964,7 +2968,7 @@ function _backdrop_exception_handler($exception) {
     // make any FATAL errors return 500 responses instead of 200, and also
     // account for cases where an exception was thrown before the 500 status
     // could be set (e.g. while loading a maintenance theme from cache).
-    drupal_add_http_header('Status', '500 Internal Server Error');
+    backdrop_add_http_header('Status', '500 Internal Server Error');
 
     // Another uncaught exception was thrown while handling the first one. If we
     // are displaying errors, then do so with no possibility of a further
@@ -3002,6 +3006,11 @@ function _backdrop_bootstrap_configuration() {
   if (empty($GLOBALS['databases']) && !backdrop_installation_attempted()) {
     include_once BACKDROP_ROOT . '/core/includes/install.inc';
     install_goto('core/install.php');
+  }
+
+  // Untrusted host names, throw an exception for the end-user.
+  if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
+    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
   // Check that the config directory is not empty.
@@ -3249,7 +3258,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3280,7 +3292,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
@@ -4369,4 +4381,39 @@ function backdrop_clear_opcode_cache($filepath) {
     // @see http://php.net/apc-delete-file
     @apc_delete_file($filepath);
   }
+}
+
+/**
+ * Checks if a host matches the trusted host patterns in settings.php.
+ *
+ * @param string $host
+ *   The host to check against the patterns specified in settings.php.
+ *
+ * @return
+ *   TRUE if the host can be trusted; FALSE otherwise.
+ *
+ * @since Backdrop 1.14.0
+ */
+function backdrop_check_trusted_hosts($host) {
+  $trusted_hosts = &backdrop_static(__FUNCTION__, array());
+  $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+
+  if (PHP_SAPI !== 'cli' && !empty($trusted_host_patterns)) {
+
+    if (in_array($host, $trusted_hosts)) {
+      return $host;
+    }
+
+    foreach ($trusted_host_patterns as $pattern) {
+      $pattern = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
+      if (preg_match($pattern, $host)) {
+        $trusted_hosts[] = $host;
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  return TRUE;
 }

@@ -43,10 +43,6 @@ function admin_bar_permission() {
       'title' => t('Access administration bar'),
       'description' => t('Display the administration bar at the top of each page.'),
     ),
-    'flush caches' => array(
-      'title' => t('Flush caches'),
-      'description' => t('Access links to flush caches in the administration bar.'),
-    ),
   );
 }
 
@@ -484,6 +480,11 @@ function admin_bar_admin_bar_output_build(&$content) {
         $content['menu']['menu'] += $links;
       }
     }
+  }
+  // Move file/add under the "Content" item.
+  if (isset($content['menu']['menu']['file/add']) && isset($content['menu']['menu']['admin/content'])) {
+    $content['menu']['menu']['admin/content']['file/add'] = $content['menu']['menu']['file/add'];
+    unset($content['menu']['menu']['file/add']);
   }
 }
 

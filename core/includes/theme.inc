@@ -632,9 +632,9 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check for the override flag and prevent the cached variable
       // preprocessors from being used. This allows themes or theme engines to
       // remove variable preprocessors set earlier in the registry build.
-      if (!empty($info['override ' . 'preprocess functions'])) {
+      if (!empty($info['override preprocess functions'])) {
         // Flag not needed inside the registry.
-        unset($result[$hook]['override ' . 'preprocess functions']);
+        unset($result[$hook]['override preprocess functions']);
       }
       elseif (isset($cache[$hook]['preprocess functions']) && is_array($cache[$hook]['preprocess functions'])) {
         $info['preprocess functions'] = array_merge($cache[$hook]['preprocess functions'], $info['preprocess functions']);
@@ -1476,8 +1476,8 @@ function theme_get_setting($setting_name, $theme = NULL) {
  * Detect if a theme has any theme settings.
  *
  * This utility function checks a theme's .info file for any settings. If the
- * theme has a base theme, it loops through the parent themes .info files as
- * well.
+ * theme has a base theme, it loops through the .info files of the parent themes
+ * as well.
  *
  * @param string $theme
  *   The theme name to be checked for settings.
@@ -1493,6 +1493,33 @@ function theme_has_settings($theme) {
   }
   if (isset($theme_info->info['base theme'])) {
     return theme_has_settings($theme_info->info['base theme']);
+  }
+  return FALSE;
+}
+
+/**
+ * Detect if a theme has support for the Color module.
+ *
+ * This utility function checks a theme's .info file for whether support for the
+ * Color module has been enabled. If the theme has a base theme, it loops
+ * through the .info files of the parent themes as well.
+ *
+ * @param string $theme
+ *   The theme name to be checked for Color module support.
+ *
+ * @return bool
+ *   TRUE if the theme supports Color module, FALSE otherwise.
+ *
+ * @since 1.16.0
+ */
+function theme_has_color_support($theme) {
+  $themes = list_themes();
+  $theme_info = $themes[$theme];
+  if ($theme_info->info['settings']['color'] && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
+    return TRUE;
+  }
+  if (isset($theme_info->info['base theme'])) {
+    return theme_has_color_support($theme_info->info['base theme']);
   }
   return FALSE;
 }

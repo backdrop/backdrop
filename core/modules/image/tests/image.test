@@ -422,7 +422,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'label' => $style_label,
     );
     $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
+    backdrop_static_reset('image_styles');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
   }
@@ -471,7 +472,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'label' => $style_label,
     );
     $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
 
     // Add effect form.
 
@@ -567,7 +568,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Test effect deletion form.
     $effect = array_pop($style['effects']);
     $this->backdropPost($style_path . '/effects/' . $effect['ieid'] . '/delete', array(), t('Delete'));
-    $this->assertRaw(t('The image effect %name has been deleted.', array('%name' => $effect['label'])), 'Image effect deleted.');
+    $this->assertRaw(t('The image effect %label has been deleted.', array('%label' => $effect['label'])), 'Image effect deleted.');
 
     // Style deletion form.
 
@@ -690,8 +691,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'replacement' => 'thumbnail',
     );
     $this->backdropPost('admin/config/media/image-styles/delete/' . $new_style_name, $edit, t('Delete'));
-    $message = t('Style %name was deleted.', array('%name' => $new_style_label));
-    $this->assertRaw($message, format_string('Style %name was deleted.', array('%name' => $new_style_label)));
+    $message = t('Style %label was deleted.', array('%label' => $new_style_label));
+    $this->assertRaw($message, format_string('Style %label was deleted.', array('%label' => $new_style_label)));
 
     $this->backdropGet('node/' . $nid);
     $this->assertRaw(check_plain(image_style_url('thumbnail', $node->{$field_name}[LANGUAGE_NONE][0]['uri'])), format_string('Image displayed using style replacement style.'));
@@ -771,8 +772,25 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
-    // Test the image style 'thumbnail' formatter.
+    // Test the lazy loading attribute.
     $instance['display']['default']['settings']['image_link'] = '';
+    $instance['display']['default']['settings']['image_load'] = 'lazy';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'lazy';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded lazily displaying correctly on full node view.'));
+
+    // Test the lazy loading attribute.
+    $instance['display']['default']['settings']['image_load'] = 'eager';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'eager';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded eagerly displaying correctly on full node view.'));
+
+    // Test the image style 'thumbnail' formatter.
+    $instance['display']['default']['settings']['image_load'] = 'auto';
     $instance['display']['default']['settings']['image_style'] = 'thumbnail';
     field_update_instance($instance);
     // Ensure the derivative image is generated so we do not have to deal with
@@ -781,6 +799,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $image_info['uri'] = image_style_path('thumbnail', $image_uri);
     $image_info['width'] = 100;
     $image_info['height'] = 50;
+    unset($image_info['attributes']['loading']);
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, 'Image style thumbnail formatter displaying correctly on full node view.');
@@ -872,6 +891,32 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       '%max' => $schema['fields'][$field_name .'_title']['length'],
       '%length' => $test_size,
     )));
+
+    // Check that image minimum size is not larger than maximum size.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => 100,
+      'instance[settings][min_dimensions][x]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with unacceptable image heights instead.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 100,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with acceptable values.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 300,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertRaw(t('Saved %field_name configuration.', array('%field_name' => $field_name)));
   }
 
   /**
@@ -1031,7 +1076,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->assertTrue($g < 5, 'Green color component is close to 0.');
     $this->assertTrue($b < 5, 'Blue color component is close to 0.');
   }
-  
+
   /**
    * Test single width resolution setting.
    */
@@ -1040,8 +1085,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => $max_dimensions . 'x' . '',
-      'min_dimensions' => $min_dimensions . 'x' . '',
+      'max_dimensions' => $max_dimensions . 'x',
+      'min_dimensions' => $min_dimensions . 'x',
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -1075,8 +1120,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => '' . 'x' . $max_dimensions,
-      'min_dimensions' => '' . 'x' . $min_dimensions,
+      'max_dimensions' => 'x' . $max_dimensions,
+      'min_dimensions' => 'x' . $min_dimensions,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -1693,6 +1738,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
     }
 
     // Load the saved image style.
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // Create an image for the 'public' wrapper.
@@ -1855,8 +1901,10 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
 
     // Close the handles
     for ($n = 0; $n < $count; $n++) {
-      curl_close(${'handle' . $n});
-      curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+      if (gettype(${'handle' . $n}) === 'resource') {
+        curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+        curl_close(${'handle' . $n});
+      }
     }
     curl_multi_close($multi_handle);
   }

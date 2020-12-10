@@ -113,9 +113,8 @@ function hook_filter_info() {
  *   implementations.
  */
 function hook_filter_info_alter(&$info) {
-  // Replace the PHP evaluator process callback with an improved
-  // PHP evaluator provided by a module.
-  $info['php_code']['process callback'] = 'my_module_php_evaluator';
+  // Replace the image caption process callback with an improved custom version.
+  $info['filter_image_caption']['process callback'] = 'my_module_custom_caption';
 
   // Alter the default settings of the URL filter provided by core.
   $info['filter_url']['default settings'] = array(

@@ -490,6 +490,16 @@ function list_field_formatter_info() {
       'label' => t('Key'),
       'field types' => array('list_integer', 'list_float', 'list_text', 'list_boolean'),
     ),
+    'boolean_yes_no' => array(
+      'label' => t('Yes/No'),
+      'field types' => array('list_boolean'),
+      'settings' => array(
+        'format' => 'yes-no',
+        'custom_on' => '',
+        'custom_off' => '',
+        'reverse' => 0,
+      ),
+    )
   );
 }
 
@@ -498,6 +508,7 @@ function list_field_formatter_info() {
  */
 function list_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   switch ($display['type']) {
     case 'list_default':
@@ -519,7 +530,140 @@ function list_field_formatter_view($entity_type, $entity, $field, $instance, $la
         $element[$delta] = array('#markup' => field_filter_xss($item['value']));
       }
       break;
+    case 'boolean_yes_no':
+      foreach ($items as $delta => $item) {
+        $output = list_boolean_display_value_with_format($item['value'], $settings['format'], $settings);
+        $element[$delta] = array('#markup' => field_filter_xss($output));
+      }
+      break;
   }
 
   return $element;
+}
+
+/**
+ * List of boolean display formats.
+ */
+function list_boolean_display_formats(array $options = array()) {
+  $formats = array(
+    'yes-no' => array(t('Yes'), t('No')),
+    'true-false' => array(t('True'), t('False')),
+    'on-off' => array(t('On'), t('Off')),
+    'enabled-disabled' => array(t('Enabled'), t('Disabled')),
+    'boolean' => array(1, 0),
+    'unicode-yes-no' => array('✔', '✖'),
+    'custom' => array(t('Custom')),
+  );
+  if (isset($options['custom_on']) && isset($options['custom_off'])) {
+    $formats['custom'] = array($options['custom_on'], $options['custom_off']);
+  }
+  return $formats;
+}
+
+/**
+ * The display format options for boolean fields.
+ */
+function list_boolean_display_format_options(array $options = array()) {
+  $format_options = array();
+  foreach (list_boolean_display_formats($options) as $key => $format) {
+    $format_options[$key] = implode('/', $format);
+  }
+  return $format_options;
+}
+
+/**
+ * Prepare the boolean display.
+ */
+function list_boolean_display_value_with_format($value, $format, array $options = array()) {
+  $formats = list_boolean_display_formats($options);
+  if (!isset($formats[$format])) {
+    // If format is invalid, default to the first available format.
+    reset($formats);
+    $format = key($formats);
+  }
+  if (!empty($options['reverse'])) {
+    $value = !(bool) $value;
+  }
+  // The first format value is the 'On' value, the second is the 'Off' format.
+  return !empty($value) ? $formats[$format][0] : $formats[$format][1];
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function list_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  switch ($display['type']) {
+    case 'boolean_yes_no':
+      $element['format'] = array(
+        '#type' => 'select',
+        '#title' => t('Output format'),
+        '#options' => list_boolean_display_format_options(),
+        '#default_value' => $settings['format'],
+      );
+
+      $element['custom_on'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom output for On'),
+        '#default_value' => $settings['custom_on'],
+        '#states' => array(
+          'visible' => array(
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
+          ),
+        ),
+      );
+
+      $element['custom_off'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom output for Off'),
+        '#default_value' => $settings['custom_off'],
+        '#states' => array(
+          'visible' => array(
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
+          ),
+        ),
+      );
+
+      $element['reverse'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Reverse'),
+        '#description' => t('If checked, true will be displayed as false.'),
+        '#default_value' => $settings['reverse'],
+      );
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function list_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = array();
+
+  switch ($display['type']) {
+    case 'boolean_yes_no':
+      $formats = list_boolean_display_format_options($settings);
+      $summary[] = t('Output format: %format', array('%format' => $formats[$settings['format']]));
+      $summary[] = t('Reversed: @reversed', array('@reversed' => list_boolean_display_value_with_format($settings['reverse'], 'yes-no', array('reverse' => FALSE))));
+      break;
+  }
+
+  return implode('<br/>', $summary);
 }
