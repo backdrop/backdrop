@@ -310,7 +310,10 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   }
 
   $vocabulary = $form_state['vocabulary'];
-  entity_form_submit_build_entity('taxonomy_vocabulary', $vocabulary, $form, $form_state);
+  form_state_values_clean($form_state);
+  foreach ($form_state['values'] as $key => $value) {
+    $vocabulary->$key = $value;
+  }
 
   // Prevent leading and trailing spaces in vocabulary names.
   $vocabulary->name = trim($vocabulary->name);
@@ -841,7 +844,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   }
   foreach ($tree as $item) {
     if (!in_array($item->tid, $exclude)) {
-      $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
+      $options[$item->tid] = str_repeat('· ', $item->depth) . $item->name;
     }
   }
   $form['relations']['parent'] = array(

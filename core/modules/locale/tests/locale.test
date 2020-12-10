@@ -1436,7 +1436,7 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
       'pt' => (object) array(
         'langcode' => 'pt',
       ),
-      // Language codes with more then one dash are actually valid.
+      // Language codes with more than one dash are actually valid.
       // eh-oh-laa-laa is the official language code of the Teletubbies.
       'eh-oh-laa-laa' => (object) array(
         'langcode' => 'eh-oh-laa-laa',
@@ -1633,10 +1633,11 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Create a user with the admin/people/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
+    $password = $this->randomName(10);
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass' => $username,
+      'pass' => $password,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
@@ -2547,7 +2548,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'it',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
+    $node = $this->backdropGetNodeByTitle($edit[$title_key], TRUE);
     $this->assertTrue($node, 'Node found in database.');
 
     $assert = isset($node->body['it']) && !isset($node->body['en']) && $node->body['it'][0]['value'] == $body_value;

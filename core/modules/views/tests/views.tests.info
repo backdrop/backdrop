@@ -196,6 +196,12 @@ description = Test the core views_handler_sort_date handler.
 group = Views Handlers
 file = handlers/views_handler_sort_date.test
 
+[ViewsHandlerManyToOneTest]
+name = Many To One
+description = Tests the many_to_one_helper handler.
+group = Views Handlers
+file = handlers/views_handler_manytoone.test
+
 [ViewsHandlerSortRandomTest]
 name = Sort: random
 description = Test the core views_handler_sort_random handler.
@@ -321,3 +327,9 @@ name = Test the view class
 description = Tests some  functionality of the view class.
 group = Views
 file = views_view.test
+
+[ViewsTranslatableTest]
+name = 'Views Translatable Test'
+description = 'Tests the pluggable translations'
+group = Views
+file = views_translatable.test

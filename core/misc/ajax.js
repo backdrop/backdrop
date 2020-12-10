@@ -21,7 +21,7 @@ Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
  */
 Backdrop.behaviors.AJAX = {
   attach: function (context, settings) {
-    
+
      function loadAjaxBehaviour(base) {
       if (!$('#' + base + '.ajax-processed').length) {
         var element_settings = settings.ajax[base];
@@ -195,7 +195,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
-    url: ajax.url,
+    url: Backdrop.sanitizeAjaxUrl(ajax.url),
     data: ajax.submit,
     beforeSerialize: function (element_settings, options) {
       return ajax.beforeSerialize(element_settings, options);
@@ -247,6 +247,7 @@ Backdrop.ajax = function (base, element, element_settings) {
       }
     },
     dataType: 'json',
+    jsonp: false,
     accepts: {
       json: element_settings.accepts || 'application/vnd.backdrop-ajax'
     },

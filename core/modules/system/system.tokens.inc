@@ -196,7 +196,7 @@ function system_token_info() {
   }
   $date['custom'] = array(
     'name' => t('Custom format'),
-    'description' => t("A date in a custom format. See !php-date for details.", array('!php-date' => l(t('the PHP documentation'), 'http://php.net/manual/en/function.date.php'))),
+    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     'dynamic' => TRUE,
   );
   $date['since'] = array(
@@ -441,7 +441,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     };
     $keys = array();
     foreach ($array as $key => $value) {
-      if ($key[0] !== '#') {
+      if (substr($key, 0, 1) !== '#') {
         $keys[] = $key;
       }
     }
@@ -477,7 +477,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [array:value:*] dynamic tokens.
     if ($value_tokens = token_find_with_prefix($tokens, 'value')) {
       foreach ($value_tokens as $key => $original) {
-        if ($key[0] !== '#' && isset($array[$key])) {
+        if (substr($key, 0, 1) !== '#' && isset($array[$key])) {
           $replacements[$original] = token_render_array_value($array[$key], $options);
         }
       }

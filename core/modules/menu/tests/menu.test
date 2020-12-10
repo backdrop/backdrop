@@ -681,6 +681,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       "title" => $node_title,
       "body[$language][0][value]" => $this->randomString(),
+      "menu[enabled]" => 0,
     );
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);

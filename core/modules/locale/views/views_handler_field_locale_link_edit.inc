@@ -52,7 +52,7 @@ class views_handler_field_locale_link_edit extends views_handler_field {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = 'admin/build/translate/edit/' . $data;
+    $this->options['alter']['path'] = 'admin/config/regional/translate/edit/' . $data;
     $this->options['alter']['query'] = backdrop_get_destination();
 
     return $text;

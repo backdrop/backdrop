@@ -96,7 +96,7 @@ class views_handler_sort extends views_handler {
     // so it can replace the button.
     $form['expose_button']['checkbox'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
       '#title' => t('Expose this sort to visitors, to allow them to change it'),

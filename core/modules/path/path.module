@@ -397,6 +397,11 @@ function path_pattern_settings_form($settings) {
     '#title' => t('Default URL alias pattern'),
     '#default_value' => $settings['default'],
     '#description' => $settings['description'],
+    '#maxlength' => 1280,
+    '#element_validate' => array('token_element_validate'),
+    '#after_build' => array('token_element_validate'),
+    '#token_types' => $settings['token_types'],
+    '#min_tokens' => 1,
   );
   $form['path']['path_tokens'] = array(
     '#theme' => 'token_tree_link',
@@ -445,7 +450,7 @@ function path_entity_insert(Entity $entity) {
       $path = $entity->path;
       $path['source'] = $uri['path'];
     }
-  
+
     // If no pattern exists for this entity type, default to a manual alias.
     $pattern = path_get_pattern_by_entity_type($entity->entityType(), $entity->bundle(), $langcode);
     $path += array(
@@ -455,10 +460,10 @@ function path_entity_insert(Entity $entity) {
       'langcode' => $langcode,
       'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
     );
-  
+
     // Trim whitespace and slashes from alias start and end.
     $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
-  
+
     // Save an automatic alias if specified.
     if ($path['auto']) {
       module_load_include('inc', 'path');
@@ -468,7 +473,7 @@ function path_entity_insert(Entity $entity) {
     elseif ($path['alias']) {
       path_save($path);
     }
-  
+
     // Save the updated path into the entity.
     if ($path) {
       $entity->path = $path;
@@ -688,18 +693,20 @@ function path_load_multiple_by_entities(array $entities) {
   // Each entity may have a different language, so group them by langcode.
   foreach ($entities as $entity) {
     $uri = $entity->uri();
-    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
-    $sources[$langcode][] = $uri['path'];
-    $map[$langcode][$uri['path']] = $entity->id();
+    if (!empty($uri)) {
+      $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+      $sources[$langcode][] = $uri['path'];
+      $map[$langcode][$uri['path']] = $entity->id();
 
-    // Provide a default path in the event no path is found.
-    $entity->path = array(
-      'pid' => NULL,
-      'source' => $uri['path'],
-      'alias' => NULL,
-      'langcode' => $langcode,
-      'auto' => FALSE,
-    );
+      // Provide a default path in the event no path is found.
+      $entity->path = array(
+        'pid' => NULL,
+        'source' => $uri['path'],
+        'alias' => NULL,
+        'langcode' => $langcode,
+        'auto' => FALSE,
+      );
+    }
   }
 
   // Load each set of paths by langcode, and update each entity's path property.
@@ -757,7 +764,7 @@ function path_delete_all_by_source($source) {
  */
 function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
   $uri = $entity->uri();
-  
+
   if (!empty($uri)) {
     path_delete_all_by_source($uri['path']);
     if (isset($default_uri) && $uri['path'] != $default_uri) {
@@ -818,6 +825,7 @@ function path_form_element(Entity $entity) {
   $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
   if ($pattern) {
     if (!isset($entity->path['auto'])) {
+      $entity->path['auto'] = FALSE;
       if (!$entity->isNew()) {
         module_load_include('inc', 'path');
         $uri = $entity->uri();
