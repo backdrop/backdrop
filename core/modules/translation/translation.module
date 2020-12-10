@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Manages content translations.
@@ -437,6 +436,24 @@ function translation_node_predelete(Node $node) {
   // Only act if we are dealing with a content type supporting translations.
   if (translation_supported_type($node->type)) {
     translation_remove_from_set($node);
+  }
+}
+
+/**
+ * Implements hook_url_inbound_alter().
+ */
+function translation_url_inbound_alter(&$path, $original_path, $path_language) {
+  if (backdrop_is_front_page()) {
+    global $language;
+    if ($language->langcode != $path_language) {
+      if (arg(0) == 'node' && is_numeric(arg(1))) {
+        $node = node_load(arg(1));
+        $translations = translation_node_get_translations($node->tnid);
+        if (!empty($translations[$language->langcode])) {
+          $path = 'node/' . $translations[$language->langcode]->nid;
+        }
+      }
+    }
   }
 }
 
