@@ -1,0 +1,246 @@
+<?php
+
+/**
+ * @file
+ * Class that holds information relating to the user from node relationship.
+ */
+class LayoutRelationshipEntityFromField extends LayoutRelationship {
+
+  /**
+   * Constructor for LayoutRelationship objects.
+   */
+  function __construct($plugin_name, $config) {
+    parent::__construct($plugin_name, $config);
+
+      if (isset($config['child'])) {
+        $this->child = $this->getChild($config['child']);
+      }
+  }
+
+  /**
+   * Get the context from this relationship.
+   */
+  function getContext($context) {
+    // Perform access check on current logged in user.
+    global $user;
+    // Clone user object so account can be passed by value to access callback.
+    $account = clone $user;
+
+    $delta = !empty($conf['delta']) ? intval($conf['delta']) : 0;
+    $plugin = $conf['name'];
+    list($plugin, $plugin_name) = explode(':', $plugin);
+    list($field_name, $from_entity, $to_entity) = explode('-', $plugin_name);
+    // If unset it wants a generic, unfilled context, which is just NULL.
+    $entity_info = entity_get_info($from_entity);
+    if (empty($context->data) || !isset($context->data->{$entity_info['entity keys']['id']})) {
+      return ctools_context_create_empty('entity:' . $to_entity, NULL);
+    }
+
+    if (isset($context->data->{$entity_info['entity keys']['id']})) {
+      // Load the entity.
+      $id = $context->data->{$entity_info['entity keys']['id']};
+      $entity = entity_load($from_entity, array($id));
+      $entity = $entity[$id];
+      if ($items = field_get_items($from_entity, $entity, $field_name)) {
+        if (isset($items[$delta])) {
+          ctools_include('fields');
+          $to_entity_info = entity_get_info($to_entity);
+
+          $plugin_info = ctools_get_relationship($conf['name']);
+          $to_entity_id = $items[$delta][$plugin_info['source key']];
+          $loaded_to_entity = entity_load($to_entity, array($to_entity_id));
+          $loaded_to_entity = array_shift($loaded_to_entity);
+
+          // Pass current user account and entity type to access callback.
+          if (isset($to_entity_info['access callback']) && function_exists($to_entity_info['access callback']) && !call_user_func($to_entity_info['access callback'], 'view', $loaded_to_entity, $account, $to_entity)) {
+            return ctools_context_create_empty('entity:' . $to_entity, NULL);
+          }
+          else {
+            // Send it to ctools.
+            return ctools_context_create('entity:' . $to_entity, $to_entity_id);
+          }
+        }
+        else {
+          // In case that delta was empty.
+          return ctools_context_create_empty('entity:' . $to_entity, NULL);
+        }
+      }
+    }
+  }
+
+  /**
+   * Return a summary for this relationship.
+   */
+  function getAdminSummary() {
+    return t('Entity from field');
+  }
+
+  function getChild($child) {
+    // Todo: make this generic.
+    // $plugins = $this->getChildren($plugin, $parent);
+    $plugins = $this->getChildren('entity_from_field');
+    return $plugins['entity_from_field:' . $child];
+  }
+
+  /**
+   * Return child relationship plugins.
+   */
+  function getChildren($parent = 'entity_from_field') {
+    
+    $parent_plugin = $this;
+    // $cid = $parent_plugin['name'] . ':' . $parent;
+    $cid = $parent . ':' . $parent;
+    // $cache = &backdrop_static(__FUNCTION__);
+    // if (!empty($cache[$cid])) {
+      // return $cache[$cid];
+    // }
+
+    $entities = entity_get_info();
+    $plugins = array();
+    $context_types = array();
+
+    // Get the schema information for every field.
+    $fields_info = field_info_fields();
+    foreach ($fields_info as $field_name => $field) {
+      foreach ($field['bundles'] as $from_entity => $bundles) {
+        foreach ($bundles as $bundle) {
+          // There might be fields attached to bundles that are disabled (e.g. a
+          // module that declared a node's content type, is now disabled), but the
+          // field instance is still shown.
+          if (!empty($entities[$from_entity]['bundles'][$bundle])) {
+            $foreign_keys = $this->entity_from_field_foreign_keys($field_name);
+
+            foreach ($foreign_keys as $key => $info) {
+              if (isset($info['table'])) {
+                foreach ($entities as $to_entity => $to_entity_info) {
+                  $from_entity_info = $entities[$from_entity];
+                  // If somehow the bundle doesn't exist on the to-entity,
+                  // skip.
+                  if (!isset($from_entity_info['bundles'][$bundle])) {
+                    continue;
+                  }
+
+                  if (isset($to_entity_info['base table']) && $to_entity_info['base table'] == $info['table'] && array_keys($info['columns'], $to_entity_info['entity keys']['id'])) {
+                    $name = $field_name . '-' . $from_entity . '-' . $to_entity;
+                    $plugin_id = $parent . ':' . $name;
+
+                    // Record the bundle for later.
+                    $context_types[$plugin_id]['types'][$bundle] = $from_entity_info['bundles'][$bundle]['label'];
+
+                    // We check for every bundle; this plugin may already have
+                    // been created, so don't recreate it.
+                    if (!isset($plugins[$plugin_id])) {
+                      // Todo: added this casting.
+                      $plugin = (array) $parent_plugin;
+                      $replacements = array(
+                        '@to_entity' => $to_entity_info['label'],
+                        '@from_entity' => $from_entity_info['label'],
+                        '@field_name' => $field_name,
+                        '@field_label' => $this->entity_from_field_label($field_name),
+                      );
+                      $plugin['title'] = t('@to_entity from @from_entity (on @from_entity: @field_label [@field_name])', $replacements);
+                      $plugin['keyword'] = $to_entity;
+                      $plugin['context name'] = $name;
+                      $plugin['name'] = $plugin_id;
+                      $plugin['description'] = t('Creates a @to_entity context from @from_entity using the @field_name field on @from_entity.', $replacements);
+                      $plugin['context'] = $from_entity;
+                      $plugin['context_label'] = $from_entity_info['label'];
+                      $plugin['from entity'] = $from_entity;
+                      $plugin['to entity'] = $to_entity;
+                      $plugin['field name'] = $field_name;
+                      $plugin['join key'] = $key;
+                      $plugin['source key'] = current(array_keys($info['columns']));
+                      $plugin['parent'] = $parent;
+
+                      $plugins[$plugin_id] = $plugin;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    $cache[$cid] = $plugins;
+
+    return $plugins;
+    
+  }
+
+  function entity_from_field_foreign_keys($field_name) {
+    $foreign_keys = &backdrop_static(__FUNCTION__, array());
+    if (!isset($foreign_keys[$field_name])) {
+      $foreign_keys[$field_name] = array();
+      $field = field_info_field($field_name);
+
+      if (!empty($field['foreign keys'])) {
+        $foreign_keys[$field_name] = $field['foreign keys'];
+      }
+      else {
+        // try to fetch foreign keys from schema, as not everything
+        // stores foreign keys properly in the field info.
+        $module = $field['module'];
+
+        module_load_install($module);
+        $schema = module_invoke($module, 'field_schema', $field);
+        if (!empty($schema['foreign keys'])) {
+          $foreign_keys[$field_name] = $schema['foreign keys'];
+        }
+      }
+    }
+
+    return $foreign_keys[$field_name];
+  }
+
+  function entity_from_field_label($field_name) {
+    $label_counter = array();
+    // Count the amount of instances per label per field.
+    $instances = field_info_instances();
+    foreach ($instances as $entity_type) {
+      foreach ($entity_type as $bundle) {
+        if (isset($bundle[$field_name])) {
+          $label_counter[$bundle[$field_name]['label']] = isset($label_counter[$bundle[$field_name]['label']]) ? ++$label_counter[$bundle[$field_name]['label']] : 1;
+        }
+      }
+    }
+    if (empty($label_counter)) {
+      return $field_name;
+    }
+    // Sort the field lables by it most used label and return the most used one.
+    arsort($label_counter);
+    $label_counter = array_keys($label_counter);
+    return $label_counter[0];
+  }
+
+  function form(&$form, &$form_state) {
+    parent::form($form, $form_state);
+
+    $child_relationship = $this->child;
+    $field = field_info_field($child_relationship['field name']);
+    //$conf = $form_state['conf'];
+
+    if ($field && $field['cardinality'] != 1) {
+      if ($field['cardinality'] == -1) {
+        $form['delta'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Delta'),
+          '#description' => t('The relationship can only create one context, but multiple items can be related. Please select which one. Since this can have unlimited items, type in the number you want. The first one will be 0.'),
+          // '#default_value' => !empty($conf['delta']) ? $conf['delta'] : 0,
+        );
+      }
+      else {
+        $form['delta'] = array(
+          '#type' => 'select',
+          '#title' => t('Delta'),
+          '#description' => t('The relationship can only create one context, but multiple items can be related. Please select which one.'),
+          '#options' => range(1, $field['cardinality']),
+          //'#default_value' => !empty($conf['delta']) ? $conf['delta'] : 0,
+        );
+      }
+    }
+
+    return $form;
+  }
+}

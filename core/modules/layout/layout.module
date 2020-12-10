@@ -866,6 +866,7 @@ function layout_autoload_info() {
 
     // Relationships.
     'LayoutRelationshipUserFromNode' => 'plugins/relationships/user_from_node.inc',
+    'LayoutRelationshipEntityFromField' => 'plugins/relationships/entity_from_field.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
     'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
@@ -1516,14 +1517,23 @@ function layout_get_context_info($plugin_name) {
  */
 function layout_relationships_get_relevant_info($contexts) {
   $relevant = array();
+  $relationships = _layout_get_all_info('layout_relationship');
 
   foreach ($contexts as $context) {
-    $relationships = _layout_get_all_info('layout_relationship');
     // Go through each relationship
     foreach ($relationships as $rid => $relationship) {
-      // For each relationship, see if there is a context that satisfies it.
-      if ($relationship['context'] == $context->plugin) {
-        $relevant[$rid] = $relationship;
+      $handler = layout_create_handler('layout_relationship', $rid);
+      if ($children = $handler->getChildren($rid)) {
+        foreach ($children as $child_rid => $child) {
+          if ($child['context'] == $context->plugin) {
+            $relevant[$child_rid] = $child;
+          }
+        }
+      }
+      else {
+        if ($relationship['context'] == $context->plugin) {
+          $relevant[$rid] = $relationship;
+        }
       }
     }
   }
@@ -1580,6 +1590,10 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
     foreach ($contexts as $context) {
       if ($context->plugin == $rdata->context) {
         $key = 'relationship_' . $rname;
+        $plugin_array = explode(':', $rdata->settings['relationship']);
+        if (!empty($plugin_array[1])) {
+          $rdata->childDelta = $plugin_array[1];
+        }
         $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
       }
     }
@@ -1764,8 +1778,8 @@ function layout_create_handler($plugin_type, $plugin_name, array $config = array
  *
  * @return LayoutContext
  */
-function layout_create_relationship($context_plugin_name, $config = array()) {
-  return layout_create_handler('layout_relationship', $context_plugin_name, $config);
+function layout_create_relationship($relationship_plugin_name, $config = array()) {
+  return layout_create_handler('layout_relationship', $relationship_plugin_name, $config);
 }
 
 /**

@@ -155,12 +155,13 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   $contexts = $layout->getContexts();
 
   // Get contexts from relationships
-  $relationships = layout_relationships_get_relevant_info($contexts);
-  $relevant = array();
+  $form_state['relevant_info'] = layout_relationships_get_relevant_info($contexts);
 
-  // Go through each relationship
-  foreach ($relationships as $rid => $relationship) {
-    $relevant[$rid] = $relationship['title'];
+  $relevant = array();
+  $parent_relationship = array();
+
+  foreach ($form_state['relevant_info'] as $rid => $info) {
+    $relevant[$rid] = $info['title'];
   }
 
   $is_new_context = TRUE;
@@ -317,13 +318,15 @@ function layout_context_relationship_return_form($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.relationship.admin');
   $layout = $form_state['layout'];
   
-  // If no context has yet been selected, there is no sub-form to display.
+  // If no relationship has yet been selected, there is no sub-form to display.
   if (!isset($form_state['values']['relationship']) && !isset($form_state['handler'])) {
     return array();
   }
 
   if (isset($form_state['values']['relationship'])) {
-    $handler = layout_create_handler('layout_relationship', $form_state['values']['relationship']);
+    $plugin_array = explode(':', $form_state['values']['relationship']);
+    $handler = layout_create_handler('layout_relationship', $plugin_array[0]);
+    $handler->childDelta = $plugin_array[1];
     $handler->is_new = TRUE;
   }
   else {

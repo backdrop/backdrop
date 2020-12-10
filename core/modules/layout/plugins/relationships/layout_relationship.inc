@@ -33,6 +33,14 @@ abstract class LayoutRelationship extends LayoutHandler{
    */
   var $context;
 
+
+  /**
+   * The type of context this relates to.
+   *
+   * @var mixed
+   */
+  var $childDelta;
+
   /**
    * Constructor for LayoutRelationship objects.
    */
@@ -61,17 +69,17 @@ abstract class LayoutRelationship extends LayoutHandler{
    */
   function form(&$form, &$form_state) {
     $contexts = $form_state['contexts'];
-    $relationships = layout_relationships_get_relevant_info($contexts);
-    $relationship = $relationships[$this->plugin];
 
-    $options = $this->filter_contexts($contexts, $relationship);
+    $relationship_info = $this->getChild($this->childDelta);
 
-    $form_state['relationship'] = $relationship;
+    $options = $this->filter_contexts($contexts, $relationship_info);
+
+    $form_state['relationship'] = $relationship_info;
     $form['context_parent'] = array(
       '#type' => 'select',
       '#default_value' => isset($this->settings) ? $this->settings['context_parent'] : '',
       '#options' => $options,
-      '#title' => $relationship['context_label'],
+      '#title' => $relationship_info['context_label'],
     );
   }
 
@@ -133,6 +141,20 @@ abstract class LayoutRelationship extends LayoutHandler{
    * Return a summary for this relationship.
    */
   function getAdminSummary() {}
+
+  /**
+   * Return child relationship plugins.
+   */
+  function getChildren($rid) {
+    return NULL;
+  }
+
+  /**
+   * Return child relationship plugins.
+   */
+  function getChild($cid) {
+    return layout_get_relationship_info($this->plugin);
+  }
 
 }
 
