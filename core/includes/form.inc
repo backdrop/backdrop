@@ -907,6 +907,10 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
   $unprocessed_form = $form;
   $form = form_builder($form_id, $form, $form_state);
 
+  // Count the number of values and alert when max_input_vars is exceeded.
+  $error_level = ($form_state['submitted'])? 'error' : 'warning';
+  _form_check_input_vars($form['#element_count'], $error_level);
+
   // Only process the input if we have a correct form submission.
   if ($form_state['process_input']) {
     backdrop_validate_form($form_id, $form, $form_state);
@@ -1924,6 +1928,7 @@ function form_builder($form_id, &$element, &$form_state) {
 
   // Recurse through all child elements.
   $count = 0;
+  static $count_total;
   foreach (element_children($element) as $key) {
     // Prior to checking properties of child elements, their default properties
     // need to be loaded.
@@ -1941,6 +1946,15 @@ function form_builder($form_id, &$element, &$form_state) {
     if (isset($element['#access']) && !$element['#access']) {
       $element[$key]['#access'] = FALSE;
     }
+
+    // Count the elements at this level with IDs.
+    if (!isset($count_total)) {
+      $count_total = 0;
+    }
+    elseif (isset($element['#id'])) {
+      $count_total++;
+    }
+
 
     // Make child elements inherit their parent's #disabled and #allow_focus
     // values unless they specify their own.
@@ -2008,6 +2022,9 @@ function form_builder($form_id, &$element, &$form_state) {
         ),
       ),
     );
+
+    // Add a count of all child elements to the form itself.
+    $element['#element_count'] = $count_total;
 
     // If a form contains a single textfield, and the ENTER key is pressed
     // within it, Internet Explorer submits the form with no POST data
@@ -4886,6 +4903,63 @@ function _form_set_class(&$element, $class = array()) {
   }
   if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
     $element['#attributes']['class'][] = 'error';
+  }
+}
+
+/**
+ * Checks the number of input form elements to ensure that the PHP
+ * max_input_vars limit is not exceeded.
+ *
+ * @param array $count
+ *   The number of elements in the form.
+ * @param string $error_level
+ *   The error level for the message displayed on screen if the input vars value
+ *   has been exceeded.
+ *
+ * @see form_pre_render()
+ */
+function _form_check_input_vars($count, $error_level = 'warning') {
+  // Determine the limit on input vars for this server configuration.
+  $limit = ini_get('max_input_vars');
+  if ($limit) {
+    // Leave a 5% buffer for ajax elements or similar.
+    if ($count > $limit * 0.95) {
+      $substitutions = array(
+        '@count' => $count,
+        '@limit' => $limit,
+      );
+
+      // Translatable strings.
+      $warning = t('This form may be too long to work properly.');
+      $notice = t('The last form processed was longer than this system can safely support.');
+      $please_increase = t('This form contains @count input elements. PHP max_input_vars allows only @limit and should be increased.', $substitutions);
+      $data_loss = t('Some data may heve been lost.');
+
+      switch ($error_level) {
+        case 'warning':
+          if (user_access('administer site configuration')) {
+            $message = $please_increase;
+          }
+          else {
+            $message = $warning;
+          }
+          break;
+
+        case 'error':
+          if (user_access('administer site configuration')) {
+            $message = $data_loss . ' ' . $please_increase;
+          }
+          else {
+            $message = $notice . ' ' . $data_loss;
+          }
+          break;
+      }
+
+      backdrop_set_message($message, $error_level);
+
+      $watchdog_message = 'Form contains @count input elements but PHP max_input_vars allows only @limit. Increase max_input_vars.';
+      watchdog('form', $watchdog_message, $substitutions, WATCHDOG_ERROR);
+    }
   }
 }
 
