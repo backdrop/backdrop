@@ -60,7 +60,7 @@ function dblog_overview() {
       $user_info = t('Deleted User');
     }
     else {
-      $user_info = theme('username', array('account' => $dblog));
+      $user_info = theme('username', array('object' => $dblog));
     }
 
     $log_date_format = config_get('system.core', 'log_date_format');
@@ -165,7 +165,7 @@ function dblog_event($id) {
     }
     else {
       $user_label = t('User');
-      $user_info = theme('username', array('account' => $dblog));
+      $user_info = theme('username', array('object' => $dblog));
     }
 
     $rows = array(

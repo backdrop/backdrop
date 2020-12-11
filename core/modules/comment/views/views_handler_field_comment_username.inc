@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_comment_username.
@@ -43,7 +42,7 @@ class views_handler_field_comment_username extends views_handler_field {
       $account->homepage = $this->get_value($values, 'homepage');
 
       return theme('username', array(
-        'account' => $account
+        'object' => $account
       ));
     }
     else {

@@ -118,7 +118,7 @@ function theme_node_recent_content($variables) {
   $output .= l($node->title, 'node/' . $node->nid);
   $output .= theme('mark', array('type' => node_mark($node->nid, $node->changed)));
   $output .= '</div><div class="node-author">';
-  $output .= theme('username', array('account' => user_load($node->uid)));
+  $output .= theme('username', array('object' => user_load($node->uid)));
   $output .= '</div>';
 
   return $output;
@@ -197,7 +197,7 @@ function template_preprocess_node(&$variables) {
 
   $variables['date']      = format_date($node->created);
   $variables['name']      = theme('username', array(
-    'account' => $node,
+    'object' => $node,
     'link_attributes' => array('rel' => 'author'),
   ));
 
@@ -236,7 +236,7 @@ function template_preprocess_node(&$variables) {
       $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], array('node' => $node));
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
-        $variables['user_picture'] = theme('user_picture', array('account' => $node));
+        $variables['user_picture'] = theme('user_picture', array('object' => $node));
       }
     }
   }
