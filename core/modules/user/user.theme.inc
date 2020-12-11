@@ -56,7 +56,8 @@ function theme_user_signature($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - account: The user object to format.
+ *   - account: Any object containing both a 'name' and a 'uid' property so that
+ *     it can be used to format a username. @todo: rename in 2.x
  *   - name: The user's name, sanitized.
  *   - extra: Additional text to append to the user's name, sanitized.
  *   - link_path: The path or URL of the user's profile page, home page, or
