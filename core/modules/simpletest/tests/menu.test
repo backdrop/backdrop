@@ -1396,6 +1396,40 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 }
 
 /**
+ * Tests translated menu links.
+ */
+class MenuTranslationTestCase extends MenuWebTestCase {
+  protected $admin_user;
+
+  function setUp() {
+    // Install the new test module.
+    $modules[] = 'menu_test_translation';
+    $modules[] = 'locale';
+    $modules[] = 'translation';
+    parent::setUp($modules);
+
+    $this->addLanguage('es');
+
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests path for active menu trail.
+   */
+  function testMenuTranslatedPath() {
+    // Set "Page" content type to use multilingual support with translation.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language'] = TRANSLATION_ENABLED;
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
+
+    // Visit the new page.
+  }
+}
+
+/**
  * Tests active menu trails.
  */
 class MenuTrailTestCase extends MenuWebTestCase {
