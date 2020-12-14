@@ -340,6 +340,48 @@
                             "default_group_multiple": [],
                             "group_items": []
                         }
+                    },
+                    "filename": {
+                        "id": "filename",
+                        "table": "file_managed",
+                        "field": "filename",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "operator": "contains",
+                        "value": "",
+                        "group": "1",
+                        "exposed": true,
+                        "expose": {
+                            "operator_id": "filename_op",
+                            "label": "Filename",
+                            "description": "",
+                            "use_operator": 0,
+                            "operator": "filename_op",
+                            "identifier": "filename",
+                            "required": 0,
+                            "remember": 0,
+                            "multiple": false,
+                            "remember_roles": {
+                                "authenticated": "authenticated",
+                                "anonymous": 0,
+                                "editor": 0,
+                                "administrator": 0
+                            }
+                        },
+                        "is_grouped": false,
+                        "group_info": {
+                            "label": "",
+                            "description": "",
+                            "identifier": "",
+                            "optional": true,
+                            "widget": "select",
+                            "multiple": false,
+                            "remember": 0,
+                            "default_group": "All",
+                            "default_group_multiple": [],
+                            "group_items": []
+                        }
                     }
                 },
                 "sorts": {
