@@ -469,8 +469,8 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($title);
 
-    // Populate the body field: the first item gets the "Raw HTML" (full_html) input
-    // format, the second one "Filtered HTML".
+    // Populate the body field: the first item gets the "Raw HTML" (full_html)
+    // input format, the second one "Filtered HTML".
     $formats = array('full_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {
