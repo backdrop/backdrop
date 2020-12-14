@@ -29,8 +29,8 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
     $full_html_format = (object) $full_html_format;
     filter_format_save($full_html_format);
 
-    // Create and log in an administrative user having access to the Raw HTML (full_html)
-    // text format.
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
     $permissions = array(
       'administer blocks',
       filter_permission_name($full_html_format),
