@@ -581,15 +581,15 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         $result[$hook] += array_intersect_key($cache[$hook], $hook_defaults);
       }
 
-      // The following apply only to theming hooks implemented as templates.
+      // The following apply only to theme hooks implemented as templates.
       if (isset($info['template'])) {
-        // Prepend the current theming path when none is set.
+        // Prepend the current theme path when none is set.
         if (!isset($info['path'])) {
           $result[$hook]['template'] = $path . '/' . $info['template'];
         }
       }
 
-      // Allow variable preprocessors for all theming hooks, whether the hook is
+      // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
       // Check for existing variable preprocessors. Ensure arrayness.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
@@ -619,7 +619,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         }
 
         foreach ($prefixes as $prefix) {
-          // Only use non-hook-specific variable preprocessors for theming hooks
+          // Only use non-hook-specific variable preprocessors for theme hooks
           // implemented as templates. See theme().
           if (isset($info['template']) && function_exists($prefix . '_preprocess')) {
             $info['preprocess functions'][] = $prefix . '_preprocess';
@@ -632,9 +632,9 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check for the override flag and prevent the cached variable
       // preprocessors from being used. This allows themes or theme engines to
       // remove variable preprocessors set earlier in the registry build.
-      if (!empty($info['override ' . 'preprocess functions'])) {
+      if (!empty($info['override preprocess functions'])) {
         // Flag not needed inside the registry.
-        unset($result[$hook]['override ' . 'preprocess functions']);
+        unset($result[$hook]['override preprocess functions']);
       }
       elseif (isset($cache[$hook]['preprocess functions']) && is_array($cache[$hook]['preprocess functions'])) {
         $info['preprocess functions'] = array_merge($cache[$hook]['preprocess functions'], $info['preprocess functions']);
@@ -655,7 +655,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         if (!isset($info['preprocess functions'])) {
           $cache[$hook]['preprocess functions'] = array();
         }
-        // Only use non-hook-specific variable preprocessors for theming hooks
+        // Only use non-hook-specific variable preprocessors for theme hooks
         // implemented as templates. See theme().
         if (isset($info['template']) && function_exists($name . '_preprocess')) {
           $cache[$hook]['preprocess functions'][] = $name . '_preprocess';
@@ -1214,12 +1214,14 @@ function theme($hook, $variables = array()) {
 /**
  * Returns the path to the current themed element.
  *
- * It can point to the active theme or the module handling a themed
- * implementation. For example, when invoked within the scope of a theming call
- * it will depend on where the theming function is handled. If implemented from
- * a module, it will point to the module. If implemented from the active theme,
- * it will point to the active theme. When called outside the scope of a
- * theming call, it will always point to the active theme.
+ * It can point to the active theme or the module that handles the theme
+ * implementation. For example:
+ * - When invoked within the scope of a theme function it will depend on where
+ *   where that theme function is being handled.
+ * - If implemented from a module, it will point to the module.
+ * - If implemented from the active theme, it will point to the active theme.
+ * - When called outside the scope of a theme function call, it will always
+ *   point to the active theme.
  */
 function path_to_theme() {
   global $theme_path;
@@ -1474,8 +1476,8 @@ function theme_get_setting($setting_name, $theme = NULL) {
  * Detect if a theme has any theme settings.
  *
  * This utility function checks a theme's .info file for any settings. If the
- * theme has a base theme, it loops through the parent themes .info files as
- * well.
+ * theme has a base theme, it loops through the .info files of the parent themes
+ * as well.
  *
  * @param string $theme
  *   The theme name to be checked for settings.
@@ -1491,6 +1493,33 @@ function theme_has_settings($theme) {
   }
   if (isset($theme_info->info['base theme'])) {
     return theme_has_settings($theme_info->info['base theme']);
+  }
+  return FALSE;
+}
+
+/**
+ * Detect if a theme has support for the Color module.
+ *
+ * This utility function checks a theme's .info file for whether support for the
+ * Color module has been enabled. If the theme has a base theme, it loops
+ * through the .info files of the parent themes as well.
+ *
+ * @param string $theme
+ *   The theme name to be checked for Color module support.
+ *
+ * @return bool
+ *   TRUE if the theme supports Color module, FALSE otherwise.
+ *
+ * @since 1.16.0
+ */
+function theme_has_color_support($theme) {
+  $themes = list_themes();
+  $theme_info = $themes[$theme];
+  if ($theme_info->info['settings']['color'] && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
+    return TRUE;
+  }
+  if (isset($theme_info->info['base theme'])) {
+    return theme_has_color_support($theme_info->info['base theme']);
   }
   return FALSE;
 }
@@ -2661,7 +2690,9 @@ function template_preprocess_header(&$variables) {
  */
 function template_preprocess_page(&$variables) {
   // Compile a list of classes that are going to be applied to the body element.
-  // This allows advanced theming based on context (home page, node of certain type, etc.).
+  // This allows for easy CSS overrides based on context (home page, node of
+  // certain type, etc.).
+
   // Add a class that tells us whether we're on the front page or not.
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';

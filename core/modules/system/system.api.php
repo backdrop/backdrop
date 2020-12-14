@@ -203,11 +203,9 @@ function callback_queue_worker($queue_item_data) {
  * Allows modules to declare their own Form API element types and specify their
  * default values.
  *
- * This hook allows modules to declare their own form element types and to
- * specify their default values. The values returned by this hook will be
- * merged with the elements returned by hook_form() implementations and so
- * can return defaults for any Form APIs keys in addition to those explicitly
- * mentioned below.
+ * The values returned by this hook will be merged with the elements returned by
+ * hook_form() implementations and so can return defaults for any Form APIs keys
+ * in addition to those explicitly mentioned below.
  *
  * Each of the form element types defined by this hook is assumed to have
  * a matching theme function, e.g. theme_elementtype(), which should be
@@ -1637,14 +1635,13 @@ function hook_permission() {
  *   array are the internal names of the hooks, and the values are arrays
  *   containing information about the hook. Each information array must contain
  *   either a 'variables' element or a 'render element' element, but not both.
- *   Use 'render element' if you are theming a single element or element tree
- *   composed of elements, such as a form array, a page array, or a single
- *   checkbox element. Use 'variables' if your theme implementation is
- *   intended to be called directly through theme() and has multiple arguments
- *   for the data and style; in this case, the variables not supplied by the
- *   calling function will be given default values and passed to the template
- *   or theme function. The returned theme information array can contain the
- *   following key/value pairs:
+ *   Use 'render element' if you are rendering a single element or element tree
+ *   composed of elements, such as a form array, or a single checkbox element.
+ *   Use 'variables' if your theme implementation is intended to be called
+ *   directly through theme() and has multiple arguments for the data and style;
+ *   in this case, the variables not supplied by the calling function will be
+ *   given default values and passed to the template or theme function. The
+ *   returned theme information array can contain the following key/value pairs:
  *   - variables: (see above) Each array key is the name of the variable, and
  *     the value given is used as the default value if the function calling
  *     theme() does not supply it. Template implementations receive each array
@@ -2521,7 +2518,7 @@ function hook_requirements($phase) {
     }
     else {
       $requirements['cron'] = array(
-        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'http://drupal.org/cron')),
+        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'https://backdropcms.org/cron')),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Never run'),
       );

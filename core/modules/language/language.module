@@ -33,7 +33,7 @@ function language_menu() {
     'file' => 'language.admin.inc',
   );
   $items['admin/config/regional/language/edit/%language'] = array(
-    'title' => 'Edit language',
+    'title' => 'Configure language',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('language_admin_edit_form', 5),
     'access arguments' => array('administer languages'),

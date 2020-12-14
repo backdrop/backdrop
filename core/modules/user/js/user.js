@@ -8,7 +8,7 @@ Backdrop.behaviors.passwordStrength = {
     $('input[data-password-strength]', context).once('password-strength', function () {
       var $passwordInput = $(this);
       var passwordStrengthSettings = $passwordInput.data('passwordStrength');
-      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
+      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.labels.strengthTitle + ': </span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
       $passwordInput.wrap('<span class="password-strength-wrapper"></span>').after(passwordMeter);
       var $innerWrapper = $passwordInput.parent();
       var $indicatorBar = $innerWrapper.find('.indicator');
@@ -18,13 +18,13 @@ Backdrop.behaviors.passwordStrength = {
       // Check the password strength.
       var passwordCheck = function () {
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.username);
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings);
 
         // Adjust the length of the strength indicator.
         $indicatorBar.css('width', result.strength + '%');
 
         // Update the strength indication text.
-        $strengthText.html(passwordStrengthSettings[result.level]);
+        $strengthText.html(passwordStrengthSettings.labels[result.level]);
 
         // Give a class to the strength.
         $strengthWrapper.attr('class', 'password-strength ' + result.level);
@@ -57,7 +57,7 @@ Backdrop.behaviors.passwordToggle = {
       }
 
       $passwordWrapper.addClass('password-hidden');
-      $passwordInput.before($passwordToggle);
+      $passwordInput.after($passwordToggle);
 
       var passwordToggle = function (e) {
         var showPassword = $passwordWrapper.is('.password-hidden');
@@ -143,19 +143,27 @@ Backdrop.behaviors.passwordConfirm = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password, username) {
+Backdrop.evaluatePasswordStrength = function (password, settings) {
   var strength = 0;
   var level = 'empty';
+  var data = settings.data;
+  var config = settings.config;
+  var username = data.username;
+  var email = data.email;
   var hasLowercase = /[a-z]+/.test(password);
   var hasUppercase = /[A-Z]+/.test(password);
   var hasNumbers = /[0-9]+/.test(password);
   var hasPunctuation = /[^a-zA-Z0-9]+/.test(password);
 
-  // If there is a username edit box on the page, compare password to that, otherwise
-  // use value from the database.
+  // If there is a username or email field on the page, compare the password to
+  // that; otherwise use the value from the database.
   var usernameBox = $('input.username');
   if (usernameBox.length > 0) {
     username = usernameBox.val();
+  }
+  var emailBox = $('input.form-email');
+  if (emailBox.length > 0) {
+    email = emailBox.val();
   }
 
   // Calculate the number of unique character sets within a string.
@@ -166,9 +174,15 @@ Backdrop.evaluatePasswordStrength = function (password, username) {
   // its length. Again, adapted from zxcvbn.
   strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
 
-  // Check if password is the same as the username.
-  if (password !== '' && password.toLowerCase() === username.toLowerCase()) {
-    strength = 5;
+  // Check if password is the same as the username or email.
+  if (password !== '') {
+    password = password.toLowerCase();
+    username = username.toLowerCase();
+    email = email.toLowerCase();
+
+    if (password === username || password === email) {
+      strength = 5;
+    }
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.

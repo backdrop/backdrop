@@ -14,11 +14,12 @@
 function taxonomy_overview_vocabularies($form) {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $form['#tree'] = TRUE;
+  $term_counts = db_query("SELECT vocabulary, count(tid) FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed();
   foreach ($vocabularies as $vocabulary) {
-    $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", array(':vocab' => $vocabulary->machine_name))->fetchField();
+    $terms_count = array_key_exists($vocabulary->machine_name, $term_counts) ? $term_counts[$vocabulary->machine_name] : 0;
     $form[$vocabulary->machine_name]['#vocabulary'] = $vocabulary;
     $form[$vocabulary->machine_name]['name'] = array('#markup' => check_plain($vocabulary->name));
-    $form[$vocabulary->machine_name]['items'] = array('#markup' => $term_count);
+    $form[$vocabulary->machine_name]['items'] = array('#markup' => $terms_count);
     $form[$vocabulary->machine_name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $vocabulary->name)),
@@ -309,7 +310,10 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   }
 
   $vocabulary = $form_state['vocabulary'];
-  entity_form_submit_build_entity('taxonomy_vocabulary', $vocabulary, $form, $form_state);
+  form_state_values_clean($form_state);
+  foreach ($form_state['values'] as $key => $value) {
+    $vocabulary->$key = $value;
+  }
 
   // Prevent leading and trailing spaces in vocabulary names.
   $vocabulary->name = trim($vocabulary->name);
@@ -840,7 +844,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   }
   foreach ($tree as $item) {
     if (!in_array($item->tid, $exclude)) {
-      $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
+      $options[$item->tid] = str_repeat('· ', $item->depth) . $item->name;
     }
   }
   $form['relations']['parent'] = array(

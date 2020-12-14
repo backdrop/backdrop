@@ -168,6 +168,27 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
+  // Password settings.
+  $form['password_policy'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Password policy'),
+    '#weight' => -1,
+  );
+
+  module_load_include('password.inc', 'user', 'user');
+  $criteria = _user_password_policy_help();
+
+  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
+  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
+  $description .= $criteria;
+
+  $form['password_policy']['user_password_reject_weak'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Reject weak passwords'),
+    '#description' => $description,
+    '#default_value' => (bool) $config->get('user_password_reject_weak'),
+  );
+
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',
@@ -594,7 +615,7 @@ function user_admin_roles($form, $form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save roles'),
+    '#value' => t('Save configuration'),
     '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
@@ -779,6 +800,31 @@ function user_settings_email($form, &$form_state) {
     '#type' => 'textarea',
     '#title' => t('Body'),
     '#default_value' => $mail_config->get('register_pending_approval_body'),
+    '#rows' => 8,
+    '#element_validate' => array('token_element_validate'),
+    '#token_types' => array('user'),
+  );
+
+  $form['email_pending_approval_admin'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Admin (awaiting approval)'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => t('Edit the email message sent to admin upon registering, when administrative approval is required.') . ' ' . $email_token_link,
+    '#group' => 'email',
+  );
+  $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => $mail_config->get('register_pending_approval_admin_subject'),
+    '#maxlength' => 180,
+    '#element_validate' => array('token_element_validate'),
+    '#token_types' => array('user'),
+  );
+  $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#default_value' => $mail_config->get('register_pending_approval_admin_body'),
     '#rows' => 8,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1008,6 +1054,8 @@ function user_settings_email_submit($form, &$form_state) {
   $config->set('register_no_approval_required_subject', $values['user_mail_register_no_approval_required_subject']);
   $config->set('register_pending_approval_body', $values['user_mail_register_pending_approval_body']);
   $config->set('register_pending_approval_subject', $values['user_mail_register_pending_approval_subject']);
+  $config->set('register_pending_approval_admin_body', $values['user_mail_register_pending_approval_admin_body']);
+  $config->set('register_pending_approval_admin_subject', $values['user_mail_register_pending_approval_admin_subject']);
   $config->set('status_activated_body', $values['user_mail_status_activated_body']);
   $config->set('status_activated_subject', $values['user_mail_status_activated_subject']);
   $config->set('status_blocked_body', $values['user_mail_status_blocked_body']);
