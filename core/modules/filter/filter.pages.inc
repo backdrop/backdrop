@@ -184,7 +184,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
     }
   }
-
+  $view = str_replace(";page=1&amp;",";page=0&amp;",$view);
   $form['library_view'] = array(
     '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
   );
