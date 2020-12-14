@@ -11,7 +11,8 @@ function basis_css_alter(&$css) {
   // Remove Basis' `/css/component/menu-dropdown.css` if using a custom
   // breakpoint.
   if (config_get('system.core', 'menu_breakpoint') != 'default') {
-    unset($css['core/themes/basis/css/component/menu-dropdown.css']);
+    $path = backdrop_get_path('theme', 'basis');
+    unset($css[$path . '/css/component/menu-dropdown.css']);
   }
 }
 
