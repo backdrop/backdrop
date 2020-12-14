@@ -1997,7 +1997,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     config_set('system.core', 'user_signatures', 1);
 
     // Prefetch text formats.
-    $this->raw_html_format = filter_format_load('raw_html');
+    $this->full_html_format = filter_format_load('full_html');
     $this->filtered_html_format = filter_format_load('filtered_html');
 
     // Create regular and administrative users.
@@ -2056,7 +2056,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     // Log in as an administrator and edit the comment to use Raw HTML, so
     // that the comment text itself is not filtered at all.
     $this->backdropLogin($this->admin_user);
-    $edit['comment_body[' . $langcode . '][0][format]'] = $this->raw_html_format->format;
+    $edit['comment_body[' . $langcode . '][0][format]'] = $this->full_html_format->format;
     $this->backdropPost('comment/' . $comment_id . '/edit', $edit, t('Save'));
 
     // Assert that the signature did not make it through unfiltered.
