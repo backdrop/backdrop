@@ -67,7 +67,7 @@ function system_requirements($phase) {
     $requirements['php'] = array(
       'title' => $t('PHP'),
       'value' => $phpversion,
-      'description' => $t('The phpinfo() function has been disabled for security reasons. To see your server\'s phpinfo() information, change your PHP settings or contact your server administrator. For more information, <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'http://drupal.org/node/243993')),
+      'description' => $t('The phpinfo() function has been disabled for security reasons. To see your server\'s phpinfo() information, change your PHP settings. For more information, <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'http://drupal.org/node/243993')),
       'severity' => REQUIREMENT_INFO,
     );
   }
@@ -219,10 +219,7 @@ function system_requirements($phase) {
 
     if (!empty($description)) {
       if ($php_ini_path = get_cfg_var('cfg_file_path')) {
-        $description .= ' ' . $t('Increase the memory limit by editing the memory_limit parameter in the file %configuration-file and then restart your web server (or contact your system administrator or hosting provider for assistance).', array('%configuration-file' => $php_ini_path));
-      }
-      else {
-        $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
+        $description .= ' ' . $t('Increase the memory limit by editing the memory_limit parameter in the file %configuration-file and then restart your web server.', array('%configuration-file' => $php_ini_path));
       }
 
       $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url" target="_blank">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
