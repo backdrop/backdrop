@@ -116,8 +116,8 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('user');
     $this->assertRaw('<h1>Raw HTML</h1>', 'Custom block successfully being displayed using Raw HTML.');
 
-    // Confirm that a user without access to Raw HTML (full_html) can not see the body field,
-    // but can still submit the form without errors.
+    // Confirm that a user without access to Raw HTML (full_html) can not see
+    // the body field, but can still submit the form without errors.
     $block_admin = $this->backdropCreateUser(array('administer blocks'));
     $this->backdropLogin($block_admin);
     $this->backdropGet('admin/structure/block/manage/' . $custom_block['delta'] . '/configure');
