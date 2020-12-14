@@ -717,8 +717,8 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-    // Create and log in an administrative user having access to the Raw HTML (full_html)
-    // text format.
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
     $permissions = array(
       'administer filters',
       filter_permission_name($full_html_format),
