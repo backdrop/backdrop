@@ -63,8 +63,10 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
-  $raw_html_format = array(
-    'format' => 'raw_html',
+  // Changed display name from Full html to Raw html but keeping machine name 
+  // for backward compatibility.
+  $full_html_format = array(
+    'format' => 'full_html',
     'name' => 'Raw HTML',
     'weight' => 1,
     'editor' => NULL,
@@ -96,8 +98,8 @@ function standard_install() {
       ),
     ),
   );
-  $raw_html_format = (object) $raw_html_format;
-  filter_format_save($raw_html_format);
+  $full_html_format = (object) $full_html_format;
+  filter_format_save($full_html_format);
 
   // Enable Basis theme and set it as default theme instead of Stark.
   // @see system_install()
