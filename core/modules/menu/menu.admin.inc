@@ -743,7 +743,7 @@ function menu_settings_form($form, &$form_state) {
   );
   $form['menu_breakpoint_custom'] = array(
     '#type' => 'textfield',
-    '#description' => t("Enter a valid CSS width value; a number followed by a unit (e.g.: '768px')."),
+    '#description' => t("A valid CSS width value (e.g.: '768px', '34em')."),
     '#default_value' => config_get('system.core', 'menu_breakpoint_custom'),
     '#size' => 8,
     '#field_prefix' => 'min-width:',
