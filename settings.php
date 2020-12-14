@@ -38,6 +38,15 @@ $config_directories['active'] = 'files/config_' . md5($database) . '/active';
 $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
+ * Skip the configuration staging directory cleanup
+ *
+ * For some development workflows (such as when the configuration files are in
+ * version control) it may be necessary to not delete the staging config files
+ * after each configuration sync.
+ */
+// $config['system.core']['config_sync_clear_staging'] = 0;
+
+/**
  * Access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
