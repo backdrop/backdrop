@@ -211,6 +211,8 @@ Backdrop.behaviors.editorImageDialog = {
           $('.editor-image-fields').removeClass('editor-image-fields-full');
           $('.editor-image-library').css({ 'display': 'block' });
           $('.form-item-image-directory').css({ 'display': 'block' });
+          
+          $('li.pager-next a').click(function(){return true;}).click();
 
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library')
