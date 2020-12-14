@@ -148,11 +148,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     // Create users.
     $filtered_html_format = filter_format_load('filtered_html');
-    $raw_html_format = filter_format_load('raw_html');
+    $full_html_format = filter_format_load('full_html');
     $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
       filter_permission_name($filtered_html_format),
-      filter_permission_name($raw_html_format),
+      filter_permission_name($full_html_format),
     ));
 
     $this->web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
@@ -171,7 +171,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
      * @param $unique_href_part
      *   A unique string that is expected to occur within the href of the desired
      *   link. For example, if the link URL is expected to look like
-     *   "admin/config/content/formats/raw_html/...", then "/raw_html/" could be
+     *   "admin/config/content/formats/full_html/...", then "/full_html/" could be
      *   passed as the expected unique string.
      *
      * @return
@@ -291,7 +291,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $second_filter = 'filter_autop';
 
     $filtered = 'filtered_html';
-    $full = 'raw_html';
+    $full = 'full_html';
     $plain = 'plain_text';
 
     // Check that the fallback format exists and cannot be disabled.
@@ -371,14 +371,14 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit_weight = array();
     $edit_weight['formats[' . $format->format . '][weight]'] = -10;
     $edit_weight['formats[filtered_html][weight]'] = -9;
-    $edit_weight['formats[raw_html][weight]'] = -8;
+    $edit_weight['formats[full_html][weight]'] = -8;
     $edit_weight['formats[plain_text][weight]'] = 0;
     $this->backdropPost('admin/config/content/formats', $edit_weight, t('Save changes'));
 
     $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
       ':first' => 'formats[' . $format->format . '][weight]',
       ':second' => 'formats[filtered_html][weight]',
-      ':third' => 'formats[raw_html][weight]',
+      ':third' => 'formats[full_html][weight]',
       ':fourth' => 'formats[plain_text][weight]',
     ));
     $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with new format at top.');
@@ -390,7 +390,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Check that the disabled text format is at the bottom of the list.
     $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
       ':first' => 'formats[filtered_html][weight]',
-      ':second' => 'formats[raw_html][weight]',
+      ':second' => 'formats[full_html][weight]',
       ':third' => 'formats[plain_text][weight]',
       ':fourth' => 'formats[' . $format->format . '][weight]',
     ));
