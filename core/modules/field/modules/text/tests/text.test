@@ -460,7 +460,8 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       $this->randomName(),
     );
 
-    // Create an post with the first body input format set to "RAW HTML" (full_html).
+    // Create an post with the first body input format set to "RAW HTML"
+    // (full_html).
     $title = $this->randomName();
     $edit = array(
       'title' => $title,
