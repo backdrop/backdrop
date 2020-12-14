@@ -46,7 +46,6 @@
     "maintenance_mode_message": "[site:name] is currently under maintenance. We should be back shortly. Thank you for your patience.",
     "maintenance_page_maximum_age": 10,
     "maintenance_theme": null,
-    "menu_breakpoint": "default",
     "menu_route_handler": null,
     "node_admin_theme": "",
     "page_cache_maximum_age": 300,

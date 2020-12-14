@@ -10,7 +10,7 @@
 function basis_css_alter(&$css) {
   // Remove Basis' `/css/component/menu-dropdown.css` if using a custom
   // breakpoint.
-  if (config_get('system.core', 'menu_breakpoint') != 'default') {
+  if (config_get('menu.settings', 'menu_breakpoint') != 'default') {
     $path = backdrop_get_path('theme', 'basis');
     unset($css[$path . '/css/component/menu-dropdown.css']);
   }
@@ -39,7 +39,8 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Add breakpoint-specific CSS for dropdown menus.
-  if (config_get('system.core', 'menu_breakpoint') != 'default') {
+  $config = config('menu.settings');
+  if ($config->get('menu_breakpoint') != 'default') {
     backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
@@ -47,7 +48,7 @@ function basis_preprocess_page(&$variables) {
     backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint-queries.css', array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
-      'media' => 'all and (min-width: ' . config_get('system.core', 'menu_breakpoint_custom') . ')',
+      'media' => 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')',
     ));
   }
 }

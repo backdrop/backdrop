@@ -729,7 +729,8 @@ function menu_reset_item_confirm_submit($form, &$form_state) {
  * Menu callback; global settings form for menus.
  */
 function menu_settings_form($form, &$form_state) {
-  $form['#config'] = 'system.core';
+  $form['#config'] = 'menu.settings';
+  $config = config('menu.settings');
 
   $form['menu_breakpoint'] = array(
     '#type' => 'radios',
@@ -739,12 +740,12 @@ function menu_settings_form($form, &$form_state) {
       'default' => t('Default (48em)'),
       'custom' => t('Custom'),
     ),
-    '#default_value' => config_get('system.core', 'menu_breakpoint'),
+    '#default_value' => $config->get('menu_breakpoint'),
   );
   $form['menu_breakpoint_custom'] = array(
     '#type' => 'textfield',
     '#description' => t("A valid CSS width value (e.g.: '768px', '34em')."),
-    '#default_value' => config_get('system.core', 'menu_breakpoint_custom'),
+    '#default_value' => $config->get('menu_breakpoint_custom'),
     '#size' => 8,
     '#field_prefix' => 'min-width:',
     '#states' => array(
@@ -764,7 +765,9 @@ function menu_settings_form($form, &$form_state) {
 function menu_settings_form_validate($form, &$form_state) {
   // Do some basic validation of the menu breakpoint setting.
   if ($form_state['values']['menu_breakpoint'] == 'custom') {
-    if (!preg_match('/^[0-9.]+[a-z%]+$/i', $form_state['values']['menu_breakpoint_custom'])) {
+    // This list of CSS units has been taken from:
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/length
+    if (!preg_match('/^[0-9.]+(px|em|ch|ex|rem|vh|vw|vmin|vmax|cm|mm|in|pc|pt)$/i', $form_state['values']['menu_breakpoint_custom'])) {
       form_set_error('menu_breakpoint_custom', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
         '@breakpoint' => $form_state['values']['menu_breakpoint_custom'],
       )));
