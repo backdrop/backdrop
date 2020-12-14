@@ -396,7 +396,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     ));
     $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with disabled format at bottom.');
 
-    // Allow authenticated users on raw HTML.
+    // Allow authenticated users on Raw HTML.
     $format = filter_format_load($full);
     $edit = array();
     $edit['roles[anonymous]'] = 0;
