@@ -11,7 +11,7 @@ class BlockTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('block_test');
 
-    // Create and log in an administrative user having access to the Raw HTML
+    // Create and log in an administrative user having access to the Raw HTML (full_html)
     // text format.
     $full_html_format = filter_format_load('full_html');
     $this->admin_user = $this->backdropCreateUser(array(
@@ -94,7 +94,7 @@ class BlockTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test creating custom block using Full HTML.
+   * Test creating custom block using Raw HTML (full_html).
    */
   function testCustomBlockFormat() {
     // Add a new custom block by filling out the input form on the admin/structure/block/add page.
@@ -116,7 +116,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('user');
     $this->assertRaw('<h1>Raw HTML</h1>', 'Custom block successfully being displayed using Raw HTML.');
 
-    // Confirm that a user without access to Raw HTML can not see the body field,
+    // Confirm that a user without access to Raw HTML (full_html) can not see the body field,
     // but can still submit the form without errors.
     $block_admin = $this->backdropCreateUser(array('administer blocks'));
     $this->backdropLogin($block_admin);
