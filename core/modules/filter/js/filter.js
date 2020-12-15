@@ -192,6 +192,12 @@ Backdrop.behaviors.editorImageDialog = {
 
       var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"]').is(':visible');
       if (libraryShown) {
+        if ($('ul').hasClass('pager')) {
+          $('li.pager-next a').click(function(){return true;}).click();
+        }
+        else {
+          $('div.view-filters').css({ 'display': 'none' });
+        }
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
@@ -212,8 +218,6 @@ Backdrop.behaviors.editorImageDialog = {
           $('.editor-image-library').css({ 'display': 'block' });
           $('.form-item-image-directory').css({ 'display': 'block' });
           
-          $('li.pager-next a').click(function(){return true;}).click();
-
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library')
             .on('click', '.image-library-choose-file', function() {
