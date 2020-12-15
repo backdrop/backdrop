@@ -69,8 +69,8 @@ function translation_update_1002() {
   $types = config_get_names_with_prefix('node.type.');
   foreach ($types as $config_name) {
     $config = config($config_name);
-    if ($config->get('show_translation_links') === NULL) {
-      $config->set('show_translation_links', TRUE);
+    if ($config->get('settings.translation_show_links') === NULL) {
+      $config->set('settings.translation_show_links', TRUE);
       $config->save();
     }
   }
