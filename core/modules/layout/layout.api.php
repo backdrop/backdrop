@@ -73,7 +73,7 @@ function hook_layout_info() {
  *
  * Each type of context requires a class that provides information about the
  * context. See the LayoutContext base class for additional documentation.
-
+ *
  * @return array
  *   Each item in the returned array of info should have the following keys:
  *   - title: The human-readable name of the context.
