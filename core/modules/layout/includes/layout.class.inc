@@ -863,6 +863,7 @@ class Layout {
    */
   function hasContexts($required_contexts) {
     $all_contexts = $this->getContexts();
+    layout_get_context_from_relationships($this->relationships, $all_contexts);
     foreach ($required_contexts as $required_context_name) {
       $context_missing = TRUE;
       foreach ($all_contexts as $context) {

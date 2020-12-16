@@ -26,14 +26,14 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
     // Clone user object so account can be passed by value to access callback.
     $account = clone $user;
 
-    $delta = !empty($conf['delta']) ? intval($conf['delta']) : 0;
-    $plugin = $conf['name'];
+    $delta = !empty($this->settings['delta']) ? intval($this->settings['delta']) : 0;
+    $plugin = $this->settings['relationship'];
     list($plugin, $plugin_name) = explode(':', $plugin);
     list($field_name, $from_entity, $to_entity) = explode('-', $plugin_name);
     // If unset it wants a generic, unfilled context, which is just NULL.
     $entity_info = entity_get_info($from_entity);
     if (empty($context->data) || !isset($context->data->{$entity_info['entity keys']['id']})) {
-      return ctools_context_create_empty('entity:' . $to_entity, NULL);
+      return layout_create_context($to_entity);
     }
 
     if (isset($context->data->{$entity_info['entity keys']['id']})) {
@@ -43,26 +43,27 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
       $entity = $entity[$id];
       if ($items = field_get_items($from_entity, $entity, $field_name)) {
         if (isset($items[$delta])) {
-          ctools_include('fields');
           $to_entity_info = entity_get_info($to_entity);
 
-          $plugin_info = ctools_get_relationship($conf['name']);
+          $plugin_info = $this->getChild($this->childDelta);;
           $to_entity_id = $items[$delta][$plugin_info['source key']];
           $loaded_to_entity = entity_load($to_entity, array($to_entity_id));
           $loaded_to_entity = array_shift($loaded_to_entity);
 
           // Pass current user account and entity type to access callback.
           if (isset($to_entity_info['access callback']) && function_exists($to_entity_info['access callback']) && !call_user_func($to_entity_info['access callback'], 'view', $loaded_to_entity, $account, $to_entity)) {
-            return ctools_context_create_empty('entity:' . $to_entity, NULL);
+            return layout_create_context($to_entity);
           }
           else {
             // Send it to ctools.
-            return ctools_context_create('entity:' . $to_entity, $to_entity_id);
+            $to_entity_context = layout_create_context($to_entity);
+            $to_entity_context->setData($loaded_to_entity);
+            return $to_entity_context;
           }
         }
         else {
           // In case that delta was empty.
-          return ctools_context_create_empty('entity:' . $to_entity, NULL);
+          return layout_create_context($to_entity);
         }
       }
     }
