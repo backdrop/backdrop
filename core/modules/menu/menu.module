@@ -159,6 +159,10 @@ function menu_config_info() {
     'label_key' => 'title',
     'group' => t('Menus'),
   );
+  $prefixes['menu.settings'] = array(
+    'label' => t('Menu settings'),
+    'group' => t('Menus'),
+  );
   return $prefixes;
 }
 
