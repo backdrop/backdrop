@@ -26,7 +26,7 @@ function bartik_css_alter(&$css) {
   }
 
   // Remove Bartik's `/css/style.css` if using a custom breakpoint.
-  if (config_get('menu.settings', 'menu_breakpoint') != 'default') {
+  if (config_get('menu.settings', 'menu_breakpoint') == 'custom') {
     unset($css[$theme_path . '/css/style.css']);
   }
 }
@@ -40,7 +40,7 @@ function bartik_preprocess_page(&$variables) {
   // Add breakpoint-specific CSS for menus.
   $config = config('menu.settings');
   $path = backdrop_get_path('theme', 'bartik');
-  if ($config->get('menu_breakpoint') != 'default') {
+  if ($config->get('menu_breakpoint') == 'custom') {
     backdrop_add_css($path . '/css/style.menu-breakpoint.css', array(
       'group' => CSS_THEME,
       'every_page' => TRUE,
