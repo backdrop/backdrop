@@ -1264,7 +1264,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       // Contexts must be set before the layout's access may be checked.
       $contexts = $layout->getContexts();
 
-      foreach ($contexts as $key => $context) {
+      foreach ($contexts as $context) {
         if (isset($context->position)) {
 
           // Check for an object loaded by the menu router. Use a preview from
@@ -1547,18 +1547,10 @@ function layout_relationships_get_relevant_info($contexts) {
 /**
  *
  * @param $relationship
- *   The configuration of a relationship. It must contain the following data:
- *   - name: The name of the relationship plugin being used.
- *   - relationship_settings: The configuration based upon the plugin forms.
- *   - identifier: The human readable identifier for this relationship, usually
- *     defined by the UI.
- *   - keyword: The keyword used for this relationship for substitutions.
+ *   A relationship object.
  *
  * @param $source_context
  *   The context this relationship is based upon.
- *
- * @param $placeholders
- *   If TRUE, placeholders are acceptable.
  *
  * @return
  *   A context object if one can be loaded.
@@ -1576,11 +1568,7 @@ function layout_get_context_from_relationship($relationship, $source_context) {
  * Fetch all active relationships
  *
  * @param $relationships
- *   An keyed array of relationship data including:
- *   - name: name of relationship
- *   - context: context id relationship belongs to. This will be used to
- *     identify which context in the $contexts array to use to create the
- *     relationship context.
+ *   An keyed array of relationship objects.
  *
  * @param $contexts
  *   A keyed array of contexts used to figure out which relationships

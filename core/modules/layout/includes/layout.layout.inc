@@ -85,14 +85,13 @@ function layout_layout_relationship_info() {
     'class' => 'LayoutRelationshipUserFromNode',
     'context' => 'node',
     'context_label' => t('Node'),
-    'load function' => 'user_from_node_context',
     'description' => t('Creates the author of a node as a user context.'),
   );
   $info['entity_from_field'] = array(
     'title' => t('Entity from field'),
     'class' => 'LayoutRelationshipEntityFromField',
-    'context' => 'entity',
-    'context_label' => t('Node'),
+    'context' => 'field',
+    'context_label' => t('Field'),
     'description' => t('Creates an entity context from a foreign key on a field.'),
   );
 
