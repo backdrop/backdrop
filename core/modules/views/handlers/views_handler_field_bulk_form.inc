@@ -96,11 +96,6 @@ class views_handler_field_bulk_form extends views_handler_field {
     $form['#attached']['js'][] = 'core/misc/tableselect.js';
     $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/views_bulk_actions.js';
 
-    // Ensure a consistent container for filters/operations in the view header.
-    $form['header'] = array(
-      '#weight' => -100,
-    );
-
     // Render checkboxes for all rows.
     $form[$this->options['id']]['#tree'] = TRUE;
     foreach ($this->view->result as $row_index => $row) {
@@ -115,6 +110,11 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
     }
+
+    // Ensure a consistent container for filters/operations in the view header.
+    $form['header'] = array(
+      '#weight' => -100,
+    );
 
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
@@ -131,7 +131,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#required' => TRUE,
     );
 
-    $actions['submit']['apply'] = array(
+    $actions['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Apply to selected items'),
       '#id' => 'views-bulk-form-apply',
