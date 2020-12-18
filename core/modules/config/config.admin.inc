@@ -18,7 +18,8 @@ function config_sync_form(array $form, array &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('For some development workflows (such as when the configuration files are in version control) it may be necessary to not delete the staging config files after each configuration sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))) . '</p>',
+    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to
+ * not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))) . '</p>',
   );
 
   if ($changed_config_count === 0) {

@@ -40,9 +40,8 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 /**
  * Skip the configuration staging directory cleanup
  *
- * For some development workflows (such as when the configuration files are in
- * version control) it may be necessary to not delete the staging config files
- * after each configuration sync.
+ * When the configuration files are in version control, it may be preferable to
+ * not empty the staging directory after each sync.
  */
 // $config['system.core']['config_sync_clear_staging'] = 0;
 
