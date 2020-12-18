@@ -2528,8 +2528,10 @@ function user_role_save($role) {
  *   The name of the role to be deleted.
  */
 function user_role_delete($role_name) {
-  // If this is the administrator role, explicitly set user_admin_role attribute
-  // to 0 ("disabled").
+  $role = user_role_load($role_name);
+
+  // If this is the administrator role, explicitly set the "user_admin_role"
+  // attribute to "0" (disabled).
   $system_config = config('system.core');
   if ($role_name == $system_config->get('user_admin_role')) {
     $system_config->set('user_admin_role', 0);
@@ -2544,7 +2546,6 @@ function user_role_delete($role_name) {
     ->condition('role', $role_name)
     ->execute();
 
-  $role = user_role_load($role_name);
   module_invoke_all('user_role_delete', $role);
 
   // Clear the user access cache.
