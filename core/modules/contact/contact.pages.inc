@@ -238,7 +238,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $form['to'] = array(
     '#type' => 'item',
     '#title' => t('To'),
-    '#markup' => theme('username', array('account' => $recipient)),
+    '#markup' => theme('username', array('object' => $recipient)),
   );
   $form['subject'] = array(
     '#type' => 'textfield',

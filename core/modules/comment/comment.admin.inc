@@ -122,7 +122,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
           '#options' => array('attributes' => array('title' => $title), 'fragment' => 'comment-' . $comment->cid),
         ),
       ),
-      'author' => theme('username', array('account' => $comment)),
+      'author' => theme('username', array('object' => $comment)),
       'posted_in' => array(
         'data' => array(
           '#type' => 'link',

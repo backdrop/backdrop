@@ -2169,7 +2169,7 @@ function layout_locked_message($item, $type = 'layout') {
   $message = '';
   if (!empty($item->locked) && $user->uid !== $item->locked['uid']) {
     $account = user_load($item->locked['uid']);
-    $lock_user = theme('username', array('account' => $account));
+    $lock_user = theme('username', array('object' => $account));
     $lock_age = format_interval(REQUEST_TIME - $item->locked['updated']);
     $lock_break_url = url('admin/structure/layouts/' . $path_type . '/' . $item->name . '/break-lock', array('query' => array('token' => backdrop_get_token($type . '-' . $item->name)) + backdrop_get_destination()));
     $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.',  array('!user' => $lock_user, '!age' => $lock_age, '!break' => $lock_break_url));

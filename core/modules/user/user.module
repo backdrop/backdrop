@@ -73,7 +73,7 @@ function user_theme() {
 
   return array(
     'user_picture' => array(
-      'variables' => array('account' => NULL),
+      'variables' => array('object' => NULL),
       'template' => 'templates/user-picture',
     ) + $base,
     'user_profile' => array(
@@ -96,7 +96,7 @@ function user_theme() {
       'variables' => array('signature' => NULL),
     ) + $base,
     'username' => array(
-      'variables' => array('account' => NULL),
+      'variables' => array('object' => NULL),
     ) + $base,
   );
 }
@@ -722,7 +722,7 @@ function user_search_execute($keys = NULL, $conditions = NULL) {
  */
 function user_user_view($account) {
   $account->content['user_picture'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
+    '#markup' => theme('user_picture', array('object' => $account)),
     '#weight' => -10,
   );
   $account->content['member_for'] = array(
@@ -950,7 +950,7 @@ function user_account_form(&$form, &$form_state) {
     '#value' => isset($account->picture) ? $account->picture : NULL,
   );
   $form['picture']['picture_current'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
+    '#markup' => theme('user_picture', array('object' => $account)),
   );
   $form['picture']['picture_delete'] = array(
     '#type' => 'checkbox',

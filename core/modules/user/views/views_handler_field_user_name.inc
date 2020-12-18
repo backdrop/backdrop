@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_user_name.
@@ -72,7 +71,7 @@ class views_handler_field_user_name extends views_handler_field_user {
       }
       elseif (!empty($this->options['link_to_user'])) {
         $account->name = $this->get_value($values);
-        return theme('username', array('account' => $account));
+        return theme('username', array('object' => $account));
       }
     }
     // If we want a formatted username, do that.

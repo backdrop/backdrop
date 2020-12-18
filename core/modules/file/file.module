@@ -914,7 +914,7 @@ function template_preprocess_file_entity(&$variables) {
   $variables['id'] = backdrop_html_id('file-'. $file->fid);
   $variables['date'] = format_date($file->timestamp);
   $account = user_load($file->uid);
-  $variables['name'] = theme('username', array('account' => $account));
+  $variables['name'] = theme('username', array('object' => $account));
 
   $uri = entity_uri('file', $file);
   $variables['file_url']  = url($uri['path'], $uri['options']);

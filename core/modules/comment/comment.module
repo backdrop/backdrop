@@ -1877,7 +1877,7 @@ function comment_form($form, &$form_state, $comment) {
     $form['author']['_author'] = array(
       '#type' => 'item',
       '#title' => t('Your name'),
-      '#markup' => theme('username', array('account' => $user)),
+      '#markup' => theme('username', array('object' => $user)),
     );
     $form['author']['name'] = array(
       '#type' => 'value',

@@ -124,7 +124,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           break;
 
         case 'link':
-          $replacements[$original] = theme('username', array('account' => $account));
+          $replacements[$original] = theme('username', array('object' => $account));
           break;
 
         case 'mail':
@@ -143,7 +143,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
         case 'picture':
           if (config_get('system.core', 'user_pictures')) {
-            $replacements[$original] = theme('user_picture', array('account' => $account));
+            $replacements[$original] = theme('user_picture', array('object' => $account));
           }
           break;
 

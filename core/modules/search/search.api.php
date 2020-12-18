@@ -215,7 +215,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
       'link' => url('node/' . $item->sid, array('absolute' => TRUE)),
       'type' => check_plain(node_type_get_name($node)),
       'title' => $node->title,
-      'user' => theme('username', array('account' => $node)),
+      'user' => theme('username', array('object' => $node)),
       'date' => $node->changed,
       'node' => $node,
       'extra' => $extra,

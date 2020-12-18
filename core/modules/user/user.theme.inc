@@ -22,7 +22,7 @@ function theme_user_list($variables) {
 
   if (!empty($users)) {
     foreach ($users as $user) {
-      $items[] = theme('username', array('account' => $user));
+      $items[] = theme('username', array('object' => $user));
     }
   }
   return theme('item_list', array('items' => $items, 'title' => $title));
@@ -56,7 +56,7 @@ function theme_user_signature($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - account: The user object to format.
+ *   - object: Any object with 'name' and 'uid' properties.
  *   - name: The user's name, sanitized.
  *   - extra: Additional text to append to the user's name, sanitized.
  *   - link_path: The path or URL of the user's profile page, home page, or
@@ -203,17 +203,16 @@ function theme_user_admin_roles($variables) {
 /**
  * Process variables for user-picture.tpl.php.
  *
- * The $variables array contains the following arguments:
- * - $account: A user, node or comment object with 'name', 'uid' and 'picture'
- *   fields.
+ * The $variables array contains the following keys:
+ * - object: Any object with 'name', 'uid' and 'picture' properties.
  *
  * @see user-picture.tpl.php
  */
 function template_preprocess_user_picture(&$variables) {
   $variables['user_picture'] = '';
   if (config_get('system.core', 'user_pictures')) {
-    $account = $variables['account'];
-    if (!empty($account->picture)) {
+    $object = $variables['object'];
+    if (!empty($object->picture)) {
       // @TODO: Ideally this function would only be passed file entities, but
       // since there's a lot of legacy code that JOINs the {users} table to
       // {node} or {comments} and passes the results into this function if we
@@ -221,18 +220,18 @@ function template_preprocess_user_picture(&$variables) {
       // and load it for them. Once we've got user_load_multiple() and
       // comment_load_multiple() functions the user module will be able to load
       // the picture files in mass during the object's load process.
-      if (is_numeric($account->picture)) {
-        $account->picture = file_load($account->picture);
+      if (is_numeric($object->picture)) {
+        $object->picture = file_load($object->picture);
       }
-      if (!empty($account->picture->uri)) {
-        $filepath = $account->picture->uri;
+      if (!empty($object->picture->uri)) {
+        $filepath = $object->picture->uri;
       }
     }
     elseif (config_get('system.core', 'user_picture_default')) {
       $filepath = config_get('system.core', 'user_picture_default');
     }
     if (isset($filepath)) {
-      $alt = t("@user's picture", array('@user' => user_format_name($account)));
+      $alt = t("@user's picture", array('@user' => user_format_name($object)));
       // If the image does not have a valid Backdrop scheme (for eg. HTTP),
       // don't load image styles.
       if (module_exists('image') && file_valid_uri($filepath) && $style = config_get('system.core', 'user_picture_style')) {
@@ -241,9 +240,9 @@ function template_preprocess_user_picture(&$variables) {
       else {
         $variables['user_picture'] = theme('image', array('path' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
-      if (!empty($account->uid) && user_access('access user profiles')) {
+      if (!empty($object->uid) && user_access('access user profiles')) {
         $attributes = array('attributes' => array('title' => t('View user profile.')), 'html' => TRUE);
-        $variables['user_picture'] = l($variables['user_picture'], "user/$account->uid", $attributes);
+        $variables['user_picture'] = l($variables['user_picture'], "user/$object->uid", $attributes);
       }
     }
   }
@@ -252,20 +251,23 @@ function template_preprocess_user_picture(&$variables) {
 /**
  * Preprocesses variables for theme_username().
  *
+ * The $variables array contains the following keys:
+ * - object: Any object with 'name' and 'uid' properties.
+ *
  * Modules that make any changes to variables like 'name' or 'extra' must insure
  * that the final string is safe to include directly in the output by using
  * check_plain() or filter_xss().
  */
 function template_preprocess_username(&$variables) {
-  $account = $variables['account'];
+  $object = $variables['object'];
 
   $variables['extra'] = '';
-  if (empty($account->uid)) {
+  if (empty($object->uid)) {
     $variables['uid'] = 0;
     $variables['extra'] = ' (' . t('not verified') . ')';
   }
   else {
-    $variables['uid'] = (int) $account->uid;
+    $variables['uid'] = (int) $object->uid;
   }
 
   // Set the name to a formatted name that is safe for printing and
@@ -273,7 +275,7 @@ function template_preprocess_username(&$variables) {
   // unsanitized version, in case other preprocess functions want to implement
   // their own shortening logic or add markup. If they do so, they must ensure
   // that $variables['name'] is safe for printing.
-  $name = $variables['name_raw'] = user_format_name($account);
+  $name = $variables['name_raw'] = user_format_name($object);
   if (backdrop_strlen($name) > 20) {
     $name = backdrop_substr($name, 0, 15) . '...';
   }
@@ -286,13 +288,13 @@ function template_preprocess_username(&$variables) {
     $variables['link_attributes']['title'] = t('View user profile.');
     $variables['link_path'] = 'user/' . $variables['uid'];
   }
-  elseif (!empty($account->homepage)) {
+  elseif (!empty($object->homepage)) {
     // Like the 'class' attribute, the 'rel' attribute can hold a
     // space-separated set of values, so initialize it as an array to make it
     // easier for other preprocess functions to append to it.
     $variables['link_attributes']['rel'] = 'nofollow';
-    $variables['link_path'] = $account->homepage;
-    $variables['homepage'] = $account->homepage;
+    $variables['link_path'] = $object->homepage;
+    $variables['homepage'] = $object->homepage;
   }
   // We do not want the l() function to check_plain() a second time.
   $variables['link_options']['html'] = TRUE;
