@@ -423,9 +423,11 @@ function path_entity_load($entities, $type) {
   if (!isset($path_entity_types)) {
     $path_entity_types = array();
     $all_path_info = path_get_info();
-    foreach ($all_path_info as $path_info) {
-      if (isset($path_info['entity type'])) {
-        $path_entity_types[] = $path_info['entity type'];
+    if (!empty($all_path_info)) {
+      foreach ($all_path_info as $path_info) {
+        if (isset($path_info['entity type'])) {
+          $path_entity_types[] = $path_info['entity type'];
+        }
       }
     }
   }
