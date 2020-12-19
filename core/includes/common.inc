@@ -1766,6 +1766,10 @@ function filter_xss_admin($string) {
  * @param $allowed_tags
  *   An array of allowed tags. Defaults to the array returned by
  *   _filter_xss_allowed_tags().
+ * @param $allowed_css_properties
+ *   An array of allowed CSS properties such as "width", "color", etc. Simple
+ *   CSS rules within these properties will be allowed. Defaults to no allowed
+ *   properties.
  *
  * @return
  *   An XSS safe version of $string, or an empty string if $string is not
@@ -1773,7 +1777,7 @@ function filter_xss_admin($string) {
  *
  * @see backdrop_validate_utf8()
  */
-function filter_xss($string, $allowed_tags = NULL) {
+function filter_xss($string, $allowed_tags = NULL, $allowed_css_properties = NULL) {
   if ($allowed_tags === NULL) {
     $allowed_tags = _filter_xss_allowed_tags();
   }
@@ -1783,7 +1787,7 @@ function filter_xss($string, $allowed_tags = NULL) {
     return '';
   }
   // Store the text format.
-  _filter_xss_split($allowed_tags, TRUE);
+  _filter_xss_split(NULL, $allowed_tags, $allowed_css_properties);
   // Remove NULL characters (ignored by some browsers).
   $string = str_replace(chr(0), '', $string);
   // Remove Netscape 4 JS entities.
@@ -1827,28 +1831,35 @@ function _filter_xss_display_allowed_tags() {
 }
 
 /**
- * Processes an HTML tag.
+ * This function is used as a callback for preg_replace_callback(). It processes
+ * the contents of an HTML tag.
  *
- * @param $m
- *   An array with various meaning depending on the value of $store.
- *   If $store is TRUE then the array contains the allowed tags.
- *   If $store is FALSE then the array has one element, the HTML tag to process.
- * @param $store
- *   Whether to store $m.
+ * @param array $string_array
+ *   An array with one element, the HTML tag to process.
+ * @param array $set_allowed_tags
+ *   Sets the allowed tags to be used in later calls to _filter_xss_split().
+ * @param array $set_allowed_css_properties
+ *   Sets the allowed style properties to be used in later calls to
+ *   _filter_xss_split().
  *
  * @return string
  *   If the element isn't allowed, an empty string. Otherwise, the cleaned up
  *   version of the HTML element.
  */
-function _filter_xss_split($m, $store = FALSE) {
-  static $allowed_html;
+function _filter_xss_split($string_array = NULL, $set_allowed_tags = NULL, $set_allowed_css_properties = NULL) {
+  static $allowed_tags, $allowed_css_properties;
 
-  if ($store) {
-    $allowed_html = array_flip($m);
+  // If setting the allowed tags or properties, save them to the static
+  // variables and then exit.
+  if (isset($set_allowed_tags)) {
+    $allowed_tags = array_flip($set_allowed_tags);
+    if (isset($set_allowed_css_properties)) {
+      $allowed_css_properties = $set_allowed_css_properties;
+    }
     return '';
   }
 
-  $string = $m[1];
+  $string = $string_array[1];
 
   if (substr($string, 0, 1) != '<') {
     // We matched a lone ">" character.
@@ -1873,7 +1884,7 @@ function _filter_xss_split($m, $store = FALSE) {
     $elem = '!--';
   }
 
-  if (!isset($allowed_html[strtolower($elem)])) {
+  if (!isset($allowed_tags[strtolower($elem)])) {
     // Disallowed HTML element.
     return '';
   }
@@ -1891,7 +1902,7 @@ function _filter_xss_split($m, $store = FALSE) {
   $xhtml_slash = $count ? ' /' : '';
 
   // Clean up attributes.
-  $attr2 = implode(' ', _filter_xss_attributes($attrlist));
+  $attr2 = implode(' ', _filter_xss_attributes($attrlist, $allowed_css_properties));
   $attr2 = preg_replace('/[<>]/', '', $attr2);
   $attr2 = strlen($attr2) ? ' ' . $attr2 : '';
 
@@ -1904,7 +1915,7 @@ function _filter_xss_split($m, $store = FALSE) {
  * @return
  *   Cleaned up version of the HTML attributes.
  */
-function _filter_xss_attributes($attr) {
+function _filter_xss_attributes($attr, $allowed_css_properties) {
   $attrarr = array();
   $skip = FALSE;
   $mode = 0;
@@ -1919,7 +1930,9 @@ function _filter_xss_attributes($attr) {
         // Attribute name, href for instance.
         if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
           $attrname = strtolower($match[1]);
-          $skip = ($attrname == 'style' || substr($attrname, 0, 2) == 'on');
+          // Skip style attributes if no properties allowed. Always skip event
+          // attributes like onClick, onLoad, etc.
+          $skip = ($attrname === 'style' && empty($allowed_css_properties)) || (substr($attrname, 0, 2) == 'on');
           $working = $mode = 1;
           $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
         }
@@ -1949,6 +1962,18 @@ function _filter_xss_attributes($attr) {
           // the filtering would cause valid and safe data to be mangled.
           if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
             $thisval = $match[1];
+          }
+          // Special handling for allowed style properties (width, color, etc.)
+          elseif ($attrname == 'style' && $allowed_css_properties) {
+            $allowed_css_properties_string = implode('|', $allowed_css_properties);
+            $css_property_matches = array();
+            $style_string = $match[1] . ';';
+            preg_match_all("/(($allowed_css_properties_string):[# 0-9a-zA-Z%]+)[;]/", $style_string, $css_property_matches);
+            $thisval = implode('; ', $css_property_matches[1]);
+            // If no style properties remain, omit the style attribute entirely.
+            if ($thisval === '') {
+              $skip = TRUE;
+            }
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
           else {

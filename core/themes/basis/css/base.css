@@ -140,10 +140,13 @@ label {
  * Table tags
  */
 table {
-  width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
   border-spacing: 0;
+}
+/* If no width is specified on a table, make 100%. */
+table:not([width]) {
+  width: 100%;
 }
 
 caption {

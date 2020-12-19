@@ -1126,8 +1126,14 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<p onmouseover="http://www.example.com/">', array('p'));
     $this->assertNoNormalized($f, 'onmouseover', 'HTML filter attributes removal -- events, no evasion.');
 
-    $f = filter_xss('<li style="list-style-image: url(javascript:alert(0))">', array('li'));
+    $f = filter_xss('<li style="width: 100px; list-style-image: url(javascript:alert(0))">', array('li'));
     $this->assertNoNormalized($f, 'style', 'HTML filter attributes removal -- style, no evasion.');
+
+    $f = filter_xss('<li style="width: 100px; list-style-image: url(javascript:alert(0))">', array('li'), array('width'));
+    $this->assertNormalized($f, 'style="width: 100px"', 'HTML filter individual style attribute allowed.');
+
+    $f = filter_xss('<li style="width: calc(100vh - 80px)">', array('li'), array('width'));
+    $this->assertNoNormalized($f, 'style', 'Advanced CSS rule stripped from allowed style attribute.');
 
     $f = filter_xss('<img onerror   =alert(0)>', array('img'));
     $this->assertNoNormalized($f, 'onerror', 'HTML filter attributes removal evasion -- spaces before equals sign.');
