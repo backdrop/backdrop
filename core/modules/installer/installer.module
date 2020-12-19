@@ -46,6 +46,11 @@ function installer_menu() {
       'type' => MENU_CALLBACK,
     );
   }
+  // Add menu titles with += for the translation extractor.
+  $items['admin/modules/install'] += array('title' => 'Install new modules');
+  $items['admin/appearance/install'] += array('title' => 'Install new themes');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
+
   $items['admin/config/system/updates'] = array(
     'title' => 'Updates',
     'description' => 'Review and install available updates.',
@@ -56,11 +61,6 @@ function installer_menu() {
     // 'type' => MENU_LOCAL_TASK,
     'file' => 'installer.manager.inc',
   );
-
-  // Add menu titles with += for the translation extractor.
-  $items['admin/modules/install'] += array('title' => 'Install new modules');
-  $items['admin/appearance/install'] += array('title' => 'Install new themes');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
 
   $items['admin/installer/manual'] = array(
     'page callback' => 'backdrop_get_form',

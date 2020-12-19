@@ -59,16 +59,14 @@
  * @ingroup forms
  */
 function installer_manager_update_form($form, $form_state, $context = NULL) {
-  backdrop_set_title('Updates');
-
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
 
   $form['#theme'] = 'installer_manager_update_form';
-  $form['#attached']['js'][] = backdrop_get_path('module', 'installer') . '/js/installer.select_updates.js';
 
   $available = update_get_available(TRUE);
+
   if (empty($available)) {
     $form['message'] = array(
       '#markup' => t('There was a problem getting update information. Try again later.'),
@@ -77,6 +75,7 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
   }
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'installer') . '/css/installer.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'installer') . '/js/installer.select_updates.js';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
@@ -171,13 +170,18 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
-    // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = ($project['project_type'] == 'core' && config_get('installer.settings', 'core_update') != TRUE);
+    // Set both contrib projects, as well as Backdrop core to be able to be
+    // updated via the admin UI by default.
+    $update_method = 'admin_ui';
+    // If self-update is disabled, Backdrop core needs to be updated manually.
+    if ($project['project_type'] == 'core' && !config_get('installer.settings', 'core_update')) {
+      $update_method = 'manual';
+    }
 
-    if ($needs_manual) {
-      // There are no checkboxes in the 'Manual updates' table so it will be
-      // rendered by theme('table'), not theme('tableselect'). Since the data
-      // formats are incompatible, we convert now to the format expected by
+    if ($update_method == 'manual') {
+      // We don't need checkboxes in the "Manual updates" table, so it will be
+      // rendered by theme('table') instead of theme('tableselect'). Since the
+      // data formats are incompatible, we convert to the format expected by
       // theme('table').
       unset($entry['#weight']);
       $attributes = $entry['#attributes'];
@@ -193,40 +197,17 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
       );
     }
 
-    // Based on what kind of project this is, save the entry into the
-    // appropriate subarray.
-    switch ($project['project_type']) {
-      case 'core':
-        // Core needs manual updates if automatic not enabled.
-        if (config_get('installer.settings', 'core_update')) {
-          $projects['enabled'][$name] = $entry;
-        }
-        else {
-          $projects['manual'][$name] = $entry;
-        }
-        break;
-      case 'module':
-      case 'theme':
-      case 'layout':
-        $projects['enabled'][$name] = $entry;
-        break;
-
-      case 'module-disabled':
-      case 'theme-disabled':
-      case 'layout-disabled':
-        $projects['disabled'][$name] = $entry;
-        break;
-    }
+    // Split projects based on method of update.
+    $projects[$update_method][$name] = $entry;
   }
 
   if (empty($projects)) {
-    $form['message'] = array(
-      '#markup' => '<p>' . t('No updates are available for any of your projects.') . '</p>',
-    );
+    backdrop_set_message(t('Your site is up to date.'));
     return $form;
   }
 
-  $headers = array(
+  // The table header is common for both the manual and the UI updates.
+  $header = array(
     'title' => array(
       'data' => t('Name'),
       'class' => array('installer-project-name'),
@@ -237,30 +218,13 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
     'recommended_version' => t('Recommended version'),
   );
 
-  if (!empty($projects['enabled'])) {
+  if (!empty($projects['admin_ui'])) {
     $form['projects'] = array(
       '#type' => 'tableselect',
-      '#header' => $headers,
-      '#options' => $projects['enabled'],
+      '#header' => $header,
+      '#options' => $projects['admin_ui'],
     );
-    if (!empty($projects['disabled'])) {
-      $form['projects']['#prefix'] = '<h2>' . t('Enabled') . '</h2>';
-    }
-  }
 
-  if (!empty($projects['disabled'])) {
-    $form['disabled_projects'] = array(
-      '#type' => 'tableselect',
-      '#header' => $headers,
-      '#options' => $projects['disabled'],
-      '#weight' => 1,
-      '#prefix' => '<h2>' . t('Disabled') . '</h2>',
-    );
-  }
-
-  // If either table has been printed yet, we need a submit button and to
-  // validate the checkboxes.
-  if (!empty($projects['enabled']) || !empty($projects['disabled'])) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -273,10 +237,10 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
   if (!empty($projects['manual'])) {
     $prefix = '<h2>' . t('Manual updates required') . '</h2>';
     $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
-    $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org/" title="Home page with download option">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" title="Handbook article">Upgrading Backdrop CMS</a> document online.') . '</p>';
+    $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
-      '#markup' => theme('table', array('header' => $headers, 'rows' => $projects['manual'])),
+      '#markup' => theme('table', array('header' => $header, 'rows' => $projects['manual'])),
       '#prefix' => $prefix,
       '#weight' => 120,
     );
