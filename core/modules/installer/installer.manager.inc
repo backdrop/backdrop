@@ -49,31 +49,13 @@
  * This presents a table with all projects that have available updates with
  * checkboxes to select which ones to upgrade.
  *
- * @param $context
- *   String representing the context from which we're trying to update.
- *   Allowed values are 'module', 'theme', and 'report'.
- *
  * @see installer_manager_update_form_validate()
  * @see installer_manager_update_form_submit()
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state, $context) {
-  $core_update_enabled = config_get('installer.settings', 'core_update');
-  switch ($context) {
-    case 'module':
-      backdrop_set_title('Update modules');
-      break;
-    case 'theme':
-      backdrop_set_title('Update themes');
-      break;
-    case 'layout':
-      backdrop_set_title('Update layouts');
-      break;
-    case 'report':
-      backdrop_set_title('Update projects');
-      break;
-  }
+function installer_manager_update_form($form, $form_state, $context = NULL) {
+  backdrop_set_title('Update Add-ons');
 
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
@@ -82,6 +64,26 @@ function installer_manager_update_form($form, $form_state, $context) {
   $form['#theme'] = 'installer_manager_update_form';
 
   $available = update_get_available(TRUE);
+
+  // Run some basic health checks, and show messages/warnings accordingly.
+  $update_config = config('update.settings');
+  $update_interval_days = $update_config->get('update_interval_days');
+  if ($update_interval_days != 0) {
+    $frequency = array(1 => t('daily'), 7 => t('weekly'));
+    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])));
+  }
+  else {
+    backdrop_set_message(t('Checks for updates are configured to be triggerred manually.'), 'warning');
+  }
+  if (empty($update_config->get('update_emails'))) {
+    backdrop_set_message(t('No email configured to receive update notifications for this site.'), 'warning');
+  }
+
+  $last = state_get('update_last_check', 0);
+  $form['last_check'] = array(
+    '#markup' => theme('update_last_check', array('last' => $last)),
+  );
+
   if (empty($available)) {
     $form['message'] = array(
       '#markup' => t('There was a problem getting update information. Try again later.'),
@@ -90,6 +92,7 @@ function installer_manager_update_form($form, $form_state, $context) {
   }
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'installer') . '/css/installer.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'installer') . '/js/installer.select_updates.js';
 
   // This will be a nested array. The first key is the kind of project, which
   // can be either 'enabled', 'disabled', 'manual' (projects which require
@@ -104,6 +107,7 @@ function installer_manager_update_form($form, $form_state, $context) {
 
   module_load_include('inc', 'update', 'update.compare');
   $project_data = update_calculate_project_data($available);
+
   foreach ($project_data as $name => $project) {
     // Filter out projects which are up to date already.
     if ($project['status'] == UPDATE_CURRENT) {
@@ -112,7 +116,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     // The project name to display can vary based on the info we have.
     if (!empty($project['title'])) {
       if (!empty($project['link'])) {
-        $project_name = l($project['title'], $project['link']);
+        $project_name = l($project['title'], $project['link'], array('attributes' => array('target'=>'_blank')));
       }
       else {
         $project_name = check_plain($project['title']);
@@ -124,9 +128,6 @@ function installer_manager_update_form($form, $form_state, $context) {
     else {
       $project_name = check_plain($name);
     }
-    if ($project['project_type'] == 'theme' || $project['project_type'] == 'theme-disabled') {
-      $project_name .= ' ' . t('(Theme)');
-    }
 
     if (empty($project['recommended'])) {
       // If we don't know what to recommend they upgrade to, we should skip
@@ -135,29 +136,37 @@ function installer_manager_update_form($form, $form_state, $context) {
     }
 
     $recommended_release = $project['releases'][$project['recommended']];
-    $recommended_version = $recommended_release['version'] . ' ' . l(t('(Release notes)'), $recommended_release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])))));
+    $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
+    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target'=>'_blank'));
+    $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
+    $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
-      $recommended_version .= '<div title="Major upgrade warning" class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version.  It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
+      $recommended_version .= '<div title="Major upgrade warning" class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version. It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
     }
 
     // Create an entry for this project.
     $entry = array(
       'title' => $project_name,
+      'project_type' => $project['project_type'] == 'layout' ? 'layout template' : $project['project_type'],
+      'project_status' => $project['project_status'] ? t('enabled') : t('disabled'),
+      // 'project_status' => $projects['disabled'][$name],
       'installed_version' => $project['existing_version'],
       'recommended_version' => $recommended_version,
     );
 
+    $update_types = array(
+      'security' => t('security update available'),
+      'unsupported' => t('unsupported version installed'),
+    );
     switch ($project['status']) {
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
-        $entry['title'] .= ' ' . t('(Security update)');
-        $entry['#weight'] = -2;
         $type = 'security';
+        $entry['#weight'] = -2;
         break;
 
       case UPDATE_NOT_SUPPORTED:
         $type = 'unsupported';
-        $entry['title'] .= ' ' . t('(Unsupported)');
         $entry['#weight'] = -1;
         break;
 
@@ -172,16 +181,24 @@ function installer_manager_update_form($form, $form_state, $context) {
         // Jump out of the switch and onto the next project in foreach.
         continue 2;
     }
+    if (isset($type) && isset($update_types[$type])) {
+      $entry['title'] .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
+    }
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
-    // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = ($project['project_type'] == 'core' && $core_update_enabled != TRUE);
+    // Backdrop CMS core and contrib projects are to be able to be updated
+    // from the administrative interface. Set this option as default.
+    $update_method = 'admin_ui';
+    // If self-update is disabled, Backdrop core needs to be updated manually.
+    if ($project['project_type'] == 'core' && !config_get('installer.settings', 'core_update')) {
+      $update_method = 'manual';
+    }
 
-    if ($needs_manual) {
-      // There are no checkboxes in the 'Manual updates' table so it will be
-      // rendered by theme('table'), not theme('tableselect'). Since the data
-      // formats are incompatible, we convert now to the format expected by
+    if ($update_method == 'manual') {
+      // We don't need checkboxes in the "Manual updates" table, so it will be
+      // rendered by theme('table') instead of theme('tableselect'). Since the
+      // data formats are incompatible, we convert to the format expected by
       // theme('table').
       unset($entry['#weight']);
       $attributes = $entry['#attributes'];
@@ -197,76 +214,39 @@ function installer_manager_update_form($form, $form_state, $context) {
       );
     }
 
-    // Based on what kind of project this is, save the entry into the
-    // appropriate subarray.
-    switch ($project['project_type']) {
-      case 'core':
-        // Core needs manual updates if automatic not enabled.
-        if ($core_update_enabled) {
-          $projects['enabled'][$name] = $entry;
-        }
-        else {
-          $projects['manual'][$name] = $entry;
-        }
-        break;
-      case 'module':
-      case 'theme':
-      case 'layout':
-        $projects['enabled'][$name] = $entry;
-        break;
-
-      case 'module-disabled':
-      case 'theme-disabled':
-      case 'layout-disabled':
-        $projects['disabled'][$name] = $entry;
-        break;
-    }
+    // Split projects based on method of update.
+    $projects[$update_method][$name] = $entry;
   }
 
   if (empty($projects)) {
-    $form['message'] = array(
-      '#markup' => '<p>' . t('No updates are available for any of your projects.') . '</p>',
-    );
+    backdrop_set_message(t('Your site is up to date.'));
     return $form;
   }
 
-  $headers = array(
+  // The table header is common for both the manual and the UI updates.
+  $header = array(
     'title' => array(
       'data' => t('Name'),
       'class' => array('installer-project-name'),
     ),
+    'project_type' => t('Project type'),
+    'project_status' => t('Project status'),
     'installed_version' => t('Installed version'),
     'recommended_version' => t('Recommended version'),
   );
 
-  if (!empty($projects['enabled'])) {
+  if (!empty($projects['admin_ui'])) {
     $form['projects'] = array(
       '#type' => 'tableselect',
-      '#header' => $headers,
-      '#options' => $projects['enabled'],
+      '#header' => $header,
+      '#options' => $projects['admin_ui'],
     );
-    if (!empty($projects['disabled'])) {
-      $form['projects']['#prefix'] = '<h2>' . t('Enabled') . '</h2>';
-    }
-  }
 
-  if (!empty($projects['disabled'])) {
-    $form['disabled_projects'] = array(
-      '#type' => 'tableselect',
-      '#header' => $headers,
-      '#options' => $projects['disabled'],
-      '#weight' => 1,
-      '#prefix' => '<h2>' . t('Disabled') . '</h2>',
-    );
-  }
-
-  // If either table has been printed yet, we need a submit button and to
-  // validate the checkboxes.
-  if (!empty($projects['enabled']) || !empty($projects['disabled'])) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Download these updates'),
+      '#value' => t('Download selected updates'),
+      '#id' => 'installer-download-updates',
     );
     $form['#validate'][] = 'installer_manager_update_form_validate';
   }
@@ -274,10 +254,10 @@ function installer_manager_update_form($form, $form_state, $context) {
   if (!empty($projects['manual'])) {
     $prefix = '<h2>' . t('Manual updates required') . '</h2>';
     $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
-    $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org/" title="Home page with download option">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" title="Handbook article">Upgrading Backdrop CMS</a> document online.') . '</p>';
+    $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
-      '#markup' => theme('table', array('header' => $headers, 'rows' => $projects['manual'])),
+      '#markup' => theme('table', array('header' => $header, 'rows' => $projects['manual'])),
       '#prefix' => $prefix,
       '#weight' => 120,
     );
