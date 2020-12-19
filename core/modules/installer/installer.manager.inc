@@ -67,6 +67,25 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
 
   $available = update_get_available(TRUE);
 
+  // Run some basic health checks, and show messages/warnings accordingly.
+  $update_config = config('update.settings');
+  $update_interval_days = $update_config->get('update_interval_days');
+  if ($update_interval_days != 0) {
+    $frequency = array(1 => t('daily'), 7 => t('weekly'));
+    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])));
+  }
+  else {
+    backdrop_set_message(t('Checks for updates are configured to be triggerred manually.'), 'warning');
+  }
+  if (empty($update_config->get('update_emails'))) {
+    backdrop_set_message(t('No email configured to receive update notifications for this site.'), 'warning');
+  }
+
+  $last = state_get('update_last_check', 0);
+  $form['last_check'] = array(
+    '#markup' => theme('update_last_check', array('last' => $last)),
+  );
+
   if (empty($available)) {
     $form['message'] = array(
       '#markup' => t('There was a problem getting update information. Try again later.'),

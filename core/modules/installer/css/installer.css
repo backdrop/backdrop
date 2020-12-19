@@ -14,6 +14,11 @@
   color: #9C1D0D;
 }
 
+.checked .button {
+  margin: 1em;
+  vertical-align: middle;
+}
+
 .installer-browser-install-button-form {
   clear: both;
   margin: 10px 0 0;
