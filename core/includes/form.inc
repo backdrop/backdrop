@@ -2068,6 +2068,9 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
     'form_type_select_value',
     'form_type_tableselect_value',
     'list_boolean_allowed_values_callback',
+    'date_popup_element_value_callback',
+    'date_timezone_element_value_callback',
+    'date_year_range_element_value_callback',
   );
 
   if (!isset($element['#name'])) {
