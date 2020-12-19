@@ -28,12 +28,12 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
    */
   function getAdminSummary() {
     if (!empty($this->settings['context_parent'])) {
-      $parts = explode(':', $this->settings['context_parent']);
-      if ($parts[0] == 'position') {
-        return t('User from node in position @position', array('@position' => $parts[1]+1));
+      list($label, $value) = explode(':', $this->settings['context_parent']);
+      if ($label == 'position') {
+        return t('User from node in position @position', array('@position' => $value+1));
       }
       else {
-        return t('User from node @id', array('@id' => $parts[1]));
+        return t('User from node @id', array('@id' => $value));
       }
     }
     return t('User from node');
