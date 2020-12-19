@@ -9,8 +9,8 @@
 Backdrop.behaviors.installerDownloadUpdatesToggle = {
   attach: function (context) {
     var $context = $(context);
-    var $donloadButton = $('#installer-download-updates');
-    var buttonText = $donloadButton.val();
+    var $downloadButton = $('#installer-download-updates');
+    var buttonText = $downloadButton.val();
 
     // Check if at least one update checkbox has been ticked. Then update the
     // disabled state and the label of the "Download updates" button
@@ -20,10 +20,10 @@ Backdrop.behaviors.installerDownloadUpdatesToggle = {
       var $allSelected = $context.find('.form-checkbox.select-none:checked').length;
       var newButtonText = $allSelected ? Backdrop.t('Download all updates') : buttonText;
       if ($rowChecked) {
-        $donloadButton.attr('disabled', false).removeClass('no-js-hide form-button-disabled').prop('value', newButtonText);
+        $downloadButton.attr('disabled', false).removeClass('no-js-hide form-button-disabled').prop('value', newButtonText);
       }
       else {
-        $donloadButton.attr('disabled', 'disabled').addClass('no-js-hide form-button-disabled').prop('value', Backdrop.t('No update selected'));
+        $downloadButton.attr('disabled', 'disabled').addClass('no-js-hide form-button-disabled').prop('value', Backdrop.t('No update selected'));
       }
     }
 
