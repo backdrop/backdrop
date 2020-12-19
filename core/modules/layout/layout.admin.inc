@@ -346,7 +346,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#validate' => array(),
       '#submit' => array(
         'layout_settings_form_update_layout',
-        'layout_settings_form_context_relationship_add',
+        'layout_settings_form_context_add',
       ),
       '#ajax' => array(
         'callback' => 'layout_ajax_form_open_dialog',
