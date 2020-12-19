@@ -145,14 +145,14 @@ abstract class LayoutRelationship extends LayoutHandler{
   /**
    * Return child relationship plugins.
    */
-  function getChildren($rid) {
+  function getChildren() {
     return NULL;
   }
 
   /**
    * Return child relationship plugins.
    */
-  function getChild($cid) {
+  function getChild() {
     return layout_get_relationship_info($this->plugin);
   }
 

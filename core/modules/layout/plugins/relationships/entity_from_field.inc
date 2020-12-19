@@ -7,17 +7,6 @@
 class LayoutRelationshipEntityFromField extends LayoutRelationship {
 
   /**
-   * Constructor for LayoutRelationship objects.
-   */
-  function __construct($plugin_name, $config) {
-    parent::__construct($plugin_name, $config);
-
-      if (isset($config['child'])) {
-        $this->child = $this->getChild($config['child']);
-      }
-  }
-
-  /**
    * Get the context from this relationship.
    */
   function getContext($context) {
@@ -55,7 +44,6 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
             return layout_create_context($to_entity);
           }
           else {
-            // Send it to ctools.
             $to_entity_context = layout_create_context($to_entity);
             $to_entity_context->setData($loaded_to_entity);
             return $to_entity_context;
@@ -73,31 +61,39 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
    * Return a summary for this relationship.
    */
   function getAdminSummary() {
+    $child = $this->getChild();
+    $title = $child['title'];
+
+    if (!empty($this->settings['context_parent'])) {
+      list($label, $value) = explode(':', $this->settings['context_parent']);
+      if ($label == 'position') {
+        return t('@title in position @position', array('@title' => $title, '@position' => $value+1));
+      }
+      else {
+        return t('@title ID: @id', array('@title' => $title, '@id' => $value));
+      }
+    }
     return t('Entity from field');
   }
 
-  function getChild($child) {
-    // Todo: make this generic.
-    // $plugins = $this->getChildren($plugin, $parent);
-    $plugins = $this->getChildren('entity_from_field');
-    return $plugins['entity_from_field:' . $child];
+  function getChild() {
+    $children = $this->getChildren();
+    return $children['entity_from_field:' . $this->childDelta];
   }
 
   /**
    * Return child relationship plugins.
    */
-  function getChildren($parent = 'entity_from_field') {
-    
-    $parent_plugin = $this;
-    // $cid = $parent_plugin['name'] . ':' . $parent;
-    $cid = $parent . ':' . $parent;
-    // $cache = &backdrop_static(__FUNCTION__);
-    // if (!empty($cache[$cid])) {
-      // return $cache[$cid];
-    // }
+  function getChildren() {
+    $parent = 'entity_from_field';
+    $info = layout_get_relationship_info($parent);
+    $cache = &backdrop_static(__FUNCTION__);
+    if (!empty($cache[$parent])) {
+      return $cache[$parent];
+    }
 
     $entities = entity_get_info();
-    $plugins = array();
+    $children = array();
     $context_types = array();
 
     // Get the schema information for every field.
@@ -130,30 +126,24 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
 
                     // We check for every bundle; this plugin may already have
                     // been created, so don't recreate it.
-                    if (!isset($plugins[$plugin_id])) {
-                      // Todo: added this casting.
-                      $plugin = (array) $parent_plugin;
+                    if (!isset($children[$plugin_id])) {
                       $replacements = array(
                         '@to_entity' => $to_entity_info['label'],
                         '@from_entity' => $from_entity_info['label'],
                         '@field_name' => $field_name,
                         '@field_label' => $this->entity_from_field_label($field_name),
                       );
-                      $plugin['title'] = t('@to_entity from @from_entity (on @from_entity: @field_label [@field_name])', $replacements);
-                      $plugin['keyword'] = $to_entity;
-                      $plugin['context name'] = $name;
-                      $plugin['name'] = $plugin_id;
-                      $plugin['description'] = t('Creates a @to_entity context from @from_entity using the @field_name field on @from_entity.', $replacements);
-                      $plugin['context'] = $from_entity;
-                      $plugin['context_label'] = $from_entity_info['label'];
-                      $plugin['from entity'] = $from_entity;
-                      $plugin['to entity'] = $to_entity;
-                      $plugin['field name'] = $field_name;
-                      $plugin['join key'] = $key;
-                      $plugin['source key'] = current(array_keys($info['columns']));
-                      $plugin['parent'] = $parent;
+                      $info['title'] = t('@to_entity from @from_entity (on @from_entity: @field_label [@field_name])', $replacements);
+                      $info['name'] = $plugin_id;
+                      $info['description'] = t('Creates a @to_entity context from @from_entity using the @field_name field on @from_entity.', $replacements);
+                      $info['context'] = $from_entity;
+                      $info['context_label'] = $from_entity_info['label'];
+                      $info['from entity'] = $from_entity;
+                      $info['to entity'] = $to_entity;
+                      $info['field name'] = $field_name;
+                      $info['source key'] = current(array_keys($info['columns']));
 
-                      $plugins[$plugin_id] = $plugin;
+                      $children[$plugin_id] = $info;
                     }
                   }
                 }
@@ -164,9 +154,9 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
       }
     }
 
-    $cache[$cid] = $plugins;
+    $cache[$parent] = $children;
 
-    return $plugins;
+    return $children;
     
   }
 
@@ -220,7 +210,7 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
 
     $child_relationship = $this->child;
     $field = field_info_field($child_relationship['field name']);
-    //$conf = $form_state['conf'];
+    $settings = $this->settings;
 
     if ($field && $field['cardinality'] != 1) {
       if ($field['cardinality'] == -1) {
@@ -228,7 +218,7 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
           '#type' => 'textfield',
           '#title' => t('Delta'),
           '#description' => t('The relationship can only create one context, but multiple items can be related. Please select which one. Since this can have unlimited items, type in the number you want. The first one will be 0.'),
-          // '#default_value' => !empty($conf['delta']) ? $conf['delta'] : 0,
+          '#default_value' => !empty($settings['delta']) ? $settings['delta'] : 0,
         );
       }
       else {
@@ -237,7 +227,7 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
           '#title' => t('Delta'),
           '#description' => t('The relationship can only create one context, but multiple items can be related. Please select which one.'),
           '#options' => range(1, $field['cardinality']),
-          //'#default_value' => !empty($conf['delta']) ? $conf['delta'] : 0,
+          '#default_value' => !empty($settings['delta']) ? $settings['delta'] : 0,
         );
       }
     }
