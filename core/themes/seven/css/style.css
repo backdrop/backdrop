@@ -671,7 +671,8 @@ fieldset .fieldset-legend {
   box-sizing: border-box;
 }
 fieldset:not(.collapsible) > legend > .fieldset-legend {
-  top: .35em;
+  margin-top: .35em;
+  margin-bottom: .35em;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
@@ -686,8 +687,9 @@ legend {
 [dir="rtl"] legend {
   float: right;
 }
-.fieldset-description {
-  margin: 1em 0;
+.fieldset-description,
+.fieldset-description p {
+  margin: .5em 0;
 }
 fieldset fieldset {
   background-color: #fff;
