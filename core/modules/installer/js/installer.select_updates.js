@@ -1,0 +1,37 @@
+/**
+ * @file
+ * Disables the "Download updates" button if no project was selected.
+ */
+(function ($) {
+
+"use strict";
+
+Backdrop.behaviors.installerDownloadUpdatesToggle = {
+  attach: function (context) {
+    var $context = $(context);
+    var $donloadButton = $('#installer-download-updates');
+    var buttonText = $donloadButton.val();
+
+    // Check if at least one update checkbox has been ticked. Then update the
+    // disabled state and the label of the "Download updates" button
+    // accordingly.
+    function toggleExecuteButton (event) {
+      var $rowChecked = $context.find('.form-checkbox:checked').length;
+      if ($rowChecked) {
+        $donloadButton.attr('disabled', false).removeClass('no-js-hide form-button-disabled').prop('value', buttonText);
+      }
+      else {
+        $donloadButton.attr('disabled', 'disabled').addClass('no-js-hide form-button-disabled').prop('value', Backdrop.t('No update selected'));
+      }
+    }
+
+    // Initialize the "Download updates" button once when the page loads.
+    toggleExecuteButton();
+    // Repeat each time any checkbox is ticked/unticked.
+    $(context).find('.form-checkbox').on('change', function () {
+      toggleExecuteButton();
+    });
+  }
+};
+
+})(jQuery);

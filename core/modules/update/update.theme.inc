@@ -112,21 +112,7 @@ function theme_update_report($variables) {
       $status_label = check_plain($project['reason']);
     }
     if ($update_link && module_exists('installer')) {
-      switch ($project['project_type']) {
-        case 'theme':
-          $updatepath = 'admin/appearance/update';
-          break;
-
-        case 'layout':
-          $updatepath = 'admin/layouts/update';
-          break;
-
-        case 'core':
-        case 'module':
-        default:
-          $updatepath = 'admin/modules/update';
-      }
-      $status_label = l($status_label, $updatepath, array('html' => TRUE));
+      $status_label = l($status_label, 'admin/config/system/updates', array('html' => TRUE));
     }
 
     $project_section = '';

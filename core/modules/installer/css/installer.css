@@ -1,6 +1,19 @@
 /**
  * Styles for the Installer interfaces.
  */
+.installer-manager-update-form .update-security.odd:not(:hover) {
+  background: #FFE0E0;
+}
+.installer-manager-update-form .update-security.even:not(:hover) {
+  background: #FFC9C9;
+}
+.installer-manager-update-form .update-security:hover .update-type {
+  color: #EC351C;
+}
+.installer-manager-update-form .update-security:not(:hover) {
+  color: #9C1D0D;
+}
+
 .installer-browser-install-button-form {
   clear: both;
   margin: 10px 0 0;

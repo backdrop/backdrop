@@ -156,11 +156,12 @@ function _update_requirement_check($project, $type) {
         $version_available = t('Updates available');
       }
       if (update_manager_access() && module_exists('installer')) {
-        $requirement_label .= ' (' . l($version_available, 'admin/modules/update') . ')';
+        $updates_path = 'admin/config/system/updates';
       }
       else {
-        $requirement_label .= ' (' . l($version_available, 'admin/reports/updates') . ')';
+        $updates_path = 'admin/reports/updates';
       }
+      $requirement_label .= ' (' . l($version_available, $updates_path) . ')';
     }
     $requirement['value'] = $requirement_label;
   }

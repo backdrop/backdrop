@@ -50,35 +50,23 @@
  * checkboxes to select which ones to upgrade.
  *
  * @param $context
- *   String representing the context from which we're trying to update.
- *   Allowed values are 'module', 'theme', and 'report'.
+ *   Deprecated since 1.18.0, after all the "Update" pages have been
+ *   consolidated into a single one, under admin/config/system/updates.
  *
  * @see installer_manager_update_form_validate()
  * @see installer_manager_update_form_submit()
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state, $context) {
-  switch ($context) {
-    case 'module':
-      backdrop_set_title('Update modules');
-      break;
-    case 'theme':
-      backdrop_set_title('Update themes');
-      break;
-    case 'layout':
-      backdrop_set_title('Update layouts');
-      break;
-    case 'report':
-      backdrop_set_title('Update projects');
-      break;
-  }
+function installer_manager_update_form($form, $form_state, $context = NULL) {
+  backdrop_set_title('Updates');
 
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
 
   $form['#theme'] = 'installer_manager_update_form';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'installer') . '/js/installer.select_updates.js';
 
   $available = update_get_available(TRUE);
   if (empty($available)) {
@@ -103,6 +91,7 @@ function installer_manager_update_form($form, $form_state, $context) {
 
   module_load_include('inc', 'update', 'update.compare');
   $project_data = update_calculate_project_data($available);
+
   foreach ($project_data as $name => $project) {
     // Filter out projects which are up to date already.
     if ($project['status'] == UPDATE_CURRENT) {
@@ -111,7 +100,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     // The project name to display can vary based on the info we have.
     if (!empty($project['title'])) {
       if (!empty($project['link'])) {
-        $project_name = l($project['title'], $project['link']);
+        $project_name = l($project['title'], $project['link'], array('attributes' => array('target'=>'_blank')));
       }
       else {
         $project_name = check_plain($project['title']);
@@ -123,9 +112,6 @@ function installer_manager_update_form($form, $form_state, $context) {
     else {
       $project_name = check_plain($name);
     }
-    if ($project['project_type'] == 'theme' || $project['project_type'] == 'theme-disabled') {
-      $project_name .= ' ' . t('(Theme)');
-    }
 
     if (empty($project['recommended'])) {
       // If we don't know what to recommend they upgrade to, we should skip
@@ -134,29 +120,37 @@ function installer_manager_update_form($form, $form_state, $context) {
     }
 
     $recommended_release = $project['releases'][$project['recommended']];
-    $recommended_version = $recommended_release['version'] . ' ' . l(t('(Release notes)'), $recommended_release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])))));
+    $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
+    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target'=>'_blank'));
+    $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
+    $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
-      $recommended_version .= '<div title="Major upgrade warning" class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version.  It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
+      $recommended_version .= '<div title="Major upgrade warning" class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version. It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
     }
 
     // Create an entry for this project.
     $entry = array(
       'title' => $project_name,
+      'project_type' => $project['project_type'] == 'layout' ? 'layout template' : $project['project_type'],
+      'project_status' => $project['project_status'] ? t('enabled') : t('disabled'),
+      // 'project_status' => $projects['disabled'][$name],
       'installed_version' => $project['existing_version'],
       'recommended_version' => $recommended_version,
     );
 
+    $update_types = array(
+      'security' => t('security update available'),
+      'unsupported' => t('unsupported version installed'),
+    );
     switch ($project['status']) {
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
-        $entry['title'] .= ' ' . t('(Security update)');
-        $entry['#weight'] = -2;
         $type = 'security';
+        $entry['#weight'] = -2;
         break;
 
       case UPDATE_NOT_SUPPORTED:
         $type = 'unsupported';
-        $entry['title'] .= ' ' . t('(Unsupported)');
         $entry['#weight'] = -1;
         break;
 
@@ -170,6 +164,9 @@ function installer_manager_update_form($form, $form_state, $context) {
       default:
         // Jump out of the switch and onto the next project in foreach.
         continue 2;
+    }
+    if (isset($type) && isset($update_types[$type])) {
+      $entry['title'] .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
     }
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
@@ -234,6 +231,8 @@ function installer_manager_update_form($form, $form_state, $context) {
       'data' => t('Name'),
       'class' => array('installer-project-name'),
     ),
+    'project_type' => t('Project type'),
+    'project_status' => t('Project status'),
     'installed_version' => t('Installed version'),
     'recommended_version' => t('Recommended version'),
   );
@@ -265,7 +264,8 @@ function installer_manager_update_form($form, $form_state, $context) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Download these updates'),
+      '#value' => t('Download selected updates'),
+      '#id' => 'installer-download-updates',
     );
     $form['#validate'][] = 'installer_manager_update_form_validate';
   }

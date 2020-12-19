@@ -88,7 +88,7 @@ class DashboardUpdateBlock extends Block {
 
           if (module_exists('installer') && user_access('administer software updates')) {
             $options = array('attributes' => array('class' => array('hi')));
-            $item .= ' - ' . l(t('Update'), 'admin/modules/update', $options);
+            $item .= ' - ' . l(t('Update'), 'admin/config/system/updates', $options);
           }
         }
         else {

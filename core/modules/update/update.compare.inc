@@ -101,16 +101,19 @@ function _update_build_layout_data() {
 /**
  * Populates an array of project data.
  *
- * This iterates over a list of the installed modules or themes and groups them
- * by project and status. A few parts of this function assume that enabled
- * modules, themes, and layouts are always processed first, and if disabled modules or
- * themes are being processed (there is a setting to control if disabled code
- * should be included or not in the 'Available updates' report), those are only
- * processed after $projects has been populated with information about the
- * enabled code. modules, themes, and layouts set as hidden are always ignored. This
- * function also records the latest change time on the .info files for each
- * module, theme, or layout, which is important data which is used when deciding if the
- * cached available update data should be invalidated.
+ * This function iterates over the list of installed modules, themes and
+ * layout templates, and groups them by project type and status.
+ *
+ * Some parts of this function assume that enabled projects are always processed
+ * first, and if disabled projects are being processed (depending on the
+ * 'update_disabled_extensions' setting, as configured under
+ * admin/reports/updates/settings), those are only processed after $projects has
+ * been populated with information about the enabled code. Projects that are set
+ * as hidden are always ignored.
+ *
+ * This function also records the latest change time on the .info files for each
+ * module, theme, or layout template. This timestamp is used when deciding if
+ * the cached available update data should be invalidated.
  *
  * @param $projects
  *   Reference to the array of project data of what's installed on this site.
@@ -194,17 +197,17 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     // or theme. If the project name is 'backdrop', we don't want it to show up
     // under the usual "Modules" section, we put it at a special "Core"
     // section at the top of the report.
-    if ($project_name == 'backdrop') {
-      $project_display_type = 'core';
-    }
-    else {
-      $project_display_type = $project_type;
-    }
+if ($project_name == 'backdrop') {
+  $project_display_type = 'core';
+}
+else {
+  $project_display_type = $project_type;
+}
     if (empty($status) && empty($file->enabled_sub_themes)) {
       // If we're processing disabled modules or themes, append a suffix.
       // However, we don't do this to a a base theme with enabled
       // subthemes, since we treat that case as if it is enabled.
-      $project_display_type .= '-disabled';
+      // $project_display_type .= '-disabled';
     }
     // Add a list of sub-themes that "depend on" the project and a list of base
     // themes that are "required by" the project.
@@ -212,6 +215,8 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
       // Backdrop core is always required, so this extra info would be noise.
       $sub_themes = array();
       $base_themes = array();
+      // Add a more distinguisable label for core.
+      // $projects[$project_name]['title'] = t('Backdrop CMS');
     }
     else {
       // Add list of enabled sub-themes.
@@ -229,7 +234,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
         'info' => update_filter_project_info($file->info),
         'datestamp' => $file->info['datestamp'],
         'includes' => array($file->name => $file->info['name']),
-        'project_type' => $project_display_type,
+        'project_type' => $project_name == 'backdrop' ? 'core' : $project_display_type,
         'project_status' => $status,
         'sub_themes' => $sub_themes,
         'base_themes' => $base_themes,
@@ -253,9 +258,9 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     }
     elseif (empty($status)) {
       // If we have a project_name that matches, but the project_display_type
-      // does not, it means we're processing a disabled module, theme, or layout that
-      // belongs to a project that has some enabled code. In this case, we add
-      // the disabled thing into a separate array for separate display.
+      // does not, it means we're processing a disabled module, theme, or layout
+      // that belongs to a project that has some enabled code. In this case, we
+      // add the disabled thing into a separate array for separate display.
       $projects[$project_name]['disabled'][$file->name] = $file->info['name'];
     }
   }
@@ -338,14 +343,14 @@ function update_process_project_info(&$projects) {
  * Calculates the current update status of all projects on the site.
  *
  * The results of this function are expensive to compute, especially on sites
- * with lots of modules or themes, since it involves a lot of comparisons and
- * other operations. Therefore, we cache the results into the {cache_update}
- * table using the 'update_project_data' cache ID. However, since this is not
- * the data about available updates fetched from the network, it is ok to
- * invalidate it somewhat quickly. If we keep this data for very long, site
- * administrators are more likely to see incorrect results if they upgrade to a
- * newer version of a module, theme, or layout but do not visit certain pages that
- * automatically clear this cache.
+ * with lots of projects, since it involves a lot of comparisons and other
+ * operations. Therefore, we cache the results into the {cache_update} table
+ * using the 'update_project_data' cache ID. However, since this is not the data
+ * about available updates fetched from the network, it is ok to invalidate it
+ * somewhat quickly. If we keep this data for very long, site administrators are
+ * more likely to see incorrect results if they upgrade to a newer version of a
+ * module, theme, or layout, but do not visit certain pages that automatically
+ * clear this cache.
  *
  * @param array $available
  *   Data about available project releases.
@@ -361,11 +366,13 @@ function update_process_project_info(&$projects) {
 function update_calculate_project_data($available) {
   // Retrieve the projects from cache, if present.
   $projects = update_project_cache('update_project_data');
-  // If $projects is empty, then the cache must be rebuilt.
-  // Otherwise, return the cached data and skip the rest of the function.
+
+  // If cached project update data exists, return that, and skip the rest of the
+  // function.
   if (!empty($projects)) {
     return $projects;
   }
+  // Otherwise the cache must be rebuilt.
   $projects = update_get_projects();
   update_process_project_info($projects);
   foreach ($projects as $project => $project_info) {
@@ -384,6 +391,7 @@ function update_calculate_project_data($available) {
 
   // Cache the site's update status for at most 1 hour.
   _update_cache_set('update_project_data', $projects, REQUEST_TIME + 3600);
+
   return $projects;
 }
 
@@ -391,10 +399,10 @@ function update_calculate_project_data($available) {
  * Calculates the current update status of a specific project.
  *
  * This function is the heart of the update status feature. For each project it
- * is invoked with, it first checks if the project has been flagged with a
+ * is invoked for, it first checks if the project has been flagged with a
  * special status like "unsupported" or "insecure", or if the project node
  * itself has been unpublished. In any of those cases, the project is marked
- * with an error and the next project is considered.
+ * with an error, and the next project is considered.
  *
  * If the project itself is valid, the function decides what major release
  * series to consider. The project defines what the currently supported major
@@ -455,8 +463,8 @@ function update_calculate_project_update_status(&$project_data, $available) {
     }
   }
 
-  // If the project status is marked as something bad, there's nothing else
-  // to consider.
+  // If the project status is marked as something bad, there's nothing else to
+  // consider.
   if (isset($available['project_status'])) {
     switch ($available['project_status']) {
       case 'insecure':
@@ -816,10 +824,9 @@ function update_project_cache($cid) {
   // update status of the site to avoid presenting stale information.
   $q = $_GET['q'];
   $paths = array(
+    'admin/config/system/updates',
     'admin/modules',
-    'admin/modules/update',
     'admin/appearance',
-    'admin/appearance/update',
     'admin/structure/layouts',
     'admin/reports',
     'admin/reports/updates',
