@@ -17,8 +17,10 @@ Backdrop.behaviors.installerDownloadUpdatesToggle = {
     // accordingly.
     function toggleExecuteButton (event) {
       var $rowChecked = $context.find('.form-checkbox:checked').length;
+      var $allSelected = $context.find('.form-checkbox.select-none:checked').length;
+      var newButtonText = $allSelected ? Backdrop.t('Download all updates') : buttonText;
       if ($rowChecked) {
-        $donloadButton.attr('disabled', false).removeClass('no-js-hide form-button-disabled').prop('value', buttonText);
+        $donloadButton.attr('disabled', false).removeClass('no-js-hide form-button-disabled').prop('value', newButtonText);
       }
       else {
         $donloadButton.attr('disabled', 'disabled').addClass('no-js-hide form-button-disabled').prop('value', Backdrop.t('No update selected'));
