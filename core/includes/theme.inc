@@ -2425,7 +2425,8 @@ function theme_help($variables) {
   if (strpos($variables['markup'], '<p') === FALSE) {
     $variables['markup'] = '<p>' . $variables['markup'] . '</p>';
   }
-  return '<div class="help">' . $variables['markup'] . '</div>';
+  $variables['attributes']['class'][] = 'help';
+  return '<div ' . backdrop_attributes($variables['attributes']) . '>' . $variables['markup'] . '</div>';
 }
 
 /**
