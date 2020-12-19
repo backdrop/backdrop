@@ -376,7 +376,19 @@ function layout_settings_form_context_relationship_edit($form, &$form_state) {
  */
 function layout_settings_form_context_remove($form, &$form_state) {
   $removed_context = $form_state['clicked_button']['#array_parents'][3];
+
+  // Find all relationships to this context and remove them too.
+  $contexts = $form_state['layout']->getContexts();
+  $id = $contexts[$removed_context]->settings['id'];
+  $relationships = $form_state['layout']->relationships;
+  foreach ($relationships as $key => $relationship) {
+    if ($relationship->settings['context_parent'] == 'id:' . $id) {
+      unset($form_state['layout']->relationships[$key]);
+    }
+  }
+  // Then finally remove the context.
   $form_state['layout']->clearContexts($removed_context);
+
   layout_set_layout_tempstore($form_state['layout']);
 
   $form_state['ajax_update'] = array('context_wrapper');
