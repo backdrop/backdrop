@@ -687,7 +687,7 @@ legend {
   float: right;
 }
 .fieldset-description {
-  margin-bottom: 1em;
+  margin: 1em 0;
 }
 fieldset fieldset {
   background-color: #fff;
