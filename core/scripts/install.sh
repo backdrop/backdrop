@@ -84,6 +84,9 @@ while ($param = array_shift($_SERVER['argv'])) {
 if (!isset($arguments[0])) {
   $arguments[0] = 'standard';
 }
+elseif ($arguments[0] != 'testing' && $arguments[0] != 'minimal') {
+  $arguments[0] = 'standard';
+} 
 $profile = array_shift($arguments);
 
 // Parse additional settings.
