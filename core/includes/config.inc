@@ -63,14 +63,17 @@ function config($config_file, $type = 'active') {
  * @param string $option
  *   The name of the config option within the file to delete. The config option
  *   may contain periods to indicate levels within the config file.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  *
  * @see config_set()
  * @see config_get()
  *
  * @since 1.7.0
  */
-function config_clear($config_file, $option) {
-  $config = config($config_file);
+function config_clear($config_file, $option, $type = 'active') {
+  $config = config($config_file, $type);
   $config->clear($option);
   $config->save();
 }
@@ -85,14 +88,17 @@ function config_clear($config_file, $option) {
  * @param string $option
  *   The name of the config option within the file to check. The config option
  *   may contain periods to indicate levels within the config file.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  *
  * @return bool
  *   TRUE if the config option is overridden. FALSE otherwise.
  *
  * @see Config::isOverridden()
  */
-function config_is_overridden($config_file, $option) {
-  return config($config_file)->isOverridden($option);
+function config_is_overridden($config_file, $option, $type = 'active') {
+  return config($config_file, $type)->isOverridden($option);
 }
 
 /**
@@ -114,8 +120,8 @@ function config_is_overridden($config_file, $option) {
  * @see config_set()
  * @see config_clear()
  */
-function config_get($config_file, $option = NULL) {
-  $config = config($config_file);
+function config_get($config_file, $option = NULL, $type = 'active') {
+  $config = config($config_file, $type);
   return $config->get($option);
 }
 
@@ -139,6 +145,9 @@ function config_get($config_file, $option = NULL) {
  *     translate to a language other than what is used to display the page.
  *   - 'context' (defaults to the empty context): The context the source string
  *     belongs to.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  *
  * @return string
  *   The translated contents of the requested config option. Returns default if no
@@ -148,8 +157,8 @@ function config_get($config_file, $option = NULL) {
  * @see t()
  * @see config_get()
  */
-function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
-  $config = config($config_file);
+function config_get_translated($config_file, $option = NULL, $args = array(), $options = array(), $type = 'active') {
+  $config = config($config_file, $type);
   return $config->getTranslated($option, $args, $options);
 }
 
@@ -175,8 +184,8 @@ function config_get_translated($config_file, $option = NULL, $args = array(), $o
  * @see config_get()
  * @see config_clear()
  */
-function config_set($config_file, $option, $value) {
-  $config = config($config_file);
+function config_set($config_file, $option, $value, $type='active') {
+  $config = config($config_file, $type);
   $config->set($option, $value);
   $config->save();
 }
@@ -195,9 +204,12 @@ function config_set($config_file, $option, $value) {
  *   config object returned will contain the contents of book.admin.json.
  * @param array $options
  *   A keyed array of configuration option names mapping their values.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  */
-function config_set_multiple($config_file, $options) {
-  $config = config($config_file);
+function config_set_multiple($config_file, $options, $type='active') {
+  $config = config($config_file, $type);
   $config->setMultiple($options);
   $config->save();
 }
@@ -277,8 +289,11 @@ function config_load_multiple($names, $type = 'active') {
  * @param string|NULL $config_name
  *   (optional) If wanting to copy just a single configuration file from the
  *   module, specify the configuration file name without the extension.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  */
-function config_install_default_config($module, $config_name = NULL) {
+function config_install_default_config($module, $config_name = NULL, $type = 'active') {
   $module_config_dir = backdrop_get_path('module', $module) . '/config';
   if (is_dir($module_config_dir)) {
     $storage = new ConfigFileStorage($module_config_dir);
@@ -292,7 +307,7 @@ function config_install_default_config($module, $config_name = NULL) {
       $file_config_name = str_replace('.json', '', $file);
       if (is_null($config_name) || $file_config_name === $config_name) {
         $data = $storage->read($file_config_name);
-        $config = config($file_config_name);
+        $config = config($file_config_name, $type);
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
           $config->setData($data);
@@ -305,19 +320,28 @@ function config_install_default_config($module, $config_name = NULL) {
 
 /**
  * Uninstall all the configuration provided by a module.
+ *
+ * @param string $module
+ *   The name of the module we are installing.
+ * @param string|NULL $config_name
+ *   (optional) If wanting to copy just a single configuration file from the
+ *   module, specify the configuration file name without the extension.
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
  */
-function config_uninstall_config($module, $config_name = NULL) {
+function config_uninstall_config($module, $config_name = NULL, $type = 'active') {
   backdrop_load('module', $module);
   if ($configs = module_invoke($module, 'config_info')) {
     foreach ($configs as $config_name => $config_info) {
       if (isset($config_info['name_key'])) {
         $sub_names = config_get_names_with_prefix($config_name . '.');
         foreach ($sub_names as $sub_name) {
-          config($sub_name)->delete();
+          config($sub_name, $type)->delete();
         }
       }
       else {
-        config($config_name)->delete();
+        config($config_name, $type)->delete();
       }
     }
   }
