@@ -2123,7 +2123,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save translations'));
 
     // Configure URL language rewrite.
-    config_get('locale.settings', 'language_negotiation_url_type', LANGUAGE_TYPE_INTERFACE);
+    config_get('locale.settings', 'language_negotiation_url_type');
 
     $tests = array(
       // Default, browser preference should have no influence.

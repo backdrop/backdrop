@@ -479,7 +479,7 @@ function simpletest_script_init($server_software) {
    * avoids resolving of symlinks. This allows the code repository to be a symlink
    * and hosted outside of the web root. See issue #1297.
    *
-   * The realpath is important here to avoid FAILURE with filetransfer.tests. 
+   * The realpath is important here to avoid FAILURE with filetransfer.tests.
    * When realpath used, BACKDROP_ROOT contain full path to backdrop root folder.
    */
   define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
@@ -628,7 +628,7 @@ function simpletest_script_get_test_list() {
       else {
         $directory = BACKDROP_ROOT . "/" . $args['directory'];
       }
-      
+
       $all_classes = array();
       foreach ($groups as $group) {
         $all_classes = array_merge($all_classes, array_keys($group));
@@ -1054,7 +1054,7 @@ function simpletest_script_clean_profile_cache_folders(){
     'testing',
   );
 
-  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+  $file_public_path = config_get('system.core', 'file_public_path');
 
   foreach($profiles as $profile) {
     // Delete temporary files directory.
