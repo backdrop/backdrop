@@ -439,6 +439,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
   $all_relationship_info = _layout_get_all_info('layout_relationship');
   foreach ($layout->relationships as $relationship_key => $relationship) {
+    $relationship_key = 'relationship_' . $relationship_key;
         $form['context_wrapper']['context']['required'][$relationship_key]['summary'] = array(
           '#markup' => $relationship->getAdminSummary(),
         );

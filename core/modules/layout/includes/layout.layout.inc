@@ -94,6 +94,13 @@ function layout_layout_relationship_info() {
     'context_label' => t('Field'),
     'description' => t('Creates an entity context from a foreign key on a field.'),
   );
+  $info['entity_from_schema'] = array(
+    'title' => t('Entity from schema'),
+    'class' => 'LayoutRelationshipEntityFromSchema',
+    'context' => 'schema',
+    'context_label' => t('Schema'),
+    'description' => t('Creates an entity context from a foreign key on a field.'),
+  );
 
   return $info;
 }
