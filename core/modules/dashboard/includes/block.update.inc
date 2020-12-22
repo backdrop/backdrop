@@ -93,7 +93,7 @@ class DashboardUpdateBlock extends Block {
         }
         else {
           // No updates available.
-          $item .= ' - ' . t('No recommended updates');
+          continue;
         }
 
 
@@ -104,10 +104,17 @@ class DashboardUpdateBlock extends Block {
     $panel = array(
       '#theme' => 'dashboard_panel__update',
     );
-    $panel['list'] = array(
-      '#theme' => 'item_list',
-      '#items' => $items,
-    );
+    if (!empty($items)) {
+      $panel['list'] = array(
+        '#theme' => 'item_list',
+        '#items' => $items,
+      );
+    }
+    else {
+      $panel['empty'] = array(
+        '#markup' => '<p class="dashboard-no-updates">' . t('There are no available updates. Your Backdrop site is up-to-date!') . '</p>',
+      );
+    }
 
     return $panel;
   }
