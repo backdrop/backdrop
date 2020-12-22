@@ -57,6 +57,10 @@ abstract class LayoutRelationship extends LayoutHandler{
         $this->$property = $config[$property];
       }
     }
+    if (isset($config['settings']['relationship'])) {
+      list(, $child) = explode(':', $config['settings']['relationship']);
+      $this->childDelta = $child;
+    }
   }
 
   /**
