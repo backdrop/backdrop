@@ -153,7 +153,7 @@ function _update_requirement_check($project, $type) {
         $version_available = t('version @version available', array('@version' => $project['recommended']));
       }
       else {
-        $version_available = t('Updates available');
+        $version_available = t('updates available');
       }
       if (update_manager_access() && module_exists('installer')) {
         $updates_path = 'admin/config/system/updates';

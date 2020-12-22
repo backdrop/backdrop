@@ -452,7 +452,7 @@ function update_mail($key, &$message, $params) {
   }
   $message['body'][] = t('See the available updates page for more information:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates', array('absolute' => TRUE, 'language' => $language));
   if (update_manager_access()) {
-    $message['body'][] = t('You can automatically install your missing updates using the Update manager:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates/update', array('absolute' => TRUE, 'language' => $language));
+    $message['body'][] = t('You can automatically install your missing updates using the Update Manager:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates/update', array('absolute' => TRUE, 'language' => $language));
   }
   $settings_url = url('admin/reports/updates/settings', array('absolute' => TRUE));
   if (config_get('update.settings', 'update_threshold') == 'all') {

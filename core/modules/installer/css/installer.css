@@ -1,16 +1,20 @@
 /**
  * Styles for the Installer interfaces.
  */
-.installer-manager-update-form .update-security.odd:not(:hover) {
+.installer-manager-update-form .update-security.odd:not(:hover),
+.block-dashboard-updates .update-security.odd:not(:hover) {
   background: #FFE0E0;
 }
-.installer-manager-update-form .update-security.even:not(:hover) {
+.installer-manager-update-form .update-security.even:not(:hover),
+.block-dashboard-updates .update-security.even:not(:hover) {
   background: #FFC9C9;
 }
-.installer-manager-update-form .update-security:hover .update-type {
+.installer-manager-update-form .update-security:hover .update-type,
+.block-dashboard-updates .update-security:hover .update-type {
   color: #EC351C;
 }
-.installer-manager-update-form .update-security:not(:hover) {
+.installer-manager-update-form .update-security:not(:hover),
+.block-dashboard-updates .update-security:not(:hover) .update-type {
   color: #9C1D0D;
 }
 
