@@ -1193,7 +1193,7 @@ function theme($hook, $variables = array()) {
       $template_file = $info['path'] . '/' . $template_file;
     }
     try {
-      $theme_debug = config_get('system.core', 'theme_debug');
+      $theme_debug = settings_get('theme_debug', config_get('system.core', 'theme_debug'));
     }
     catch (ConfigException $e) {
       $theme_debug = FALSE;
