@@ -4432,3 +4432,389 @@ function system_theme_debug_enabled_warning() {
     backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
   }
 }
+
+/**
+ * Implements hook_process_html().
+ */
+function d8cache_process_html(&$variables) {
+  backdrop_emit_cache_tags();
+  backdrop_emit_cache_max_age();
+}
+
+/**
+ * Implements hook_ajax_render_alter().
+ */
+function d8cache_ajax_render_alter(&$commands) {
+  backdrop_emit_cache_tags();
+  backdrop_emit_cache_max_age();
+}
+
+/**
+ * Implements hook_emit_cache_tags().
+ */
+function d8cache_emit_cache_tags($tags) {
+  $page_cache_tags = &backdrop_static(__FUNCTION__, array());
+
+  if (config_get('d8cache.settings', 'd8cache_emit_cache_tags')) {
+    backdrop_add_http_header('X-Backdrop-Cache-Tags', implode(' ', $tags));
+  }
+
+  // Store the emitted cache tags for further use.
+  $page_cache_tags = $tags;
+}
+
+/**
+ * Implements hook_emit_cache_max_age().
+ */
+function d8cache_emit_cache_max_age($max_age) {
+  $page_cache_max_age = &backdrop_static(__FUNCTION__, array());
+
+  // Store the emitted cache max_age for further use.
+  $page_cache_max_age = $max_age;
+}
+
+/**
+ * Backwards compatible version of d8cache_invalidate_cache_tags().
+ * This will automatically be used when the core patch to implement end of
+ * transaction callbacks is missing.
+ * @param $tags
+ */
+function d8cache_OLD_invalidate_cache_tags($tags) {
+  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
+  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+
+  foreach ($tags as $tag) {
+    // Only invalidate tags once per request unless they are written again.
+    if (isset($invalidated_tags[$tag])) {
+      continue;
+    }
+
+    $invalidated_tags[$tag] = TRUE;
+    unset($tag_cache[$tag]);
+    db_merge('d8cache_cache_tags')
+      ->key(array('tag' => $tag))
+      ->fields(array('invalidations' => 1))
+      ->expression('invalidations', 'invalidations + 1')
+      ->execute();
+    _d8cache_cache_tags_invalidate_cache($tag);
+  }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function d8cache_flush_caches() {
+  return _d8cache_cache_tags_cache_bins();
+}
+
+/**
+ * Check whether the database connection supports root transaction end callbacks.
+ * @param DatabaseConnection $connection
+ *
+ * @return bool
+ */
+function _d8cache_has_transaction_callbacks($connection) {
+  return method_exists($connection, 'addRootTransactionEndCallback');
+}
+
+/**
+ * Implements hook_invalidate_cache_tags().
+ */
+function d8cache_invalidate_cache_tags($tags) {
+  // Not using backdrop_static because the detection is based on the running
+  // code, and that is not going to change during execution.
+  static $use_transaction_callback;
+  $deferred_tags = &backdrop_static('d8cache_deferred_tags', array());
+
+  $connection = Database::getConnection();
+  if (!isset($use_transaction_callback)) {
+    $use_transaction_callback = _d8cache_has_transaction_callbacks($connection);
+  }
+  if (!$use_transaction_callback) {
+    // Core support missing, use the old (deadlock-prone) invalidation code.
+    return d8cache_OLD_invalidate_cache_tags($tags);
+  }
+  if ($connection->inTransaction()) {
+    // We are inside a transaction, we must defer until the end of the transaction.
+    foreach ($tags as $tag) {
+      if (empty($deferred_tags)) {
+        $connection->addRootTransactionEndCallback('d8cache_root_transaction_end');
+      }
+      $deferred_tags[$tag] = TRUE;
+    }
+  }
+  else {
+    // Not in a transction, directly invalidate instead.
+    d8cache_do_invalidate_cache_tags($tags);
+  }
+}
+
+/**
+ * Perform cache tag invalidations. Must do outside of a transaction.
+ *
+ * @throws \Exception
+ */
+function d8cache_do_invalidate_cache_tags($tags) {
+  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
+  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+
+  $connection = Database::getConnection();
+  if ($connection->inTransaction()) {
+    throw new Exception('Must be outside of a transaction!');
+  }
+  // Ensure tags are cleared in a deterministic order by sorting them first.
+  // This prevents an edge case between multiple transactions that can
+  // cause a deadlock.
+  $tags = array_unique($tags);
+  sort($tags);
+
+  $transaction = db_transaction();
+  foreach ($tags as $tag) {
+    // Only invalidate tags once per request unless they are written again.
+    if (isset($invalidated_tags[$tag])) {
+      continue;
+    }
+
+    $invalidated_tags[$tag] = TRUE;
+    unset($tag_cache[$tag]);
+    try {
+      db_merge('d8cache_cache_tags')
+        ->key(['tag' => $tag])
+        ->fields(['invalidations' => 1])
+        ->expression('invalidations', 'invalidations + 1')
+        ->execute();
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      throw $e;
+    }
+  }
+  // COMMIT
+  unset($transaction);
+  // Ensure the cache tags cache is invalidated too.
+  foreach ($tags as $tag) {
+    _d8cache_cache_tags_invalidate_cache($tag);
+  }
+}
+
+/**
+ * Callback to invalidate cache tags at the end of a transaction.
+ */
+function d8cache_root_transaction_end($committed = NULL) {
+  $deferred_tags = &backdrop_static('d8cache_deferred_tags', array());
+  if ($committed === NULL || $committed === TRUE) {
+    // If the commit is presumed successful, proceed with the invalidation.
+    d8cache_do_invalidate_cache_tags(array_keys($deferred_tags));
+  }
+  else {
+    // Since the transaction was rolled back, the deferred tags no longer
+    // match reality. Since the end result of this transaction was nothing,
+    // we should also do nothing, to eliminate side effects.
+    // Whatever transaction beat us to the commit will have also done its
+    // own invalidation as appropriate, and attempting to invalidate
+    // things ourselves will just cause additional contention for no reason.
+    // Therefore, we do not want to act on the deferred tags at all.
+    //
+    // @todo Check transaction isolation level and invalidate anyway if the
+    // database is operating in a non-isolated mode?
+  }
+  // In both cases, we reset the deferred_tags list.
+  $deferred_tags = array();
+}
+
+/* -----------------------------------------------------------------------
+ * Contrib Hooks
+ */
+
+/* -----------------------------------------------------------------------
+ * Public API
+ */
+
+/**
+ * Returns the sum total of validations for a given set of tags.
+ *
+ * Called by a backend when storing a cache item.
+ *
+ * @param string[] $tags
+ *   Array of cache tags.
+ *
+ * @return string
+ *   Cache tag invalidations checksum.
+ */
+function d8cache_cache_tags_get_current_checksum(array $tags) {
+  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+
+  // Remove tags that were already invalidated during this request from the
+  // static caches so that another invalidation can occur later in the same
+  // request. Without that, written cache items would not be invalidated
+  // correctly.
+  foreach ($tags as $tag) {
+    unset($invalidated_tags[$tag]);
+  }
+
+  return _d8cache_cache_tags_calculate_checksum($tags);
+}
+
+/**
+ * Returns whether the checksum is valid for the given cache tags.
+ *
+ * Used when retrieving a cache item in a cache backend, to verify that no
+ * cache tag based invalidation happened.
+ *
+ * @param int $checksum
+ *   The checksum that was stored together with the cache item.
+ * @param string[] $tags
+ *   The cache tags that were stored together with the cache item.
+ *
+ * @return bool
+ *   FALSE if cache tag invalidations happened for the passed in tags since
+ *   the cache item was stored, TRUE otherwise.
+ */
+function d8cache_cache_tags_is_valid($checksum, array $tags) {
+  return $checksum == _d8cache_cache_tags_calculate_checksum($tags);
+}
+
+/**
+ * Wraps the internal Backdrop API with an official API.
+ *
+ * @param string $bin
+ *   The bin to get a cache object for.
+ *
+ * @return BackdropCacheInterface
+ *   The BackdropCacheInterface object for the selected bin.
+ */
+function d8cache_cache_get_object($bin) {
+  return _cache_get_object($bin);
+}
+
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */
+
+/**
+ * Calculates the current checksum for a given set of tags.
+ *
+ * @param array $tags
+ *   The array of tags to calculate the checksum for.
+ *
+ * @return int
+ *   The calculated checksum.
+ */
+function _d8cache_cache_tags_calculate_checksum(array $tags) {
+  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
+  $checksum = 0;
+
+  $query_tags = array_diff($tags, array_keys($tag_cache));
+
+  // Try to load from cache first.
+  if ($query_tags) {
+    $tag_cache += _d8cache_cache_tags_load_from_cache($query_tags);
+  }
+
+  // Are there any remaining tags to query?
+  if ($query_tags) {
+    $result = _d8cache_cache_tags_load_from_db($query_tags);
+    _d8cache_cache_tags_update_cache($result);
+    $tag_cache += $result;
+  }
+
+  foreach ($tags as $tag) {
+    $checksum += $tag_cache[$tag];
+  }
+
+  return $checksum;
+}
+
+/**
+ * Loads cache tag invalidations from the database.
+ *
+ * @param array $query_tags
+ *   The tags to query from the database.
+ *
+ * @return array
+ *   An array keyed by tag with invalidations as value. Using 0 if no
+ *   invalidation occured, yet.
+ */
+function _d8cache_cache_tags_load_from_db($query_tags) {
+  $result = array();
+
+  // Ensure database is loaded, since we can get called to load missing tags
+  // during BACKDROP_BOOTSTRAP_PAGE_CACHE. This is a recursive call.
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+  if ($db_tags = db_query('SELECT tag, invalidations FROM {d8cache_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
+    $result += $db_tags;
+  }
+
+  // Fill static cache with empty objects for tags not found in the database.
+  $result += array_fill_keys(array_diff($query_tags, array_keys($db_tags)), 0);
+
+  return $result;
+}
+
+/* -----------------------------------------------------------------------
+ * Cache helper functions
+ */
+
+function _d8cache_cache_tags_cache_bins() {
+  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+    return array();
+  }
+
+  return ['cache_d8cache_cache_tags'];
+}
+
+/**
+ * Invalidate a tag from the cache tags cache.
+ *
+ * @param string $tag
+ *   The tag to invalidate.
+ */
+function _d8cache_cache_tags_invalidate_cache($tag) {
+  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+    return;
+  }
+
+  cache_clear_all($tag, 'cache_d8cache_cache_tags');
+}
+
+/**
+ * Update the cache with data returned from the database.
+ *
+ * @param array $result
+ *   The array of (tag, invalidations) to sync to the database.
+ */
+function _d8cache_cache_tags_update_cache($result) {
+  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+    return;
+  }
+
+  foreach ($result as $tag => $invalidations) {
+    cache_set($tag, $invalidations, 'cache_d8cache_cache_tags');
+  }
+}
+
+/**
+ * Loads cache tag invalidations from the cache.
+ *
+ * @param array &$query_tags
+ *   The tags to query in the cache. Will be updated by removing tags
+ *   sucessfully returned from cache.
+ *
+ * @return array
+ *   An array keyed by tag with invalidations as value.
+ */
+function _d8cache_cache_tags_load_from_cache(&$query_tags) {
+  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+    return array();
+  }
+
+  $result = array();
+
+  // Load from cache.
+  $cached = cache_get_multiple($query_tags, 'cache_d8cache_cache_tags');
+  foreach ($cached as $tag => $item) {
+    $result[$tag] = $item->data;
+  }
+
+  return $result;
+}

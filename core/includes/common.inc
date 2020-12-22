@@ -8459,6 +8459,332 @@ function _backdrop_flush_css_js() {
 }
 
 /**
+ * Add custom cache tags to the current context.
+ *
+ * @param array $tags
+ *   Tags to add.
+ */
+function backdrop_add_cache_tags(array $tags) {
+  // Process the data as attachment if we have an active attachments
+  // collector.
+  if (function_exists('backdrop_has_attachments_collector') && backdrop_has_attachments_collector()) {
+    backdrop_add_attachment('backdrop_add_cache_tags', array($tags));
+    return;
+  }
+
+  $stored_tags = &backdrop_static(__FUNCTION__, array());
+  $stored_tags = backdrop_merge_cache_tags($stored_tags, $tags);
+}
+
+  /**
+   * Get cache tags for the current context.
+   *
+   * @return array
+   *   Tags in current context.
+   */
+  function backdrop_get_cache_tags() {
+    $stored_tags = &backdrop_static('backdrop_add_cache_tags', array());
+
+    // Add the rendered cache tag.
+    $tags = backdrop_merge_cache_tags($stored_tags, array('rendered'));
+
+    sort($tags);
+    return $tags;
+  }
+
+  /**
+   * Invalidate cache tags immediately.
+   *
+   * @param array $tags
+   *   Tags to invalidate.
+   */
+  function backdrop_invalidate_cache_tags(array $tags) {
+    // @todo Add hooks to .api.php.
+    backdrop_alter('pre_invalidate_cache_tags', $tags);
+    module_invoke_all('invalidate_cache_tags', $tags);
+  }
+
+  /**
+   * Merges arrays of cache tags and removes duplicates.
+   *
+   * When caching elements, it is necessary to collect all cache tags into a
+   * single array, from both the element itself and all child elements. This
+   * allows items to be invalidated based on all tags attached to the content
+   * they're constituted from.
+   *
+   * @param array $tags1
+   *   Cache tags array to merge.
+   * @param array $tags2
+   *   Cache tags array to merge.
+   *
+   * @return string[]
+   *   The merged array of cache tags.
+   */
+  function backdrop_merge_cache_tags(array $tags1, array $tags2) {
+    return array_unique(array_merge($tags1, $tags2));
+  }
+
+  /**
+   * Emit cache tags for current context.
+   */
+  function backdrop_emit_cache_tags() {
+    $tags = backdrop_get_cache_tags();
+    // @todo Add hooks to .api.php.
+    backdrop_alter('pre_emit_cache_tags', $tags);
+    module_invoke_all('emit_cache_tags', $tags);
+  }
+
+if (!defined('CACHE_MAX_AGE_PERMANENT')) {
+  /**
+   * A max-age value signifying an item that should be cached forever.
+   */
+  define('CACHE_MAX_AGE_PERMANENT', -2);
+}
+
+/**
+ * Sets the maximum age (in seconds).
+ *
+ * Defaults to CACHE_MAX_AGE_PERMANENT.
+ *
+ * @param int $max_age
+ *   The max age to associate.
+ */
+function backdrop_set_cache_max_age($max_age) {
+  // Process the data as attachment if we have an active attachments
+  // collector.
+  if (function_exists('backdrop_has_attachments_collector') && backdrop_has_attachments_collector()) {
+    backdrop_add_attachment('backdrop_set_cache_max_age', array($max_age));
+    return;
+  }
+
+  $stored_max_age = &backdrop_static(__FUNCTION__, CACHE_MAX_AGE_PERMANENT);
+  $stored_max_age = backdrop_merge_cache_max_ages($stored_max_age, $max_age);
+}
+
+/**
+ * Get the maximum age for which the current context may be cached.
+ *
+ * @return int
+ *   The maximum time in seconds that this object may be cached.
+ */
+function backdrop_get_cache_max_age() {
+  $stored_max_age = &backdrop_static('backdrop_set_cache_max_age', CACHE_MAX_AGE_PERMANENT);
+
+  return $stored_max_age;
+}
+
+/**
+ * Merges max-age values (TTL in seconds), finds the lowest max-age.
+ *
+ * Ensures infinite max-age (CACHE_MAX_AGE_PERMANENT) is taken into account.
+ *
+ * @param int $a
+ *   Max age value to merge.
+ * @param int $b
+ *   Max age value to merge.
+ *
+ * @return int
+ *   The minimum max-age value.
+ */
+function backdrop_merge_cache_max_ages($a, $b) {
+  // If one of the values is CACHE_MAX_AGE_PERMANENT, return the other value.
+  if ($a === CACHE_MAX_AGE_PERMANENT) {
+    return $b;
+  }
+  if ($b === CACHE_MAX_AGE_PERMANENT) {
+    return $a;
+  }
+
+  // If none of the values are CACHE_MAX_AGE_PERMANENT, return the minimum
+  // value.
+  return min($a, $b);
+}
+
+/**
+ * Creates a cacheable metadata array with values taken from a render array.
+ *
+ * @param array $build
+ *   A render array.
+ *
+ * @return array
+ *   Cacheable metadata array.
+ */
+function backdrop_get_cacheable_metadata_from_render_array($build) {
+  if (!isset($build['#attached'])) {
+    return array();
+  }
+
+  $contexts = array();
+  $max_age = CACHE_MAX_AGE_PERMANENT;
+  $tags = array('rendered');
+
+  // @todo Implement cache contexts.
+  if (isset($build['#attached']['backdrop_set_cache_max_age'])) {
+    foreach ($build['#attached']['backdrop_set_cache_max_age'] as $key => $parameters) {
+      if (!isset($parameters[0])) {
+        continue;
+      }
+
+      $max_age = backdrop_merge_cache_max_ages($max_age, $parameters[0]);
+    }
+  }
+
+  if (isset($build['#attached']['backdrop_add_cache_tags'])) {
+    foreach ($build['#attached']['backdrop_add_cache_tags'] as $key => $parameters) {
+      if (!isset($parameters[0])) {
+        continue;
+      }
+
+      $tags = backdrop_merge_cache_tags($tags, $parameters[0]);
+    }
+    sort($tags);
+  }
+
+  $cacheable_metadata = array(
+    'contexts' => $contexts,
+    'max-age' => $max_age,
+    'tags' => $tags,
+  );
+
+  return $cacheable_metadata;
+}
+
+/**
+ * Invoke hook_pre_emit_cache_max_age() and hook_emit_cache_max_age().
+ */
+function backdrop_emit_cache_max_age() {
+  $max_age = backdrop_get_cache_max_age();
+  // @todo Add hooks to .api.php.
+  backdrop_alter('pre_emit_cache_max_age', $max_age);
+  module_invoke_all('emit_cache_max_age', $max_age);
+}
+
+/**
+ * @file
+ * Attachment Collector functions for the D8 caching system backport.
+ */
+
+/* -----------------------------------------------------------------------
+ * Public API
+ */
+
+if (!function_exists('backdrop_add_attachment')) {
+
+  /**
+   * Adds attachments in a way that they can be collected for render caching.
+   *
+   * This allows collecting attachments that are added out-of-band within a
+   * local scope to store them into #attached for render caching.
+   * If you want to call this from a legacy function that both works when
+   * called via #attached and when called directly, ensure to check
+   * backdrop_has_attachments_collector() first as not doing so can lead to
+   * an endless recursion.
+   * This is essentially a short wrapper around backdrop_process_attached().
+   *
+   * @param string $key
+   *   The key within #attached, like 'js', 'css' to add to.
+   * @param mixed $value
+   *   The value to store as attachment.
+   * @param bool $dependency_check
+   *   This parameter is passed on to backdrop_process_attached() and can be used
+   *   for checking dependency chains for backdrop_add_library().
+   *
+   * @return bool
+   *   FALSE if there were any missing library dependencies; TRUE if all library
+   *   dependencies were met.
+   *
+   * @see backdrop_process_attached()
+   */
+  function backdrop_add_attachment($key, $value, $dependency_check = FALSE) {
+    $elements = array();
+    $elements['#attached'] = array();
+    $elements['#attached'][$key][] = $value;
+    return _backdrop_process_attached_supplement($elements, JS_DEFAULT, $dependency_check);
+  }
+
+}
+
+if (!function_exists('backdrop_has_attachments_collector')) {
+
+  /**
+   * Returns whether there is an active attachments collector.
+   *
+   * @return bool
+   *   TRUE if Backdrop is collecting attachments, FALSE otherwise.
+   */
+  function backdrop_has_attachments_collector() {
+    static $backdrop_static_fast;
+
+    if (!isset($backdrop_static_fast)) {
+      $backdrop_static_fast = array();
+      $backdrop_static_fast['render_listeners'] = &backdrop_static('backdrop_render:render_listeners', array());
+      $backdrop_static_fast['collect_attachments'] = &backdrop_static('backdrop_process_attached:collect_attachments', TRUE);
+    }
+
+    if ($backdrop_static_fast['collect_attachments'] !== FALSE && !empty($backdrop_static_fast['render_listeners'])) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+}
+
+
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */
+
+/**
+ * Overrides backdrop_process_attached().
+ */
+function _backdrop_process_attached_supplement($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
+  static $backdrop_static_fast;
+
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast = array();
+    $backdrop_static_fast['render_listeners'] = &backdrop_static('backdrop_render:render_listeners', array());
+    $backdrop_static_fast['collect_attachments'] = &backdrop_static('backdrop_process_attached:collect_attachments', TRUE);
+  }
+  $render_listeners = &$backdrop_static_fast['render_listeners'];
+  $collect_attachments = &$backdrop_static_fast['collect_attachments'];
+
+  // If we are collecting attachments and have at least one listener in the
+  // active render listeners, then put all attachments from $elements into the
+  // storage of all listeners.
+  if ($collect_attachments && !empty($render_listeners)) {
+    foreach ($render_listeners as $listener_id => $listener_storage) {
+      foreach ($elements['#attached'] as $key => $value) {
+        if (!isset($render_listeners[$listener_id][$key])) {
+          $render_listeners[$listener_id][$key] = array();
+        }
+        $render_listeners[$listener_id][$key] = array_merge($render_listeners[$listener_id][$key], $value);
+      }
+    }
+  }
+
+  // Protect against accidental recursion.
+  $old_collect_attachments = $collect_attachments;
+  $collect_attachments = FALSE;
+
+  // Add additional types of attachments specified in the render() structure.
+  // Libraries, JavaScript and CSS have been added already, as they require
+  // special handling.
+  foreach ($elements['#attached'] as $callback => $options) {
+    if (function_exists($callback)) {
+      foreach ($elements['#attached'][$callback] as $args) {
+        call_user_func_array($callback, $args);
+      }
+    }
+  }
+
+  // Restore old value.
+  $collect_attachments = $old_collect_attachments;
+
+  return TRUE;
+}
+
+/**
  * Outputs debug information.
  *
  * The debug information is passed on to trigger_error() after being converted

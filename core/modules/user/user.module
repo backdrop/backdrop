@@ -328,6 +328,8 @@ function user_load_by_name($name) {
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function user_save($account) {
+  backdrop_invalidate_cache_tags(array('search_index:user'));
+
   return $account->save();
 }
 
@@ -2119,6 +2121,10 @@ function _user_cancel($edit, $account, $method) {
       }
       $account->status = 0;
       $account->save();
+
+      // Clear the cache tag for this user.
+      backdrop_invalidate_cache_tags(array('user:' . $account->uid));
+
       backdrop_set_message(t('%name has been disabled.', array('%name' => $account->name)));
       watchdog('user', 'Blocked user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
       break;
@@ -2150,6 +2156,13 @@ function _user_cancel($edit, $account, $method) {
  * @see user_cancel()
  */
 function _user_cancel_session_regenerate() {
+  // Clear cache tags for user lists because this function is called after the
+  // user_cancel batch process.
+  backdrop_invalidate_cache_tags(array(
+    'user_list',
+    'search_index:user',
+  ));
+
   // Regenerate the users session instead of calling session_destroy() as we
   // want to preserve any messages that might have been set.
   backdrop_session_regenerate();
@@ -2178,6 +2191,11 @@ function user_delete_multiple(array $uids) {
   if (!empty($uids)) {
     $accounts = user_load_multiple($uids, array());
 
+    $tags = array(
+      'user_list',
+      'search_index:user',
+    );
+
     $transaction = db_transaction();
     try {
       foreach ($accounts as $uid => $account) {
@@ -2199,12 +2217,17 @@ function user_delete_multiple(array $uids) {
         // Allow modules to respond to user deletion.
         module_invoke_all('user_delete', $account);
         module_invoke_all('entity_delete', $account, 'user');
+
+        $tags[] = 'user:' . $account->uid;
     }
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception('user', $e);
       throw $e;
     }
+
+    backdrop_invalidate_cache_tags($tags);
+
     entity_get_controller('user')->resetCache();
   }
 }

@@ -885,6 +885,26 @@ function system_schema() {
   $schema['cache_token'] = $schema['cache'];
   $schema['cache_token']['description'] = 'Cache table for token information.';
 
+  $schema['invalidated_cache_tags'] = array(
+    'description' => 'Table for tracking cache tag invalidations.',
+    'fields' => array(
+      'tag' => array(
+        'description' => 'Namespace-prefixed tag string.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'invalidations' => array(
+        'description' => 'Number incremented when the tag is invalidated.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('tag'),
+  );
+
   $schema['flood'] = array(
     'description' => 'Flood controls the threshold of events, such as the number of contact attempts.',
     'fields' => array(

@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * @file
+ * Drupal 8 Caching backport tests.
+ */
+
+/**
+ * Test the Drupal 8 caching backport.
+ */
+class D8CacheUnitTestCase extends BackdropUnitTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Drupal 8 Cache Backport',
+      'description' => 'Tests the Drupal 8 caching backport.',
+      'group' => 'D8Cache',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('d8cache');
+  }
+
+  /**
+   * Tests that attachment collectors work properly.
+   */
+  function testAttachmentCollectors() {
+    // Skip test if attachment collectors do not exist.
+    if (!class_exists('BackdropAttachmentsCollector')) {
+      return;
+    }
+
+    $expected_attachments = array();
+    $expected_attachments['backdrop_add_cache_tags'] = array(
+      array(array('foo:1')),
+      array(array('foo:1', 'foo:2')),
+      array(array('foo:3', 'foo:2')),
+      array(array('bar:1')),
+      array(array('foo:3', 'foo:4')),
+    );
+    $expected_attachments['backdrop_set_cache_max_age'] = array(
+      array(600),
+      array(1200),
+      array(1800),
+      array(CACHE_MAX_AGE_PERMANENT),
+    );
+
+    $expected_cache_tags = array(
+      'bar:1',
+      'foo:1',
+      'foo:2',
+      'foo:3',
+      'foo:4',
+      'rendered',
+    );
+
+    $expected_cache_max_age = 600;
+
+    $attachments_collector = new BackdropAttachmentsCollector();
+    backdrop_add_cache_tags(array('foo:1'));
+    backdrop_add_cache_tags(array('foo:1', 'foo:2'));
+    backdrop_add_cache_tags(array('foo:3', 'foo:2'));
+
+    backdrop_set_cache_max_age(600);
+    backdrop_set_cache_max_age(1200);
+
+    $build = array();
+    $build['#markup'] = 'foo';
+    $build['#attached']['backdrop_add_cache_tags'][] = array(
+      array('bar:1'),
+    );
+    $build['#attached']['backdrop_add_cache_tags'][] = array(
+      array('foo:3', 'foo:4'),
+    );
+    $build['#attached']['backdrop_set_cache_max_age'][] = array(
+      1800,
+    );
+    $build['#attached']['backdrop_set_cache_max_age'][] = array(
+      CACHE_MAX_AGE_PERMANENT,
+    );
+
+    backdrop_render($build);
+
+    $attachments = $attachments_collector->getAttachments();
+    unset($attachments_collector);
+
+    $this->assertEqual($attachments, $expected_attachments, 'Expected attachments are present.');
+
+    $rendered_build = array();
+    $rendered_build['#attached'] = $attachments;
+
+    $cacheable_metadata = backdrop_get_cacheable_metadata_from_render_array($rendered_build);
+
+    $this->assertEqual($cacheable_metadata['tags'], $expected_cache_tags, 'Expected cache tags are present.');
+    $this->assertEqual($cacheable_metadata['max-age'], $expected_cache_max_age, 'Expected cache max age is present.');
+
+    $this->assertEqual(backdrop_get_cache_tags(), $expected_cache_tags, 'Expected cache tags are present in global state.');
+    $this->assertEqual(backdrop_get_cache_max_age(), $expected_cache_max_age, 'Expected cache max age is present in global state.');
+  }
+}

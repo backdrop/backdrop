@@ -751,6 +751,7 @@ function node_type_cache_reset() {
   entity_info_cache_clear();
 }
 
+
 /**
  * Sets the default values for a node type.
  *
@@ -2435,6 +2436,8 @@ function node_update_index() {
   foreach (node_load_multiple($nids) as $node) {
     _node_index_node($node);
   }
+
+  backdrop_invalidate_cache_tags(array('search_index:node'));
 }
 
 /**

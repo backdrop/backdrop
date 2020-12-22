@@ -87,6 +87,11 @@ function theme_username($variables) {
   else {
     $output = '<span' . backdrop_attributes($variables['attributes']) . '>' . $variables['name'] . $variables['extra'] . '</span>';
   }
+
+  if ($variables['uid'] > 0) {
+    backdrop_add_cache_tags(array('user:' . $variables['uid']));
+  }
+
   return $output;
 }
 

@@ -16,9 +16,14 @@
  */
 function template_preprocess_search_results(&$variables) {
   global $language;
+
+  $tags = array('search_index');
+
   $variables['search_results'] = array();
   if (!empty($variables['module'])) {
     $variables['module'] = check_plain($variables['module']);
+
+    $tags[] = 'search_index:' . $variables['module'];
   }
   foreach ($variables['results'] as $result) {
     $info = array();
@@ -58,5 +63,7 @@ function template_preprocess_search_results(&$variables) {
   }
   $variables['pager'] = theme('pager', array('tags' => NULL));
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
+
+  backdrop_add_cache_tags($tags);
 }
 

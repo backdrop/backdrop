@@ -1586,6 +1586,8 @@ function comment_access($op, Comment $comment = NULL) {
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
 function comment_save(Comment $comment) {
+  backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
+
   return $comment->save();
 }
 
@@ -1610,6 +1612,34 @@ function comment_delete($cid) {
  */
 function comment_delete_multiple($cids) {
   entity_delete_multiple('comment', $cids);
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function d8cache_comment_insert($comment) {
+  backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
+}
+
+/**
+ * Implements hook_comment_delete().
+ */
+function d8cache_comment_delete($comment) {
+  backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
+}
+
+/**
+ * Implements hook_comment_publish().
+ */
+function d8cache_comment_publish($comment) {
+  backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
+}
+
+/**
+ * Implements hook_comment_unpublish().
+ */
+function d8cache_comment_unpublish($comment) {
+  backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
 }
 
 /**

@@ -665,6 +665,106 @@ function entity_label($entity_type, $entity) {
 }
 
 /**
+ * Implements hook_entity_view().
+ */
+function entity_entity_view($entity, $entity_type, $view_mode, $langcode) {
+  $tags = _entity_entity_get_cache_tags($entity_type, $entity);
+  $tags[] = $entity_type . '_view';
+
+  if ($entity_type == 'node' && $view_mode != 'full') {
+    // @todo Find a better way to add list cache tags.
+    $tags = array_merge($tags, _entity_entity_get_list_cache_tags($entity_type, $entity));
+  }
+
+  $entity->content['#attached']['backdrop_add_cache_tags'][][0] = $tags;
+}
+
+/**
+ * Implements hook_entity_load().
+ */
+function entity_entity_load($entities, $entity_type) {
+  $disabled = &backdrop_static(__FUNCTION__, FALSE);
+
+  if ($disabled) {
+    return;
+  }
+
+  $tags = array();
+  foreach ($entities as $entity_id => $entity) {
+    $tags[] = $entity_type . ':' . $entity_id;
+  }
+
+  backdrop_add_cache_tags($tags);
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function entity_entity_insert($entity, $entity_type) {
+  _entity_entity_invalidate_cache_tags($entity_type, $entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function entity_entity_update($entity, $entity_type) {
+  _entity_entity_invalidate_cache_tags($entity_type, $entity);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function entity_entity_delete($entity, $entity_type) {
+  _entity_entity_invalidate_cache_tags($entity_type, $entity);
+}
+
+/**
+ * Temporarily disable adding of cache tags during entity loading.
+ */
+function entity_disable_cache_tags_for_entity_load($new_state = NULL) {
+  $state = &backdrop_static('entity_entity_load', FALSE);
+  $old_state = $state;
+
+  if ($new_state !== NULL) {
+    $state = $new_state;
+  }
+
+  return $old_state;
+}
+
+/**
+ * Invalidate entity specific cache tags.
+ */
+function _entity_entity_invalidate_cache_tags($entity_type, $entity) {
+  $tags = _entity_entity_get_list_cache_tags($entity_type, $entity);
+  $tags = array_merge($tags, _entity_entity_get_cache_tags($entity_type, $entity));
+
+  backdrop_invalidate_cache_tags($tags);
+}
+
+/**
+ * Get cache tags for an entity type.
+ */
+function _entity_entity_get_list_cache_tags($entity_type, $entity = NULL) {
+  $return = array($entity_type . '_list');
+  if (!empty($entity)) {
+    list(, , $entity_bundle) = entity_extract_ids($entity_type, $entity);
+    $return[] = $entity_type . '_' . $entity_bundle . '_list';
+  }
+  return $return;
+}
+
+/**
+ * Get cache tags for an entity.
+ */
+function _entity_entity_get_cache_tags($entity_type, $entity) {
+  list($entity_id, , ) = entity_extract_ids($entity_type, $entity);
+  return array(
+    $entity_type . ':' . $entity_id,
+  );
+}
+
+/**
  * Attaches field API validation to entity forms.
  */
 function entity_form_field_validate($entity_type, $form, &$form_state) {
