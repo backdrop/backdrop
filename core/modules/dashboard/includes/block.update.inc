@@ -160,7 +160,7 @@ class DashboardUpdateBlock extends Block {
       );
     }
 
-    if (!empty($rows) && module_exists('installer') && user_access('administer software updates')) {
+    if (!empty($updates) && module_exists('installer') && user_access('administer software updates')) {
       $link_path = 'admin/config/system/updates';
       $link_text = t('Update');
     }
