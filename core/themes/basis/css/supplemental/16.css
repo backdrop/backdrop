@@ -1,0 +1,9 @@
+.l-header::after {
+  display: block;
+  font-size: 20px;
+  color: orange;
+  content: "The supplemental CSS stylesheet for 1.16 is active.";
+  text-align: center;
+  margin: 20px auto;
+  padding: 0 20px;
+}

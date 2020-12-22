@@ -25,6 +25,23 @@ function basis_preprocess_page(&$variables) {
   if ($view) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
+
+  // Include supplemental CSS.
+  $initial_version = config_get('system.core', 'initial_version');
+  if ($initial_version) {
+    $version_info = explode('.', $initial_version);
+    $initial_minor_version = $version_info['1'];
+
+    $css_path = backdrop_get_path('theme', 'basis') . '/css/supplemental/';
+    $css_files = array_diff(scandir($css_path), array('..', '.'));
+    foreach ($css_files as $filename) {
+      $filename_parts = explode('.', $filename);
+      $filename_version = $filename_parts[0];
+      if ($initial_minor_version >= $filename_version) {
+        backdrop_add_css($css_path . $filename);
+      }
+    }
+  }
 }
 
 /**

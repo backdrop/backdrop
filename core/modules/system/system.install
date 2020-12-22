@@ -735,6 +735,7 @@ function system_install() {
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
   backdrop_set_installed_schema_version('system', $version);
+  config_set('system.core', 'initial_version', BACKDROP_VERSION);
 
   // Set the public files path to the directory with the settings.php file.
   config_set('system.core', 'file_public_path', str_replace('./', '', conf_path() . '/files'));
