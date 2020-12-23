@@ -1789,14 +1789,14 @@ function _form_test_disabled_elements($form, &$form_state) {
     '#title' => 'date',
     '#disabled' => TRUE,
     '#default_value' => array(
-      'day' => 19,
-      'month' => 11,
-      'year' => 1978,
+      'day' => 16,
+      'month' => 01,
+      'year' => 2015,
     ),
     '#test_hijack_value' => array(
-      'day' => 20,
-      'month' => 12,
-      'year' => 1979,
+      'day' => 16,
+      'month' => 09,
+      'year' => 2016,
     ),
   );
 
