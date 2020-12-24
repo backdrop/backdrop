@@ -134,7 +134,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     foreach ($modules as $name => $module) {
       // Check the "version" key matches the Backdrop version to restrict to
       // core modules only.
-      if ($module->info['version'] !== BACKDROP_VERSION) {
+      if (!strstr($module->uri, 'core/modules')) {
         unset($modules[$name]);
       }
 
