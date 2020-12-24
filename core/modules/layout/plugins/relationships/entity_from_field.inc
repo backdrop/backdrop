@@ -40,6 +40,7 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
           $loaded_to_entity = array_shift($loaded_to_entity);
 
           // Pass current user account and entity type to access callback.
+          // @todo: we dont have 'access callback' in core entity API. Leave for contrib?
           if (isset($to_entity_info['access callback']) && function_exists($to_entity_info['access callback']) && !call_user_func($to_entity_info['access callback'], 'view', $loaded_to_entity, $account, $to_entity)) {
             return layout_create_context($to_entity);
           }
