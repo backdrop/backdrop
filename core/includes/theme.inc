@@ -1466,7 +1466,14 @@ function theme_get_setting($setting_name, $theme = NULL) {
 
   // Loop up through any base themes.
   if (is_null($value) && isset($theme_info->info['base theme'])) {
-    $value = theme_get_setting($setting_name, $theme_info->info['base theme']);
+    $theme = $theme_info->info['base theme'];
+    $value = theme_get_setting($setting_name, $theme);
+  }
+
+  // Save the setting to config.
+  if (!is_null($value)) {
+    $configs[$theme]->set($setting_name, $value);
+    $configs[$theme]->save();
   }
 
   return $value;
