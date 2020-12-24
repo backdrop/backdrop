@@ -129,10 +129,16 @@ class EnableDisableTestCase extends ModuleTestCase {
    * Test that all core modules can be enabled, disabled and uninstalled.
    */
   function testEnableDisable() {
-    // Try to enable, disable and uninstall all core modules, unless they are
-    // hidden or required, or testing-only modules.
+    // Try to enable, disable and uninstall all core modules.
     $modules = system_rebuild_module_data();
     foreach ($modules as $name => $module) {
+      // Check the "version" key matches the Backdrop version to restrict to
+      // core modules only.
+      if (!strstr($module->uri, 'core/modules')) {
+        unset($modules[$name]);
+      }
+
+      // Exclude hidden, required, or testing-only modules.
       if ($module->info['package'] == 'Testing' || !empty($module->info['hidden']) || !empty($module->info['required'])) {
         unset($modules[$name]);
       }
@@ -2497,7 +2503,6 @@ class SystemValidTokenTest extends BackdropWebTestCase {
     // The following checks will throw PHP notices, so we disable error
     // assertions.
     $this->assertErrors = FALSE;
-    $this->assertFalse(backdrop_valid_token(NULL, new stdClass()), 'Token NULL, value object returns FALSE.');
     $this->assertFalse(backdrop_valid_token(0, array()), 'Token 0, value array returns FALSE.');
     $this->assertFalse(backdrop_valid_token('', array()), "Token '', value array returns FALSE.");
     $this->assertFalse('' === backdrop_get_token(array()), 'Token generation does not return an empty string on invalid parameters.');
