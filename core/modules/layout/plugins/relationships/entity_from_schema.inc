@@ -129,7 +129,7 @@ class LayoutRelationshipEntityFromSchema extends LayoutRelationship {
    * Get the context from this relationship.
    */
   function getContext($context) {
-    $plugin = $this->settings['name'];
+    $plugin = $this->settings['relationship'];
     list($plugin, $plugin_name) = explode(':', $plugin);
     list($this_col, $from_entity, $to_entity) = explode('-', $plugin_name);
     // If unset it wants a generic, unfilled context, which is just NULL.

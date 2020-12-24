@@ -10,7 +10,6 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
    * Get the context from this relationship.
    */
   function getContext($context) {
-    dpm($context);
     // Perform access check on current logged in user.
     global $user;
     // Clone user object so account can be passed by value to access callback.
@@ -63,7 +62,6 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
    */
   function getAdminSummary() {
     $child = $this->getChild();
-    dpm($this);
     $title = $child['title'];
 
     if (!empty($this->settings['context_parent'])) {
@@ -213,7 +211,6 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
     $child_relationship = $this->getChild();
     $field = field_info_field($child_relationship['field name']);
     $settings = $this->settings;
-      dpm($field);
 
     if ($field && $field['cardinality'] != 1) {
       if ($field['cardinality'] == -1) {

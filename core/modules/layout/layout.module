@@ -1563,6 +1563,7 @@ function layout_get_context_from_relationship($relationship, $source_context) {
   if ($context) {
     return $context;
   }
+  return array();
 }
 
 /**
@@ -1576,16 +1577,18 @@ function layout_get_context_from_relationship($relationship, $source_context) {
  *   are relevant. New contexts will be added to this.
  */
 function layout_get_context_from_relationships($relationships, &$contexts) {
-  $contexts_from_relationships_list = array();
+  $contexts_from_relationships_list  = &backdrop_static('layout_get_context_from_relationships', array());
   foreach ($relationships as $rname => $rdata) {
-    foreach ($contexts as $context) {
-      if ($context->plugin == $rdata->context) {
-        $key = 'relationship_' . $rname;
-        $plugin_array = explode(':', $rdata->settings['relationship']);
-        if (!empty($plugin_array[1])) {
-          $rdata->childDelta = $plugin_array[1];
+    $key = 'relationship_' . $rname;
+    if (!isset($contexts_from_relationships_list[$key])) {
+      foreach ($contexts as $context) {
+        if ($context->plugin == $rdata->context) {
+          $plugin_array = explode(':', $rdata->settings['relationship']);
+          if (!empty($plugin_array[1])) {
+            $rdata->childDelta = $plugin_array[1];
+          }
+          $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
         }
-        $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
       }
     }
   }
