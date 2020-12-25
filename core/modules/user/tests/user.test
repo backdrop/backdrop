@@ -2197,8 +2197,9 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
-    // Make sure this role is no longer configured as the administrator role.
-    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The administrator role is no longer configured as the administrator role.');
+    // Since the administrator role that was previously set as admin has been
+    // deleted, no role should be set as admin now.
+    $this->assertFalse(config_get('system.core', 'user_admin_role'), 'No role is configured as the administrator role.');
   }
 
   /**

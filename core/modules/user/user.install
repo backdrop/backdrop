@@ -1230,5 +1230,16 @@ function user_update_1018() {
 }
 
 /**
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  if ($config->get('user_admin_role') == NULL) {
+    $config->set('user_admin_role', 0);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

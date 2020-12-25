@@ -508,15 +508,19 @@ function user_admin_roles($form, $form_state) {
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
-  // Do not allow the anonymous or authenticated user roles as administrator.
   $roles = user_roles();
+  // Do not allow the anonymous or authenticated roles to be set as the
+  // administrator.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
+  // Add the "disabled" option to the top of the roles list (makes sure that
+  // this is the selected option if the role that was previously set as admin is
+  // deleted).
+  array_unshift($roles, t('disabled'));
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role'),
+    '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
