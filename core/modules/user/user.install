@@ -1230,8 +1230,7 @@ function user_update_1018() {
 }
 
 /**
- * Explicitly set the "user_admin_role" attribute to "0" (disabled) if it's
- * missing.
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
  */
 function user_update_1019() {
   $config = config('system.core');
