@@ -100,10 +100,14 @@ fieldset .fieldset-wrapper {
 }
 
 .fieldset-legend span.summary {
-  position: absolute;
-  top: .4em;
-  right: 2em;
-  display: none;
+  position: relative;
+  z-index: 0;
+  float: right; /* LTR */
+  top: -1.9em;
+}
+[dir="rtl"] .fieldset-legend span.summary {
+  float: left;
+  left: 1em;
 }
 
 .fieldset-legend span.summary:not(:empty):before {
