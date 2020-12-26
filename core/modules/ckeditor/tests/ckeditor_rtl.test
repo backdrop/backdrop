@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Tests for ckeditor.module.
+ */
+
+/**
+ * CKEditor testing class specific for right-to-left languages.
+ */
+class CKEditorRtlTestCase extends BackdropWebTestCase {
+  /**
+   * User object.
+   *
+   * @var object
+   */
+  protected $adminUser;
+  /**
+   * Profile name.
+   *
+   * @var string
+   */
+  protected $profile = 'standard';
+
+  /**
+   * Set up environment.
+   */
+  public function setUp() {
+    parent::setUp('ckeditor', 'language', 'locale');
+    // Add RTL language.
+    $arabic = (object) array(
+      'langcode' => 'ar',
+      'name' => 'Arabic',
+      'direction' => LANGUAGE_RTL,
+    );
+    language_save($arabic);
+
+    // Switch on error display.
+    config_set('system.core', 'error_level', 'all');
+
+    // Create and log in as the admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer filters',
+      'access administration pages',
+      'access content',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the CKEditor admin form throws no notices with RTL language.
+   */
+  public function testRtlAdminIcons() {
+    $arabic = language_load('ar');
+    $notice = '<em class="placeholder">Notice</em>: Undefined index: image_rtl in <em class="placeholder">{closure}()</em>';
+
+    $this->backdropGet('admin/config/content/formats/filtered_html', array('language' => $arabic));
+    $this->assertNoRaw($notice, '"Notice: Undefined index: image_rtl in {closure}()" not found');
+  }
+
+}
