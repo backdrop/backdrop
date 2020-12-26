@@ -2530,15 +2530,16 @@ function user_role_save($role) {
 function user_role_delete($role_name) {
   $role = user_role_load($role_name);
 
-  // If this is the administrator role, delete the user_admin_role variable.
-  if ($role_name == config_get('system.core', 'user_admin_role')) {
-    $system_config = config('system.core');
-    $system_config->clear('user_admin_role');
+  // If this is the administrator role, explicitly set the "user_admin_role"
+  // attribute to "0" (disabled).
+  $system_config = config('system.core');
+  if ($role_name == $system_config->get('user_admin_role')) {
+    $system_config->set('user_admin_role', 0);
     $system_config->save();
   }
 
-  $config = config('user.role.' . $role_name);
-  $config->delete();
+  $user_config = config('user.role.' . $role_name);
+  $user_config->delete();
 
   // Update the users who have this role set:
   db_delete('users_roles')

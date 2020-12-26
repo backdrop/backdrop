@@ -1436,7 +1436,7 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
       'pt' => (object) array(
         'langcode' => 'pt',
       ),
-      // Language codes with more then one dash are actually valid.
+      // Language codes with more than one dash are actually valid.
       // eh-oh-laa-laa is the official language code of the Teletubbies.
       'eh-oh-laa-laa' => (object) array(
         'langcode' => 'eh-oh-laa-laa',

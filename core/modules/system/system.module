@@ -3743,6 +3743,21 @@ function system_image_toolkits() {
 }
 
 /**
+ * Implements hook_image_supported_extensions_alter().
+ *
+ * Add webp to supported file extensions if GD is the active image toolkit and
+ * the GD version supports WebP.
+ */
+function system_image_supported_extensions_alter(&$supported_extensions) {
+  if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      $supported_extensions[] = 'webp';
+    }
+  }
+}
+
+/**
  * Attempts to get a file using backdrop_http_request and to store it locally.
  *
  * @param string $url
