@@ -8,6 +8,163 @@ require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.tes
 /**
  * Tests the interface for adding, removing, and moving blocks.
  */
+class LayoutRel extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+  protected $user1;
+  protected $user2;
+  protected $user1_node1;
+  protected $user1_node2;
+  protected $user2_node1;
+  protected $user2_node2;
+  protected $orphaned_blocks = FALSE;
+
+  function setUp() {
+    parent::setUp('layout_test');
+
+    // Create and login admin user.
+    $this->user1 = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer modules',
+      'administer layouts',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->user1);
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
+    $this->user1_node1 = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => $this->randomString(),
+    ));
+    $this->user1_node2 = $this->backdropCreateNode(array(
+      'type' => 'page',
+      'title' => $this->randomString(),
+    ));
+
+    // Create and login admin user.
+    $this->user2 = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer modules',
+      'administer layouts',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->user2);
+
+    $this->user2_node1 = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => $this->randomString(),
+    ));
+    $this->user2_node2 = $this->backdropCreateNode(array(
+      'type' => 'page',
+      'title' => $this->randomString(),
+    ));
+  }
+
+
+  /**
+   * Test the support for contexts within conditions and blocks.
+   */
+  function testRelationships() {
+    // Make a new layout that creates a custom path with wildcards.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_path,
+    );
+    // Check the path first to populate available contexts.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Check path'));
+
+     // Test user from node relationship.
+    $edit = array();
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context relationship'));
+
+    $edit = array(
+      'relationship' => 'user_from_node',
+    );
+    $this->backdropPost(NULL, $edit, t('Load relationship'));
+    $this->backdropPost(NULL, array(), t('Add relationship'));
+
+    $this->backdropPost('admin/structure/layouts/add', array(), t('Create layout'));
+
+    // Add the test block that requires both node and user contexts.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts with contexts.'));
+    $this->clickLink(t('Layout bar block'));
+    $this->assertOption('edit-contexts-my-user', 'current_user', 'Current user context selection is shown.');
+    $this->assertOption('edit-contexts-my-user', 'relationship_0', 'Relationship context selection is shown.');
+    cache_clear_all();
+
+    $edit = array(
+      'contexts[my_user]' => 'relationship_0',
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+    $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Visit a node created by another user. The user context from that node,
+    // rather than the current user, should be available.
+    // The current user is User 2.
+    $this->backdropGet('node/' . $this->user1_node1->nid);
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user1->name, '@title' => $this->user1_node1->title)));
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+
+    // Change the user context on the test block to use the current user and
+    // test that the node user is no longer displayed.
+    $edit = array(
+      'contexts[my_user]' => 'current_user',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->user1_node1->nid);
+    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user1->name, '@title' => $this->user1_node1->title)));
+
+    // Visit a node created by the current user (User 2) and test that the
+    // correct user is displayed.
+    $this->backdropGet('node/' . $this->user2_node1->nid);
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user2->name, '@title' => $this->user2_node1->title)));
+
+     // Remove the user from node relationship.
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
+
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Add context relationship'));
+
+    $edit = array(
+      'relationship' => 'entity_from_schema:uid-user-node',
+    );
+    $this->backdropPost(NULL, $edit, t('Load relationship'));
+    $this->backdropPost(NULL, array(), t('Add relationship'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $edit = array(
+      'contexts[my_user]' => 'current_user',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+  }
+
+}
+
+
+/**
+ * Tests the interface for adding, removing, and moving blocks.
+ */
 class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $profile = 'minimal';
   protected $admin_user;
