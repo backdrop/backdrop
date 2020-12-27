@@ -1302,7 +1302,7 @@ function system_site_information_settings($form, &$form_state) {
     '#title' => t('Default home page'),
     '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
-    '#description' => t('Specify a path to use for the home page. If left blank, the system will display the home layout if it exists, or a list of promoted content if it does not.'),
+    '#description' => t('Specify a path to use for the home page. If left blank, the system will display the home layout if it exists (<em>home</em>), or a list of promoted content if it does not (<em>node</em>).'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
