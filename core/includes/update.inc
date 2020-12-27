@@ -550,9 +550,15 @@ class BackdropUpdateException extends Exception { }
 function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
   // During the update, bring the site offline so that schema changes do not
   // affect visiting users.
-  $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
-  if ($_SESSION['maintenance_mode'] == FALSE) {
-    state_set('maintenance_mode', TRUE);
+  if (!isset($_SESSION['maintenance_mode'])) {
+    // Save the previous offline state in a session variable.
+    $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
+    // If not already offline, set the site offline.
+    if ($_SESSION['maintenance_mode'] == FALSE) {
+      state_set('maintenance_mode', TRUE);
+      // In some cases, the site might seem as still online/offline, due to cache.
+      cache_clear_all();
+    }
   }
 
   // Resolve any update dependencies to determine the actual updates that will
@@ -600,8 +606,8 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
  *
  * After the updates run, all caches are flushed. The update results are
  * stored into the session (for example, to be displayed on the update results
- * page in update.php). Additionally, if the site was off-line, now that the
- * update process is completed, the site is set back online.
+ * page in update.php). Additionally, if the site was online before the update,
+ * it is set back online now that the update process is completed.
  *
  * @param $success
  *   Indicate that the batch API tasks were all completed successfully.
@@ -613,19 +619,18 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
  * @see update_batch()
  */
 function update_finished($success, $results, $operations) {
+  // If the site was online before the update, set back online now.
+  if (isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
+    state_set('maintenance_mode', FALSE);
+    unset($_SESSION['maintenance_mode']);
+  }
+
   // Clear the caches in case the data has been updated.
   backdrop_flush_all_caches();
 
   $_SESSION['update_results'] = $results;
   $_SESSION['update_success'] = $success;
   $_SESSION['updates_remaining'] = $operations;
-
-  // Now that the update is done, we can put the site back online if it was
-  // previously in maintenance mode.
-  if (isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
-    state_set('maintenance_mode', FALSE);
-    unset($_SESSION['maintenance_mode']);
-  }
 }
 
 /**

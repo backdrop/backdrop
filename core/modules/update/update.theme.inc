@@ -126,7 +126,7 @@ function theme_update_report($variables) {
         default:
           $updatepath = 'admin/modules/update';
       }
-      $status_label = l($status_label, $updatepath, array('html' => TRUE));
+      $status_label = l($status_label, $updatepath, array('html' => TRUE, 'attributes' => array('class' => array('button'))));
     }
 
     $project_section = '';

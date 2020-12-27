@@ -11,6 +11,10 @@ table.update {
   width: 100%;
   margin-top: .5em;
 }
+td.update-data {
+  padding: 10px 20px 25px 20px;
+}
+
 .update tr {
   position: relative;
 }
@@ -18,7 +22,15 @@ table.update {
 .update .project {
   font-weight: bold;
   font-size: 110%;
+  line-height: 43px;
 }
+.update .report-icon div::before {
+  margin-top: 7px;
+}
+.update .version-status a.button {
+  margin: 0;
+}
+
 @media all and (min-width: 550px) {
   .update .project {
     float: left; /* LTR */
@@ -68,9 +80,6 @@ table.update {
   direction: ltr; /* Note: version numbers should always be LTR. */
 }
 
-.update .version {
-  padding-top: 5px;
-}
 .update .version div {
   box-sizing: border-box;
   padding: 0;

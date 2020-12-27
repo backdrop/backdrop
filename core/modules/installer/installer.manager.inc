@@ -395,7 +395,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
   );
 
   $form['maintenance_mode'] = array(
-    '#title' => t('Perform updates with site in maintenance mode (strongly recommended)'),
+    '#title' => t('Replace code with site in maintenance mode (strongly recommended)'),
     '#type' => 'checkbox',
     '#default_value' => TRUE,
   );
@@ -403,7 +403,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue'),
+    '#value' => t('Replace code'),
   );
 
   return $form;
