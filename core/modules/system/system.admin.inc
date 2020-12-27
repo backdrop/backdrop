@@ -1302,7 +1302,7 @@ function system_site_information_settings($form, &$form_state) {
     '#title' => t('Default home page'),
     '#default_value' => ($site_config->get('site_frontpage') != 'node' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
+    '#description' => t('Specify a path to use for the home page. If left blank, the system will display the home layout if it exists, or a list of promoted content if it does not.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
@@ -1315,10 +1315,7 @@ function system_site_information_settings($form, &$form_state) {
     '#states' => array(
       // Show this setting when the home page is set to 'node' or is empty.
       'visible' => array(
-        array(
-          array('input[name="site_frontpage"]' => array('value' => '')),
-          array('input[name="site_frontpage"]' => array('value' => 'node')),
-        ),
+        'input[name="site_frontpage"]' => array('value' => 'node'),
       ),
     ),
   );
@@ -1433,8 +1430,15 @@ function system_site_information_settings_validate($form, &$form_state) {
 
   // Check for empty home page path.
   if (empty($form_state['values']['site_frontpage'])) {
-    // Set to default "node".
-    form_set_value($form['front_page']['site_frontpage'], 'node', $form_state);
+    $home_layout = layout_load('home');
+    if (isset($home_layout) && !$home_layout->disabled) {
+      // Set to home layout path.
+      form_set_value($form['front_page']['site_frontpage'], $home_layout->getPath(), $form_state);
+    }
+    else {
+      // Set to default "node".
+      form_set_value($form['front_page']['site_frontpage'], 'node', $form_state);
+    }
   }
   else {
     // Get the normal path of the home page.
@@ -1444,6 +1448,7 @@ function system_site_information_settings_validate($form, &$form_state) {
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
+
   // Get the normal paths of both error pages.
   if (!empty($form_state['values']['site_403'])) {
     form_set_value($form['error_page']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
