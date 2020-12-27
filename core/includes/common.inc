@@ -5119,7 +5119,8 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *   ),
  * )
  * @endcode
- * All conditions must be met for the state to be applied.
+ * All top-level conditions must be met for the state to be applied. Sub-level
+ * conditions can be used for OR/XOR situations (see below).
  *
  * Each remote condition is a key/value pair specifying conditions on the other
  * element that need to be met to apply the state to the element:
@@ -5145,6 +5146,27 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *       ':input[name="toggle_me"]' => array('checked' => TRUE),
  *     ),
  *   ),
+ * );
+ * @endcode
+ *
+ * OR/XOR conditions can be specified using the following syntax:
+ * @code
+ * array(
+ *   'disabled' => array(
+ *     // dependee_1 has value ON.
+ *     '[name="dependee_1"]' => array('value' => 'ON'),
+ *     // OR: At least one of dependee_2 or dependee_3 has value ON.
+ *     array(
+ *       array('[name="dependee_2"]' => array('value' => 'ON')),
+ *       array('[name="dependee_3"]' => array('value' => 'ON')),
+ *     ),
+ *     // XOR: Only one of dependee_4 or dependee_5 can have value ON.
+ *     array(
+ *       array('[name="dependee_4"]' => array('value' => 'ON')),
+ *       'xor',
+ *       array('[name="dependee_5"]' => array('value' => 'ON')),
+ *     ),
+ *   )
  * );
  * @endcode
  *
