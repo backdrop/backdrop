@@ -5089,38 +5089,73 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * #states is an associative array in the form of:
  * @code
- * array(
+ * '#states' => array(
  *   STATE1 => CONDITIONS_ARRAY1,
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
  * )
  * @endcode
- * Each key is the name of a state to apply to the element, such as 'visible'.
- * Each value is a list of conditions that denote when the state should be
- * applied.
  *
- * Multiple different states may be specified to act on complex conditions:
- * @code
- * array(
- *   'visible' => CONDITIONS,
- *   'checked' => OTHER_CONDITIONS,
- * )
- * @endcode
+ * Each key is the name of a state to apply to the element, such as 'visible' or
+ * 'disabled'. Each value is a list of conditions that denote when the state
+ * should be applied.
  *
- * Every condition is a key/value pair, whose key is a jQuery selector that
- * denotes another element on the page, and whose value is an array of
- * conditions, which must bet met on that element:
+ * Multiple conditions may be specified for a single state, and the default
+ * conditional is AND:
  * @code
- * array(
- *   'visible' => array(
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
+ * '#states' => array(
+ *   STATE1 => array(
+ *     JQUERY_SELECTOR1 => CONDITION1,
+ *     // This syntax means:
+ *     // "the condition above needs to be true, AND the one below...".
+ *     JQUERY_SELECTOR2 => CONDITION2,
+ *     // "...AND the one below".
+ *     JQUERY_SELECTOR3 => CONDITION3,
+ *     // "...AND so on".
  *     ...
  *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
  * )
  * @endcode
- * All top-level conditions must be met for the state to be applied. Sub-level
- * conditions can be used for OR/XOR situations (see below).
+ *
+ * For OR conditions, use a non-associative array by wrapping each group of
+ * conditions in an array, and then each individual condition in its own array
+ * as well:
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     array(
+ *       array(JQUERY_SELECTOR1 => CONDITION1),
+ *       // This syntax means:
+ *       // "either or both of the conditions needs to be true; the one above,
+ *       // OR the one below".
+ *       array(JQUERY_SELECTOR2 => CONDITION2),
+ *     ),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
+ *
+ * For XOR (exclusive OR) conditions, a similar syntax as OR can be used, but
+ * the XOR operator needs to be explicitly defined, as an array item with the
+ * string 'xor':
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     array(
+ *       array(JQUERY_SELECTOR1 => CONDITION1),
+ *       'xor',
+ *       // This syntax means "one or the other condition needs to be true, BUT
+ *       // NOT BOTH".
+ *       array(JQUERY_SELECTOR2 => CONDITION2),
+ *     ),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
  *
  * Each remote condition is a key/value pair specifying conditions on the other
  * element that need to be met to apply the state to the element:
@@ -5146,27 +5181,6 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *       ':input[name="toggle_me"]' => array('checked' => TRUE),
  *     ),
  *   ),
- * );
- * @endcode
- *
- * OR/XOR conditions can be specified using the following syntax:
- * @code
- * array(
- *   'disabled' => array(
- *     // dependee_1 has value ON.
- *     '[name="dependee_1"]' => array('value' => 'ON'),
- *     // OR: At least one of dependee_2 or dependee_3 has value ON.
- *     array(
- *       array('[name="dependee_2"]' => array('value' => 'ON')),
- *       array('[name="dependee_3"]' => array('value' => 'ON')),
- *     ),
- *     // XOR: Only one of dependee_4 or dependee_5 can have value ON.
- *     array(
- *       array('[name="dependee_4"]' => array('value' => 'ON')),
- *       'xor',
- *       array('[name="dependee_5"]' => array('value' => 'ON')),
- *     ),
- *   )
  * );
  * @endcode
  *
