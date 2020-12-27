@@ -1300,7 +1300,7 @@ function system_site_information_settings($form, &$form_state) {
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
     '#title' => t('Default home page'),
-    '#default_value' => ($site_config->get('site_frontpage') != 'node' && $site_config->get('site_frontpage') != 'home' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
+    '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
     '#description' => t('Specify a path to use for the home page. If left blank, the system will display the home layout if it exists, or a list of promoted content if it does not.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
