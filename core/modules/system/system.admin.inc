@@ -1313,10 +1313,12 @@ function system_site_information_settings($form, &$form_state) {
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
     '#states' => array(
-      // Show the number of posts setting when the home page is 'node' (e.g.
-      // empty)).
+      // Show this setting when the home page is set to 'node' or is empty.
       'visible' => array(
-        'input[name="site_frontpage"]' => array('value' => ''),
+        array(
+          array('input[name="site_frontpage"]' => array('value' => '')),
+          array('input[name="site_frontpage"]' => array('value' => 'node')),
+        ),
       ),
     ),
   );
