@@ -439,46 +439,45 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
   $all_relationship_info = _layout_get_all_info('layout_relationship');
   foreach ($layout->relationships as $relationship_key => $relationship) {
-    $relationship_key = 'relationship_' . $relationship_key;
-        $form['context_wrapper']['context']['required'][$relationship_key]['summary'] = array(
-          '#markup' => $relationship->getAdminSummary(),
-        );
-        $form['context_wrapper']['context']['required'][$relationship_key]['plugin'] = array(
-          '#markup' => check_plain($all_relationship_info[$relationship->plugin]['title']),
-        );
-        $form['context_wrapper']['context']['required'][$relationship_key]['operations'] = array(
-          '#type' => 'container',
-          '#attributes' => array('class' => array('layout-operations')),
-        );
-        $form['context_wrapper']['context']['required'][$relationship_key]['operations']['remove'] = array(
-          '#type' => 'submit',
-          '#value' => t('Remove'),
-          '#attributes' => array('class' => array('layout-link-button', 'layout-context-remove')),
-          '#validate' => array(),
-          '#submit' => array(
-            'layout_settings_form_context_relationship_remove',
-            'layout_settings_form_update_layout',
-          ),
-          '#ajax' => array(
-            'callback' => 'layout_ajax_form_update',
-          ),
-          '#name' => 'conditions_' . $relationship_key . '_remove',
-        );
-        $form['context_wrapper']['context']['required'][$relationship_key]['operations']['configure'] = array(
-          '#type' => 'submit',
-          '#value' => t('Configure'),
-          '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
-          '#validate' => array(
-            'layout_settings_form_validate',
-          ),
-          '#submit' => array(
-            'layout_settings_form_context_relationship_edit',
-          ),
-          '#ajax' => array(
-            'callback' => 'layout_ajax_form_open_dialog',
-          ),
-          '#name' => 'conditions_' . $relationship_key . '_configure',
-        );
+    $form['context_wrapper']['context']['required'][$relationship_key]['summary'] = array(
+      '#markup' => $relationship->getAdminSummary(),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['plugin'] = array(
+      '#markup' => check_plain($all_relationship_info[$relationship->plugin]['title']),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('layout-operations')),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations']['remove'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-context-remove')),
+      '#validate' => array(),
+      '#submit' => array(
+        'layout_settings_form_context_relationship_remove',
+        'layout_settings_form_update_layout',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_update',
+      ),
+      '#name' => 'conditions_' . $relationship_key . '_remove',
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations']['configure'] = array(
+      '#type' => 'submit',
+      '#value' => t('Configure'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
+      '#validate' => array(
+        'layout_settings_form_validate',
+      ),
+      '#submit' => array(
+        'layout_settings_form_context_relationship_edit',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+      '#name' => 'conditions_' . $relationship_key . '_configure',
+    );
   }
 
   // Display a notice if overriding a system path that normally contains
