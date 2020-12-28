@@ -17,6 +17,7 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
     }
     $user_context = layout_create_context('user', array(
       'position' => $context->position,
+      'label' => $this->getAdminSummary(),
     ));
     $user_context->setData($account);
 

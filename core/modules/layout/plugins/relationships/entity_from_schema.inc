@@ -135,7 +135,7 @@ class LayoutRelationshipEntityFromSchema extends LayoutRelationship {
     // If unset it wants a generic, unfilled context, which is just NULL.
     $entity_info = entity_get_info($from_entity);
     if (empty($context->data) || !isset($context->data->{$entity_info['entity keys']['id']})) {
-      return layout_create_context($to_entity);
+      return layout_create_context($to_entity, array('label' => $this->label()));
     }
 
     if (isset($context->data->{$entity_info['entity keys']['id']})) {
@@ -148,10 +148,19 @@ class LayoutRelationshipEntityFromSchema extends LayoutRelationship {
 
         $loaded_to_entity = entity_load($to_entity, array($to_entity_id));
         $loaded_to_entity = array_shift($loaded_to_entity);
-        $to_entity_context =  layout_create_context($to_entity);
+        $to_entity_context =  layout_create_context($to_entity, array('label' => $this->label()));
         $to_entity_context->setData($loaded_to_entity);
         return $to_entity_context;
       }
     }
+  }
+
+
+  /**
+   * Assemble a human-readable label of this object.
+   */
+  function label() {
+    $child = $this->getChild();
+    return $child['title'];
   }
 }

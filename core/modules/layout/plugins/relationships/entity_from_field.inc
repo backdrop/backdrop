@@ -22,7 +22,7 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
     // If unset it wants a generic, unfilled context, which is just NULL.
     $entity_info = entity_get_info($from_entity);
     if (empty($context->data) || !isset($context->data->{$entity_info['entity keys']['id']})) {
-      return layout_create_context($to_entity);
+      return layout_create_context($to_entity, array('label' => $this->label()));
     }
 
     if (isset($context->data->{$entity_info['entity keys']['id']})) {
@@ -42,17 +42,18 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
           // Pass current user account and entity type to access callback.
           // @todo: we dont have 'access callback' in core entity API. Leave for contrib?
           if (isset($to_entity_info['access callback']) && function_exists($to_entity_info['access callback']) && !call_user_func($to_entity_info['access callback'], 'view', $loaded_to_entity, $account, $to_entity)) {
-            return layout_create_context($to_entity);
+            return layout_create_context($to_entity, array('label' => $this->label()));
           }
           else {
-            $to_entity_context = layout_create_context($to_entity);
+            $to_entity_context = layout_create_context($to_entity, array('label' => $this->label()));
             $to_entity_context->setData($loaded_to_entity);
+            $to_entity_context->label = 'Hoooo';
             return $to_entity_context;
           }
         }
         else {
           // In case that delta was empty.
-          return layout_create_context($to_entity);
+          return layout_create_context($to_entity, array('label' => $this->label()));
         }
       }
     }
@@ -235,4 +236,13 @@ class LayoutRelationshipEntityFromField extends LayoutRelationship {
 
     return $form;
   }
+
+  /**
+   * Assemble a human-readable label of this object.
+   */
+  function label() {
+    $child = $this->getChild();
+    return $child['title'];
+  }
+
 }
