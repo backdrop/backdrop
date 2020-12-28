@@ -5078,8 +5078,8 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * A "state" means a certain property on a DOM element, such as "visible" or
  * "checked". A state can be applied to an element, depending on the state of
- * another element on the page. In general, states depend on HTML attributes and
- * DOM element properties, which change due to user interaction.
+ * one or more other elements on the page. In general, states depend on HTML
+ * attributes and DOM element properties, which change due to user interaction.
  *
  * Since states are driven by JavaScript only, it is important to understand
  * that all states are applied on presentation only, none of the states force
@@ -5096,61 +5096,50 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  * )
  * @endcode
  *
- * Each key is the name of a state to apply to the element, such as 'visible' or
- * 'disabled'. Each value is a list of conditions that denote when the state
+ * Each key is the name of a state to apply to the element, such as "visible" or
+ * "checked". Each value is a list of conditions that denote when the state
  * should be applied.
  *
- * Multiple conditions may be specified for a single state, and the default
- * conditional is AND:
+ * Multiple conditions may be specified for a given state. In this case (an
+ * 'AND' conditional), all conditions must be true for the state to be applied:
  * @code
  * '#states' => array(
  *   STATE1 => array(
+ *     // All of these conditions must be true; this one...
  *     JQUERY_SELECTOR1 => CONDITION1,
- *     // This syntax means:
- *     // "the condition above needs to be true, AND the one below...".
+ *     // ...AND this one.
  *     JQUERY_SELECTOR2 => CONDITION2,
- *     // "...AND the one below".
- *     JQUERY_SELECTOR3 => CONDITION3,
- *     // "...AND so on".
- *     ...
  *   ),
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
  * )
  * @endcode
  *
- * For OR conditions, use a non-associative array by wrapping each group of
- * conditions in an array, and then each individual condition in its own array
- * as well:
+ * For 'OR' conditionals, each condition must be wrapped in its own array:
  * @code
  * '#states' => array(
  *   STATE1 => array(
- *     array(
- *       array(JQUERY_SELECTOR1 => CONDITION1),
- *       // This syntax means:
- *       // "either or both of the conditions needs to be true; the one above,
- *       // OR the one below".
- *       array(JQUERY_SELECTOR2 => CONDITION2),
- *     ),
+ *     // Any of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     // OR this one (or both).
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
  *   ),
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
  * )
  * @endcode
  *
- * For XOR (exclusive OR) conditions, a similar syntax as OR can be used, but
- * the XOR operator needs to be explicitly defined, as an array item with the
- * string 'xor':
+ * For 'XOR' (exclusive 'OR') conditionals, a similar syntax as 'OR' is used,
+ * but the 'XOR' operator needs to be explicitly defined as an array item with
+ * the string 'xor':
  * @code
  * '#states' => array(
  *   STATE1 => array(
- *     array(
- *       array(JQUERY_SELECTOR1 => CONDITION1),
- *       'xor',
- *       // This syntax means "one or the other condition needs to be true, BUT
- *       // NOT BOTH".
- *       array(JQUERY_SELECTOR2 => CONDITION2),
- *     ),
+ *     // Either one of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     'xor',
+ *     // or this one, but NOT both.
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
  *   ),
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
