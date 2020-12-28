@@ -62,7 +62,7 @@ fieldset .fieldset-wrapper {
   z-index: 1;
   display: block;
   width: 100%;
-  padding: 0.3em 0.3em 0.3em 1.8em;
+  padding: 0.3em 0.3em 0.3em 1.8em; /* LTR */
   margin: 0 -0.5em;
   border-radius: 4px;
   background: transparent;
@@ -75,7 +75,7 @@ fieldset .fieldset-wrapper {
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
-  left: 0.6em;
+  left: 0.6em; /* LTR */
   top: 0.8em;
   width: 0;
   height: 0;
@@ -104,21 +104,23 @@ fieldset .fieldset-wrapper {
   z-index: 0;
   float: right; /* LTR */
   top: -1.9em;
+  color: #999;
+  /* Hide the summary by default; we show it on wider screens (see below). */
+  display: none;
 }
 [dir="rtl"] .fieldset-legend span.summary {
   float: left;
   left: 1em;
 }
-
 .fieldset-legend span.summary:not(:empty):before {
   content: '(';
 }
 .fieldset-legend span.summary:not(:empty):after {
   content: ')';
 }
-
 @media (min-width: 34em) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }

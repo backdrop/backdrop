@@ -747,10 +747,12 @@ fieldset fieldset fieldset {
 .js[dir="rtl"] fieldset.collapsible legend {
   float: right;
 }
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
+  /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 .fieldset-legend span.summary:not(:empty):before {
@@ -761,9 +763,11 @@ fieldset fieldset fieldset {
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed {
   padding: 0;
