@@ -58,7 +58,7 @@ abstract class LayoutRelationship extends LayoutHandler{
       }
     }
     if (isset($config['settings']['relationship'])) {
-      list(, $child) = explode(':', $config['settings']['relationship']);
+      list(, $child) = array_pad(explode(':', $config['settings']['relationship']), 2, null);
       $this->childDelta = $child;
     }
   }
@@ -81,7 +81,7 @@ abstract class LayoutRelationship extends LayoutHandler{
     $form_state['relationship'] = $relationship_info;
     $form['context_parent'] = array(
       '#type' => 'select',
-      '#default_value' => isset($this->settings) ? $this->settings['context_parent'] : '',
+      '#default_value' => isset($this->settings['context_parent']) ? $this->settings['context_parent'] : '',
       '#options' => $options,
       '#title' => $relationship_info['context_label'],
     );
