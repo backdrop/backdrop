@@ -27,13 +27,19 @@ function language_admin_overview_form($form, &$form_state) {
   );
 
   foreach ($languages as $langcode => $language) {
+    if (isset($language->native)) {
+      $language_name = $language->native;
+    }
+    else {
+      $language_name = $language->name;
+    }
     $form['languages'][$langcode]['#weight'] = $language->weight;
     $form['languages'][$langcode]['name'] = array(
-      '#markup' => check_plain($language->name),
+      '#markup' => check_plain($language_name),
     );
     $form['languages'][$langcode]['enabled'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enable @title', array('@title' => $language->name)),
+      '#title' => t('Enable @title', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#default_value' => (int) $language->enabled,
       '#disabled' => $langcode == $default->langcode,
@@ -41,7 +47,7 @@ function language_admin_overview_form($form, &$form_state) {
     $form['languages'][$langcode]['default'] = array(
       '#type' => 'radio',
       '#parents' => array('site_default'),
-      '#title' => t('Set @title as default', array('@title' => $language->name)),
+      '#title' => t('Set @title as default', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#return_value' => $langcode,
       '#default_value' => ($langcode == $default->langcode ? $langcode : NULL),
@@ -49,7 +55,7 @@ function language_admin_overview_form($form, &$form_state) {
     );
     $form['languages'][$langcode]['weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $language->name)),
+      '#title' => t('Weight for @title', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#default_value' => $language->weight,
       '#attributes' => array(
@@ -212,6 +218,14 @@ function _language_admin_common_controls(&$form, $language = NULL) {
     '#default_value' => @$language->name,
     '#required' => TRUE,
   );
+  $form['native'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Native language name'),
+    '#maxlength' => 64,
+    '#default_value' => isset($language->native) ? $language->native : '',
+    '#required' => TRUE,
+    '#description' => t('Name of the language in the language being added.'),
+  );
   $form['direction'] = array(
     '#type' => 'radios',
     '#title' => t('Direction'),
@@ -266,6 +280,7 @@ function language_admin_add_custom_form_submit($form, &$form_state) {
   $language = (object) array(
     'langcode' => $langcode,
     'name' => $form_state['values']['name'],
+    'native' => $form_state['values']['native'],
     'direction' => $form_state['values']['direction'],
   );
   language_save($language);

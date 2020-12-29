@@ -1589,6 +1589,7 @@ function install_import_translations(&$install_state) {
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);

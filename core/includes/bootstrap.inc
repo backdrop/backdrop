@@ -3527,7 +3527,7 @@ function language_multilingual() {
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
  */
-function language_list($only_enabled = FALSE, $option_list = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3560,6 +3560,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
       $languages['all']['en'] = (object) array(
         'langcode' => 'en',
         'name' => 'English',
+        'native' => 'English',
         'direction' => 0,
         'enabled' => TRUE,
         'weight' => 0,
@@ -3586,7 +3587,13 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
     require_once __DIR__ . '/common.inc';
     backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
     foreach ($this_list as $language) {
-      $list[$language->langcode] = $language->name;
+      if ($native_names && isset($language->native)) {
+        $label = $language->native;
+      }
+      else {
+        $label = $language->name;
+      }
+      $list[$language->langcode] = $label;
     }
     return $list;
   }
