@@ -16,10 +16,12 @@ class LayoutRel extends BackdropWebTestCase {
   protected $user1_node2;
   protected $user2_node1;
   protected $user2_node2;
+  protected $field_name;
+  protected $file_entity;
   protected $orphaned_blocks = FALSE;
 
   function setUp() {
-    parent::setUp('layout_test');
+    parent::setUp('layout_test', 'file', 'field');
 
     // Create and login admin user.
     $this->user1 = $this->backdropCreateUser(array(
@@ -51,6 +53,11 @@ class LayoutRel extends BackdropWebTestCase {
       'administer modules',
       'administer layouts',
       'administer nodes',
+      'bypass node access',
+      'access file overview',
+      'manage files',
+      'delete files',
+      'access content',
     ));
     $this->backdropLogin($this->user2);
 
@@ -58,12 +65,51 @@ class LayoutRel extends BackdropWebTestCase {
       'type' => 'post',
       'title' => $this->randomString(),
     ));
+
+    // Attach a file to this node.
+    $this->addFileField($this->user2_node1);
+
     $this->user2_node2 = $this->backdropCreateNode(array(
       'type' => 'page',
       'title' => $this->randomString(),
     ));
   }
 
+  /**
+   * Creates a new file field.
+   */
+  function addFileField($node) {
+    $field_name = $this->field_name = strtolower($this->randomName());
+    $cardinality = 1;
+    $field = array(
+      'field_name' => $field_name,
+      'type' => 'file',
+      'cardinality' => $cardinality,
+      'settings' => array(),
+    );
+    field_create_field($field);
+
+    $instance = array(
+      'field_name' => $field_name,
+      'label' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'settings' => array(),
+      'widget' => array(
+        'type' => 'file_generic',
+        'settings' => array(),
+      ),
+    );
+    field_create_instance($instance);
+
+    $file = current($this->backdropGetTestFiles('text'));
+    $file->filesize = filesize($file->uri);
+    $file_entity = entity_create('file', (array) $file);
+    $this->file_entity = $file_entity;
+    $edit['files[' . $field_name . '_und_0]'] = backdrop_realpath($file_entity->uri);
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+
+  }
 
   /**
    * Test the support for contexts within conditions and blocks.
@@ -100,7 +146,6 @@ class LayoutRel extends BackdropWebTestCase {
     $this->clickLink(t('Layout bar block'));
     $this->assertOption('edit-contexts-my-user', 'current_user', 'Current user context selection is shown.');
     $this->assertOption('edit-contexts-my-user', 'relationship_0', 'Relationship context selection is shown.');
-    cache_clear_all();
 
     $edit = array(
       'contexts[my_user]' => 'relationship_0',
@@ -143,6 +188,7 @@ class LayoutRel extends BackdropWebTestCase {
      // Remove the user from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
 
+    // Test the entity from schema relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Add context relationship'));
 
     $edit = array(
@@ -153,10 +199,53 @@ class LayoutRel extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $edit = array(
-      'contexts[my_user]' => 'current_user',
+      'contexts[my_node]' => 'relationship_0',
     );
     $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Visit a node created by the current user (User 2) and test that the
+    // NID of the available node context is equal to the UID of the current
+    // user.
+    $this->backdropGet('node/' . $this->user2_node1->nid);
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user2->name, '@title' => $this->user2_node1->title)));
+    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user2->name, '@title' => $this->user2_node2->title)));
+
+     // Remove the user from node relationship.
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
+
+    // Test the entity from field relationship.
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Add context relationship'));
+
+    $edit = array(
+      'relationship' => 'entity_from_field:' . $this->field_name . '-node-file',
+    );
+    $this->backdropPost(NULL, $edit, t('Load relationship'));
+    $this->backdropPost(NULL, array(), t('Add relationship'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+
+    // Add the test block that requires file contexts.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts that requires a file context.'));
+    $this->clickLink(t('File context test'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+    $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->user2_node1->nid);
+    $this->assertText(format_string('The file name is @name', array('@name' => $this->file_entity->filename)));
+
+    // Remove our file.
+    node_delete($this->user2_node2->nid);
   }
 
 }
