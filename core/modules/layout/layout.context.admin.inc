@@ -295,7 +295,7 @@ function layout_context_return_form($form, &$form_state) {
     $handler->is_new = TRUE;
   }
   elseif (isset($form_state['values']['relationship'])) {
-    list($plugin_name, $child_delta) = array_pad(explode(':', $form_state['values']['relationship']), 2, null);
+    list($plugin_name, $child_delta) = explode(':', $form_state['values']['relationship']);
     $handler = layout_create_handler('layout_relationship', $plugin_name);
     $handler->childDelta = $child_delta;
     $handler->is_new = TRUE;

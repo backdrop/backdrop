@@ -58,8 +58,8 @@ abstract class LayoutRelationship extends LayoutHandler{
       }
     }
     if (isset($config['settings']['relationship'])) {
-      list(, $child) = array_pad(explode(':', $config['settings']['relationship']), 2, null);
-      $this->childDelta = $child;
+      list($plugin, $child) = explode(':', $config['settings']['relationship']);
+      $this->childDelta = ($child == 'relationship') ? NULL : $child;
     }
   }
 

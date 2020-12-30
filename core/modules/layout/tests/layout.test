@@ -133,7 +133,7 @@ class LayoutRel extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context relationship'));
 
     $edit = array(
-      'relationship' => 'user_from_node',
+      'relationship' => 'user_from_node:relationship',
     );
     $this->backdropPost(NULL, $edit, t('Load relationship'));
     $this->backdropPost(NULL, array(), t('Add relationship'));

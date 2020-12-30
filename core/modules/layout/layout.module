@@ -1535,7 +1535,7 @@ function layout_relationships_get_relevant_info($contexts) {
       }
       else {
         if ($relationship['context'] == $context->plugin) {
-          $relevant[$rid] = $relationship;
+          $relevant[$rid . ':relationship'] = $relationship;
         }
       }
     }
@@ -1584,7 +1584,7 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
       foreach ($contexts as $context) {
         if ($context->plugin == $rdata->context) {
           $plugin_array = explode(':', $rdata->settings['relationship']);
-          if (!empty($plugin_array[1])) {
+          if ($plugin_array[1] != 'child') {
             $rdata->childDelta = $plugin_array[1];
           }
           $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
