@@ -349,7 +349,7 @@ function translation_node_prepare(Node $node) {
       if (isset($translations[$langcode])) {
         backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array(
           '%title' => $source_node->title,
-          '%language' => $language_list[$langcode]->native,
+          '%language' => isset($language_list[$langcode]->native) ? $language_list[$langcode]->native : $language_list[$langcode]->name,
           '%type' => $node->type,
         )), 'error');
         return;
