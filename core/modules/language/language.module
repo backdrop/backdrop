@@ -120,7 +120,7 @@ function language_save($language) {
       $language->direction = isset($predefined[$language->langcode][2]) ? $predefined[$language->langcode][2] : LANGUAGE_LTR;
     }
     if (!isset($language->native)) {
-      $language->native = $predefined[$language->langcode][1];
+      $language->native = isset($predefined[$language->langcode][1]) ? $predefined[$language->langcode][1] : $language->name;
     }
   }
 
