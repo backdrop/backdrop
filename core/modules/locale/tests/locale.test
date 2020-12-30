@@ -188,6 +188,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -201,6 +203,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -339,12 +342,15 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
 
     // Add custom language.
     $edit = array(
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -390,6 +396,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -408,6 +416,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -451,6 +460,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -463,6 +474,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
