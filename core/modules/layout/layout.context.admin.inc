@@ -150,11 +150,11 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   // Get contexts from relationships
   $form_state['relevant_info'] = layout_relationships_get_relevant_info($contexts);
 
-  $relevant = array();
+  $relevant_relationships = array();
   $parent_relationship = array();
 
   foreach ($form_state['relevant_info'] as $rid => $info) {
-    $relevant[$rid] = $info['title'];
+    $relevant_relationships[$rid] = $info['title'];
   }
 
   $is_new_context = TRUE;
@@ -188,12 +188,12 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   else {
     $handler = NULL;
   }
-  if (!empty($relevant)) {
-    backdrop_sort($relevant, array('title'));
+  if (!empty($relevant_relationships)) {
+    backdrop_sort($relevant_relationships, array('title'));
     $form['relationship'] = array(
       '#type' => 'select',
       '#title' => t('Available context relationships'),
-      '#options' => $relevant,
+      '#options' => $relevant_relationships,
       '#required' => TRUE,
       '#default_value' => !empty($handler) ? $handler->plugin : NULL,
       '#parents' => array('relationship'),
@@ -231,7 +231,7 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   $form['actions']['add'] = array(
     '#type' => 'submit',
     '#name' => 'relationship_add_button',
-    '#access' => !empty($relevant),
+    '#access' => !empty($relevant_relationships),
     '#value' => $is_new_context ? t('Add relationship') : t('Save relationship'),
     '#submit' => array(
       'layout_context_add_form_submit',

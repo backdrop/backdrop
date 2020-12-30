@@ -35,7 +35,7 @@ abstract class LayoutRelationship extends LayoutHandler{
 
 
   /**
-   * The type of context this relates to.
+   * The identifier for the child relationship being provided by this class.
    *
    * @var mixed
    */
@@ -74,9 +74,9 @@ abstract class LayoutRelationship extends LayoutHandler{
   function form(&$form, &$form_state) {
     $contexts = $form_state['contexts'];
 
-    $relationship_info = $this->getChild($this->childDelta);
+    $relationship_info = $this->getChild();
 
-    $options = $this->filter_contexts($contexts, $relationship_info);
+    $options = $this->getOptionLabels($contexts, $relationship_info);
 
     $form_state['relationship'] = $relationship_info;
     $form['context_parent'] = array(
@@ -105,7 +105,7 @@ abstract class LayoutRelationship extends LayoutHandler{
   /**
    * Returns an array of appropriate contexts for this relationship.
    */
-  function filter_contexts($contexts, $relationship) {
+  function getOptionLabels($contexts, $relationship) {
     $options = array();
 
     foreach ($contexts as $context) {
@@ -127,7 +127,6 @@ abstract class LayoutRelationship extends LayoutHandler{
     }
     return $options;
   }
-
 
   /**
    * Convert the configuration of this relationship to an array for storage.

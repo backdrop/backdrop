@@ -1546,7 +1546,6 @@ function layout_relationships_get_relevant_info($contexts) {
 
 
 /**
- *
  * @param $relationship
  *   A relationship object.
  *
@@ -1557,7 +1556,6 @@ function layout_relationships_get_relevant_info($contexts) {
  *   A context object if one can be loaded.
  */
 function layout_get_context_from_relationship($relationship, $source_context) {
-  //$relationship = layout_create_handler('layout_relationship', $relationship->name);
   $new_context = clone($source_context);
   $context = $relationship->getContext($new_context);
   if ($context) {
@@ -1592,7 +1590,7 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
       }
     }
   }
-  if($contexts_from_relationships_list) {
+  if ($contexts_from_relationships_list) {
     foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
       if (is_object($context_from_relationships)) {
         $contexts[$key] = $context_from_relationships;
