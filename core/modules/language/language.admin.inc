@@ -315,6 +315,9 @@ function language_admin_edit_form_validate($form, &$form_state) {
   if ($form_state['values']['name'] != check_plain($form_state['values']['name'])) {
     form_set_error('name', t('%field cannot contain any markup.', array('%field' => $form['name']['#title'])));
   }
+  if ($form_state['values']['native'] != check_plain($form_state['values']['native'])) {
+    form_set_error('native', t('%field cannot contain any markup.', array('%field' => $form['native']['#title'])));
+  }
 }
 
 /**
@@ -326,6 +329,7 @@ function language_admin_edit_form_submit($form, &$form_state) {
   $langcode = $form_state['values']['langcode'];
   $language = $languages[$langcode];
   $language->name = $form_state['values']['name'];
+  $language->native = $form_state['values']['native'];
   $language->direction = $form_state['values']['direction'];
   language_save($language);
   // Display status messages for this form.
