@@ -3523,6 +3523,9 @@ function language_multilingual() {
  *   (optional) Whether to return a list of options instead of objects. This
  *   list is suitable for use in a select list #options array. This list is
  *   ordered by weight and then language name.
+ * @param bool $native_names
+ *   (optional) Whether the option_list labels should use the native name
+ *   instead of the English language name. Only applies if $option_list is TRUE.
  *
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
