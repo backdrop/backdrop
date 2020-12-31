@@ -187,7 +187,7 @@ function node_form($form, &$form_state, Node $node) {
 
   if ($node_type->settings['language'] && module_exists('language')) {
     $language_options = array();
-    foreach (language_list() as $langcode => $language) {
+    foreach (language_list(TRUE) as $langcode => $language) {
       $option_label = $language->name;
       if (isset($language->native)) {
         $option_label .= ' (' . $language->native . ')';
