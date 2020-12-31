@@ -169,7 +169,7 @@ function locale_config_info() {
 function locale_language_selector_form($user) {
   global $language;
   // Get list of enabled languages only.
-  $language_options = language_list(TRUE, TRUE);
+  $language_options = language_list(TRUE, TRUE, TRUE);
 
   // If the user is being created, we set the user language to the page language.
   $user_preferred_language = $user->uid ? user_preferred_language($user) : $language;
