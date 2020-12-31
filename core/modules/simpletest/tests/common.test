@@ -1300,8 +1300,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Test adding settings.
    */
   function testAddSetting() {
-    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'dries' => 280342800), 'setting');
-    $this->assertEqual(280342800, $javascript['settings']['data'][2]['dries'], 'JavaScript setting is set correctly.');
+    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'v1.0.0' => 1421394600), 'setting');
+    $this->assertEqual(1421394600, $javascript['settings']['data'][2]['v1.0.0'], 'JavaScript setting is set correctly.');
     $this->assertEqual('rocks', $javascript['settings']['data'][2]['backdrop'], 'The other JavaScript setting is set correctly.');
   }
 
