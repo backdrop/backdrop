@@ -28,7 +28,7 @@ function language_admin_overview_form($form, &$form_state) {
 
   foreach ($languages as $langcode => $language) {
     if (isset($language->native)) {
-      $language_name = $language->native;
+      $language_name = $language->name . ' (' . $language->native . ')';
     }
     else {
       $language_name = $language->name;
