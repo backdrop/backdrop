@@ -3138,6 +3138,17 @@ function system_update_1072() {
 }
 
 /**
+ * Set config_sync_clear_staging on existing sites, if not already set.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  if ($config->get('config_sync_clear_staging') == NULL) {
+    $config->set('config_sync_clear_staging', 1);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
