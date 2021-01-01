@@ -2053,8 +2053,8 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     preg_match('/#comment-([0-9]+)/', $this->getURL(), $match);
     $comment_id = $match[1];
 
-    // Log in as an administrator and edit the comment to use Full HTML, so
-    // that the comment text itself is not filtered at all.
+    // Log in as an administrator and edit the comment to use Raw HTML
+    // (full_html), so that the comment text itself is not filtered at all.
     $this->backdropLogin($this->admin_user);
     $edit['comment_body[' . $langcode . '][0][format]'] = $this->full_html_format->format;
     $this->backdropPost('comment/' . $comment_id . '/edit', $edit, t('Save'));

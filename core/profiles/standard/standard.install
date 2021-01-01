@@ -63,9 +63,11 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
+  // Changed display name from Full HTML to Raw HTML but keeping machine name 
+  // for backward compatibility.
   $full_html_format = array(
     'format' => 'full_html',
-    'name' => 'Full HTML',
+    'name' => 'Raw HTML',
     'weight' => 1,
     'editor' => NULL,
     'filters' => array(
