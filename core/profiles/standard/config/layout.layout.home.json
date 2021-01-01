@@ -96,7 +96,7 @@
                 "delta": "hero",
                 "settings": {
                     "title_display": "default",
-                    "title": "Welcome to Test Site!",
+                    "title": "Welcome to Backdrop CMS!",
                     "style": "default",
                     "block_settings": [],
                     "contexts": [],
