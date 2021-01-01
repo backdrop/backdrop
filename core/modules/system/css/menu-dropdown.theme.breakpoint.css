@@ -14,7 +14,7 @@
 .js .menu-dropdown a:hover,
 .js .menu-dropdown a:focus,
 .js .menu-dropdown a:active {
-  /* make room for the toggle button (sub indicator) */
+  /* Make room for the toggle button (sub indicator) */
   padding-right: 58px;
   font-weight: normal;
   line-height: 17px;
