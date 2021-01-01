@@ -178,9 +178,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-
             'value' => st('<h3>Welcome to your new site.</h3>
-
             <p>A great place to start configuring your new site is with your home page layout.</p>
             <ul>
               <li>You can edit this message by looking for the "Home page" listed under the Content menu.</li>
