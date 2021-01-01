@@ -3,7 +3,8 @@
    These transform the menu tree from
    collapsible to desktop (navbar + dropdowns)
 -----------------------------------------------*/
-/* start... (it's not recommended editing these rules) */
+
+/* @group It's not recommended to edit these rules */
 .js .menu-dropdown ul {
   position: absolute;
   width: 12em;
@@ -30,7 +31,7 @@
 .menu-dropdown ul a {
   white-space: normal;
 }
-/* ...end */
+/* @end */
 
 .menu-dropdown a,
 .menu-dropdown a:hover,
