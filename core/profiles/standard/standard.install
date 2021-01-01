@@ -169,6 +169,33 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
+    // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('Home page'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+
+            'value' => st('<h3>Welcome to your new site.</h3>
+
+            <p>A great place to start configuring your new site is with your home page layout.</p>
+            <ul>
+              <li>You can edit this message by looking for the "Home page" listed under the Content menu.</li>
+              <li>You can add or remove blocks on this page layout at admin/structure/layouts.</li>
+            </ul>'),
+            'format' => 'filtered_html'
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
   // Create an initial post to welcome users on install.
   $post = new Node(
     array(
