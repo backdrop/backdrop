@@ -211,7 +211,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
     }
 
     if ($data['below']) {
-      _menu_overview_tree_form($data['below']);
+      _menu_overview_tree_form($data['below'], $langcode);
     }
   }
   return $form;

@@ -1122,7 +1122,7 @@ function menu_tree_output($tree, $_current_depth = 0) {
     // the active class accordingly. But local tasks do not appear in menu
     // trees, so if the current path is a local task, and this link is its
     // tab root, then we have to set the class manually.
-    if ($data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
+    if ($router_item && $data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
       $class[] = 'active';
       $data['link']['localized_options']['attributes']['class'][] = 'active';
     }
@@ -2601,12 +2601,11 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     $selected_menu = MENU_PREFERRED_LINK;
   }
 
-  if (!isset($preferred_links[$path])) {
+  if (!isset($preferred_links[$path]) && ($item = menu_get_item($path))) {
     // Look for the correct menu link by building a list of candidate paths,
     // which are ordered by priority (translated hrefs are preferred over
     // untranslated paths). Afterwards, the most relevant path is picked from
     // the menus, ordered by menu preference.
-    $item = menu_get_item($path);
     $path_candidates = array();
     // 1. The current item href.
     $path_candidates[$item['href']] = $item['href'];

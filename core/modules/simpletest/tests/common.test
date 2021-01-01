@@ -1300,8 +1300,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Test adding settings.
    */
   function testAddSetting() {
-    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'dries' => 280342800), 'setting');
-    $this->assertEqual(280342800, $javascript['settings']['data'][2]['dries'], 'JavaScript setting is set correctly.');
+    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'v1.0.0' => 1421394600), 'setting');
+    $this->assertEqual(1421394600, $javascript['settings']['data'][2]['v1.0.0'], 'JavaScript setting is set correctly.');
     $this->assertEqual('rocks', $javascript['settings']['data'][2]['backdrop'], 'The other JavaScript setting is set correctly.');
   }
 
@@ -2792,7 +2792,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     date_default_timezone_set(backdrop_get_user_timezone());
 
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'America/Los_Angeles', 'en'), 'Sunday, 25-Mar-07 17:00:00 PDT', 'Test a different language.');
-    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
+    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London', 'en'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T'), 'domingo, 25-Mar-07 17:00:00 PDT', 'Test custom date format.');
     $this->assertIdentical(format_date($timestamp, 'long'), 'domingo, 25. marzo 2007 - 17:00', 'Test long date format.');
     $this->assertIdentical(format_date($timestamp, 'medium'), '25. marzo 2007 - 17:00', 'Test medium date format.');
