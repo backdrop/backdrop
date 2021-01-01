@@ -49,14 +49,33 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test that the CKEditor admin form throws no notices with RTL language.
+   * Test that the CKEditor admin form works correnctly with RTL languages.
    */
   public function testRtlAdminIcons() {
     $arabic = language_load('ar');
     $notice = '<em class="placeholder">Notice</em>: Undefined index: image_rtl in <em class="placeholder">{closure}()</em>';
 
     $this->backdropGet('admin/config/content/formats/filtered_html', array('language' => $arabic));
+    // Make sure, there's no php notice.
     $this->assertNoRaw($notice, '"Notice: Undefined index: image_rtl in {closure}()" not found');
+
+    // Get the settings script tag.
+    $script_tag = $this->xpath('//script[contains(text(), :string)]', array(':string' => 'window.Backdrop'));
+    $js_settings = (string) $script_tag[0];
+    // If something goes wrong, the icon src is only the base url.
+    $icons = array(
+      'bold' => 'ckeditor\\\/images\\\/buttons\\\/bold.png',
+      'italic' => 'ckeditor\\\/images\\\/buttons\\\/italic.png',
+      'blockquote' => 'ckeditor\\\/images\\\/buttons\\\/blockquote.png',
+      'cut' => 'ckeditor\\\/images\\\/buttons\\\/cut.png',
+      'copy' => 'ckeditor\\\/images\\\/buttons\\\/copy.png',
+      'paste' => 'ckeditor\\\/images\\\/buttons\\\/paste.png',
+      'justifyblock' => 'ckeditor\\\/images\\\/buttons\\\/justifyblock.png',
+    );
+
+    foreach ($icons as $name => $icon) {
+      $this->assertTrue(preg_match('#' . $icon . '#', $js_settings, $matches), format_string('Image src found for %icon', array('%icon' => $name)));
+    }
   }
 
 }
