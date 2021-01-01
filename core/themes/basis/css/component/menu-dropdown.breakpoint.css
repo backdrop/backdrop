@@ -28,7 +28,7 @@
 }
 
 .js .menu-dropdown li.has-children > a {
-  /* make room for the toggle button (sub indicator) */
+  /* Make room for the toggle button (sub indicator) */
   padding-right: 3.625rem;
 }
 
