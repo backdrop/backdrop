@@ -8,7 +8,7 @@ Backdrop.behaviors.passwordStrength = {
     $('input[data-password-strength]', context).once('password-strength', function () {
       var $passwordInput = $(this);
       var passwordStrengthSettings = $passwordInput.data('passwordStrength');
-      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.labels.strengthTitle + ': </span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
+      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.labels.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
       $passwordInput.wrap('<span class="password-strength-wrapper"></span>').after(passwordMeter);
       var $innerWrapper = $passwordInput.parent();
       var $indicatorBar = $innerWrapper.find('.indicator');
