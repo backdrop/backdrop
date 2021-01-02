@@ -58,8 +58,8 @@ description = Tests that flexible layout templates perform correctly.
 group = Layout
 file = layout.test
 
-[LayoutRel]
+[LayoutRelationships]
 name = Layout Relationships Test
-description = Tests that flexible layout templates perform correctly.
+description = Tests that layout context relationships perform correctly.
 group = Layout
 file = layout.test

@@ -8,14 +8,10 @@ require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.tes
 /**
  * Tests the interface for adding, removing, and moving blocks.
  */
-class LayoutRel extends BackdropWebTestCase {
+class LayoutRelationships extends BackdropWebTestCase {
   protected $profile = 'minimal';
-  protected $user1;
-  protected $user2;
   protected $user1_node1;
-  protected $user1_node2;
   protected $user2_node1;
-  protected $user2_node2;
   protected $field_name;
   protected $file_entity;
   protected $orphaned_blocks = FALSE;
@@ -41,10 +37,6 @@ class LayoutRel extends BackdropWebTestCase {
       'type' => 'post',
       'title' => $this->randomString(),
     ));
-    $this->user1_node2 = $this->backdropCreateNode(array(
-      'type' => 'page',
-      'title' => $this->randomString(),
-    ));
 
     // Create and login admin user.
     $this->user2 = $this->backdropCreateUser(array(
@@ -68,11 +60,6 @@ class LayoutRel extends BackdropWebTestCase {
 
     // Attach a file to this node.
     $this->addFileField($this->user2_node1);
-
-    $this->user2_node2 = $this->backdropCreateNode(array(
-      'type' => 'page',
-      'title' => $this->randomString(),
-    ));
   }
 
   /**
@@ -209,7 +196,6 @@ class LayoutRel extends BackdropWebTestCase {
     // user.
     $this->backdropGet('node/' . $this->user2_node1->nid);
     $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user2->name, '@title' => $this->user2_node1->title)));
-    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->user2->name, '@title' => $this->user2_node2->title)));
 
      // Remove the user from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
@@ -243,13 +229,9 @@ class LayoutRel extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $this->user2_node1->nid);
     $this->assertText(format_string('The file name is @name', array('@name' => $this->file_entity->filename)));
-
-    // Remove our file.
-    node_delete($this->user2_node2->nid);
   }
 
 }
-
 
 /**
  * Tests the interface for adding, removing, and moving blocks.
