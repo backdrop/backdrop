@@ -16,6 +16,12 @@ description = Test custom field widget hooks and callbacks on field administrati
 group = Field UI
 file = field_ui.test
 
+[FieldUIManageFieldsFailTestCase]
+name = Field add failures
+description = Test the system cleanup, in case of any DB failure while adding fields.
+group = Field UI
+file = field_ui.test
+
 [FieldUIViewModeFunctionalTest]
 name = Display modes
 description = Tests view mode functionality.

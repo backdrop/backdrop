@@ -805,9 +805,9 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
       ),
     ));
 
-    // Test that field_test_field_widget_properties_alter() sets the size to
-    // 42 and that field_test_field_widget_form_alter() reports the correct
-    // size when the form is displayed.
+    // Test that field_test_field_widget_properties_alter() sets the size to 42,
+    // and that field_test_field_widget_form_alter() reports the correct size
+    // when the form is displayed.
     $this->backdropGet('admin/structure/types/manage/post/fields/alter_test_text');
     $this->assertText('Field size: 42', 'Altered field size is found in hook_field_widget_form_alter().');
 
@@ -834,15 +834,76 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
       )
     ));
 
-    // Test that field_test_field_widget_properties_user_alter() replaces
-    // the widget and that field_test_field_widget_form_alter() reports the
-    // correct widget name when the form is displayed.
+    // Test that field_test_field_widget_properties_user_alter() replaces the
+    // widget, and that field_test_field_widget_form_alter() reports the correct
+    // widget name when the form is displayed.
     $this->backdropGet('admin/config/people/manage/fields/alter_test_options');
     $this->assertText('Widget type: options_buttons', 'Widget type is altered for users in hook_field_widget_form_alter().');
 
     // Test that the widget is not altered on page nodes.
     $this->backdropGet('admin/structure/types/manage/page/fields/alter_test_options');
     $this->assertText('Widget type: options_select', 'Widget type is not altered for pages in hook_field_widget_form_alter().');
+  }
+}
+
+/**
+ * Tests for correct messaging, and DB cleanup when field creation fails.
+ *
+ * @see based on FieldUIManageFields class.
+ */
+class FieldUIManageFieldsFailTestCase extends BAckdropWebTestCase {
+  function setUp() {
+    parent::setUp();
+
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer users'));
+
+    $this->backdropLogin($admin_user);
+
+    // Create content type, with underscores.
+    $type_name = strtolower($this->randomName(8)) . '_test';
+    $type = $this->backdropCreateContentType(array('name' => $type_name, 'type' => $type_name));
+    $this->type = $type->type;
+
+    // Store a valid URL name, with hyphens instead of underscores.
+    $this->hyphen_type = str_replace('_', '-', $this->type);
+
+    $schema =  array(
+      'description' => 'Leftover sample table.',
+      'fields' => array(
+        'just_field' => array(
+          'type' => 'int',
+        ),
+      ),
+    );
+    $this->field_name_input = strtolower($this->randomName(5));
+    $this->table_name_data = 'field_data_field_' . $this->field_name_input;
+    $this->table_name_revision = 'field_revision_field_' . $this->field_name_input;
+    // Intentionally create a table that is a field revision table. That should
+    // break the field creation.
+    db_create_table($this->table_name_revision, $schema);
+  }
+
+  /**
+   * Create a new field through the Field UI.
+   */
+  function testCreateFieldFailureCleanup() {
+    $label = $this->randomName();
+    $field_name = $this->field_name_input;
+    $initial_edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $field_name,
+      'fields[_add_new_field][type]' => 'text',
+      'fields[_add_new_field][widget_type]' => 'text_textfield',
+    );
+
+    // Try creating a field, and assert it was not created.
+    $this->backdropPost('admin/structure/types/manage/' . $this->hyphen_type . '/fields',  $initial_edit, t('Save'));
+    $this->assertRaw(t('There was a problem creating field'), t('Message about field creation problem was displayed.'));
+    $this->assertNoRaw(t('Your settings have been saved.'), t('No success message, because there was an error.'));
+
+    // Check database tables.
+    $this->assertFalse(db_table_exists($this->table_name_data), t('Field tables consistency check. No new tables expected on field creation failure.'));
+    $this->assert(db_table_exists($this->table_name_revision), t('Previously-existing table still in place.'));
   }
 }
 
