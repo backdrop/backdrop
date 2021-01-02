@@ -658,7 +658,13 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    */
   public function createTable($name, $table) {
     if ($this->tableExists($name)) {
-      throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $name)));
+	    if (db_select($name)->countQuery()->execute()->fetchField() == 0) {
+        $this->dropTable($name);
+        watchdog('database', 'Dropped empty, already existing table @name before recreating it.', array('@name' => $name));
+      }
+      else {
+        throw new DatabaseSchemaObjectExistsException(t('Table @name already exists and has data. Can\'t automatically recreate it.', array('@name' => $name)));
+      }
     }
     $statements = $this->createTableSql($name, $table);
     foreach ($statements as $statement) {
