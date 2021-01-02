@@ -111,7 +111,8 @@ abstract class LayoutRelationship extends LayoutHandler{
     foreach ($contexts as $context) {
       if ($context->plugin == $relationship['context']) {
         if (isset($context->position)) {
-          $label = $relationship['context_label'] . ' ' . t('at position') . ' ' . $context->position;
+          $position = $context->position + 1;
+          $label = $relationship['context_label'] . ' ' . t('at position') . ' ' . $position;
           $key = 'position:' . $context->position;
         }
         elseif (isset($context->settings['id'])) {
