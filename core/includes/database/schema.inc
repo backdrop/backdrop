@@ -658,7 +658,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    */
   public function createTable($name, $table) {
     if ($this->tableExists($name)) {
-	    if (db_select($name)->countQuery()->execute()->fetchField() == 0) {
+      if (db_select($name)->countQuery()->execute()->fetchField() == 0) {
         $this->dropTable($name);
         watchdog('database', 'Dropped empty, already existing table @name before recreating it.', array('@name' => $name));
       }
