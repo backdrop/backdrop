@@ -3655,6 +3655,12 @@ function system_cron() {
 function system_flush_caches() {
   // Reset the menu static caches.
   menu_reset_static_cache();
+
+  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
+    return array();
+  }
+
+  return ['cache_cache_tags'];
 }
 
 /**
@@ -4436,7 +4442,7 @@ function system_theme_debug_enabled_warning() {
 /**
  * Implements hook_process_html().
  */
-function d8cache_process_html(&$variables) {
+function system_process_html(&$variables) {
   backdrop_emit_cache_tags();
   backdrop_emit_cache_max_age();
 }
@@ -4444,7 +4450,7 @@ function d8cache_process_html(&$variables) {
 /**
  * Implements hook_ajax_render_alter().
  */
-function d8cache_ajax_render_alter(&$commands) {
+function system_ajax_render_alter(&$commands) {
   backdrop_emit_cache_tags();
   backdrop_emit_cache_max_age();
 }
@@ -4452,10 +4458,10 @@ function d8cache_ajax_render_alter(&$commands) {
 /**
  * Implements hook_emit_cache_tags().
  */
-function d8cache_emit_cache_tags($tags) {
+function system_emit_cache_tags($tags) {
   $page_cache_tags = &backdrop_static(__FUNCTION__, array());
 
-  if (config_get('d8cache.settings', 'd8cache_emit_cache_tags')) {
+  if (config_get('system.core.settings', 'emit_cache_tags')) {
     backdrop_add_http_header('X-Backdrop-Cache-Tags', implode(' ', $tags));
   }
 
@@ -4466,7 +4472,7 @@ function d8cache_emit_cache_tags($tags) {
 /**
  * Implements hook_emit_cache_max_age().
  */
-function d8cache_emit_cache_max_age($max_age) {
+function system_emit_cache_max_age($max_age) {
   $page_cache_max_age = &backdrop_static(__FUNCTION__, array());
 
   // Store the emitted cache max_age for further use.
@@ -4474,14 +4480,14 @@ function d8cache_emit_cache_max_age($max_age) {
 }
 
 /**
- * Backwards compatible version of d8cache_invalidate_cache_tags().
+ * Backwards compatible version of system_invalidate_cache_tags().
  * This will automatically be used when the core patch to implement end of
  * transaction callbacks is missing.
  * @param $tags
  */
-function d8cache_OLD_invalidate_cache_tags($tags) {
-  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
-  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+function system_OLD_invalidate_cache_tags($tags) {
+  $tag_cache = &backdrop_static('cache_tag_cache', array());
+  $invalidated_tags = &backdrop_static('invalidated_cache_tags', array());
 
   foreach ($tags as $tag) {
     // Only invalidate tags once per request unless they are written again.
@@ -4491,20 +4497,13 @@ function d8cache_OLD_invalidate_cache_tags($tags) {
 
     $invalidated_tags[$tag] = TRUE;
     unset($tag_cache[$tag]);
-    db_merge('d8cache_cache_tags')
+    db_merge('invalidated_cache_tags')
       ->key(array('tag' => $tag))
       ->fields(array('invalidations' => 1))
       ->expression('invalidations', 'invalidations + 1')
       ->execute();
-    _d8cache_cache_tags_invalidate_cache($tag);
+    _system_cache_tags_invalidate_cache($tag);
   }
-}
-
-/**
- * Implements hook_flush_caches().
- */
-function d8cache_flush_caches() {
-  return _d8cache_cache_tags_cache_bins();
 }
 
 /**
@@ -4513,39 +4512,39 @@ function d8cache_flush_caches() {
  *
  * @return bool
  */
-function _d8cache_has_transaction_callbacks($connection) {
+function _system_has_transaction_callbacks($connection) {
   return method_exists($connection, 'addRootTransactionEndCallback');
 }
 
 /**
  * Implements hook_invalidate_cache_tags().
  */
-function d8cache_invalidate_cache_tags($tags) {
+function system_invalidate_cache_tags($tags) {
   // Not using backdrop_static because the detection is based on the running
   // code, and that is not going to change during execution.
   static $use_transaction_callback;
-  $deferred_tags = &backdrop_static('d8cache_deferred_tags', array());
+  $deferred_tags = &backdrop_static('deferred_cache_tags', array());
 
   $connection = Database::getConnection();
   if (!isset($use_transaction_callback)) {
-    $use_transaction_callback = _d8cache_has_transaction_callbacks($connection);
+    $use_transaction_callback = _system_has_transaction_callbacks($connection);
   }
   if (!$use_transaction_callback) {
     // Core support missing, use the old (deadlock-prone) invalidation code.
-    return d8cache_OLD_invalidate_cache_tags($tags);
+    return system_OLD_invalidate_cache_tags($tags);
   }
   if ($connection->inTransaction()) {
     // We are inside a transaction, we must defer until the end of the transaction.
     foreach ($tags as $tag) {
       if (empty($deferred_tags)) {
-        $connection->addRootTransactionEndCallback('d8cache_root_transaction_end');
+        $connection->addRootTransactionEndCallback('system_root_transaction_end');
       }
       $deferred_tags[$tag] = TRUE;
     }
   }
   else {
     // Not in a transction, directly invalidate instead.
-    d8cache_do_invalidate_cache_tags($tags);
+    system_do_invalidate_cache_tags($tags);
   }
 }
 
@@ -4554,9 +4553,9 @@ function d8cache_invalidate_cache_tags($tags) {
  *
  * @throws \Exception
  */
-function d8cache_do_invalidate_cache_tags($tags) {
-  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
-  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+function system_do_invalidate_cache_tags($tags) {
+  $tag_cache = &backdrop_static('cache_tag_cache', array());
+  $invalidated_tags = &backdrop_static('invalidated_cache_tags', array());
 
   $connection = Database::getConnection();
   if ($connection->inTransaction()) {
@@ -4578,7 +4577,7 @@ function d8cache_do_invalidate_cache_tags($tags) {
     $invalidated_tags[$tag] = TRUE;
     unset($tag_cache[$tag]);
     try {
-      db_merge('d8cache_cache_tags')
+      db_merge('invalidated_cache_tags')
         ->key(['tag' => $tag])
         ->fields(['invalidations' => 1])
         ->expression('invalidations', 'invalidations + 1')
@@ -4593,18 +4592,18 @@ function d8cache_do_invalidate_cache_tags($tags) {
   unset($transaction);
   // Ensure the cache tags cache is invalidated too.
   foreach ($tags as $tag) {
-    _d8cache_cache_tags_invalidate_cache($tag);
+    _system_cache_tags_invalidate_cache($tag);
   }
 }
 
 /**
  * Callback to invalidate cache tags at the end of a transaction.
  */
-function d8cache_root_transaction_end($committed = NULL) {
-  $deferred_tags = &backdrop_static('d8cache_deferred_tags', array());
+function system_root_transaction_end($committed = NULL) {
+  $deferred_tags = &backdrop_static('deferred_cache_tags', array());
   if ($committed === NULL || $committed === TRUE) {
     // If the commit is presumed successful, proceed with the invalidation.
-    d8cache_do_invalidate_cache_tags(array_keys($deferred_tags));
+    system_do_invalidate_cache_tags(array_keys($deferred_tags));
   }
   else {
     // Since the transaction was rolled back, the deferred tags no longer
@@ -4622,14 +4621,6 @@ function d8cache_root_transaction_end($committed = NULL) {
   $deferred_tags = array();
 }
 
-/* -----------------------------------------------------------------------
- * Contrib Hooks
- */
-
-/* -----------------------------------------------------------------------
- * Public API
- */
-
 /**
  * Returns the sum total of validations for a given set of tags.
  *
@@ -4641,8 +4632,8 @@ function d8cache_root_transaction_end($committed = NULL) {
  * @return string
  *   Cache tag invalidations checksum.
  */
-function d8cache_cache_tags_get_current_checksum(array $tags) {
-  $invalidated_tags = &backdrop_static('d8cache_invalidated_tags', array());
+function system_cache_tags_get_current_checksum(array $tags) {
+  $invalidated_tags = &backdrop_static('invalidated_cache_tags', array());
 
   // Remove tags that were already invalidated during this request from the
   // static caches so that another invalidation can occur later in the same
@@ -4652,7 +4643,7 @@ function d8cache_cache_tags_get_current_checksum(array $tags) {
     unset($invalidated_tags[$tag]);
   }
 
-  return _d8cache_cache_tags_calculate_checksum($tags);
+  return _system_cache_tags_calculate_checksum($tags);
 }
 
 /**
@@ -4670,8 +4661,8 @@ function d8cache_cache_tags_get_current_checksum(array $tags) {
  *   FALSE if cache tag invalidations happened for the passed in tags since
  *   the cache item was stored, TRUE otherwise.
  */
-function d8cache_cache_tags_is_valid($checksum, array $tags) {
-  return $checksum == _d8cache_cache_tags_calculate_checksum($tags);
+function system_cache_tags_is_valid($checksum, array $tags) {
+  return $checksum == _system_cache_tags_calculate_checksum($tags);
 }
 
 /**
@@ -4683,13 +4674,9 @@ function d8cache_cache_tags_is_valid($checksum, array $tags) {
  * @return BackdropCacheInterface
  *   The BackdropCacheInterface object for the selected bin.
  */
-function d8cache_cache_get_object($bin) {
+function system_cache_get_object($bin) {
   return _cache_get_object($bin);
 }
-
-/* -----------------------------------------------------------------------
- * Helper functions
- */
 
 /**
  * Calculates the current checksum for a given set of tags.
@@ -4700,21 +4687,21 @@ function d8cache_cache_get_object($bin) {
  * @return int
  *   The calculated checksum.
  */
-function _d8cache_cache_tags_calculate_checksum(array $tags) {
-  $tag_cache = &backdrop_static('d8cache_tag_cache', array());
+function _system_cache_tags_calculate_checksum(array $tags) {
+  $tag_cache = &backdrop_static('cache_tag_cache', array());
   $checksum = 0;
 
   $query_tags = array_diff($tags, array_keys($tag_cache));
 
   // Try to load from cache first.
   if ($query_tags) {
-    $tag_cache += _d8cache_cache_tags_load_from_cache($query_tags);
+    $tag_cache += _system_cache_tags_load_from_cache($query_tags);
   }
 
   // Are there any remaining tags to query?
   if ($query_tags) {
-    $result = _d8cache_cache_tags_load_from_db($query_tags);
-    _d8cache_cache_tags_update_cache($result);
+    $result = _system_cache_tags_load_from_db($query_tags);
+    _system_cache_tags_update_cache($result);
     $tag_cache += $result;
   }
 
@@ -4735,13 +4722,13 @@ function _d8cache_cache_tags_calculate_checksum(array $tags) {
  *   An array keyed by tag with invalidations as value. Using 0 if no
  *   invalidation occured, yet.
  */
-function _d8cache_cache_tags_load_from_db($query_tags) {
+function _system_cache_tags_load_from_db($query_tags) {
   $result = array();
 
   // Ensure database is loaded, since we can get called to load missing tags
   // during BACKDROP_BOOTSTRAP_PAGE_CACHE. This is a recursive call.
   backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
-  if ($db_tags = db_query('SELECT tag, invalidations FROM {d8cache_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
+  if ($db_tags = db_query('SELECT tag, invalidations FROM {invalidated_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
     $result += $db_tags;
   }
 
@@ -4755,26 +4742,18 @@ function _d8cache_cache_tags_load_from_db($query_tags) {
  * Cache helper functions
  */
 
-function _d8cache_cache_tags_cache_bins() {
-  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
-    return array();
-  }
-
-  return ['cache_d8cache_cache_tags'];
-}
-
 /**
  * Invalidate a tag from the cache tags cache.
  *
  * @param string $tag
  *   The tag to invalidate.
  */
-function _d8cache_cache_tags_invalidate_cache($tag) {
-  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+function _system_cache_tags_invalidate_cache($tag) {
+  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
     return;
   }
 
-  cache_clear_all($tag, 'cache_d8cache_cache_tags');
+  cache_clear_all($tag, 'cache_cache_tags');
 }
 
 /**
@@ -4783,13 +4762,13 @@ function _d8cache_cache_tags_invalidate_cache($tag) {
  * @param array $result
  *   The array of (tag, invalidations) to sync to the database.
  */
-function _d8cache_cache_tags_update_cache($result) {
-  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+function _system_cache_tags_update_cache($result) {
+  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
     return;
   }
 
   foreach ($result as $tag => $invalidations) {
-    cache_set($tag, $invalidations, 'cache_d8cache_cache_tags');
+    cache_set($tag, $invalidations, 'cache_cache_tags');
   }
 }
 
@@ -4803,15 +4782,15 @@ function _d8cache_cache_tags_update_cache($result) {
  * @return array
  *   An array keyed by tag with invalidations as value.
  */
-function _d8cache_cache_tags_load_from_cache(&$query_tags) {
-  if (!config_get('d8cache.settings', 'd8cache_use_cache_tags_cache')) {
+function _system_cache_tags_load_from_cache(&$query_tags) {
+  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
     return array();
   }
 
   $result = array();
 
   // Load from cache.
-  $cached = cache_get_multiple($query_tags, 'cache_d8cache_cache_tags');
+  $cached = cache_get_multiple($query_tags, 'cache_cache_tags');
   foreach ($cached as $tag => $item) {
     $result[$tag] = $item->data;
   }

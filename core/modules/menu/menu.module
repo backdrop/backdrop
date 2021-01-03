@@ -851,18 +851,19 @@ function menu_preprocess_block(&$variables) {
 /**
  * Implements hook_preprocess_menu_link().
  */
-function d8cache_preprocess_menu_link(&$variables) {
+function menu_preprocess_menu_link(&$variables) {
   $link = $variables['element']['#original_link'];
 
   // Unfortunately preprocess_menu_tree does not have the information we need,
   // so we need to add the cache tag for each menu link in a menu separately.
-  backdrop_add_cache_tags(_d8cache_menu_link_get_cache_tags($link));
+  backdrop_add_cache_tags(_menu_menu_link_get_cache_tags($link));
 }
 
 /**
  * Implements hook_preprocess_links().
  */
-function d8cache_preprocess_links(&$variables) {
+
+function menu_preprocess_links(&$variables) {
   $tag_map = array();
   if (isset($variables['links'])) {
     foreach ($variables['links'] as $link) {
@@ -877,7 +878,7 @@ function d8cache_preprocess_links(&$variables) {
 /**
  * Implements hook_menu_link_alter().
  */
-function d8cache_menu_link_alter(&$item) {
+function menu_menu_link_alter(&$item) {
   // @todo This needs an upgrade path for existing menu items.
   $item['options']['#menu_name'] = $item['menu_name'];
 }
@@ -885,22 +886,22 @@ function d8cache_menu_link_alter(&$item) {
 /**
  * Implements hook_menu_link_insert().
  */
-function d8cache_menu_link_insert($link) {
-  backdrop_invalidate_cache_tags(_d8cache_menu_link_get_cache_tags($link));
+function menu_menu_link_insert($link) {
+  backdrop_invalidate_cache_tags(_menu_menu_link_get_cache_tags($link));
 }
 
 /**
  * Implements hook_menu_link_update().
  */
-function d8cache_menu_link_update($link) {
-  backdrop_invalidate_cache_tags(_d8cache_menu_link_get_cache_tags($link));
+function menu_menu_link_update($link) {
+  backdrop_invalidate_cache_tags(_menu_menu_link_get_cache_tags($link));
 }
 
 /**
  * Implements hook_menu_item_delete().
  */
-function d8cache_menu_link_delete($link) {
-  backdrop_invalidate_cache_tags(_d8cache_menu_link_get_cache_tags($link));
+function menu_menu_link_delete($link) {
+  backdrop_invalidate_cache_tags(_menu_menu_link_get_cache_tags($link));
 }
 
 /* -----------------------------------------------------------------------
@@ -918,7 +919,7 @@ function d8cache_menu_link_delete($link) {
 /**
  * Get cache tags for menu link.
  */
-function _d8cache_menu_link_get_cache_tags($link) {
+function _menu_menu_link_get_cache_tags($link) {
   return array(
     'menu:' . strtr($link['menu_name'], '-', '_'),
   );

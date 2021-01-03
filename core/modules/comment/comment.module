@@ -1617,28 +1617,28 @@ function comment_delete_multiple($cids) {
 /**
  * Implements hook_comment_insert().
  */
-function d8cache_comment_insert($comment) {
+function comment_comment_insert($comment) {
   backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
 }
 
 /**
  * Implements hook_comment_delete().
  */
-function d8cache_comment_delete($comment) {
+function comment_comment_delete($comment) {
   backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
 }
 
 /**
  * Implements hook_comment_publish().
  */
-function d8cache_comment_publish($comment) {
+function comment_comment_publish($comment) {
   backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
 }
 
 /**
  * Implements hook_comment_unpublish().
  */
-function d8cache_comment_unpublish($comment) {
+function comment_comment_unpublish($comment) {
   backdrop_invalidate_cache_tags(array('node:' . $comment->nid));
 }
 

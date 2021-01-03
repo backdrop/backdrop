@@ -2253,21 +2253,10 @@ function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
 /**
  * Implements hook_views_pre_render().
  */
-function d8cache_views_pre_render(&$view) {
-  $tags = _d8cache_views_get_cache_tags($view);
-  backdrop_add_cache_tags($tags);
-}
-
-/* -----------------------------------------------------------------------
- * Helper functions
- */
-
-/**
- * Get the cache tags for a view.
- */
-function _d8cache_views_get_cache_tags($view) {
-  return array(
+function views_views_pre_render(&$view) {
+  $tags = array(
     'views:' . $view->name,
     'views:' . $view->name . '.' . $view->current_display,
   );
+  backdrop_add_cache_tags($tags);
 }

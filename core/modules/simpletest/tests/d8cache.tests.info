@@ -1,6 +1,0 @@
-[D8CacheUnitTestCase]
-name = Drupal 8 Cache Backport
-description = Tests the Drupal 8 caching backport.
-group = D8Cache
-file = d8cache.test
-

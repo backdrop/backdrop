@@ -712,7 +712,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
    *   The cache bin for which the object is created.
    */
   public function __construct($bin) {
-    $config = config('d8cache.settings');
+    $config = config('system.core.settings');
 
     $this->bin = $bin;
 
@@ -724,7 +724,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
     $this->backend = new $class($bin);
     $this->configuration = array();
 
-    $configuration = $config->get('d8cache_cache_options');
+    $configuration = $config->get('cache_options');
     if (isset($configuration[$bin])) {
       $this->configuration = $configuration[$bin];
     }
@@ -753,19 +753,19 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
       }
 
       $data = $item->data;
-      $expire = isset($data->d8cache_expire) ? $data->d8cache_expire : $item->expire;
+      $expire = isset($data->cache_expire) ? $data->cache_expire : $item->expire;
 
       // Check expire time.
       $item->valid = $expire === CACHE_PERMANENT || $expire === CACHE_TEMPORARY || $expire >= REQUEST_TIME;
 
       // Is this packed data?
-      if ($data instanceof stdClass && isset($data->d8cache_tags)) {
+      if ($data instanceof stdClass && isset($data->cache_tags)) {
         // Check if the cache tags are valid.
-        if (!$this->checksumValid($data->d8cache_checksum, $data->d8cache_tags)) {
+        if (!$this->checksumValid($data->cache_checksum, $data->cache_tags)) {
           $item->valid = FALSE;
         }
 
-        $item->data = $data->d8cache_data;
+        $item->data = $data->cache_data;
       }
 
       if (!$allow_invalid && !$item->valid) {
@@ -801,7 +801,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
         $expire = REQUEST_TIME + $this->configuration['ttl'];
       }
     }
-//    print_r($expire . '<br>');
+
     // Allow to set global tags per bin.
     if (isset($this->configuration['tags'])) {
       $tags = backdrop_merge_cache_tags($tags, $this->configuration['tags']);
@@ -809,8 +809,8 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 
     // Special case cache_page.
     if ($this->bin == 'cache_page') {
-      $page_cache_tags = &backdrop_static('d8cache_emit_cache_tags', array());
-      $page_cache_max_age = &backdrop_static('d8cache_emit_cache_max_age', CACHE_MAX_AGE_PERMANENT);
+      $page_cache_tags = &backdrop_static('system_emit_cache_tags', array());
+      $page_cache_max_age = &backdrop_static('system_emit_cache_max_age', CACHE_MAX_AGE_PERMANENT);
 
       if (!empty($page_cache_tags)) {
         $tags = backdrop_merge_cache_tags($tags, $page_cache_tags);
@@ -852,10 +852,10 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
       $checksum = $this->getCurrentChecksum($tags);
 
       $data = (object) array(
-        'd8cache_tags' => $tags,
-        'd8cache_checksum' => $checksum,
-        'd8cache_expire' => $expire,
-        'd8cache_data' => $data,
+        'cache_tags' => $tags,
+        'cache_checksum' => $checksum,
+        'cache_expire' => $expire,
+        'cache_data' => $data,
       );
 
       $this->backend->set($cid, $data, $expire);
@@ -931,7 +931,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
       // When the module has not been installed yet, don't calculate a checksum.
       return 0;
     }
-    return d8cache_cache_tags_get_current_checksum($tags);
+    return system_cache_tags_get_current_checksum($tags);
   }
 
   /**
@@ -956,40 +956,27 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
       return TRUE;
     }
 
-    return d8cache_cache_tags_is_valid($checksum, $tags);
+    return system_cache_tags_is_valid($checksum, $tags);
   }
 
   /**
-   * Ensure D8Cache is installed properly.
+   * Ensure that the database table for cache tags has been created.
    *
-   * This will preload d8cache.module during page cache serving, and ensure it
-   * is properly installed in other circumstances.
-   *
-   * @return bool FALSE if it appears d8cache is incorrectly installed, otherwise TRUE.
+   * @return bool TRUE if the table {invalidated_cache_tags} exists , otherwise FALSE.
    */
   public function ensureInstalled() {
-    static $installStateKnown = FALSE;
-    static $isInstalled = TRUE;
+    static $is_installed = NULL;
 
-    if ($this->bin == 'cache_page' && backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_FULL) {
-      // Ensure the module file is loaded, in case we are serving a cached page.
-      require_once __DIR__ . '/d8cache.module';
-      // When we haven't fully bootstrapped yet, we can't actually verify that
-      // d8cache has been installed properly. Just assume things are OK.
-      return TRUE;
+    if (is_null($is_installed)) {
+      if (db_table_exists('invalidated_cache_tags')) {
+        $is_installed = TRUE;
+      }
+      else {
+        $is_installed = FALSE;
+      }
     }
 
-    if ($installStateKnown) {
-      return $isInstalled;
-    }
-
-    if (!module_exists('d8cache')) {
-      watchdog('d8cache', 'D8Cache Backend is in use, but the d8cache module has not been enabled! Please enable it to ensure cache tags work properly.', array(), WATCHDOG_ALERT, 'admin/modules');
-      $isInstalled = FALSE;
-    }
-    $installStateKnown = TRUE;
-
-    return $isInstalled;
+    return $is_installed;
   }
 
   public function delete($cid) {
@@ -1048,6 +1035,20 @@ class BackdropAttachmentsCollector {
   protected $attachments = array();
 
   /**
+   * A count for how many cache IDs this collector should be used.
+   *
+   * @var int
+   */
+  public $count = 0;
+
+  /**
+   * The stored previous collector.
+   *
+   * @var \BackdropAttachmentsCollector
+   */
+  public $previousCollector = NULL;
+
+  /**
    * Constructs a BackdropAttachmentsCollector object.
    *
    * This will register a listener that listens for attachments created via:
@@ -1094,6 +1095,13 @@ class BackdropAttachmentsCollector {
   }
 
   /**
+   * Reset the attachments in the collector.
+   */
+  public function reset() {
+    $this->attachments = array();
+  }
+
+  /**
    * Destructs the BackdropAttachmentsCollector object.
    *
    * This will unregister the listener that listens for attachments.
@@ -1117,39 +1125,11 @@ class BackdropAttachmentsCollector {
 }
 
 /**
- * Adds reset() and some properties to BackdropAttachmentsCollector().
- */
-class D8CacheBackdropAttachmentsCollector extends BackdropAttachmentsCollector {
-
-  /**
-   * A count for how many cache IDs this collector should be used.
-   *
-   * @var int
-   */
-  public $count = 0;
-
-  /**
-   * The stored previous collector.
-   *
-   * @var \BackdropAttachmentsCollector
-   */
-  public $previousCollector = NULL;
-
-  /**
-   * Reset the attachments in the collector.
-   */
-  public function reset() {
-    $this->attachments = array();
-  }
-
-}
-
-/**
  * Special cache backend that tracks attachments.
  *
  * @ingroup cache
  */
-class D8CacheAttachmentsCollector extends D8Cache {
+class BackdropAttachmentsCollectorCache extends BackdropTaggableCache {
 
   /**
    * An array of attachment collectors, keyed by cache id.
@@ -1166,8 +1146,8 @@ class D8CacheAttachmentsCollector extends D8Cache {
   protected $currentAttachmentsCollector;
 
   /**
-   * Whether this D8CacheAttachmentsCollector is in a valid state or not.
-   * If not valid, behavior falls back to D8Cache behavior.
+   * Whether this CacheAttachmentsCollector is in a valid state or not.
+   * If not valid, behavior falls back to BackdropTaggableCache behavior.
    *
    * The most common cause of an invalid state is attempting to use this
    * class to handle early page cache.
@@ -1183,13 +1163,13 @@ class D8CacheAttachmentsCollector extends D8Cache {
     $this->isValid = TRUE;
     if (!function_exists('backdrop_process_attached')) {
       // Something is trying to use us during early bootstrap.
-      // Fall back to baseline D8Cache behavior for safety.
+      // Fall back to baseline BackdropTaggableCache behavior for safety.
       $this->isValid = FALSE;
 
       // Additionally, prevent the request from saving to cache, and warn
       // loudly that we are in an unsupported configuration.
       $t = get_t();
-      backdrop_set_message($t('D8CacheAttachmentsCollector is not designed for early page cache! Please switch cache_page to D8Cache in settings.php!'), 'error');
+      backdrop_set_message($t('BackdropAttachmentsCollectorCache is not designed for early page cache! Please switch cache_page to BackdropTaggableCache in settings.php!'), 'error');
     }
     parent::__construct($bin);
   }
@@ -1207,9 +1187,9 @@ class D8CacheAttachmentsCollector extends D8Cache {
 
     // Unpack the cached data and process attachments.
     foreach ($cache as $cid => $item) {
-      if (is_array($item->data) && isset($item->data['#d8cache_data'])) {
+      if (is_array($item->data) && isset($item->data['#cache_tags_data'])) {
         backdrop_process_attached($item->data);
-        $cache[$cid]->data = $item->data['#d8cache_data'];
+        $cache[$cid]->data = $item->data['#cache_tags_data'];
       }
     }
 
@@ -1219,7 +1199,7 @@ class D8CacheAttachmentsCollector extends D8Cache {
     }
 
     // We have multiple cids, so we need to reset after each cache set.
-    $attachments_collector = new D8CacheBackdropAttachmentsCollector();
+    $attachments_collector = new BackdropAttachmentsCollector();
     $attachments_collector->count = count($cids);
     $attachments_collector->previousCollector = $this->currentAttachmentsCollector;
     $this->currentAttachmentsCollector = $attachments_collector;
@@ -1235,7 +1215,7 @@ class D8CacheAttachmentsCollector extends D8Cache {
    * {@inheritdoc}
    */
   public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
-    // Fall back to regular D8Cache if we are not in a valid state.
+    // Fall back to regular BackdropTaggableCache if we are not in a valid state.
     if (!$this->isValid) {
       parent::set($cid, $data, $expire, $tags);
       return;
@@ -1259,7 +1239,7 @@ class D8CacheAttachmentsCollector extends D8Cache {
 
     // Create a pseudo render array.
     $data = array(
-      '#d8cache_data' => $data,
+      '#cache_tags_data' => $data,
       '#attached' => $attachments,
     );
 

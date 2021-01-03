@@ -8465,6 +8465,7 @@ function _backdrop_flush_css_js() {
  *   Tags to add.
  */
 function backdrop_add_cache_tags(array $tags) {
+//  dpm($tags);
   // Process the data as attachment if we have an active attachments
   // collector.
   if (function_exists('backdrop_has_attachments_collector') && backdrop_has_attachments_collector()) {
