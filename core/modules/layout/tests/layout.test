@@ -179,63 +179,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
      // Remove the user from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
-
-    // Test the entity from schema relationship.
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Add context relationship'));
-
-    $edit = array(
-      'relationship' => 'entity_from_schema:uid-user-node',
-    );
-    $this->backdropPost(NULL, $edit, t('Load relationship'));
-    $this->backdropPost(NULL, array(), t('Add relationship'));
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    $edit = array(
-      'contexts[my_node]' => 'relationship_0',
-    );
-    $this->backdropPost($block_edit_url, $edit, t('Update block'));
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    // Visit a node created by the current user (User 2) and test that the
-    // NID of the available node context is equal to the UID of the current
-    // user.
-    $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
-    debug($this->test_node1);
-    debug($this->test_node2);
-
-     // Remove the user from node relationship.
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
-
-    // Test the entity from field relationship.
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Add context relationship'));
-
-    $edit = array(
-      'relationship' => 'entity_from_field:' . $this->field_name . '-node-file',
-    );
-    $this->backdropPost(NULL, $edit, t('Load relationship'));
-    $this->backdropPost(NULL, array(), t('Add relationship'));
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-
-    // Add the test block that requires file contexts.
-    $this->clickLink(t('Add block'), 3);
-    $this->assertText(t('A testing block for layouts that requires a file context.'));
-    $this->clickLink(t('File context test'));
-    $this->backdropPost(NULL, array(), t('Add block'));
-
-    // Record the UUID for the newly added block.
-    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
-      ':region' => 'l-sidebar',
-    ));
-    $block_uuid = (string) $last_block[0]['data-block-id'];
-    $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
-
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The file name is @name', array('@name' => $this->file_entity->filename)));
   }
 
 

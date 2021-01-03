@@ -866,8 +866,6 @@ function layout_autoload_info() {
 
     // Relationships.
     'LayoutRelationshipUserFromNode' => 'plugins/relationships/user_from_node.inc',
-    'LayoutRelationshipEntityFromField' => 'plugins/relationships/entity_from_field.inc',
-    'LayoutRelationshipEntityFromSchema' => 'plugins/relationships/entity_from_schema.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
     'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
