@@ -344,7 +344,9 @@ function layout_context_add_form_submit($form, &$form_state) {
       $layout->setContexts($handler->name, $handler);
     }
     else {
-      $layout->relationships[] = $handler;
+      $uuid = new Uuid();
+      $key = $uuid->generate();
+      $layout->relationships[$key] = $handler;
     }
   }
   layout_set_layout_tempstore($layout);
