@@ -587,9 +587,10 @@ function menu_test_title_callback($title, $case_no = 3) {
 /**
  * Helper function for MenuChangeTestCase.
  *
- * @param $new_type
+ * @param string $new_type
  *   If set, will change the type value.
- * @return
+ *
+ * @return int
  *   The type value to use.
  */
 function menu_test_change_menu_type($new_type = NULL) {
