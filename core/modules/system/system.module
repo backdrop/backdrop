@@ -3660,7 +3660,7 @@ function system_flush_caches() {
     return array();
   }
 
-  return ['cache_cache_tags'];
+  return array('cache_cache_tags');
 }
 
 /**
