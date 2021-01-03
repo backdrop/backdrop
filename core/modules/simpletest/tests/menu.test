@@ -1599,16 +1599,16 @@ class MenuTrailTestCase extends MenuWebTestCase {
  */
 class MenuChangeTestCase extends MenuWebTestCase {
   /**
-   *
+   * Set up testing environment.
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp('menu_test');
   }
 
   /**
-   *
+   * Test that updating the type of a menu item works correctly.
    */
-  function testMenuChangeTypeTestCase() {
+  public function testMenuChangeTypeTestCase() {
     // Check that the test menu item exists.
     $sql = "SELECT type FROM {menu_links}, {menu_router} WHERE {menu_links}.router_path = {menu_router}.path AND {menu_links}.router_path = 'menu-test/changes'";
     $type = db_query($sql)->fetchField();
