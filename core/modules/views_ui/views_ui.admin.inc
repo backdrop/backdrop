@@ -277,7 +277,10 @@ function views_ui_list_page() {
 
     $row = array();
     $row[] = array(
-      'data' => theme('views_ui_view_name', array('view' => $view)),
+      'data' => theme('label_machine_name__view', array(
+        'label' => $view->get_human_name(),
+        'machine_name' => $view->name,
+      )),
       'class' => array('views-ui-name'),
       'data-label' => t('Name'),
     );

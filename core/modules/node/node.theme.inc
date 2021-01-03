@@ -162,8 +162,8 @@ function theme_node_add_list($variables) {
  *     the content type.
  *
  * @deprecated as of 1.18.1. Labels are now output using the
- * label_machine_name() function, and descriptions are displayed in a separate
- * column.
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
  *
  * @ingroup themeable
  */
