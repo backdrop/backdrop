@@ -1,0 +1,32 @@
+name: Backdrop Coding Standards
+
+# Run on all pull requests.
+on:
+  pull_request:
+    branches: [ 1.x ]
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Download PHP_CodeSniffer
+        run: |
+          sudo wget https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar -qO /usr/bin/phpcs
+          sudo wget https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar -qO /usr/bin/phpcbf
+          sudo chmod 755 /usr/bin/phpcs
+          sudo chmod 755 /usr/bin/phpcbf
+
+      - name: Run PHP CS on affected files
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF..HEAD -- .)
+          sudo /usr/bin/phpcs --config-set installed_paths core/misc/code_sniffer
+          /usr/bin/phpcs \
+            --standard=Backdrop \
+            --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md,yml \
+            --ignore="misc/ckeditor,misc/ui,misc/jquery.*,misc/opensans,misc/smartmenus,misc/farbtastic,core/misc/code_sniffer" \
+            $CHANGED_FILES

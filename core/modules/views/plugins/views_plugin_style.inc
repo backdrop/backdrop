@@ -2,6 +2,8 @@
 /**
  * @file
  * Definition of views_plugin_style.
+ *
+ * phpcs:disable Backdrop.NamingConventions
  */
 
 /**
