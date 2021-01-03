@@ -34,11 +34,13 @@ function layout_list_page() {
       // priority-low class on the $header array.
       $row[] = '';
       $row[] = '';
+      $row[] = '';
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
       $row[] = array('data' => $path_link);
       // Empty columns are intentional.
+      $row[] = '';
       $row[] = '';
       $row[] = '';
     }
@@ -65,8 +67,13 @@ function layout_list_page() {
         $storage = t('Custom');
       }
 
+      // Create a link to the settings page.
+      $info = layout_get_layout_template_info($layout->layout_template);
+      $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = $template;
       $row[] = theme('layout_condition_info', array('layout' => $layout));
       $row[] = $storage;
       $row[] = backdrop_render($operations);
@@ -80,6 +87,7 @@ function layout_list_page() {
 
   $header = array(
     array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
     array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),

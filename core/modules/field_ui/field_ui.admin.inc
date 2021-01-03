@@ -291,7 +291,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       t('Label'),
       t('Weight'),
       t('Parent'),
-      t('Machine name'),
       t('Field type'),
       t('Widget'),
       t('Operations'),
@@ -316,7 +315,10 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($instance['label']),
+        '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
+          'label' => $instance['label'],
+          'machine_name' => $instance['field_name'],
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -341,9 +343,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
           '#default_value' => $name,
           '#attributes' => array('class' => array('field-name')),
         ),
-      ),
-      'field_name' => array(
-        '#markup' => $instance['field_name'],
       ),
       'type' => array(
         '#type' => 'link',
@@ -387,7 +386,10 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'extra_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($extra_field['label']),
+        '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
+          'label' => $extra_field['label'],
+          'machine_name' => $name,
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -412,9 +414,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
           '#default_value' => $name,
           '#attributes' => array('class' => array('field-name')),
         ),
-      ),
-      'field_name' => array(
-        '#markup' => $name,
       ),
       'type' => array(
         '#markup' => isset($extra_field['description']) ? $extra_field['description'] : '',

@@ -798,3 +798,35 @@ function system_preprocess_page_components(&$variables) {
     'page_components__' . $child_delta,
   );
 }
+
+/**
+ * Returns HTML for the display of a label with both human and machine names.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - label: The human-readable name or label.
+ *   - link: (optional) An associative array containing:
+ *     - path: The path to link the label to.
+ *     - options: (optional) An associative array of additional options used by
+ *       the l() function.
+ *   - machine_name: (optional) The machine-safe name or label.
+ *
+ * @ingroup themeable
+ */
+function theme_label_machine_name($variables) {
+  if (isset($variables['link'])) {
+    $options = isset($variables['link']['options']) ? $variables['link']['options'] : array();
+    $label = l($variables['label'], $variables['link']['path'], $options);
+  }
+  else {
+    $label = check_plain($variables['label']);
+  }
+  $output = '<div class="label">' . $label . '</div>';
+
+  if (!empty($variables['machine_name'])) {
+    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
+}

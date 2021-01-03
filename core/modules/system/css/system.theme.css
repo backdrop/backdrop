@@ -551,3 +551,10 @@ img.align-right {
   display: table;
   clear: both;
 }
+
+/**
+ * Labels & machine names.
+ */
+.machine-name {
+  font-size: smaller;
+}

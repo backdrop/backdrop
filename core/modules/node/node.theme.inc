@@ -161,6 +161,10 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.18.1. Labels are now output using the
+ * label_machine_name() function, and descriptions are displayed in a separate
+ * column.
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {

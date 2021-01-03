@@ -58,7 +58,11 @@ function theme_image_style_list($variables) {
   $rows = array();
   foreach ($styles as $style) {
     $row = array();
-    $row[] = l($style['label'], 'admin/config/media/image-styles/configure/' . $style['name']);
+    $row[] = theme('label_machine_name__image_style', array(
+      'label' => $style['label'],
+      'link' => array('path' => 'admin/config/media/image-styles/configure/' . $style['name']),
+      'machine_name' => $style['name'],
+    ));
 
     $links = array();
     $links['configure'] = array(
