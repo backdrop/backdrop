@@ -26,31 +26,34 @@
 class views_plugin_style extends views_plugin {
   /**
    * Store all available tokens row rows.
+   *
+   * @var array
    */
-  var $row_tokens = array();
+  public $row_tokens = array();
 
   /**
-   * Contains the row plugin, if it's initialized
-   * and the style itself supports it.
+   * Contains the row plugin, if it's initialized and the style supports it.
    *
    * @var views_plugin_row
    */
-  var $row_plugin;
+  public $row_plugin;
 
   /**
    * Initialize a style plugin.
    *
-   * @param $view
-   * @param $display
-   * @param $options
+   * @param view $view
+   *   The view.
+   * @param views_display $display
+   *   The display on which this style is bieing applied.
+   * @param array $options
    *   The style options might come externally as the style can be sourced
    *   from at least two locations. If it's not included, look on the display.
    */
-  function init(&$view, &$display, $options = NULL) {
+  public function init(view &$view, views_display &$display, array $options = NULL) {
     $this->view = &$view;
     $this->display = &$display;
 
-    // Overlay incoming options on top of defaults
+    // Overlay incoming options on top of defaults.
     $this->unpack_options($this->options, isset($options) ? $options : $display->handler->get_option('style_options'));
 
     if ($this->uses_row_plugin() && $display->handler->get_option('row_plugin')) {
@@ -66,7 +69,10 @@ class views_plugin_style extends views_plugin {
     );
   }
 
-  function destroy() {
+  /**
+   * {@inheritdoc}
+   */
+  public function destroy() {
     parent::destroy();
 
     if (isset($this->row_plugin)) {
@@ -77,23 +83,21 @@ class views_plugin_style extends views_plugin {
   /**
    * Return TRUE if this style also uses a row plugin.
    */
-  function uses_row_plugin() {
+  public function uses_row_plugin() {
     return !empty($this->definition['uses row plugin']);
   }
 
   /**
    * Return TRUE if this style also uses a row plugin.
    */
-  function uses_row_class() {
+  public function uses_row_class() {
     return !empty($this->definition['uses row class']);
   }
 
   /**
-   * Return TRUE if this style also uses fields.
-   *
-   * @return bool
+   * Determines whether this style plugin uses fields.
    */
-  function uses_fields() {
+  public function uses_fields() {
     // If we use a row plugin, ask the row plugin. Chances are, we don't
     // care, it does.
     $row_uses_fields = FALSE;
@@ -105,11 +109,11 @@ class views_plugin_style extends views_plugin {
   }
 
   /**
-   * Return TRUE if this style uses tokens.
+   * Determines if this style uses tokens.
    *
    * Used to ensure we don't fetch tokens when not needed for performance.
    */
-  function uses_tokens() {
+  public function uses_tokens() {
     if ($this->uses_row_class()) {
       $class = $this->options['row_class'];
       if (strpos($class, '[') !== FALSE || strpos($class, '!') !== FALSE || strpos($class, '%') !== FALSE) {
@@ -121,7 +125,7 @@ class views_plugin_style extends views_plugin {
   /**
    * Return the token replaced row class for the specified row.
    */
-  function get_row_class($row_index) {
+  public function get_row_class($row_index) {
     if ($this->uses_row_class() && $this->options['row_class']) {
 
       $has_tokens = FALSE;
@@ -147,7 +151,7 @@ class views_plugin_style extends views_plugin {
   /**
    * Take a value and apply token replacement logic to it.
    */
-  function tokenize_value($value, $row_index) {
+  public function tokenize_value($value, $row_index) {
     if (strpos($value, '[') !== FALSE || strpos($value, '!') !== FALSE || strpos($value, '%') !== FALSE) {
       $fake_item = array(
         'alter_text' => TRUE,
@@ -169,13 +173,16 @@ class views_plugin_style extends views_plugin {
   }
 
   /**
-   * Should the output of the style plugin be rendered even if it's a empty view.
+   * Print the output of the style plugin even if it's an empty view.
    */
-  function even_empty() {
+  public function even_empty() {
     return !empty($this->definition['even empty']);
   }
 
-  function option_definition() {
+  /**
+   * {@inheritdoc}
+   */
+  public function option_definition() {
     $options = parent::option_definition();
     $options['grouping'] = array('default' => array());
     if ($this->uses_row_class()) {
@@ -188,12 +195,15 @@ class views_plugin_style extends views_plugin {
     return $options;
   }
 
-  function options_form(&$form, &$form_state) {
+  /**
+   * {@inheritdoc}
+   */
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     // Only fields-based views can handle grouping. Style plugins can also
     // exclude themselves from being groupable by setting their "use grouping"
     // definition key to FALSE.
-    // @TODO: Document "uses grouping" in docs.php when docs.php is written.
+    // @todo Document "uses grouping" in docs.php when docs.php is written.
     if ($this->uses_fields() && $this->definition['uses grouping']) {
       $options = array('' => t('- None -'));
       $field_labels = $this->display->handler->get_field_labels(TRUE);
@@ -285,7 +295,10 @@ class views_plugin_style extends views_plugin {
     }
   }
 
-  function options_validate(&$form, &$form_state) {
+  /**
+   * {@inheritdoc}
+   */
+  public function options_validate(&$form, &$form_state) {
     // Don't run validation on style plugins without the grouping setting.
     if (isset($form_state['values']['style_options']['grouping'])) {
       // Don't save grouping if no field is specified.
@@ -298,25 +311,31 @@ class views_plugin_style extends views_plugin {
   }
 
   /**
+   * Overrides the default sorting behavior.
+   *
    * Called by the view builder to see if this style handler wants to
    * interfere with the sorts. If so it should build; if it returns
    * any non-TRUE value, normal sorting will NOT be added to the query.
    */
-  function build_sort() { return TRUE; }
+  public function build_sort() {
+    return TRUE;
+  }
 
   /**
+   * Adds additional sorts after the view is built.
+   *
    * Called by the view builder to let the style build a second set of
    * sorts that will come after any other sorts in the view.
    */
-  function build_sort_post() { }
+  public function build_sort_post() {}
 
   /**
    * Allow the style to do stuff before each row is rendered.
    *
-   * @param $result
+   * @param array $result
    *   The full array of results from the query.
    */
-  function pre_render($result) {
+  public function pre_render(array $result) {
     if (!empty($this->row_plugin)) {
       $this->row_plugin->pre_render($result);
     }
@@ -325,7 +344,7 @@ class views_plugin_style extends views_plugin {
   /**
    * Render the display in this style.
    */
-  function render() {
+  public function render() {
     if ($this->uses_row_plugin() && empty($this->row_plugin)) {
       debug('views_plugin_style_default: Missing row plugin');
       return;
@@ -347,15 +366,15 @@ class views_plugin_style extends views_plugin {
    * Plugins may override this method if they wish some other way of handling
    * grouping.
    *
-   * @param $sets
+   * @param array $sets
    *   Array containing the grouping sets to render.
-   * @param $level
+   * @param int $level
    *   Integer indicating the hierarchical level of the grouping.
    *
    * @return string
    *   Rendered output of given grouping sets.
    */
-  function render_grouping_sets($sets, $level = 0) {
+  public function render_grouping_sets(array $sets, $level = 0) {
     $output = '';
     foreach ($sets as $set) {
       $row = reset($set['rows']);
@@ -367,7 +386,8 @@ class views_plugin_style extends views_plugin {
             'grouping' => $this->options['grouping'][$level],
             'grouping_level' => $level,
             'rows' => $set['rows'],
-            'title' => $set['group'])
+            'title' => $set['group'],
+          )
         );
       }
       // Render as a record set.
@@ -385,7 +405,8 @@ class views_plugin_style extends views_plugin {
             'options' => $this->options,
             'grouping_level' => $level,
             'rows' => $set['rows'],
-            'title' => $set['group'])
+            'title' => $set['group'],
+          )
         );
       }
     }
@@ -396,18 +417,19 @@ class views_plugin_style extends views_plugin {
   /**
    * Group records as needed for rendering.
    *
-   * @param $records
+   * @param array $records
    *   An array of records from the view to group.
-   * @param $groupings
+   * @param array $groupings
    *   An array of grouping instructions on which fields to group. If empty, the
    *   result set will be given a single group with an empty string as a label.
-   * @param $group_rendered
+   * @param bool $group_rendered
    *   Boolean value whether to use the rendered or the raw field value for
    *   grouping. If set to NULL the return is structured as before
    *   Views 7.x-3.0-rc2. After Views 7.x-3.0 this boolean is only used if
    *   $groupings is an old-style string or if the rendered option is missing
    *   for a grouping instruction.
-   * @return
+   *
+   * @return array
    *   The grouped record set.
    *   A nested set structure is generated if multiple grouping fields are used.
    *
@@ -432,7 +454,7 @@ class views_plugin_style extends views_plugin {
    *   )
    *   @endcode
    */
-  function render_grouping($records, $groupings = array(), $group_rendered = NULL) {
+  public function render_grouping(array $records, array $groupings = array(), $group_rendered = NULL) {
     // This is for backward compatibility, when $groupings was a string
     // containing the ID of a single field.
     if (is_string($groupings)) {
@@ -440,7 +462,7 @@ class views_plugin_style extends views_plugin {
       $groupings = array(array('field' => $groupings, 'rendered' => $rendered));
     }
 
-    // Make sure fields are rendered
+    // Make sure fields are rendered.
     $this->render_fields($this->view->result);
     $sets = array();
     if ($groupings) {
@@ -485,10 +507,10 @@ class views_plugin_style extends views_plugin {
             $set[$grouping]['rows'] = array();
           }
 
-          // Move the set reference into the row set of the group we just determined.
+          // Move the set reference into the row set of the group.
           $set = &$set[$grouping]['rows'];
         }
-        // Add the row to the hierarchically positioned row set we just determined.
+        // Add the row to the hierarchically positioned row set.
         $set[$index] = $row;
       }
     }
@@ -502,7 +524,7 @@ class views_plugin_style extends views_plugin {
 
     // If this parameter isn't explicitly set, modify the output to be fully
     // backward compatible to code before Views 7.x-3.0-rc2.
-    // @TODO Remove this as soon as possible (e.g. October 2020).
+    // @todo Remove this as soon as possible (e.g. October 2020).
     if ($group_rendered === NULL) {
       $old_style_sets = array();
       foreach ($sets as $group) {
@@ -517,10 +539,10 @@ class views_plugin_style extends views_plugin {
   /**
    * Render all of the fields for a given style and store them on the object.
    *
-   * @param $result
+   * @param array $result
    *   The result array from $view->result.
    */
-  function render_fields($result) {
+  public function render_fields(array $result) {
     if (!$this->uses_fields()) {
       return;
     }
@@ -551,12 +573,12 @@ class views_plugin_style extends views_plugin {
   /**
    * Get a rendered field.
    *
-   * @param $index
+   * @param int $index
    *   The index count of the row.
-   * @param $field
-   *    The id of the field.
+   * @param string $field
+   *   The id of the field.
    */
-  function get_field($index, $field) {
+  public function get_field($index, $field) {
     if (!isset($this->rendered_fields)) {
       $this->render_fields($this->view->result);
     }
@@ -567,21 +589,24 @@ class views_plugin_style extends views_plugin {
   }
 
   /**
-  * Get the raw field value.
-  *
-  * @param $index
-  *   The index count of the row.
-  * @param $field
-  *    The id of the field.
-  */
-  function get_field_value($index, $field) {
+   * Get the raw field value.
+   *
+   * @param int $index
+   *   The index count of the row.
+   * @param string $field
+   *   The id of the field.
+   */
+  public function get_field_value($index, $field) {
     $this->view->row_index = $index;
     $value = $this->view->field[$field]->get_value($this->view->result[$index]);
     unset($this->view->row_index);
     return $value;
   }
 
-  function validate() {
+  /**
+   * {@inheritdoc}
+   */
+  public function validate() {
     $errors = parent::validate();
 
     if ($this->uses_row_plugin()) {
@@ -599,12 +624,16 @@ class views_plugin_style extends views_plugin {
     return $errors;
   }
 
-  function query() {
+  /**
+   * {@inheritdoc}
+   */
+  public function query() {
     parent::query();
     if (isset($this->row_plugin)) {
       $this->row_plugin->query();
     }
   }
+
 }
 
 /**
