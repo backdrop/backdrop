@@ -4110,7 +4110,7 @@ function path_autocomplete($string = '') {
     }
 
     // Get taxonomy term matches.
-    if ($match_count < $range) {
+    if (module_exists('taxonomy') && $match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
         ->condition('name', '%' . db_like($string) . '%', 'LIKE')
