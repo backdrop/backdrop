@@ -1513,6 +1513,7 @@ function user_menu() {
   );
   return $items;
 }
+
 /**
  * Implements hook_menu_alter().
  */
@@ -1530,9 +1531,9 @@ function user_menu_alter(&$items) {
 }
 
 /**
- * Implements hook_admin_menu_output_alter().
+ * Implements hook_admin_bar_output_alter().
  */
-function user_admin_menu_output_alter(&$content) {
+function user_admin_bar_output_alter(&$content) {
   // Admin menu shows both the parent menu item and its children, remove the
   // duplicate child element show "Manage fields" doesn't show up twice.
   if (isset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields'])) {
