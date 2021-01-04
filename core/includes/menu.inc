@@ -2967,9 +2967,11 @@ function _menu_link_build($item) {
 function _menu_navigation_links_rebuild($menu) {
   // Add normal and suggested items as links.
   $menu_links = array();
+  $default_menu_link_paths = array();
   foreach ($menu as $path => $item) {
     if ($item['_visible']) {
       $menu_links[$path] = $item;
+      $default_menu_link_paths[] = $path;
       $sort[$path] = $item['_number_parts'];
     }
   }
@@ -3045,10 +3047,10 @@ function _menu_navigation_links_rebuild($menu) {
         ->execute();
     }
   }
-  // Find any item whose router path does not exist any more.
+  // Find any item that is no longer visible.
   $result = db_select('menu_links')
     ->fields('menu_links')
-    ->condition('router_path', $paths, 'NOT IN')
+    ->condition('router_path', $default_menu_link_paths, 'NOT IN')
     ->condition('external', 0)
     ->condition('updated', 0)
     ->condition('customized', 0)
