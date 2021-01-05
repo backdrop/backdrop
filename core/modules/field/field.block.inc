@@ -82,7 +82,32 @@ class FieldBlock extends Block {
 
     // Do not proceed if the entity is not an EntityInterface object
     if (!is_a($entity, 'EntityInterface')) {
-      return NULL;
+      if ($entity_type == 'user') {
+        if (isset($entity->uid)) {
+          // Get a complete user entity.
+          $context_info = layout_get_context_info('user');
+          // Check if a load function has been set by some other module. If not, default to user_load().
+          if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
+            $load_function = $context_info['load callback'];
+          }
+          else {
+            $load_function = 'user_load';
+          }
+          $entity = $load_function($entity->uid);
+          if (is_a($entity, 'EntityInterface')) {
+            $this->contexts[$entity_type]->setData($entity);
+          }
+          else {
+            return NULL;
+          }
+        }
+        else {
+          return NULL;
+        }
+      }
+      else {
+        return NULL;
+      }
     }
 
     // Load the entity type's information for this field.
