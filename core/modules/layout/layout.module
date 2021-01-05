@@ -1816,16 +1816,12 @@ function layout_context_required_by_path($path) {
  * Return the current user context, which is always available.
  */
 function layout_current_user_context() {
-  global $user;
-
   $current_user_context = layout_create_context('user', array(
     'name' => 'current_user',
     'label' => t('Current user'),
     'locked' => TRUE,
   ));
-
   $current_user_context->setData($GLOBALS['user']);
-
   return $current_user_context;
 }
 
