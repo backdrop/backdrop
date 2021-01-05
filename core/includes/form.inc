@@ -1355,9 +1355,9 @@ function backdrop_redirect_form($form_state) {
  *   A keyed array containing the current state of the form. The current
  *   user-submitted data is stored in $form_state['values'], though
  *   form validation functions are passed an explicit copy of the
- *   values for the sake of simplicity. Validation handlers can also
+ *   values for the sake of simplicity. Validation handlers can also use
  *   $form_state to pass information on to submit handlers. For example:
- *     $form_state['data_for_submission'] = $data;
+ *   $form_state['data_for_submission'] = $data;
  *   This technique is useful when validation requires file parsing,
  *   web service requests, or other expensive requests that should
  *   not be repeated in the submission step.
@@ -1467,15 +1467,30 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       $is_empty_value = ($elements['#value'] === 0);
       $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
-        // Although discouraged, a #title is not mandatory for form elements. In
-        // case there is no #title, we cannot set a form error message.
-        // Instead of setting no #title, form constructors are encouraged to set
-        // #title_display to 'invisible' to improve accessibility.
-        if (isset($elements['#title'])) {
-          form_error($elements, $t('!name field is required.', array('!name' => $elements['#title'])));
+        $skip = FALSE;
+
+        // Don't display validation errors for machine name fields if their
+        // source field also has a validation error (since fixing the source
+        // field will also fix the machine name field).
+        if ($elements['#type'] == 'machine_name') {
+          $source = $elements['#machine_name']['source'][0];
+          $errors = form_get_errors();
+          if (isset($errors[$source])) {
+            $skip = TRUE;
+          }
         }
-        else {
-          form_error($elements);
+
+        if (!$skip) {
+          // Although discouraged, a #title is not mandatory for form elements.
+          // In case there is no #title, we cannot set a form error message.
+          // Instead of setting no #title, form constructors are encouraged to
+          // set #title_display to 'invisible' to improve accessibility.
+          if (isset($elements['#title'])) {
+            form_error($elements, $t('!name field is required.', array('!name' => $elements['#title'])));
+          }
+          else {
+            form_error($elements);
+          }
         }
       }
     }

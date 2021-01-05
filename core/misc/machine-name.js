@@ -73,10 +73,6 @@ Backdrop.behaviors.machineName = {
        if (!$source.length || !$target.length || !$suffix.length || !$wrapper.length) {
          return;
        }
-       // Skip processing upon a form validation error on the machine name.
-       if ($target.hasClass('error')) {
-         return;
-       }
        // Figure out the maximum length for the machine name.
        options.maxlength = $target.attr('maxlength');
        // Hide the form item container of the machine name form element.
@@ -172,7 +168,7 @@ Backdrop.behaviors.machineName = {
       url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + urlAppend),
       data: transliterationOptions,
       dataType: "text"
-    }); 
+    });
   }
 };
 
