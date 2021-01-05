@@ -367,7 +367,11 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
-      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.')
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
+      '#ajax' => array(
+        'callback' => 'menu_update_parent_options_ajax',
+        'wrapper' => 'menu-parent-select',
+      ),
     );
   }
   else {
@@ -411,6 +415,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
+    '#prefix' => '<div id="menu-parent-select">',
+    '#suffix' => '</div>',
   );
   $form['weight'] = array(
     '#type' => 'weight',
@@ -421,6 +427,21 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   );
 
   return $form;
+}
+
+/**
+ * Ajax callback to replace the menu item parent options.
+ *
+ * Whenever the item language changes, the available parents also have to get
+ * updated.
+ */
+function menu_update_parent_options_ajax($form, $form_state) {
+  $item = $form['original_item']['#value'];
+  if (isset($form_state['values']['langcode'])) {
+    $item['langcode'] = $form_state['values']['langcode'];
+    $form['parent']['#options'] = menu_parent_options(menu_get_menus(), $item);
+  }
+  return $form['parent'];
 }
 
 /**
