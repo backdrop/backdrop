@@ -1178,17 +1178,30 @@ function menu_tree_output($tree, $_current_depth = 0) {
  *   Optional maximum depth of links to retrieve. Typically useful if only one
  *   or two levels of a sub tree are needed in conjunction with a non-NULL
  *   $link, in which case $max_depth should be greater than $link['depth'].
+ * @param string $langcode
+ *   Optional, filter tree by this langcode, defaults to current language if not
+ *   set. Language neutral items are always included.
  *
  * @return
  *   An tree of menu links in an array, in the order they should be rendered.
  */
-function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
+function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langcode = NULL) {
   $tree = &backdrop_static(__FUNCTION__, array());
 
   // Use $mlid as a flag for whether the data being loaded is for the whole tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
   // Generate a cache ID (cid) specific for this $menu_name, $link, $language, and depth.
-  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $GLOBALS['language']->langcode . ':' . (int) $max_depth;
+  if (empty($langcode)) {
+    $langcode = $GLOBALS['language']->langcode;
+    $langcode_params = FALSE;
+  }
+  else {
+    $langcode_params = array($langcode);
+    if ($langcode != LANGUAGE_NONE) {
+      $langcode_params[] = LANGUAGE_NONE;
+    }
+  }
+  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $langcode . ':' . (int) $max_depth;
 
   if (!isset($tree[$cid])) {
     // If the static variable doesn't have the data, check {cache_menu}.
@@ -1216,6 +1229,9 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
         $tree_parameters['expanded'] = $parents;
         $tree_parameters['active_trail'] = $parents;
         $tree_parameters['active_trail'][] = $mlid;
+      }
+      if ($langcode_params) {
+        $tree_parameters['langcode'] = $langcode_params;
       }
 
       // Cache the tree building parameters using the page-specific cid.
