@@ -80,32 +80,26 @@ class FieldBlock extends Block {
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
 
-    // Do not proceed if the entity is not an EntityInterface object
+    // If the entity is not an EntityInterface object, try to get one.
     if (!is_a($entity, 'EntityInterface')) {
-      if ($entity_type == 'user') {
-        if (isset($entity->uid)) {
-          // Get a complete user entity.
-          $context_info = layout_get_context_info('user');
-          // Check if a load function has been set by some other module. If not, default to user_load().
-          if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-            $load_function = $context_info['load callback'];
-          }
-          else {
-            $load_function = 'user_load';
-          }
-          $entity = $load_function($entity->uid);
-          if (is_a($entity, 'EntityInterface')) {
-            $this->contexts[$entity_type]->setData($entity);
-          }
-          else {
-            return NULL;
-          }
+      $info = entity_get_info($entity_type);
+      $id_key = $info['entity keys']['id'];
+      if (isset($entity->{$id_key})) {
+        $entity = $info['load hook']($entity->{$id_key});
+        if (is_a($entity, 'EntityInterface')) {
+          // Save the EntityInterface object for future use.
+          $this->contexts[$entity_type]->setData($entity);
         }
         else {
+          // Either there is a problem with this entity type definition,
+          //  or the entity does not exist or is failing to load for some reason.
+          //  Do not proceed.
           return NULL;
         }
       }
       else {
+        // Unable to load an entity without an id property value.
+        //  Do not proceed.
         return NULL;
       }
     }
