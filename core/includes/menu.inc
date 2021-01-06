@@ -1196,10 +1196,15 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langco
     $langcode_params = FALSE;
   }
   else {
-    $langcode_params = array($langcode);
-    if ($langcode != LANGUAGE_NONE) {
-      $langcode_params[] = LANGUAGE_NONE;
+    if ($langcode == LANGUAGE_NONE) {
+      // Language neutral items can be attached to any parent.
+      $all_enabled = language_list(TRUE);
+      $langcode_params = array_keys($all_enabled);
     }
+    else {
+      $langcode_params = array($langcode);
+    }
+    $langcode_params[] = LANGUAGE_NONE;
   }
   $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $langcode . ':' . (int) $max_depth;
 
