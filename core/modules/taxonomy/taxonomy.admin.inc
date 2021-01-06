@@ -747,7 +747,8 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       ));
     }
     else {
-      backdrop_set_title(t('Edit term %term_name', array('%term_name' => $term->name)), PASS_THROUGH);
+      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
+      backdrop_set_title(t('Edit @vocab_name term %term_name', array('@vocab_name' => $vocabulary->name, '%term_name' => $term->name)), PASS_THROUGH);
     }
     if (!isset($vocabulary) && isset($term->vocabulary)) {
       $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
