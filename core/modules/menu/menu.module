@@ -406,7 +406,7 @@ function _menu_get_options($menus, $available_menus, $item) {
 
   $options = array();
   $langcode = NULL;
-  if (module_exists('language')) {
+  if (module_exists('language') && isset($item['langcode'])) {
     $langcode = $item['langcode'];
   }
   foreach ($menus as $menu_name => $title) {
