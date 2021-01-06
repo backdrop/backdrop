@@ -851,11 +851,11 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
  *
  * @see based on FieldUIManageFields class.
  */
-class FieldUIManageFieldsFailTestCase extends BAckdropWebTestCase {
+class FieldUIManageFieldsFailTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer users'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields', 'administer users'));
 
     $this->backdropLogin($admin_user);
 
