@@ -913,7 +913,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     foreach ($types as $type) {
       // Create 5 nodes for each of the 2 content types.
       for ($i = 1; $i <= 5; $i++) {
-        $node = $this->backdropCreateNode(array('type' => $types[$type]));
+        $node = $this->backdropCreateNode(array('type' => $type));
         $this->nodes[$node->nid] = $node;
       }
     }
