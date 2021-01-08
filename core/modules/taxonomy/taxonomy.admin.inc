@@ -741,10 +741,10 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
-      backdrop_set_title(t('Add term'));
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));
+      backdrop_set_title(t('Add @vocab_name term', array('@vocab_name' => $vocabulary->name)), PASS_THROUGH);
     }
     else {
       $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
