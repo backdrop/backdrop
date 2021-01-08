@@ -170,7 +170,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
@@ -180,7 +180,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header set to keep alive when getting a cached page.');
 
@@ -276,7 +276,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->backdropLogout();
 
@@ -605,9 +605,14 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Test that settings.php variables can be overridden by the server.
    */
   function testBackdropSettingsOverride() {
-    // This test only works on Travis CI through the SetEnv call in
-    // core/misc/travis-ci/vhost.conf. See backdrop_settings_initialize().
+    // This test only runs when the "BACKDROP_SETTINGS" environment variable is
+    // set. This usually is done through a Apache VirtualHost setting.
+    // See backdrop_settings_initialize().
+    $raw_settings = array();
     if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+      $raw_settings = json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
+    }
+    if (isset($raw_settings['test_setting'])) {
       $this->assertEqual(settings_get('test_setting'), 'foo', 'Custom setting set through the server environment variables in BACKDROP_SETTINGS.');
 
       $test_database_array = array(

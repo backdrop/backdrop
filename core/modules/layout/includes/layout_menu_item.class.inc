@@ -103,7 +103,7 @@ class LayoutMenuItem {
    *
    * @var LayoutContext[]
    */
-  private $contexts;
+  private $contexts = array();
 
   /**
    * Constructor for LayoutMenuItems.
@@ -136,6 +136,11 @@ class LayoutMenuItem {
     // Load conditions.
     foreach ($this->conditions as $key => $condition) {
       $this->conditions[$key] = layout_create_handler('layout_access', $condition['plugin'], $condition['data']);
+    }
+
+    // Ensure contexts is always set to an array.
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
     }
   }
 
@@ -230,28 +235,33 @@ class LayoutMenuItem {
    */
   function getContexts() {
     if (is_null($this->contexts)) {
-      // Required contexts are generated on-demand.
-      $contexts = layout_context_required_by_path($this->path);
-      $path_parts = explode('/', $this->path);
-
-      // Add in configured arguments.
-      foreach ($this->arguments as $position => $argument_config) {
-        if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
-          $context_config = $argument_config + array('required' => TRUE);
-          $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
-        }
-      }
-
-      // Add on the current user context, which is always available.
-      $contexts['current_user'] = layout_create_context('user', array(
-        'name' => 'current_user',
-        'label' => t('Current user'),
-        'locked' => TRUE,
-      ));
-      $contexts['current_user']->setData($GLOBALS['user']);
-
-      $this->contexts = $contexts;
+      $this->contexts = array();
     }
+
+    $this->resetContexts();
+
+    // Required contexts are generated on-demand.
+    $contexts = layout_context_required_by_path($this->path);
+    $path_parts = explode('/', $this->path);
+
+    // Add in configured arguments.
+    foreach ($this->arguments as $position => $argument_config) {
+      if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
+        $context_config = $argument_config + array('required' => TRUE);
+        $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
+      }
+    }
+
+    // Add on the current user context, which is always available.
+    $contexts['current_user'] = layout_create_context('user', array(
+      'name' => 'current_user',
+      'label' => t('Current user'),
+      'locked' => TRUE,
+    ));
+    $contexts['current_user']->setData($GLOBALS['user']);
+
+    $this->contexts += $contexts;
+
     return $this->contexts;
   }
 
@@ -262,7 +272,11 @@ class LayoutMenuItem {
    * such as when actively changing the layout's path.
    */
   function resetContexts() {
-    $this->contexts = NULL;
+    foreach ($this->contexts as $key => $context) {
+      if (!$context->storage) {
+        unset($this->contexts[$key]);
+      }
+    }
   }
 
   /**

@@ -237,7 +237,13 @@ function _backdrop_session_write($sid, $value) {
 function backdrop_session_initialize() {
   global $user, $is_https;
 
-  session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
+  // Calling session_set_save_handler() multiple times will cause errors on
+  // PHP 7.2+. But checking a session status is only available 5.4+, so if the
+  // status cannot be checked, or the status indicates that there is no session,
+  // set session handlers.
+  if (!function_exists('session_status') || session_status() === PHP_SESSION_NONE) {
+    session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
+  }
 
   // We use !empty() in the following check to ensure that blank session IDs
   // are not valid.

@@ -35,7 +35,7 @@ function user_block_user_action(User $account, &$context) {
  * Unblocks a specific user account.
  *
  * @param User $account
- *   The user entity whose account will be blocked.
+ *   The user entity whose account will be unblocked.
  *
  * @ingroup actions
  */
@@ -50,13 +50,14 @@ function user_unblock_user_action($account, &$context) {
  * Queues a specific user account for cancellation.
  *
  * @param User $account
- *   The user entity whose account will be blocked.
+ *   The user entity whose account will be cancelled.
  *
  * @ingroup actions
  */
 function user_cancel_user_action($account, &$context) {
-  // Save the list of nodes to be deleted in the session. Append to the existing
-  // list if within the last minute, otherwise start a new list of nodes.
+  // Save the list of user accounts to be deleted in the session. Append to 
+  // the existing list if within the last minute, otherwise start a new list
+  // of user accounts.
   $last_action_time = 0;
   if (isset($_SESSION['user_cancel_action'])) {
     $last_action_time = $_SESSION['user_cancel_action']['timestamp'];
@@ -77,7 +78,7 @@ function user_cancel_user_action($account, &$context) {
  * Adds a role to a user account.
  *
  * @param User $account
- *   The user entity whose account will be blocked.
+ *   The user entity to which the role will be added.
  *
  * @ingroup actions
  */
@@ -93,7 +94,7 @@ function user_add_role_action($account, &$context) {
  * Removes a role from a user account.
  *
  * @param User $account
- *   The user entity whose account will be blocked.
+ *   The user entity from which the role will be removed.
  *
  * @ingroup actions
  */

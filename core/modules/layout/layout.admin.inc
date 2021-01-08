@@ -210,6 +210,7 @@ function layout_add_page() {
  */
 function layout_settings_form($form, &$form_state, Layout $layout) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
 
   $form_state['layout'] = &$layout;
   $form['#tree'] = TRUE;
@@ -271,12 +272,21 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
+  $items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = theme('item_list', array('items' => $items));
+
   $form['path'] = array(
     '#title' => t('Path'),
+    '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => t('Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
+    '#description' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
     '#access' => !$layout->isDefault(),
   );
   $form['path_update'] = array(
@@ -303,16 +313,35 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   $contexts = $layout->getContexts();
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
+  $form['context_wrapper'] = array(
+    '#title' => t('Contexts'),
+    '#type' => 'item',
+    '#id' => 'context-wrapper',
+    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
+    // Current user context is always present.
+  );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
   $form['context_wrapper']['#suffix'] = '</div>';
   $form['context_wrapper']['context'] = array(
-    '#title' => t('Contexts'),
-    '#type' => 'item',
-    '#description' => t('Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
+    '#type' => 'container',
     '#parents' => array('context'),
-    // Current user context is always present.
-    '#access' => count($contexts) > $built_in_contexts,
+  );
+
+  $form['context_wrapper']['context']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add context'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_settings_form_update_layout',
+      'layout_settings_form_context_add',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
+    '#prefix' => '<ul class="action-links"><li>',
+    '#suffix' => '</li></ul>',
   );
 
   $all_context_info = _layout_get_all_info('layout_context');
@@ -326,33 +355,79 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['context_wrapper']['context']['required'] = array(
     '#theme' => 'layout_settings_context_table',
     '#layout_path' => $layout->getPath(),
+    '#access' => count($contexts) > $built_in_contexts,
   );
 
   foreach ($contexts as $context_key => $layout_context) {
-    if ($layout_context->position && $layout_context->locked) {
-      $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
-        '#type' => 'value',
-        '#value' => $layout_context->plugin,
-      );
-      $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
-        '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
-      );
-    }
-    elseif ($layout_context->position && $layout_context->required) {
-      $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
-        '#type' => 'select',
-        '#options' => $context_options,
-        '#default_value' => $layout_context->plugin,
-      );
-    }
-    else {
-      // @todo: Support adding and removing custom contexts not based on path.
-      // e.g. Adding a Node context based on a hard-coded ID.
+    if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
+      // Contexts that are locked to a particular position (such as node/%).
+      if ($layout_context->position && $layout_context->required) {
+        $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
+          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
+        );
+        if ($layout_context->locked) {
+          $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+            '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
+          );
+        }
+        else{
+          $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+            '#type' => 'select',
+            '#options' => $context_options,
+            '#default_value' => $layout_context->plugin,
+          );
+        }
+      }
+      // Custom contexts and required contexts that do not need position (such
+      // as admin/dashboard).
+      else {
+        $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
+          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
+        );
+        $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+          '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
+        );
+      }
+      if (!$layout_context->required) {
+        $form['context_wrapper']['context']['required'][$context_key]['operations'] = array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('layout-operations')),
+        );
+        $form['context_wrapper']['context']['required'][$context_key]['operations']['remove'] = array(
+          '#type' => 'submit',
+          '#value' => t('Remove'),
+          '#attributes' => array('class' => array('layout-link-button', 'layout-context-remove')),
+          '#validate' => array(),
+          '#submit' => array(
+            'layout_settings_form_context_remove',
+            'layout_settings_form_update_layout',
+          ),
+          '#ajax' => array(
+            'callback' => 'layout_ajax_form_update',
+          ),
+          '#name' => 'conditions_' . $context_key . '_remove',
+        );
+        $form['context_wrapper']['context']['required'][$context_key]['operations']['configure'] = array(
+          '#type' => 'submit',
+          '#value' => t('Configure'),
+          '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
+          '#validate' => array(
+            'layout_settings_form_validate',
+          ),
+          '#submit' => array(
+            'layout_settings_form_context_edit',
+          ),
+          '#ajax' => array(
+            'callback' => 'layout_ajax_form_open_dialog',
+          ),
+          '#name' => 'conditions_' . $context_key . '_configure',
+        );
+      }
     }
   }
 
   // Display a notice if overriding a system path that normally contains
-  // wildcards e.g. node/1 instead of node/%. This is usually (but not always)
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
@@ -369,7 +444,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['conditions'] = array(
     '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same wildcard path.'),
+    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same placeholder path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
@@ -475,7 +550,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   $path = $form_state['values']['path'] = trim($form_state['values']['path'], '/');
 
   if (strpos($path, '%') === 0) {
-    form_error($form['path'], t('The first part of a path may not be a wildcard.'));
+    form_error($form['path'], t('The first part of a path may not be a placeholder.'));
   }
 
   // Ensure the path is not already an alias to something else.
@@ -495,7 +570,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($parts as $part) {
     $wildcard_position = strpos($part, '%');
     if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
-      form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      form_error($form['path'], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
     }
   }
 
@@ -589,9 +664,18 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $layout->name = $form_state['values']['name'];
   }
   if (isset($form_state['values']['layout_template'])) {
-    $new = $form_state['values']['layout_template'];
-    $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
-    $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+    $old_template = $layout->layout_template;
+    $new_template = $form_state['values']['layout_template'];
+    if ($old_template != $new_template) {
+      $region_mapping = layout_get_legacy_region_mapping($old_template, $new_template);
+      // If there is no theme cache entry for this template, rebuild theme cache
+      // to ensure that the new template is loaded.
+      $theme_entries = theme_get_registry(FALSE);
+      if (empty($theme_entries['layout__' . $new_template])) {
+        backdrop_theme_rebuild();
+      }
+      $layout->setLayoutTemplate($new_template, $region_mapping);
+    }
     if (!empty($layout->orphaned_blocks)) {
       $orphaned_blocks_titles = array();
       $layout_template_info = layout_get_layout_template_info($form_state['values']['layout_template']);
@@ -615,7 +699,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $arguments = array();
 
     foreach ($layout->getContexts() as $position => $layout_context) {
-      if (isset($form_state['values']['context']['required'][$position])) {
+      if (isset($form_state['values']['context']['required'][$position]['plugin'])) {
         $argument_config = $form_state['values']['context']['required'][$position];
         $plugin = $argument_config['plugin'];
       }
@@ -825,7 +909,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     $form['top']['button']['#links'] = array(
       array(
         'title' => t('View page'),
-        'href' => url($link_path),
+        'href' => $link_path,
       )
     );
   }
@@ -1223,6 +1307,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     $form['region']['#default_value'] = $layout->in_progress['region_name'];
   }
 
+  $form['actions']['#weight'] = 999;
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -1571,7 +1656,6 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
     backdrop_goto('admin/structure/layouts/manage/' . $layout->name);
   }
 }
-
 
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
@@ -2907,7 +2991,7 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
     '#title' => t('CSS classes for inner wrapper'),
     '#type' => 'textfield',
     '#default_value' => isset($layout->settings[$region_name]['classes']) ? $layout->settings[$region_name]['classes'] : '',
-    '#description' => t('Available only after selecting an HTML element. Separate multiple classes with spaces.'),
+    '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
     '#states' => array(
       'disabled' => array(
         ':input[name="element"]' => array('value' => ''),

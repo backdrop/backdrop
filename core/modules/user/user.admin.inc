@@ -168,6 +168,27 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
+  // Password settings.
+  $form['password_policy'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Password policy'),
+    '#weight' => -1,
+  );
+
+  module_load_include('password.inc', 'user', 'user');
+  $criteria = _user_password_policy_help();
+
+  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
+  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
+  $description .= $criteria;
+
+  $form['password_policy']['user_password_reject_weak'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Reject weak passwords'),
+    '#description' => $description,
+    '#default_value' => (bool) $config->get('user_password_reject_weak'),
+  );
+
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',
@@ -487,15 +508,19 @@ function user_admin_roles($form, $form_state) {
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
-  // Do not allow the anonymous or authenticated user roles as administrator.
   $roles = user_roles();
+  // Do not allow the anonymous or authenticated roles to be set as the
+  // administrator.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
+  // Add the "disabled" option to the top of the roles list (makes sure that
+  // this is the selected option if the role that was previously set as admin is
+  // deleted).
+  array_unshift($roles, t('disabled'));
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role'),
+    '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
@@ -594,7 +619,7 @@ function user_admin_roles($form, $form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save roles'),
+    '#value' => t('Save configuration'),
     '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
@@ -672,6 +697,12 @@ function user_admin_role($form, &$form_state, $role) {
     '#type' => 'submit',
     '#value' => t('Save role'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
