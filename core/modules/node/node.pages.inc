@@ -729,6 +729,11 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
  * @since 1.11.0
  */
 function node_preview_banner_form_node_submit(array $form, array &$form_state) {
+  // Prevent the "This is a preview." and "Changes are stored temporarily."
+  // warnings (previously set in node_preview_banner_form()) from bleeding onto
+  // the saved node page, after saving content changes from the preview mode.
+  backdrop_get_messages();
+
   form_load_include($form_state, 'inc', 'node', 'node.pages');
   $node = $form_state['values']['node'];
   node_object_prepare($node);
