@@ -738,6 +738,9 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   // During initial form build, add the term entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
+  if (!isset($vocabulary) && isset($term->vocabulary)) {
+    $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
+  }
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
@@ -747,19 +750,12 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       backdrop_set_title(t('Add @vocab_name term', array('@vocab_name' => $vocabulary->name)), PASS_THROUGH);
     }
     else {
-      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
       backdrop_set_title(t('Edit @vocab_name term %term_name', array('@vocab_name' => $vocabulary->name, '%term_name' => $term->name)), PASS_THROUGH);
-    }
-    if (!isset($vocabulary) && isset($term->vocabulary)) {
-      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
     }
     $form_state['term'] = $term;
   }
   else {
     $term = $form_state['term'];
-    if (!isset($vocabulary) && isset($term->vocabulary)) {
-      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
-    }
   }
 
   $parent = array_keys(taxonomy_term_load_parents($term->tid));
