@@ -161,6 +161,16 @@ function locale_config_info() {
 }
 
 /**
+ * Implements hook_locale().
+ */
+function locale_locale($op = 'groups') {
+  switch ($op) {
+    case 'groups':
+      return array('default' => t('Built-in interface'));
+  }
+}
+
+/**
  * Form builder callback to display language selection widget.
  *
  * @ingroup forms
@@ -564,7 +574,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         // We only store short strings used in current version, to improve
         // performance and consume less memory.
         try {
-          $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(
+          $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.textgroup = 'default' AND s.version = :version AND LENGTH(s.source) < :length", array(
             ':language' => $langcode,
             ':version' => BACKDROP_VERSION,
             ':length' => config_get('locale.settings', 'cache_length'),
@@ -590,10 +600,11 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
   if (!isset($locale_t[$langcode][$context][$string])) {
     // We do not have this translation cached, so get it from the DB.
     try {
-      $translation = db_query("SELECT s.lid, t.translation, s.version FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.source = :source AND s.context = :context", array(
+      $translation = db_query("SELECT s.lid, t.translation, s.version FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.source = :source AND s.context = :context AND s.textgroup = 'default'", array(
         ':language' => $langcode,
         ':source' => $string,
         ':context' => (string) $context,
+        'textgroup' => 'default',
       ))->fetchObject();
     }
     // In the event the table does not exist (such as when uninstalling the

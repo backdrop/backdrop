@@ -54,6 +54,12 @@ function locale_translate_import_form($form, &$form_state) {
     '#default_value' => $default,
     '#description' => t('Choose the language you want to add strings into. If you choose a language which is not yet set up, it will be added.'),
   );
+  $form['import']['group'] = array('#type' => 'radios',
+    '#title' => t('Text group'),
+    '#default_value' => 'default',
+    '#options' => module_invoke_all('locale', 'groups'),
+    '#description' => t('Imported translations will be added to this text group.'),
+  );
   $form['import']['mode'] = array('#type' => 'radios',
     '#title' => t('Mode'),
     '#default_value' => LOCALE_IMPORT_KEEP,
@@ -90,7 +96,7 @@ function locale_translate_import_form_submit($form, &$form_state) {
     }
 
     // Now import strings into the language
-    if ($return = _locale_import_po($file, $langcode, $form_state['values']['mode']) == FALSE) {
+    if ($return = _locale_import_po($file, $langcode, $form_state['values']['mode'], $form_state['values']['group']) == FALSE) {
       $variables = array('%filename' => $file->filename);
       backdrop_set_message(t('The translation import of %filename failed.', $variables), 'error');
       watchdog('locale', 'The translation import of %filename failed.', $variables, WATCHDOG_ERROR);
@@ -146,6 +152,11 @@ function locale_translate_export_po_form($form, &$form_state, $names) {
     '#options' => $names,
     '#description' => t('Select the language to export in Gettext Portable Object (<em>.po</em>) format.'),
   );
+  $form['group'] = array('#type' => 'radios',
+    '#title' => t('Text group'),
+    '#default_value' => 'default',
+    '#options' => module_invoke_all('locale', 'groups'),
+  );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Export'));
   return $form;
@@ -159,6 +170,11 @@ function locale_translate_export_pot_form() {
   $form['export_title'] = array('#type' => 'item',
     '#title' => t('Export template'),
     '#description' => t('Generate a Gettext Portable Object Template (<em>.pot</em>) file with all strings from the Backdrop locale database.'),
+  );
+  $form['group'] = array('#type' => 'radios',
+    '#title' => t('Text group'),
+    '#default_value' => 'default',
+    '#options' => module_invoke_all('locale', 'groups'),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Export'));
@@ -177,7 +193,7 @@ function locale_translate_export_po_form_submit($form, &$form_state) {
     $languages = language_list();
     $language = $languages[$form_state['values']['langcode']];
   }
-  _locale_export_po($language, _locale_export_po_generate($language, _locale_export_get_strings($language)));
+  _locale_export_po($language, _locale_export_po_generate($language, _locale_export_get_strings($language, $form_state['values']['group'])));
 }
 
 /**

@@ -10,6 +10,19 @@
  * @{
  */
 
+/**
+ * Allows modules to define their own text groups that can be translated.
+ *
+ * @param $op
+ *   Type of operation. Currently, only supports 'groups'.
+ */
+function hook_locale($op = 'groups') {
+  switch ($op) {
+    case 'groups':
+      return array('custom' => t('Custom'));
+  }
+}
+
  /**
  * React to a language about to be added or updated in the system.
  *

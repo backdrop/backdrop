@@ -681,7 +681,7 @@ function _locale_parse_js_file($filepath) {
     $string =  implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['string'], 1, -1)));
     $context = implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['context'], 1, -1)));
 
-    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context", array(':source' => $string, ':context' => $context))->fetchObject();
+    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context AND textgroup = 'default'", array(':source' => $string, ':context' => $context))->fetchObject();
     if ($source) {
       // We already have this source string and now have to add the location
       // to the location column, if this file is not yet present in there.
@@ -707,6 +707,7 @@ function _locale_parse_js_file($filepath) {
           'location'  => $filepath,
           'source'    => $string,
           'context'   => $context,
+          'textgroup' => 'default',
         ))
         ->execute();
     }
@@ -770,7 +771,7 @@ function _locale_rebuild_js($langcode = NULL) {
 
   // Construct the array for JavaScript translations.
   // Only add strings with a translation to the translations array.
-  $result = db_query("SELECT s.lid, s.source, s.context, t.translation FROM {locales_source} s INNER JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.location LIKE '%.js%'", array(':language' => $language->langcode));
+  $result = db_query("SELECT s.lid, s.source, t.translation FROM {locales_source} s INNER JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.location LIKE '%.js%' AND s.textgroup = :textgroup", array(':language' => $language->langcode, ':textgroup' => 'default'));
 
   $translations = array();
   foreach ($result as $data) {

@@ -25,11 +25,14 @@
  * @param $mode
  *   Should existing translations be replaced LOCALE_IMPORT_KEEP or
  *   LOCALE_IMPORT_OVERWRITE.
+ * @param $group
+ *   Text group to import PO file into (eg. 'default' for interface
+ *   translations).
  *
  * @return bool
  *   TRUE if the import was successful, FALSE otherwise.
  */
-function _locale_import_po($file, $langcode, $mode) {
+function _locale_import_po($file, $langcode, $mode, $group = NULL) {
   // Check if we have the language already in the database.
   if (!language_load($langcode)) {
     backdrop_set_message(t('The language selected for import is not supported.'), 'error');
@@ -37,7 +40,7 @@ function _locale_import_po($file, $langcode, $mode) {
   }
 
   // Get strings from file (returns on failure after a partial import, or on success)
-  $status = _locale_import_read_po('db-store', $file, $mode, $langcode);
+  $status = _locale_import_read_po('db-store', $file, $mode, $langcode, $group);
   if ($status === FALSE) {
     // Error messages are set in _locale_import_read_po().
     return FALSE;
@@ -84,11 +87,14 @@ function _locale_import_po($file, $langcode, $mode) {
  *   LOCALE_IMPORT_OVERWRITE.
  * @param string $langcode
  *   Language code.
+ * @param $group
+ *   Text group to import PO file into (eg. 'default' for interface
+ *   translations).
  *
  * @return NULL|FALSE
  *   NULL return value on success. FALSE upon failure.
  */
-function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
+function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL, $group = 'default') {
 
   // The file will get closed by PHP on returning from this function.
   $fd = fopen($file->uri, 'rb');
@@ -145,7 +151,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
       }
       elseif (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in string token, close it out.
-        _locale_import_one_string($op, $current, $mode, $langcode, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file, $group);
 
         // Start a new entry for the comment.
         $current         = array();
@@ -189,7 +195,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
 
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message string, close it out.
-        _locale_import_one_string($op, $current, $mode, $langcode, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file, $group);
 
         // Start a new context for the id.
         $current = array();
@@ -219,7 +225,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
 
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message, start a new one.
-        _locale_import_one_string($op, $current, $mode, $langcode, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file, $group);
         $current = array();
       }
       elseif (!empty($current['msgctxt'])) {
@@ -333,7 +339,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
 
   // End of PO file, closed out the last entry.
   if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
-    _locale_import_one_string($op, $current, $mode, $langcode, $file);
+    _locale_import_one_string($op, $current, $mode, $langcode, $file, $group);
   }
   elseif ($context != 'COMMENT') {
     _locale_import_message('The translation file %filename ended unexpectedly at line %line.', $file, $lineno);
@@ -376,12 +382,15 @@ function _locale_import_message($message, $file, $lineno = NULL) {
  * @param stdClass $file
  *   Object representation of file being imported, only required when op is
  *   'db-store'.
+ * @param $group
+ *   Text group to import PO file into (eg. 'default' for interface
+ *   translations).
  *
  * @return NULL|array
  *   If the operation is a "report" operation, an array is returned with
  *   information about currently stored strings. Other operations return NULL.
  */
-function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode = NULL, $file = NULL) {
+function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode = NULL, $file = NULL, $group = 'default') {
   $report = &backdrop_static(__FUNCTION__, array('additions' => 0, 'updates' => 0, 'deletes' => 0, 'skips' => 0));
   $header_done = &backdrop_static(__FUNCTION__ . ':header_done', FALSE);
   $strings = &backdrop_static(__FUNCTION__ . ':strings', array());
@@ -441,7 +450,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
             if ($key == 0) {
               $plid = 0;
             }
-            $plid = _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $comments, $mode, $plid, $key);
+            $plid = _locale_import_one_string_db($report, $lang, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $group, $comments, $mode, $plid, $key);
           }
         }
 
@@ -449,7 +458,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
           // A simple string to import.
           $english = $value['msgid'];
           $translation = $value['msgstr'];
-          _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $comments, $mode);
+          _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $group, $comments, $mode);
         }
       }
   } // end of db-store operation
@@ -471,6 +480,8 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
  *   Source string.
  * @param $translation
  *   Translation to language specified in $langcode.
+ * @param $textgroup
+ *   Name of textgroup to store translation in.
  * @param $location
  *   Location value to save with source string.
  * @param $mode
@@ -483,12 +494,14 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
  * @return
  *   The string ID of the existing string modified or the new string added.
  */
-function _locale_import_one_string_db(&$report, $langcode, $context, $source, $translation, $location, $mode, $plid = 0, $plural = 0) {
-  $lid = db_query("SELECT lid FROM {locales_source} WHERE source = :source AND context = :context", array(':source' => $source, ':context' => $context))->fetchField();
+function _locale_import_one_string_db(&$report, $langcode, $context, $source, $translation, $textgroup, $location, $mode, $plid = 0, $plural = 0) {
+  $lid = db_query("SELECT lid FROM {locales_source} WHERE source = :source AND context = :context AND textgroup = :textgroup", array(':source' => $source, ':context' => $context, ':textgroup' => $textgroup))->fetchField();
 
   if (!empty($translation)) {
     // Skip this string unless it passes a check for dangerous code.
-    if (!locale_string_is_safe($translation)) {
+    // Text groups other than default still can contain HTML tags
+    // (i.e. translatable blocks).
+    if ($textgroup == "default" && !locale_string_is_safe($translation)) {
       watchdog('locale', 'Import of string "%string" was skipped because of disallowed or malformed HTML.', array('%string' => $translation), WATCHDOG_ERROR);
       $report['skips']++;
       $lid = 0;
@@ -540,6 +553,7 @@ function _locale_import_one_string_db(&$report, $langcode, $context, $source, $t
           'location' => $location,
           'source' => $source,
           'context' => (string) $context,
+          'textgroup' => $textgroup,
         ))
         ->execute();
 
@@ -883,16 +897,19 @@ function _locale_import_parse_quoted($string) {
  * @param stdClass $language
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
+ * @param $group
+ *   Text group to export PO file from (eg. 'default' for interface
+ *   translations).
  *
  * @return array
  *   An array of translated strings that can be used to generate an export.
  */
-function _locale_export_get_strings($language = NULL) {
+function _locale_export_get_strings($language = NULL, $group = 'default') {
   if (isset($language)) {
-    $result = db_query("SELECT s.lid, s.source, s.context, s.location, t.translation, t.plid, t.plural FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language ORDER BY t.plid, t.plural", array(':language' => $language->langcode));
+    $result = db_query("SELECT s.lid, s.source, s.context, s.location, t.translation, t.plid, t.plural FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.textgroup = :textgroup ORDER BY t.plid, t.plural", array(':language' => $language->langcode, ':textgroup' => $group));
   }
   else {
-    $result = db_query("SELECT s.lid, s.source, s.context, s.location, t.plid, t.plural FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid ORDER BY t.plid, t.plural");
+    $result = db_query("SELECT s.lid, s.source, s.context, s.location, t.plid, t.plural FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid WHERE s.textgroup = :textgroup ORDER BY t.plid, t.plural", array(':textgroup' => $group));
   }
   $strings = array();
   foreach ($result as $child) {
