@@ -26,7 +26,7 @@ abstract class LayoutContext extends LayoutHandler {
   /**
    * Indicator as to whether this context is required and cannot be removed.
    *
-   * Required contexts typically are those provided by a menu path wildcard.
+   * Required contexts typically are those provided by a menu path placeholder.
    * While these contexts are required to exist, they can be changed to a
    * different type of context. e.g. A layout at path "foo/%" could have a
    * required context at position 1 with either a "node" or "string" plugin. The

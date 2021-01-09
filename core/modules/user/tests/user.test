@@ -2053,8 +2053,8 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     preg_match('/#comment-([0-9]+)/', $this->getURL(), $match);
     $comment_id = $match[1];
 
-    // Log in as an administrator and edit the comment to use Full HTML, so
-    // that the comment text itself is not filtered at all.
+    // Log in as an administrator and edit the comment to use Raw HTML
+    // (full_html), so that the comment text itself is not filtered at all.
     $this->backdropLogin($this->admin_user);
     $edit['comment_body[' . $langcode . '][0][format]'] = $this->full_html_format->format;
     $this->backdropPost('comment/' . $comment_id . '/edit', $edit, t('Save'));
@@ -2179,23 +2179,27 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Set this as the administrator role.
     config_set('system.core', 'user_admin_role', $admin_role->name);
 
-    // Test cancel deleting a role.
-    $role_name = 'administrator';
-    $this->backdropGet("admin/config/people/roles/delete/$role_name");
-    $this->clickLink(t('Cancel'));
-    $this->assertResponse(200);
-    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after cancel.');
-
-    // Test deleting the default administrator role.
     $role_name = 'administrator';
     $role = user_role_load($role_name);
+
+    // Test canceling the various actions that can be performed on user roles.
+    $actions = array('edit', 'delete');
+    foreach ($actions as $action) {
+      $this->backdropGet("admin/config/people/roles/$action/$role_name");
+      $this->clickLink(t('Cancel'));
+      $this->assertResponse(200);
+      $this->assertUrl('admin/config/people/roles', array(), "Redirected to correct URL after canceling $action role.");
+    }
+
+    // Test deleting the default administrator role.
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
     $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
     $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
-    // Make sure this role is no longer configured as the administrator role.
-    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The administrator role is no longer configured as the administrator role.');
+    // Since the administrator role that was previously set as admin has been
+    // deleted, no role should be set as admin now.
+    $this->assertFalse(config_get('system.core', 'user_admin_role'), 'No role is configured as the administrator role.');
   }
 
   /**

@@ -2605,7 +2605,7 @@ function system_update_1035() {
   // This is in system module because Layout module was enabled earlier in the
   // upgrade path from D7. If it is in layout.install, it requires that
   // update.php be run twice when doing an upgrade.
-  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+  module_set_weight('layout', 60);
 }
 
 /**
@@ -3155,6 +3155,17 @@ function system_update_1071() {
  */
 function system_update_1072() {
   // Empty update to force a rebuild of hook_library() and JS aggregates.
+}
+
+/**
+ * Set config_sync_clear_staging on existing sites, if not already set.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  if ($config->get('config_sync_clear_staging') == NULL) {
+    $config->set('config_sync_clear_staging', 1);
+    $config->save();
+  }
 }
 
 /**

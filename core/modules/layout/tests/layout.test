@@ -588,7 +588,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    * Test the support for contexts within conditions and blocks.
    */
   function testContexts() {
-    // Make a new layout that creates a custom path with wildcards.
+    // Make a new layout that creates a custom path with placeholders.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
     $layout_path = 'node/%/foo/%';
@@ -926,7 +926,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    * Test the overriding of paths.
    */
   function testOverriddenPaths() {
-    // Make a new layout that creates a custom path with wildcards.
+    // Make a new layout that creates a custom path with placeholders.
     $layout_name = 'node';
     $layout_title = 'Generic Node';
     $layout_path = 'node/%';
@@ -1507,7 +1507,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     field_create_instance($instance);
 
-    // Make a new layout that creates a custom path with wildcards.
+    // Make a new layout that creates a custom path with placeholders.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
     $layout_path = 'taxonomy/term/%';
