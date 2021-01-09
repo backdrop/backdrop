@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field CRUD API, handling field and field instance creation and deletion.
@@ -213,10 +212,12 @@ function field_update_field($field) {
   // Tell the storage engine to update the field. Do this before
   // saving the new definition since it still might fail.
   $storage_type = field_info_storage_types($field['storage']['type']);
-  module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
+  if (!empty($storage_type)) {
+    module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
+  }
 
   // Clear caches
-  field_cache_clear(TRUE);
+  field_cache_clear();
 
   // Invoke external hooks after the cache is cleared for API consistency.
   module_invoke_all('field_update_field', $field, $prior_field, $has_data);
@@ -224,11 +225,16 @@ function field_update_field($field) {
 
 /**
  * Validates a field configuration.
+ *
+ * @param $field_name
+ *   The field name to read.
+ * @param $update
+ *   Whether this is a new or existing field.
  */
 function field_validate_field($field, $update = FALSE) {
   // Field name is required.
   if (empty($field['field_name'])) {
-    throw new FieldException(format_string('Attempt to create field @field_name with no type.', array('@field_name' => $field['field_name'])));
+    throw new FieldException(format_string('Attempt to validate a field with no field name specified.'));
   }
   // Field type is required.
   if (empty($field['type'])) {
@@ -236,7 +242,7 @@ function field_validate_field($field, $update = FALSE) {
   }
   // Field name cannot contain invalid characters.
   if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $field['field_name'])) {
-    throw new FieldException(format_string('Attempt to create a field @field_name with invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character', array('@field_name' => $field['field_name'])));
+    throw new FieldException(format_string('The field @field_name contains invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character', array('@field_name' => $field['field_name'])));
   }
 
   // Validations that only apply to newly created fields.
@@ -467,14 +473,14 @@ function field_delete_field($field_name) {
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_widget_info().
  *   - display:
- *     Settings for the 'default' view mode will be added if not present, and
- *     each view mode in the definition will be completed with the following
+ *     Settings for the 'default' display mode will be added if not present, and
+ *     each display mode in the definition will be completed with the following
  *     default values:
- *     - label: 'above'
+ *     - label: 'hidden'
  *     - type: the default formatter specified in hook_field_info().
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_formatter_info().
- *     View modes not present in the definition are left empty, and the field
+ *     Display modes not present in the definition are left empty, and the field
  *     will not be displayed in this mode.
  *
  * @return
@@ -504,6 +510,10 @@ function field_create_instance($instance) {
 
   // Populate the instance default settings.
   $field = field_read_field($instance['field_name']);
+  if (empty($field)) {
+    $message = t('Attempted to create an instance of field @field_name, but that field does not exist.', array('@field_name' => $instance['field_name']));
+    throw new FieldException($message);
+  }
   $instance['settings'] += field_info_instance_settings($field['type']);
 
   // Validate the fully populated instance.
@@ -580,6 +590,13 @@ function field_update_instance($instance) {
 
 /**
  * Validates a field instance.
+ *
+ * @param $instance
+ *   The instance name to read.
+ * @param $update
+ *   Whether this is a new or existing field instance.
+ * @param $load_field
+ *   Whether the field instance should be read directly from config.
  */
 function field_validate_instance($instance, $update = FALSE, $load_field = TRUE) {
   $label = isset($instance['label']) ? $instance['label'] : $instance['field_name'];
@@ -604,7 +621,7 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
 
     // @todo: Check that the widget type is known and can handle the field type.
     // @todo: Check that the formatters are known and can handle the field type.
-    // @todo: Check that the display view modes are known for the entity type.
+    // @todo: Check that the display display modes are known for the entity type.
   }
 }
 
@@ -633,23 +650,24 @@ function _field_write_instance($instance, $update = FALSE) {
   }
   // Check widget module.
   $widget_type = field_info_widget_types($instance['widget']['type']);
-  $instance['widget']['module'] = $widget_type['module'];
+  $instance['widget']['module'] = isset($widget_type['module']) ? $widget_type['module'] : '';
   $instance['widget']['settings'] += field_info_widget_settings($instance['widget']['type']);
 
-  // Make sure there are at least display settings for the 'default' view mode,
-  // and fill in defaults for each view mode specified in the definition.
+  // Make sure there are at least display settings for the 'default' display
+  // mode, and fill in defaults for each display mode specified in the
+  // definition.
   $instance['display'] += array(
     'default' => array(),
   );
   foreach ($instance['display'] as $view_mode => $display) {
     $display += array(
-      'label' => 'above',
+      'label' => 'hidden',
       'type' => isset($field_type['default_formatter']) ? $field_type['default_formatter'] : 'hidden',
       'settings' => array(),
     );
     if ($display['type'] != 'hidden') {
       $formatter_type = field_info_formatter_types($display['type']);
-      $display['module'] = $formatter_type['module'];
+      $display['module'] = isset($formatter_type['module']) ? $formatter_type['module'] : '';
       $display['settings'] += field_info_formatter_settings($display['type']);
     }
     // If no weight specified, make sure the field sinks at the bottom.
@@ -960,11 +978,16 @@ function field_purge_batch($batch_size) {
       ->execute();
 
     if ($results) {
-      foreach ($results as $entity_type => $stub_entities) {
-        field_attach_load($entity_type, $stub_entities, FIELD_LOAD_CURRENT, array('field_name' => $field['field_name'], 'deleted' => 1));
-        foreach ($stub_entities as $stub_entity) {
-          // Purge the data for the entity.
-          field_purge_data($entity_type, $stub_entity, $field, $instance);
+      foreach ($results as $entity_type => $ids_array) {
+        $entities = array();
+        foreach ($ids_array as $ids) {
+          $entities[$ids->entity_id] = _field_create_entity_from_ids($ids);
+        }
+
+        field_attach_load($entity_type, $entities, FIELD_LOAD_CURRENT, array('field_name' => $field['field_name'], 'deleted' => 1));
+        foreach ($entities as $entity) {
+           // Purge the data for the entity.
+          field_purge_data($entity_type, $entity, $field, $instance);
         }
       }
     }

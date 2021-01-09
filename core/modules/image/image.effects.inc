@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions needed to execute image effects provided by Image module.
@@ -250,7 +249,7 @@ function image_desaturate_effect(&$image, $data) {
  *   TRUE on success. FALSE on failure to rotate image.
  * @see image_rotate().
  */
-function image_rotate_effect(&$image, $data) {
+function image_rotate_effect(stdClass $image, $data) {
   // Set sane default values.
   $data += array(
     'degrees' => 0,
@@ -258,15 +257,9 @@ function image_rotate_effect(&$image, $data) {
     'random' => FALSE,
   );
 
-  // Convert short #FFF syntax to full #FFFFFF syntax.
-  if (strlen($data['bgcolor']) == 4) {
-    $c = $data['bgcolor'];
-    $data['bgcolor'] = $c[0] . $c[1] . $c[1] . $c[2] . $c[2] . $c[3] . $c[3];
-  }
-
-  // Convert #FFFFFF syntax to hexadecimal colors.
+  // Convert any syntax to hexadecimal colors.
   if ($data['bgcolor'] != '') {
-    $data['bgcolor'] = hexdec(str_replace('#', '0x', $data['bgcolor']));
+    image_hex2rgba($data['bgcolor']);
   }
   else {
     $data['bgcolor'] = NULL;

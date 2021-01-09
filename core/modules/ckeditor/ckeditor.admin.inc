@@ -39,6 +39,17 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
     '#parents' => array('editor_settings', 'image_upload'),
   );
 
+  $elements['plugins']['file'] = filter_editor_file_upload_settings_form($format);
+  $elements['plugins']['file'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('File uploading'),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-backdroplink'),
+      'data-ckeditor-feature-dependency' => 'BackdropLink',
+    ),
+    '#parents' => array('editor_settings', 'file_upload'),
+  );
+
   $elements['plugins']['style'] = array(
     '#type' => 'fieldset',
     '#title' => t('Style list'),

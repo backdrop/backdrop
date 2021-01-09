@@ -1,0 +1,41 @@
+{
+  "_config_name": "views.view.test_noajax",
+  "name": "test_noajax",
+  "description": "",
+  "tag": "",
+  "disabled": false,
+  "base_table": "node",
+  "human_name": "test_noajax",
+  "core": null,
+  "display": {
+    "default": {
+      "display_title": "Master",
+      "display_plugin": "default",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "access": {},
+        "pager": {
+          "type": "none"
+        },
+        "style_plugin": "default",
+        "row_plugin": "node",
+        "title": "No AJAX Test Page",
+        "use_ajax": false
+      }
+    },
+    "page": {
+      "display_title": "Page",
+      "display_plugin": "page",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "path": "test_noajax_view"
+      }
+    }
+  }
+}

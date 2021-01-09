@@ -18,6 +18,12 @@
   background-size: cover;
 }
 
+.block-hero .block-title,
+.block-hero .block-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
 .l-top .block-hero {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
@@ -50,7 +56,7 @@
 }
 
 .block-hero-no-image {
-  background: #0074bd url(../../images/texture.png) no-repeat center center;
+  background: #0074bd url(../../images/texture.png) repeat center center;
   background-blend-mode: luminosity;
 }
 

@@ -1391,6 +1391,15 @@ fieldset legend a:focus,
 fieldset legend a:active {
   color: #000;
 }
+fieldset legend span.summary {
+  padding: 0 5px;
+}
+fieldset legend span.summary:not(:empty):before {
+  content: '(';
+}
+fieldset legend span.summary:not(:empty):after {
+  content: ')';
+}
 fieldset .fieldset-wrapper {
   padding: 0 10px;
 }
@@ -1622,7 +1631,7 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
 #search-form .form-submit {
   margin-left: 0;
   margin-right: 0;
-  height: 25px;
+  height: 26px;
   width: 34px;
   padding: 0;
   cursor: pointer;
@@ -1635,7 +1644,7 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
 #search-block-form .form-submit:focus,
 #search-form .form-submit:hover,
 #search-form .form-submit:focus {
-  background-position: center bottom;
+  background-position: center top;
 }
 #search-form .form-item-keys label {
   display: block;

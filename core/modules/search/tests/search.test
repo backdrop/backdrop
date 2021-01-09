@@ -255,7 +255,7 @@ class SearchPageText extends BackdropWebTestCase {
     $this->backdropGet('search/node');
     $this->assertText(t('Enter your keywords'));
     $this->assertText(t('Search'));
-    $title = t('Search') . ' | Backdrop';
+    $title = t('Search') . ' | Backdrop CMS';
     $this->assertTitle($title, 'Search page title is correct');
 
     $edit = array();
@@ -414,7 +414,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
 
     // Test each of the possible rankings.
     foreach ($node_ranks as $node_rank) {
-      // Disable all relevancy rankings except the one we are testing.
+      // Disable all relevance rankings except the one we are testing.
       foreach ($node_ranks as $var) {
         config_set('search.settings', 'node_rank_' . $var, $var == $node_rank ? 10 : 0);
       }
@@ -677,6 +677,7 @@ class SearchExactTestCase extends BackdropWebTestCase {
  */
 class SearchCommentTestCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp('comment', 'search');
@@ -684,14 +685,46 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     // Disable cache.
     config_set('system.core', 'cache', '0');
 
-    // Create and log in an administrative user having access to the Full HTML
-    // text format.
-    $full_html_format = filter_format_load('full_html');
+    // Create a simple content type and text format.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+        'comment_preview' => BACKDROP_OPTIONAL,
+        'comment_subject_field' => TRUE,
+      ),
+    ));
+    $full_html_format = (object) array(
+      'format' => 'full_html',
+      'name' => 'Raw HTML',
+      'weight' => 1,
+      'editor' => NULL,
+      'filters' => array(),
+    );
+    filter_format_save($full_html_format);
+    $this->checkPermissions(array(), TRUE);
+
+    $anonymous_permissions = array(
+      'access content',
+      'access comments',
+    );
+    $authenticated_permissions = array(
+      'access content',
+      'access comments',
+      'post comments',
+    );
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
+
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
     $permissions = array(
       'administer filters',
       filter_permission_name($full_html_format),
       'administer permissions',
-      'create page content',
+      'create post content',
+      'post comments',
       'skip comment approval',
       'access comments',
     );
@@ -710,17 +743,6 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   function testSearchResultsComment() {
     $comment_body = 'Test comment body';
 
-    $node_type = node_type_get_type('post');
-    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
-    $node_type->settings['comment_subject_field'] = TRUE;
-    node_type_save($node_type);
-
-    // Enable check_plain() for 'Filtered HTML' text format.
-    $filtered_html_format_id = 'filtered_html';
-    $edit = array(
-      'filters[filter_html_escape][status]' => TRUE,
-    );
-    $this->backdropPost('admin/config/content/formats/' . $filtered_html_format_id, $edit, t('Save configuration'));
     // Allow anonymous users to search content.
     $edit = array(
       BACKDROP_ANONYMOUS_ROLE . '[search content]' => 1,
@@ -731,7 +753,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'post'));
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = 'Test comment subject';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
@@ -786,15 +808,10 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $this->admin_role = reset($roles);
 
-    $node_type = node_type_get_type('post');
-    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
-    $node_type->settings['comment_subject_field'] = TRUE;
-    node_type_save($node_type);
-
     // Create a node.
     $this->node = $this->backdropCreateNode(array('type' => 'post'));
 
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = $this->comment_subject;
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
@@ -1331,7 +1348,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
+    $this->search_user = $this->backdropCreateUser(array('search content', 'use advanced search', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
     $this->backdropLogin($this->search_user);
 
     // Delete the two default nodes.
@@ -1383,6 +1400,21 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
     $this->assertNoText(t('The active search modules have been changed.'), 'Form does not save with an invalid word length.');
+
+    // Test logging setting. It should be on by default.
+    $config = config('search.settings');
+    $config->set('search_logging', TRUE)->save();
+    $text = $this->randomName(5);
+    $this->backdropPost('search/node', array('keys' => $text), t('Search'));
+    $this->backdropGet('admin/reports/dblog');
+    $this->assertLink('Searched Content for ' . $text . '.', 0, 'Search was logged');
+
+    // Turn off logging.
+    $config->set('search_logging', FALSE)->save();
+    $text = $this->randomName(5);
+    $this->backdropPost('search/node', array('keys' => $text), t('Search'));
+    $this->backdropGet('admin/reports/dblog');
+    $this->assertNoLink('Searched Content for ' . $text . '.', 'Search was not logged');
   }
 
   /**
@@ -1473,6 +1505,78 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
       }
     }
   }
+
+  /**
+   * Verify enabling/disabling of certain node types.
+   */
+  function testSearchNodeTypes() {
+    $new_type1 = $this->backdropCreateContentType();
+    $new_type2 = $this->backdropCreateContentType();
+    $new_type3 = $this->backdropCreateContentType();
+
+    // Create 2 nodes that should both be indexed.
+    $node1 = $this->backdropCreateNode(array(
+      'title' => 'Rabbits',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy."))),
+      'type' => $new_type1->type,
+    ));
+    $node2 = $this->backdropCreateNode(array(
+      'title' => 'Llamas',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "Llamas are fuzzy all over."))),
+      'type' => $new_type2->type,
+    ));
+
+    // Update the search index.
+    module_invoke_all('update_index');
+    search_update_totals();
+
+    // Disable types 2 and 3.
+    $edit['node_types[page]'] = TRUE;
+    $edit['node_types[post]'] = TRUE;
+    $edit['node_types[' . $new_type1->type . ']'] = TRUE;
+    $edit['node_types[' . $new_type2->type . ']'] = FALSE;
+    $edit['node_types[' . $new_type3->type . ']'] = FALSE;
+    $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
+
+    // Create a node of the third type that should not be indexed at all.
+    $node3 = $this->backdropCreateNode(array(
+      'title' => 'Fish',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "These creatures are scaly but beautiful. Not fuzzy."))),
+      'type' => $new_type3->type,
+    ));
+
+    // Update the search index.
+    module_invoke_all('update_index');
+    search_update_totals();
+
+    // Check that the names of the node types are not found on the search page,
+    // as they should not be visible in the advanced search.
+    $this->backdropGet('search/node/fuzzy');
+    $this->assertText($node1->type, 'Enabled first node type found on advanced search form.');
+    $this->assertNoText($node2->type, 'Disabled second node type not found on advanced search form.');
+    $this->assertNoText($node3->type, 'Disabled third node type not found on advanced search form.');
+
+    // Test searching all 3.
+    $this->backdropGet('search/node/fuzzy');
+    $this->assertText($node1->title, 'Fuzzy bunny ears found in search. Node type is enabled.');
+    $this->assertNoText($node2->title, 'Fuzzy llamas not found in search. Node type is disabled.');
+    $this->assertNoText($node3->title, 'Scaly fish not found in search. Node type is disabled.');
+
+    // Check that node 2 is still in the index even after it was disabled.
+    $result = db_select('search_index', 'i')
+      ->extend('SearchQuery')
+      ->searchexpression($node2->title, 'node')
+      ->execute();
+    $this->assertEqual($result->rowCount(), 1, 'Node correctly still indexed after disabling its type.');
+
+    // Check that node 3 is not in the index, as it was disabled before create.
+    $result = db_select('search_index', 'i')
+      ->extend('SearchQuery')
+      ->searchexpression($node3->title, 'node')
+      ->execute();
+    $this->assertEqual($result->rowCount(), 0, 'New nodes of disabled type are not added to search index.');
+  }
+
 }
 
 /**

@@ -55,7 +55,6 @@ function _search_get_module_names() {
 function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
 
-
   $form['active'] = array(
     '#type' => 'fieldset',
     '#title' => t('Search items')
@@ -77,7 +76,18 @@ function search_admin_settings($form, &$form_state) {
     '#type' => 'radios',
     '#default_value' => $config->get('search_default_module'),
     '#options' => $module_options,
-    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
+    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => url('search', array('absolute' => TRUE)))),
+  );
+
+  $form['logging'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Logging')
+  );
+  $form['logging']['search_logging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log all searches'),
+    '#default_value' => $config->get('search_logging'),
+    '#description' => t('This setting may affect performance. Enable only if actively inspecting logs of search queries.'),
   );
   $form['#validate'][] = 'search_admin_settings_validate';
   $form['#submit'][] = 'search_admin_settings_submit';
@@ -101,7 +111,6 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Indexing'),
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
-
 
   // Collect some stats
   $remaining = 0;
@@ -192,6 +201,8 @@ function search_admin_settings_submit($form, &$form_state) {
   }
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
+  $config->set('search_logging', (bool) $form_state['values']['search_logging']);
+
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
     $new_modules = array('node', 'user');
@@ -214,6 +225,7 @@ function search_admin_settings_submit($form, &$form_state) {
   }
 
   $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

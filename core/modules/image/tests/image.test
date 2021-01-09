@@ -118,7 +118,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     parent::setUp('image_module_test');
 
     $this->style_name = 'style_foo';
-    image_style_save(array('name' => $this->style_name, 'label' => $this->randomString()));
+    image_style_save(array('name' => $this->style_name, 'label' => $this->randomName()));
   }
 
   /**
@@ -242,7 +242,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Content-Type'), $generated_image_info['mime_type'], 'Expected Content-Type was reported.');
     $this->assertEqual($this->backdropGetHeader('Content-Length'), $generated_image_info['file_size'], 'Expected Content-Length was reported.');
     if ($scheme == 'private') {
-      $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+      $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
       $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was set to prevent caching.');
       $this->assertEqual($this->backdropGetHeader('X-Image-Owned-By'), 'image_module_test', 'Expected custom header has been added.');
 
@@ -293,87 +293,73 @@ class ImageEffectsUnitTest extends ImageToolkitTestCase {
   }
 
   /**
-   * Test the image_resize_effect() function.
+   * Test all the image effects provided by core.
    */
-  function testResizeEffect() {
+  function testEffects() {
+    // Test the image_resize_effect() function.
     $this->assertTrue(image_resize_effect($this->image, array('width' => 1, 'height' => 2)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['resize'][0][1], 1, 'Width was passed correctly');
-    $this->assertEqual($calls['resize'][0][2], 2, 'Height was passed correctly');
-  }
+    $this->assertIdentical($calls['resize'][0][1], 1, 'Width was passed correctly');
+    $this->assertIdentical($calls['resize'][0][2], 2, 'Height was passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_scale_effect() function.
-   */
-  function testScaleEffect() {
+    // Test the image_scale_effect() function.
     // @todo: need to test upscaling.
     $this->assertTrue(image_scale_effect($this->image, array('width' => 10, 'height' => 10)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['resize'][0][1], 10, 'Width was passed correctly');
-    $this->assertEqual($calls['resize'][0][2], 5, 'Height was based off aspect ratio and passed correctly');
-  }
+    $this->assertIdentical($calls['resize'][0][1], 10, 'Width was passed correctly');
+    $this->assertIdentical($calls['resize'][0][2], 5, 'Height was based off aspect ratio and passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_crop_effect() function.
-   */
-  function testCropEffect() {
+    // Test the image_crop_effect() function.
     // @todo should test the keyword offsets.
     $this->assertTrue(image_crop_effect($this->image, array('anchor' => 'top-1', 'width' => 3, 'height' => 4)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('crop'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['crop'][0][1], 0, 'X was passed correctly');
-    $this->assertEqual($calls['crop'][0][2], 1, 'Y was passed correctly');
-    $this->assertEqual($calls['crop'][0][3], 3, 'Width was passed correctly');
-    $this->assertEqual($calls['crop'][0][4], 4, 'Height was passed correctly');
-  }
+    $this->assertIdentical($calls['crop'][0][1], 0, 'X was passed correctly');
+    $this->assertIdentical($calls['crop'][0][2], 1, 'Y was passed correctly');
+    $this->assertIdentical($calls['crop'][0][3], 3, 'Width was passed correctly');
+    $this->assertIdentical($calls['crop'][0][4], 4, 'Height was passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_scale_and_crop_effect() function.
-   */
-  function testScaleAndCropEffect() {
+    // Test the image_scale_and_crop_effect() function.
     $this->assertTrue(image_scale_and_crop_effect($this->image, array('width' => 5, 'height' => 10)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize', 'crop'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['crop'][0][1], 7.5, 'X was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][2], 0, 'Y was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][3], 5, 'Width was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][4], 10, 'Height was computed and passed correctly');
-  }
+    $this->assertIdentical($calls['crop'][0][1], 7.5, 'X was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][2], 0.0, 'Y was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][3], 5, 'Width was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][4], 10, 'Height was computed and passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_desaturate_effect() function.
-   */
-  function testDesaturateEffect() {
+    // Test the image_desaturate_effect() function.
     $this->assertTrue(image_desaturate_effect($this->image, array()), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('desaturate'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual(count($calls['desaturate'][0]), 1, 'Only the image was passed.');
-  }
+    $this->assertIdentical(count($calls['desaturate'][0]), 1, 'Only the image was passed.');
+    image_test_reset();
 
-  /**
-   * Test the image_rotate_effect() function.
-   */
-  function testRotateEffect() {
-    // @todo: need to test with 'random' => TRUE
+    // Test the image_rotate_effect() function.
     $this->assertTrue(image_rotate_effect($this->image, array('degrees' => 90, 'bgcolor' => '#fff')), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('rotate'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['rotate'][0][1], 90, 'Degrees were passed correctly');
-    $this->assertEqual($calls['rotate'][0][2], 0xffffff, 'Background color was passed correctly');
+    $this->assertIdentical($calls['rotate'][0][1], 90, 'Degrees were passed correctly');
+    $this->assertIdentical($calls['rotate'][0][2], '#FFFFFF', 'Background color was passed correctly');
+    image_test_reset();
   }
 
   /**
@@ -430,13 +416,14 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
    */
   function testNumericStyleName() {
     $style_name = rand();
-    $style_label = $this->randomString();
+    $style_label = $this->randomName();
     $edit = array(
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
+    backdrop_static_reset('image_styles');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
   }
@@ -447,8 +434,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   function testStyle() {
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
-    $style_label = $this->randomString();
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_label = $this->randomName();
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $effect_edits = array(
       'image_resize' => array(
         'data[width]' => 100,
@@ -484,8 +471,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
 
     // Add effect form.
 
@@ -528,7 +515,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Test the style overview form.
     // Change the name of the style and adjust the weights of effects.
     $style_name = strtolower($this->randomName(10));
-    $style_label = $this->randomString();
+    $style_label = $this->randomName();
     $weight = count($effect_edits);
     $edit = array(
       'name' => $style_name,
@@ -546,7 +533,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $this->backdropPost($style_path, $edit, t('Update style'));
 
     // Note that after changing the style name, the style path is changed.
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
 
     // Check that the URL was updated.
     $this->backdropGet($style_path);
@@ -581,7 +568,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Test effect deletion form.
     $effect = array_pop($style['effects']);
     $this->backdropPost($style_path . '/effects/' . $effect['ieid'] . '/delete', array(), t('Delete'));
-    $this->assertRaw(t('The image effect %name has been deleted.', array('%name' => $effect['label'])), 'Image effect deleted.');
+    $this->assertRaw(t('The image effect %label has been deleted.', array('%label' => $effect['label'])), 'Image effect deleted.');
 
     // Style deletion form.
 
@@ -603,7 +590,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Setup a style to be created and effects to add to it.
     $style_name = 'thumbnail';
     $style_label = 'Thumbnail (100x100)';
-    $edit_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $edit_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $delete_path = 'admin/config/media/image-styles/delete/' . $style_name;
     $revert_path = 'admin/config/media/image-styles/revert/' . $style_name;
 
@@ -666,9 +653,9 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   function testStyleReplacement() {
     // Create a new style.
     $style_name = strtolower($this->randomName(10));
-    $style_label = $this->randomString();
+    $style_label = $this->randomName();
     image_style_save(array('name' => $style_name, 'label' => $style_label));
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
 
     // Create an image field that uses the new style.
     $field_name = strtolower($this->randomName(10));
@@ -689,12 +676,12 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
 
     // Rename the style and make sure the image field is updated.
     $new_style_name = strtolower($this->randomName(10));
-    $new_style_label = $this->randomString();
+    $new_style_label = $this->randomName();
     $edit = array(
       'name' => $new_style_name,
       'label' => $new_style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/edit/' . $style_name, $edit, t('Update style'));
+    $this->backdropPost('admin/config/media/image-styles/configure/' . $style_name, $edit, t('Update style'));
     $this->assertText(t('Changes to the style have been saved.'), format_string('Style %name was renamed to %new_name.', array('%name' => $style_name, '%new_name' => $new_style_name)));
     $this->backdropGet('node/' . $nid);
     $this->assertRaw(check_plain(image_style_url($new_style_name, $node->{$field_name}[LANGUAGE_NONE][0]['uri'])), format_string('Image displayed using style replacement style.'));
@@ -704,8 +691,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'replacement' => 'thumbnail',
     );
     $this->backdropPost('admin/config/media/image-styles/delete/' . $new_style_name, $edit, t('Delete'));
-    $message = t('Style %name was deleted.', array('%name' => $new_style_label));
-    $this->assertRaw($message, format_string('Style %name was deleted.', array('%name' => $new_style_label)));
+    $message = t('Style %label was deleted.', array('%label' => $new_style_label));
+    $this->assertRaw($message, format_string('Style %label was deleted.', array('%label' => $new_style_label)));
 
     $this->backdropGet('node/' . $nid);
     $this->assertRaw(check_plain(image_style_url('thumbnail', $node->{$field_name}[LANGUAGE_NONE][0]['uri'])), format_string('Image displayed using style replacement style.'));
@@ -785,8 +772,25 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
-    // Test the image style 'thumbnail' formatter.
+    // Test the lazy loading attribute.
     $instance['display']['default']['settings']['image_link'] = '';
+    $instance['display']['default']['settings']['image_load'] = 'lazy';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'lazy';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded lazily displaying correctly on full node view.'));
+
+    // Test the lazy loading attribute.
+    $instance['display']['default']['settings']['image_load'] = 'eager';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'eager';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded eagerly displaying correctly on full node view.'));
+
+    // Test the image style 'thumbnail' formatter.
+    $instance['display']['default']['settings']['image_load'] = 'auto';
     $instance['display']['default']['settings']['image_style'] = 'thumbnail';
     field_update_instance($instance);
     // Ensure the derivative image is generated so we do not have to deal with
@@ -795,6 +799,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $image_info['uri'] = image_style_path('thumbnail', $image_uri);
     $image_info['width'] = 100;
     $image_info['height'] = 50;
+    unset($image_info['attributes']['loading']);
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, 'Image style thumbnail formatter displaying correctly on full node view.');
@@ -818,8 +823,8 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       'alt_field' => 1,
       'file_extensions' => $test_image_extension,
       'max_filesize' => '50 KB',
-      'max_resolution' => '100x100',
-      'min_resolution' => '10x10',
+      'max_dimensions' => '100x100',
+      'min_dimensions' => '10x10',
       'title_field' => 1,
     );
     $widget_settings = array(
@@ -834,7 +839,8 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/add/post');
     $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on post form.');
     $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on post form.');
-    $this->assertText(t('Images must be larger than 10x10 pixels. Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed resolution displayed on post form.');
+    $this->assertText(t('Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed maximum dimensions displayed on post form.');
+    $this->assertText(t('Images must be at least 10x10 pixels.'), 'Image widget allowed mimimum dimensions displayed on post form.');
 
     // We have to create the post first and then edit it because the alt
     // and title fields do not display until the image has been attached.
@@ -885,6 +891,32 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       '%max' => $schema['fields'][$field_name .'_title']['length'],
       '%length' => $test_size,
     )));
+
+    // Check that image minimum size is not larger than maximum size.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => 100,
+      'instance[settings][min_dimensions][x]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with unacceptable image heights instead.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 100,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with acceptable values.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 300,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertRaw(t('Saved %field_name configuration.', array('%field_name' => $field_name)));
   }
 
   /**
@@ -968,13 +1000,13 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test min/max resolution settings.
    */
-  function testResolution() {
+  function testDimensions() {
     $field_name = strtolower($this->randomName());
-    $min_resolution = 50;
-    $max_resolution = 100;
+    $min_dimensions = 50;
+    $max_dimensions = 100;
     $instance_settings = array(
-      'max_resolution' => $max_resolution . 'x' . $max_resolution,
-      'min_resolution' => $min_resolution . 'x' . $min_resolution,
+      'max_dimensions' => $max_dimensions . 'x' . $max_dimensions,
+      'min_dimensions' => $min_dimensions . 'x' . $min_dimensions,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -984,10 +1016,10 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $image_that_is_too_small = FALSE;
     foreach ($this->backdropGetTestFiles('image') as $image) {
       $info = image_get_info($image->uri);
-      if ($info['width'] > $max_resolution) {
+      if ($info['width'] > $max_dimensions) {
         $image_that_is_too_big = $image;
       }
-      if ($info['width'] < $min_resolution) {
+      if ($info['width'] < $min_dimensions) {
         $image_that_is_too_small = $image;
       }
       if ($image_that_is_too_small && $image_that_is_too_big) {
@@ -995,10 +1027,169 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       }
     }
     $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
-    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image resolution was not met.');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
     $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
-    $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max resolution was properly resized.');
+    $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max dimensions was properly resized.');
   }
+
+  /**
+   * Test image rotation resulting from EXIF data.
+   * Requires a special test image, file rotate90cw.jpg.
+   */
+  function testOrientation() {
+    // Create an image field.
+    $field_name = strtolower($this->randomName());
+    $instance_settings = array(
+      'orientate' => 1,
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+    // Upload our test image to this field.
+    $orientation_test_image = image_load(backdrop_get_path('module', 'image') . '/images/rotate90cw.jpg');
+    $uri = $orientation_test_image->source;
+    $img = image_load($uri);
+    $this->assertTrue(is_object($img), 'Image data is available.');
+    $orientation_test_image->uri = $uri;
+
+    if (!$orientation_test_image) {
+      $this->fail(t('Could not load image %file.', array('%file' => 'rotate90cw.jpg')));
+    }
+    $nid = $this->uploadNodeImage($orientation_test_image, $field_name, 'post');
+    $this->assertText(t('The image was rotated by 90 degrees.'), 'The image was correctly re-oriented.');
+
+    $node = node_load($nid, NULL, TRUE);
+    $uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+
+    // Check orientation.
+    $img = image_load($uri);
+    $this->assertTrue(is_object($img), 'Image data is available.');
+
+    // Test the aspect ratio.
+    $this->assertTrue($img->info['width'] > $img->info['height'], 'The image format is landscape.');
+
+    // Verify the rotation by color inspection.
+    $rgb = imagecolorat($img->resource, 10, 10);
+    $r = ($rgb >> 16) & 0xFF;
+    $g = ($rgb >> 8) & 0xFF;
+    $b = $rgb & 0xFF;
+    // The top left corner should be red.
+    $this->assertTrue(abs($r - 255) < 5, 'Red color component is close to 255.');
+    $this->assertTrue($g < 5, 'Green color component is close to 0.');
+    $this->assertTrue($b < 5, 'Blue color component is close to 0.');
+  }
+
+  /**
+   * Test single width resolution setting.
+   */
+  function testWidthDimensions() {
+    $field_name = strtolower($this->randomName());
+    $min_dimensions = 50;
+    $max_dimensions = 100;
+    $instance_settings = array(
+      'max_dimensions' => $max_dimensions . 'x',
+      'min_dimensions' => $min_dimensions . 'x',
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    // We want a test image that is too small, and a test image that is too
+    // big, so cycle through test image files until we have what we need.
+    $image_that_is_too_big = FALSE;
+    $image_that_is_too_small = FALSE;
+    foreach ($this->backdropGetTestFiles('image') as $image) {
+      $info = image_get_info($image->uri);
+      if ($info['width'] > $max_dimensions) {
+        $image_that_is_too_big = $image;
+      }
+      if ($info['width'] < $min_dimensions) {
+        $image_that_is_too_small = $image;
+      }
+      if ($image_that_is_too_small && $image_that_is_too_big) {
+        break;
+      }
+    }
+    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum width is 50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
+    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
+    $this->assertText(t('The image was resized to fit within the maximum allowed width of 100 pixels.'), 'Image exceeding max width was properly resized.');
+  }
+
+  /**
+   * Test single height resolution setting.
+   */
+  function testHeightDimensions() {
+    $field_name = strtolower($this->randomName());
+    $min_dimensions = 50;
+    $max_dimensions = 100;
+    $instance_settings = array(
+      'max_dimensions' => 'x' . $max_dimensions,
+      'min_dimensions' => 'x' . $min_dimensions,
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    // We want a test image that is too small, and a test image that is too
+    // big, so cycle through test image files until we have what we need.
+    $image_that_is_too_big = FALSE;
+    $image_that_is_too_small = FALSE;
+    foreach ($this->backdropGetTestFiles('image') as $image) {
+      $info = image_get_info($image->uri);
+      if ($info['height'] > $max_dimensions) {
+        $image_that_is_too_big = $image;
+      }
+      if ($info['height'] < $min_dimensions) {
+        $image_that_is_too_small = $image;
+      }
+      if ($image_that_is_too_small && $image_that_is_too_big) {
+        break;
+      }
+    }
+    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum height is 50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
+    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
+    $this->assertText(t('The image was resized to fit within the maximum allowed height of 100 pixels.'), 'Image exceeding max height was properly resized.');
+  }
+
+  /**
+   * Test for supported image types.
+   */
+  public function testTypeSupport() {
+    $field_name = strtolower($this->randomName());
+    $instance_settings = array(
+      'file_extensions' => 'jpg webp',
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    $path = backdrop_get_path('module', 'image') . '/tests/images';
+    $filename = 'testimage.webp';
+    $files = file_scan_directory($path, '/' . $filename . '/');
+    $webp_image = reset($files);
+    $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
+    $refused_message = t('The specified file %file could not be uploaded. Only files with the following extensions are allowed: %extensions.', array(
+      '%file' => $filename,
+      '%extensions' => 'jpg',
+    ));
+
+    // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
+    // the bundled GD version still might not support it.
+    $gd_info = gd_info();
+    $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
+    if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {
+      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused');
+      // Also check the field description.
+      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension');
+    }
+    else {
+      // Successful upload and node creation.
+      $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused');
+      $node = node_load($nid);
+      $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
+      $this->assertEqual($uploaded_filename, $filename, 'New node contains the file');
+      // Thumbnail image has been created.
+      $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+      $this->backdropGet(image_style_url('thumbnail', $image_uri));
+      $this->assertResponse(200, 'Received a 200 response for derivative image.');
+      $this->assertNoText('Error generating image.');
+    }
+  }
+
 }
 
 /**
@@ -1561,8 +1752,8 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
 
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
-    $style_label = $this->randomString();
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_label = $this->randomName();
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $effect_edits = array(
       'image_resize' => array(
         'data[width]' => 100,
@@ -1580,7 +1771,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     // Add each sample effect to the style.
     foreach ($effect_edits as $effect => $edit) {
       // Add the effect.
@@ -1591,6 +1782,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
     }
 
     // Load the saved image style.
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // Create an image for the 'public' wrapper.
@@ -1633,7 +1825,7 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
 
     $style = array(
       'name' => $this->style_name,
-      'label' => $this->randomString(),
+      'label' => $this->randomName(),
       'effects' => array(),
     );
     $style['effects'][] = array(
@@ -1753,8 +1945,10 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
 
     // Close the handles
     for ($n = 0; $n < $count; $n++) {
-      curl_close(${'handle' . $n});
-      curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+      if (gettype(${'handle' . $n}) === 'resource') {
+        curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+        curl_close(${'handle' . $n});
+      }
     }
     curl_multi_close($multi_handle);
   }

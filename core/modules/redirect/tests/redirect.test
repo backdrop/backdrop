@@ -152,26 +152,27 @@ class RedirectFunctionalTest extends RedirectTestHelper {
    * Tests the links added to 404 pages for creating redirects.
    */
   function test404Interface() {
-    // Check that 404 pages do get add redirect links for admin users.
+    // Check that 404 pages do get "Add URL redirect" links for admin users.
     $this->backdropGet('invalid-path1');
     $this->backdropGet('invalid-path2');
-    $this->assertLink('Add URL redirect from this page to another location');
+    $this->assertLink('Add a URL redirect from this page to another location');
 
-    // Check that 403 pages do not get the add redirect link at all.
+    // Check that 403 pages do not get the "Add URL redirect" link at all.
     $this->backdropGet('admin/config/system/actions');
-    $this->assertNoLink('Add URL redirect from this page to another location');
+    $this->assertNoLink('Add a URL redirect from this page to another location');
 
     $this->backdropGet('admin/reports/page-not-found');
     $this->clickLink('Fix 404 pages with URL redirects');
 
-    // Check that normal users do not see the add redirect link on 404 pages.
+    // Check that normal users do not see the "Add URL redirect" link on 404
+    // pages.
     $this->backdropLogout();
     $this->backdropGet('invalid-path3');
-    $this->assertNoLink('Add an URL redirect from this page to another location');
+    $this->assertNoLink('Add a URL redirect from this page to another location');
   }
 
   /**
-   * Tests the links added to 404 pages for creating redirects.
+   * Tests the links added to 404 pages for creating URL redirects.
    */
   function testPageCache() {
     // Set up cache variables.
@@ -179,7 +180,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $edit = array(
       'purge_inactive' => 604800,
     );
-    $this->backdropPost('admin/config/search/redirect/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/redirect/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
     $this->backdropLogout();
 
@@ -248,7 +249,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
       'source' => 'manual-test',
       'redirect' => $node_path,
     );
-    $this->backdropPost('admin/config/search/redirect/add', $edit, t('Save redirect'));
+    $this->backdropPost('admin/config/urls/redirect/add', $edit, t('Save redirect'));
     $this->assertText(t('You are attempting to redirect the page to itself. This will result in an infinite loop.'));
 
     // Redirect that points to the alias.
@@ -256,7 +257,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
       'source' => 'manual-redirect',
       'redirect' => 'manual-test',
     );
-    $this->backdropPost('admin/config/search/redirect/add', $edit, t('Save redirect'));
+    $this->backdropPost('admin/config/urls/redirect/add', $edit, t('Save redirect'));
     $this->assertText(t('The redirect has been saved.'));
 
     // The redirect will resolve from "manual-test" (the alias) to the internal
@@ -272,5 +273,19 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $redirect = redirect_load_by_source('manual-test');
     $this->assertRedirect($redirect);
     $this->assertEqual($redirect->redirect, $node_path);
+  }
+
+  /**
+   * Tests presence or absence of Redirect elements on node edit forms.
+   */
+  function testNodeRedirectForm() {
+    // Ensure that the redirect form is not present on node/add
+    $this->backdropGet('node/add');
+    $this->assertNoLink('Add URL redirect to this node');
+
+    // Ensure that the redirect form is present on node/[nid]/edit
+    $node = $this->backdropCreateNode(array('type' => 'post'));
+    $this->backdropGet('node/' . $node->nid . '/edit');
+    $this->assertLink('Add URL redirect to this node');
   }
 }

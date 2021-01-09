@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update, and uninstall functions for the Update Manager module.
@@ -110,7 +109,7 @@ function _update_requirement_check($project, $type) {
     $requirement['title'] = t('Backdrop CMS update status');
   }
   else {
-    $requirement['title'] = t('Module, theme and layout update status');
+    $requirement['title'] = t('Module, theme, and layout updates');
   }
   $status = $project['status'];
   if ($status != UPDATE_CURRENT) {
@@ -149,10 +148,21 @@ function _update_requirement_check($project, $type) {
       $requirement_label = t('Up to date');
   }
   if (isset($requirement_label)) {
-    if ($status != UPDATE_CURRENT && $type == 'core' && isset($project['recommended'])) {
-      $requirement_label .= ' ' . t('(version @version available)', array('@version' => $project['recommended']));
+    if ($status != UPDATE_CURRENT) {
+      if ($type == 'core' && isset($project['recommended'])) {
+        $version_available = t('version @version available', array('@version' => $project['recommended']));
+      }
+      else {
+        $version_available = t('Updates available');
+      }
+      if (update_manager_access() && module_exists('installer')) {
+        $requirement_label .= ' (' . l($version_available, 'admin/modules/update') . ')';
+      }
+      else {
+        $requirement_label .= ' (' . l($version_available, 'admin/reports/updates') . ')';
+      }
     }
-    $requirement['value'] = l($requirement_label, update_manager_access() ? 'admin/reports/updates/update' : 'admin/reports/updates');
+    $requirement['value'] = $requirement_label;
   }
   return $requirement;
 }
@@ -174,7 +184,7 @@ function update_update_1000() {
   $config->set('update_max_attempts', update_variable_get('update_max_fetch_attempts', 2));
   $config->set('update_timeout', update_variable_get('update_max_fetch_time', 5));
   $config->set('update_emails', update_variable_get('update_notify_emails', array()));
-  $config->set('update_threshold', update_variable_get('update_notification_threshold', 0));
+  $config->set('update_threshold', update_variable_get('update_notification_threshold', 'all'));
   $config->set('update_projects', update_variable_get('update_advanced_project_settings', array()));
   $config->save();
 
@@ -204,6 +214,27 @@ function update_update_1001() {
 function update_update_1002() {
   $config = config('update.settings');
   $config->set('_config_static', true);
+  $config->save();
+}
+
+/**
+ * Removes the testing-only values from the update.settings config.
+ */
+function update_update_1003() {
+  $config = config('update.settings');
+  $config->clear('update_xml_map');
+  $config->clear('update_system_info');
+  $config->save();
+}
+
+/**
+ * Fix wrong default value for update_threshold setting.
+ */
+function update_update_1004() {
+  $config = config('update.settings');
+  if ($config->get('update_threshold') === 0) {
+    $config->set('update_threshold', 'all');
+  }
   $config->save();
 }
 

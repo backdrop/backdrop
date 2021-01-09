@@ -19,12 +19,16 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
+    'expand_all' => FALSE,
+    'clickdown' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
+    $defaults['toggle'] = TRUE;
   }
   else {
     $defaults['depth'] = 0;
+    $defaults['toggle'] = FALSE;
   }
   return $defaults;
 }
@@ -53,7 +57,6 @@ function system_menu_block_form($config) {
       'tree' => t('Hierarchical tree'),
     ),
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
   );
 
   $form['level'] = array(
@@ -71,7 +74,7 @@ function system_menu_block_form($config) {
       '8' => t('8th level'),
       '9' => t('9th level'),
     ),
-    '#description' => t('Blocks that start with the 1st level will always be visible. Blocks that start with the 2nd level or deeper will only be visible when the trail to the active menu item passes though the block’s starting level.'),
+    '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'tree'),
@@ -100,6 +103,42 @@ function system_menu_block_form($config) {
         'select[name="block_settings[style]"]' => array('value' => 'top_only'),
       ),
     ),
+  );
+  $form['expand_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show all menu links'),
+    '#default_value' => $config['expand_all'],
+    '#description' => t('When unchecked, only expanded or active trail menu links will be displayed.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'tree'),
+      ),
+    ),
+  );
+  $form['clickdown'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use a click to open, instead of a hover'),
+    '#default_value' => $config['clickdown'],
+    '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
+  $link = t('menu settings');
+  if (user_access('administer menu')) {
+    $link = l($link, 'admin/structure/menu/settings', array(
+      'attributes' => array('target' => '_blank'),
+    ));
+  }
+  $form['toggle'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display menu toggle button on small screens'),
+    '#default_value' => $config['toggle'],
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global !menu_settings.', array(
+      '!menu_settings' => $link,
+    )),
   );
 
   return $form;
@@ -134,15 +173,19 @@ function system_menu_block_build(array $config) {
   }
 
   // Set defaults.
-  $config += array(
-    'style' => 'tree',
-    'level' => 1,
-    'depth' => 3,
-  );
+  $menu_name = str_replace('_', '-', $config['menu_name']);
+  $config += system_menu_block_defaults($menu_name);
+  if (empty($config['style'])) {
+    $config['style'] = 'tree';
+  }
+
+  // Always expand dropdown style output.
+  if ($config['style'] === 'dropdown') {
+    $config['expand_all'] = TRUE;
+  }
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
-  $menu_name = str_replace('_', '-', $config['menu_name']);
   system_menu_block_set_title($menu_names[$menu_name]);
 
   // Get the raw menu tree data.
@@ -159,10 +202,17 @@ function system_menu_block_build(array $config) {
     if (!empty($config['style'])) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+      $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
       }
+    }
+    if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
+      $id = backdrop_html_id('menu-toggle-state');
+      $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
+      $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
+      $data['content']['#attached']['library'][] = array('system', 'backdrop.menu-toggle');
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);

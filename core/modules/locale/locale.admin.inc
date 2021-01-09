@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration functions for locale.module.
@@ -148,7 +147,7 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
  * @see language_negotiation_configure_url_form_submit()
  */
 function language_negotiation_configure_url_form($form, &$form_state) {
-  $form['locale_language_negotiation_url_part'] = array(
+  $form['language_negotiation_url_part'] = array(
     '#title' => t('Part of the URL that determines language'),
     '#type' => 'radios',
     '#options' => array(
@@ -165,7 +164,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#description' => t('Language codes or other custom text to use as a path prefix for URL language detection. For the default language, this value may be left blank. <strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "deutsch" as the path prefix code for German results in URLs like "example.com/deutsch/contact".'),
     '#states' => array(
       'visible' => array(
-        ':input[name="locale_language_negotiation_url_part"]' => array(
+        ':input[name="language_negotiation_url_part"]' => array(
           'value' => (string) LANGUAGE_NEGOTIATION_URL_PREFIX,
         ),
       ),
@@ -178,7 +177,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#description' => t('The domain names to use for these languages. Leave blank for the default language. Use with caution in a production environment.<strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "de.example.com" as language domain for German will result in an URL like "http://de.example.com/contact".'),
     '#states' => array(
       'visible' => array(
-        ':input[name="locale_language_negotiation_url_part"]' => array(
+        ':input[name="language_negotiation_url_part"]' => array(
           'value' => (string) LANGUAGE_NEGOTIATION_URL_DOMAIN,
         ),
       ),
@@ -186,7 +185,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   );
 
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $prefixes = locale_language_negotiation_url_prefixes();
   $domains = locale_language_negotiation_url_domains();
 
@@ -195,17 +194,17 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   $mock_language = (object)(array(
     'langcode' => '',
   ));
-  foreach ($languages as $langcode => $language) {
+  foreach ($language_list as $langcode => $label) {
     $form['prefix'][$langcode] = array(
       '#type' => 'textfield',
-      '#title' => t('%language (%langcode) path prefix', array('%language' => $language->name, '%langcode' => $language->langcode)),
+      '#title' => t('%language (%langcode) path prefix', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
       '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',
-      '#title' => t('%language (%langcode) domain', array('%language' => $language->name, '%langcode' => $language->langcode)),
+      '#title' => t('%language (%langcode) domain', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 128,
       '#default_value' => isset($domains[$langcode]) ? $domains[$langcode] : '',
     );
@@ -230,7 +229,6 @@ function language_negotiation_configure_url_form($form, &$form_state) {
 function language_negotiation_configure_url_form_validate($form, &$form_state) {
   // Get the enabled languages only.
   $languages = language_list(TRUE);
-  $default = language_default();
 
   // Count repeated values for uniqueness check.
   $count = array_count_values($form_state['values']['prefix']);
@@ -238,7 +236,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
     $value = $form_state['values']['prefix'][$langcode];
 
     if ($value === '') {
-      if (!$language->default && $form_state['values']['locale_language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_PREFIX) {
+      if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_PREFIX) {
         // Validation error if the prefix is blank for a non-default language, and value is for selected negotiation type.
         form_error($form['prefix'][$langcode], t('The prefix may only be left blank for the default language.'));
       }
@@ -255,7 +253,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
     $value = $form_state['values']['domain'][$langcode];
 
     if ($value === '') {
-      if (!$language->default && $form_state['values']['locale_language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_DOMAIN) {
+      if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_DOMAIN) {
         // Validation error if the domain is blank for a non-default language, and value is for selected negotiation type.
         form_error($form['domain'][$langcode], t('The domain may only be left blank for the default language.'));
       }
@@ -272,11 +270,15 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
  */
 function language_negotiation_configure_url_form_submit($form, &$form_state) {
   // Save selected format (prefix or domain).
-  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['locale_language_negotiation_url_part']);
+  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['language_negotiation_url_part']);
 
   // Save new domain and prefix values.
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
   locale_language_negotiation_url_domains_save($form_state['values']['domain']);
+
+  // Clear menu caches, to ensure that admin bar links are updated to include
+  // any change in the path prefix (so not to 404).
+  menu_cache_clear_all();
 
   backdrop_set_message(t('Configuration saved.'));
 }
@@ -320,7 +322,7 @@ function language_negotiation_configure_session_form_submit($form, &$form_state)
  * Form callback; Display fields for setting the date format for each language.
  */
 function locale_date_format_form($form, &$form_state, $format) {
-  backdrop_set_title(t('Localize %format', array('%format' => $format['name'])), PASS_THROUGH);
+  backdrop_set_title(t('Localize date format %format', array('%format' => $format['label'])), PASS_THROUGH);
 
   // We use the system_date_time_lookup() function from system.admin.inc.
   form_load_include($form_state, 'inc', 'system', 'system.admin');
@@ -328,7 +330,8 @@ function locale_date_format_form($form, &$form_state, $format) {
 
   $form['#tree'] = TRUE;
   $form['help'] = array(
-    '#markup' => '<p>' . t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
   );
 
   $form['locales']['default'] = array(

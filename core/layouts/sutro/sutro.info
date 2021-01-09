@@ -7,13 +7,13 @@ backdrop = 1.x
 regions[header]     = Header
 regions[top]        = Top
 regions[content]    = Content
-regions[half1]      = Half First
-regions[half2]      = Half Second
+regions[half1]      = First Half
+regions[half2]      = Second Half
 regions[bottom]     = Bottom
 regions[footer]     = Footer
 
 ; The default region automatically receives the "Main Content" block if needed.
-default region = half1
+default region = content
 
 ; Include a file for special preprocessing of this layout's variables.
 ; file = sutro.php

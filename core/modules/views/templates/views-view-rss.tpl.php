@@ -11,6 +11,7 @@
   <channel>
     <title><?php print $title; ?></title>
     <link><?php print $link; ?></link>
+    <atom:link href="<?php print $link; ?>" rel="self" type="application/rss+xml" />
     <description><?php print $description; ?></description>
     <language><?php print $langcode; ?></language>
     <?php print $channel_elements; ?>

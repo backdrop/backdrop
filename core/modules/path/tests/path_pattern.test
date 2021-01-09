@@ -8,10 +8,25 @@
  * Helper test class with some added functions for testing.
  */
 class PathPatternTestHelper extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp(array $modules = array()) {
     $modules[] = 'path';
     $modules[] = 'taxonomy';
     parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+    config('path.settings')
+      ->set('node_page_pattern', '[node:title]')
+      ->set('node_post_pattern', 'posts/[node:title]')
+      ->save();
   }
 
   function assertToken($type, $object, $token, $expected) {
@@ -170,11 +185,14 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $tests['this thing with that thing'] = 'thing-thing';
 
     // Test length truncation and duplicate separator removal.
-    $tests[' - Dave - Greg - Freso - Mike'] = 'dave-greg-freso-mike';
+    $tests[' - Dave – Greg — Freso - Mike'] = 'dave-greg-freso-mike';
 
     // Test that HTML tags are removed.
     $tests['This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.'] = 'text-has-html-tags';
     $tests[check_plain('This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.')] = 'text-has-html-tags';
+
+    // Test fancy single and double quotes are removed along with normal ones.
+    $tests['"double" “fancy” \'single\' ‘fancy’'] = 'double-fancy-single-fancy';
 
     foreach ($tests as $input => $expected) {
       $output = path_clean_string($input);
@@ -190,6 +208,16 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $expected = 'add-accents'; // "a" and "the" is stripped out.
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+
+    // German transiteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
+    $input = 'Ärger im Büro ist möglich';
+    $expected = 'aerger-im-buero-ist-moeglich';
+    $output = path_clean_string($input, array('langcode' => 'de'));
+    $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array(
+      '@input' => $input,
+      '@expected' => $expected,
+      '@output' => $output,
+    )));
   }
 
   /**
@@ -206,7 +234,6 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
       $output = path_clean_alias($input);
       $this->assertEqual($output, $expected, format_string("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
-
   }
 
   /**
@@ -425,6 +452,8 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
  * Test basic Path automatic URL alias functionality.
  */
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
+  protected $profile = 'standard';
+
   /**
    * Create a new content type with new path pattern.
    */
@@ -581,9 +610,9 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     $edit = array(
       'action' => 'path_node_update_action',
-      "bulk_form[0]" => TRUE,
+      'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost('admin/content', $edit, t('Execute'));
+    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'type', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item', array('%action' => 'Update content URL alias')));
 
     $this->assertEntityAlias('node', $node1, 'content/' . $node1->title);
@@ -679,28 +708,28 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array();
     $edit['max_length'] = 'abc';
     $edit['max_component_length'] = 'abc';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be a number.');
     $this->assertText('Maximum component length must be a number.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
     $edit['max_component_length'] = '0';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be higher or equal to 1.');
     $this->assertText('Maximum component length must be higher or equal to 1.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
     $edit['max_component_length'] = '999';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be below or equal to 255.');
     $this->assertText('Maximum component length must be below or equal to 255.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';
     $edit['max_component_length'] = '50';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
 
     // To test alternate interfaces, we need more permissions.
@@ -718,7 +747,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array('path_pattern' => 'post/[node:title]/foo');
     $this->backdropPost('admin/structure/types/manage/post', $edit, 'Save content type');
     // Check that the page URL alias pattern is on the pathauto form.
-    $this->backdropGet('admin/config/search/path/patterns');
+    $this->backdropGet('admin/config/urls/path/patterns');
     $this->assertFieldByName('node_post_pattern', 'post/[node:title]/foo', 'URL alias pattern set with node type settings appears on path config page.');
 
     // Test alternate interfaces - vocab configuration.
@@ -727,14 +756,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array('path_pattern' =>  $pattern);
     $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure', $edit, 'Save');
     // Check that the page URL alias pattern is on the pathauto form.
-    $this->backdropGet('admin/config/search/path/patterns');
+    $this->backdropGet('admin/config/urls/path/patterns');
     $this->assertFieldByName('taxonomy_term_' . $vocabulary->machine_name . '_pattern', $pattern, 'URL alias pattern set with vocabulary settings appears on path config page.');
 
     // Test alternate interfaces - user configuration.
     $edit = array('path_pattern' => 'accounts/[user:name]/foo');
     $this->backdropPost('admin/config/people/settings', $edit, 'Save configuration');
     // Check that the page URL alias pattern is on the pathauto form.
-    $this->backdropGet('admin/config/search/path/patterns');
+    $this->backdropGet('admin/config/urls/path/patterns');
     $this->assertFieldByName('user_pattern', 'accounts/[user:name]/foo', 'URL alias pattern set with user account settings appears on path config page.');
   }
 
@@ -742,7 +771,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array();
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
-    $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns', $edit, 'Save configuration');
     $this->assertText('The Default URL alias pattern (applies to all content types with blank URL alias patterns below) is using the following invalid tokens: [user:name], [term:name].');
     $this->assertText('The URL alias pattern for all Page URLs cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
@@ -750,7 +779,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_pattern'] = '[node:title]';
     $edit['node_page_pattern'] = 'page/[node:title]';
     $edit['node_post_pattern'] = '';
-    $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
   }
 
@@ -784,13 +813,19 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $modules[] = 'translation';
     parent::setUp($modules, array('administer languages'));
 
-    // Add predefined French language and reset the locale cache.
-    $language = (object) array(
+    // Add predefined French and German languages and reset the locale cache.
+    $french = (object) array(
       'langcode' => 'fr',
       'name' => 'French',
       'direction' => LANGUAGE_LTR,
     );
-    language_save($language);
+    language_save($french);
+    $german = (object) array(
+      'langcode' => 'de',
+      'name' => 'German',
+      'direction' => LANGUAGE_LTR,
+    );
+    language_save($german);
     backdrop_language_initialize();
   }
 
@@ -829,12 +864,41 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $this->assertEntityAlias('node', $node, 'french-node', 'fr');
     $this->assertAliasExists(array('pid' => $english_alias['pid'], 'alias' => 'content/english-node-1'));
   }
+
+  /**
+   * Language neutral German node has the correct transliteration applied.
+   */
+  public function testNeutralTransliteration() {
+    config_set('system.core', 'language_default', 'de');
+    config_set('path.settings', 'transliterate', TRUE);
+    $title_de = 'Lückenbüßer stören DE';
+    $title_en = 'Lückenbüßer stören EN';
+    $edit = array(
+      'title' => $title_de,
+      'path[auto]' => TRUE,
+    );
+    // We need to get rid of the session.
+    $this->backdropLogout($this->admin_user);
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title_de);
+    // DE: "ü" -> "ue", "ß" -> "ss", "ö" -> "oe".
+    $this->assertEntityAlias('node', $node, 'content/lueckenbuesser-stoeren-de');
+    config_set('system.core', 'language_default', 'en');
+    $edit['title'] = $title_en;
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title_en);
+    // EN: "ü" -> "u", "ß" -> "ss", "ö" -> "o".
+    $this->assertEntityAlias('node', $node, 'content/luckenbusser-storen-en');
+  }
+
 }
 
 /**
  * Bulk update functionality tests.
  */
 class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
+  protected $profile = 'standard';
   private $nodes;
 
   function testBulkUpdate() {
@@ -905,8 +969,8 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[user][base]' => TRUE,
       'operations[operation]' => 'generate',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
-    $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users.
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
@@ -919,7 +983,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $this->nodes[$new_node->nid] = $new_node;
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
@@ -929,7 +993,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][base]' => TRUE,
       'operations[operation]' => 'delete',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     $this->backdropPost(NULL, array(), t('Delete URL aliases'));
     // Check that aliases have actually been deleted.
     foreach ($this->nodes as $node) {
@@ -941,7 +1005,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][post]' => TRUE,
       'operations[operation]' => 'generate',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     // Check that aliases only now exists for post types.
     foreach ($this->nodes as $node) {
       if ($node->type == 'page') {
@@ -962,7 +1026,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[node][post]' => TRUE,
       'operations[operation]' => 'update',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     foreach ($this->nodes as $node) {
       if ($node->type == 'page') {
         $this->assertNoEntityAliasExists('node', $node);
@@ -978,7 +1042,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[taxonomy_term][tags]' => TRUE,
       'operations[operation]' => 'delete',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     $this->backdropPost(NULL, array(), t('Delete URL aliases'));
     // Check that all node aliases are again deleted.
     foreach ($this->nodes as $node) {
@@ -1008,7 +1072,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     );
 
     $tokens = array(
-      'join-path' => 'test-first-arg/array-value',
+      'join-path' => 'test-first-arg/the-array-value',
     );
     $data['array'] = $array;
     $replacements = $this->assertTokens('array', $data, $tokens);
@@ -1017,7 +1081,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     // this token value.
     module_load_include('inc', 'path');
     path_clean_token_values($replacements, $data, array());
-    $this->assertEqual($replacements['[array:join-path]'], 'test-first-arg/array-value');
+    $this->assertEqual($replacements['[array:join-path]'], 'test-first-arg/the-array-value');
   }
 
   /**

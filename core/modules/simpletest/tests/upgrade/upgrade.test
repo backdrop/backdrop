@@ -31,12 +31,11 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
    * Checks that zlib is enabled in order to run the upgrade tests.
    */
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
     if (!function_exists('gzopen')) {
-      return array(
-        'Missing zlib requirement for upgrade tests.',
-      );
+      $errors[] = 'Missing zlib requirement for upgrade tests.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**

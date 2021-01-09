@@ -1,8 +1,7 @@
 <?php
-
 /**
  *  FieldBlock extends Block
- *  
+ *
  *  Provides entity field values in configurable blocks.
  */
 class FieldBlock extends Block {
@@ -23,6 +22,10 @@ class FieldBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     return t('Field %field', array('%field' => $field_name));
   }
@@ -31,13 +34,21 @@ class FieldBlock extends Block {
    *  Sets description text on draggable block in Layout builder.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     $field = field_info_field($field_name);
-    $formatter = field_info_formatter_types($this->settings['formatter']);
-    $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
-    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+    $formatter_name = $this->settings['formatter'];
+    $formatter = field_info_formatter_types($formatter_name);
+    $default_formatter_settings = $formatter['settings'];
+    $formatter_settings = array_merge($default_formatter_settings, $this->settings['formatter_settings']);
+    $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
+
+    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
+    $preview = '<p>' . t('Displays values of the %field field.', array('%field' => $field_name)) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
@@ -68,6 +79,11 @@ class FieldBlock extends Block {
     // Get a shortcut to the entity.
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
+
+    // Do not render if the entity is not found on this layout.
+    if (empty($entity)) {
+      return NULL;
+    }
 
     // Load the entity type's information for this field.
     $field = field_info_instance($entity_type, $field_name, $entity->bundle());
@@ -166,7 +182,7 @@ class FieldBlock extends Block {
     // Provide an instance array for hook_field_formatter_settings_form().
     $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
 
-    // Store the settings in a '_custom' view mode.
+    // Store the settings in a '_custom' display mode.
     $pseudo_instance['display']['_custom'] = array(
       'type' => $formatter_name,
       'settings' => $formatter_settings,
@@ -222,7 +238,7 @@ class FieldBlock extends Block {
       );
     }
   }
-  
+
   /**
    * Submit handler to save the form settings.
    */

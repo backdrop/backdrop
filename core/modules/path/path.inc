@@ -135,6 +135,25 @@ function path_clean_string($string, array $options = array()) {
       }
     }
 
+    // Copy settings from hyphen, single, and double-quotes to simple versions.
+    $fancy_character_map = array(
+      '‘' => '\'', // Single opening curly quote.
+      '’' => '\'', // Single closing curly quote.
+      '‚' => '\'', // Single low-quote.
+      '′' => '"', // Single prime.
+      '“' => '"', // Double opening curly quote.
+      '”' => '"', // Double closing curly quote.
+      '„' => '"', // Double low-quote.
+      '″' => '"', // Double prime.
+      '–' => '-', // En dash.
+      '—' => '-', // Em dash.
+    );
+    foreach ($fancy_character_map as $fancy_character => $simple_character) {
+      if (!isset($cache['punctuation'][$fancy_character])) {
+        $cache['punctuation'][$fancy_character] =  $cache['punctuation'][$simple_character];
+      }
+    }
+
     // Generate and cache the ignored words regular expression.
     $ignore_words = $config->get('ignore_words');
     $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
@@ -164,6 +183,15 @@ function path_clean_string($string, array $options = array()) {
   }
   elseif (!empty($options['langcode'])) {
     $langcode = $options['langcode'];
+  }
+  if ($langcode == LANGUAGE_NONE) {
+    // Paths for language neutral content get transliterated according to
+    // current language.
+    global $language;
+    // We are intentionally not using config_get('system.core', 'language_default')
+    // here. That can have unexpected behavior in cases such as on a multilingual
+    // site with language-neutral content types.
+    $langcode = $language->langcode;
   }
 
   // Check if the string has already been processed, and if so return the
@@ -473,7 +501,7 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
 }
 
 /**
- * Update the URL aliases for an individual taxonomy term.
+ * Update the URL aliases for an individual entity.
  *
  * @param Entity $entity
  *   An entity (node/user/term/etc.) object.

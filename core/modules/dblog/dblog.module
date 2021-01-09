@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * System monitoring and logging for administrators.
@@ -125,20 +124,27 @@ function dblog_watchdog(array $log_entry) {
   if (!function_exists('backdrop_substr')) {
     require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   }
-  Database::getConnection('default', 'default')->insert('watchdog')
-    ->fields(array(
-      'uid' => $log_entry['uid'],
-      'type' => backdrop_substr($log_entry['type'], 0, 64),
-      'message' => $log_entry['message'],
-      'variables' => serialize($log_entry['variables']),
-      'severity' => $log_entry['severity'],
-      'link' => backdrop_substr($log_entry['link'], 0, 255),
-      'location' => $log_entry['request_uri'],
-      'referer' => $log_entry['referer'],
-      'hostname' => backdrop_substr($log_entry['ip'], 0, 128),
-      'timestamp' => $log_entry['timestamp'],
-    ))
-    ->execute();
+  try {
+    Database::getConnection('default', 'default')->insert('watchdog')
+      ->fields(array(
+        'uid' => $log_entry['uid'],
+        'type' => backdrop_substr($log_entry['type'], 0, 64),
+        'message' => $log_entry['message'],
+        'variables' => serialize($log_entry['variables']),
+        'severity' => $log_entry['severity'],
+        'link' => backdrop_substr($log_entry['link'], 0, 255),
+        'location' => $log_entry['request_uri'],
+        'referer' => $log_entry['referer'],
+        'hostname' => backdrop_substr($log_entry['ip'], 0, 128),
+        'timestamp' => $log_entry['timestamp'],
+      ))
+      ->execute();
+  }
+  catch (Exception $e) {
+    // Exception is ignored so that watchdog does not break pages during the
+    // installation process or is not able to create the watchdog table during
+    // installation.
+  }
 }
 
 /**
@@ -152,6 +158,29 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
+
+  $format = config_get('system.core', 'log_date_format');
+  $pattern = isset($form_state['values']['dblog_date_format']) ? $form_state['values']['dblog_date_format'] : $format;
+  $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
+
+  $form['dblog_date_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date format for log messages'),
+    '#maxlength' => 100,
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#default_value' => $pattern,
+    '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
+    '#ajax' => array(
+      'callback' => 'system_date_time_lookup',
+      'event' => 'keyup',
+      'progress' => array('type' => 'none', 'message' => NULL),
+      'disable' => FALSE,
+    ),
+    '#required' => TRUE,
+    '#wrapper_attributes' => array(
+      'id' => 'date-format-pattern',
+    ),
+  );
   $form['#submit'][] = 'dblog_logging_settings_submit';
 }
 
@@ -162,5 +191,5 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
  */
 function dblog_logging_settings_submit($form, &$form_state) {
   config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
+  config_set('system.core', 'log_date_format', $form_state['values']['dblog_date_format']);
 }
-

@@ -182,7 +182,6 @@ function theme_date_display_combination($variables) {
   $show_remaining_days = $variables['show_remaining_days'];
 
   $output = '';
-
   // If date_id is set for this field and delta doesn't match, don't display it.
   if (!empty($entity->date_id)) {
     foreach ((array) $entity->date_id as $key => $id) {
@@ -225,11 +224,19 @@ function theme_date_display_combination($variables) {
   // Pull the timezone, if any, out of the formatted result and tack it back on
   // at the end, if it is in the current formatted date.
   $timezone = $dates['value']['formatted_timezone'];
-  if ($timezone) {
+  if (date_timezone_is_valid($timezone) && $date1 !== $date2) {
+    // We only handle timezone identifiers.
+    // Start and end can have different offsets (DST).
+    // Removing an offset in seconds (Z) creates false positives.
+    // And we only do this, if we really have a range,
+    // single dates are left untouched.
+    $date1 = str_replace($timezone, '', $date1);
+    $date2 = str_replace($timezone, '', $date2);
     $timezone = ' ' . $timezone;
   }
-  $date1 = str_replace($timezone, '', $date1);
-  $date2 = str_replace($timezone, '', $date2);
+  else {
+    $timezone = '';
+  }
   $time1 = preg_replace('`^([\(\[])`', '', $dates['value']['formatted_time']);
   $time1 = preg_replace('([\)\]]$)', '', $time1);
   $time2 = preg_replace('`^([\(\[])`', '', $dates['value2']['formatted_time']);
@@ -245,11 +252,13 @@ function theme_date_display_combination($variables) {
   // Check remaining days.
   $show_remaining_days = '';
   if (!empty($variables['show_remaining_days'])) {
-    $remaining_days = floor((strtotime($variables['dates']['value']['formatted_iso'])
-    - strtotime('now')) / (24 * 3600));
-
+    // Create a date object from the timestamp.
+    $date = new DateTime('@' . strtotime($variables['dates']['value']['formatted_iso']));
+    // Using date_diff()->days allows to get the days diff, without having to
+    // use complex math to calculate it. It also takes into account leap years.
+    $remaining_days = date_diff($date, date_now())->days;
     // Show remaining days only for future events.
-    if ($remaining_days >= 0) {
+    if ($date->format('U') > REQUEST_TIME) {
       $show_remaining_days = theme('date_display_remaining', array(
         'remaining_days' => $remaining_days,
       ));
@@ -284,7 +293,7 @@ function theme_date_display_combination($variables) {
       'timezone' => $timezone,
       'attributes' => $attributes,
       'dates' => $dates,
-      'show_remaining_days' => $show_remaining_days,
+      'show_remaining_days' => '',
     ));
     $replaced = str_replace($time1, $time, $date1);
     $output .= theme('date_display_single', array(
@@ -292,6 +301,7 @@ function theme_date_display_combination($variables) {
       'timezone' => $timezone,
       'attributes' => array(),
       'dates' => $dates,
+      'show_remaining_days' => $show_remaining_days,
     ));
   }
   // Different days, display both in their entirety.
@@ -314,17 +324,11 @@ function theme_date_display_combination($variables) {
  */
 function theme_date_display_single($variables) {
   $date = $variables['date'];
-  $timezone = $variables['timezone'];
-
-  $format = $variables['dates']['format'];
-  // If timezone is already included in format, suppress it from display
-  if ($format == 'Y-m-d\TH:iO') {$timezone = '';}
-
   $attributes = $variables['attributes'];
   $show_remaining_days = isset($variables['show_remaining_days']) ? $variables['show_remaining_days'] : '';
 
   // Wrap the result with the attributes.
-  $output = '<span class="date-display-single"' . backdrop_attributes($attributes) . '>' . $date . $timezone . '</span>';
+  $output = '<span class="date-display-single"' . backdrop_attributes($attributes) . '>' . $date . '</span>';
 
   // Add remaining message and return.
   return $output . $show_remaining_days;
@@ -452,9 +456,11 @@ function theme_date_popup($variables) {
  */
 function theme_date_display_remaining($variables) {
   $remaining_days = $variables['remaining_days'];
-  $show_remaining_text = t('The upcoming date less then 1 day.');
   if ($remaining_days) {
-    $show_remaining_text = format_plural($remaining_days, 'To event remaining 1 day', 'To event remaining @count days');
+    $show_remaining_text = format_plural($remaining_days, '1 day remaining to event.', '@count days remaining to event.');
+  }
+  else {
+    $show_remaining_text = t('Less than 1 day remaining to event.');
   }
 
   return '<div class="date-display-remaining"><span class="date-display-remaining">' . $show_remaining_text . '</span></div>';
@@ -463,15 +469,237 @@ function theme_date_display_remaining($variables) {
 /**
  * Preprocessor for Date Views filter form.
  */
-function template_preprocess_date_views_filter_form(&$vars) {
-  $form = $vars['form'];
-  $vars['date'] = backdrop_render($form['valuedate']);
-  $vars['mindate'] = backdrop_render($form['mindate']);
-  $vars['maxdate'] = backdrop_render($form['maxdate']);
-  $vars['adjustment'] = backdrop_render($form['valueadjustment']);
-  $vars['minadjustment'] = backdrop_render($form['minadjustment']);
-  $vars['maxadjustment'] = backdrop_render($form['maxadjustment']);
-  $vars['description'] = backdrop_render($form['description']) . backdrop_render($form);
+function template_preprocess_date_views_filter_form(&$variables) {
+  $form = $variables['form'];
+  $variables['date'] = backdrop_render($form['valuedate']);
+  $variables['mindate'] = backdrop_render($form['mindate']);
+  $variables['maxdate'] = backdrop_render($form['maxdate']);
+  $variables['adjustment'] = backdrop_render($form['valueadjustment']);
+  $variables['minadjustment'] = backdrop_render($form['minadjustment']);
+  $variables['maxadjustment'] = backdrop_render($form['maxadjustment']);
+  $variables['description'] = backdrop_render($form['description']) . backdrop_render($form);
+}
+
+/**
+ * Implements template_preprocess_views_view().
+ *
+ * Display the pager above view content, below or both.
+ */
+function date_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
+  if (!empty($view->date_info) && !empty($view->date_info->date_pager_position)) {
+    switch ($view->date_info->date_pager_position) {
+      case 'top':
+        $variables['header'] .= $variables['pager'];
+        $variables['pager'] = '';
+        break;
+
+      case 'both':
+        $variables['header'] .= $variables['pager'];
+        break;
+
+      default:
+        // Already on the bottom.
+    }
+  }
+}
+
+/**
+ * Preprocess function for Date pager template.
+ */
+function template_preprocess_date_views_pager(&$variables) {
+  backdrop_add_css(backdrop_get_path('module', 'date') . "/css/date-views.css");
+
+  $plugin = $variables['plugin'];
+  $input = $variables['input'];
+  $view = $plugin->view;
+
+  $variables['nav_title'] = '';
+  $variables['next_url'] = '';
+  $variables['prev_url'] = '';
+  $variables['classes'] = array('date-nav-wrapper');
+
+  if (empty($view->date_info) || empty($view->date_info->min_date)) {
+    return;
+  }
+  $date_info = $view->date_info;
+  // Make sure we have some sort of granularity.
+  $granularity = !empty($date_info->granularity) ? $date_info->granularity : 'month';
+  $pos = $date_info->date_arg_pos;
+  if (!empty($input)) {
+    $id = $plugin->options['date_id'];
+    if (array_key_exists($id, $input) && !empty($input[$id])) {
+      $view->args[$pos] = $input[$id];
+    }
+  }
+
+  $next_args = $view->args;
+  $prev_args = $view->args;
+  $min_date = $date_info->min_date;
+  $max_date = $date_info->max_date;
+
+  // Set up the pager link format. Setting the block identifier
+  // will force pager style links.
+  if ((isset($date_info->date_pager_format) && $date_info->date_pager_format != 'clean') || !empty($date_info->mini)) {
+    if (empty($date_info->block_identifier)) {
+      $date_info->block_identifier = $date_info->pager_id;
+    }
+  }
+
+  if (empty($date_info->hide_nav)) {
+    $prev_date = $date_info->prev_date;
+    $next_date = $date_info->next_date;
+
+    $format = array('year' => 'Y', 'month' => 'Y-m', 'day' => 'Y-m-d', 'hour' => 'Y-m-d\TH');
+    if (!empty($prev_date)) {
+      switch ($granularity) {
+        case 'week':
+          $prev_week = date_week(date_format($prev_date, 'Y-m-d'));
+          $prev_arg = date_format($prev_date, 'o-\W') . date_pad($prev_week);
+          break;
+        default:
+          $prev_arg = date_format($prev_date, $format[$granularity]);
+      }
+      $prev_path = str_replace($date_info->date_arg, $prev_arg, $date_info->url);
+      $prev_args[$pos] = $prev_arg;
+      $variables['prev_url'] = date_pager_url($view, NULL, $prev_arg);
+    }
+    if (!empty($next_date)) {
+      switch ($granularity) {
+        case 'week':
+          $next_week = date_week(date_format($next_date, 'Y-m-d'));
+          $next_arg = date_format($next_date, 'o-\W') . date_pad($next_week);
+          break;
+        default:
+          $next_arg = date_format($next_date, $format[$granularity]);
+      }
+      $next_path = str_replace($date_info->date_arg, $next_arg, $date_info->url);
+      $next_args[$pos] = $next_arg;
+      $variables['next_url'] = date_pager_url($view, NULL, $next_arg);
+    }
+
+    $variables['next_options'] = $variables['prev_options'] = array();
+  }
+  else {
+    $next_path = '';
+    $prev_path = '';
+    $variables['next_url'] = '';
+    $variables['prev_url'] = '';
+    $variables['next_options'] = $variables['prev_options'] = array();
+  }
+
+  // Check whether navigation links would point to
+  // a date outside the allowed range.
+  if (!empty($next_date) && !empty($variables['next_url']) && date_format($next_date, 'Y') > $date_info->limit[1]) {
+    $variables['next_url'] = '';
+  }
+  if (!empty($prev_date) && !empty($variables['prev_url']) && date_format($prev_date, 'Y') < $date_info->limit[0]) {
+    $variables['prev_url'] = '';
+  }
+  $variables['prev_options'] += array('attributes' => array());
+  $variables['next_options'] += array('attributes' => array());
+  $prev_title = '';
+  $next_title = '';
+
+  // Build next/prev link titles.
+  switch ($granularity) {
+    case 'year':
+      $prev_title = t('Navigate to previous year');
+      $next_title = t('Navigate to next year');
+      break;
+
+    case 'month':
+      $prev_title = t('Navigate to previous month');
+      $next_title = t('Navigate to next month');
+      break;
+
+    case 'week':
+      $prev_title = t('Navigate to previous week');
+      $next_title = t('Navigate to next week');
+      break;
+
+    case 'day':
+      $prev_title = t('Navigate to previous day');
+      $next_title = t('Navigate to next day');
+      break;
+  }
+  $variables['prev_options']['attributes'] += array('title' => $prev_title);
+  $variables['next_options']['attributes'] += array('title' => $next_title);
+
+  // Add nofollow for next/prev links.
+  $variables['prev_options']['attributes'] += array('rel' => 'nofollow');
+  $variables['next_options']['attributes'] += array('rel' => 'nofollow');
+
+  // Need this so we can use '&laquo;' or images in the links.
+  $variables['prev_options'] += array('html' => TRUE);
+  $variables['next_options'] += array('html' => TRUE);
+
+  $link = FALSE;
+  // Month navigation titles are used as links in the block view.
+  if (!empty($date_info->mini) && $granularity == 'month') {
+    $link = TRUE;
+  }
+  $params = array(
+    'granularity' => $granularity,
+    'view' => $view,
+    'link' => $link,
+  );
+  $nav_title = theme('date_nav_title', $params);
+  $variables['nav_title'] = $nav_title;
+  $variables['mini'] = !empty($date_info->mini);
+}
+
+/**
+ * Theme the calendar title.
+ */
+function theme_date_nav_title($params) {
+  $title  = '';
+  $granularity = $params['granularity'];
+  $view = $params['view'];
+  $date_info = $view->date_info;
+  $link = !empty($params['link']) ? $params['link'] : FALSE;
+  $format = !empty($params['format']) ? $params['format'] : NULL;
+  $format_with_year = config_get('date_views.settings', "date_views_{$granularity}_format_with_year");
+  $format_without_year = config_get('date_views.settings', "date_views_{$granularity}_format_without_year");
+  switch ($granularity) {
+    case 'year':
+      $title = $date_info->year;
+      $date_arg = $date_info->year;
+      break;
+
+    case 'month':
+      $format = !empty($format) ? $format : (empty($date_info->mini) ? $format_with_year : $format_without_year);
+      $title = date_format_date($date_info->min_date, 'custom', $format);
+      $date_arg = $date_info->year . '-' . date_pad($date_info->month);
+      break;
+
+    case 'day':
+      $format = !empty($format) ? $format : (empty($date_info->mini) ? $format_with_year : $format_without_year);
+      $title = date_format_date($date_info->min_date, 'custom', $format);
+      $date_arg = $date_info->year;
+      $date_arg .= '-';
+      $date_arg .= date_pad($date_info->month);
+      $date_arg .= '-';
+      $date_arg .= date_pad($date_info->day);
+      break;
+
+    case 'week':
+      $format = !empty($format) ? $format : (empty($date_info->mini) ? $format_with_year : $format_without_year);
+      $title = t('Week of @date', array(
+        '@date' => date_format_date($date_info->min_date, 'custom', $format),
+      ));
+      $date_arg = $date_info->year . '-W' . date_pad($date_info->week);
+      break;
+  }
+  if (!empty($date_info->mini) || $link) {
+    // Month navigation titles are used as links in the mini view.
+    $attributes = array('title' => t('View full page month'));
+    $url = date_pager_url($view, $granularity, $date_arg, TRUE);
+    return l($title, $url, array('attributes' => $attributes));
+  }
+  else {
+    return $title;
+  }
 }
 
 /** @} End of addtogroup themeable */

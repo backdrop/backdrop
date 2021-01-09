@@ -81,6 +81,9 @@ function DropButton (dropbutton, settings) {
         'focusin.dropbutton': $.proxy(this.focusIn, this)
       });
   }
+  else {
+    this.$dropbutton.addClass('dropbutton-single');
+  }
 }
 
 /**

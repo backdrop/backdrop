@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the User module.
@@ -301,7 +300,7 @@ function hook_user_logout($account) {
  * @param $account
  *   The user object on which the operation is being performed.
  * @param $view_mode
- *   View mode, e.g. 'full'.
+ *   Display mode, e.g. 'full' or 'teaser'.
  * @param $langcode
  *   The language code used for rendering.
  *
@@ -426,6 +425,28 @@ function hook_user_role_delete($role) {
   db_delete('my_module_table')
     ->condition('role', $role->name)
     ->execute();
+}
+
+/**
+ * Alter the requirement for rejecting weak passwords.
+ *
+ * Called by user_password_reject_weak() to allow modules to alter
+ * wheather to reject weak passwords. Can be used to only reject
+ * passwords for certain roles. For instance, administrators
+ * may be required to set strong passwords.
+ *
+ * @param bool $reject_weak
+ *   Reject or allow weak passwords.
+ *
+ * @param $account
+ *   The account object passed from user_password_reject_password().
+ *
+ * @see user_password_reject_password()
+ */
+function hook_user_password_reject_weak_alter(&$reject_weak, $account) {
+  if (in_array('administrator', $account->roles)) {
+    $reject_weak = TRUE;
+  }
 }
 
 /**

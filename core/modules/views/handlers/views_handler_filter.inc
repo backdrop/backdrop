@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * @todo.
@@ -373,7 +372,7 @@ class views_handler_filter extends views_handler {
     $grouped_description = t('Grouped filters allow a choice between predefined operator|value pairs.');
     $form['group_button']['radios'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['group_button']['radios']['radios'] = array(
       '#title' => t('Filter type to expose'),
@@ -428,7 +427,7 @@ class views_handler_filter extends views_handler {
     // so it can replace the button.
     $form['expose_button']['checkbox'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
       '#title' => t('Expose this filter to visitors, to allow them to change it'),
@@ -1387,10 +1386,10 @@ class views_handler_filter extends views_handler {
   /**
    * Can this filter be used in OR groups?
    *
-   * Some filters have complicated where clauses that cannot be easily used
-   * with OR groups. Some filters must also use HAVING which also makes
-   * them not groupable. These filters will end up in a special group
-   * if OR grouping is in use.
+   * Some filters have complicated where clauses that cannot be used with OR
+   * groups. Some filters must also use HAVING which also makes them not
+   * groupable. These filters will end up in a special group if OR grouping is
+   * in use.
    *
    * @return bool
    */

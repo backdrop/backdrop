@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This is the API for configuration storage.
@@ -33,8 +32,7 @@ function config($config_file, $type = 'active') {
   $loaded_configs = &$backdrop_static_fast['loaded_configs'];
 
   if (!isset($loaded_configs[$type][$config_file])) {
-    $directory = config_get_config_directory($type);
-    $storage = new ConfigFileStorage($directory);
+    $storage = config_get_config_storage($type);
     $config = new Config($config_file, $storage);
     $config->load();
     $cache = $config->get('_config_static');
@@ -47,6 +45,54 @@ function config($config_file, $type = 'active') {
   }
 
   return $config;
+}
+
+/**
+ * A shortcut function to delete a single value from a config file.
+ *
+ * Note that this function immediately writes the config file to disk and clears
+ * associated caches related to the new config. If deleting a number of options
+ * in the same configuration file, it is better to create a config object
+ * directly, delete all the necessary values, and then save the config file
+ * minus new options all at once.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to delete. The config option
+ *   may contain periods to indicate levels within the config file.
+ *
+ * @see config_set()
+ * @see config_get()
+ *
+ * @since 1.7.0
+ */
+function config_clear($config_file, $option) {
+  $config = config($config_file);
+  $config->clear($option);
+  $config->save();
+}
+
+/**
+ * A shortcut function to check if a value is overridden within a config file.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to check. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to check. The config option
+ *   may contain periods to indicate levels within the config file.
+ *
+ * @return bool
+ *   TRUE if the config option is overridden. FALSE otherwise.
+ *
+ * @see Config::isOverridden()
+ */
+function config_is_overridden($config_file, $option) {
+  return config($config_file)->isOverridden($option);
 }
 
 /**
@@ -64,10 +110,47 @@ function config($config_file, $type = 'active') {
  * @return mixed
  *   The contents of the requested config option. Returns NULL if the specified
  *   option was not found in the file at all.
+ *
+ * @see config_set()
+ * @see config_clear()
  */
 function config_get($config_file, $option = NULL) {
   $config = config($config_file);
   return $config->get($option);
+}
+
+/**
+ * A shortcut function to load and retrieve a single translated value from a config file.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to read. The config option
+ *   may contain periods to indicate levels within the config file. If NULL is
+ *   passed in, the entire contents of the config file will be returned.
+ * @param array $args
+ *   An associative array of replacements to make. Replacements are made in the
+ *   same way as the t() function.
+ * @param array $options
+ *   An associative array of additional options, with the following elements:
+ *   - 'langcode' (defaults to the current language): The language code to
+ *     translate to a language other than what is used to display the page.
+ *   - 'context' (defaults to the empty context): The context the source string
+ *     belongs to.
+ *
+ * @return string
+ *   The translated contents of the requested config option. Returns default if no
+ *   translation is found. Returns NULL if the specified option was not found in
+ *   the file at all or if not a string.
+ *
+ * @see t()
+ * @see config_get()
+ */
+function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
+  $config = config($config_file);
+  return $config->getTranslated($option, $args, $options);
 }
 
 /**
@@ -89,9 +172,8 @@ function config_get($config_file, $option = NULL) {
  * @param mixed $value
  *   The value to save into the config file.
  *
- * @return mixed
- *   The contents of the requested config option. Returns NULL if the specified
- *   option was not found in the file at all.
+ * @see config_get()
+ * @see config_clear()
  */
 function config_set($config_file, $option, $value) {
   $config = config($config_file);
@@ -99,6 +181,26 @@ function config_set($config_file, $option, $value) {
   $config->save();
 }
 
+/**
+ * A shortcut function to set and save multiple values in a config file.
+ *
+ * Note that this function immediately writes the config file to disk and clears
+ * associated caches related to the new config.  Unlike config_set() which would
+ * need to be called once per value, this function updates all the values and
+ * then saves the object.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param array $options
+ *   A keyed array of configuration option names mapping their values.
+ */
+function config_set_multiple($config_file, $options) {
+  $config = config($config_file);
+  $config->setMultiple($options);
+  $config->save();
+}
 
 /**
  * Returns the path of a configuration directory.
@@ -147,8 +249,7 @@ function config_get_config_directory($type = 'active') {
  *   An array containing matching configuration object names.
  */
 function config_get_names_with_prefix($prefix, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->listAll($prefix);
 }
 
@@ -164,8 +265,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  *   An array containing matching configuration objects.
  */
 function config_load_multiple($names, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->readMultiple($names);
 }
 
@@ -180,9 +280,9 @@ function config_load_multiple($names, $type = 'active') {
  */
 function config_install_default_config($module, $config_name = NULL) {
   $module_config_dir = backdrop_get_path('module', $module) . '/config';
-  $storage = new ConfigFileStorage($module_config_dir);
-  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
-    $files = glob($module_config_dir . '/' . '*.json');
+  if (is_dir($module_config_dir)) {
+    $storage = new ConfigFileStorage($module_config_dir);
+    $files = glob($module_config_dir . '/*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
       // file system in the Backdrop config directory. Note the config name
@@ -221,6 +321,21 @@ function config_uninstall_config($module, $config_name = NULL) {
       }
     }
   }
+}
+
+/**
+ * Get the storage object for the specified configuration type
+ *
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
+ *
+ * @return ConfigStorageInterface
+ *   A ConfigStorageInterface object managing the specified configuration type.
+ */
+function config_get_config_storage($type = 'active') {
+  $directory = config_get_config_directory($type);
+  return new ConfigFileStorage($directory);
 }
 
 /**
@@ -290,6 +405,13 @@ class Config {
   protected $data;
 
   /**
+   * Any overrides specified for this configuration object.
+   *
+   * @var array
+   */
+  protected $overrides;
+
+  /**
    * The state of validation on this object.
    *
    * This value is set to TRUE by Config::validate() and is reset to FALSE after
@@ -328,8 +450,11 @@ class Config {
    *   configuration data.
    */
   public function __construct($name, ConfigStorageInterface $storage) {
+    global $config;
+
     $this->name = $name;
     $this->storage = $storage;
+    $this->overrides = isset($config[$name]) ? $config[$name] : NULL;
   }
 
   /**
@@ -449,6 +574,19 @@ class Config {
   }
 
   /**
+   * Check if a particular config key is overridden.
+   *
+   * @param $key
+   *   A string that maps to a key within the configuration data.
+   *
+   * @return bool
+   *   TRUE if the $key is overridden. FALSE otherwise.
+   */
+  public function isOverridden($key) {
+    return $this->getOverride($key) !== NULL;
+  }
+
+  /**
    * Gets data from this configuration object.
    *
    * @param string $key
@@ -469,6 +607,32 @@ class Config {
    *   The data that was requested.
    */
   public function get($key = '') {
+    $value = $this->getOverride($key);
+    if (!isset($value)) {
+      $value = $this->getOriginal($key);
+    }
+    return $value;
+  }
+
+  /**
+   * Gets the current config value as specified in the written config storage.
+   *
+   * In most cases, Config::get() should be used to pull the config value and
+   * also include any overrides to apply. This method should be used only when
+   * explicitly wanting the currently saved value (as stored in a config file)
+   * rather than what may be specified in an override (as provided in
+   * settings.php).
+   *
+   * @param string $key
+   *   The string that maps to a key with the configuration data. See
+   *   Config::get() for full examples.
+   *
+   * @return mixed
+   *   The data that was requested.
+   *
+   * @see Config::get()
+   */
+  public function getOriginal($key = '') {
     if (!$this->isLoaded) {
       $this->load();
     }
@@ -496,6 +660,126 @@ class Config {
         return $key_exists ? $value : NULL;
       }
     }
+  }
+
+  /**
+   * Checks if a config value has an override specified.
+   *
+   * @param string $key
+   *   The string that maps to a key with the configuration data.
+   *
+   *   A key may be overridden at any level, for example if
+   *   $key === 'foo.bar.key1', the matched value could be provided by an override
+   *   from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of the
+   *   following would provide an overridden value for 'foo.bar.key1'.
+   *
+   *   @code
+   *   // Exact match.
+   *   $config['example.settings']['foo.bar.key1'] = 'value1';
+   *
+   *   // One level up.
+   *   $config['example.settings']['foo.bar'] = array(
+   *     'key1' => 'value1',
+   *   );
+   *
+   *   // A root level override.
+   *   $config['example.settings']['foo'] = array(
+   *     'bar' => array(
+   *       'key1' => 'value1',
+   *       'key2' => 'value2',
+   *     ),
+   *     'baz' => 'other value',
+   *   );
+   *   @endcode
+   *
+   * @see Config::get()
+   * @see settings.php
+   */
+  public function getOverride($key) {
+    $value = NULL;
+    $parts = explode('.', $key);
+    $popped_parts = array();
+    while ($parts) {
+      $assembled_key = implode('.', $parts);
+      if (isset($this->overrides[$assembled_key])) {
+        // An override is matched at some level.
+        $value = $this->overrides[$assembled_key];
+        // Drill down back into the override value to get the requested key.
+        foreach ($popped_parts as $popped_part) {
+          if (isset($value[$popped_part])) {
+            $value = $value[$popped_part];
+          }
+          else {
+            $value = NULL;
+            $popped_parts = array();
+          }
+        }
+      }
+      // If an override was not found at this key, go up a level in the key
+      // and continue until there are no more $parts left.
+      array_unshift($popped_parts, array_pop($parts));
+    }
+
+    return $value;
+  }
+
+  /**
+   * Gets translated data from this configuration object.
+   *
+   * @param string $key
+   *   A string that maps to a key within the configuration data.
+   *   For instance in the following configuration array:
+   *   @code
+   *   array(
+   *     'foo' => array(
+   *       'bar' => 'baz',
+   *     ),
+   *   );
+   *   @endcode
+   *   A key of 'foo.bar' would return the string 'baz'. However, a key of 'foo'
+   *   would return array('bar' => 'baz').
+   *   If no key is specified, then an empty string is returned.
+   *   If the key is not 'translatable' key then the original string is returned.
+   *   If the key's value is not a string then an empty string is returned.
+   *
+   * @param array $args
+   *   An associative array of replacements to make. Replacements are made in
+   *   the same way as the t() function.
+   * @param array $options
+   *   An associative array of additional options, with the following elements:
+   *   - 'langcode' (defaults to the current language): The language code to
+   *     translate to a language other than what is used to display the page.
+   *   - 'context' (defaults to the empty context): The context the source string
+   *     belongs to.
+   *
+   * @return string|NULL
+   *   The translated data that was requested.
+   *
+   * @see t()
+   * @see get()
+   */
+  public function getTranslated($key = '', $args = array(), $options = array()) {
+    if (empty($key)) {
+      return NULL;
+    }
+    $value = $this->get($key);
+    if (!is_string($value)) {
+      return NULL;
+    }
+    if (!is_array($this->get('_config_translatables'))) {
+      return $value;
+    }
+    // Ensure that it's a translatable key.
+    if (!in_array($key, $this->get('_config_translatables'))) {
+      return $value;
+    }
+    // Set a default context so we can differentiate between config strings.
+    // Rather than by using isset() or empty(), checking by key existence
+    // allows a NULL context to be used.
+    if (!array_key_exists('context', $options)) {
+      $options['context'] = 'config:' . $this->getName() . ':' . $key;
+    }
+    return t($value, $args, $options);
   }
 
   /**
@@ -543,11 +827,24 @@ class Config {
    *   Identifier to store value in configuration.
    * @param mixed $value
    *   Value to associate with identifier.
+   * @param bool $include_overridden_value
+   *   Set to TRUE to write the config value even if this key has been
+   *   overridden (usually through settings.php). Overridden keys are ignored
+   *   by default to prevent accidentally writing values that may be
+   *   environment-specific or contain sensitive information that should not
+   *   be written to config.
    *
    * @return Config
    *   The configuration object.
    */
-  public function set($key, $value) {
+  public function set($key, $value, $include_overridden_value = FALSE) {
+    // If setting a value that matches an override-provided one, don't actually
+    // write it to config.
+    $override_value = $this->getOverride($key);
+    if (isset($override_value) && ($override_value === $value) && !$include_overridden_value) {
+      return $this;
+    }
+
     if (!$this->isLoaded) {
       $this->load();
     }
@@ -572,6 +869,34 @@ class Config {
     $this->validated = FALSE;
 
     return $this;
+  }
+
+  /**
+   * Sets multiple values in this configuration object.
+   *
+   * @param array $options
+   *   A keyed array of identifiers mapping to the associated values.
+   *
+   * @return Config
+   *   The configuration object.
+   */
+  public function setMultiple($options) {
+    foreach ($options as $key => $value) {
+      $this->set($key, $value);
+    }
+    return $this;
+  }
+
+  /**
+   * Sets overrides for this configuration object.
+   *
+   * @param array $overrides
+   *   A list of overrides keyed by strings.
+   *
+   * @see Config::getOverride()
+   */
+  public function setOverrides($overrides) {
+    $this->overrides = $overrides;
   }
 
   /**
@@ -684,6 +1009,28 @@ class Config {
  * data from and to the storage.
  */
 interface ConfigStorageInterface {
+
+  /**
+   * Perform any steps needed to create and initialize the storage.  This may
+   * include creating directories or database tables, and initializing data
+   * structures.
+   *
+   * This function does not re-initialize already initialized storage.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage();
+
+  /**
+   * Check that the storage managed by this object is present and functional.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   */
+  public function isInitialized();
 
   /**
    * Returns whether a configuration object exists.
@@ -839,6 +1186,33 @@ interface ConfigStorageInterface {
    */
   public function deleteAll($prefix = '');
 
+  /**
+   * Import an archive of configuration files into the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the tar archive file to import.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function importArchive($file_uri);
+
+  /**
+   * Export an archive of configuration files from the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the tar archive file to create.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function exportArchive($file_uri);
 }
 
 /**
@@ -861,6 +1235,34 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function __construct($directory) {
     $this->directory = $directory;
+  }
+
+  /**
+   * Create a configuration directory, if it does not already exist, and ensure
+   * it is writable by the site. Additionally, protect it with a .htaccess file.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage() {
+    if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
+        '@directory' => $this->directory,
+      )));
+    }
+    // No need to create htaccess files if not running Apache.
+    if (backdrop_is_apache()) {
+      file_save_htaccess($this->directory);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isInitialized() {
+    return is_dir($this->directory);
   }
 
   /**
@@ -1018,5 +1420,38 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
 
     return $success;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function importArchive($file_uri) {
+    $realpath = backdrop_realpath($file_uri);
+
+    try {
+      $archiver = new ArchiverTar($realpath);
+      // Only extract JSON files, ignoring anything else in the archive.
+      $file_list = preg_grep('/.json$/', $archiver->listContents());
+      if ($file_list) {
+        $archiver->extract($this->directory, $file_list);
+      }
+    }
+    catch (\Exception $e) {
+      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      throw new ConfigStorageException($e->getMessage(), 0, $e);
+    }
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exportArchive($file_uri) {
+    $archiver = new ArchiverTar($file_uri);
+    $config_files = array();
+    foreach ($this->listAll() as $config_name) {
+      $config_files[] = $this->directory . '/' . $config_name . '.json';
+    }
+    $archiver->getArchive()->createModify($config_files, '', $this->directory);
   }
 }

@@ -1,0 +1,39 @@
+/**
+ * @file
+ * Caption styles.
+ *
+ * This file is typically added both to the front-end and to the CKEditor iframe
+ * when editing content. See basis.info "ckeditor_stylesheets" section.
+ */
+.caption {
+  display: table;
+  max-width: 100%;
+}
+.caption > * {
+  display: block;
+  max-width: 100%;
+  border: none;
+}
+.caption > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
+  margin: 0.5em 0 1em;
+  padding: 0.3em 0.5em;
+  border: none;
+  border-left: 0.25rem solid #bbbbbb;
+  background: none;
+}
+[dir="rtl"] .caption > figcaption {
+  border-left: none;
+  border-right: 0.25rem solid #bbbbbb;
+}
+
+img.align-left {
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+img.align-right {
+  margin-left: 2em;
+  margin-bottom: 1em;
+}

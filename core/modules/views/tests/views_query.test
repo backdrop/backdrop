@@ -147,6 +147,24 @@ abstract class ViewsSqlTest extends ViewsTestCase {
   }
 
   /**
+   * Create a term.
+   *
+   * @param int $vocabulary_name
+   *   The vocabulary name that the term is to be added to.
+   *
+   * @return object
+   *   A full term object with a random name.
+   */
+  protected function viewsCreateTerm($vocabulary_name) {
+    $term = new TaxonomyTerm();
+    $term->name = $this->randomName();
+    $term->description = $this->randomName();
+    $term->vocabulary = $vocabulary_name;
+    $term->save();
+    return $term;
+  }
+
+  /**
    * This function allows to enable views ui from a higher class which can't change the setup function anymore.
    *
    * @TODO

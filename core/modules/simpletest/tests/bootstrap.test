@@ -63,6 +63,15 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
       'Proxy forwarding with trusted proxy got forwarded IP address.'
     );
 
+    // Proxy forwarding on and proxy address trusted and visiting from proxy.
+    $_SERVER['REMOTE_ADDR'] = $this->proxy_ip;
+    $_SERVER['HTTP_X_FORWARDED_FOR'] = $this->proxy_ip;
+    backdrop_static_reset('ip_address');
+    $this->assertTrue(
+      ip_address() == $this->proxy_ip,
+      'Visiting from trusted proxy got proxy IP address.'
+    );
+
     // Multi-tier architecture with comma separated values in header.
     $_SERVER['REMOTE_ADDR'] = $this->proxy_ip;
     $_SERVER['HTTP_X_FORWARDED_FOR'] = implode(', ', array($this->untrusted_ip, $this->forwarded_ip, $this->proxy2_ip));
@@ -161,7 +170,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
@@ -171,7 +180,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header set to keep alive when getting a cached page.');
 
@@ -219,8 +228,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age (5). Fresh copy expected.
-    sleep(6);
+    // Wait 5 seconds to wait past the maximum age (6). Fresh copy expected.
+    sleep(5);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);
@@ -267,7 +276,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->backdropLogout();
 
@@ -337,7 +346,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), 'A Content-Encoding header was not sent.');
-    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
     $this->assertRaw('</html>', 'Page was not compressed.');
 
     // Disable compression mode.
@@ -473,7 +482,7 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
 
     // Retrieving the location of a profile. Profiles are a special case with
     // a fixed location and naming.
-    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'profiles/standard/standard.profile', t('Retrieve install profile location.'));
+    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'core/profiles/standard/standard.profile', t('Retrieve install profile location.'));
 
     // When a file is not found in the database cache, backdrop_get_filename()
     // searches several locations on the filesystem, including the core/
@@ -596,9 +605,14 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Test that settings.php variables can be overridden by the server.
    */
   function testBackdropSettingsOverride() {
-    // This test only works on Travis CI through the SetEnv call in
-    // core/misc/travis-ci/vhost.conf. See backdrop_settings_initialize().
+    // This test only runs when the "BACKDROP_SETTINGS" environment variable is
+    // set. This usually is done through a Apache VirtualHost setting.
+    // See backdrop_settings_initialize().
+    $raw_settings = array();
     if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+      $raw_settings = json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
+    }
+    if (isset($raw_settings['test_setting'])) {
       $this->assertEqual(settings_get('test_setting'), 'foo', 'Custom setting set through the server environment variables in BACKDROP_SETTINGS.');
 
       $test_database_array = array(
@@ -618,16 +632,12 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Tests that the backdrop_check_memory_limit() function works as expected.
    */
   function testCheckMemoryLimit() {
-    $memory_limit = ini_get('memory_limit');
     // Test that a very reasonable amount of memory is available.
     $this->assertTrue(backdrop_check_memory_limit('30MB'), '30MB of memory tested available.');
 
-    // Get the available memory and multiply it by two to make it unreasonably
-    // high.
-    $twice_avail_memory = ($memory_limit * 2) . 'MB';
-
+    // Test an unlimited memory limit.
     // The function should always return true if the memory limit is set to -1.
-    $this->assertTrue(backdrop_check_memory_limit($twice_avail_memory, -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
+    $this->assertTrue(backdrop_check_memory_limit('9999999999YB', -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
 
     // Test that even though we have 30MB of memory available - the function
     // returns FALSE when given an upper limit for how much memory can be used.

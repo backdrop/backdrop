@@ -37,6 +37,7 @@
 .header-site-name-wrapper {
   margin: 0;
   padding: 0;
+  overflow-wrap: break-word;
 }
 
 @media (min-width: 34em) {
@@ -145,6 +146,13 @@
 .header-menu a {
   display: block;
   padding: 1rem 1.25rem;
+}
+.l-header .menu-toggle-button {
+  margin-left: .9375rem;
+  padding: .5rem 0;
+}
+.l-header .menu-toggle-button-text {
+  color: #bcbbbb;
 }
 
 @media (min-width: 34em) {

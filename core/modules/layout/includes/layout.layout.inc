@@ -6,6 +6,10 @@
 
 /**
  * Implements hook_layout_context_info().
+ *
+ * @see node_layout_context_info().
+ * @see user_layout_context_info().
+ * @see taxonomy_layout_context_info().
  */
 function layout_layout_context_info() {
   $info['node'] = array(
@@ -44,6 +48,16 @@ function layout_layout_context_info() {
     ),
     'path placeholder' => '%term',
     'load callback' => 'taxonomy_term_load',
+  );
+  $info['file'] = array(
+    'title' => t('File'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'file/%file',
+      'file/%file/view',
+    ),
+    'path placeholder' => '%file',
+    'load callback' => 'file_load',
   );
   $info['overrides_path'] = array(
     'title' => t('Overrides path'),
@@ -154,6 +168,9 @@ function layout_layout_renderer_info() {
   );
   $info['standard'] = array(
     'class' => 'LayoutRendererStandard',
+  );
+  $info['flexible'] = array(
+    'class' => 'LayoutRendererFlexible',
   );
   return $info;
 }

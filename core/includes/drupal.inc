@@ -8,9 +8,9 @@
  * @defgroup drupal_compatibility Drupal compatibility layer.
  * @{
  * These functions and classes are wrappers around Backdrop functions that allow
- * for Drupal 7 modules to work with Backdrop easily. All of these functions
- * are made available if the "backdrop_drupal_compatibility" option is enabled
- * in your site's settings.php file.
+ * for Drupal 7 modules to work with Backdrop. All of these functions are made
+ * available if the "backdrop_drupal_compatibility" option is enabled in your
+ * site's settings.php file.
  */
 
 /**
@@ -2376,7 +2376,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @deprecated since 1.0.0
  * @see backdrop_find_theme_templates()
@@ -2490,6 +2490,36 @@ function drupal_var_export($var, $prefix = '') {
 }
 
 /**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer_positive() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_number() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Drupal-compatible wrapper for clearing caches.
  *
  * Backdrop no longer needs to "rebuild" its node types, which previously
@@ -2501,69 +2531,6 @@ function drupal_var_export($var, $prefix = '') {
 function node_types_rebuild() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   node_type_cache_reset();
-}
-
-/**
- * Sets up a form to save information automatically.
- *
- * This function adds a submit handler and a submit button to a form array. The
- * submit function saves all the data in the form, using variable_set(), to
- * variables named the same as the keys in the form array. Note that this means
- * you should normally prefix your form array keys with your module name, so
- * that they are unique when passed into variable_set().
- *
- * If you need to manipulate the data in a custom manner, you can either put
- * your own submission handler in the form array before calling this function,
- * or just use your own submission handler instead of calling this function.
- *
- * This function is deprecated in Backdrop because it saves to the old
- * "variables" table. In Backdrop sites, developers are encouraged to save
- * configuration using the config system. See config(), config_set(), and
- * config_get() for information on saving into configuration.
- *
- * @deprecated since 1.0.0
- */
-function system_settings_form($form) {
-  watchdog_deprecated_function('drupal', __FUNCTION__);
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
-
-  if (!empty($_POST) && form_get_errors()) {
-    backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
-  }
-  $form['#submit'][] = 'system_settings_form_submit';
-  if (!isset($form['#theme'])) {
-    $form['#theme'] = 'system_settings_form';
-  }
-  return $form;
-}
-
-/**
- * Form submission handler for system_settings_form().
- *
- * If you want node type configure style handling of your checkboxes,
- * add an array_filter value to your form.
- *
- * Use of this function is discouraged because it is not compatible with the
- * configuration system. See config(), config_set(), and config_get() for
- * alternatives. Rather than reusing this submit handler throughout settings
- * forms, developers should create separate submit handlers for each form
- * to save the settings into various configuration files as needed.
- *
- * @deprecated since 1.0.0
- */
-function system_settings_form_submit($form, &$form_state) {
-  watchdog_deprecated_function('drupal', __FUNCTION__);
-  form_state_values_clean($form_state);
-
-  foreach ($form_state['values'] as $key => $value) {
-    if (is_array($value) && isset($form_state['values']['array_filter'])) {
-      $value = array_keys(array_filter($value));
-    }
-    variable_set($key, $value);
-  }
-
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -2599,6 +2566,17 @@ function system_get_date_types($type = NULL) {
   }
 
   return $formats;
+}
+
+/**
+ * Drupal-compatible wrapper for creating safe CSS identifiers.
+ *
+ * @deprecated since 1.0.0
+ * @since 1.13.1 Function added.
+ */
+function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  backdrop_clean_css_identifier($identifier, $filter);
 }
 
 /**

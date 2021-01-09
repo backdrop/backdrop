@@ -106,6 +106,15 @@ class Block extends LayoutHandler {
   }
 
   /**
+   * Do any processing prior to getTitle() and getContent() being called.
+   *
+   * The contexts will have been set on the object at this point, just prior to
+   * the block being rendered. This method is useful to save duplicate
+   * processing if both getTitle() and getContent() need to use the same data.
+   */
+  function prepare() {}
+
+  /**
    * Return the title of a block as configured in the layout.
    *
    * @return mixed
@@ -122,11 +131,15 @@ class Block extends LayoutHandler {
    * Return an administrative title that will always have a value.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     $title = $this->getTitle();
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
       $info = $this->getBlockInfo();
-      $title = $info['info'];
+      $title = check_plain($info['info']);
     }
     return $title;
   }
@@ -144,10 +157,14 @@ class Block extends LayoutHandler {
    * Return a preview for this block.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     $info = $this->getBlockInfo();
     $preview = '';
     if (isset($info['description'])) {
-      $preview .= '<p>' . $info['description'] . '</p>';
+      $preview .= '<p>' . filter_xss($info['description']) . '</p>';
     }
     $preview .= $this->getAdminConditionsPreview();
 
@@ -233,6 +250,30 @@ class Block extends LayoutHandler {
       ),
       '#maxlength' => 255,
     );
+    $actions_weight = $form['actions']['#weight'];
+    $form['admin_label'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Admin label'),
+      '#tree' => FALSE,
+      '#collapsed' => empty($this->settings['admin_label']),
+      '#collapsible' => TRUE,
+      '#weight' => $actions_weight - 1,
+      '#access' => $this->module != 'block',
+    );
+    $form['admin_label']['admin_label'] = array(
+      '#type' => 'textfield',
+      '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
+      '#title' => t('Admin label'),
+      '#description' => t('Used to identify the block on layout pages.'),
+      '#maxlength' => 255,
+    );
+    $form['admin_label']['admin_description'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Admin description'),
+      '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
+      '#maxlength' => 128,
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+    );
   }
 
   /**
@@ -248,6 +289,8 @@ class Block extends LayoutHandler {
   function formSubmit($form, &$form_state) {
     $this->settings['title_display'] = $form_state['values']['title_display'];
     $this->settings['title'] = $form_state['values']['title'];
+    $this->settings['admin_label'] = $form_state['values']['admin_label'];
+    $this->settings['admin_description'] = $form_state['values']['admin_description'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {
       $this->settings['contexts'] = $form_state['values']['contexts'];

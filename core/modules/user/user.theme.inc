@@ -239,7 +239,7 @@ function template_preprocess_user_picture(&$variables) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
       else {
-        $variables['user_picture'] = theme('image', array('uri' => $filepath, 'alt' => $alt, 'title' => $alt));
+        $variables['user_picture'] = theme('image', array('path' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
       if (!empty($account->uid) && user_access('access user profiles')) {
         $attributes = array('attributes' => array('title' => t('View user profile.')), 'html' => TRUE);
@@ -309,6 +309,8 @@ function template_preprocess_username(&$variables) {
  * @see user-profile.tpl.php
  */
 function template_preprocess_user_profile(&$variables) {
+  $view_mode = $variables['elements']['#view_mode'];
+  $bundle = $variables['elements']['#bundle'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.

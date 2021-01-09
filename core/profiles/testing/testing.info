@@ -1,0 +1,8 @@
+name = Testing
+description = Minimal profile for running tests. Includes absolutely required modules only.
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = profile
+hidden = TRUE
+
+dependencies[] = layout

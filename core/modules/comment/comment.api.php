@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Comment module.
@@ -65,13 +64,13 @@ function hook_comment_load($comments) {
  * @param $comment
  *   Passes in the comment the action is being performed on.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
- *   The language code used for rendering.
+ *   (optional) The language code used for rendering.
  *
  * @see hook_entity_view()
  */
-function hook_comment_view($comment, $view_mode, $langcode) {
+function hook_comment_view($comment, $view_mode = 'full', $langcode = NULL) {
   // how old is the comment
   $comment->time_ago = time() - $comment->changed;
 }

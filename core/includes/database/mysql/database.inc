@@ -11,7 +11,6 @@
  */
 
 class DatabaseConnection_mysql extends DatabaseConnection {
-
   /**
    * Flag to indicate if the cleanup function in __destruct() should run.
    *
@@ -53,7 +52,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // set when escaping. This has security implications. See
     // https://www.drupal.org/node/1201452 for further discussion.
     $dsn .= ';charset=' . $charset;
-    $dsn .= ';dbname=' . $connection_options['database'];
+    if (!empty($connection_options['database'])) {
+      $dsn .= ';dbname=' . $connection_options['database'];
+    }
     // Allow PDO options to be overridden.
     $connection_options += array(
       'pdo' => array(),
@@ -95,12 +96,86 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       'init_commands' => array(),
     );
     $connection_options['init_commands'] += array(
-      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER'",
+      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
       $this->exec($sql);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setPrefix($prefix) {
+    if (is_array($prefix)) {
+      $this->prefixes = $prefix + array('default' => '');
+    }
+    else {
+      $this->prefixes = array('default' => $prefix);
+    }
+
+    // This differs from the parent class implementation in that all tables
+    // are escaped with back-ticks. First, do table-specific replacements.
+    $this->prefixSearch = array();
+    $this->prefixReplace = array();
+    foreach ($this->prefixes as $key => $val) {
+      if ($key != 'default') {
+        $this->prefixSearch[] = '{' . $key . '}';
+        // Add backticks around the entire table name to avoid MySQL keywords,
+        // but also add backticks within the prefix value, in the event
+        // different database names are used as a prefix.
+        $this->prefixReplace[] = '`' . str_replace('.', '`.`', $val) . $key . '`';
+      }
+    }
+    // Then replace remaining tables with the default prefix.
+    $this->prefixSearch[] = '{';
+    $this->prefixReplace[] = '`' . $this->prefixes['default'];
+    $this->prefixSearch[] = '}';
+    $this->prefixReplace[] = '`';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeField($field) {
+    $field = parent::escapeField($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeAlias($field) {
+    $field = parent::escapeAlias($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * Quotes an identifier with backticks for MySQL 8 compatibility.
+   *
+   * Not all identifiers need quotes, only keywords, but we add them on all
+   * fields and table names for consistency and to ease compatibility in the
+   * future.
+   *
+   * @param string $identifier
+   *   The field to check.
+   *
+   * @return string
+   *   The identifier, quoted with backticks.
+   */
+  private function quoteIdentifier($identifier) {
+    // Some identifiers are empty, such as when doing expressions.
+    if (strlen($identifier) === 0) {
+      return $identifier;
+    }
+    // Identifiers that have both a table and field should quote both.
+    elseif (strpos($identifier, '.') !== FALSE) {
+      list($table, $identifier) = explode('.', $identifier, 2);
+      return "`$table`" . '.' . "`$identifier`";
+    }
+    // Otherwise quote just the field name.
+    return "`$identifier`";
   }
 
   public function __destruct() {
@@ -125,6 +200,25 @@ class DatabaseConnection_mysql extends DatabaseConnection {
 
   public function databaseType() {
     return 'mysql';
+  }
+
+  /**
+   * Overrides DatabaseConnection::createDatabase().
+   *
+   * @param string $database
+   *   The name of the database to create.
+   *
+   * @throws DatabaseNotFoundException
+   */
+  public function createDatabase($database) {
+    try {
+      // Create the database and set it as active.
+      $this->exec("CREATE DATABASE IF NOT EXISTS $database");
+      $this->exec("USE $database");
+    }
+    catch (\Exception $e) {
+      throw new DatabaseNotFoundException($e->getMessage());
+    }
   }
 
   public function mapConditionOperator($operator) {
@@ -256,7 +350,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     catch (Exception $e) {
       return FALSE;
     }
-    $this->query("DROP TABLE {backdrop_utf8mb4_test}");
+    $this->query("DROP TABLE IF EXISTS {backdrop_utf8mb4_test}");
     return TRUE;
   }
 }

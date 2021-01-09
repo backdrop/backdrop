@@ -5,9 +5,21 @@
  */
 
 /**
- * Implements hook_preprocess_page().
+ * Implements hook_css_alter().
+ */
+function basis_css_alter(&$css) {
+  // Remove Basis' `/css/component/menu-dropdown.css` if using a custom
+  // breakpoint.
+  if (config_get('menu.settings', 'menu_breakpoint') == 'custom') {
+    $path = backdrop_get_path('theme', 'basis');
+    unset($css[$path . '/css/component/menu-dropdown.css']);
+  }
+}
+
+/**
+ * Prepares variables for page templates.
  *
- * @see maintenance_page.tpl.php
+ * @see page.tpl.php
  */
 function basis_preprocess_page(&$variables) {
   $node = menu_get_object();
@@ -25,10 +37,34 @@ function basis_preprocess_page(&$variables) {
   if ($view) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
+
+  // Add breakpoint-specific CSS for dropdown menus.
+  $config = config('menu.settings');
+  if ($config->get('menu_breakpoint') == 'custom') {
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+    ));
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint-queries.css', array(
+      'group' => CSS_THEME,
+      'every_page' => TRUE,
+      'media' => 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')',
+    ));
+  }
 }
 
 /**
- * Implements template_preprocess_page().
+ * Prepares variables for maintenance page templates.
+ *
+ * @see maintenance-page.tpl.php
+ */
+function basis_preprocess_maintenance_page(&$variables) {
+  $css_path = backdrop_get_path('theme', 'basis') . '/css/component/maintenance.css';
+  backdrop_add_css($css_path);
+}
+
+/**
+ * Prepares variables for layout templates.
  *
  * @see layout.tpl.php
  */
@@ -44,36 +80,43 @@ function basis_preprocess_layout(&$variables) {
 }
 
 /**
- * Implements template_preprocess_header().
+ * Prepares variables for node templates.
+ *
+ * @see node.tpl.php
+ */
+function basis_preprocess_node(&$variables) {
+  if ($variables['status'] == NODE_NOT_PUBLISHED) {
+    $name = node_type_get_name($variables['type']);
+    $variables['title_suffix']['unpublished_indicator'] = array(
+      '#type' => 'markup',
+      '#markup' => '<div class="unpublished-indicator">' . t('This @type is unpublished.', array('@type' => $name)) . '</div>',
+    );
+  }
+}
+
+/**
+ * Prepares variables for header templates.
  *
  * @see header.tpl.php
  */
 function basis_preprocess_header(&$variables) {
   $logo = $variables['logo'];
+  $logo_attributes = $variables['logo_attributes'];
 
   // Add classes and height/width to logo.
   if ($logo) {
-    $logo_attributes = array();
     $logo_wrapper_classes = array();
     $logo_wrapper_classes[] = 'header-logo-wrapper';
-    $logo_size = getimagesize($logo);
-    if (!empty($logo_size)) {
-      if ($logo_size[0] < $logo_size[1]) {
-        $logo_wrapper_classes[] = 'header-logo-tall';
-      }
-      $logo_attributes['width'] = $logo_size[0];
-      $logo_attributes['height'] = $logo_size[1];
+    if ($logo_attributes['width'] <= $logo_attributes['height']) {
+      $logo_wrapper_classes[] = 'header-logo-tall';
     }
 
     $variables['logo_wrapper_classes'] = $logo_wrapper_classes;
-    $variables['logo_attributes'] = $logo_attributes;
   }
 }
 
 /**
- * Overrides theme_breadcrumb().
- *
- * Removes &raquo; from markup.
+ * Overrides theme_breadcrumb(). Removes &raquo; from markup.
  *
  * @see theme_breadcrumb().
  */

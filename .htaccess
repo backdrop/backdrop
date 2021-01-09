@@ -3,7 +3,7 @@
 #
 
 # Protect files and directories from prying eyes.
-<FilesMatch "\.(engine|inc|info|install|make|module|profile|test|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template)$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save)$">  
+<FilesMatch "\.(engine|inc|info|install|make|module|profile|test|po|sh|.*sql|theme|tpl(\.php)?|xtmpl)(~|\.sw[op]|\.bak|\.orig|\.save)?$|^(\..*|Entries.*|Repository|Root|Tag|Template)$|^#.*#$|\.php(~|\.sw[op]|\.bak|\.orig\.save)$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>
@@ -15,15 +15,20 @@
 # Don't show directory listings for URLs which map to a directory.
 Options -Indexes
 
-# Make Backdrop handle any 404 errors.
-ErrorDocument 404 /index.php
-
 # Set the default handler.
 DirectoryIndex index.php index.html index.htm
 
 # Override PHP settings that cannot be changed at runtime. See
 # settings.php and backdrop_environment_initialize() in includes/bootstrap.inc
 # for settings that can be changed at runtime.
+<IfModule mod_php7.c>
+  php_flag session.auto_start               off
+  php_value mbstring.http_input             pass
+  php_value mbstring.http_output            pass
+  php_value max_input_vars                  10007
+  php_flag mbstring.encoding_translation    off
+</IfModule>
+# Same settings again for PHP 5 versions.
 <IfModule mod_php5.c>
   php_flag session.auto_start               off
   php_value mbstring.http_input             pass
@@ -54,13 +59,6 @@ DirectoryIndex index.php index.html index.htm
 <IfModule mod_rewrite.c>
   RewriteEngine on
 
-  # Set "protossl" to "s" if we were accessed via https://.  This is used later
-  # if you enable "www." stripping or enforcement, in order to ensure that
-  # you don't bounce between http and https.
-  RewriteRule ^ - [E=protossl]
-  RewriteCond %{HTTPS} on
-  RewriteRule ^ - [E=protossl:s]
-
   # Make sure Authorization HTTP header is available to PHP
   # even when running as CGI or FastCGI.
   RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -71,6 +69,8 @@ DirectoryIndex index.php index.html index.htm
   # as the control files used by CVS, are protected by the FilesMatch directive
   # above.
   #
+  # The ".well-known" directory used by Let's Encrypt is access white-listed.
+  #
   # NOTE: This only works when mod_rewrite is loaded. Without mod_rewrite, it is
   # not possible to block access to entire directories from .htaccess because
   # <DirectoryMatch> is not allowed here.
@@ -78,7 +78,13 @@ DirectoryIndex index.php index.html index.htm
   # If you do not have mod_rewrite installed, you should remove these
   # directories from your webroot or otherwise protect them from being
   # downloaded.
+  RewriteCond %{REQUEST_URI} !^/\.well-known
   RewriteRule "(^|/)\." - [F]
+
+  # To redirect all users to access the site using a SSL/https certificate,
+  # uncomment the following:
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
   # If your site can be accessed both with and without the 'www.' prefix, you
   # can use one of the following settings to redirect users to your preferred
@@ -86,16 +92,15 @@ DirectoryIndex index.php index.html index.htm
   #
   # To redirect all users to access the site WITH the 'www.' prefix,
   # (http://example.com/... will be redirected to http://www.example.com/...)
-  # uncomment the following:
-  # RewriteCond %{HTTP_HOST} .
-  # RewriteCond %{HTTP_HOST} !^www\. [NC]
-  # RewriteRule ^ http%{ENV:protossl}://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # adapt and uncomment the following:
+  # RewriteCond %{HTTP_HOST} ^example\.com$ [NC]
+  # RewriteRule ^(.*)$ http://www.example.com/$1 [L,R=301]
   #
   # To redirect all users to access the site WITHOUT the 'www.' prefix,
   # (http://www.example.com/... will be redirected to http://example.com/...)
-  # uncomment the following:
-  # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-  # RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]
+  # uncomment and adapt the following:
+  # RewriteCond %{HTTP_HOST} ^www\.example\.com$ [NC]
+  # RewriteRule ^(.*)$ http://example.com/$1 [L,R=301]
 
   # Modify the RewriteBase if you are using Backdrop in a subdirectory or in a
   # VirtualDocumentRoot and the rewrite rules are not working properly.

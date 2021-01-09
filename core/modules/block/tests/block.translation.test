@@ -1,0 +1,164 @@
+<?php
+/**
+ * @file
+ * Tests for translation functionality within block.module.
+ */
+
+class BlockTranslationTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    $modules = array(
+      'layout',
+      'block',
+      'block_test',
+      'language',
+      'locale',
+    );
+    parent::setUp($modules);
+
+    // Create a Raw HTML (full_html) text format with no filters.
+    $full_html_format = array(
+      'format' => 'full_html',
+      'name' => 'Raw HTML',
+      'weight' => 1,
+      'editor' => NULL,
+      'filters' => array(),
+    );
+    $full_html_format = (object) $full_html_format;
+    filter_format_save($full_html_format);
+
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
+    $permissions = array(
+      'administer blocks',
+      filter_permission_name($full_html_format),
+      'access administration pages',
+      'administer layouts',
+      'administer languages',
+    );
+    $this->checkPermissions($permissions, TRUE);
+    $this->admin_user = $this->backdropCreateUser($permissions);
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test creating custom block, translate it, and then deleting it.
+   */
+  function testTranslateCustomBlock() {
+
+    // Check if language module was enabled.
+    $this->assertTrue(module_exists('language'), 'Language module was enabled successfully.');
+
+    $languages = array(
+      'it' => 'italian',
+      'fr' => 'french',
+      'es' => 'spanish',
+      'fi' => 'finnish',
+      'nl' => 'dutch',
+    );
+
+    // Installing new languages.
+    foreach ($languages as $key => $value) {
+      $this->addLanguage($key);
+    }
+
+    backdrop_static_reset('language_list');
+
+    // Confirm that the add block link appears on block overview pages.
+    $this->backdropGet('admin/structure/block');
+    $this->assertRaw(l('Add custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
+
+    // Load the form and check that file uploads are enabled on the body field.
+    $this->backdropGet('admin/structure/block/add');
+
+    // Add a new custom block by filling out the input form on the admin/structure/block/add page.
+    $block_delta = strtolower($this->randomName(8));
+    $custom_block = array();
+    $custom_block['info'] = $this->randomName(8);
+    $custom_block['delta'] = $block_delta;
+    $custom_block['title'] = 'Testblock created in default language';
+    $custom_block['body[value]'] = $this->randomName(32);
+    $this->backdropPost(NULL, $custom_block, t('Save block'));
+
+    // Confirm that the custom block has been created, and then find its config file
+    $this->assertText(t('The block has been created.'), 'Custom block successfully created.');
+
+    // Check to see if the custom block was created by checking that it has a configuration file.
+    $custom_block = config_get('block.custom.' . $block_delta);
+    $this->assertNotNull($custom_block, 'Custom block found in configuration.');
+
+    // There should not yet be a translation link.
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/configure', 0, 'Custom block configure link found.');
+    $this->assertNoLinkByHref('admin/structure/block/manage/' . $block_delta . '/translation', 'Custom block translate link not found when translation disabled.');
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translation');
+    $this->assertResponse(403, 'Access not allowed to translation page when translation disabled.');
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translate/fr');
+    $this->assertResponse(403, 'Access not allowed to individual translate page when translation disabled.');
+
+    // Enable language translation by setting a source language.
+    $edit = array(
+      'default_langcode' => language_default()->langcode,
+    );
+    $this->backdropPost('admin/structure/block/manage/' . $block_delta, $edit, t('Save block'));
+
+    // Verify presence of configure and translate links for custom block.
+    $this->backdropGet('admin/structure/block');
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/configure', 0, 'Custom block configure link found.');
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/translation', 0, 'Custom block translate link found.');
+
+    // Test translation form.
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translation');
+
+    // Check if the translation links are set.
+    foreach ($languages as $key => $value) {
+      $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/translate/' . $key, 0, 'Found custom block translate link for ' . $value . '.');
+    }
+
+    // Translate the blocks.
+    foreach ($languages as $key => $value) {
+      $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translate/' . $key);
+      // Translate custom block by filling out the input.
+      $translated_block = array();
+      $translated_block['info'] = $this->randomName(8);
+      $translated_block['title'] = 'Testblock translated to ' . $value;
+      $translated_block['body[value]'] = $this->randomName(32);
+      $this->backdropPost(NULL, $translated_block, t('Save block'));
+    }
+
+    // Set the created custom block to a specific region.
+    $layout = layout_load('default');
+    $layout->addBlock('block', $block_delta, 'sidebar');
+    $layout->save();
+
+    // Confirm that the custom block is being displayed in the default language.
+    $this->backdropGet('user');
+    $this->assertText('Testblock created in default language', 'Custom block successfully being displayed.');
+
+    // Check if the translated blocks appear.
+    foreach ($languages as $key => $value) {
+      // Set the default language.
+      // Get the system config.
+      $core_config = config('system.core');
+      $core_config->set('language_default', $key);
+      $core_config->save();
+
+      $this->resetAll();
+
+      // Confirm that the custom block is being displayed in italy.
+      $this->backdropGet('user');
+      $this->assertText('Testblock translated to ' . $value, 'Translated block successfully being displayed in ' . $value . '.');
+    }
+  }
+
+  private function addLanguage($language_code) {
+    if (strpos($this->backdropGetContent(), 'enabled[' . $language_code . ']') === FALSE) {
+      // Doesn't have language installed so add it.
+      $edit = array(
+        'predefined_langcode' => $language_code,
+      );
+      $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
+    }
+  }
+}

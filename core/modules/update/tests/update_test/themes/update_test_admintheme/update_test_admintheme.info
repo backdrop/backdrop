@@ -1,0 +1,6 @@
+name = Update test admin theme
+description = Test theme which is used as admin theme.
+type = theme
+version = BACKDROP_VERSION
+backdrop = 1.x
+hidden = TRUE

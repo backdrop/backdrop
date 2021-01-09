@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop database update API.
@@ -11,10 +10,10 @@
 /**
  * Minimum schema version of Drupal 7 required for upgrade to Backdrop.
  *
- * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running
- * the most recent version, or the upgrade could fail. We can't easily
- * check the Drupal 7 version once the update process has begun, so instead
- * we check the schema version of system.module in the system table.
+ * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running the most
+ * recent version, or the upgrade could fail. We can't check the Drupal 7
+ * version  once the update process has begun, so instead we check the schema
+ * version of system.module in the system table.
  */
 define('REQUIRED_D7_SCHEMA_VERSION', '7069');
 
@@ -87,9 +86,18 @@ function update_prepare_bootstrap() {
 
   // Check whether settings.php needs to be rewritten.
   $settings_exist = !empty($GLOBALS['config_directories']);
+  $active_config = config_get_config_storage('active');
+  $staging_config = config_get_config_storage('staging');
 
-  if (!$settings_exist || !is_dir(config_get_config_directory('active')) || !is_dir(config_get_config_directory('staging'))) {
+  if (!$settings_exist || !$active_config->isInitialized()) {
     backdrop_install_config_directories();
+  }
+
+  // Check for a staging directory.
+  if (!$staging_config->isInitialized()) {
+    $t = get_t();
+    backdrop_set_message($t('The staging configuration directory (%directory) could not be found. Please make sure it exists and is properly referenced in settings.php.',
+      array('%directory' => config_get_config_directory('staging'))), 'warning', FALSE);
   }
 
   // If any of the required settings needs to be written, then settings.php
@@ -323,8 +331,8 @@ function update_fix_requirements() {
     }
 
     // Empty a few basic caches.
-    db_query('TRUNCATE {cache}');
-    db_query('TRUNCATE {cache_bootstrap}');
+    db_truncate('cache')->execute();
+    db_truncate('cache_bootstrap')->execute();
 
     state_set('update_backdrop_requirements', TRUE);
   }
@@ -365,7 +373,7 @@ function update_module_enable(array $modules) {
 /**
  * Gets the value of a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_get().
+ * Use this during the upgrade path instead of variable_get().
  *
  * @param string $name
  *   The name of the variable.
@@ -385,7 +393,7 @@ function update_variable_get($name, $default = NULL) {
 /**
  * Sets a persistent variable during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_set().
+ * Use this during the upgrade path instead of variable_set().
  *
  * @param string $name
  *   The name of the variable.
@@ -406,7 +414,7 @@ function update_variable_set($name, $value) {
 /**
  * Delete a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_del().
+ * Use this during the upgrade path instead of variable_del().
  *
  * @param string $name
  *   The name of the variable to delete.
@@ -564,8 +572,8 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
-      // correct place. (The updates are already sorted, so we can simply base
-      // this on the first one we come across in the above foreach loop.)
+      // correct place. (The updates are already sorted, so we can base this on
+      // the first one we come across in the above foreach loop.)
       if (isset($start[$update['module']])) {
         backdrop_set_installed_schema_version($update['module'], $update['number'] - 1);
         unset($start[$update['module']]);

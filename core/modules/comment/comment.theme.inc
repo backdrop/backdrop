@@ -77,14 +77,16 @@ function theme_comment_post_forbidden($variables) {
  * @see comment.tpl.php
  */
 function template_preprocess_comment(&$variables) {
+  $view_mode = $variables['elements']['#view_mode'];
+  $bundle = $variables['elements']['#bundle'];
   $comment = $variables['elements']['#comment'];
   $node = $variables['elements']['#node'];
   $node_type = node_type_get_type($node->type);
+
   $variables['comment'] = $comment;
   $variables['node'] = $node;
   $variables['author'] = theme('username', array('account' => $comment));
   $variables['user_picture'] = '';
-
   $variables['created'] = format_date($comment->created);
   // Avoid calling format_date() twice on the same timestamp.
   if ($comment->changed == $comment->created) {
@@ -105,7 +107,7 @@ function template_preprocess_comment(&$variables) {
 
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
-  $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['author'], '!datetime' => $variables['created']));
+  $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
   // Preprocess fields.
   field_attach_preprocess('comment', $comment, $variables['elements'], $variables);

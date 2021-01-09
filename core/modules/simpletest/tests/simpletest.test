@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for simpletest.module.
@@ -197,7 +196,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
 
     $this->assertAssertion("Debug: 'Foo'", 'Debug', 'Fail', 'simpletest.test', 'SimpleTestFunctionalTest->stubTest()');
 
-    $this->assertEqual('6 passes, 5 fails, 2 exceptions, and 1 debug message', $this->childTestResults['summary'], 'Stub test summary is correct');
+    $this->assertTrue(strpos($this->childTestResults['summary'], '6 passes, 5 fails, 2 exceptions, and 1 debug message.') === 0, 'Stub test summary is correct');
 
     $this->test_ids[] = $test_id = $this->getTestIdFromResults();
     $this->assertTrue($test_id, 'Found test ID in results.');
@@ -208,7 +207,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    */
   function getTestIdFromResults() {
     foreach ($this->childTestResults['assertions'] as $assertion) {
-      if (preg_match('@^Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
+      if (preg_match('@^PASS: Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
         return $matches[1];
       }
     }
@@ -531,12 +530,12 @@ class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
    * Overrides checkRequirements().
    */
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     if (backdrop_valid_test_ua()) {
-      return array(
-        'Test is not allowed to run.'
-      );
+      $errors[] = 'Test is not allowed to run.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**

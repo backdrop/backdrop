@@ -12,7 +12,7 @@
 /**
  * Exposes "pseudo-field" components on fieldable entities.
  *
- * Field UI's "Manage fields" and "Manage display" pages let users re-order
+ * Field UI's "Manage fields" and "Manage displays" pages let users re-order
  * fields, but also non-field components. For nodes, these include the title,
  * path aliases, and other elements exposed by modules through hook_form() or
  * hook_form_alter().
@@ -213,8 +213,8 @@ function hook_field_info_alter(&$info) {
  *   An associative array with the following keys:
  *   - columns: An array of Schema API column specifications, keyed by column
  *     name. This specifies what comprises a value for a given field. For
- *     example, a value for a number field is simply 'value', while a value for
- *     a formatted text field is the combination of 'value' and 'format'. It is
+ *     example, a value for a number field is 'value', while a value for a
+ *     formatted text field is the combination of 'value' and 'format'. It is
  *     recommended to avoid having the column definitions depend on field
  *     settings when possible. No assumptions should be made on how storage
  *     engines internally use the original column name to structure their
@@ -850,11 +850,10 @@ function hook_field_widget_info_alter(&$info) {
  *   - #field_name: The name of the field.
  *   - #language: The language the field is being edited in.
  *   - #field_parents: The 'parents' space for the field in the form. Most
- *       widgets can simply overlook this property. This identifies the
- *       location where the field values are placed within
- *       $form_state['values'], and is used to access processing information
- *       for the field through the field_form_get_state() and
- *       field_form_set_state() functions.
+ *       widgets can overlook this property. This identifies the location where
+ *       the field values are placed within $form_state['values'], and is used
+ *       to access processing information for the field through the
+ *       field_form_get_state() and field_form_set_state() functions.
  *   - #columns: A list of field storage columns of the field.
  *   - #title: The sanitized element label for the field instance, ready for
  *     output.
@@ -1240,6 +1239,52 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
 }
 
 /**
+ * Alter the form elements for a formatter's settings.
+ *
+ * @param $context
+ *   An array of additional context for the settings form, containing:
+ *   - module: The module providing the formatter being configured.
+ *   - formatter: The definition array of the formatter being configured. Note
+ *     that this does not contain the machine name of the formatter. This can
+ *     be found in:
+ *     @code
+ *     $context['instance']['display'][$context['view_mode']]['type']
+ *     @endcode
+ *   - field: The field structure being configured.
+ *   - instance: The instance structure being configured.
+ *   - view_mode: The view mode being configured.
+ *   - form: The (entire) configuration form array, which will usually have no
+ *     use here.
+ *   - form_state: The form state of the (entire) configuration form.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings()
+ */
+function hook_field_formatter_settings_form_alter(&$settings_form, $context) {
+
+}
+
+/**
+ * Alter the short summary for the current formatter settings of an instance.
+ *
+ * @param $summary
+ *   A string containing a short summary of the formatter settings.
+ * @param $context
+ *   An array with additional context for the summary:
+ *   - field: The field structure.
+ *   - instance: The instance structure.
+ *   - view_mode: The view mode for which a settings summary is requested.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings_summary()
+ */
+function hook_field_formatter_settings_summary_alter(&$summary, array $context) {
+
+}
+
+/**
  * @} End of "defgroup field_formatter".
  */
 
@@ -1474,10 +1519,10 @@ function hook_field_attach_purge($entity_type, $entity, $field, $instance) {
  *   An associative array containing:
  *   - entity_type: The type of $entity; for example, 'node' or 'user'.
  *   - entity: The entity with fields to render.
- *   - view_mode: View mode; for example, 'full' or 'teaser'.
- *   - display: Either a view mode string or an array of display settings. If
- *     this hook is being invoked from field_attach_view(), the 'display'
- *     element is set to the view mode string. If this hook is being invoked
+ *   - view_mode: Display mode; for example, 'full' or 'teaser'.
+ *   - display: Either a display mode string or an array of display settings.
+ *     If this hook is being invoked from field_attach_view(), the 'display'
+ *     element is set to the display mode string. If this hook is being invoked
  *     from field_view_field(), this element is set to the $display argument
  *     and the view_mode element is set to '_custom'. See field_view_field()
  *     for more information on what its $display argument contains.
@@ -2288,12 +2333,12 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
  *   The bundle name.
  * @param $context
  *   The context for which the maximum weight is requested. Either 'form', or
- *   the name of a view mode.
+ *   the name of a display mode.
  * @return
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.
  *
- * @ingroup field_info 
+ * @ingroup field_info
  */
 function hook_field_info_max_weight($entity_type, $bundle, $context) {
   $weights = array();
@@ -2330,7 +2375,7 @@ function hook_field_info_max_weight($entity_type, $bundle, $context) {
  *   - field: The field being rendered.
  *   - instance: The instance being rendered.
  *   - entity: The entity being rendered.
- *   - view_mode: The view mode, e.g. 'full', 'teaser'...
+ *   - view_mode: The display mode, e.g. 'full', 'teaser'...
  *
  * @see hook_field_display_ENTITY_TYPE_alter()
  */
@@ -2365,7 +2410,7 @@ function hook_field_display_alter(&$display, $context) {
  *   - field: The field being rendered.
  *   - instance: The instance being rendered.
  *   - entity: The entity being rendered.
- *   - view_mode: The view mode, e.g. 'full', 'teaser'...
+ *   - view_mode: The display mode, e.g. 'full', 'teaser'...
  *
  * @see hook_field_display_alter()
  */
@@ -2394,7 +2439,7 @@ function hook_field_display_ENTITY_TYPE_alter(&$display, $context) {
  *   An associative array containing:
  *   - entity_type: The entity type; e.g., 'node' or 'user'.
  *   - bundle: The bundle name.
- *   - view_mode: The view mode, e.g. 'full', 'teaser'...
+ *   - view_mode: The display mode, e.g. 'full', 'teaser'...
  *
  * @ingroup field_types
  */
@@ -2634,7 +2679,7 @@ function hook_field_purge_instance($instance) {
  * @param $field
  *   The field being purged.
  *
- * @ingroup field_storage 
+ * @ingroup field_storage
  */
 function hook_field_storage_purge_field($field) {
   $table_name = _field_sql_storage_tablename($field);
@@ -2653,7 +2698,7 @@ function hook_field_storage_purge_field($field) {
  * @param $instance
  *   The instance being purged.
  *
- * @ingroup field_storage  
+ * @ingroup field_storage
  */
 function hook_field_storage_purge_field_instance($instance) {
   db_delete('my_module_field_instance_info')
@@ -2676,7 +2721,7 @@ function hook_field_storage_purge_field_instance($instance) {
  * @param $instance
  *   The deleted field instance whose data is being purged.
  *
- * @ingroup field_storage 
+ * @ingroup field_storage
  */
 function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -2717,7 +2762,7 @@ function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
  * @return
  *   TRUE if the operation is allowed, and FALSE if the operation is denied.
  *
- * @ingroup field_types 
+ * @ingroup field_types
  */
 function hook_field_access($op, $field, $entity_type, $entity, $account) {
   if ($field['field_name'] == 'field_of_interest' && $op == 'edit') {

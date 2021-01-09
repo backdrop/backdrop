@@ -95,10 +95,9 @@ class ThemeUnitTest extends BackdropWebTestCase {
     $this->backdropGet('theme-test/suggestion');
     $this->assertNoText('modules/system/css/system.css', "The theme's .info file is able to override a module CSS file from being added to the page.");
 
-    // Also test with aggregation enabled, simply ensuring no PHP errors are
-    // triggered during backdrop_build_css_cache() when a source file doesn't
-    // exist. Then allow remaining tests to continue with aggregation disabled
-    // by default.
+    // Also test with aggregation enabled, ensuring no PHP errors are triggered
+    // during backdrop_build_css_cache() when a source file doesn't exist. Then
+    // allow remaining tests to continue with aggregation disabled by default.
     config_set('system.core', 'preprocess_css', 1);
     $this->backdropGet('theme-test/suggestion');
     config_set('system.core', 'preprocess_css', 0);
@@ -365,9 +364,9 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    */
   protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
-    $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
-      . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
+    $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
+      . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
+      . '<hr />Expected:<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {
@@ -698,46 +697,46 @@ class ThemeDatetime extends BackdropWebTestCase {
    */
   function testThemeDatetime() {
     // Create timestamp and formatted date for testing.
-    $timestamp = 280281600;
+    $timestamp = 1421394600;
     $date = format_date($timestamp);
 
     // Test with timestamp.
     $variables = array(
       'timestamp' => $timestamp,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">' . $date . '</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">' . $date . '</time>', theme('datetime', $variables));
 
     // Test with text and timestamp.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with datetime attribute.
     $variables = array(
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">1978-11-19</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">2015-01-16</time>', theme('datetime', $variables));
 
     // Test with text and datetime attribute.
     $variables = array(
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with HTML text.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "<span>Dries' birthday</span>",
+      'text' => "<span>Backdrop's birthday</span>",
       'html' => TRUE,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000"><span>Dries\' birthday</span></time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000"><span>Backdrop\'s birthday</span></time>', theme('datetime', $variables));
   }
 }
 
@@ -785,8 +784,14 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $this->backdropGet("node/$node->nid");
     $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
-    $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
-    $this->assertRaw('x node--' . $node->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
+    $this->assertRaw("CALL: theme('node__page__full')", 'Theme call information found.');
+    $debug_output = <<<EOL
+   * node--page--full.tpl.php
+   * node--page.tpl.php
+   x node--{$node->nid}.tpl.php
+   * node.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and node ID specific template shown as current template.');
     $template_filename = $templates['node__' . $node->nid]['path'] . '/' . $templates['node__' . $node->nid]['template'] . $extension;
     $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
 
@@ -794,7 +799,13 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     // debug markup are correct.
     $node2 = $this->backdropCreateNode();
     $this->backdropGet("node/$node2->nid");
-    $this->assertRaw('* node--' . $node2->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
+    $debug_output = <<<EOL
+   * node--page--full.tpl.php
+   * node--page.tpl.php
+   * node--{$node2->nid}.tpl.php
+   x node.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and base template shown as current template.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
@@ -803,7 +814,13 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $build += node_view($node3);
     $output = backdrop_render($build);
     $this->assertTrue(strpos($output, "CALL: theme('node__foo__bar')") !== FALSE, 'Theme call information found.');
-    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--' . $node3->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+    $debug_output = <<<EOL
+   * node--foo--bar.tpl.php
+   * node--foo.tpl.php
+   * node--{$node3->nid}.tpl.php
+   x node.tpl.php
+EOL;
+    $this->assertTrue(strpos($output, $debug_output) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
 
     // Disable theme debug.
     config_set('system.core', 'theme_debug', FALSE);

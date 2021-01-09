@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_field.
@@ -254,7 +253,7 @@ class views_handler_field_field extends views_handler_field {
         global $language_content;
         $default_language = language_default();
         $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                                array($language_content->language, $default_language),
+                                array($language_content->langcode, $default_language->langcode),
                                 $this->view->display_handler->options['field_language']);
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
@@ -492,7 +491,7 @@ class views_handler_field_field extends views_handler_field {
       'deleted' => 0,
     );
 
-    // Store the settings in a '_custom' view mode.
+    // Store the settings in a '_custom' display mode.
     $this->instance['display']['_custom'] = array(
       'type' => $format,
       'settings' => $settings,
@@ -730,7 +729,7 @@ class views_handler_field_field extends views_handler_field {
         }
       }
 
-      // Now, transfer the data back into the resultset so it can be easily used.
+      // Now, transfer the data back into the resultset.
       foreach ($values as $row_id => &$value) {
         $value->{'field_' . $this->options['id']} = $this->set_items($value, $row_id);
       }
@@ -768,6 +767,10 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function get_value($values, $field = NULL) {
+    if (!isset($values->_field_data[$this->field_alias]['entity']) || !is_object($values->_field_data[$this->field_alias]['entity'])) {
+      return array();
+    }
+
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
 
@@ -968,7 +971,7 @@ class views_handler_field_field extends views_handler_field {
     if (field_is_translatable($entity_type, $this->field_info)) {
       $default_language = language_default();
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                              array($language_content->language, $default_language),
+                              array($language_content->langcode, $default_language->langcode),
                               $this->view->display_handler->options['field_language']);
 
       // Give the Field Language API a chance to fallback to a different language

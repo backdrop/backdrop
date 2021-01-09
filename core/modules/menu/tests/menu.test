@@ -82,16 +82,18 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertEqual($description, $saved_item['options']['attributes']['title'], 'Saving an existing link updates the description (title attribute)');
     $this->resetMenuLink($item, $old_title);
 
-    // Test for the correct behavior of a menu link title.
-    // @see https://www.drupal.org/node/1973262
-    $item = $this->addMenuLink(0, 'user/register', 'user-menu');
-    $this->backdropGet('user/password');
-    $this->assertNoTitle('Home | Backdrop');
+    // Test for the correct behavior of user menu titles.
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
+    $this->addMenuLink(0, 'user/register', 'user-menu');
     $this->backdropLogout();
     $this->backdropGet('user/register');
-    $this->assertTitle($item['link_title'] . ' | Backdrop');
+    $this->assertTitle('Create new account | Backdrop CMS');
+    $this->backdropGet('user/password');
+    $this->assertTitle('Reset password | Backdrop CMS');
+    $this->backdropGet('user/login');
+    $this->assertTitle('Log in | Backdrop CMS');
     $this->backdropGet('user');
-    $this->assertNoTitle('Home | Backdrop');
+    $this->assertTitle('Log in | Backdrop CMS');
   }
 
   /**
@@ -391,7 +393,7 @@ class MenuTestCase extends BackdropWebTestCase {
       // Verify menu link.
       $this->clickLink($title);
       $title = $parent_node->title;
-      $this->assertTitle(t("@title | Backdrop", array('@title' => $title)), 'Parent menu link link target was correct');
+      $this->assertTitle(t("@title | Backdrop CMS", array('@title' => $title)), 'Parent menu link link target was correct');
     }
 
     // Verify menu link.
@@ -401,7 +403,7 @@ class MenuTestCase extends BackdropWebTestCase {
     // Verify menu link link.
     $this->clickLink($title);
     $title = $item_node->title;
-    $this->assertTitle(t("@title | Backdrop", array('@title' => $title)), 'Menu link link target was correct');
+    $this->assertTitle(t("@title | Backdrop CMS", array('@title' => $title)), 'Menu link link target was correct');
   }
 
   /**
@@ -662,19 +664,24 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Change default parent item to Main menu, so we can assert more
-    // easily.
+    // Change default parent item to Main menu, so we can assert more easily.
     $edit = array(
       'menu_parent' => 'main-menu:0',
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Create a node.
+    // Verify that the menu link title on the node add form has the correct
+    // maxlength.
+    $this->backdropGet('node/add/page');
+    $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node add form.');
+
+    // Create a node with menu link disabled.
     $node_title = $this->randomName();
     $language = LANGUAGE_NONE;
     $edit = array(
       "title" => $node_title,
       "body[$language][0][value]" => $this->randomString(),
+      "menu[enabled]" => 0,
     );
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);
@@ -722,6 +729,11 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       'menu_options[main-menu]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Verify that the menu link title on the node edit form has the correct
+    // maxlength.
+    $this->backdropGet('node/' . $node->nid . '/edit');
+    $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node edit form.');
 
     // Edit the node and remove the menu link.
     $edit = array(

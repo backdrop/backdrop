@@ -1,0 +1,41 @@
+{
+  "_config_name": "views.view.test_ajax",
+  "name": "test_ajax",
+  "description": "",
+  "tag": "",
+  "disabled": false,
+  "base_table": "node",
+  "human_name": "test_ajax",
+  "core": null,
+  "display": {
+    "default": {
+      "display_title": "Master",
+      "display_plugin": "default",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "access": {},
+        "pager": {
+          "type": "none"
+        },
+        "style_plugin": "default",
+        "row_plugin": "node",
+        "title": "AJAX Test Page",
+        "use_ajax": true
+      }
+    },
+    "page": {
+      "display_title": "Page",
+      "display_plugin": "page",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "path": "test_ajax_view"
+      }
+    }
+  }
+}

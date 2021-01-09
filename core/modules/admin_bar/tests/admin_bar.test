@@ -191,6 +191,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     // Create a user who is able to change permissions.
     $permissions = $this->basePermissions + array(
       'administer permissions',
+      'assign roles',
     );
     $admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($admin_user);
