@@ -253,7 +253,7 @@ class views_handler_field_field extends views_handler_field {
         global $language_content;
         $default_language = language_default();
         $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                                array($language_content->language, $default_language),
+                                array($language_content->langcode, $default_language->langcode),
                                 $this->view->display_handler->options['field_language']);
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
@@ -971,7 +971,7 @@ class views_handler_field_field extends views_handler_field {
     if (field_is_translatable($entity_type, $this->field_info)) {
       $default_language = language_default();
       $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                              array($language_content->language, $default_language),
+                              array($language_content->langcode, $default_language->langcode),
                               $this->view->display_handler->options['field_language']);
 
       // Give the Field Language API a chance to fallback to a different language

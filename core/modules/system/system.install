@@ -232,9 +232,22 @@ function system_requirements($phase) {
 
   // Test the contents of the .htaccess files.
   if ($phase == 'runtime' && backdrop_is_apache()) {
+
+    // Check/create .htaccess files for active and staging config directories.
+    foreach (array('active', 'staging') as $type) {
+      $config_directory = config_get_config_directory($type);
+      file_save_htaccess($config_directory);
+
+      $htaccess_files[$config_directory . '/.htaccess'] = array(
+        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+        'directory' => $config_directory,
+      );
+    }
+
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
+
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
       'directory' => config_get('system.core', 'file_public_path'),
@@ -249,6 +262,7 @@ function system_requirements($phase) {
       'title' => $t('Temporary files directory'),
       'directory' => file_directory_temp(),
     );
+
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
       // in the latest security update.
@@ -271,7 +285,7 @@ function system_requirements($phase) {
     // Cron error threshold defaults to two weeks.
     $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
-    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
+    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'https://backdropcms.org/cron'));
 
     // Determine when cron last ran.
     $cron_last = state_get('cron_last');
@@ -388,7 +402,7 @@ function system_requirements($phase) {
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), base_path() . 'core/update.php'). ')';
+          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), 'core/update.php'). ')';
           $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
           break;
         }
@@ -724,7 +738,7 @@ function system_install() {
 
   // Set the public files path to the directory with the settings.php file.
   config_set('system.core', 'file_public_path', str_replace('./', '', conf_path() . '/files'));
-  
+
   // Sets the path of system-appropriate temporary directory.
   config_set('system.core', 'file_temporary_path', file_directory_temp());
 
@@ -2571,7 +2585,7 @@ function system_update_1035() {
   // This is in system module because Layout module was enabled earlier in the
   // upgrade path from D7. If it is in layout.install, it requires that
   // update.php be run twice when doing an upgrade.
-  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+  module_set_weight('layout', 60);
 }
 
 /**
@@ -3113,6 +3127,24 @@ function system_update_1071() {
   $roles = user_roles(FALSE, 'administer layouts');
   foreach ($roles as $role_name => $role) {
     user_role_grant_permissions($role_name, array('administer flexible templates'));
+  }
+}
+
+/**
+ * Add 'jquery-html-prefilter-3.5.0.js' to the 'jquery' library.
+ */
+function system_update_1072() {
+  // Empty update to force a rebuild of hook_library() and JS aggregates.
+}
+
+/**
+ * Set config_sync_clear_staging on existing sites, if not already set.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  if ($config->get('config_sync_clear_staging') == NULL) {
+    $config->set('config_sync_clear_staging', 1);
+    $config->save();
   }
 }
 

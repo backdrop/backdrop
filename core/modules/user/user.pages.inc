@@ -39,6 +39,9 @@ function user_pass() {
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
+    '#attributes' => array(
+      'autofocus' => 'autofocus',
+    ),
   );
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
@@ -180,11 +183,20 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
  */
 function user_pass_reset_form($form, &$form_state, $account) {
   $form['#account'] = $account;
+  $description = '';
+  module_load_include('password.inc', 'user', 'user');
+  $reject_weak = user_password_reject_weak($account->name);
+  if ($reject_weak) {
+    $form['#validate'][] = 'user_password_policy_validate';
+    $description = _user_password_policy_help();
+  }
   $form['message'] = array(
     '#markup' => t('<p>Please enter a new password to access your account.</p>'),
   );
   $form['pass'] = array(
     '#type' => 'password_confirm',
+    '#required' => TRUE,
+    '#description' => $description,
   );
   $form['actions'] = array(
     '#type' => 'actions',

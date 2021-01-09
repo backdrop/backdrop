@@ -364,9 +364,9 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    */
   protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
-    $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
-      . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
+    $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
+      . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
+      . '<hr />Expected:<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {
@@ -697,46 +697,46 @@ class ThemeDatetime extends BackdropWebTestCase {
    */
   function testThemeDatetime() {
     // Create timestamp and formatted date for testing.
-    $timestamp = 280281600;
+    $timestamp = 1421394600;
     $date = format_date($timestamp);
 
     // Test with timestamp.
     $variables = array(
       'timestamp' => $timestamp,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">' . $date . '</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">' . $date . '</time>', theme('datetime', $variables));
 
     // Test with text and timestamp.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with datetime attribute.
     $variables = array(
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">1978-11-19</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">2015-01-16</time>', theme('datetime', $variables));
 
     // Test with text and datetime attribute.
     $variables = array(
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with HTML text.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "<span>Dries' birthday</span>",
+      'text' => "<span>Backdrop's birthday</span>",
       'html' => TRUE,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000"><span>Dries\' birthday</span></time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000"><span>Backdrop\'s birthday</span></time>', theme('datetime', $variables));
   }
 }
 

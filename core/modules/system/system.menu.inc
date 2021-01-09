@@ -126,11 +126,19 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $link = t('menu settings');
+  if (user_access('administer menu')) {
+    $link = l($link, 'admin/structure/menu/settings', array(
+      'attributes' => array('target' => '_blank'),
+    ));
+  }
   $form['toggle'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
-    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.'),
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global !menu_settings.', array(
+      '!menu_settings' => $link,
+    )),
   );
 
   return $form;
@@ -204,7 +212,7 @@ function system_menu_block_build(array $config) {
       $id = backdrop_html_id('menu-toggle-state');
       $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
       $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
-      $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
+      $data['content']['#attached']['library'][] = array('system', 'backdrop.menu-toggle');
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);

@@ -31,27 +31,20 @@
 /**
  * Implements hook_views_plugins().
  */
-function date_views_views_plugins() {
-  $path = backdrop_get_path('module', 'date_views');
-  module_load_include('inc', 'date_views', 'theme/theme');
+function date_views_plugins() {
+  $path = backdrop_get_path('module', 'date');
+  module_load_include('inc', 'date', 'date.theme');
 
   return array(
-    // This just tells our themes are elsewhere.
-    'module' => 'date_views',
-    'style' => array(
-      'date_nav' => array(
-        'title' => t('Date browser style'),
-        'help' => t('Creates back/next navigation.'),
-        'handler' => 'date_navigation_plugin_style',
+    'module' => 'date',
+    'pager' => array(
+      'date_views_pager' => array(
+        'title' => t('Page by date'),
+        'help' => t('Page using the value of a date field.'),
+        'handler' => 'date_views_plugin_pager',
         'path' => "$path/includes",
-        'theme' => 'date_navigation',
-        'theme file' => 'theme.inc',
-        'theme path' => "$path/theme",
-        'uses row plugin' => FALSE,
-        'uses fields' => FALSE,
+        'help topic' => 'date-views-pager',
         'uses options' => TRUE,
-        'type' => 'date_nav',
-        'even empty' => TRUE,
       ),
     ),
   );
@@ -60,7 +53,7 @@ function date_views_views_plugins() {
 /**
  * Implements hook_views_data().
  */
-function date_views_views_data() {
+function date_views_data() {
   $data = array();
 
   $tables = date_views_base_tables();
@@ -98,7 +91,7 @@ function date_views_views_data() {
 /**
  * Implements hook_views_data_alter().
  */
-function date_views_views_data_alter(&$data) {
+function date_views_data_alter(&$data) {
 
   // Mark all the core date handlers as date fields.
   // This will identify all handlers that directly use the _date handlers,
@@ -221,9 +214,120 @@ function date_views_base_tables() {
       }
     }
 
-    // Then we let other modules tell us about other entity tables that hold date fields.
+    // Then we let other modules tell us about other entity tables
+    // that hold date fields.
     $base_tables += module_invoke_all('date_views_extra_tables');
   }
 
   return $base_tables;
+}
+
+/**
+ * Custom helper function.
+ *
+ * The instanceof function makes this work for any handler that was derived
+ * from 'views_handler_filter_date' or 'views_handler_argument_date',
+ * which includes core date fields like the node updated field.
+ *
+ * The test for $handler->min_date tells us that this is an argument that
+ * not only is derived from the views date handler but also has been processed
+ * by the Date Views filter or argument code.
+ */
+function date_views_handler_is_date($handler, $type = 'argument') {
+  switch ($type) {
+    case 'filter':
+      return $handler instanceof views_handler_filter_date && !empty($handler->min_date);
+
+    case 'argument':
+      return $handler instanceof views_handler_argument_date && !empty($handler->min_date);
+  }
+  return FALSE;
+}
+
+/**
+ * Format links correctly for the new Date pager.
+ */
+function date_pager_url($view, $date_type = NULL, $date_arg = NULL, $force_view_url = FALSE, $absolute = TRUE) {
+
+  // If someone adds a pager without a matching argument,
+  // there is no date information to work with.
+  if (empty($view->date_info) || !isset($view->date_info->date_arg_pos)) {
+    return '';
+  }
+
+  $args = $view->args;
+  $pos = $view->date_info->date_arg_pos;
+
+  // The View arguments array is indexed numerically but is not necessarily
+  // in numerical order. Sort the arguments to ensure the correct order.
+  ksort($args);
+
+  // If there are empty arguments before the date argument,
+  // pad them with the wildcard so the date argument will be in
+  // the right position.
+  if (count($args) < $pos) {
+    foreach ($view->argument as $name => $argument) {
+      if ($argument->position == $pos) {
+        break;
+      }
+      $args[] = $argument->options['exception']['value'];
+    }
+  }
+
+  if (!empty($date_type)) {
+    switch ($date_type) {
+      case 'year':
+        $args[$pos] = date_pad($view->date_info->year, 4);
+        break;
+
+      case 'week':
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-W' . date_pad($view->date_info->week);
+        break;
+
+      case 'day':
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-' . date_pad($view->date_info->month) . '-' . date_pad($view->date_info->day);
+        break;
+
+      default:
+        $args[$pos] = date_pad($view->date_info->year, 4) . '-' . date_pad($view->date_info->month);
+        break;
+    }
+  }
+  elseif (!empty($date_arg)) {
+    $args[$pos] = $date_arg;
+  }
+  else {
+    $args = $view->args;
+  }
+  // Is this an embedded or a block view?
+  // Return the pager query value.
+  if (!$force_view_url &&
+  (!empty($view->preview) || !empty($view->date_info->block_identifier))) {
+
+    $url = $args[$pos];
+    $key = date_block_identifier($view);
+    if (!empty($key)) {
+      return url($_GET['q'], array(
+        'query' => date_views_querystring($view, array($key => $url)),
+        'absolute' => $absolute));
+    }
+  }
+
+  // Normal views may need querystrings appended to them
+  // if they use exposed filters.
+  return url($view->get_url($args), array(
+    'query' => date_views_querystring($view),
+    'absolute' => $absolute,
+    )
+  );
+}
+
+/**
+ * Identifier of a date block.
+ */
+function date_block_identifier($view) {
+  if (!empty($view->block_identifier)) {
+    return $view->block_identifier;
+  }
+  return isset($view->date_info->block_identifier) ? $view->date_info->block_identifier : NULL;
 }

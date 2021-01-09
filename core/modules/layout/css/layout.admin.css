@@ -97,11 +97,15 @@
 
 /* Buttons that are displayed as links. */
 .layout-access-remove,
-.layout-access-configure {
+.layout-access-configure,
+.layout-context-remove,
+.layout-context-configure {
   padding-left: 10px; /* LTR */
 }
 [dir="rtl"] .layout-access-remove,
-[dir="rtl"] .layout-access-configure {
+[dir="rtl"] .layout-access-configure,
+[dir="rtl"] .layout-context-remove,
+[dir="rtl"] .layout-context-configure {
   padding-left: 0;
   padding-right: 10px;
 }
@@ -373,4 +377,18 @@
 .form-item .form-item.form-item-region-count {
   margin-right: 2em;
   display: inline;
+}
+
+.edit-layout-top {
+  padding: 0.5em 0.5em;
+  background: #e9e8e8;
+  border-radius: 4px 4px 0 0;
+  margin: 1em 0;
+}
+.edit-layout-top .dropbutton-wrapper {
+  float: right; /* LTR */
+  width: 140px;
+}
+[dir="rtl"] .edit-layout-top .dropbutton-wrapper {
+  float: left;
 }

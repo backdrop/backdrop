@@ -1078,6 +1078,12 @@ description = Tests active menu trails and alteration functionality.
 group = Menu
 file = menu.test
 
+[MenuChangeTestCase]
+name = Menu changes
+description = Tests that menu links are updated on menu rebuild.
+group = Menu
+file = menu.test
+
 [ModuleUnitTest]
 name = Module API
 description = Test low-level module functions.

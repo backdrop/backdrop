@@ -993,6 +993,7 @@ function backdrop_merged_modules() {
     'entity_view_mode', // Backdrop 1.6.0.
     'options_element', // Backdrop 1.12.0.
     'field_formatter_settings', // Backdrop 1.13.0.
+    'imagecache_token', // Backdrop 1.17.0.
   );
 }
 
@@ -1183,4 +1184,23 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
   foreach ($functions[$cid] as $function) {
     $function($data, $context1, $context2, $context3);
   }
+}
+
+/**
+ * Set the weight of a module in the 'system' table, thereby determining the
+ * order in which its hooks will be executed in relation to other modules.
+ *
+ * @param string $module
+ *   The name of the module (without the .module extension).
+ * @param integer $weight
+ *   The weight to set, as an integer.
+ *
+ * @since 1.17.2 Function added.
+ */
+function module_set_weight($module, $weight) {
+  db_update('system')
+    ->fields(array('weight' => $weight))
+    ->condition('type', 'module')
+    ->condition('name', $module)
+    ->execute();
 }

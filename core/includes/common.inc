@@ -834,7 +834,10 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
   // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
     $destination = backdrop_parse_url($_GET['destination']);
-    $path = $destination['path'];
+    // Double check the path derived by backdrop_parse_url() is not external.
+    if (!url_is_external($destination['path'])) {
+      $path = $destination['path'];
+    }
     $options['query'] = $destination['query'];
     $options['fragment'] = $destination['fragment'];
   }
@@ -5075,8 +5078,8 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * A "state" means a certain property on a DOM element, such as "visible" or
  * "checked". A state can be applied to an element, depending on the state of
- * another element on the page. In general, states depend on HTML attributes and
- * DOM element properties, which change due to user interaction.
+ * one or more other elements on the page. In general, states depend on HTML
+ * attributes and DOM element properties, which change due to user interaction.
  *
  * Since states are driven by JavaScript only, it is important to understand
  * that all states are applied on presentation only, none of the states force
@@ -5086,37 +5089,62 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * #states is an associative array in the form of:
  * @code
- * array(
+ * '#states' => array(
  *   STATE1 => CONDITIONS_ARRAY1,
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
  * )
  * @endcode
- * Each key is the name of a state to apply to the element, such as 'visible'.
- * Each value is a list of conditions that denote when the state should be
- * applied.
  *
- * Multiple different states may be specified to act on complex conditions:
- * @code
- * array(
- *   'visible' => CONDITIONS,
- *   'checked' => OTHER_CONDITIONS,
- * )
- * @endcode
+ * Each key is the name of a state to apply to the element, such as "visible" or
+ * "checked". Each value is a list of conditions that denote when the state
+ * should be applied.
  *
- * Every condition is a key/value pair, whose key is a jQuery selector that
- * denotes another element on the page, and whose value is an array of
- * conditions, which must bet met on that element:
+ * Multiple conditions may be specified for a given state. In this case (an
+ * 'AND' conditional), all conditions must be true for the state to be applied:
  * @code
- * array(
- *   'visible' => array(
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
- *     ...
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // All of these conditions must be true; this one...
+ *     JQUERY_SELECTOR1 => CONDITION1,
+ *     // ...AND this one.
+ *     JQUERY_SELECTOR2 => CONDITION2,
  *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
  * )
  * @endcode
- * All conditions must be met for the state to be applied.
+ *
+ * For 'OR' conditionals, each condition must be wrapped in its own array:
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // Any of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     // OR this one (or both).
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
+ *
+ * For 'XOR' (exclusive 'OR') conditionals, a similar syntax as 'OR' is used,
+ * but the 'XOR' operator needs to be explicitly defined as an array item with
+ * the string 'xor':
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // Either one of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     'xor',
+ *     // or this one, but NOT both.
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
  *
  * Each remote condition is a key/value pair specifying conditions on the other
  * element that need to be met to apply the state to the element:

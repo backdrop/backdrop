@@ -43,8 +43,14 @@ function filter_admin_overview($form) {
       );
     }
 
-    // Add status so we can sort by enabled/disabled.
+    // Add status so we can group by enabled/disabled. If disabled, add 100
+    // to weight to push it down to the bottom of the list.
     $form['formats'][$id]['#status'] = $format->status;
+    $form['formats'][$id]['#weight'] = $format->weight;
+    if (!$format->status) {
+      $form['formats'][$id]['#weight'] += 100;
+    }
+
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -99,7 +105,8 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
-  backdrop_sort($form['formats'], array('#status'), SORT_DESC);
+  backdrop_sort($form['formats'], array('#weight'));
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;
@@ -109,7 +116,7 @@ function filter_admin_overview($form) {
  * Form submission handler for filter_admin_overview().
  */
 function filter_admin_overview_submit($form, &$form_state) {
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   foreach ($form_state['values']['formats'] as $id => $data) {
     if (is_array($data) && isset($data['weight']) && $data['weight'] != $formats[$id]->weight) {
       // Update the weight of this filter.
@@ -186,11 +193,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
     filter_admin_set_message($stored_format);
     $format = $stored_format;
   }
-  // If editing an already-existing format.
-  elseif (isset($format->format)) {
-    filter_set_format_tempstore($format);
-  }
-
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
@@ -465,9 +467,6 @@ function filter_admin_format_filter_settings_form_redirect($form, &$form_state) 
   if (empty($form_state['format']->format)) {
     $form_state['format']->format = $form_state['values']['format'];
   }
-
-  filter_set_format_tempstore($form_state['format']);
-
   $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format . '/filter-settings/' . $name;
 }
 
@@ -484,7 +483,13 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
   else {
     $trigger = $form_state['triggering_element'];
     $name = $trigger['#name'];
-    $format = $form_state['format'];
+    // Load previously added settings from tempstore, if any.
+    if ($stored_format = filter_get_format_tempstore($form_state['format']->format)) {
+      $format = $stored_format;
+    }
+    else {
+      $format = $form_state['format'];
+    }
 
     $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
     $title = t('Configure filter');
@@ -515,6 +520,12 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
   $form_state['format'] = $format;
   $form_state['filter_name'] = $filter_name;
 
+  // Use a format stored in tempstore if available.
+  // Has to get loaded again here in case we did not come here via ajax.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    $form_state['format'] = $stored_format;
+    $format = $stored_format;
+  }
   $all_filter_info = filter_get_filters();
   $filter_info = $all_filter_info[$filter_name];
   $filter = $format->filters[$filter_name];
@@ -662,15 +673,23 @@ function filter_admin_format_form_submit($form, &$form_state) {
   unset($form_state['values']['filter_settings']);
   unset($form_state['values']['actions']);
 
-  // Save allowed HTML tags from the hidden field in the event JS modified them.
-  $form_state['values']['filters']['filter_html']['settings']['allowed_html'] = $form_state['values']['allowed_html'];
-  unset($form_state['values']['allowed_html']);
-
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
+  // Save allowed HTML tags from the hidden field in the event JS modified them.
+  $allowed_html = $form_state['values']['allowed_html'];
+  unset($form_state['values']['allowed_html']);
+
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
+  // Get values from filter settings forms back from tempstore.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    foreach ($stored_format->filters as $name => $filter) {
+      $format->filters[$name]['settings'] = $filter->settings;
+    }
+  }
+  // Set allowed html, parked in a variable previously.
+  $format->filters['filter_html']['settings']['allowed_html'] = $allowed_html;
 
   // If not saving an editor, do not save any settings.
   if (!$format->editor) {

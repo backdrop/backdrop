@@ -119,6 +119,16 @@ function menu_menu() {
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
   );
+  $items['admin/structure/menu/settings'] = array(
+    'title' => 'Menu settings',
+    'description' => 'Configure global settings for menus.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('menu_settings_form'),
+    'access arguments' => array('administer menu'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'menu.admin.inc',
+    'weight' => 99,
+  );
   return $items;
 }
 
@@ -147,6 +157,10 @@ function menu_config_info() {
   $prefixes['menu.menu'] = array(
     'name_key' => 'menu_name',
     'label_key' => 'title',
+    'group' => t('Menus'),
+  );
+  $prefixes['menu.settings'] = array(
+    'label' => t('Menu settings'),
     'group' => t('Menus'),
   );
   return $prefixes;
