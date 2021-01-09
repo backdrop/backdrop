@@ -567,10 +567,9 @@ ul.tips {
   color: #333;
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
-  height: 2.4em;
-  line-height: 2.4em;
   text-decoration: none;
 }
+.l-header ul.menu a,
 .js .menu-dropdown a,
 .js .menu-dropdown a:hover,
 .js .menu-dropdown a:focus,
