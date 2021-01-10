@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for menu module.
+ * Admin page callbacks for the Menu module.
  */
 
 /**

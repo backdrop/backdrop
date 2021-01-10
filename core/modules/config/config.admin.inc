@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative pages and callbacks for the Configuration management module.
+ * Admin page callbacks for the Configuration Management module.
  */
 
 /**

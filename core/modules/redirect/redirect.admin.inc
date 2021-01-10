@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Redirect module.
+ * Admin page callbacks for the Redirect module.
  */
 
 /**
