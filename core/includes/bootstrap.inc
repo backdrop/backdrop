@@ -1967,12 +1967,21 @@ function t($string, array $args = array(), array $options = array()) {
   elseif ($options['langcode'] != LANGUAGE_SYSTEM && ($options['langcode'] != 'en' || $translate_english) && function_exists('locale')) {
     $string = locale($string, $options['context'], $options['langcode']);
   }
+
+  // If the string contains asterisks or back-ticks, run it through the
+  // markdown formatter.
+  // @todo: possibly support more Markdown in the future.
+  if (preg_match('/[*`]/', $string)) {
+    $string = format_string_markdown($string);
+  }
+
   if (empty($args)) {
     return $string;
   }
   else {
     return format_string($string, $args);
   }
+
 }
 
 /**
@@ -2031,6 +2040,45 @@ function format_string($string, array $args = array()) {
     }
   }
   return strtr($string, $args);
+}
+
+/**
+ * Formats a string containing basic Markdown for HTML display.
+ *
+ * Text wrapped in the following Markdown is converted:
+ *   - *** -> both bold and italics (<strong> and <em> HTML tags).
+ *   - ** -> bolded text (<strong> HTML tag).
+ *   - * -> italicized text (<em> HTML tag).
+ *   - ` -> monospaced text (<code> HTML tag).
+ *
+ * Literal asterisks and back-ticks in text can be escaped by adding a backslash
+ * before the asterisk/back-tick.
+ *
+ * Used automatically by format_string().
+ *
+ * @param $text
+ *   The text to format (plain-text).
+ *
+ * @return
+ *   The formatted text (HTML).
+ */
+function format_string_markdown($text) {
+  // Replace any non-escaped pairs of triple asterisks with both <strong> and
+  // <em> tags.
+  $text = preg_replace('/(?<!(\\\))\*(?<!(\\\))\*(?<!(\\\))\*(.+)(?<!(\\\))\*(?<!(\\\))\*(?<!(\\\))\*/', '<strong><em>\\4</em></strong>', $text);
+  // Replace any non-escaped pairs of double asterisks with <strong> tags.
+  $text = preg_replace('/(?<!(\\\))\*(?<!(\\\))\*(.+)(?<!(\\\))\*(?<!(\\\))\*/', '<strong>\\3</strong>', $text);
+  // Replace any non-escaped pairs of asterisks with <em> tags.
+  $text = preg_replace('/(?<!(\\\))\*(.+)(?<!(\\\))\*/', '<em>\\2</em>', $text);
+  // Replace any non-escaped pairs of back-ticks with <code> tags.
+  $text = preg_replace('/(?<!(\\\))`(.+)(?<!(\\\))`/', '<code>\\2</code>', $text);
+
+  // Remove any backslashes that may have been added in order to escape any
+  // literal asterisks and back-ticks.
+  $text = preg_replace('/\\\\\*/', '*', $text);
+  $text = preg_replace('/\\\\`/', '`', $text);
+
+  return $text;
 }
 
 /**
