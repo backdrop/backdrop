@@ -604,7 +604,6 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         ':language' => $langcode,
         ':source' => $string,
         ':context' => (string) $context,
-        'textgroup' => 'default',
       ))->fetchObject();
     }
     // In the event the table does not exist (such as when uninstalling the

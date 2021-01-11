@@ -450,7 +450,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
             if ($key == 0) {
               $plid = 0;
             }
-            $plid = _locale_import_one_string_db($report, $lang, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $group, $comments, $mode, $plid, $key);
+            $plid = _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $group, $comments, $mode, $plid, $key);
           }
         }
 
