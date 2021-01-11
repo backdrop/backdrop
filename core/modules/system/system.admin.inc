@@ -2146,15 +2146,16 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
  * @ingroup forms
  */
 function system_urls_settings($form, &$form_state) {
+  global $base_url;
   $config = config('system.core');
   $available = FALSE;
   $conflict = FALSE;
 
   // If the request URI is a clean URL, clean URLs must be available.
-  // Otherwise, run a test.
   if (strpos(request_uri(), '?q=') === FALSE && strpos(request_uri(), '&q=') === FALSE) {
     $available = TRUE;
   }
+  // Otherwise, run a test.
   else {
     $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/urls/settings/check');
     // If the request returns HTTP 200, clean URLs are available.
@@ -2188,14 +2189,18 @@ function system_urls_settings($form, &$form_state) {
   }
 
   $form['#config'] = 'system.core';
-  // Show the enable/disable form if clean URLs are available, or if the user
-  // must be able to resolve a conflicting setting.
+  $form['clean_urls'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Clean URLs'),
+  );
+  // If clean URLs are available, or if the user must be able to resolve a
+  // conflicting setting, show the enable/disable form.
   if ($available || $conflict) {
-    $form['clean_url'] = array(
+    $form['clean_urls']['clean_url'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable clean URLs'),
       '#default_value' => $config->get('clean_url'),
-      '#description' => t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
+      '#description' => t('Use URLs like <code>@domain/user</code> instead of <code>@domain/?q=user</code>.', array('@domain' => $base_url)),
     );
     if ($conflict) {
       // $form_state['redirect'] needs to be set to the non-clean URL,
@@ -2203,24 +2208,26 @@ function system_urls_settings($form, &$form_state) {
       $form_state['redirect'] = url('', array('query' => array('q' => '/admin/config/url/settings')));
     }
   }
-  // Show the clean URLs test form.
+  // Otherwise, show the clean URLs test form.
   else {
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
 
+    // Prevent duplicate messages from being shown when the clean URLs test is
+    // executed multiple times consecutively.
+    backdrop_get_messages();
     // Explain why the user is seeing this page and what to expect after
     // clicking the 'Run the clean URL test' button.
     backdrop_set_message(t('Clean URLs cannot be enabled.'), 'warning');
-    backdrop_set_message(t('When clean URLs can be enabled, you will be able to use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'), 'info');
-    backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('https://backdropcms.org/user-guide/clean-urls'))), 'info');
+    backdrop_set_message(t('When clean URLs can be enabled, you will be able to use URLs like <code>@domain/user</code> instead of <code>@domain/?q=user</code>.', array('@domain' => $base_url)), 'info');
+    backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url" target="_blank">online handbook</a>.', array('@url' => url('https://backdropcms.org/user-guide/clean-urls'))), 'info');
 
     $form_state['redirect'] = url('admin/config/urls/settings');
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['clean_url_test'] = array(
+    $form['clean_urls']['clean_url_test'] = array(
       '#type' => 'submit',
       '#value' => t('Run the clean URL test'),
       '#submit' => array(),
     );
-    $form['clean_url_test_execute'] = array(
+    $form['clean_urls']['clean_url_test_execute'] = array(
       '#type' => 'hidden',
       '#value' => 1,
     );
@@ -2228,9 +2235,9 @@ function system_urls_settings($form, &$form_state) {
 
   $form['canonical_secure'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use HTTPS for canonical URLs'),
+    '#title' => t('Use HTTPS when generating canonical URLs'),
     '#default_value' => $config->get('canonical_secure'),
-    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable <code>https</code> should be set to <code>TRUE</code> in your file <code>settings.php</code>' ),
+    '#description' => t("<strong>Note</strong>: To support mixed-mode (both secure and insecure) sessions, you will need to add <code>\$config['https'] = TRUE;</code> in your <code>settings.php</code> file."),
   );
 
   return system_settings_form($form);
