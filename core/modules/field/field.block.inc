@@ -84,24 +84,22 @@ class FieldBlock extends Block {
     if (!is_a($entity, 'EntityInterface')) {
       $info = entity_get_info($entity_type);
       $id_key = $info['entity keys']['id'];
-      if (isset($entity->{$id_key})) {
-        $entity = $info['load hook']($entity->{$id_key});
-        if (is_a($entity, 'EntityInterface')) {
-          // Save the EntityInterface object for future use.
-          $this->contexts[$entity_type]->setData($entity);
-        }
-        else {
-          // Either there is a problem with this entity type definition,
-          //  or the entity does not exist or is failing to load for some reason.
-          //  Do not proceed.
-          return NULL;
-        }
-      }
-      else {
-        // Unable to load an entity without an id property value.
-        //  Do not proceed.
+
+      // Unable to load an entity without an id property value.
+      if (!isset($entity->{$id_key})) {
         return NULL;
       }
+
+      $entity = $info['load hook']($entity->{$id_key});
+
+      // Either there is a problem with this entity type definition,
+      //  or the entity does not exist or is failing to load for some reason.
+      if (!is_a($entity, 'EntityInterface')) {
+        return NULL;
+      }
+
+      // Save the EntityInterface object for future use.
+      $this->contexts[$entity_type]->setData($entity);
     }
 
     // Load the entity type's information for this field.
