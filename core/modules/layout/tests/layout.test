@@ -1189,7 +1189,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Load condition'));
 
-    // This condition will make the menu item available on the front page, and
+    // This condition will make the menu item available on the home page, and
     // on the layout path itself. Note that the "layout_name" is the first part
     // of the path, so we allow access on it and its children paths.
     $edit = array(
@@ -1706,7 +1706,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
 
-    // Go to the front page and check that the text shows.
+    // Go to the home page and check that the text shows.
     $this->backdropGet('<front>');
 
     $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
@@ -1752,7 +1752,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // The reusable checkbox should exist but be disabled.
     $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
 
-    // Go to the front page and check that the converted block shows up.
+    // Go to the home page and check that the converted block shows up.
     $this->backdropGet('<front>');
     $custom_block = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
       ':region' => 'l-sidebar',

@@ -2563,7 +2563,7 @@ function menu_set_active_trail($new_trail = NULL) {
     }
     // Make sure the current page is in the trail to build the page title, by
     // appending either the preferred link or the menu router item for the
-    // current page. Exclude it if we are on the front page.
+    // current page. Exclude it if we are on the home page.
     $last = end($trail);
     if ($preferred_link && $last['href'] != $preferred_link['href'] && !backdrop_is_front_page()) {
       $trail[] = $preferred_link;
@@ -2700,7 +2700,7 @@ function menu_get_active_trail() {
 function menu_get_active_breadcrumb() {
   $breadcrumb = array();
 
-  // No breadcrumb for the front page.
+  // No breadcrumb for the home page.
   if (backdrop_is_front_page()) {
     return $breadcrumb;
   }
@@ -2753,9 +2753,9 @@ function menu_get_active_title() {
   foreach (array_reverse($active_trail) as $item) {
     // Local task titles are displayed as tabs and therefore should not be
     // repeated as the page title. However, if the local task appears in a
-    // top-level menu, it is no longer a "local task" anymore (the front page
+    // top-level menu, it is no longer a "local task" anymore (the home page
     // of the site does not have tabs) so it is better to use the local task
-    // title in that case than to fall back on the front page link in the
+    // title in that case than to fall back on the home page link in the
     // active trail (which is usually "Home" and would not make sense in this
     // context).
     if ((bool) ($item['type'] & MENU_IS_LOCAL_TASK)) {
@@ -4005,7 +4005,7 @@ function _menu_router_save($menu, $masks) {
 /**
  * Checks whether the site is in maintenance mode.
  *
- * This function will log the current user out and redirect to front page
+ * This function will log the current user out and redirect to home page
  * if the current user has no 'access site in maintenance mode' permission.
  *
  * @param string $path

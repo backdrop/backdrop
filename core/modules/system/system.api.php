@@ -1372,7 +1372,7 @@ function hook_boot() {
  * @see hook_boot()
  */
 function hook_init() {
-  // Since this file should only be loaded on the front page, it cannot be
+  // Since this file should only be loaded on the home page, it cannot be
   // declared in the info file.
   if (backdrop_is_front_page()) {
     backdrop_add_css(backdrop_get_path('module', 'foo') . '/foo.css');
