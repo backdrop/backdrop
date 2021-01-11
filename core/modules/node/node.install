@@ -84,7 +84,7 @@ function node_schema() {
         'default' => 0,
       ),
       'promote' => array(
-        'description' => 'Boolean indicating whether the node should be displayed on the front page.',
+        'description' => 'Boolean indicating whether the node should be displayed on the home page.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -248,7 +248,7 @@ function node_schema() {
         'default' => 0,
       ),
       'promote' => array(
-        'description' => 'Boolean indicating whether the node (at the time of this revision) should be displayed on the front page.',
+        'description' => 'Boolean indicating whether the node (at the time of this revision) should be displayed on the home page.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -368,10 +368,10 @@ function node_update_dependencies() {
  */
 
 /**
- * Set 'node' as front page path if it implicitly was before.
+ * Set 'node' as home page path if it implicitly was before.
  *
- * Node module became optional. The default front page path was changed to
- * 'user'. Since 'node' was the implicit default front page path previously and
+ * Node module became optional. The default home page path was changed to
+ * 'user'. Since 'node' was the implicit default home page path previously and
  * may not have been explicitly configured as such, this update ensures that the
  * old implicit default is still the default.
  *

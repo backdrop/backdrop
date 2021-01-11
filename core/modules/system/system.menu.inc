@@ -316,7 +316,7 @@ function system_menu_tree_prune_tree(array &$tree, $level, array $parent_item = 
     $found_active_trail = FALSE;
     // Examine each element at this level for the active trail.
     foreach ($tree as $key => &$value) {
-      // Also include the children of the front page.
+      // Also include the children of the home page.
       if ($tree[$key]['link']['in_active_trail'] || ($tree[$key]['link']['link_path'] == '<front>' && $is_front_page)) {
         // Get the title for the pruned tree.
         system_menu_block_set_title($tree[$key]['link']);

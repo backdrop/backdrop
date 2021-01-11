@@ -1106,7 +1106,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     );
     language_save($language);
 
-    // Request front page in French and check for matching Content-language.
+    // Request home page in French and check for matching Content-language.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE, 'language' => $language)));
     $this->assertEqual($request->headers['content-language'], 'fr', t('Content-Language HTTP header is French.'));
   }
