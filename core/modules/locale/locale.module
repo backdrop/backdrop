@@ -633,6 +633,7 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
       db_merge('locales_source')
         ->insertFields(array(
           'location' => request_uri(),
+          'textgroup' => 'default',
           'version' => BACKDROP_VERSION,
         ))
         ->key(array(
