@@ -219,23 +219,12 @@ function locale_update_dependencies() {
  */
 
 /**
- * Drop textgroup support.
- *
- * Update assumes i18n migrated this data before the update happened. Core
- * never used textgroups for anything, so it is not our job to find place
- * for the data elsewhere.
+ * Update removed.
  */
 function locale_update_1000() {
-  $subquery = db_select('locales_source', 'ls')
-    ->fields('ls', array('lid'))
-    ->condition('ls.textgroup', 'default', '<>');
-  db_delete('locales_target')
-    ->condition('lid', $subquery, 'IN')
-    ->execute();
-  db_delete('locales_source')
-    ->condition('textgroup', 'default', '<>')
-    ->execute();
-  db_drop_field('locales_source', 'textgroup');
+// Previously this was "Drop textgroup support." But locale_update_1006() adds
+// textgroup back in to provide backwards-compatibility for i18n and other
+// modules.
 }
 
 /**
@@ -389,7 +378,9 @@ function locale_update_1005() {
  * Add textgroup to locales_source.
  */
 function locale_update_1006() {
-  if (db_field_exists('locale_source', 'textgroup')) {
+  // Textgroup was previously removed in locale_update_1001() but reverting
+  // that change here.
+  if (db_field_exists('locales_source', 'textgroup')) {
     return;
   }
 
@@ -400,9 +391,9 @@ function locale_update_1006() {
     'default' => 'default',
     'description' => 'A module defined group of translations, see hook_locale().',
   );
-  db_add_field('locale_source', 'textgroup', $schema);
+  db_add_field('locales_source', 'textgroup', $schema);
 
-  db_update('locale_source')
+  db_update('locales_source')
   ->fields(array(
     'textgroup' => 'default',
   ))
