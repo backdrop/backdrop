@@ -2189,14 +2189,10 @@ function system_urls_settings($form, &$form_state) {
   }
 
   $form['#config'] = 'system.core';
-  $form['clean_urls'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Clean URLs'),
-  );
   // If clean URLs are available, or if the user must be able to resolve a
   // conflicting setting, show the enable/disable form.
   if ($available || $conflict) {
-    $form['clean_urls']['clean_url'] = array(
+    $form['clean_url'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable clean URLs'),
       '#default_value' => $config->get('clean_url'),
@@ -2222,6 +2218,10 @@ function system_urls_settings($form, &$form_state) {
     backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url" target="_blank">online handbook</a>.', array('@url' => url('https://backdropcms.org/user-guide/clean-urls'))), 'info');
 
     $form_state['redirect'] = url('admin/config/urls/settings');
+    $form['clean_urls'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Clean URLs'),
+    );
     $form['clean_urls']['clean_url_test'] = array(
       '#type' => 'submit',
       '#value' => t('Run the clean URL test'),
