@@ -339,10 +339,9 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
   // list. The source language is English for built-in strings and the default
   // language for other strings.
   $languages = language_list();
-  $default = language_default();
-  // We don't need the default language value, that value is in $source.
-  $omit = $source->textgroup == 'default' ? 'en' : $default->langcode;
-  unset($languages[($omit)]);
+  if (!locale_translate_english()) {
+    unset($languages['en']);
+  }
   $form['translations'] = array('#tree' => TRUE);
   // Approximate the number of rows to use in the default textarea.
   $rows = min(ceil(str_word_count($source->source) / 12), 10);
@@ -356,7 +355,7 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
   }
 
   // Fetch translations and fill in default values in the form.
-  $result = db_query("SELECT DISTINCT translation, language FROM {locales_target} WHERE lid = :lid AND language <> :omit", array(':lid' => $lid, ':omit' => $omit));
+  $result = db_query("SELECT DISTINCT translation, language FROM {locales_target} WHERE lid = :lid", array(':lid' => $lid));
   foreach ($result as $translation) {
     $form['translations'][$translation->language]['#default_value'] = $translation->translation;
   }
