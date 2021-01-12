@@ -430,21 +430,6 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
 }
 
 /**
- * Ajax callback to replace the menu item parent options.
- *
- * Whenever the item language changes, the available parents also have to get
- * updated.
- */
-function menu_update_parent_options_ajax($form, $form_state) {
-  $item = $form['original_item']['#value'];
-  if (isset($form_state['values']['langcode'])) {
-    $item['langcode'] = $form_state['values']['langcode'];
-    $form['parent']['#options'] = menu_parent_options(menu_get_menus(), $item);
-  }
-  return $form['parent'];
-}
-
-/**
  * Validate form values for a menu link being added or edited.
  */
 function menu_edit_item_validate($form, &$form_state) {
