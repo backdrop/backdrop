@@ -7,7 +7,7 @@
  */
 
 /**
- * Output a list of pages that are managed.
+ * Output a list of layouts that are managed.
  */
 function layout_list_page() {
   $layouts = layout_load_all();
@@ -85,7 +85,46 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
+  $help_items = array();
+  $help_items[] = t('The various paths that layouts handle are listed here alphabetically.');
+  $help_items[] = t('Each path is used as a group, to hold all layouts that may possibly apply to it (layouts are grouped within the path they may handle).');
+  $help_items[] = t('To determine which layout is to be used for a page, the path of the page is matched against the ones in this table.');
+  $help_items[] = t('Paths without a layout explicitly defined for them are not listed here. In that case, one of the <em>Default layouts</em> will be used (listed at the bottom of the table).');
+  $help_items[] = array(
+    'data' => t('Each path listed here may have either one or multiple layouts defined within its group:'),
+    'children' => array(
+      t('If any path has <strong>exactly one layout defined</strong>, then that layout will be used (unless visibility conditions rule it out).'),
+      array(
+        'data' => t('If any path has <strong>multiple layouts defined</strong>, then:'),
+        'children' => array(
+          t('Starting from top to bottom, all layouts <em>within the path group</em> are checked for matching visibility conditions.'),
+          t('The first layout within the path group that matches all conditions will be the one that gets used.'),
+          t('To affect priority, you may reorder any layout <em>within the same path group</em>.'),
+          t('If no matching layout is found, it will fall back to one of the Default layouts.'),
+        ),
+      ),
+    ),
+  );
+  $help = theme('item_list', array('items' => $help_items));
+  $help .= t('For more information and details, see the <a href="@documentation" target="_blank">online documentation</a>.');
+
   $page = array();
+  $page['help'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Help'),
+    '#parents' => array(),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $page['help']['help_text'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
+  // The collapsibility of the fiedlset doesn't work, because this page is not a
+  // form. We use form_process_fieldset() to fix that.
+  $form_state = array();
+  form_process_fieldset($page['help'], $form_state);
+
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $page['table'] = array(
     '#theme' => 'table',
