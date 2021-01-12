@@ -735,12 +735,14 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
  * @see taxonomy_form_term_submit()
  */
 function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, TaxonomyVocabulary $vocabulary = NULL) {
-  // During initial form build, add the term entity to the form state for use
-  // during form building and processing. During a rebuild, use what is in the
-  // form state.
+  // Load the vocabulary from the term, if not already provided.
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
   }
+  
+  // During initial form build, add the term entity to the form state for use
+  // during form building and processing. During a rebuild, use what is in the
+  // form state.
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
