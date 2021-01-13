@@ -575,7 +575,7 @@ class MenuTestCase extends BackdropWebTestCase {
    * Get standard menu link.
    */
   private function getStandardMenuLink() {
-    // Retrieve menu link id of the Log out menu link, which will always be on the front page.
+    // Retrieve menu link id of the Log out menu link, which will always be on the home page.
     $mlid = db_query("SELECT mlid FROM {menu_links} WHERE module = 'system' AND router_path = 'user/logout'")->fetchField();
     $this->assertTrue($mlid > 0, 'Standard menu link id was found');
     // Load menu link.

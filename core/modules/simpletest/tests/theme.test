@@ -19,7 +19,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
    * Test function theme_get_suggestions() for SA-CORE-2009-003.
    */
   function testThemeSuggestions() {
-    // Set the front page as something random otherwise the CLI
+    // Set the home page as something random otherwise the CLI
     // test runner fails.
     config_set('system.core', 'site_frontpage', 'nobody-home');
     $args = array('node', '1', 'edit');
@@ -59,18 +59,18 @@ class ThemeUnitTest extends BackdropWebTestCase {
   }
 
   /**
-   * Ensure page-front template suggestion is added when on front page.
+   * Ensure page-front template suggestion is added when on home page.
    */
   function testFrontPageThemeSuggestion() {
     $q = $_GET['q'];
     // Set $_GET['q'] to node because theme_get_suggestions() will query it to
-    // see if we are on the front page.
+    // see if we are on the home page.
     config_set('system.core', 'site_frontpage', 'node');
     $_GET['q'] = 'node';
     $suggestions = theme_get_suggestions(explode('/', $_GET['q']), 'page');
     // Set it back to not annoy the batch runner.
     $_GET['q'] = $q;
-    $this->assertTrue(in_array('page__front', $suggestions), 'Front page template was suggested.');
+    $this->assertTrue(in_array('page__front', $suggestions), 'Home page template was suggested.');
   }
 
   /**
@@ -301,7 +301,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected = '';
     $this->assertThemeOutput('links', $variables, $expected, 'Empty %callback with heading generates no output.');
 
-    // Set the current path to the front page path.
+    // Set the current path to the home page path.
     // Required to verify the "active" class in expected links below, and
     // because the current path is different when running tests manually via
     // simpletest.module ('batch') and via the testing framework ('').
@@ -319,7 +319,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'title' => 'Plain "text"',
       ),
       'front page' => array(
-        'title' => 'Front page',
+        'title' => 'Home page',
         'href' => '<front>',
       ),
     );
@@ -328,7 +328,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected_links .= '<ul id="somelinks">';
     $expected_links .= '<li class="a-link odd first"><a href="' . url('a/link') . '">' . check_plain('A <link>') . '</a></li>';
     $expected_links .= '<li class="plain-text even"><span>' . check_plain('Plain "text"') . '</span></li>';
-    $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active">' . check_plain('Front page') . '</a></li>';
+    $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active">' . check_plain('Home page') . '</a></li>';
     $expected_links .= '</ul>';
 
     // Verify that passing a string as heading works.

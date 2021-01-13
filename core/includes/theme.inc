@@ -2693,7 +2693,7 @@ function template_preprocess_page(&$variables) {
   // This allows for easy CSS overrides based on context (home page, node of
   // certain type, etc.).
 
-  // Add a class that tells us whether we're on the front page or not.
+  // Add a class that tells us whether we're on the home page or not.
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';
   }

@@ -548,7 +548,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
       );
       user_cancel($edit, $account->uid, $account->data['user_cancel_method']);
       // Since user_cancel() is not invoked via Form API, batch processing needs
-      // to be invoked manually and should redirect to the front page after
+      // to be invoked manually and should redirect to the home page after
       // completion.
       batch_process('');
     }

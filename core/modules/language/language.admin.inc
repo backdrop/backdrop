@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administration functions for language.module.
+ * Admin page callbacks for the Language module.
  */
 
 /**

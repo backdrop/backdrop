@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides the Views' administrative interface.
+ * Admin page callbacks for the Views UI module.
  */
 
 /**
