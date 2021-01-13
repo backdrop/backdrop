@@ -29,7 +29,7 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
+      $row[] = array('data' => t('Default layouts'));
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';

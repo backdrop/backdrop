@@ -84,13 +84,22 @@ function theme_layout_condition_info($variables) {
   foreach ($layout->conditions as $access_key => $layout_access) {
     $conditions[] = $layout_access->summary();
   }
-  $output  = '<div class="layout-conditions-list">';
+  $output = '<div class="layout-conditions-list">';
   if (empty($conditions)) {
-    $output .= t('No conditions set.');
+    switch ($layout->name) {
+      case 'default':
+        $conditions[] = t('No other layout matches');
+        $conditions[] = t('Is not an administrative page.');
+        break;
+      case 'admin_default':
+        $conditions[] = t('No other layout matches');
+        $conditions[] = t('Is an administrative page.');
+        break;
+      default:
+        $output .= t('No conditions set.');
+    }
   }
-  else {
-    $output .= theme('item_list', array('items' => $conditions));
-  }
+  $output .= theme('item_list', array('items' => $conditions));
   $output .= '</div>';
 
   return $output;
