@@ -219,15 +219,8 @@ function locale_update_dependencies() {
  * for the data elsewhere.
  */
 function locale_update_1000() {
-  $subquery = db_select('locales_source', 'ls')
-    ->fields('ls', array('lid'))
-    ->condition('ls.textgroup', 'default', '<>');
-  db_delete('locales_target')
-    ->condition('lid', $subquery, 'IN')
-    ->execute();
-  db_delete('locales_source')
-    ->condition('textgroup', 'default', '<>')
-    ->execute();
+  // Update removed, which was deleting all non-default translations.
+  // See https://github.com/backdrop/backdrop-issues/issues/4874.
   db_drop_field('locales_source', 'textgroup');
 }
 
