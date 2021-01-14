@@ -2621,7 +2621,7 @@ function url($path = NULL, array $options = array()) {
     }
   }
 
-  // The special path '<front>' links to the default front page.
+  // The special path '<front>' links to the default home page.
   if ($path == '<front>') {
     $path = '';
   }

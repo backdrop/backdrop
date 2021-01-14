@@ -3686,7 +3686,7 @@ function language_default() {
  *   base_path() returns "/backdropfolder/".
  * - http://example.com/path/alias (which is a path alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
- * - http://example.com/index.php returns an empty string (meaning: front page).
+ * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.
  *
  * @return
@@ -3718,13 +3718,13 @@ function request_path() {
     // If the path equals the script filename, either because 'index.php' was
     // explicitly provided in the URL, or because the server added it to
     // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-    // versions of Microsoft IIS do this), the front page should be served.
+    // versions of Microsoft IIS do this), the home page should be served.
     if ($path == basename($_SERVER['PHP_SELF'])) {
       $path = '';
     }
   }
   else {
-    // This is the front page.
+    // This is the home page.
     $path = '';
   }
 
