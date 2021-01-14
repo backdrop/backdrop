@@ -185,9 +185,8 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
       }
       $this->backdropGet('node/' . $node->nid . '/edit', $options);
 
-      // The interface language is the default one, but the nodes have their
-      // langcodes set. The available parents must match the node langcode, not
-      // the interface language.
+      // The available parents must match the node langcode, not the interface
+      // language.
       $available_mlids = array();
       $option_values = $this->xpath('//select[@id="edit-menu-parent"]//option/@value');
       foreach ($option_values as $value) {
