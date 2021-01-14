@@ -379,17 +379,19 @@ function module_load_all_includes($type, $name = NULL) {
  * - Invoke hook_modules_installed().
  * - Invoke hook_modules_enabled().
  *
- * @param string $module_list
+ * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   If TRUE, dependency-checking is enabled. This means that if dependencies
- *   are available, they will be automatically added and enabled in the correct
- *   order. If they are unavailable, the module(s) will not be enabled.
- *   Note that dependency-checking incurs a significant performance cost. If
- *   FALSE, dependency-checking is bypassed and the module(s) will be enabled
- *   regardless of whether or not their dependencies are available or listed in
- *   the correct order. This could lead to problems, and so should only be used
- *   if you know $module_list is already complete and in the correct order.
+ *   - If TRUE, dependency-checking is enabled. This means that if dependencies
+ *     are available, they will be automatically added and enabled in the
+ *     correct order. If they are unavailable, the module(s) will not be
+ *     enabled. Note that dependency-checking incurs a significant performance
+ *     cost.
+ *   - If FALSE, dependency-checking is bypassed and the module(s) will be
+ *     enabled regardless of whether or not their dependencies are available or
+ *     listed in the correct order. This could lead to problems, and so should
+ *     only be used if you know $module_list is already complete and in the
+ *     correct order.
  *
  * @return bool
  *   If $enable_dependencies is TRUE and one or more dependencies are missing,
