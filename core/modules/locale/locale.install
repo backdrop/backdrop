@@ -219,12 +219,16 @@ function locale_update_dependencies() {
  */
 
 /**
- * Update removed.
+ * Drop textgroup support.
+ *
+ * Update assumes i18n migrated this data before the update happened. Core
+ * never used textgroups for anything, so it is not our job to find place
+ * for the data elsewhere.
  */
 function locale_update_1000() {
-// Previously this was "Drop textgroup support." But locale_update_1006() adds
-// textgroup back in to provide backwards-compatibility for i18n and other
-// modules.
+  // Update removed. See https://github.com/backdrop/backdrop-issues/issues/4864.
+  // locale_update_1006() adds textgroup back in to provide backwards
+  // compatibility for i18n and other modules.
 }
 
 /**
@@ -380,6 +384,7 @@ function locale_update_1005() {
 function locale_update_1006() {
   // Textgroup was previously removed in locale_update_1001() but reverting
   // that change here.
+  // See https://github.com/backdrop/backdrop-issues/issues/4864.
   if (db_field_exists('locales_source', 'textgroup')) {
     return;
   }
