@@ -61,11 +61,10 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
     }
     $result = $query->execute()->fetchAllAssoc('mlid');
     $valid_mlids = array_keys($result);
+    sort($valid_mlids);
+    sort($current_options);
 
-    // Compare database result with the options from select list.
-    $intersect = array_intersect($current_options, $valid_mlids);
-
-    if (sort($intersect) == sort($result)) {
+    if ($current_options == $valid_mlids) {
       return TRUE;
     }
     return FALSE;
@@ -87,6 +86,9 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
     }
     $this->langcodes[] = 'en';
     $this->langcodes[] = LANGUAGE_NONE;
+
+    // First remove all existing menu links.
+    db_truncate('menu_links')->execute();
 
     // Add some (unnested) items to main menu.
     foreach ($this->langcodes as $langcode) {
@@ -115,8 +117,14 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
   public function testMenuParentLanguage() {
 
     foreach ($this->langcodes as $langcode) {
-      $query = array('langcode' => $langcode);
-      $this->backdropGet('admin/structure/menu/manage/main-menu/add', array('query' => $query));
+      $options = array(
+        'query' => array('langcode' => $langcode),
+      );
+      if ($langcode == 'en') {
+        // Make sure that the interface language does not match the langcode.
+        $options['language'] = language_load('es');
+      }
+      $this->backdropGet('admin/structure/menu/manage/main-menu/add', $options);
       $item_langcodes = $this->xpath('//select[@id="edit-langcode"]//option[@selected]/@value');
       // The url parameter also sets the menu item language.
       $this->assertTrue((string) $item_langcodes[0] == $langcode, 'The item langcode list has the right value selected');
@@ -170,7 +178,12 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
       );
       $this->backdropPost('node/add/page', $edit, t('Save'));
       $node = $this->backdropGetNodeByTitle($title);
-      $this->backdropGet('node/' . $node->nid . '/edit');
+      $options = array();
+      if ($langcode == 'en') {
+        // Make sure that the interface language does not match the langcode.
+        $options['language'] = language_load('es');
+      }
+      $this->backdropGet('node/' . $node->nid . '/edit', $options);
 
       // The interface language is the default one, but the nodes have their
       // langcodes set. The available parents must match the node langcode, not
