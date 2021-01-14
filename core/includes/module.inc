@@ -545,9 +545,14 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   If TRUE, dependent modules will automatically be added and disabled in the
- *   correct order. This incurs a significant performance cost, so use FALSE
- *   if you know $module_list is already complete and in the correct order.
+ *   - If TRUE, dependency-checking is enabled. This means that if there are
+ *     dependent modules, they will be automatically added and disabled in the
+ *     correct order. Note that dependency-checking incurs a significant
+ *     performance cost.
+ *   - If FALSE, dependency-checking is bypassed and dependent modules will not
+ *     be automatically added or disabled. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @see backdrop_uninstall_modules()
  * @see module_enable()
