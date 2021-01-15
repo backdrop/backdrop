@@ -41,6 +41,11 @@ define('USER_REGISTER_VISITORS', 'visitors');
 define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approval');
 
 /**
+ * Password strength modifier to encourage longer passwords.
+ */
+define('USER_PASSWORD_STRENGTH_MODIFIER', 0.7);
+
+/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -2884,6 +2889,9 @@ function user_form_process_password($element, $form_state = array()) {
       'data' => array(
         'username' => $username,
         'email' => $email,
+      ),
+      'config' => array(
+        'strengthModifier' => USER_PASSWORD_STRENGTH_MODIFIER,
       ),
     );
 

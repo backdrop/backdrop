@@ -650,7 +650,16 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   foreach ($projects as $project) {
     if ($project['type'] == 'module' && isset($modules[$project['name']])) {
       foreach ($modules as $module) {
-        if (isset($module->info['project']) && isset($modules[$project['name']]->info['project']) && $modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name && !$module->info['hidden']) {
+        // Ignore stand-alone and hidden modules.
+        if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
+          continue;
+        }
+        // The type key is required, skip over the violating module.
+        if (!isset($module->info['type'])) {
+          continue;
+        }
+        // Collect information about sub-modules.
+        if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name) {
           $projects[$module->name] = array(
             'type' => $module->info['type'],
             'title' => $module->info['name'],
