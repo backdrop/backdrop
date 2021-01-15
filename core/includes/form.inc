@@ -4933,7 +4933,7 @@ function _form_check_input_vars($count, $error_level = 'warning') {
       $warning = t('This form may be too long to work properly.');
       $notice = t('The last form processed was longer than this system can safely support.');
       $please_increase = t('This form contains @count input elements. PHP max_input_vars allows only @limit and should be increased.', $substitutions);
-      $data_loss = t('Some data may heve been lost.');
+      $data_loss = t('The form has been submitted, but data may heve been lost.');
 
       switch ($error_level) {
         case 'warning':
@@ -4955,7 +4955,41 @@ function _form_check_input_vars($count, $error_level = 'warning') {
           break;
       }
 
-      backdrop_set_message($message, $error_level);
+      // Remove existing messages that could be confusing.
+      $set_new_message = TRUE;
+      if (!empty($_SESSION['messages'])) {
+
+        $current_path = current_path();
+        foreach ($_SESSION['messages'] as $level => $set) {
+          foreach ($_SESSION['messages'][$level] as $key => $previous_message) {
+            // Look for a specific message on the permissions page.
+            if ($current_path == 'admin/config/people/permissions' && $previous_message == t('The changes have been saved.')) {
+              unset($_SESSION['messages'][$level][$key]);
+            }
+            elseif (strstr($current_path, 'admin/structure/taxonomy') && $previous_message == t('The configuration options have been saved.')) {
+              unset($_SESSION['messages'][$level][$key]);
+            }
+            elseif (strstr($current_path, 'admin/structure/menu') && $previous_message == t('Your configuration has been saved.')) {
+              unset($_SESSION['messages'][$level][$key]);
+            }
+
+            // If we are setting a warning now, but previously set an error...
+            if ($error_level == 'warning' && ($previous_message == $notice . ' ' . $data_loss || $previous_message == $data_loss . ' ' . $please_increase)) {
+              // ...don't set the warning.
+              $set_new_message = FALSE;
+            }
+          }
+
+          // Don't leave an empty set behind.
+          if (empty($_SESSION['messages'][$level])) {
+            unset($_SESSION['messages'][$level]);
+          }
+        }
+      }
+
+      if ($set_new_message) {
+        backdrop_set_message($message, $error_level);
+      }
 
       $watchdog_message = 'Form contains @count input elements but PHP max_input_vars allows only @limit. Increase max_input_vars.';
       watchdog('form', $watchdog_message, $substitutions, WATCHDOG_ERROR);
