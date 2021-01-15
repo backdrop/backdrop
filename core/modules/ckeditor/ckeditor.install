@@ -32,11 +32,6 @@ function ckeditor_requirements($phase) {
     if (user_access('administer filters')) {
       $description .= ' ' . $t('To configure text formats, visit the <a href="!url">Text editors and formats</a> configuration page.', array('!url' => url('admin/config/content/formats')));
     }
-    else {
-      $filter_admins = user_roles(TRUE, 'administer filters');
-      $description .= ' ' . $t('To be able to use CKEditor, you will need to ask a person with one of the following roles to configure the text formats you are allowed to use:');
-      $description .= theme('item_list', array('items' => $filter_admins));
-    }
 
     $requirements['ckeditor'] = array(
       'title' => $t('CKEditor'),
