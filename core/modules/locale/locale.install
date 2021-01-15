@@ -212,15 +212,26 @@ function locale_update_dependencies() {
  */
 
 /**
- * Drop textgroup support.
+ * Drop textgroup support which was not being used by core.
  *
- * Update assumes i18n migrated this data before the update happened. Core
- * never used textgroups for anything, so it is not our job to find place
- * for the data elsewhere.
+ * It also removes all "non-default" translations if Internationalization
+ * module is not being used since core will not be using them.
  */
 function locale_update_1000() {
-  // Update removed, which was deleting all non-default translations.
+  // Only delete if i18n not being used.
   // See https://github.com/backdrop/backdrop-issues/issues/4874.
+  if (!module_exists('i18n')) {
+    $subquery = db_select('locales_source', 'ls')
+      ->fields('ls', array('lid'))
+      ->condition('ls.textgroup', 'default', '<>');
+    db_delete('locales_target')
+      ->condition('lid', $subquery, 'IN')
+      ->execute();
+    db_delete('locales_source')
+      ->condition('textgroup', 'default', '<>')
+      ->execute();
+  }
+
   db_drop_field('locales_source', 'textgroup');
 }
 
