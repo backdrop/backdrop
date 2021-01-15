@@ -1184,6 +1184,8 @@ function menu_tree_output($tree, $_current_depth = 0) {
  *
  * @return
  *   An tree of menu links in an array, in the order they should be rendered.
+ *
+ * @since 1.17.5 $langcode parameter added.
  */
 function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langcode = NULL) {
   $tree = &backdrop_static(__FUNCTION__, array());
