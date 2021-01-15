@@ -72,6 +72,10 @@ function _user_password_evaluate_strength($password, $username, $email) {
   $length = backdrop_strlen($password);
   $strength = (log($cardinality) / log(2)) * $length + 1;
 
+  // Adjust the strength so that we hit our desired password length for each
+  // threshold. As computers improve, the recommended minimum length increases.
+  $strength = $strength * USER_PASSWORD_STRENGTH_MODIFIER;
+
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;
   }

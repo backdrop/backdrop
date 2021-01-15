@@ -166,13 +166,36 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
     email = emailBox.val();
   }
 
+  // The strength estimator is adapted from the "naive strength estimation"
+  // found in https://dropbox.tech/security/zxcvbn-realistic-password-strength-estimation.
+  //
+  // Strength is best measured as entropy. A more random password has a higher
+  // entropy, and, therefore, is harder to guess. The naive strength estimation
+  // looks like this:
+  //
+  // n: password length
+  // c: password cardinality: the size of the symbol space
+  //    (26 for lowercase letters only, 62 for a mix of lower+upper+numbers)
+  // entropy = n * lg(c)
+  //
+  // This equation gives the entropy in units of "bits" (per symbol) because it
+  // is using a logarithm of base 2. It's the number of times a space of
+  // possible passwords can be cut in half. The length of a password has much
+  // more influence on the entropy (that is, strength) than the diversity of
+  // symbols. For example, "correcthorsebatterystaple" is a stronger password
+  // than "aaAA11!!" even though the latter has a higher cardinality (symbol
+  // diversity).
+
   // Calculate the number of unique character sets within a string.
-  // Adapted from https://github.com/dropbox/zxcvbn.
   var cardinality = (hasLowercase * 26) + (hasUppercase * 26) + (hasNumbers * 10) + (hasPunctuation * 33);
 
   // Assign strength based on the level of entropy within the password, times
   // its length. Again, adapted from zxcvbn.
   strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
+
+  // Adjust the strength so that we hit our desired password length for each
+  // threshold. As computers improve, the recommended minimum length increases.
+  strength = strength * config.strengthModifier;
 
   // Check if password is the same as the username or email.
   if (password !== '') {
