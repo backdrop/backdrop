@@ -129,10 +129,16 @@ class EnableDisableTestCase extends ModuleTestCase {
    * Test that all core modules can be enabled, disabled and uninstalled.
    */
   function testEnableDisable() {
-    // Try to enable, disable and uninstall all core modules, unless they are
-    // hidden or required, or testing-only modules.
+    // Try to enable, disable and uninstall all core modules.
     $modules = system_rebuild_module_data();
     foreach ($modules as $name => $module) {
+      // Check the "version" key matches the Backdrop version to restrict to
+      // core modules only.
+      if (!strstr($module->uri, 'core/modules')) {
+        unset($modules[$name]);
+      }
+
+      // Exclude hidden, required, or testing-only modules.
       if ($module->info['package'] == 'Testing' || !empty($module->info['hidden']) || !empty($module->info['required'])) {
         unset($modules[$name]);
       }
@@ -1480,7 +1486,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
 }
 
 /**
- * Test front page functionality and administration.
+ * Test home page functionality and administration.
  */
 class FrontPageTestCase extends BackdropWebTestCase {
   function setUp() {
@@ -1491,21 +1497,21 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
     $this->node_path = "node/" . $this->backdropCreateNode(array('promote' => 1))->nid;
 
-    // Enable front page logging in system_test.module.
+    // Enable home page logging in system_test.module.
     config_set('system.core', 'front_page_output', 1);
   }
 
   /**
-   * Test front page functionality.
+   * Test home page functionality.
    */
   function testBackdropIsFrontPage() {
     $this->backdropGet('');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     config_set('system.core', 'site_frontpage', 'node');
     $this->backdropGet('node');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     $this->backdropGet($this->node_path);
-    $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+    $this->assertNoText(t('On home page.'), 'Path is not the home page.');
 
     // Test that the default_nodes_main setting is saved and works from
     // Site information form: /admin/config/system/site-information
@@ -1514,9 +1520,9 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $node3 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
     $this->backdropGet('');
     // Check that all three promoted nodes are on the frontpage.
-    $this->assertText($node1->title, 'node1 title found on front page.');
-    $this->assertText($node2->title, 'node2 title found on front page.');
-    $this->assertText($node3->title, 'node3 title found on front page.');
+    $this->assertText($node1->title, 'node1 title found on home page.');
+    $this->assertText($node2->title, 'node2 title found on home page.');
+    $this->assertText($node3->title, 'node3 title found on home page.');
     // Change the number of nodes allowed on frontpage.
     config_set('system.core', 'default_nodes_main', 2);
     backdrop_flush_all_caches();
@@ -1524,18 +1530,18 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
 
-    // Change the front page to an invalid path.
+    // Change the home page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->assertText(t("The path '@path' is either invalid or you do not have access to it.", array('@path' => $edit['site_frontpage'])));
 
-    // Change the front page to a valid path.
+    // Change the home page to a valid path.
     $edit['site_frontpage'] = $this->node_path;
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'), 'The front page path has been saved.');
+    $this->assertText(t('The configuration options have been saved.'), 'The home page path has been saved.');
 
     $this->backdropGet('');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     // Check that the path /node is redirected to the custom frontpage.
     $this->backdropGet('node');
     $node_alias = current_path();
@@ -1543,7 +1549,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this_alias = current_path();
     $this->assertEqual($node_alias, $this_alias, 'Path /node is redirected to custom frontpage.');
     $this->backdropGet($this->node_path);
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
   }
 }
 
@@ -2468,7 +2474,7 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
    */
   function testIndexPhpHandling() {
     $this->backdropGet('<front>');
-    $this->assertResponse(200, 'Make sure the front page returns a valid page.');
+    $this->assertResponse(200, 'Make sure the home page returns a valid page.');
 
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
@@ -2497,7 +2503,6 @@ class SystemValidTokenTest extends BackdropWebTestCase {
     // The following checks will throw PHP notices, so we disable error
     // assertions.
     $this->assertErrors = FALSE;
-    $this->assertFalse(backdrop_valid_token(NULL, new stdClass()), 'Token NULL, value object returns FALSE.');
     $this->assertFalse(backdrop_valid_token(0, array()), 'Token 0, value array returns FALSE.');
     $this->assertFalse(backdrop_valid_token('', array()), "Token '', value array returns FALSE.");
     $this->assertFalse('' === backdrop_get_token(array()), 'Token generation does not return an empty string on invalid parameters.');
@@ -2777,7 +2782,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $block_uuid = (string) $last_block[0]['data-block-id'];
     $block_edit_url = 'admin/structure/layouts/manage/default/configure-block/editor/' . $block_uuid;
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2799,7 +2804,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2817,7 +2822,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2831,7 +2836,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
     $this->assertNoLink($item1['link_title']);

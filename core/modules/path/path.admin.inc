@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the path module.
+ * Admin page callbacks for the Path module.
  */
 
 /**

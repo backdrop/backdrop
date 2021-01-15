@@ -9,7 +9,7 @@
  */
 function contextual_install() {
   // Weight must be greater than that of views module.
-  db_query("UPDATE {system} SET weight = 11 WHERE name = 'contextual'");
+  module_set_weight('contextual', 11);
 }
 
 /**
@@ -21,7 +21,7 @@ function contextual_install() {
  * Increases weight of contextual module so it runs after most other modules.
  */
 function contextual_update_1000() {
-  db_query("UPDATE {system} SET weight = 11 WHERE name = 'contextual'");
+  module_set_weight('contextual', 11);
 }
 
 /**

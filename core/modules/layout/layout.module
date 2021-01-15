@@ -331,6 +331,23 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/add'] = array(
+    'title' => 'Add context',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/edit/layout/%'] = array(
+    'title' => 'Configure context',
+    'load arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
     'title' => 'Add visibility condition',
     'page callback' => 'backdrop_get_form',
@@ -459,7 +476,7 @@ function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_positio
   $contexts = $menu_item->getContexts();
   $context_info = layout_get_context_info($contexts[$arg_position]->plugin);
   if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-    return $context_info['load callback']($arg_value);
+    return call_user_func_array($context_info['load callback'], array($arg_value));
   }
 
   // Pass-through the string argument if no load callback specified.
@@ -946,7 +963,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * Load all layouts at a given path.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
@@ -976,9 +993,6 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
-    foreach ($layouts as $layout) {
-      $layout->resetContexts();
-    }
     cache('layout_path')->set($path, $layouts);
   }
   return $layouts;
@@ -1184,7 +1198,7 @@ function layout_provides_path($path) {
  * are passed. In which case the current path will be used.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  * @param $router_item
  *   The menu router item for the page currently being loaded.
  *   The $path parameter will be ignored if $router_item is specified.
@@ -1243,8 +1257,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
           if (!is_object($context->data)) {
             $context_info = layout_get_context_info($context->plugin);
             if (isset($context_info['load callback'])) {
-              $function = $context_info['load callback'];
-              $context_data = $function($router_item['original_map'][$context->position]);
+              $context_data = call_user_func_array($context_info['load callback'], $router_item['original_map'][$context->position]);
               $context->setData($context_data);
             }
           }
@@ -1684,9 +1697,6 @@ function layout_set_layout_tempstore($item, $type = 'layout') {
     return;
   }
 
-  // Layout contexts should not be stored in the tempstore, they're generated on
-  // the fly when needed after loading.
-  $item->resetContexts();
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
@@ -1732,7 +1742,7 @@ function layout_tempstore_block_load($layout_block_uuid, $layout_name) {
 }
 
 /**
- * Given a path with wildcard placeholders (%), determine the required contexts.
+ * Given a path with placeholders (%), determine the required contexts.
  *
  * @param string $path
  *   The path for which required contexts should be retrieved.
@@ -1755,7 +1765,7 @@ function layout_context_required_by_path($path) {
           'plugin' => $context_info['name'],
         );
       }
-      // If the path matches based on % wildcards, add this context as a
+      // If the path matches based on % placeholders, add this context as a
       // required context info in the correct order.
       elseif (strpos($path, $cleaned_path) === 0) {
         // Determine the argument placement within the path.
@@ -1772,7 +1782,7 @@ function layout_context_required_by_path($path) {
     }
   }
 
-  // If any wildcards are not filled, populate with a placeholder context
+  // If any placeholders are not filled, populate with a placeholder context
   // that can be modified.
   $parts = explode('/', $path);
   foreach ($parts as $part_index => $part) {

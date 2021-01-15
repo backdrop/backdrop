@@ -1044,8 +1044,8 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     // Uninstall the module.
     module_load_install($module);
     module_invoke($module, 'uninstall');
-    backdrop_uninstall_schema($module);
     config_uninstall_config($module);
+    backdrop_uninstall_schema($module);
 
     watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
     backdrop_set_installed_schema_version($module, SCHEMA_UNINSTALLED);

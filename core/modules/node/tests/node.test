@@ -230,7 +230,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     foreach ($logs as $log) {
       $this->assertText($log, t('Log message found.'));
     }
- 
+
     // Confirm that this is the active revision.
     $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
 
@@ -243,7 +243,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     )), 'Revision reverted.');
     $reverted_node = node_load($node->nid);
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), 'Node reverted correctly.');
- 
+
     // Confirm that this is not the current version.
     $node = node_load($node->nid, $node->vid);
     $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
@@ -723,7 +723,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
-    // Test that a user with permissions to create, but not edit, can still 
+    // Test that a user with permissions to create, but not edit, can still
     // access preview.
     $no_edit_user = $this->backdropCreateUser(array(
       'create page content',
@@ -740,7 +740,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
 
-    // Test that a user with permissions to edit, but not create, can still 
+    // Test that a user with permissions to edit, but not create, can still
     // access preview.
     $no_create_user = $this->backdropCreateUser(array(
       'edit any page content',
@@ -1558,31 +1558,31 @@ class NodeSaveTestCase extends BackdropWebTestCase {
 
     $node->save();
     $node = $this->backdropGetNodeByTitle('testing_node_presave', TRUE);
-    $this->assertEqual($node->created, 280299600, 'Saving a node uses "created" timestamp set in presave hook.');
-    $this->assertEqual($node->changed, 979534800, 'Saving a node uses "changed" timestamp set in presave hook.');
+    $this->assertEqual($node->created, 1421394600, 'Saving a node uses "created" timestamp set in presave hook.');
+    $this->assertEqual($node->changed, 1474011660, 'Saving a node uses "changed" timestamp set in presave hook.');
 
     // Programmatically set the timestamps on the node.
     $edit = array(
       'uid' => $this->web_user->uid,
       'type' => 'post',
       'title' => $this->randomName(8),
-      'created' => 280299600, // Sun, 19 Nov 1978 05:00:00 GMT
-      'changed' => 979534800, // Drupal 1.0 release.
+      'created' => 1421394600, // Backdrop v1.0.0 release.
+      'changed' => 1474011660, // Backdrop v1.5.0 release.
     );
 
     entity_create('node', $edit)->save();
     $node = $this->backdropGetNodeByTitle($edit['title']);
-    $this->assertEqual($node->created, 280299600, 'Creating a node uses user-set "created" timestamp.');
-    $this->assertNotEqual($node->changed, 979534800, 'Creating a node doesn\'t use user-set "changed" timestamp.');
+    $this->assertEqual($node->created, 1421394600, 'Creating a node uses user-set "created" timestamp.');
+    $this->assertNotEqual($node->changed, 1474011660, 'Creating a node doesn\'t use user-set "changed" timestamp.');
 
     // Update the timestamps.
-    $node->created = 979534800;
-    $node->changed = 280299600;
+    $node->created = 1474011660;
+    $node->changed = 1421394600;
 
     $node->save();
     $node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
-    $this->assertEqual($node->created, 979534800, 'Updating a node uses user-set "created" timestamp.');
-    $this->assertNotEqual($node->changed, 280299600, 'Updating a node doesn\'t use user-set "changed" timestamp.');
+    $this->assertEqual($node->created, 1474011660, 'Updating a node uses user-set "created" timestamp.');
+    $this->assertNotEqual($node->changed, 1421394600, 'Updating a node doesn\'t use user-set "changed" timestamp.');
   }
 
   /**
