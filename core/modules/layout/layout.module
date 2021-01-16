@@ -1813,7 +1813,12 @@ function layout_context_required_by_path($path) {
 }
 
 /**
- * Return the current user context, which is always available.
+ * Returns the current user context, which is always available.
+ *
+ * @return EntityLayoutContext
+ *   The layout context for the current user.
+ *
+ * @since 1.17.5 Function added.
  */
 function layout_current_user_context() {
   $current_user_context = layout_create_context('user', array(
