@@ -755,13 +755,14 @@ function simpletest_script_get_test_list() {
  * be comma delimited.
  *
  * @param $test_class
- *  The name of the test class to run.
+ *  The name of the test class to check.  If NULL, return the full list of
+ *  tests to skip, indexed by test class name.
  *
  * @return
  *  TRUE if the entire test class should be skipped or an array of
  *  tests to skip, which may be an empty array.
  */
-function simpletest_skip_list($test_class) {
+function simpletest_skip_list($test_class=NULL) {
   static $skip_list = NULL;
   global $args;
 
@@ -795,6 +796,9 @@ function simpletest_skip_list($test_class) {
     }
   }
 
+  if ($test_class === NULL) {
+    return $skip_list;
+  }
   return array_key_exists($test_class, $skip_list) ? $skip_list[$test_class] : array();
 }
 
@@ -810,6 +814,7 @@ function simpletest_script_reporter_init() {
     'skip' => 'Skipped',
     'exception' => 'Exception'
   );
+  $skip_list = array();
 
   echo "\n";
   echo "Backdrop test run\n";
@@ -818,18 +823,57 @@ function simpletest_script_reporter_init() {
 
   // Tell the user about what tests are to be run.
   if ($args['all']) {
+    $skip_list = simpletest_skip_list();
     $part_message = '';
     if ($args['split']) {
       list($part, $total) = explode('/', $args['split']);
       $part_message = " (part $part of $total)";
     }
-    echo "All tests will run$part_message.\n\n";
+    if ($skip_list) {
+      echo "All tests will run, except: $part_message\n";
+    }
+    else {
+      echo "All tests will run$part_message.\n\n";
+    }
   }
   else {
     echo "Tests to be run:\n";
     foreach ($test_list as $class_name) {
       $info = simpletest_test_get_by_class($class_name);
+      $skipped_tests = simpletest_skip_list($class_name);
+      if ($skipped_tests === TRUE) {
+        // If skipping all the tests, don't list in the "to be run" list.
+        // Instead, put it in a separate "to be skipped" list below.
+        $skip_list[$class_name] = TRUE;
+        continue;
+      }
       echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
+      if ($skipped_tests && is_array($skipped_tests)) {
+        echo "     except " . implode(', ', $skipped_tests) . "\n";
+      }
+    }
+    echo "\n";
+  }
+
+  if ($skip_list) {
+    if (!$args['all']) {
+      // When running all tests, we already say "except" above.
+      // When running a list of tests, we need a "to be skipped" header.
+      echo "Tests to be skipped:\n";
+    }
+    foreach ($skip_list as $class_name => $tests) {
+      if (in_array($class_name, $test_list)) {
+        $info = simpletest_test_get_by_class($class_name);
+        if ($tests === TRUE) {
+          echo " - " . $info['name'] . ' (' . $class_name . ')' . ": All\n";
+        }
+        else {
+          echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
+          foreach ($tests as $test_func) {
+            echo "   - " . $test_func . "\n";
+          }
+        }
+      }
     }
     echo "\n";
   }
