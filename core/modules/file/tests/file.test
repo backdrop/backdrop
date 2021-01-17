@@ -137,7 +137,7 @@ class FileTestHelper extends BackdropWebTestCase {
   /**
    * Overrides BackdropWebTestCase::backdropGetToken() to support the hash salt.
    *
-   * @todo Remove when http://backdrop.org/node/1555862 is fixed in core.
+   * @todo Remove when https://www.drupal.org/node/1555862 is fixed in core.
    */
   protected function backdropGetToken($value = '') {
     $private_key = backdrop_get_private_key();
@@ -1840,7 +1840,7 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
 class FileUnitTestCase extends FileTestHelper {
 
   /**
-   * Regression tests for core issue http://backdrop.org/node/1239376.
+   * Regression tests for core issue https://www.drupal.org/node/1239376.
    */
   function testMimeTypeMappings() {
     $tests = array(
