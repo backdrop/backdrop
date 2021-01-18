@@ -134,12 +134,14 @@ function hook_filter_info_alter(&$info) {
  *   which should be unique and therefore prefixed with the name of the module.
  *   Each value is an associative array describing the editor, with the
  *   following elements (all are optional except as noted):
- *   - title: (required) A human readable name for the editor.
+ *   - label: (required) A human readable name for the editor.
  *   - settings callback: The name of a function that returns configuration
  *     form elements for the editor. See hook_editor_EDITOR_settings() for
  *     details.
  *   - default settings: An associative array containing default settings for
  *     the editor, to be applied when the editor has not been configured yet.
+ *   - file: The name of a file containing the editor settings callback.
+ *   - library: An associative array containing additional libraries.
  *   - js settings callback: The name of a function that returns configuration
  *     options that should be added to the page via JavaScript for use on the
  *     client side. See hook_editor_EDITOR_js_settings() for details.
@@ -149,13 +151,15 @@ function hook_filter_info_alter(&$info) {
  */
 function hook_editor_info() {
   $editors['myeditor'] = array(
-    'title' => t('My Editor'),
+    'label' => t('My Editor'),
     'settings callback' => '_myeditor_settings',
     'default settings' => array(
       'enable_toolbar' => TRUE,
       'toolbar_buttons' => array('bold', 'italic', 'underline', 'link', 'image'),
       'resizeable' => TRUE,
     ),
+    'file' => 'myeditor.admin.inc',
+    'library' => array('myeditor', 'backdrop.myeditor'),
     'js settings callback' => '_myeditor_js_settings',
   );
   return $editors;
@@ -169,7 +173,7 @@ function hook_editor_info() {
  *   implementations.
  */
 function hook_editor_info_alter(&$editors) {
-  $editors['some_other_editor']['title'] = t('A different name');
+  $editors['some_other_editor']['label'] = t('A different name');
 }
 
 /**
