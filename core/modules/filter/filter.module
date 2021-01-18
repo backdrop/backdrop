@@ -1410,7 +1410,8 @@ function filter_process_format($element) {
  */
 function filter_get_attached($formats) {
   $attached = array();
-
+  $attached['library'][] = array('filter', 'filter');
+  
   foreach ($formats as $format) {
     // Add the library associated with a format's editor if exists.
     if ($format->editor && ($editor = filter_editor_load($format->editor)) && isset($editor['library'])) {
