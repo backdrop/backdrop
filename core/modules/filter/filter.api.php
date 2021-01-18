@@ -146,8 +146,8 @@ function hook_filter_info_alter(&$info) {
  *     options that should be added to the page via JavaScript for use on the
  *     client side. See hook_editor_EDITOR_js_settings() for details.
  *
- * @see filter_example.module
- * @see hook_filter_info_alter()
+ * @see ckeditor.module
+ * @see hook_editor_info_alter()
  */
 function hook_editor_info() {
   $editors['myeditor'] = array(
