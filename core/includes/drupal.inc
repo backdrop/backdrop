@@ -2476,8 +2476,6 @@ function drupal_substr($text, $start, $length = NULL) {
   return backdrop_substr($text, $start, $length);
 }
 
-// Functions from utility.inc.
-
 /**
  * Backdrop-friendly var_export().
  *
