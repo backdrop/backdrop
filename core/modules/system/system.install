@@ -3154,7 +3154,7 @@ function system_update_1073() {
 function system_update_1074() {
   $config = config('system.core');
   $available = $config->get('_config_translatables');
-  if (count($available) < 4 ) {
+  if ($available === NULL || count($available) < 4 ) {
     $system_translatables = array(
       'anonymous',
       'site_name',

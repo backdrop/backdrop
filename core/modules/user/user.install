@@ -1246,7 +1246,7 @@ function user_update_1019() {
 function user_update_1020() {
   $mail_config = config('user.mail');
   $available = $mail_config->get('_config_translatables');
-  if (count($available) < 18 ) {
+  if ($available === NULL || count($available) < 18 ) {
     $mail_translatables = array(
       'cancel_confirm_body',
       'cancel_confirm_subject',
