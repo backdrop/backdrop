@@ -3149,6 +3149,24 @@ function system_update_1073() {
 }
 
 /**
+ * Make sure that all config translatables are set for system core.
+ */
+function system_update_1074() {
+  $config = config('system.core');
+  $available = $config->get('_config_translatables');
+  if (count($available) < 4 ) {
+    $system_translatables = array(
+      'anonymous',
+      'site_name',
+      'site_slogan',
+      'maintenance_mode_message',
+    );
+    $config->set('_config_translatables', $system_translatables);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
