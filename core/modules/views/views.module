@@ -2249,3 +2249,19 @@ function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
     return $class;
   }
 }
+
+/**
+ * Returns an array of HTML elements used for rewriting fields.
+ *
+ * @return array
+ *   An associative array of HTML elements.
+ */
+function views_field_rewrite_elements() {
+  $options = array(
+    '' => '- ' . t('Use default') . ' -',
+    0 => '- ' . t('None') . ' -',
+  );
+  $elements = backdrop_html_elements(TRUE);
+
+  return array_merge($options, $elements);
+}

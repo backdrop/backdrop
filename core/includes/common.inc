@@ -4396,6 +4396,41 @@ function backdrop_region_class($region) {
 }
 
 /**
+ * Returns an array of common HTML elements.
+ *
+ * These elements are typically used as wrapper tags, and the output of this
+ * function can be used to populate selectable options in form elements.
+ *
+ * @param bool $inline
+ *   Whether or not to include inline elements in the array.
+ *
+ * @return array
+ *   An associative array of HTML elements.
+ */
+function backdrop_html_elements($inline = FALSE) {
+  // Common block-level elements.
+  $elements = array(
+    'div' => 'DIV',
+    'h1' => 'H1',
+    'h2' => 'H2',
+    'h3' => 'H3',
+    'h4' => 'H4',
+    'h5' => 'H5',
+    'h6' => 'H6',
+    'p' => 'P',
+  );
+
+  // Add common inline elements.
+  if ($inline) {
+    $elements['span'] = 'SPAN';
+    $elements['strong'] = 'STRONG';
+    $elements['em'] = 'EM';
+  }
+
+  return $elements;
+}
+
+/**
  * Adds a JavaScript file, setting, or inline code to the page.
  *
  * The behavior of this function depends on the parameters it is called with.

@@ -3,7 +3,7 @@
 /**
  * PageComponents extends Block
  *
- * This class allows us to display the page title, local task tabs, 
+ * This class allows us to display the page title, local task tabs,
  * local actions links, and messages in a block.
  */
 class PageComponents extends Block {
@@ -75,15 +75,7 @@ class PageComponents extends Block {
       $form['title_wrapper']['title_tag'] = array(
         '#title' => t('Title tag'),
         '#type' => 'select',
-        '#options' => array(
-          'h1' => 'H1',
-          'h2' => 'H2',
-          'h3' => 'H3',
-          'h4' => 'H4',
-          'h5' => 'H5',
-          'h6' => 'H6',
-          'div' => 'DIV',
-        ),
+        '#options' => backdrop_html_elements(),
         '#default_value' => $this->settings['title_tag'],
       );
       $form['title_wrapper']['title_classes'] = array(

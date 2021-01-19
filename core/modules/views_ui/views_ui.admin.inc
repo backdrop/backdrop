@@ -4642,7 +4642,7 @@ function views_ui_admin_settings_advanced() {
 
   $form['field_rewrite_elements'] = array(
     '#type' => 'value',
-    '#value' => $config->get('field_rewrite_elements'),
+    '#value' => views_field_rewrite_elements(),
   );
 
   $form['actions'] = array('#type' => 'actions');
