@@ -4427,6 +4427,9 @@ function backdrop_html_elements($inline = FALSE) {
     $elements['em'] = 'EM';
   }
 
+  // Allow other modules to alter this list of elements.
+  backdrop_alter('html_elements', $elements);
+
   return $elements;
 }
 
