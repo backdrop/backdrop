@@ -191,9 +191,9 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           );
           $items["$path/display/%/reset"] = array(
-            'title' => 'Reset to default',
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_view_mode_reset_form', $entity_type, $bundle_arg, $view_mode_position),
+            'title' => 'Reset Display mode',
+            'page callback' => 'field_ui_view_mode_reset',
+            'page arguments' => array($entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
