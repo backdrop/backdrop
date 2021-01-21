@@ -41,6 +41,14 @@
   color: #555555;
   padding-right: 24px;
 }
+[dir="rtl"] .js .menu-dropdown a,
+[dir="rtl"] .js .menu-dropdown a:hover,
+[dir="rtl"] .js .menu-dropdown a:focus,
+[dir="rtl"] .js .menu-dropdown a:active,
+[dir="rtl"] .js .menu-dropdown a.highlighted {
+  padding-right: 0;
+  padding-left: 24px;
+}
 .menu-dropdown a.disabled {
   color: #bbbbbb;
 }

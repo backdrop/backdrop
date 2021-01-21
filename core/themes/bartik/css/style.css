@@ -581,8 +581,13 @@ ul.tips {
   line-height: 2.4em;
   padding: 0 0.8em;
 }
+/* Prevents the sub-menu indicator (arrow) overlapping the text. */
 .js .menu-dropdown .has-children a {
   padding-right: 2.5em;
+}
+[dir="rtl"] .js .menu-dropdown .has-children a {
+  padding-right: 0.8em;
+  padding-left: 2.5em;
 }
 .l-header ul.menu li li a {
   background: rgba(255, 255, 255, 0.8);
