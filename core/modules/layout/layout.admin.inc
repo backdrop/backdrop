@@ -11,6 +11,7 @@
  */
 function layout_list_page() {
   $layouts = layout_load_all();
+  $layout_template_info = layout_get_layout_template_info();
 
   // Group layouts by path.
   $path_groups = array();
@@ -68,7 +69,7 @@ function layout_list_page() {
       }
 
       // Create a link to the settings page.
-      $info = layout_get_layout_template_info($layout->layout_template);
+      $info = $layout_template_info[$layout->layout_template];
       $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
 
       $row = array();
@@ -3060,7 +3061,6 @@ function layout_block_list() {
           }
         }
         $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
-        // $block_name = check_plain($block['info']) . ' (' . $delta . ')';
         $block_name = theme('label_machine_name__layout_block', array(
           'label' => $block['info'],
           'machine_name' => $delta,

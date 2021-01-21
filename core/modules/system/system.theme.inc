@@ -800,12 +800,12 @@ function system_preprocess_page_components(&$variables) {
 }
 
 /**
- * Returns HTML for the display of a label with both human and machine names.
+ * Returns HTML for the display of a label and its machine name.
  *
  * @param array $variables
  *   An associative array containing:
- *   - label: The human-readable name or label.
- *   - machine_name: (optional) The machine-safe name or label.
+ *   - label: The human-readable label.
+ *   - machine_name: (optional) The machine-safe name.
  *
  * @ingroup themeable
  */
