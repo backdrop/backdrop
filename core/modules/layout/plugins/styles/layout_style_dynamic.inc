@@ -47,7 +47,7 @@ class LayoutStyleDynamic extends LayoutStyle {
       $form['title_tag'] = array(
         '#title' => t('Heading level'),
         '#type' => 'select',
-        '#options' => backdrop_html_elements(),
+        '#options' => backdrop_html_elements(array('block')),
         '#default_value' => $this->settings['title_tag'],
         '#weight' => 2,
       );

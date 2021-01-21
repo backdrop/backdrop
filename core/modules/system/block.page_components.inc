@@ -75,7 +75,7 @@ class PageComponents extends Block {
       $form['title_wrapper']['title_tag'] = array(
         '#title' => t('Title tag'),
         '#type' => 'select',
-        '#options' => backdrop_html_elements(),
+        '#options' => backdrop_html_elements(array('block')),
         '#default_value' => $this->settings['title_tag'],
       );
       $form['title_wrapper']['title_classes'] = array(

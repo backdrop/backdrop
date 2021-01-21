@@ -2974,17 +2974,10 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
 
   $form['#tree'] = TRUE;
 
-  $options = array(
-    '' => 'No inner wrapper',
-    'div' => 'DIV',
-    'nav' => 'NAV',
-    'aside' => 'ASIDE',
-    'section' => 'SECTION',
-  );
   $form['element'] = array(
     '#title' => t('HTML element for inner wrapper'),
     '#type' => 'select',
-    '#options' => $options,
+    '#options' => array('' => 'No inner wrapper') + backdrop_html_elements(array('layout')),
     '#default_value' => isset($layout->settings[$region_name]['element']) ? $layout->settings[$region_name]['element'] : '',
   );
   $form['classes'] = array(

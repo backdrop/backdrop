@@ -2271,7 +2271,7 @@ function views_field_rewrite_elements() {
       '' => '- ' . t('Use default') . ' -',
       0 => '- ' . t('None') . ' -',
     );
-    $elements = backdrop_html_elements(TRUE);
+    $elements = backdrop_html_elements(array('block', 'inline'));
     return array_merge($options, $elements);
   }
 }

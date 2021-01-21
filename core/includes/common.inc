@@ -4401,36 +4401,57 @@ function backdrop_region_class($region) {
  * These elements are typically used as wrapper tags, and the output of this
  * function can be used to populate selectable options in form elements.
  *
- * @param bool $inline
- *   Whether or not to include inline elements in the array.
+ * @param array $types
+ *   The types of elements that should be returned. Can be any of: 'block',
+ *   'inline' or 'layout'. Leave blank to return all elements.
  *
  * @return array
  *   An associative array of HTML elements.
  */
-function backdrop_html_elements($inline = FALSE) {
-  // Common block-level elements.
+function backdrop_html_elements($types = array()) {
   $elements = array(
-    'div' => 'DIV',
-    'h1' => 'H1',
-    'h2' => 'H2',
-    'h3' => 'H3',
-    'h4' => 'H4',
-    'h5' => 'H5',
-    'h6' => 'H6',
-    'p' => 'P',
+    'block' => array(
+      'div' => 'DIV',
+      'h1' => 'H1',
+      'h2' => 'H2',
+      'h3' => 'H3',
+      'h4' => 'H4',
+      'h5' => 'H5',
+      'h6' => 'H6',
+      'p' => 'P',
+    ),
+    'inline' => array(
+      'span' => 'SPAN',
+      'strong' => 'STRONG',
+      'em' => 'EM',
+    ),
+    'layout' => array(
+      'div' => 'DIV',
+      'nav' => 'NAV',
+      'aside' => 'ASIDE',
+      'section' => 'SECTION',
+      'header' => 'HEADER',
+      'footer' => 'FOOTER',
+      'main' => 'MAIN',
+    ),
   );
-
-  // Add common inline elements.
-  if ($inline) {
-    $elements['span'] = 'SPAN';
-    $elements['strong'] = 'STRONG';
-    $elements['em'] = 'EM';
-  }
 
   // Allow other modules to alter this list of elements.
   backdrop_alter('html_elements', $elements);
 
-  return $elements;
+  // Return the appropriate list.
+  $list = array();
+  if (empty($types)) {
+    foreach ($elements as $type_elements) {
+      $list += $type_elements;
+    }
+  }
+  else {
+    foreach ($types as $type) {
+      $list += $elements[$type];
+    }
+  }
+  return $list;
 }
 
 /**
