@@ -2273,4 +2273,5 @@ function views_field_rewrite_elements() {
     );
     $elements = backdrop_html_elements(TRUE);
     return array_merge($options, $elements);
+  }
 }

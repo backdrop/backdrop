@@ -4640,11 +4640,6 @@ function views_ui_admin_settings_advanced() {
     '#description' => t('Select extensions of the views interface.')
   );
 
-  $form['field_rewrite_elements'] = array(
-    '#type' => 'value',
-    '#value' => views_field_rewrite_elements(),
-  );
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
