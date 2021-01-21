@@ -102,6 +102,15 @@ function theme_field_ui_view_modes($variables) {
   $entity_type = $element['#entity_type'];
   $path = $element['#admin_path'] . '/display';
 
+  // Get the node type machine name.
+  $node_type = '';
+  foreach (node_type_get_types() as $node_type_name => $node_type) {
+    if ($node_type->name == $element['#bundle']) {
+      $node_type = $node_type_name;
+      break;
+    }
+  }
+
   $rows = array();
 
   $header = array(
@@ -115,7 +124,7 @@ function theme_field_ui_view_modes($variables) {
 
   // Add the row for the default display mode.
   $row = array();
-  $row['label'] = theme('label_machine_name__node_display__' . backdrop_strtolower($element['#bundle']), array(
+  $row['label'] = theme('label_machine_name__node_display__' . $node_type, array(
     'label' => $label,
     'machine_name' => t('default'),
   ));
@@ -142,7 +151,7 @@ function theme_field_ui_view_modes($variables) {
     $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
     $row = array();
 
-    $row['label'] = theme('label_machine_name__node_display__' . backdrop_strtolower($element['#bundle']), array(
+    $row['label'] = theme('label_machine_name__node_display__' . $node_type, array(
       'label' => $view_mode_info['label'],
       'machine_name' => $view_mode_name,
     ));
