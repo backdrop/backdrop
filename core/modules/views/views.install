@@ -193,13 +193,6 @@ function views_update_1007() {
 }
 
 /**
- * Remove element list from config in favor of views_field_rewrite_elements().
- */
-function views_update_1008() {
-  config_clear('views.settings', 'views_field_rewrite_elements');
-}
-
-/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

@@ -2253,15 +2253,24 @@ function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
 /**
  * Returns an array of HTML elements used for rewriting fields.
  *
+ * In previous versions of Backdrop, this was a config value. For
+ * backwards-compatibility, we first check to see if that value still exists. If
+ * so, we use that. If not, we call the new backdrop_html_elements() function.
+ *
  * @return array
  *   An associative array of HTML elements.
  */
 function views_field_rewrite_elements() {
-  $options = array(
-    '' => '- ' . t('Use default') . ' -',
-    0 => '- ' . t('None') . ' -',
-  );
-  $elements = backdrop_html_elements(TRUE);
+  $config_value = config_get('views.settings', 'field_rewrite_elements');
 
-  return array_merge($options, $elements);
+  if (!is_null($config_value)) {
+    return $config_value;
+  }
+  else {
+    $options = array(
+      '' => '- ' . t('Use default') . ' -',
+      0 => '- ' . t('None') . ' -',
+    );
+    $elements = backdrop_html_elements(TRUE);
+    return array_merge($options, $elements);
 }
