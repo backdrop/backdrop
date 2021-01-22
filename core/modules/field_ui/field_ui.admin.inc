@@ -291,8 +291,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       t('Label'),
       t('Weight'),
       t('Parent'),
-      // Empty column for New Field's machine name.
-      '',
+      t('Machine name'),
       t('Field type'),
       t('Widget'),
       t('Operations'),
@@ -319,7 +318,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'label' => array(
         '#markup' => theme('label_machine_name__node_fields__' . $bundle, array(
           'label' => $instance['label'],
-          'machine_name' => $instance['field_name'],
         )),
       ),
       'weight' => array(
@@ -347,7 +345,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         ),
       ),
       'field_name' => array(
-        '#markup' => '',
+        '#markup' => $instance['field_name'],
       ),
       'type' => array(
         '#type' => 'link',
@@ -393,7 +391,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'label' => array(
         '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
           'label' => $extra_field['label'],
-          'machine_name' => $name,
         )),
       ),
       'weight' => array(
@@ -421,7 +418,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         ),
       ),
       'field_name' => array(
-        '#markup' => '',
+        '#markup' => $name,
       ),
       'type' => array(
         '#markup' => isset($extra_field['description']) ? $extra_field['description'] : '',
@@ -583,9 +580,6 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
           '#attributes' => array('class' => array('field-name')),
         ),
       ),
-      'type' => array(
-        '#markup' => '',
-      ),
       'field_name' => array(
         '#type' => 'select',
         '#title' => t('Existing field to share'),
@@ -594,6 +588,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#empty_option' => t('- Select an existing field -'),
         '#description' => t('Field to share'),
         '#attributes' => array('class' => array('field-select')),
+        '#cell_attributes' => array('colspan' => 2),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
       'widget_type' => array(
