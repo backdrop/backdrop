@@ -1247,6 +1247,7 @@ function user_update_1020() {
   $mail_config = config('user.mail');
   $available = $mail_config->get('_config_translatables');
   if ($available === NULL || count($available) < 18 ) {
+    // @see core/modules/user/config/user.mail.json
     $mail_translatables = array(
       'cancel_confirm_body',
       'cancel_confirm_subject',
@@ -1267,6 +1268,11 @@ function user_update_1020() {
       'status_canceled_body',
       'status_canceled_subject',
     );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $mail_translatables = array_merge($available, $mail_translatables);
+      $mail_translatables = array_values(array_unique($mail_translatables));
+    }
     $mail_config->set('_config_translatables', $mail_translatables);
     $mail_config->save();
   }
