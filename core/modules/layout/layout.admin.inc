@@ -2977,7 +2977,7 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
   $form['element'] = array(
     '#title' => t('HTML element for inner wrapper'),
     '#type' => 'select',
-    '#options' => array('' => 'No inner wrapper') + backdrop_html_elements(array('layout')),
+    '#options' => array('' => t('No inner wrapper')) + backdrop_html_elements(array('layout')),
     '#default_value' => isset($layout->settings[$region_name]['element']) ? $layout->settings[$region_name]['element'] : '',
   );
   $form['classes'] = array(
