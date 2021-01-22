@@ -1442,10 +1442,17 @@ function user_menu() {
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
   );
-  $items['admin/config/people/roles/edit/%user_role'] = array(
-    'title' => 'Edit role',
+  $items['admin/config/people/roles/configure/%user_role'] = array(
+    'title' => 'Configure role',
     'page arguments' => array('user_admin_role', 5),
     'access arguments' => array('administer permissions'),
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/people/roles/edit/%user_role'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/people/roles/configure/%user_role'),
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_CALLBACK,
   );
   $items['admin/config/people/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
