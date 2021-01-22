@@ -2141,14 +2141,14 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test adding a role.
     $role_name = '123';
     $edit = array('name' => $role_name, 'label' => $role_name);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
 
     // Try adding a duplicate role.
-    $this->backdropPost(NULL, $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertRaw(t('The machine-readable name is already in use. It must be unique.'), 'Duplicate role warning displayed.');
 
     // Test renaming a role.
