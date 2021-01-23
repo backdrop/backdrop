@@ -1194,8 +1194,8 @@ function node_update_1018() {
   // See if the content admin view has been modified on this site.
   $config = config('views.view.node_admin_content');
 
-  // Only update if view isn't overridden.
-  if ($config->get('storage') == VIEWS_STORAGE_OVERRIDE) {
+  // Only update if view isn't overridden (VIEWS_STORAGE_OVERRIDE).
+  if ($config->get('storage') == 2) {
     return;
   }
   $data = array (
@@ -1994,7 +1994,7 @@ function node_update_1021() {
 function node_update_1022() {
   $config = config('views.view.node_admin_content');
   // Only update if the view is in the default state (VIEWS_STORAGE_DEFAULT).
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') == 4) {
     $config->set('display.default.display_options.fields.timestamp', array(
       'id' => 'timestamp',
       'table' => 'history',
