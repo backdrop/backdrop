@@ -938,6 +938,13 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   elseif (is_object($bundle) && property_exists($bundle, 'label')) {
     $bundle_name = check_plain($bundle->label);
   }
+  elseif (is_string($bundle)) {
+    $entity_info = entity_get_info($entity_type);
+    if (isset($entity_info['label'])) {
+      $bundle_name = $entity_info['label'];
+    }
+  }
+
   $page_title = field_ui_manage_display_title($entity_type, $view_mode);
   backdrop_set_title(t('!page: !teaser display', array(
     '!page' => $bundle_name,
