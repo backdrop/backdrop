@@ -8805,3 +8805,52 @@ function backdrop_get_filetransfer_info() {
   }
   return $info;
 }
+
+/**
+ * Loads a file.
+ *
+ * Examples:
+ * @code
+ *   // Load node.admin.inc from the Node module.
+ *   backdrop_load_file('module', 'node', 'node.admin.inc');
+ *   // Load template.php from the Basis theme.
+ *   backdrop_load_file('theme', 'basis', 'template.php');
+ * @endcode
+ *
+ * Do not use this function to load an install file, use module_load_install()
+ * instead. Do not use this function in a global context since it requires
+ * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT .
+ * '/path/file' instead.
+ *
+ * @param string $project_type
+ *   The type of project to load the file from (i.e. module, theme, layout,
+ *   profile, theme_engine).
+ * @param string $project_name
+ *   The name of the project to load the file from (e.g. admin_bar).
+ * @param string $filename
+ *   The name of the file to load. Specify the full filename, including the
+ *   extension (e.g. admin_bar.theme.inc).
+ *
+ * @return bool
+ *   The full path to the loaded file, if successful; FALSE otherwise.
+ */
+function backdrop_load_file($project_type, $project_name, $filename) {
+  static $files = array();
+
+  if (isset($files[$project_name][$filename])) {
+    return $files[$project_name][$filename];
+  }
+
+  if (function_exists('backdrop_get_path')) {
+    $file = BACKDROP_ROOT . '/' . backdrop_get_path($project_type, $project_name) . "/$filename";
+    if (is_file($file)) {
+      require_once $file;
+      $files[$project_name][$filename] = $file;
+      return $file;
+    }
+    else {
+      $files[$project_name][$filename] = FALSE;
+    }
+  }
+  return FALSE;
+}
