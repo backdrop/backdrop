@@ -3,7 +3,7 @@
  * CSS for the responsive menu toggle checkbox / button.
  */
 
- /**
+/**
   * Menu toggle button
   */
 .menu-toggle-button {
@@ -13,7 +13,7 @@
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 @media (min-width: 25em) { /* 400px @ 16px font size */
   .menu-toggle-button {
@@ -52,12 +52,12 @@
   right: 2px;
 }
 .menu-toggle-button-icon:before {
-  content: '';
+  content: "";
   top: -7px;
   left: 0; /* LTR */
 }
 .menu-toggle-button-icon:after {
-  content: '';
+  content: "";
   top: 7px;
   left: 0; /* LTR */
 }
@@ -95,11 +95,12 @@
   border: 0;
   padding: 0;
   overflow: hidden;
-  clip: rect(1px,1px,1px,1px);
+  clip: rect(1px, 1px, 1px, 1px);
 }
 .menu-toggle-state ~ .menu {
   display: none;
 }
+
 /* Hide the menu in mobile view. */
 .menu-toggle-state:not(:checked) ~ .menu {
   display: none;

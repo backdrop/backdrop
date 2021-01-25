@@ -33,7 +33,7 @@
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   border-top: none;
   background-color: #eee;
 }
@@ -43,7 +43,7 @@
  *
  * Based on http://codepen.io/flesler/pen/AEIFc.
  */
-.caption > figcaption[contenteditable=true]:empty:before {
+.caption > figcaption[contenteditable="true"]:empty:before {
   content: attr(data-placeholder);
   font-style: italic;
 }

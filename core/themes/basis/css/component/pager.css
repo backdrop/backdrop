@@ -75,14 +75,14 @@ ul.pager {
 .pager-next a:before,
 .pager-last a:before,
 .pager-last a:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
   display: block;
   width: 0.5em;
   height: 0.5em;
-  border: 0.125rem solid #ffffff;
+  border: 0.125rem solid #fff;
   -webkit-transform: translate(-50%, -50%) rotate(45deg);
   transform: translate(-50%, -50%) rotate(45deg);
 }

@@ -121,7 +121,7 @@ input.form-radio {
 .form-required {
   color: #f00;
 }
-.marker{
+.marker {
   font-size: 0.9em;
   color: #234600;
   background-color: #e6f2ba;
@@ -145,6 +145,7 @@ abbr.ajax-changed {
 .form-type-radios.form-error {
   border: 2px solid red;
 }
+
 /* Display border on a single checkbox, but not on checkboxes within a group. */
 .form-type-checkbox.form-error {
   border: 2px solid red;
@@ -399,8 +400,8 @@ ul.primary {
 }
 ul.primary li a {
   display: block;
-  background-color: #E8E6E5;
-  border-color: #E8E6E5;
+  background-color: #e8e6e5;
+  border-color: #e8e6e5;
   border-width: 1px;
   height: auto;
   padding: .4em 1em;
@@ -453,7 +454,7 @@ ul.secondary:after {
   width: 1px; /* Shrink table cell as much as possible. */
 }
 ins.diffchange {
-  background-color: #CFDE56;
+  background-color: #cfde56;
 }
 del.diffchange {
   background-color: #ffa8a8;
@@ -465,7 +466,7 @@ del.diffchange {
   background-color: #fff4f4;
 }
 tr.odd .diff-addedline {
-  background-color: #E9EEBC;
+  background-color: #e9eebc;
 }
 tr.odd .diff-deletedline {
   background-color: #ffdbdb;
@@ -487,13 +488,13 @@ tr:hover del.diffchange {
  * Hero blocks.
  */
 .block-hero {
-  background-color: #cccccc;
+  background-color: #ccc;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top center;
   padding: 50px 100px;
   text-align: center;
-  color: #ffffff;
+  color: #fff;
   margin-bottom: 50px;
 }
 
@@ -537,7 +538,7 @@ img.align-right {
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   border-top: none;
   background-color: #eee;
 }
@@ -547,7 +548,7 @@ img.align-right {
  */
 .field-type-text-long:after,
 .field-type-text-with-summary:after {
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }

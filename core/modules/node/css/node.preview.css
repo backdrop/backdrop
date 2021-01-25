@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Styles for preview pages.
@@ -22,7 +21,7 @@ a.node-preview-backlink {
 .node-preview-backlink {
   text-decoration: none;
   display: block;
-  margin: 10px 0px;
+  margin: 10px 0;
 }
 .preview-button.form-submit {
   text-align: center;
@@ -51,9 +50,9 @@ input.node-preview-save-button.form-submit:hover {
 .node-preview-switch-button.form-submit {
   color: #828188;
   background: #fff;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
-  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
-  box-shadow: inset 0px 0px 0px 2px #97979e;
+  -webkit-box-shadow: inset 0 0 0 2px #97979e;
+  -moz-box-shadow: inset 0 0 0 2px #97979e;
+  box-shadow: inset 0 0 0 2px #97979e;
 }
 .node-preview-display-mode.form-select {
   font-weight: 400;
@@ -91,7 +90,6 @@ div.node-preview-banner-form-actions {
     float: right;
   }
   .node-preview-backlink {
-    margin: 10px;
     display: inline;
     margin: 10px 0 10px 10px;
   }

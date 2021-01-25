@@ -3,7 +3,10 @@
  * Main stylesheet for Date module.
  */
 
-/* Force start/end dates to float using inline-block, where it works, otherwise inline. */
+/**
+ * Force start/end dates to float using inline-block, where it works, otherwise
+ * inline.
+ */
 .container-inline-date {
   clear: both;
 }
@@ -80,14 +83,6 @@ fieldset.date-combo .container-inline-date > .form-item {
   padding: 0;
 }
 
-/* formatting for start/end dates in nodes and views */
-span.date-display-single {
-}
-span.date-display-start {
-}
-span.date-display-end {
-}
-
 .date-prefix-inline {
   display: inline-block;
 }
@@ -112,11 +107,11 @@ span.date-display-end {
 
 /* Calendar day css */
 div.date-calendar-day {
-  background: #F3F3F3;
-  border-top: 1px solid #EEE;
-  border-left: 1px solid #EEE;
-  border-right: 1px solid #BBB;
-  border-bottom: 1px solid #BBB;
+  background: #f3f3f3;
+  border-top: 1px solid #eee;
+  border-left: 1px solid #eee;
+  border-right: 1px solid #bbb;
+  border-bottom: 1px solid #bbb;
   color: #999;
   float: left;
   line-height: 1;
@@ -130,7 +125,7 @@ div.date-calendar-day span {
   text-align: center;
 }
 div.date-calendar-day span.month {
-  background-color: #B5BEBE;
+  background-color: #b5bebe;
   color: white;
   font-size: .9em;
   padding: 2px;

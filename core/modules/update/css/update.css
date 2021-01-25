@@ -113,7 +113,7 @@ table.update {
 }
 
 .update .version-security .version-title {
-  color: #EC351C;
+  color: #ec351c;
 }
 
 .update .check-manually {
@@ -134,5 +134,5 @@ table.update {
 }
 
 .update-major-version-warning {
-  color: #ff0000;
+  color: #f00;
 }

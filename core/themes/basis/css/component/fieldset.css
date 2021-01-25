@@ -80,7 +80,7 @@ fieldset .fieldset-wrapper {
   width: 0;
   height: 0;
   border: .32em solid transparent;
-  border-top-color: #000000;
+  border-top-color: #000;
   border-bottom: 0;
   -webkit-transform: translate(0, 0.125em);
   transform: translate(0, 0.125em);
@@ -88,9 +88,7 @@ fieldset .fieldset-wrapper {
   -webkit-transition: -webkit-transform 0.25s ease-out;
   transition: -webkit-transform 0.25s ease-out;
   transition: transform 0.25s ease-out;
-  transition:
-    transform 0.25s ease-out,
-    -webkit-transform 0.25s ease-out;
+  transition: transform 0.25s ease-out, -webkit-transform 0.25s ease-out;
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   right: 0.6em;
@@ -107,10 +105,10 @@ fieldset .fieldset-wrapper {
 }
 
 .fieldset-legend span.summary:not(:empty):before {
-  content: '(';
+  content: "(";
 }
 .fieldset-legend span.summary:not(:empty):after {
-  content: ')';
+  content: ")";
 }
 
 @media (min-width: 34em) {
@@ -125,18 +123,14 @@ fieldset .fieldset-wrapper {
 }
 
 .js fieldset.collapsed .fieldset-legend a:before {
-  -webkit-transform:
-    translate(0, 0.125em)
+  -webkit-transform: translate(0, 0.125em)
     rotate(-90deg);
-  transform:
-    translate(0, 0.125em)
+  transform: translate(0, 0.125em)
     rotate(-90deg);
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
-  -webkit-transform:
-    translate(0, 0.125em)
+  -webkit-transform: translate(0, 0.125em)
     rotate(90deg);
-  transform:
-    translate(0, 0.125em)
+  transform: translate(0, 0.125em)
     rotate(90deg);
 }

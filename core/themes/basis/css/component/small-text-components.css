@@ -29,7 +29,7 @@
 }
 
 .more-help-link a:before {
-  content: '?';
+  content: "?";
   display: inline-block;
   width: 1.3em;
   height: 1.3em;
@@ -42,7 +42,9 @@
 /**
  * Icon - External Link
  * Add following markup:
- * <span class="icon-external-link"><span class="icon-external-link-arrow"></span></span>
+ * <span class="icon-external-link">
+ *   <span class="icon-external-link-arrow"></span>
+ * </span>
  */
 .icon-external-link {
   position: relative;
@@ -59,25 +61,23 @@
   top: 0;
   right: 0;
   display: block;
-  -webkit-transform:
-    translate(0.4375em, -0.3125em)
+  -webkit-transform: translate(0.4375em, -0.3125em)
     rotate(45deg);
-  transform:
-    translate(0.4375em, -0.3125em)
+  transform: translate(0.4375em, -0.3125em)
     rotate(45deg);
   -webkit-transform-origin: top center;
   transform-origin: top left;
   box-sizing: content-box;
   width: 0.2em;
   height: 0.6em;
-  border: 0.125em solid #ffffff;
+  border: 0.125em solid #fff;
   border-top: 0;
   border-bottom: 0;
 }
 
 .icon-external-link-arrow:before,
 .icon-external-link-arrow:after {
-  content: '';
+  content: "";
   position: absolute;
 }
 
@@ -88,11 +88,9 @@
   width: 0.4em;
   height: 0.4em;
   z-index: 100;
-  -webkit-transform:
-    rotate(45deg)
+  -webkit-transform: rotate(45deg)
     translate(0.28125em, -0.01367em);
-  transform:
-    rotate(45deg)
+  transform: rotate(45deg)
     translate(0.28125em, -0.01367em);
   -webkit-transform-origin: top right;
   transform-origin: top right;
@@ -134,7 +132,7 @@ ul.links,
 
 .links li:before,
 .links li:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 0;
@@ -142,20 +140,16 @@ ul.links,
   height: 0.4375em;
   border: 0.0625rem solid #0074bd;
   border-width: 0.0625rem 0.0625rem 0 0;
-  -webkit-transform:
-    translate(-1.25em, -50%)
+  -webkit-transform: translate(-1.25em, -50%)
     rotate(45deg);
-  transform:
-    translate(-1.25em, -50%)
+  transform: translate(-1.25em, -50%)
     rotate(45deg);
 }
 
 .links li:after {
-  -webkit-transform:
-    translate(-1em, -50%)
+  -webkit-transform: translate(-1em, -50%)
     rotate(45deg);
-  transform:
-    translate(-1em, -50%)
+  transform: translate(-1em, -50%)
     rotate(45deg);
 }
 
@@ -176,7 +170,7 @@ ul.links,
 }
 
 .links.inline li:after {
-  content: ',';
+  content: ",";
   position: static;
   display: inline;
   -webkit-transform: none;
@@ -185,7 +179,7 @@ ul.links,
 }
 
 .links.inline li:last-child:after {
-  content: '';
+  content: "";
 }
 
 .links.inline .node-readmore {
@@ -193,5 +187,5 @@ ul.links,
 }
 
 .links.inline .node-readmore:after {
-  content: '';
+  content: "";
 }

@@ -3,7 +3,10 @@
  * Hero component styling.
  */
 .block-hero {
-  /* Positioning, width and transform is to make hero full width on smaller screens */
+  /**
+   * Positioning, width and transform is to make hero full width on smaller
+   * screens.
+   */
   position: relative;
   left: 50%;
   width: 100vw;
@@ -72,7 +75,7 @@
 }
 
 .no-background-blend-mode .block-hero-no-image:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;

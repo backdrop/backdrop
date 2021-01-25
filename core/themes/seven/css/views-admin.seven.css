@@ -131,7 +131,7 @@ table th {
 /* @group Attachment details */
 
 #edit-display-settings-title {
-  color: #008BCB;
+  color: #008bcb;
 }
 
 #edit-display-settings-top {
@@ -162,11 +162,11 @@ table th {
 }
 .views-displays .secondary li.add a {
   background-color: #fff;
-  color: #008BCB;
+  color: #008bcb;
 }
 .views-displays .secondary li.add a:hover {
   background-color: #f7f7f7;
-  color: #008BCB;
+  color: #008bcb;
 }
 .views-displays .secondary a:hover > .icon.add {
   background-position: center 3px;
@@ -188,7 +188,7 @@ table th {
 }
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
-  color: #008BCB;
+  color: #008bcb;
 }
 
 .views-displays .secondary .action-list  li:first-child {
@@ -207,14 +207,16 @@ table th {
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
   border-radius: 0;
-  color: #008BCB;
+  color: #008bcb;
 }
 
 /* @end */
 
-/* @group Attachment buckets
+/**
+ * @group Attachment buckets
  *
- * These are the individual "buckets," or boxes, inside the display settings area
+ * These are the individual "buckets," or boxes, inside the display settings
+ * area.
  */
 
 .views-ui-display-tab-bucket h3 {
@@ -261,11 +263,11 @@ table th {
 }
 
 #views-ui-rearrange-filter-form tr.drag td {
-  background-color: #FFEE77 !important;
+  background-color: #fe7 !important;
 }
 
 #views-ui-rearrange-filter-form tr.drag-previous td {
-  background-color: #FFFFBB !important;
+  background-color: #ffb !important;
 }
 
 /* @end */
@@ -315,7 +317,10 @@ table th {
 }
 
 .filterable-option .form-item.form-type-checkbox {
-  /* This selector is aggressive because Seven's reset for .form-items is aggressive. */
+  /**
+   * This selector is aggressive because Seven's reset for .form-items is
+   * aggressive.
+   */
   padding-bottom: 8px;
   padding-left: 8px;
   padding-top: 8px;

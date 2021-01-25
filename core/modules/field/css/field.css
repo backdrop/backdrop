@@ -1,11 +1,10 @@
-
 /* Field display */
 .field .field-label {
   font-weight: bold;
 }
 .field-label-inline .field-label,
 .field-label-inline .field-items {
-  float:left; /*LTR*/
+  float: left; /*LTR*/
 }
 [dir="rtl"] .field-label-inline .field-label,
 [dir="rtl"] .field-label-inline .field-items {

@@ -24,7 +24,7 @@
   color: #d23600;
 }
 .menu-dropdown a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 .menu-dropdown a span.sub-arrow {
   position: absolute;
@@ -41,9 +41,9 @@
 }
 .menu-dropdown span.sub-arrow:before {
   display: block;
-  content: '+';
+  content: "+";
 }
 .menu-dropdown a.highlighted span.sub-arrow:before {
   display: block;
-  content: '-';
+  content: "-";
 }

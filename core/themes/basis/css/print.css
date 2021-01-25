@@ -28,9 +28,9 @@ html.admin-bar body {
 .pager-next a,
 .pager-last a,
 .pager-item {
-  color: #000000;
+  color: #000;
 }
 
 .breadcrumb li:after {
-  border-color: #000000;
+  border-color: #000;
 }

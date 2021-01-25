@@ -20,7 +20,7 @@ hr {
   padding: 0;
   border: none;
   height: 1px;
-  background: #cccccc;
+  background: #ccc;
 }
 h1,
 h2,
@@ -68,7 +68,7 @@ blockquote {
   width: 85%;
   background-color: #fff;
   margin: 20px auto;
-  border-left: 2px solid #BDBDBD;
+  border-left: 2px solid #bdbdbd;
 }
 blockquote * {
   font-size: 95%;

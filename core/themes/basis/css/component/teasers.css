@@ -9,7 +9,7 @@
 
 .view-mode-teaser + .view-mode-teaser,
 .view-promoted .views-row {
-  border-top: 0.25rem solid #bbbbbb;
+  border-top: 0.25rem solid #bbb;
 }
 
 .view-promoted .views-row:first-child {

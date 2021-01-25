@@ -15,7 +15,7 @@
 
 .header-identity-wrapper:after {
   /* Clearfix */
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }
@@ -127,7 +127,7 @@
 
 .l-header .menu:after {
   /* Clearfix menus */
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }

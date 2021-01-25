@@ -41,42 +41,24 @@
 }
 
 .views-admin a.icon {
-  background-image:
-    url("../images/sprites.png"),
-    -moz-linear-gradient(
-      -90deg,
-      #fff 0px,
-      #e8e8e8 100%);
-  background-image:
-    url("../images/sprites.png"),
-    -webkit-gradient(
-      linear,
-      left top,
-      left bottom,
-      color-stop(0.0, rgba(255, 255, 255, 1.0)),
-      color-stop(1.0, rgba(232, 232, 232, 1.0))
-    );
-  background-image:
-    url("../images/sprites.png"),
-    -webkit-linear-gradient(
-      -90deg,
-      #fff 0px,
-      #e8e8e8 100%);
+  background-image: url("../images/sprites.png"), -moz-linear-gradient(-90deg, #fff 0, #e8e8e8 100%);
+  background-image: url("../images/sprites.png"), -webkit-gradient(linear, left top, left bottom, color-stop(0.0, rgba(255, 255, 255, 1.0)), color-stop(1.0, rgba(232, 232, 232, 1.0)));
+  background-image: url("../images/sprites.png"), -webkit-linear-gradient(-90deg, #fff 0, #e8e8e8 100%);
   background-repeat: no-repeat, repeat-y;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
-  -moz-box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
-  -webkit-box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
-  box-shadow: 0 0 0 rgba(0,0,0,0.3333) inset;
+  -moz-box-shadow: 0 0 0 rgba(0, 0, 0, 0.3333) inset;
+  -webkit-box-shadow: 0 0 0 rgba(0, 0, 0, 0.3333) inset;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.3333) inset;
 }
 
 .views-admin a.icon:hover {
   border-color: #d0d0d0;
-  -moz-box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
-  -webkit-box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
-  box-shadow: 0 0 1px rgba(0,0,0,0.3333) inset;
+  -moz-box-shadow: 0 0 1px rgba(0, 0, 0, 0.3333) inset;
+  -webkit-box-shadow: 0 0 1px rgba(0, 0, 0, 0.3333) inset;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.3333) inset;
 }
 
 .views-admin a.icon:active {
@@ -190,14 +172,17 @@ input.form-radio {
   padding-bottom: 0;
 }
 
-/* Indent form elements so they're directly underneath the label of the checkbox that reveals them */
+/**
+ * Indent form elements so they're directly underneath the label of the checkbox
+ * that reveals them.
+ */
 .views-admin .form-type-checkbox + .form-wrapper {
   margin-left: 16px; /* LTR */
 }
 
 /* Hide 'remove' checkboxes. */
 .views-remove-checkbox {
-    display: none;
+  display: none;
 }
 
 /* sizes the labels of checkboxes and radio button to the height of the text */
@@ -449,7 +434,10 @@ td.views-ui-displays ul {
   font-weight: bold;
 }
 
-/* This makes the form elements after the "Display Format" label flow underneath the label */
+/**
+ * This makes the form elements after the "Display Format" label flow underneath
+ * the label.
+ */
 .form-item-page-style-style-plugin > label,
 .form-item-block-style-style-plugin > label {
   display: block;
@@ -506,10 +494,11 @@ td.group-title {
   padding-right: 10px;
 }
 
-/* This keeps the collapsible fieldsets of options from crashing into the bottom
- * of the edit option columns. Because the edit option columns are floated, the collapsible
- * fieldsets need to be floated as well so that the margin above the fieldset interacts with
- * the float edit option columns.
+/**
+ * This keeps the collapsible fieldsets of options from crashing into the bottom
+ * of the edit option columns. Because the edit option columns are floated, the
+ * collapsible fieldsets need to be floated as well so that the margin above the
+ * fieldset interacts with the float edit option columns.
  */
 #edit-options .collapsible {
   float: left;
@@ -564,7 +553,7 @@ td.group-title {
  */
 .views-displays ul.secondary li.active a.active.error,
 .views-displays .secondary a.error {
-  border: 2px solid #ED541D;
+  border: 2px solid #ed541d;
 }
 
 .views-displays .secondary a:focus {
@@ -623,7 +612,7 @@ td.group-title {
 }
 
 .views-displays .secondary .action-list li:hover {
-  background-color: #dddddd;
+  background-color: #ddd;
 }
 
 /* @end */
@@ -658,10 +647,10 @@ td.group-title {
  */
 
 .views-display-column + .views-display-column {
-   margin-top: 0;
- }
+  margin-top: 0;
+}
 
- /* @end */
+/* @end */
 
 /* @group Auto preview
  *
@@ -709,9 +698,11 @@ td.group-title {
 
 /* @end */
 
-/* @group Attachment buckets
+/**
+ * @group Attachment buckets
  *
- * These are the individual "buckets," or boxes, inside the display settings area
+ * These are the individual "buckets," or boxes, inside the display settings
+ * area.
  */
 
 .views-ui-display-tab-bucket {
@@ -814,13 +805,13 @@ td.group-title {
 }
 
 .views-filterable-options .form-type-checkbox {
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   padding: 5px 8px;
   border-top: none;
 }
 
 .views-filterable-options {
-  border-top:  1px solid #CCC;
+  border-top: 1px solid #ccc;
 }
 
 .views-filterable-options .even .form-type-checkbox {
@@ -872,8 +863,8 @@ td.group-title {
 
 .views-ui-dialog #views-ajax-title,
 .views-ui-dialog .views-override {
-  background-color: #F3F4EE;
-  border-bottom: 1px solid #CCCCCC;
+  background-color: #f3f4ee;
+  border-bottom: 1px solid #ccc;
 }
 
 .views-ui-dialog .views-override {
@@ -909,7 +900,7 @@ td.group-title {
 }
 
 .views-ui-dialog .form-buttons {
-  background-color: #F3F4EE;
+  background-color: #f3f4ee;
   padding: 8px 13px;
 }
 .views-ui-dialog .form-buttons input {
@@ -925,7 +916,7 @@ td.group-title {
 /* @todo Make this a class to be used anywhere there's node types? */
 .form-type-checkboxes #edit-options-value,
 .form-type-checkboxes #edit-options-validate-options-node-types {
-  border-color: #CCCCCC;
+  border-color: #ccc;
   border-style: solid;
   border-width: 1px;
   max-height: 210px;
@@ -944,25 +935,25 @@ td.group-title {
 }
 
 #views-ui-rearrange-filter-form tr td[rowspan] {
-  border-color: #CDCDCD;
+  border-color: #cdcdcd;
   border-style: solid;
   border-width: 0 1px 1px 1px;
 }
 
 #views-ui-rearrange-filter-form tr[id^="views-row"] {
-  border-right: 1px solid #CDCDCD;
+  border-right: 1px solid #cdcdcd;
 }
 
 #views-ui-rearrange-filter-form tr[id^="views-row"].even td {
-  background-color: #F3F4ED;
+  background-color: #f3f4ed;
 }
 
 #views-ui-rearrange-filter-form .views-group-title {
-  border-top: 1px solid #CDCDCD;
+  border-top: 1px solid #cdcdcd;
 }
 
 #views-ui-rearrange-filter-form .group-empty {
-  border-bottom: 1px solid #CDCDCD;
+  border-bottom: 1px solid #cdcdcd;
 }
 
 /* @end */
@@ -985,7 +976,7 @@ td.group-title {
   padding-bottom: 12px;
   padding-top: 20px;
   margin: 0 0 1em;
-  border-top: 0.125em solid #CCC;
+  border-top: 0.125em solid #ccc;
 }
 
 #views-ui-preview-form {
@@ -1016,7 +1007,7 @@ td.group-title {
 }
 
 #views-live-preview .preview-section {
-  border: 1px dashed #DEDEDE;
+  border: 1px dashed #dedede;
   margin: 0 -5px;
   padding: 3px 5px;
 }
@@ -1034,7 +1025,7 @@ td.group-title {
 
 .views-query-info table {
   border-collapse: separate;
-  border-color: #dddddd;
+  border-color: #ddd;
   border-spacing: 0;
   margin: 10px 0;
 }
@@ -1045,7 +1036,7 @@ td.group-title {
 
 .views-query-info table th,
 .views-query-info table td {
-  color: #666666;
+  color: #666;
   padding: 4px 10px;
 }
 
@@ -1165,6 +1156,7 @@ div.messages {
   text-align: left;
   min-width: 100%;
   margin: 0;
+
   /* LTR */
   -webkit-border-top-right-radius: 0;
   -webkit-border-bottom-right-radius: 0;
@@ -1236,7 +1228,7 @@ html.js #views-live-preview .contextual-links-wrapper {
   padding: 0.5em 1em 0.25em 0.5em;
   color: #333;
   display: block;
-  border-bottom: 1px dashed #CCC;
+  border-bottom: 1px dashed #ccc;
 }
 
 /* @end */

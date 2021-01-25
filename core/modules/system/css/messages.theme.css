@@ -15,7 +15,7 @@
   padding: .625em 3.438em .625em .625em;
 }
 .messages:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0; /* LTR */

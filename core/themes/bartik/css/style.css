@@ -41,7 +41,7 @@ del {
   text-decoration: line-through;
 }
 tr.odd {
-  background-color: #dddddd;
+  background-color: #ddd;
 }
 img {
   outline: 0;
@@ -393,6 +393,7 @@ ul.tips {
   word-spacing: 0.1em;
   font-style: italic;
 }
+
 /* Region header blocks. */
 .l-header .block:after {
   /* Clearfix */
@@ -451,6 +452,7 @@ ul.tips {
 .l-header .header-menu li.last a {
   border-bottom: 0;
 }
+
 /* User Login block in the header region */
 .l-header .block-user-login {
   width: auto;
@@ -515,6 +517,7 @@ ul.tips {
   background: #fff;
   background: rgba(255, 255, 255, 0.9);
 }
+
 /* Search block in region header. */
 .l-header .block-search-form {
   width: 208px;
@@ -522,6 +525,7 @@ ul.tips {
 .l-header .block-search-form .form-text {
   width: 154px;
 }
+
 /* Language switcher block in region header. */
 .l-header .block-locale ul li {
   display: inline;
@@ -574,7 +578,7 @@ ul.tips {
 .js .menu-dropdown a:hover,
 .js .menu-dropdown a:focus,
 .js .menu-dropdown a:active,
-/* Prevents 2+ level menu items with child items from "jumping" when their 
+/* Prevents 2+ level menu items with child items from "jumping" when their
    child items are hovered over. */
 .js .menu-dropdown .has-children a {
   height: 2.4em;
@@ -597,7 +601,7 @@ ul.tips {
 .l-header .rounded-tabs ul.menu > li > a.active,
 .l-header .square-tabs ul.menu > li > a.active {
   color: #333;
-  background: #ffffff;
+  background: #fff;
 }
 
 
@@ -612,6 +616,7 @@ ul.tips {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
 /* Likewise, the last tab is rounded on the bottom. */
 .l-header .rounded-tabs ul.menu > li.last > a {
   -moz-border-radius-bottomleft: 8px;
@@ -656,7 +661,7 @@ ul.tips {
   }
   .l-header ul.menu-dropdown ul {
     border: 0;
-    box-shadow: 2px 2px 2px -2px #333333;
+    box-shadow: 2px 2px 2px -2px #333;
   }
 }
 .l-header .no-tabs ul.menu > li > a.active {
@@ -1166,7 +1171,7 @@ article .link-wrapper ul.links {
   float: right;
 }
 .tabs ul.primary li.active a {
-  border-bottom: 1px solid #ffffff;
+  border-bottom: 1px solid #fff;
 }
 .tabs ul.primary li a {
   color: #000;
@@ -1185,7 +1190,7 @@ article .link-wrapper ul.links {
   border-top-right-radius: 6px;
 }
 .tabs ul.primary li.active a {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .tabs ul.secondary {
   border-bottom: none;
@@ -1250,7 +1255,7 @@ ul.action-links li a {
   padding: 0;
 }
 
- /* -------------- Hero blocks  -------------- */
+/* -------------- Hero blocks  -------------- */
 
 .block-hero {
   position: relative;
@@ -1322,8 +1327,8 @@ a.button:active {
 /* -------------- Form Elements   ------------- */
 
 fieldset {
-  background: #ffffff;
-  border: 1px solid #cccccc;
+  background: #fff;
+  border: 1px solid #ccc;
   margin-top: 10px;
   margin-bottom: 32px;
   padding: 0 0 10px;
@@ -1394,10 +1399,10 @@ fieldset legend span.summary {
   padding: 0 5px;
 }
 fieldset legend span.summary:not(:empty):before {
-  content: '(';
+  content: "(";
 }
 fieldset legend span.summary:not(:empty):after {
-  content: ')';
+  content: ")";
 }
 fieldset .fieldset-wrapper {
   padding: 0 10px;
@@ -1459,6 +1464,7 @@ select.form-select {
 .form-actions {
   padding-top: 10px;
 }
+
 /* Contact Form */
 .contact-form #edit-name {
   width: 75%;

@@ -31,6 +31,7 @@
 .menu-dropdown ul a {
   white-space: normal;
 }
+
 /* @end */
 
 .menu-dropdown a,
@@ -38,10 +39,10 @@
 .menu-dropdown a:focus,
 .menu-dropdown a:active,
 .menu-dropdown a.highlighted {
-  color: #555555;
+  color: #555;
 }
 .menu-dropdown a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 .menu-dropdown li.has-children > a {
   padding-right: 24px;
@@ -54,7 +55,7 @@
   height: 0;
   border-width: 4px;
   border-style: solid dashed dashed dashed;
-  border-color: #555555 transparent transparent transparent;
+  border-color: #555 transparent transparent transparent;
   background: transparent;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
@@ -69,7 +70,7 @@
   border-top: 0;
 }
 .menu-dropdown ul {
-  border: 1px solid #bbbbbb;
+  border: 1px solid #bbb;
   padding: 5px 0;
   background: #ccc;
 }
@@ -80,17 +81,17 @@
 .menu-dropdown ul a.highlighted {
   border: 0 !important;
   padding: 10px 20px;
-  color: #555555;
+  color: #555;
 }
 .menu-dropdown ul a:hover,
 .menu-dropdown ul a:focus,
 .menu-dropdown ul a:active,
 .menu-dropdown ul a.highlighted {
-  background: #eeeeee;
+  background: #eee;
 }
 .menu-dropdown ul a.disabled {
   background: white;
-  color: #cccccc;
+  color: #ccc;
 }
 .menu-dropdown ul .has-children > a {
   padding-right: 20px;
@@ -101,7 +102,7 @@
   margin-top: -5px;
   border-width: 5px;
   border-style: dashed dashed dashed solid;
-  border-color: transparent transparent transparent #555555;
+  border-color: transparent transparent transparent #555;
 }
 .menu-dropdown span.scroll-up,
 .menu-dropdown span.scroll-down {
@@ -114,7 +115,7 @@
 }
 .menu-dropdown span.scroll-up:hover,
 .menu-dropdown span.scroll-down:hover {
-  background: #eeeeee;
+  background: #eee;
 }
 .menu-dropdown span.scroll-up-arrow,
 .menu-dropdown span.scroll-down-arrow {
@@ -127,12 +128,12 @@
   overflow: hidden;
   border-width: 6px;
   border-style: dashed dashed solid dashed;
-  border-color: transparent transparent #555555 transparent;
+  border-color: transparent transparent #555 transparent;
 }
 .menu-dropdown span.scroll-down-arrow {
   top: 8px;
   border-style: solid dashed dashed dashed;
-  border-color: #555555 transparent transparent transparent;
+  border-color: #555 transparent transparent transparent;
 }
 [dir="rtl"] .menu-dropdown li.has-children > a {
   padding-right: 12px;
@@ -157,5 +158,5 @@
   right: auto;
   left: 8px;
   border-style: dashed solid dashed dashed;
-  border-color: transparent #555555 transparent transparent;
+  border-color: transparent #555 transparent transparent;
 }
