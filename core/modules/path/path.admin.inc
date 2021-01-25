@@ -11,6 +11,9 @@
  * and return the list of matching URL aliases.
  */
 function path_admin_overview($keys = NULL) {
+  // @todo Why does the $keys parameter get reset to the first arg, while
+  // func_get_args() gets all of them?
+  $keys = implode('/', func_get_args());
   // Add the filter form above the overview table.
   $build['path_admin_filter_form'] = backdrop_get_form('path_admin_filter_form', $keys);
   // Enable language column if language.module is enabled or if we have any
