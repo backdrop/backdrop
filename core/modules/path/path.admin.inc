@@ -7,12 +7,11 @@
 /**
  * Returns a listing of all defined URL aliases.
  *
- * When filter key passed, perform a standard search on the given key,
- * and return the list of matching URL aliases.
+ * Any additional arguments passed by the redirect path in function
+ * path_admin_filter_form_submit_filter() will perform a search on given keys.
  */
-function path_admin_overview($keys = NULL) {
-  // @todo Why does the $keys parameter get reset to the first arg, while
-  // func_get_args() gets all of them?
+function path_admin_overview() {
+  // Collect additional arguments, if any.
   $keys = implode('/', func_get_args());
   // Add the filter form above the overview table.
   $build['path_admin_filter_form'] = backdrop_get_form('path_admin_filter_form', $keys);
