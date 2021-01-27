@@ -678,7 +678,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
 
     // Set the display mode back to 'default', check that the field is displayed
     // accordingly.
-    $this->backdropGet('admin/structure/types/manage/' . $this->hyphen_type . '/display/rss/reset', array());
+    $this->backdropPost('admin/structure/types/manage/' . $this->hyphen_type . '/display/rss/reset', array(), t('Reset'));
     $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected when 'rss' mode is set back to 'default' settings.");
 
     // Specialize the display mode again.
@@ -970,7 +970,7 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], TRUE, 'The default settings were applied to the new display mode.');
 
     // Reset the view-mode on the post content type.
-    $this->backdropGet('admin/structure/types/manage/post/display/custom_1/reset', array());
+    $this->backdropPost('admin/structure/types/manage/post/display/custom_1/reset', array(), 'Reset');
     $this->assertViewModeExists('node', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
