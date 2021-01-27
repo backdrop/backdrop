@@ -1074,7 +1074,7 @@ function locale_config_update($staging_config, $active_config) {
 function _locale_get_config_translatables($config) {
   if ($config->get('_config_translatables') !== NULL) {
     foreach ($config->get('_config_translatables') as $translatable) {
-      $translation = locale($config->get($translatable), $translatable);
+      $translation = locale($config->get($translatable), 'config:' . $config->get('_config_name') . ':' . $translatable);
     }
   }
 }
