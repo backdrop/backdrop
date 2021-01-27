@@ -1411,16 +1411,11 @@ function filter_process_format($element) {
 function filter_get_attached($formats) {
   $attached = array();
   $attached['library'][] = array('filter', 'filter');
-
-  foreach ($formats as $format_name => $format_info) {
-    if (isset($added[$format_name])) {
-      unset($formats[$format_name]);
-    }
-    else {
-      // Add the library associated with a format's editor if needed.
-      if ($format_info->editor && ($editor = filter_editor_load($format_info->editor))) {
-        $attached['library'][] = $editor['library'];
-      }
+  
+  foreach ($formats as $format) {
+    // Add the library associated with a format's editor if exists.
+    if ($format->editor && ($editor = filter_editor_load($format->editor)) && isset($editor['library'])) {
+      $attached['library'][] = $editor['library'];
     }
   }
 
