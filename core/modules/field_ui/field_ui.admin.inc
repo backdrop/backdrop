@@ -2431,67 +2431,31 @@ function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redi
 }
 
 /**
- * Confirm form: Resets a display mode to using the default display.
+ * Menu callback: Resets the manage displays UI for a display mode.
  */
-function field_ui_view_mode_reset_form($form, &$form_state, $entity_type = NULL, $bundle = NULL, $view_mode_name = NULL) {
+function field_ui_view_mode_reset($entity_type, $bundle, $view_mode_name, $redirect = TRUE) {
+  // Be sure we get the bundle.
   $bundle = field_extract_bundle($entity_type, $bundle);
 
-  $form['#entity_type'] = $entity_type;
-  $form['#machine_name'] = $view_mode_name;
-  $form['#bundle'] = $bundle;
-  $view_mode = entity_view_mode_load($entity_type, $view_mode_name);
-  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
-
-  $message = '';
-
-  // Check to see if this display mode is in use on any other bundles.
-  $active = array();
-  $entity_info = entity_get_info($entity_type);
-  foreach ($entity_info['bundles'] as $machine => $bundle) {
-    $settings = field_view_mode_settings($entity_type, $machine);
-    if (isset($settings[$view_mode_name]) && $settings[$view_mode_name]) {
-      $active[] = t($bundle['label']);
-    }
-  }
-
-  if (!empty($active)) {
-    $message .= '<p>' . t('The %view-mode display mode has been customized in the following places:', array('%view-mode' => $view_mode['label'])) . '</p>';
-    $message .= theme('item_list', array('items' => $active));
-  }
-
-  $message .= '<p>' . t('A reset will cause all customizations to be lost. The <em>Default</em> display mode will be used instead.') . '</p>';
-
-  return confirm_form(
-    $form,
-    t('Are you sure you want to reset the %view-mode display mode?', array('%view-mode' => $view_mode['label'])),
-    $path,
-    $message,
-    t('Reset'),
-    t('Cancel')
-  );
-}
-
-/**
- * Submit handler for field_ui_view_mode_reset_form().
- */
-function field_ui_view_mode_reset_form_submit($form, &$form_state) {
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
-  $view_mode_name = $form['#machine_name'];
-
-  // Save updated bundle settings.
+  // Get and update current bundle settings.
   $bundle_settings = field_bundle_settings($entity_type, $bundle);
   $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = FALSE;
-  field_bundle_settings($entity_type, $bundle, $bundle_settings);
 
-  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
+  // Save updated bundle settings.
+  field_bundle_settings($entity_type, $bundle, $bundle_settings);
 
   // Set a friendly message.
   $entity_info = entity_get_info($entity_type);
   $label = $entity_info['view modes'][$view_mode_name]['label'];
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
   $message = t('The display mode %name will now use the <em>Default</em> settings.', array('%name' => $label));
   backdrop_set_message($message);
 
-  // Reload the current page.
-  $form_state['redirect'] = $path;
+  // Clear the menu cache to remove display mode from administration menu.
+  menu_cache_clear();
+
+  if ($redirect) {
+    // Reload the current page.
+    backdrop_goto($path);
+  }
 }
