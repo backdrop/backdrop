@@ -491,35 +491,65 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 
 /**
  * Element validation function.
+ *
+ * Additionally to validation, this function also rewrites values, if necessary.
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
 
-  // If Link module is available, automatically clean up URL, automatically
-  // adding http:// or a prefixing slash if needed.
-  if (module_exists('link') && $type = link_validate_url($value)) {
-    $value = link_cleanup_url($value);
-    $form_state['values']['type'] = $type;
-    if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
-      $value = '/' . $value;
-    }
+  // Empty values are OK, this won't become a link (<a>) tag anyway.
+  if ($value === '') {
+    form_set_value($element, $value, $form_state);
+    return;
   }
 
-  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
-  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
-    // We might need to encode some characters, but we only do this if
-    // transliteration is off and only for relative paths.
-    $encoded_value = backdrop_encode_path($value);
-    if (config_get('path.settings', 'transliterate') == FALSE && valid_url($encoded_value, FALSE)) {
-      // Function url() takes care of base_path and language prefix.
+  $valid_url = FALSE;
+  if (valid_url($value, TRUE)) {
+    // This is valid syntax for an external url, but we still check for
+    // dangerous protocols and markup and reject, if that check fails.
+    if ($value == check_url($value)) {
+      $valid_url = TRUE;
+    }
+  }
+  else {
+    if (backdrop_valid_path($value)) {
+      // This is a valid internal path like "node/1" or "<front>" and it's
+      // accessible. Let url() add the base path (and language prefix).
       $value = url($value);
+      $valid_url = TRUE;
     }
     else {
-      form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+      $parts = parse_url($value);
+      $path = isset($parts['path']) ? $parts['path'] : '';
+      // Remove the path from the array, keep possible query or fragment for
+      // later usage as options in url().
+      unset($parts['path']);
+
+      if (valid_url($value, FALSE)) {
+        // The syntax is valid for a relative url, but we still might have to
+        // add the base path.
+        if (substr($value, 0, 1) != '/' && substr($value, 0, 1) != '#') {
+          $value = url($path, $parts);
+        }
+        $valid_url = TRUE;
+      }
+      elseif (backdrop_encode_path($path) != $path) {
+        // Not transliterated or actually invalid? Let url() encode the path
+        // part, then we verify the reassembled url again.
+        $encoded = url($path, $parts);
+        if (valid_url($encoded, FALSE)) {
+          $value = $encoded;
+          $valid_url = TRUE;
+        }
+      }
     }
   }
-  form_set_value($element, $value, $form_state);
 
+  if (!$valid_url) {
+    form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+  }
+
+  form_set_value($element, $value, $form_state);
 }
 
 /**
