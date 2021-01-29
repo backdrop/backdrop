@@ -504,15 +504,13 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   }
 
   $valid_url = FALSE;
+  $parts = parse_url($value);
+
   if (valid_url($value, TRUE)) {
-    // This is valid syntax for an external url, but we still check for
-    // dangerous protocols and markup and reject, if that check fails.
-    if ($value == check_url($value)) {
-      $valid_url = TRUE;
-    }
+    // This is valid syntax for an external url.
+    $valid_url = TRUE;
   }
-  else {
-    $parts = parse_url($value);
+  elseif (!isset($parts['host'])) {
     $path = isset($parts['path']) ? $parts['path'] : '';
     // Remove the path from the array, keep possible query or fragment for
     // later usage as options in url().
