@@ -506,11 +506,20 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $valid_url = FALSE;
   $parts = parse_url($value);
 
-  if (valid_url($value, TRUE)) {
-    // This is valid syntax for an external url.
-    $valid_url = TRUE;
+  // External urls.
+  if (isset($parts['host'])) {
+    if (valid_url($value, TRUE)) {
+      $valid_url = TRUE;
+    }
+    elseif (!isset($parts['scheme'])) {
+      if (valid_url('http:' . $value, TRUE)) {
+        // Allow scheme relative urls like "//domain.tld/path".
+        $valid_url = TRUE;
+      }
+    }
   }
-  elseif (!isset($parts['host'])) {
+  // Internal urls.
+  else {
     $path = isset($parts['path']) ? $parts['path'] : '';
     // Remove the path from the array, keep possible query or fragment for
     // later usage as options in url().
