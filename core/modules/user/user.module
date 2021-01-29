@@ -1445,12 +1445,10 @@ function user_menu() {
   $items['admin/config/people/roles/add'] = array(
     'title' => 'Add role',
     'description' => 'Add a new user role.',
-    // 'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_role'),
     'access arguments' => array('administer permissions'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'user.admin.inc',
-    // 'weight' => 2,
   );
   $items['admin/config/people/roles/edit/%user_role'] = array(
     'title' => 'Edit role',
