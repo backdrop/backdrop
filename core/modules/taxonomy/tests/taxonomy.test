@@ -115,7 +115,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   }
 
   /**
-   * Tests that node types permissions are correctly set from the Node Type UI.
+   * Tests that vocabulary permissions are correctly set from the Taxonomy UI.
    */
   function testVocabularyPermissions() {
     // Create admin user.
@@ -173,6 +173,33 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit terms in tags', $account), "Web user has edit terms in tags permission.");
     $this->assertTrue(user_access('delete terms in tags', $account), "Web user has delete terms in tags permission.");
+
+    $vocabulary = taxonomy_vocabulary_load('tags');
+    $this->createTerm($vocabulary);
+    $this->createTerm($vocabulary);
+    $this->backdropGet('admin/structure/taxonomy/tags');
+    $this->assertText(t('Edit'), "Edit action is found on vocabulary form.");
+    $this->assertText(t('Delete'), "Delete action is found on vocabulary form.");
+    $this->assertNoText(t('Add term'), "Add term link found on vocabulary form.");
+    $this->assertText(t('Weight for added term'), 'Weight visible on term listing page.');
+
+    // Add "create term" permissions for the "tags" vocabulary.
+    $this->backdropLogin($admin_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+
+    $edit = array(
+      $role_name . '[create terms in tags]' => TRUE,
+    );
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+
+    // Test that the permissions actually exist
+    $this->backdropLogin($web_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+
+    $this->backdropGet('admin/structure/taxonomy/tags');
+    $this->assertText(t('Add term'), "Add term link found on vocabulary form.");
   }
 
   /**
