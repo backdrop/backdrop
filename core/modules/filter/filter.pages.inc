@@ -529,7 +529,6 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
       $valid_url = TRUE;
     }
     else {
-
       if (valid_url($value, FALSE)) {
         // The syntax is valid for a relative url, but we still might have to
         // add the base path.
