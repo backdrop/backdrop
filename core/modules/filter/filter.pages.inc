@@ -512,18 +512,23 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
     }
   }
   else {
+    $parts = parse_url($value);
+    $path = isset($parts['path']) ? $parts['path'] : '';
+    // Remove the path from the array, keep possible query or fragment for
+    // later usage as options in url().
+    unset($parts['path']);
+    if (isset($parts['query'])) {
+      parse_str($parts['query'], $query_array);
+      $parts['query'] = $query_array;
+    }
+
     if (backdrop_valid_path($value)) {
       // This is a valid internal path like "node/1" or "<front>" and it's
       // accessible. Let url() add the base path (and language prefix).
-      $value = url($value);
+      $value = url($path, $parts);
       $valid_url = TRUE;
     }
     else {
-      $parts = parse_url($value);
-      $path = isset($parts['path']) ? $parts['path'] : '';
-      // Remove the path from the array, keep possible query or fragment for
-      // later usage as options in url().
-      unset($parts['path']);
 
       if (valid_url($value, FALSE)) {
         // The syntax is valid for a relative url, but we still might have to
