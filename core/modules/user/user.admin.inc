@@ -629,6 +629,9 @@ function user_admin_roles_order_submit($form, &$form_state) {
  */
 function user_admin_role($form, &$form_state, $role = NULL) {
   $form_state['role'] = $role;
+  if (empty($role)) {
+    backdrop_set_title('Add role');
+  }
 
   $form['label'] = array(
     '#type' => 'textfield',
