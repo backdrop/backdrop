@@ -396,7 +396,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // Successive versions of MySQL have become increasingly strict about the
     // use of reserved keywords as table names. Drupal 7 uses at least one such
     // table (system). Therefore we surround all table names with quotes.
-    $quote_char = variable_get('mysql_identifier_quote_character', MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT);
+    $quote_char = MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT;
     foreach ($this->prefixSearch as $i => $prefixSearch) {
       if (substr($prefixSearch, 0, 1) === '{') {
         // If the prefix already contains one or more quotes remove them.
