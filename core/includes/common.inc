@@ -8560,13 +8560,6 @@ function backdrop_add_cache_tags(array $tags) {
     module_invoke_all('emit_cache_tags', $tags);
   }
 
-if (!defined('CACHE_MAX_AGE_PERMANENT')) {
-  /**
-   * A max-age value signifying an item that should be cached forever.
-   */
-  define('CACHE_MAX_AGE_PERMANENT', -2);
-}
-
 /**
  * Sets the maximum age (in seconds).
  *

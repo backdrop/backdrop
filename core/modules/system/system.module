@@ -4621,7 +4621,7 @@ function system_do_invalidate_cache_tags($tags) {
     unset($tag_cache[$tag]);
     try {
       db_merge('invalidated_cache_tags')
-        ->key(['tag' => $tag])
+        ->key(array('tag' => $tag))
         ->fields(['invalidations' => 1])
         ->expression('invalidations', 'invalidations + 1')
         ->execute();

@@ -350,11 +350,11 @@ interface BackdropCacheInterface {
 }
 
 /**
- * Defines a Drupal 8 cacheable metadata aware cache backend.
+ * Defines a metadata aware cache backend.
  *
  * @ingroup cache
  */
-interface BackdropTaggableCacheInterface {
+interface BackdropTaggableCacheInterface  extends BackdropCacheInterface {
 
   /**
    * Stores data in the persistent cache.
@@ -722,11 +722,15 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
     }
 
     $this->backend = new $class($bin);
-    $this->configuration = array();
 
     $configuration = $config->get('cache_options');
     if (isset($configuration[$bin])) {
       $this->configuration = $configuration[$bin];
+    }
+    else {
+      $this->configuration = array(
+        'ttl' => CACHE_PERMANENT,
+      );
     }
   }
 
@@ -753,7 +757,8 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
       }
 
       $data = $item->data;
-      $expire = isset($data->cache_expire) ? $data->cache_expire : $item->expire;
+
+      $expire = isset($data->cache_expire) ? (int) $data->cache_expire : (int) $item->expire;
 
       // Check expire time.
       $item->valid = $expire === CACHE_PERMANENT || $expire === CACHE_TEMPORARY || $expire >= REQUEST_TIME;
@@ -873,9 +878,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    // It is impossible to determine this as we cannot list all items in a
-    // consistent way as it depends on the backend used.
-    return FALSE;
+    return $this->backend->isEmpty();
   }
 
   /**
@@ -979,22 +982,37 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
     return $is_installed;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function delete($cid) {
     $this->backend->delete($cid);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function deleteMultiple($cids) {
     $this->backend->deleteMultiple($cids);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function deletePrefix($prefix) {
     $this->backend->deletePrefix($prefix);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function flush() {
     $this->backend->flush();
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function garbageCollection() {
     $this->backend->garbageCollection();
   }
