@@ -65,6 +65,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    *   The row limit.
    */
   private function verifyRowLimit($row_limit) {
+    $site_config = config('system.core');
     // Change the database log row limit.
     $edit = array();
     $edit['dblog_row_limit'] = $row_limit;
@@ -72,7 +73,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
 
     // Check row limit variable.
-    $current_limit = config_get('system.core', 'log_row_limit');
+    $current_limit = $site_config->get('log_row_limit');
     $this->assertTrue($current_limit == $row_limit, format_string('[Cache] Row limit variable of @count equals row limit of @limit', array('@count' => $current_limit, '@limit' => $row_limit)));
   }
 
@@ -90,7 +91,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
 
     // Check date format config value.
-    $current_format = config_get('system.core', 'log_date_format');
+    $current_format = $site_config->get('log_date_format');
     $this->assertTrue($current_format == $date_format, format_string('[Cache] Date format of @current matches date format of @format', array('@current' => $current_format, '@format' => $date_format)));
   }
 

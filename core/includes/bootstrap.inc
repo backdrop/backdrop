@@ -3026,6 +3026,7 @@ function _backdrop_bootstrap_configuration() {
  * Attempts to serve a page from the cache.
  */
 function _backdrop_bootstrap_page_cache() {
+  $site_config = config('system.core');
   global $user;
 
   // Allow specifying special cache handlers in settings.php, like
@@ -3036,7 +3037,7 @@ function _backdrop_bootstrap_page_cache() {
   }
 
   try {
-    $cache_enabled = config_get('system.core', 'cache') ? TRUE : FALSE;
+    $cache_enabled = $site_config->get('cache') ? TRUE : FALSE;
   }
   catch (ConfigException $e) {
     $cache_enabled = FALSE;
@@ -3052,7 +3053,7 @@ function _backdrop_bootstrap_page_cache() {
     // checked, hook_boot might check for anonymous user etc.
     $user = backdrop_anonymous_user();
     // Get the page from the cache.
-    $background_fetch_enabled = config_get('system.core', 'page_cache_background_fetch');
+    $background_fetch_enabled = $site_config->get('page_cache_background_fetch');
     $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
@@ -3061,7 +3062,7 @@ function _backdrop_bootstrap_page_cache() {
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
       // on its creation date.
-      $lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $lifetime = $site_config->get('page_cache_maximum_age');
       $expires_on = $cache->created + $lifetime;
       $cache_expired = REQUEST_TIME > $expires_on;
 

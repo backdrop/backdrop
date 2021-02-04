@@ -4425,6 +4425,7 @@ function views_ui_admin_settings_basic() {
   $form = array();
   $form['#attached']['css'] = views_ui_get_admin_css();
   $config = config('views_ui.settings');
+  $views_settings_config = config('views.settings');
 
   $options = array();
   foreach (list_themes() as $name => $theme) {
@@ -4463,7 +4464,7 @@ function views_ui_admin_settings_basic() {
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
     '#options' => array('old_any' => '<Any>', 'new_any' => t('- Any -')),
-    '#default_value' => config_get('views.settings', 'exposed_filter_any_label'),
+    '#default_value' => $views_settings_config->('exposed_filter_any_label'),
   );
 
   $form['live_preview'] = array(
@@ -4518,7 +4519,7 @@ function views_ui_admin_settings_basic() {
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),
     '#description' => t("Backdrop has the potential to run many queries while a view is being rendered. Checking this box will display every query run during view render as part of the live preview."),
-    '#default_value' => config_get('views.settings', 'show_additional_queries'),
+    '#default_value' => $views_settings_config->get('show_additional_queries'),
     '#states' => array(
       'visible' => array(
         ':input[name="show_preview_information"]' => array('checked' => TRUE),

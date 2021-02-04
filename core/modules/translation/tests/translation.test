@@ -417,6 +417,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    *   TRUE if the language switch links are found, FALSE if not.
    */
   function assertLanguageSwitchLinks($node, $translation, $find = TRUE, $types = NULL) {
+    $site_config = config('system.core');
     if (empty($types)) {
       $types = array('node', 'block-locale');
     }
@@ -426,8 +427,8 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     $result = TRUE;
     $languages = language_list();
-    $node_langcode = $node->langcode === LANGUAGE_NONE ? config_get('system.core', 'language_default') : $node->langcode;
-    $translation_langcode = $translation->langcode === LANGUAGE_NONE ? config_get('system.core', 'language_default') : $translation->langcode;
+    $node_langcode = $node->langcode === LANGUAGE_NONE ? $site_config->get('language_default') : $node->langcode;
+    $translation_langcode = $translation->langcode === LANGUAGE_NONE ? $site_config->get('language_default') : $translation->langcode;
     $page_language = $languages[$node_langcode];
     $translation_language = $languages[$translation_langcode];
     $url = url("node/$translation->nid", array('language' => $translation_language));

@@ -1306,8 +1306,9 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     $this->assertTrue($language_negotiation, format_string('URL language negotiation: %setting', array('%setting' => $language_negotiation ? 'none' : 'set')));
 
     // Check language providers settings.
-    $this->assertFalse(config_get('locale.settings', 'language_negotiation_url_part'), format_string('URL language negotiation method indicator settings cleared.'));
-    $this->assertFalse(config_get('locale.settings', 'language_negotiation_session_parameter'), format_string('Visit language negotiation method settings cleared.'));
+    $locale_settings_config = config('locale.settings');
+    $this->assertFalse($locale_settings_config('language_negotiation_url_part'), format_string('URL language negotiation method indicator settings cleared.'));
+    $this->assertFalse($locale_settings_config('language_negotiation_session_parameter'), format_string('Visit language negotiation method settings cleared.'));
 
     // Check JavaScript parsed.
     $javascript_parsed_count = count(state_get('locale_javascript_parsed', array()));
@@ -2783,6 +2784,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
    * Tests alterations to language types/negotiation info.
    */
   function testInfoAlterations() {
+    $language_settings_config = config('language.settings');
     // Enable language type/negotiation info alterations.
     state_set('locale_test_language_types', TRUE);
     state_set('locale_test_language_negotiation_info', TRUE);
@@ -2814,7 +2816,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
     // negotiation settings with the proper flag enabled.
     state_set('locale_test_language_negotiation_info_alter', TRUE);
     $this->languageNegotiationUpdate();
-    $negotiation = (array) config_get('language.settings', "language_negotiation.$type");
+    $negotiation = (array) $language_settings_config->get("language_negotiation.$type");
     $this->assertFalse(isset($negotiation[$provider]), 'Interface language provider removed from the stored settings.');
     $this->assertNoFieldByXPath("//input[@name=\"$form_field\"]", NULL, 'Interface language provider unavailable.');
 
@@ -2850,7 +2852,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
 
     // Check that unavailable language providers are not present in the
     // negotiation settings.
-    $negotiation = (array) config_get('language.settings', "language_negotiation.$type");
+    $negotiation = (array) $language_settings_config->get("language_negotiation.$type");
     $this->assertFalse(isset($negotiation[$test_provider]), 'The disabled test language provider is not part of the content language negotiation settings.');
 
     // Check that configuration page presents the correct options and settings.
@@ -2924,4 +2926,3 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $this->assertTrue($result);
   }
 }
-

@@ -21,6 +21,7 @@ class LanguageListTest extends BackdropWebTestCase {
    * Functional tests for adding, configuring, and deleting languages.
    */
   function testLanguageList() {
+    $site_config = config('system.core');
     global $base_url;
 
     // User to add and remove language.
@@ -115,7 +116,7 @@ class LanguageListTest extends BackdropWebTestCase {
     // Make sure the "language_count" variable has been updated correctly.
     backdrop_static_reset('language_list');
     $enabled_languages = language_list(TRUE);
-    $this->assertEqual(config_get('system.core', 'language_count'), count($enabled_languages), t('Language count is correct.'));
+    $this->assertEqual($site_config->get('language_count'), count($enabled_languages), t('Language count is correct.'));
     // Delete a disabled language.
     // Disable an enabled language.
     $edit = array(
@@ -136,7 +137,7 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->backdropGet('admin/config/regional/language/delete/fr');
     $this->assertResponse(404, t('Language no longer found.'));
     // Make sure the "language_count" variable has not changed.
-    $this->assertEqual(config_get('system.core', 'language_count'), count($enabled_languages), t('Language count is correct.'));
+    $this->assertEqual($site_config->get('language_count'), count($enabled_languages), t('Language count is correct.'));
 
     // Ensure we can delete the English language. Right now English is the only
     // language so we must add a new language and make it the default before

@@ -15,6 +15,7 @@
  */
 function _backdrop_maintenance_theme() {
   global $theme, $theme_key;
+  $site_config = config('system.core');
 
   // If $theme is already set, assume the others are set too, and do nothing.
   if (isset($theme)) {
@@ -46,10 +47,10 @@ function _backdrop_maintenance_theme() {
     try {
       $custom_theme = settings_get('maintenance_theme');
       if (empty($custom_theme)) {
-        $custom_theme = config_get('system.core', 'maintenance_theme');
+        $custom_theme = $site_config->get('maintenance_theme');
       }
       if (empty($custom_theme)) {
-        $custom_theme = config_get('system.core', 'theme_default');
+        $custom_theme = $site_config->get('theme_default');
       }
     }
     catch (ConfigException $e) {}

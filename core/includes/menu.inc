@@ -539,8 +539,9 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
   // Offline pages are not cached in the database but have a Cache-Control
   // header to allow reverse proxies to serve offline hits instead of Backdrop.
   elseif ($site_status == MENU_SITE_OFFLINE) {
-    $page_cache_enabled = (bool) config_get('system.core', 'page_cache_maximum_age');
-    $maintenance_max_age = config_get('system.core', 'maintenance_page_maximum_age');
+    $site_config = config('system.core');
+    $page_cache_enabled = (bool) $site_config->get('page_cache_maximum_age');
+    $maintenance_max_age = $site_config->get('maintenance_page_maximum_age');
     if ($page_cache_enabled && $maintenance_max_age) {
       backdrop_add_http_header('Cache-Control', 'public; max-age: ' . $maintenance_max_age);
     }
@@ -1928,16 +1929,17 @@ function theme_menu_toggle($variables) {
  */
 function menu_get_custom_theme($initialize = FALSE) {
   $custom_theme = &backdrop_static(__FUNCTION__);
+  $site_config = config('system.core');
 
   // Offline mode checking does not allow for module overrides of the theme.
   $offline_mode = (_menu_site_status() === MENU_SITE_OFFLINE || defined('MAINTENANCE_MODE'));
   if ($offline_mode) {
     $custom_theme = settings_get('maintenance_theme');
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'maintenance_theme');
+      $custom_theme = $site_config->get('maintenance_theme');
     }
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'theme_default');
+      $custom_theme = $site_config->get('theme_default');
     }
   }
   elseif ($initialize) {

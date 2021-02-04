@@ -9,6 +9,7 @@
  */
 function system_requirements($phase) {
   global $base_url;
+  $site_config = config('system.core');
   $requirements = array();
   // Ensure translations don't break during installation.
   $t = get_t();
@@ -250,9 +251,9 @@ function system_requirements($phase) {
 
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => config_get('system.core', 'file_public_path'),
+      'directory' => $site_config->get('file_public_path'),
     );
-    if ($private_files_directory = config_get('system.core', 'file_private_path')) {
+    if ($private_files_directory = $site_config->get('file_private_path')) {
       $htaccess_files['private://.htaccess'] = array(
         'title' => $t('Private files directory'),
         'directory' => $private_files_directory,
@@ -325,8 +326,8 @@ function system_requirements($phase) {
   // Test files directories.
   $directories = array();
   if ($phase == 'runtime') {
-    $directories[] = config_get('system.core', 'file_public_path');
-    $directories[] = config_get('system.core', 'file_private_path');
+    $directories[] = $site_config->get('file_public_path');
+    $directories[] = $site_config->get('file_private_path');
     $directories[] = file_directory_temp();
   }
   else {
@@ -579,7 +580,7 @@ function system_requirements($phase) {
 
   if ($phase == 'runtime') {
     // Inform user about status of display error messages.
-    $error_level = config_get('system.core', 'error_level');
+    $error_level = $site_config->get('error_level');
     $description = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
     $logging_url = url('admin/config/development/logging');
     if ($error_level != ERROR_REPORTING_HIDE) {
@@ -603,7 +604,7 @@ function system_requirements($phase) {
 
   if ($phase == 'runtime') {
     // Inform the user if theme_debug is enabled.
-    $theme_debug_enabled = config_get('system.core', 'theme_debug');
+    $theme_debug_enabled = $site_config->get('theme_debug');
     if ($theme_debug_enabled) {
       $requirements['theme_debug'] = array(
         'title' => $t('Theme debug'),
