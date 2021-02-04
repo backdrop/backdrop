@@ -3026,8 +3026,8 @@ function _backdrop_bootstrap_configuration() {
  * Attempts to serve a page from the cache.
  */
 function _backdrop_bootstrap_page_cache() {
-  $site_config = config('system.core');
   global $user;
+  $site_config = config('system.core');
 
   // Allow specifying special cache handlers in settings.php, like
   // using memcached or files for storing cache information.
