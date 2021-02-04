@@ -896,6 +896,18 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#suffix' => '</div>',
   );
 
+  if (!language_multilingual()) {
+    $language_switcher_block = FALSE;
+    foreach ($layout->content as $block_id => $block_info) {
+      if ($block_info->plugin == 'locale:language') {
+        $language_switcher_block = TRUE;
+      }
+    }
+    if ($language_switcher_block) {
+      $form['messages']['#markup'] .= '<div class="messages warning">' . t('This layout contains at least one language switcher block, but there is only one language enabled on this site. Language switcher blocks are displayed only if at least 2 languages are enabled. You can enable additional languages in the <a href="@languages">Languages</a> page.', array('@languages' => url('admin/config/regional/language'))) . '</div>';
+    }
+  }
+
   // Add a link to preview the page.
   $link_path = $layout->getPath();
   // A null path returns the site root. See https://github.com/backdrop/backdrop-issues/issues/4383

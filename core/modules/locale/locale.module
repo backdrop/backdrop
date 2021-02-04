@@ -263,6 +263,9 @@ function locale_theme() {
     'locale_date_format_form' => array(
       'render element' => 'form',
     ) + $base,
+    'locale_block' => array(
+      'variables' => array(),
+    ) + $base,
   );
 }
 
@@ -854,24 +857,161 @@ function locale_block_info() {
 }
 
 /**
+ * Implements hook_block_configure().
+ */
+function locale_block_configure($delta = '', $settings = array()) {
+  $form = array();
+  if ($delta == 'language') {
+    if (!language_multilingual()) {
+      $form['only_one_language_warning'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('messages', 'warning')),
+      );
+      $form['only_one_language_warning']['message'] = array(
+        '#markup' => t('The language switcher block is only shown if at least 2 languages are enabled. Enable additional languages in the <a href="@href">Languages</a> page.', array('@href' => url('admin/config/regional/language'))),
+      );
+    }
+
+    // Set defaults for new block instances.
+    $locale_switcher_settings = !empty($settings['locale_switcher'])? $settings['locale_switcher'] : array();
+    $locale_switcher_settings += array(
+      'language_list_display' => 'vertical',
+      'language_link_label_display' => 'name',
+    );
+
+    $form['locale_switcher'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Language switcher style'),
+      '#collapsible' => TRUE,
+    );
+
+    $form['locale_switcher']['language_list_display'] = array(
+      '#type' => 'radios',
+      '#title' => t('Display language links'),
+      '#default_value' => $locale_switcher_settings['language_list_display'],
+      '#options' => array(
+        'vertical' => t('Vertically (as bullet points)'),
+        'inline' => t('Horizontally (delimited)'),
+      ),
+    );
+    $form['locale_switcher']['language_list_display']['inline']['#description'] = t('Defaults to using the pipe character (|) as delimiter.');
+    $form['locale_switcher']['language_list_inline_delimiter'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('container-inline')),
+    );
+    $form['locale_switcher']['language_list_inline_delimiter']['custom_delimiter'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use custom language list delimiter'),
+      '#default_value' => isset($locale_switcher_settings['custom_delimiter']) ? 1 : 0,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="block_settings[locale_switcher][language_list_display]"]' => array('value' => 'inline'),
+        ),
+      ),
+    );
+    $form['locale_switcher']['language_list_inline_delimiter']['delimiter'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Custom language list delimiter'),
+      '#title_display' => 'invisible',
+      '#field_prefix' => ':',
+      '#default_value' => isset($locale_switcher_settings['custom_delimiter']) ? $locale_switcher_settings['custom_delimiter'] : '',
+      '#size' => 1,
+      '#maxlength' => 1,
+      '#states' => array(
+        'enabled' => array(
+          ':input[name="block_settings[locale_switcher][language_list_display]"]' => array('value' => 'inline'),
+          ':input[name="block_settings[locale_switcher][language_list_inline_delimiter][custom_delimiter]"]' => array('checked' => TRUE),
+        ),
+        'visible' => array(
+          ':input[name="block_settings[locale_switcher][language_list_display]"]' => array('value' => 'inline'),
+        ),
+      ),
+    );
+    $form['locale_switcher']['language_link_label_display'] = array(
+      '#type' => 'radios',
+      '#title' => t('Display links using'),
+      '#default_value' => $locale_switcher_settings['language_link_label_display'],
+      '#options' => array(
+        'name' => t('Full name of each language'),
+        'code' => t('Short code of each language'),
+      ),
+    );
+
+    $languages = language_list();
+    $language_count = count($languages);
+    foreach ($languages as $langcode => $language) {
+      $languages[$langcode] = $language->name;
+    }
+    // To avoid too long help text when too many languages are enabled, list
+    // only the first 4 (and add ellipsis, to indicate more).
+    $language_help_limit = 4;
+    if ($language_count > $language_help_limit) {
+      $languages = array_slice($languages, 0, $language_help_limit);
+      $languages['...'] = '...';
+    }
+    $delimiter = ' ' . (isset($locale_switcher_settings['custom_delimiter']) ? $locale_switcher_settings['custom_delimiter'] : '|') . ' ';
+    $form['locale_switcher']['language_link_label_display']['name']['#description'] = implode($delimiter, $languages);
+    $form['locale_switcher']['language_link_label_display']['code']['#description'] = implode($delimiter, array_keys($languages));
+  }
+
+  return $form;
+}
+
+/**
  * Implements hook_block_view().
  *
  * Displays a language switcher. Only show if we have at least two languages.
  */
-function locale_block_view($type) {
+function locale_block_view($type, $settings = array(), $contexts = array()) {
   if (language_multilingual()) {
     $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
     $links = language_negotiation_get_switch_links($type, $path);
+    $settings = _locale_block_settings_cleanup($settings['locale_switcher']);
 
     if (isset($links->links)) {
-      backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
-      $class = "language-switcher-{$links->provider}";
-      $variables = array('links' => $links->links, 'attributes' => array('class' => array($class)));
-      $block['content'] = theme('links__locale_block', $variables);
+      $variables = array('links' => $links, 'settings' => $settings);
+
       $block['subject'] = t('Languages');
+      // $block['content'] = theme('links__locale_block', $variables);
+      $block['content'] = theme('locale_block', $variables);
+
       return $block;
     }
   }
+}
+
+/**
+ * Implements hook_block_save().
+ *
+ * Cleans up the submitted block settings, before they are saved in config.
+ */
+function locale_block_save($delta, &$edit = array()) {
+  if ($delta == 'language') {
+    $edit['locale_switcher'] = _locale_block_settings_cleanup($edit['locale_switcher']);
+  }
+}
+
+/**
+ * Helper function to simplify the settings for the language switcher block.
+ *
+ * @see locale_block_configure()
+ * @see locale_block_view()
+ */
+function _locale_block_settings_cleanup($settings) {
+    if (!empty($settings) && !empty($settings['language_list_inline_delimiter'])) {
+      if ($settings['language_list_inline_delimiter']['custom_delimiter'] && isset($settings['language_list_inline_delimiter']['delimiter'])) {
+        switch ($settings['language_list_inline_delimiter']['delimiter']) {
+          case '|':
+          case ' ':
+          case '':
+            break;
+          default:
+            $settings['custom_delimiter'] = $settings['language_list_inline_delimiter']['delimiter'];
+        }
+      }
+      unset($settings['language_list_inline_delimiter']);
+    }
+  return $settings;
 }
 
 /**
@@ -880,6 +1020,12 @@ function locale_block_view($type) {
 function locale_preprocess_block(&$variables) {
   if ($variables['block']->module == 'locale') {
     $variables['attributes']['role'] = 'navigation';
+    // Legacy hook suggestion, so not to break themes that use
+    // theme('links__locale_block') for their language switcher.
+    // @to-do: figure out if this needs to be higher up the suggestions list,
+    // and if so, then what is the best way to do it.
+    // $variables['theme_hook_suggestions'][] = 'links__locale_block';
+    array_unshift($variables['theme_hook_suggestions'], 'links__locale_block');
   }
 }
 
