@@ -2797,7 +2797,7 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
 function system_transliteration_file_query() {
   $operator = 'NOT REGEXP';
   if (config_get('system.core', 'file_transliterate_lowercase')) {
-    $regex =  'CAST("/[a-z0-9_.-]+$" AS BINARY)';
+    $regex =  'CAST("/[a-z0-9_.-]+$" AS CHAR CHARACTER SET latin1_general_cs)';
   }
   else {
     $regex = '/[a-z0-9_.-]+$';
