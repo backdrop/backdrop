@@ -1308,13 +1308,13 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
 }
 
 /**
- * Utility function to get a list of image file extensions available by default.
+ * Returns an array of image file extensions available by default.
  *
  * @return array
  *   List of supported image file extensions, possibly extended by other
  *   modules.
  *
- * @see hook_image_supported_extensions_alter().
+ * @see hook_image_supported_extensions_alter()
  */
 function image_default_supported_extensions() {
   $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
