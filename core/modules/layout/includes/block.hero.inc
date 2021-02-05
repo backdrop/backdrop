@@ -52,13 +52,7 @@ class BlockHero extends BlockText {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $allowed_extensions = 'jpg jpeg png gif';
-    if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
-      $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-        $allowed_extensions .= ' webp';
-      }
-    }
+    $allowed_extensions = implode(' ', image_default_supported_extensions());
     $upload_validators = array(
       'file_validate_extensions' => array($allowed_extensions),
       'file_validate_image_resolution' => array('3200x1600', '1200x300'),
