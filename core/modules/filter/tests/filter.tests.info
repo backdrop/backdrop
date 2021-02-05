@@ -72,6 +72,6 @@ file = filter.test
 
 [FilterEditorLinkValidateTestCase]
 name = Editor link validation
-description = todo
+description = Validate correct handling of urls inserted via editor link dialog.
 group = Filter
 file = filter_dialog.test

@@ -497,7 +497,7 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
 
-  // Empty values are OK, this won't become a link (<a>) tag anyway.
+  // Allow empty values, since this will not result in a link tag anyway.
   if ($value === '') {
     form_set_value($element, $value, $form_state);
     return;
@@ -512,8 +512,9 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
       $valid_url = TRUE;
     }
     elseif (!isset($parts['scheme'])) {
+      // Allow scheme relative urls like "//domain.tld/path". No need to
+      // rewrite, only validate the syntax.
       if (valid_url('http:' . $value, TRUE)) {
-        // Allow scheme relative urls like "//domain.tld/path".
         $valid_url = TRUE;
       }
     }
