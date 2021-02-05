@@ -55,7 +55,7 @@ class BlockHero extends BlockText {
     $allowed_extensions = 'jpg jpeg png gif';
     if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
       $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      if (!empty($gd_info['WebP Support'])) {
         $allowed_extensions .= ' webp';
       }
     }
