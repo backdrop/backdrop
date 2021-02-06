@@ -282,6 +282,17 @@ function entity_get_info($entity_type = NULL) {
           }
         }
 
+        // Add a token view mode if it does not already exist. Only work with
+        // fieldable entities.
+        if (!empty($entity_info[$name]['fieldable'])) {
+          if (!isset($entity_info[$name]['view modes']['token'])) {
+            $entity_info[$name]['view modes']['token'] = array(
+              'label' => t('Tokens'),
+              'custom settings' => FALSE,
+            );
+          }
+        }
+
         foreach ($entity_info[$name]['view modes'] as $view_mode => $view_mode_info) {
           $entity_info[$name]['view modes'][$view_mode] += array(
             'custom settings' => FALSE,

@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.16.x-dev');
+define('BACKDROP_VERSION', '1.19.x-dev');
 
 /**
  * Core API compatibility.
@@ -1663,7 +1663,7 @@ function backdrop_page_header() {
   $headers_sent = TRUE;
 
   $default_headers = array(
-    'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
+    'Expires' => 'Fri, 16 Jan 2015 07:50:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
     'Cache-Control' => 'no-cache, must-revalidate',
     'X-Content-Type-Options' => 'nosniff',
@@ -1761,7 +1761,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   // by sending an Expires date in the past. HTTP/1.1 clients ignores the
   // Expires header if a Cache-Control: max-age= directive is specified (see RFC
   // 2616, section 14.9.3).
-  $default_headers['Expires'] = 'Sun, 19 Nov 1978 05:00:00 GMT';
+  $default_headers['Expires'] = 'Fri, 16 Jan 2015 07:50:00 GMT';
 
   backdrop_send_headers($default_headers);
 
@@ -2014,7 +2014,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -3258,7 +3258,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3289,7 +3292,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
@@ -3683,7 +3686,7 @@ function language_default() {
  *   base_path() returns "/backdropfolder/".
  * - http://example.com/path/alias (which is a path alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
- * - http://example.com/index.php returns an empty string (meaning: front page).
+ * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.
  *
  * @return
@@ -3715,13 +3718,13 @@ function request_path() {
     // If the path equals the script filename, either because 'index.php' was
     // explicitly provided in the URL, or because the server added it to
     // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-    // versions of Microsoft IIS do this), the front page should be served.
+    // versions of Microsoft IIS do this), the home page should be served.
     if ($path == basename($_SERVER['PHP_SELF'])) {
       $path = '';
     }
   }
   else {
-    // This is the front page.
+    // This is the home page.
     $path = '';
   }
 

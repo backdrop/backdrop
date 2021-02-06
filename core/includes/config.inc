@@ -63,7 +63,7 @@ function config($config_file, $type = 'active') {
  * @param string $option
  *   The name of the config option within the file to delete. The config option
  *   may contain periods to indicate levels within the config file.
- * 
+ *
  * @see config_set()
  * @see config_get()
  *
@@ -282,7 +282,7 @@ function config_install_default_config($module, $config_name = NULL) {
   $module_config_dir = backdrop_get_path('module', $module) . '/config';
   if (is_dir($module_config_dir)) {
     $storage = new ConfigFileStorage($module_config_dir);
-    $files = glob($module_config_dir . '/' . '*.json');
+    $files = glob($module_config_dir . '/*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
       // file system in the Backdrop config directory. Note the config name
@@ -1239,7 +1239,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
 
   /**
    * Create a configuration directory, if it does not already exist, and ensure
-   * it is writable by the site.
+   * it is writable by the site. Additionally, protect it with a .htaccess file.
    *
    * @return bool
    *   TRUE on success, FALSE in case of an error.
@@ -1248,9 +1248,13 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function initializeStorage() {
     if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new ConfigStorageException(format_string('The directory %directory could not be created or could not be made writable. ', array(
-      '%directory' => $config_directory,
-    )));
+      throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
+        '@directory' => $this->directory,
+      )));
+    }
+    // No need to create htaccess files if not running Apache.
+    if (backdrop_is_apache()) {
+      file_save_htaccess($this->directory);
     }
   }
 

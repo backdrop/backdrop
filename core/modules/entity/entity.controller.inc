@@ -408,6 +408,10 @@ class DefaultEntityController implements EntityControllerInterface {
         }
       }
       $query->fields('revision', $entity_revision_fields);
+
+      // Compare revision id of the base and revision table, if equal then this
+      // is the active revision.
+      $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'is_active_revision');
     }
 
     $query->fields('base', $entity_fields);
@@ -437,8 +441,8 @@ class DefaultEntityController implements EntityControllerInterface {
    * @param $queried_entities
    *   Associative array of query results, keyed on the entity ID.
    * @param $revision_id
-   *   ID of the revision that was loaded, or FALSE if the most current revision
-   *   was loaded.
+   *   ID of the revision that was loaded, or FALSE if no revision was
+   *   specified..
    */
   protected function attachLoad(&$queried_entities, $revision_id = FALSE) {
     // Attach fields.

@@ -348,6 +348,7 @@ function simpletest_settings_form($form, &$form_state) {
   $form['httpauth']['simpletest_httpauth_password'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
+    '#password_toggle' => TRUE,
   );
   if ($password) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');

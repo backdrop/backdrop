@@ -1278,7 +1278,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     module_disable($locale_module);
     backdrop_uninstall_modules($locale_module);
 
-    // Visit the front page.
+    // Visit the home page.
     $this->backdropGet('');
 
     // Check the init language logic.
@@ -1436,7 +1436,7 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
       'pt' => (object) array(
         'langcode' => 'pt',
       ),
-      // Language codes with more then one dash are actually valid.
+      // Language codes with more than one dash are actually valid.
       // eh-oh-laa-laa is the official language code of the Teletubbies.
       'eh-oh-laa-laa' => (object) array(
         'langcode' => 'eh-oh-laa-laa',
@@ -1633,10 +1633,11 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Create a user with the admin/people/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
+    $password = $this->randomName(10);
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass' => $username,
+      'pass' => $password,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
@@ -1720,10 +1721,10 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     $edit = array( "prefix[$langcode]" => $prefix );
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
 
-    // Check that the "xx" front page is readily available because path prefix
+    // Check that the "xx" home page is readily available because path prefix
     // negotiation is pre-configured.
     $this->backdropGet($prefix);
-    $this->assertText(t('Welcome to Backdrop'), 'The "xx" front page is readibly available.');
+    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readibly available.');
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
@@ -2268,7 +2269,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
 
-    // Access the front page without specifying any valid URL language prefix
+    // Access the home page without specifying any valid URL language prefix
     // and having as browser language preference a non-default language.
     $http_header = array("Accept-Language: $langcode_browser_fallback;q=1");
     $language = (object) array('langcode' => '');
@@ -2392,7 +2393,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting for the given language.
    *
-   * The test is performed with a fixed URL (the default front page) to check
+   * The test is performed with a fixed URL (the default home page) to check
    * that language prefixes are not added to it, and that the prefixed URL is
    * actually not working.
    *

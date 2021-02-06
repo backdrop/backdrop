@@ -1245,7 +1245,7 @@ function image_effect_save($style_name, $effect) {
   }
 
   $config->save();
-  $style = image_style_load(NULL, $style_name);
+  $style = image_style_load($style_name);
   image_style_flush($style);
   return $effect;
 }

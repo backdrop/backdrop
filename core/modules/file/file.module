@@ -1335,6 +1335,13 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#prefix' => '<span class="file-browse-text js-show"> ' . t('or') . ' ',
     '#suffix' => '</span>',
     '#access' => !empty($element['#browser_view']),
+    // Attaching the assets from the Filter module makes sure that the image
+    // browser works, even if no field on that form has a filter set.
+    '#attached' => array(
+      'library' => array(
+        array('filter', 'filter'),
+      ),
+    ),
   );
 
   $element['fid'] = array(
@@ -3390,7 +3397,6 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   }
 
   $formatter = $display['formatter'];
-  $settings = $display['settings'][$formatter];
 
   // Attempt to display the file with the specified display.
   // See file_display() for details.

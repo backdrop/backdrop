@@ -56,7 +56,7 @@ function layout_layout_context_info() {
       'file/%file',
       'file/%file/view',
     ),
-    'path placeholder' => 'file',
+    'path placeholder' => '%file',
     'load callback' => 'file_load',
   );
   $info['overrides_path'] = array(
@@ -116,8 +116,8 @@ function layout_layout_access_info() {
   }
 
   $info['front'] = array(
-    'title' => t('Front page'),
-    'description' => t('Is this the front page.'),
+    'title' => t('Home page'),
+    'description' => t('Is this the home page.'),
     'class' => 'FrontLayoutAccess',
   );
   $info['language'] = array(

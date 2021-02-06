@@ -180,6 +180,11 @@ class TranslationTestCase extends BackdropWebTestCase {
     $this->backdropPost("node/$translation_es->nid/edit", $edit, t('Save'));
     $this->backdropLogin($this->translator);
     $this->assertLanguageSwitchLinks($node, $translation_es, TRUE, 'node');
+
+    // Check that language switch links are not shown if hidden for this content
+    // type.
+    config_set('node.type.' . $node->type, 'settings.translation_show_links', FALSE);
+    $this->assertLanguageSwitchLinks($node, $translation_es, FALSE, 'node');
   }
 
   /**

@@ -471,7 +471,7 @@ function backdrop_add_feed($url = NULL, $title = '') {
  */
 function backdrop_get_feeds($delimiter = "\n") {
   $feeds = backdrop_add_feed();
-  return implode($feeds, $delimiter);
+  return implode($delimiter, $feeds);
 }
 
 /**
@@ -834,7 +834,10 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
   // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
     $destination = backdrop_parse_url($_GET['destination']);
-    $path = $destination['path'];
+    // Double check the path derived by backdrop_parse_url() is not external.
+    if (!url_is_external($destination['path'])) {
+      $path = $destination['path'];
+    }
     $options['query'] = $destination['query'];
     $options['fragment'] = $destination['fragment'];
   }
@@ -1435,44 +1438,71 @@ function valid_url($url, $absolute = FALSE) {
  * The implementation assumes it is dealing with IEEE 754 double precision
  * floating point numbers that are used by PHP on most systems.
  *
- * This is based on the number/range verification methods of webkit.
- *
- * @param $value
- *   The value that needs to be checked.
- * @param $step
- *   The step scale factor. Must be positive.
- * @param $offset
+ * @param mixed $value
+ *   The numeric value that needs to be checked, integer or float.
+ * @param mixed $step
+ *   The step scale factor, integer or float. Must be positive.
+ * @param mixed $offset
  *   (optional) An offset, to which the difference must be a multiple of the
- *   given step.
+ *   given step, integer or float.
  *
  * @return bool
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
- *
- * @see http://opensource.apple.com/source/WebCore/WebCore-1298/html/NumberInputType.cpp
  */
 function valid_number_step($value, $step, $offset = 0.0) {
-  $double_value = (double) abs($value - $offset);
+  // Avoid division by zero.
+  if ($step == 0) {
+    return FALSE;
+  }
 
-  // The fractional part of a double has 53 bits. The greatest number that could
-  // be represented with that is 2^53. If the given value is even bigger than
-  // $step * 2^53, then dividing by $step will result in a very small remainder.
-  // Since that remainder can't even be represented with a single precision
-  // float the following computation of the remainder makes no sense and we can
-  // safely ignore it instead.
-  if ($double_value / pow(2.0, 53) > $step) {
+  // Consider offset, get absolute values.
+  $value = abs($value - $offset);
+  $step = abs($step);
+
+  // Value and step are the same, no need for math.
+  if ($value == $step) {
     return TRUE;
   }
 
-  // Now compute that remainder of a division by $step.
-  $remainder = (double) abs($double_value - $step * round($double_value / $step));
+  // Both numbers are integers - use modulo right away.
+  if ((int) $value == $value && (int) $step == $step) {
+    return $value % $step == 0;
+  }
 
-  // $remainder is a double precision floating point number. Remainders that
-  // can't be represented with single precision floats are acceptable. The
-  // fractional part of a float has 24 bits. That means remainders smaller than
-  // $step * 2^-24 are acceptable.
-  $computed_acceptable_error = (double)($step / pow(2.0, 24));
+  // Convert from possible exponent notation to decimal strings to get the scale
+  // values. Note: sprintf also rounds values but seems to give more reliable
+  // results than number_format.
+  // "10" is the maximum value allowed by the number widget, so higher scale
+  // values do not make much sense.
+  // But as several (also unrelated) tests require a higher value, we have to
+  // provide at least a scale of 13 here.
+  $max_scale = 13;
+  $step_string = rtrim(sprintf("%.{$max_scale}F", $step), '0');
+  $value_string = rtrim(sprintf("%.{$max_scale}F", $value), '0');
 
-  return $computed_acceptable_error >= $remainder || $remainder >= ($step - $computed_acceptable_error);
+  // If the actual value has more significant decimals than expected, it has a
+  // higher precision than desired and is not divisible by the step.
+  // But if the scale value is high, and the length of string (minus comma) is
+  // beyond the php setting for precision, it's more likely that the conversion
+  // to string caused a problem with rounding. It's a compromise to allow it,
+  // because there's no way for php to handle it reliably.
+  $step_scale = strpos(strrev($step_string), '.');
+  $value_scale = strpos(strrev($value_string), '.');
+  if ($value_scale > $step_scale) {
+    if ($value_scale > 10 && $step_scale > 0 && strlen($value_string) - 1 > ini_get('precision')) {
+      $value = round($value, $step_scale);
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  // Because of the floating point precision problem, fmod() has a high error
+  // rate. We convert the floats to integers instead by multiplying powers of 10
+  // and use the modulo operator.
+  $step_int = intval($step * pow(10, $step_scale));
+  $value_int = intval($value * pow(10, $step_scale));
+  return $value_int % $step_int == 0;
 }
 
 /**
@@ -2398,7 +2428,9 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   // If we have a non-custom date format use the provided date format pattern.
   if ($date_format_name != 'custom') {
     $date_format = system_date_format_load($date_format_name);
-    $pattern = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
+    if (!empty($date_format)) {
+      $pattern = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
+    }
   }
 
   // Fall back to medium if a format was not found.
@@ -2554,7 +2586,7 @@ function url($path = NULL, array $options = array()) {
   // path is always treated as internal by default (to prevent external link
   // injection vulnerabilities).
   if (!isset($options['external'])) {
-    $options['external'] = ($path === $_GET['q']) ? FALSE : url_is_external($path);
+    $options['external'] = (isset($_GET['q']) && $path === $_GET['q']) ? FALSE : url_is_external($path);
   }
 
   // Preserve the original path before altering or aliasing.
@@ -2616,7 +2648,7 @@ function url($path = NULL, array $options = array()) {
     }
   }
 
-  // The special path '<front>' links to the default front page.
+  // The special path '<front>' links to the default home page.
   if ($path == '<front>') {
     $path = '';
   }
@@ -3993,7 +4025,12 @@ function _backdrop_build_css_path($matches, $base = NULL) {
   }
 
   // Prefix with base and remove '../' segments where possible.
-  $path = $_base . $matches[1];
+  if (is_array($matches)) {
+    $path = $_base . $matches[1];
+  }
+  else {
+    $path = $_base;
+  }
   $last = '';
   while ($path != $last) {
     $last = $path;
@@ -5068,8 +5105,8 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * A "state" means a certain property on a DOM element, such as "visible" or
  * "checked". A state can be applied to an element, depending on the state of
- * another element on the page. In general, states depend on HTML attributes and
- * DOM element properties, which change due to user interaction.
+ * one or more other elements on the page. In general, states depend on HTML
+ * attributes and DOM element properties, which change due to user interaction.
  *
  * Since states are driven by JavaScript only, it is important to understand
  * that all states are applied on presentation only, none of the states force
@@ -5079,37 +5116,62 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *
  * #states is an associative array in the form of:
  * @code
- * array(
+ * '#states' => array(
  *   STATE1 => CONDITIONS_ARRAY1,
  *   STATE2 => CONDITIONS_ARRAY2,
  *   ...
  * )
  * @endcode
- * Each key is the name of a state to apply to the element, such as 'visible'.
- * Each value is a list of conditions that denote when the state should be
- * applied.
  *
- * Multiple different states may be specified to act on complex conditions:
- * @code
- * array(
- *   'visible' => CONDITIONS,
- *   'checked' => OTHER_CONDITIONS,
- * )
- * @endcode
+ * Each key is the name of a state to apply to the element, such as "visible" or
+ * "checked". Each value is a list of conditions that denote when the state
+ * should be applied.
  *
- * Every condition is a key/value pair, whose key is a jQuery selector that
- * denotes another element on the page, and whose value is an array of
- * conditions, which must bet met on that element:
+ * Multiple conditions may be specified for a given state. In this case (an
+ * 'AND' conditional), all conditions must be true for the state to be applied:
  * @code
- * array(
- *   'visible' => array(
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
- *     JQUERY_SELECTOR => REMOTE_CONDITIONS,
- *     ...
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // All of these conditions must be true; this one...
+ *     JQUERY_SELECTOR1 => CONDITION1,
+ *     // ...AND this one.
+ *     JQUERY_SELECTOR2 => CONDITION2,
  *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
  * )
  * @endcode
- * All conditions must be met for the state to be applied.
+ *
+ * For 'OR' conditionals, each condition must be wrapped in its own array:
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // Any of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     // OR this one (or both).
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
+ *
+ * For 'XOR' (exclusive 'OR') conditionals, a similar syntax as 'OR' is used,
+ * but the 'XOR' operator needs to be explicitly defined as an array item with
+ * the string 'xor':
+ * @code
+ * '#states' => array(
+ *   STATE1 => array(
+ *     // Either one of these conditions must be true; this one...
+ *     array(JQUERY_SELECTOR1 => CONDITION1),
+ *     'xor',
+ *     // or this one, but NOT both.
+ *     array(JQUERY_SELECTOR2 => CONDITION2),
+ *   ),
+ *   STATE2 => CONDITIONS_ARRAY2,
+ *   ...
+ * )
+ * @endcode
  *
  * Each remote condition is a key/value pair specifying conditions on the other
  * element that need to be met to apply the state to the element:
@@ -7184,7 +7246,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
  * Checks if the key is a property.
  */
 function element_property($key) {
-  return $key[0] == '#';
+  return substr($key, 0, 1) == '#';
 }
 
 /**
@@ -7198,7 +7260,7 @@ function element_properties($element) {
  * Checks if the key is a child.
  */
 function element_child($key) {
-  return !isset($key[0]) || $key[0] != '#';
+  return empty($key) || substr($key, 0, 1) != '#';
 }
 
 /**
@@ -7223,7 +7285,7 @@ function element_children(&$elements, $sort = FALSE) {
   $children = array();
   $sortable = FALSE;
   foreach ($elements as $key => $value) {
-    if ($key === '' || $key[0] !== '#') {
+    if ($key === '' || substr($key, 0, 1) !== '#') {
       if (is_array($value)) {
         $children[$key] = $value;
         if (isset($value['#weight'])) {

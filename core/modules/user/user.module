@@ -41,6 +41,11 @@ define('USER_REGISTER_VISITORS', 'visitors');
 define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approval');
 
 /**
+ * Password strength modifier to encourage longer passwords.
+ */
+define('USER_PASSWORD_STRENGTH_MODIFIER', 0.7);
+
+/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -129,6 +134,10 @@ function user_entity_info() {
       'view modes' => array(
         'full' => array(
           'label' => t('User account'),
+          'custom settings' => FALSE,
+        ),
+        'token' => array(
+          'label' => t('Tokens'),
           'custom settings' => FALSE,
         ),
       ),
@@ -325,6 +334,25 @@ function user_load_by_name($name) {
  */
 function user_save($account) {
   return $account->save();
+}
+
+/**
+ * Element validate handler for the password field.
+ *
+ * Set a default value if one-time login link goes out,
+ * set a form error if not and password value is empty.
+ */
+function user_pass_required_validate($element, &$form_state, $form) {
+  $values = $form_state['values'];
+  if ($values['notify'] == 1) {
+    $form_state['values']['pass'] = user_password(22);
+  }
+  else {
+    if (empty($values['pass']) && $values['pass'] !== '0') {
+      $message = t('!name field is required.', array('!name' => $element['#title']));
+      form_set_error('pass', $message);
+    }
+  }
 }
 
 /**
@@ -717,6 +745,7 @@ function user_user_view($account) {
  * @see user_validate_current_pass()
  * @see user_validate_picture()
  * @see user_validate_mail()
+ * @see user_password_policy_validate()
  */
 function user_account_form(&$form, &$form_state) {
   global $user;
@@ -728,6 +757,11 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
+  module_load_include('password.inc', 'user', 'user');
+  $reject_weak = user_password_reject_weak($user->name);
+  if ($reject_weak) {
+    $form['#validate'][] = 'user_password_policy_validate';
+  }
 
   // Account information.
   $form['account'] = array(
@@ -746,6 +780,10 @@ function user_account_form(&$form, &$form_state) {
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
+  // Autofocus the username field (on the registration form only).
+  if ($register) {
+    $form['account']['name']['#attributes']['autofocus'] = 'autofocus';
+  }
 
   $form['account']['mail'] = array(
     '#type' => 'email',
@@ -758,10 +796,15 @@ function user_account_form(&$form, &$form_state) {
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
   if (!$register) {
+    $description = t('Current password must be entered to set a new password.');
+    if ($reject_weak) {
+      $description .= ' ' . t('Weak passwords will be rejected.');
+      $description .= _user_password_policy_help();
+    }
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
-      '#description' => t('Current password must be entered to set a new password.'),
+      '#description' => $description,
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
     );
@@ -802,15 +845,50 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!config_get('system.core', 'user_email_verification') || $admin_users) {
-    $form['account']['pass'] = array(
-      '#type' => 'password',
-      '#title' => t('Password'),
-      '#description' => t('Provide a password for the new account.'),
-      '#password_toggle' => TRUE,
-      '#password_strength' => TRUE,
-      '#required' => TRUE,
-    );
+  else {
+    $description = '';
+    // Provide different help text if weak passwords are rejected.
+    if ($reject_weak) {
+      $description = ' ' . t('Weak passwords will be rejected.');
+      $description .= _user_password_policy_help();
+    }
+    if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+      // Someone registers a new account and may set a password directly.
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => $description,
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => TRUE,
+      );
+    }
+    if ($admin_users) {
+      // An admin creates an account.
+      $form['account']['notify'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Notify user of new account'),
+        '#default_value' => 1,
+        '#description' => t('The user will receive an email with a one-time login link which leads to a page where they can set their password.'),
+      );
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => $description,
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => FALSE,
+        '#element_validate' => array('user_pass_required_validate'),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+          'required' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+        ),
+      );
+    }
   }
 
   $form['account_settings'] = array(
@@ -847,12 +925,6 @@ function user_account_form(&$form, &$form_state) {
   $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
-  );
-
-  $form['account_settings']['notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin_users,
   );
 
   // Signature.
@@ -998,6 +1070,52 @@ function user_account_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Validation callback for password constraints.
+ *
+ * @see user_account_form()
+ * @see user_pass_reset_form()
+ */
+function user_password_policy_validate($form, &$form_state) {
+  $strength = 0;
+  if (!array_key_exists('pass', $form_state['values'])) {
+    // If mail verification is required, user registration forms don't have a
+    // password field.
+    return;
+  }
+  $password = trim($form_state['values']['pass']);
+
+  if ($form['#form_id'] == 'user_profile_form' && strlen($password) == 0) {
+    // On profile form and no new password has been set.
+    return;
+  }
+  $config = config('system.core');
+  $messages = array();
+  if ($form['#form_id'] == 'user_pass_reset_form') {
+    $account = $form['#account'];
+    $username = $account->name;
+    $email = $account->mail;
+  }
+  else {
+    $username = $form_state['values']['name'];
+    $email = $form_state['values']['mail'];
+  }
+  module_load_include('password.inc', 'user', 'user');
+  // @todo add a hook so modules can override the strength.
+  $strength = _user_password_evaluate_strength($password, $username, $email);
+
+  if ($strength < $config->get('user_password_strength_threshold')) {
+    form_set_error('complex_pass', t('The password is too weak. Please consider making your password longer or more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
+  }
+
+  if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
+    form_set_error('username_pass', t('The password cannot be the same as the username.'));
+  }
+  if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
+    form_set_error('email_pass', t('The password cannot be the same as the e-mail.'));
+  }
+}
+
 function user_login_block($form) {
   $credentials = config_get('system.core', 'user_login_method');
 
@@ -1019,6 +1137,7 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 2,
+    '#password_toggle' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -1580,11 +1699,16 @@ function user_login($form, &$form_state) {
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,
+    '#attributes' => array(
+      'autofocus' => 'autofocus',
+    ),
   );
 
-  $form['pass'] = array('#type' => 'password',
+  $form['pass'] = array(
+    '#type' => 'password',
     '#title' => t('Password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();
   $form['actions'] = array('#type' => 'actions');
@@ -2411,15 +2535,16 @@ function user_role_save($role) {
 function user_role_delete($role_name) {
   $role = user_role_load($role_name);
 
-  // If this is the administrator role, delete the user_admin_role variable.
-  if ($role_name == config_get('system.core', 'user_admin_role')) {
-    $system_config = config('system.core');
-    $system_config->clear('user_admin_role');
+  // If this is the administrator role, explicitly set the "user_admin_role"
+  // attribute to "0" (disabled).
+  $system_config = config('system.core');
+  if ($role_name == $system_config->get('user_admin_role')) {
+    $system_config->set('user_admin_role', 0);
     $system_config->save();
   }
 
-  $config = config('user.role.' . $role_name);
-  $config->delete();
+  $user_config = config('user.role.' . $role_name);
+  $user_config->delete();
 
   // Update the users who have this role set:
   db_delete('users_roles')
@@ -2725,19 +2850,49 @@ function _user_mail_notify($op, $account, $language = NULL) {
 
 /**
  * Form element process handler for client-side password hide/show and strength.
- * @param $element
+ *
+ * @param array $element
+ *   The form element to process.
+ * @param array $form_state
+ *   The $form_state array of the form this element belongs to.
  */
-function user_form_process_password($element) {
+function user_form_process_password($element, $form_state = array()) {
   global $user;
+  $config = config('system.core');
 
   if ($element['#password_strength']) {
+    if (isset($form_state['user']) && is_a($form_state['user'], 'User')) {
+      // Existing account, not the current user if an admin edits an account.
+      $username = $form_state['user']->name;
+      $email = $form_state['user']->mail;
+    }
+    else {
+      // The AnonymousUser object has no mail property, and name is NULL.
+      // The User object has both mail and name set.
+      $username = (isset($user->name) ? $user->name : '');
+      $email = (isset($user->mail) ? $user->mail : '');
+    }
     $strength_settings = array(
-      'strengthTitle' => t('Password strength: '),
-      'weak' => t('poor'),
-      'fair' => t('fair'),
-      'good' => t('good'),
-      'strong' => t('excellent'),
-      'username' => (isset($user->name) ? $user->name : ''),
+      'scores' => array(
+        'weak' => 0,
+        'fair' => 50,
+        'good' => 70,
+        'strong' => 90,
+      ),
+      'labels' => array(
+        'strengthTitle' => t('Password strength: '),
+        'weak' => t('weak'),
+        'fair' => t('fair'),
+        'good' => t('good'),
+        'strong' => t('excellent'),
+      ),
+      'data' => array(
+        'username' => $username,
+        'email' => $email,
+      ),
+      'config' => array(
+        'strengthModifier' => USER_PASSWORD_STRENGTH_MODIFIER,
+      ),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
@@ -2939,7 +3094,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_form($form, &$form_state) {
   global $user;
   // We need to set the page title bc this menu entry is a local task.
-  backdrop_set_title('Create new account');
+  backdrop_set_title(t('Create new account'));
 
   $admin = user_access('administer users');
 

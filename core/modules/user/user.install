@@ -1206,5 +1206,40 @@ function user_update_1016() {
 }
 
 /**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
+  $config->save();
+}
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1018() {
+  $config = config('system.core');
+  $config->set('user_password_reject_weak', FALSE);
+  $config->set('user_password_strength_threshold', 50);
+  $config->save();
+}
+
+/**
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  if ($config->get('user_admin_role') == NULL) {
+    $config->set('user_admin_role', 0);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

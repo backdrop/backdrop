@@ -251,6 +251,7 @@ function contact_mail($key, &$message, $params) {
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),
     '!sender-name' => user_format_name($params['sender']),
+    '!sender-phone' => !empty($params['phone']) ? $params['phone'] : '',
     '!sender-url' => $params['sender']->uid ? url('user/' . $params['sender']->uid, array('absolute' => TRUE, 'language' => $language)) : $params['sender']->mail,
   );
 
@@ -259,6 +260,9 @@ function contact_mail($key, &$message, $params) {
     case 'page_copy':
       $message['subject'] .= t('[!category] !subject', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t("!sender-name (!sender-url) sent a message using the contact form at !form-url.", $variables, array('langcode' => $language->langcode));
+      if (!empty($params['phone'])) {
+        $message['body'][] = t("!sender-name provided a phone number: !sender-phone", $variables, array('langcode' => $language->langcode));
+      }
       $message['body'][] = $params['message'];
       break;
 
@@ -277,6 +281,9 @@ function contact_mail($key, &$message, $params) {
       $message['body'][] = t('Hello !recipient-name,', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t("!sender-name (!sender-url) has sent you a message via your contact form (!form-url) at !site-name.", $variables, array('langcode' => $language->langcode));
       $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings at !recipient-edit-url.", $variables, array('langcode' => $language->langcode));
+      if (!empty($params['phone'])) {
+        $message['body'][] = t("!sender-name provided a phone number: !sender-phone", $variables, array('langcode' => $language->langcode));
+      }
       $message['body'][] = t('Message:', array(), array('langcode' => $language->langcode));
       $message['body'][] = $params['message'];
       break;
