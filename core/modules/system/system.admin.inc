@@ -2796,11 +2796,19 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
  */
 function system_transliteration_file_query() {
   $operator = 'NOT REGEXP';
+  $regex = '/[a-z0-9_.-]+$';
+
   if (config_get('system.core', 'file_transliterate_lowercase')) {
-    $regex =  'CAST("/[a-z0-9_.-]+$" AS CHAR CHARACTER SET latin1_general_cs)';
-  }
-  else {
-    $regex = '/[a-z0-9_.-]+$';
+    // As of version 8.0.22 MySQL throws an error on binary comparison, but
+    // newer versions support setting case insensitive comparison in the regex.
+    // @todo newer MariaDB versions support that, too.
+    $connection = Database::getConnection();
+    if ($connection->databaseType() == 'mysql' && version_compare($connection->version(), '8.0.22', '>')) {
+      $regex = '/(?-i)[a-z0-9_.-]+$';
+    }
+    else {
+      $operator .= ' BINARY';
+    }
   }
 
   return db_select('file_managed')
