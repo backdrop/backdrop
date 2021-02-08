@@ -2800,10 +2800,10 @@ function system_transliteration_file_query() {
 
   if (config_get('system.core', 'file_transliterate_lowercase')) {
     // As of version 8.0.22 MySQL throws an error on binary comparison, but
-    // newer versions support setting case insensitive comparison in the regex.
-    // @todo newer MariaDB versions support that, too.
+    // recent versions support setting a flag for case sensitive comparison in
+    // the regex.
     $connection = Database::getConnection();
-    if ($connection->databaseType() == 'mysql' && version_compare($connection->version(), '8.0.22', '>')) {
+    if ($connection->databaseType() == 'mysql' && version_compare($connection->version(), '8.0.22', '>=')) {
       $regex = '/(?-i)[a-z0-9_.-]+$';
     }
     else {
