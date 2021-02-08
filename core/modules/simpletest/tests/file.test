@@ -1100,6 +1100,8 @@ class FileUploadTransliterationTest extends FileTestCase {
     $config->save();
     $this->backdropGet('admin/config/media/file-system/transliteration');
     $table_rows = $this->xpath('//*[@id="system-transliteration-retroactive"]//tbody//tr');
+    // Transliterated but not lowercase yet.
+    $this->assertLink('uFail_A_fau.txt');
     $this->assertEqual(count($table_rows), 2, 'Two files available for transliteration.');
     $this->backdropPost(NULL, array(), t('Transliterate'));
     $this->assertText('2 file names have been successfully transliterated.');
@@ -1109,6 +1111,13 @@ class FileUploadTransliterationTest extends FileTestCase {
     $now_transliterated_file = file_load($non_transliterated_fid);
     $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
     $this->assertIdentical($now_transliterated_file->uri, 'temporary://ufail_a_fau.txt', 'File name transliterated and lower case after bulk updating.');
+
+    // The file should not show up anymore as available for retroactive
+    // transliteration. This ensures that case sensitive comparison has been
+    // successful.
+    $this->backdropGet('admin/config/media/file-system/transliteration');
+    $this->assertText('Transliteration is not required.');
+    $this->assertNoLink('ufail_a_fau.txt');
   }
 }
 
