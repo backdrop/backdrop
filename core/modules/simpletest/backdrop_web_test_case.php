@@ -204,15 +204,15 @@ abstract class BackdropTestCase {
         ->execute();
     }
     else {
-      $this->databasePrefix = $prefix;
-      $this->fileDirectoryName = substr($prefix, 10);
-
       db_update('simpletest_prefix')
         ->condition('prefix', $prefix)
         ->fields(array(
           'in_use' => 1,
         ))
         ->execute();
+
+      $this->databasePrefix = $prefix;
+      $this->fileDirectoryName = substr($prefix, 10);
     }
   }
 
@@ -1517,7 +1517,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function changeDatabasePrefix() {
     if (empty($this->databasePrefix)) {
+      // Get a lock so that 2 different tests don't try to use the same prefix.
+      $lock_id = 'simpletest:' . $this->testId . ':' . $this->profile;
+      lock_wait($lock_id);
+
       $this->prepareDatabasePrefix();
+
+      lock_release($lock_id);
+
       // If $this->prepareDatabasePrefix() failed to work, return without
       // setting $this->setupDatabasePrefix to TRUE, so setUp() methods will
       // know to bail out.
