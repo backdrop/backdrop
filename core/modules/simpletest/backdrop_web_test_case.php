@@ -173,9 +173,8 @@ abstract class BackdropTestCase {
    * @see BackdropWebTestCase::setUp()
    */
   protected function prepareDatabasePrefix() {
-    // Generate a temporary prefixed database to ensure that tests have a clean
-    // starting point and confirm that random prefix isn't already in use.
-    db_transaction();
+    $lock_id = 'simpletest:' . $this->profile;
+    lock_wait($lock_id);
 
     // Check if there is an existing prefix that is not in use.
     $prefix = db_query("SELECT prefix FROM {simpletest_prefix} WHERE test_id = :test_id AND profile = :profile AND in_use = 0", array(
@@ -207,6 +206,7 @@ abstract class BackdropTestCase {
       db_update('simpletest_prefix')
         ->condition('prefix', $prefix)
         ->fields(array(
+          'test_id' => $this->testId,
           'in_use' => 1,
         ))
         ->execute();
@@ -214,6 +214,8 @@ abstract class BackdropTestCase {
       $this->databasePrefix = $prefix;
       $this->fileDirectoryName = substr($prefix, 10);
     }
+
+    lock_release($lock_id);
   }
 
   /**
@@ -945,7 +947,10 @@ class BackdropUnitTestCase extends BackdropTestCase {
     db_update('simpletest_prefix')
       ->condition('test_id', $this->testId)
       ->condition('prefix', $this->databasePrefix)
-      ->fields(array('in_use' => 0))
+      ->fields(array(
+        'test_id' => 0,
+        'in_use' => 0
+      ))
       ->execute();
 
     $conf['file_public_path'] = $this->originalFileDirectory;
@@ -1517,13 +1522,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function changeDatabasePrefix() {
     if (empty($this->databasePrefix)) {
-      // Get a lock so that 2 different tests don't try to use the same prefix.
-      $lock_id = 'simpletest:' . $this->testId . ':' . $this->profile;
-      lock_wait($lock_id);
-
       $this->prepareDatabasePrefix();
-
-      lock_release($lock_id);
 
       // If $this->prepareDatabasePrefix() failed to work, return without
       // setting $this->setupDatabasePrefix to TRUE, so setUp() methods will
@@ -1973,7 +1972,10 @@ class BackdropWebTestCase extends BackdropTestCase {
       db_update('simpletest_prefix')
         ->condition('test_id', $this->testId)
         ->condition('prefix', $this->databasePrefix)
-        ->fields(array('in_use' => 0))
+        ->fields(array(
+          'test_id' => 0,
+          'in_use' => 0,
+        ))
         ->execute();
     }
     // Set the configuration directories back to the originals.

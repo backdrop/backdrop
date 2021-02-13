@@ -177,6 +177,7 @@ function simpletest_schema() {
     'indexes' => array(
       'test_id' => array('test_id'),
       'prefix' => array('prefix'),
+      'profile' => array('profile'),
     ),
   );
   return $schema;
