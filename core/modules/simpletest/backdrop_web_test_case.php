@@ -177,8 +177,7 @@ abstract class BackdropTestCase {
     lock_wait($lock_id);
 
     // Check if there is an existing prefix that is not in use.
-    $prefix = db_query("SELECT prefix FROM {simpletest_prefix} WHERE test_id = :test_id AND profile = :profile AND in_use = 0", array(
-      ':test_id' => $this->testId,
+    $prefix = db_query("SELECT prefix FROM {simpletest_prefix} WHERE test_id = 0 AND profile = :profile AND in_use = 0", array(
       ':profile' => $this->profile,
     ))->fetchField();
 
@@ -1669,10 +1668,12 @@ class BackdropWebTestCase extends BackdropTestCase {
 
         $prefix_tables = array_flip($prefix_tables);
         foreach ($cache_tables as $cache_table_name) {
-          $prefix_table_name = $this->databasePrefix . substr($cache_table_name, strlen($cache_prefix));
+          $original_name = substr($cache_table_name, strlen($cache_prefix));
+          $prefix_table_name = $this->databasePrefix . $original_name;
           if (isset($prefix_tables[$prefix_table_name])) {
             // The table exists, so check if it was changed.
-            if ($checksums[$cache_table_name] !== $checksums[$prefix_table_name]) {
+            // Cache tables will get cleared before the test starts, so skip them.
+            if (strpos($original_name, 'cache') === FALSE && $checksums[$cache_table_name] !== $checksums[$prefix_table_name]) {
               // They don't match, so drop the prefix table and recreate it.
               db_query('DROP TABLE ' . $prefix_table_name);
               db_query('CREATE TABLE ' . $prefix_table_name . ' LIKE ' . $cache_table_name);
