@@ -3003,6 +3003,8 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  * @see backdrop_deliver_page()
  */
 function backdrop_deliver_html_page($page_callback_result) {
+  $site_config = config('system.core');
+  
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
