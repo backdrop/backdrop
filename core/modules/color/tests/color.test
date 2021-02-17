@@ -160,7 +160,6 @@ class ColorTestCase extends BackdropWebTestCase {
    * Test the Bartik legacy color mode.
    */
   public function testBartikLegacy() {
-    $bartik_config = config('bartik.settings');
     config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
 
@@ -179,8 +178,8 @@ class ColorTestCase extends BackdropWebTestCase {
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
     // No color settings should be saved other than the legacy option.
-    $this->assertTrue($bartik_config->get('color_legacy'), 'Legacy color flag set in Bartik configuration.');
-    $this->assertNull($bartik_config->get('color'), 'No other color settings saved.');
+    $this->assertTrue(config_get('bartik.settings', 'color_legacy'), 'Legacy color flag set in Bartik configuration.');
+    $this->assertNull(config_get('bartik.settings', 'color'), 'No other color settings saved.');
     $this->backdropGet('');
     $this->assertRaw('bartik/css/colors-legacy.css', 'Legacy color CSS found on the homepage.');
     $this->assertNoRaw('bartik/css/legacy.css', 'Default color CSS correctly not used on the homepage.');
