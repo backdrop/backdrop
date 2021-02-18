@@ -653,7 +653,7 @@ function template_preprocess_date_views_pager(&$variables) {
  * Theme the calendar title.
  */
 function theme_date_nav_title($params) {
-  $date_views_config->config('date_views.settings');
+  $date_views_config = config('date_views.settings');
   $title  = '';
   $granularity = $params['granularity'];
   $view = $params['view'];
