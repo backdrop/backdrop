@@ -1856,12 +1856,11 @@ class SearchEmbedForm extends BackdropWebTestCase {
    * Tests that the embedded form appears and can be submitted.
    */
   function testEmbeddedForm() {
-    $search_settings_config = config('search.settings');
     // First verify we can submit the form from the module's page.
     $this->backdropPost('search_embedded_form',
       array('name' => 'John'),'Send away');
     $this->assertText('Test form was submitted', 'Form message appears');
-    $count = $search_settings_config->get('search_embedded_form_submitted');
+    $count = config_get('search.settings', 'search_embedded_form_submitted');
     $this->assertEqual($this->submit_count + 1, $count, 'Form submission count is correct');
     $this->submit_count = $count;
 
@@ -1871,7 +1870,7 @@ class SearchEmbedForm extends BackdropWebTestCase {
     $this->backdropPost('search/node/' . $this->node->title,
       array('name' => 'John'), 'Send away');
     $this->assertText('Test form was submitted', 'Form message appears');
-    $count = $search_settings_config->get('search_embedded_form_submitted');
+    $count = config_get('search.settings', 'search_embedded_form_submitted');
     $this->assertEqual($this->submit_count + 1, $count, 'Form submission count is correct');
     $this->submit_count = $count;
 
@@ -1881,7 +1880,7 @@ class SearchEmbedForm extends BackdropWebTestCase {
       array('keys' => 'foo'),
       t('Search'));
     $this->assertNoText(t('Test form was submitted'), 'Form message does not appear');
-    $count = $search_settings_config->get('search_embedded_form_submitted');
+    $count = config_get('search.settings', 'search_embedded_form_submitted');
     $this->assertEqual($this->submit_count, $count, 'Form submission count is correct');
     $this->submit_count = $count;
   }
