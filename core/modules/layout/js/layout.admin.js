@@ -90,6 +90,34 @@ Backdrop.behaviors.layoutDisplayEditor = {
         forcePlaceholderSize: true
       });
 
+    $('.layout-editor-block').bind('keydown', function(event) {
+        if(event.which == 38) {
+          $(this).insertBefore($(this).prev());
+          $(this).focus();
+        } 
+        if(event.which == 40) {
+          $(this).insertAfter($(this).next()); 
+          $(this).focus();
+        }     
+        if (event.which == 84 || event.which == 33) {
+          $(this).parent().prepend($(this));
+          $(this).focus();
+        } 
+        if (event.which == 66 || event.which == 34) {
+          $(this).parent().append($(this));
+          $(this).focus();
+        }
+        // @Todo: this duplicates Backdrop.behaviors.layoutDisplayEditor.updateLayout().
+        var region = $(this).parent();
+        var regionName = region.closest('.layout-editor-region').data('regionName');
+        var blockList = [];
+        region.find('.layout-editor-block').each(function(index) {
+          blockList.push($(this).data('blockId'));
+        });
+        $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+
+    });
+
       // Open a dialog if editing a particular block.
       var blockUuid = window.location.hash.replace(/#configure-block:/, '');
       if (blockUuid) {
