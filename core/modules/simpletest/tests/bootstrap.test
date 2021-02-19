@@ -91,10 +91,10 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
     );
 
     // Verifies that backdrop_valid_http_host() prevents invalid characters.
-    $this->assertFalse(backdrop_valid_http_host('security/.backdrop.org:80'), 'HTTP_HOST with / is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security\\.backdrop.org:80'), 'HTTP_HOST with \\ is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security<.backdrop.org:80'), 'HTTP_HOST with &lt; is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security..backdrop.org:80'), 'HTTP_HOST with .. is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security/.backdropcms.org:80'), 'HTTP_HOST with / is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security\\.backdropcms.org:80'), 'HTTP_HOST with \\ is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security<.backdropcms.org:80'), 'HTTP_HOST with &lt; is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security..backdropcms.org:80'), 'HTTP_HOST with .. is invalid');
     // Verifies that host names are shorter than 1000 characters.
     $this->assertFalse(backdrop_valid_http_host(str_repeat('x', 1001)), 'HTTP_HOST with more than 1000 characters is invalid.');
     $this->assertFalse(backdrop_valid_http_host(str_repeat('.', 101)), 'HTTP_HOST with more than 100 subdomains is invalid.');
