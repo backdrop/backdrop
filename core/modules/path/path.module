@@ -593,7 +593,7 @@ function path_config_info() {
 function path_get_info() {
   $all_info = backdrop_static(__FUNCTION__);
 
-  if (!isset($info)) {
+  if (!isset($all_info)) {
     module_load_include('inc', 'path', 'path.path');
     $modules = module_implements('path_info');
     foreach ($modules as $module) {
