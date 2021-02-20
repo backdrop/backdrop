@@ -3523,7 +3523,9 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
 
   // Fix 'every_page_weight' in case it is missing.
   foreach ($css as $key => &$item) {
-    $item['every_page_weight'] = $item['every_page_weight'] ?? $item['every_page'] ? -1 : 1;
+    if (!isset($item['every_page_weight'])) {
+      $item['every_page_weight'] = $item['every_page'] ? -1 : 1;
+    }
   }
 
   // Sort CSS items, so that they appear in the correct order.
@@ -4744,7 +4746,9 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
 
   // Fix 'every_page_weight' in case it is missing.
   foreach ($items as $key => &$item) {
-    $item['every_page_weight'] = $item['every_page_weight'] ?? $item['every_page'] ? -1 : 1;
+    if (!isset($item['every_page_weight'])) {
+      $item['every_page_weight'] = $item['every_page'] ? -1 : 1;
+    }
   }
 
   // Sort the JavaScript so that it appears in the correct order.
