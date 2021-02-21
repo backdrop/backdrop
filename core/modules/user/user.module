@@ -3189,10 +3189,10 @@ function user_register_validate($form, &$form_state) {
  * @see user_register_form()
  */
 function user_register_submit($form, &$form_state) {
-  $site_config = config('system.core');
+  $user_email_verification = config_get('system.core', 'user_email_verification');
   $admin = $form_state['values']['administer_users'];
 
-  if (!$site_config->get('user_email_verification') || $admin) {
+  if (!$user_email_verification) || $admin) {
     $pass = $form_state['values']['pass'];
   }
   else {
@@ -3236,7 +3236,7 @@ function user_register_submit($form, &$form_state) {
     backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No email verification required; log in user immediately.
-  elseif (!$admin && !$site_config->get('user_email_verification') && $account->status) {
+  elseif (!$admin && !$user_email_verification && $account->status) {
     _user_mail_notify('register_no_approval_required', $account);
     $form_state['uid'] = $account->uid;
     user_login_submit(array(), $form_state);
