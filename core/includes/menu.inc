@@ -511,6 +511,8 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  *   it will be printed directly to the page.
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
+  $site_config = config('system.core');
+  
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -521,7 +523,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
         // In most cases, Layout module will provide the route handler if
         // it is enabled. See layout_route_handler().
         if (empty($route_handler)) {
-          $route_handler = config_get('system.core', 'menu_route_handler');
+          $route_handler = $site_config->get('menu_route_handler');
         }
         if (empty($route_handler) || !function_exists($route_handler)) {
           $route_handler = 'menu_default_route_handler';
@@ -539,7 +541,6 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
   // Offline pages are not cached in the database but have a Cache-Control
   // header to allow reverse proxies to serve offline hits instead of Backdrop.
   elseif ($site_status == MENU_SITE_OFFLINE) {
-    $site_config = config('system.core');
     $page_cache_enabled = (bool) $site_config->get('page_cache_maximum_age');
     $maintenance_max_age = $site_config->get('maintenance_page_maximum_age');
     if ($page_cache_enabled && $maintenance_max_age) {
