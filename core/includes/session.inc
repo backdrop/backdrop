@@ -237,7 +237,13 @@ function _backdrop_session_write($sid, $value) {
 function backdrop_session_initialize() {
   global $user, $is_https;
 
-  session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
+  // Calling session_set_save_handler() multiple times will cause errors on
+  // PHP 7.2+. But checking a session status is only available 5.4+, so if the
+  // status cannot be checked, or the status indicates that there is no session,
+  // set session handlers.
+  if (!function_exists('session_status') || session_status() === PHP_SESSION_NONE) {
+    session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
+  }
 
   // We use !empty() in the following check to ensure that blank session IDs
   // are not valid.
@@ -370,10 +376,20 @@ function backdrop_session_regenerate() {
 
   if (backdrop_session_started()) {
     $old_session_id = session_id();
+    // PHP 7.3 requires closing the session before setting a new session ID.
+    $original_session_saving = backdrop_save_session();
+    backdrop_save_session(FALSE);
+    session_write_close();
+    backdrop_session_started(FALSE);
   }
   session_id(backdrop_random_key());
 
   if (isset($old_session_id)) {
+    // Preserve and restore user object, as starting session will reset it.
+    $original_user = $user;
+    backdrop_session_start();
+    $user = $original_user;
+    backdrop_save_session($original_session_saving);
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);

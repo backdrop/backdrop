@@ -53,10 +53,10 @@ class Layout {
   /**
    * The storage state of the layout.
    *
-   * This is the machine-version of the $type variable, which represents whether
-   * this view is has a default, user-created, or overridden configuration.
-   * Possible values for this variable include the constants
-   * LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or LAYOUT_STORAGE_DEFAULT.
+   * This represents whether this layout is has a default, user-created, or
+   * overridden configuration. Possible values for this variable include the
+   * constants LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or 
+   * LAYOUT_STORAGE_DEFAULT.
    *
    * @var int
    */
@@ -158,11 +158,41 @@ class Layout {
   var $renderer_name = 'standard';
 
   /**
+   * An array of orphaned blocks when changing templates.
+   *
+   * @var array
+   */
+  var $orphaned_blocks = array();
+
+  /**
+   * The region where orphaned blocks are placed in new template.
+   *
+   * @var string
+   */
+  var $refuge_region;
+
+  /**
    * An array of LayoutContext instances used by this menu item.
    *
    * @var LayoutContext[]
    */
-  private $contexts;
+  private $contexts = array();
+
+  /**
+   * An array of removed blocks, keyed by their UUID.
+   *
+   * This is being used in removeBlock() to keep track of blocks being removed
+   * from the layout being edited. If the layout edits are saved, this is used
+   * in layout_layout_presave() in order to give block modules a chance to react
+   * on block removals. If the layout edits are canceled, there is no need to
+   * clear this as that task is already being handled in
+   * layout_settings_form_reset().
+   *
+   * @var array
+   * @see removeBlock()
+   * @see layout_layout_presave()
+   */
+  var $removed_blocks = array();
 
   /**
    * Constructor for a Layout class.
@@ -209,12 +239,21 @@ class Layout {
       // Items are key => handler_type.
       'content' => 'block',
       'conditions' => 'layout_access',
-      // 'contexts' => 'layout_context',
+      'contexts' => 'layout_context',
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
+        // Set the storage property for contexts stored in config.
+        if ($property_key == 'contexts') {
+          $plugin_data['data']['storage'] = TRUE;
+        }
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
+    }
+
+    // Ensure contexts is always set to an array.
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
     }
   }
 
@@ -226,6 +265,13 @@ class Layout {
       $this->storage = LAYOUT_STORAGE_OVERRIDE;
     }
     $is_new = !empty($this->is_new);
+
+    // Don't save path based contexts as these are generated on the fly.
+    foreach ($this->contexts as $key => $context) {
+      if (!$context->storage) {
+        unset($this->contexts[$key]);
+      }
+    }
 
     // Allow modules to act on layout data before saving.
     foreach (module_implements('layout_presave') as $module) {
@@ -246,6 +292,7 @@ class Layout {
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
+      'contexts' => $this->contexts,
     );
 
     // Basic validation to prevent data corruption.
@@ -258,7 +305,7 @@ class Layout {
     $sub_parts = array(
       'content',
       'conditions',
-      // 'contexts',
+      'contexts',
       // 'relationships',
     );
     foreach ($sub_parts as $config_type) {
@@ -291,7 +338,7 @@ class Layout {
     }
     $files = file_load_multiple($fids);
     foreach ($files as $fid => $file) {
-      if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+      if ((int) ($file && $file->status) !== FILE_STATUS_PERMANENT) {
         // This makes the file "self-referencing", so it will never be deleted.
         // File usages are not removed for text blocks currently.
         // See https://github.com/backdrop/backdrop-issues/issues/2137.
@@ -499,6 +546,10 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
+    // Keep track of removed blocks so that block modules can react to their
+    // removal (if layout edits are saved).
+    $this->removed_blocks[$block_uuid] = $this->content[$block_uuid];
+
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
@@ -661,7 +712,12 @@ class Layout {
 
     $old_layout_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_info = layout_get_layout_template_info($layout_name);
+    // Set up the array with region names for the new layout.
     $new_positions = array();
+    $new_regions = array_keys($new_layout_info['regions']);
+    foreach ($new_regions as $new_region_name) {
+      $new_positions[$new_region_name] = array();
+    }
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -679,21 +735,31 @@ class Layout {
         $new_region_name = $old_region_name;
       }
       else {
-        $new_region_name = FALSE;
-      }
-      if ($new_region_name && !array_key_exists($new_region_name, $new_positions)) {
-        $new_positions[$new_region_name] = array();
+        $new_region_name = '';
       }
 
       if (isset($this->positions[$old_region_name])) {
         foreach ($this->positions[$old_region_name] as $uuid) {
-          if ($new_region_name) {
+          if (!empty($new_region_name)) {
             $new_positions[$new_region_name][] = $uuid;
+          }
+          elseif ($new_region_name === '') {
+            $this->orphaned_blocks[] = $uuid;
           }
           else {
             unset($this->content[$uuid]);
           }
         }
+      }
+    }
+
+    // Assign orphan blocks to the default or last region, if the former doesn't
+    // exist.
+    if (!empty($this->orphaned_blocks)) {
+      end($new_positions);
+      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      foreach ($this->orphaned_blocks as $uuid) {
+        $new_positions[$this->refuge_region][] = $uuid;
       }
     }
 
@@ -709,25 +775,31 @@ class Layout {
    */
   function getContexts() {
     if (is_null($this->contexts)) {
-      if ($this->menu_item) {
-        $this->contexts = $this->menu_item->getContexts();
+      $this->contexts = array();
+    }
+
+    // Load objects for stored contexts.
+    foreach ($this->contexts as $key => $context) {
+      if (!isset($context->position) && !is_object($context->data)) {
+        $context_info = layout_get_context_info($context->plugin);
+        if (isset($context_info['load callback'])) {
+          $context_data = call_user_func_array($context_info['load callback'], $context->settings);
+          $context->setData($context_data);
+        }
       }
-      elseif ($this->path) {
-        $this->contexts = layout_context_required_by_path($this->path);
-      }
-      else {
-        $this->contexts = array();
-      }
+    }
+
+    // Load contexts from paths and menu items.
+    if ($this->menu_item) {
+      $this->contexts += $this->menu_item->getContexts();
+    }
+    elseif ($this->path) {
+      $this->contexts += layout_context_required_by_path($this->path);
     }
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
-      $this->contexts['current_user'] = layout_create_context('user', array(
-        'name' => 'current_user',
-        'label' => t('Current user'),
-        'locked' => TRUE,
-      ));
-      $this->contexts['current_user']->setData($GLOBALS['user']);
+      $this->contexts['current_user'] = layout_current_user_context();
     }
 
     // Add on the overrides path context, which is always available.
@@ -742,13 +814,31 @@ class Layout {
   }
 
   /**
+   * Set the internally stored contexts.
+   */
+  function setContexts($key, $context) {
+    $this->contexts[$key] = $context;
+  }
+
+  /**
+   * Clear a stored context.
+   */
+  function clearContexts($key) {
+    unset($this->contexts[$key]);
+  }
+
+  /**
    * Reset the internally stored contexts.
    *
    * This is used before storing a layout, or when fresh contexts are important,
    * such as when actively changing the layout's path.
    */
   function resetContexts() {
-    $this->contexts = NULL;
+    foreach ($this->contexts as $key => $context) {
+      if (!$context->storage) {
+        unset($this->contexts[$key]);
+      }
+    }
     if ($this->menu_item) {
       $this->menu_item->resetContexts();
     }
@@ -807,4 +897,3 @@ class Layout {
     return TRUE;
   }
 }
-

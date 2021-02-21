@@ -17,6 +17,13 @@ class File extends Entity {
   public $fid;
 
   /**
+   * The file type (bundle).
+   *
+   * @var string
+   */
+  public $type;
+
+  /**
    * The file language code.
    *
    * @var string
@@ -105,11 +112,16 @@ class File extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType() {
+  public function entityType() {
     return 'file';
+  }
+
+  /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
   }
 
   /**
@@ -191,6 +203,22 @@ class FileStorageController extends EntityDatabaseStorageController {
       // Default the file's language code to none, because files are language
       // neutral more often than language dependent.
       $entity->langcode = LANGUAGE_NONE;
+    }
+
+    // The file type is used as a bundle key, and therefore, must not be NULL.
+    // It defaults to FILE_TYPE_NONE when loaded via file_load(), but in case
+    // file_save() is called on a new file object, default it here too.
+    if (!isset($entity->type)) {
+      $entity->type = FILE_TYPE_NONE;
+    }
+
+    // If the file isn't already assigned a real type, determine what type should
+    // be assigned to it.
+    if ($entity->type === FILE_TYPE_NONE) {
+      $type = file_get_type($entity);
+      if (isset($type)) {
+        $entity->type = $type;
+      }
     }
   }
 

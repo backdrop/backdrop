@@ -21,6 +21,14 @@ DirectoryIndex index.php index.html index.htm
 # Override PHP settings that cannot be changed at runtime. See
 # settings.php and backdrop_environment_initialize() in includes/bootstrap.inc
 # for settings that can be changed at runtime.
+<IfModule mod_php7.c>
+  php_flag session.auto_start               off
+  php_value mbstring.http_input             pass
+  php_value mbstring.http_output            pass
+  php_value max_input_vars                  10007
+  php_flag mbstring.encoding_translation    off
+</IfModule>
+# Same settings again for PHP 5 versions.
 <IfModule mod_php5.c>
   php_flag session.auto_start               off
   php_value mbstring.http_input             pass

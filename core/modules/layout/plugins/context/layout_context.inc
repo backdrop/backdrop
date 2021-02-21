@@ -3,12 +3,8 @@
 /**
  * @file
  * Class that holds information relating to a layouts context.
- *
- * This class does not extend the LayoutHandler class because contexts are not
- * stored directly within configuration. Instead contexts are determined based
- * on the Layout's path
  */
-abstract class LayoutContext {
+abstract class LayoutContext extends LayoutHandler {
   /**
    * The name of the plugin that provides this context.
    *
@@ -30,7 +26,7 @@ abstract class LayoutContext {
   /**
    * Indicator as to whether this context is required and cannot be removed.
    *
-   * Required contexts typically are those provided by a menu path wildcard.
+   * Required contexts typically are those provided by a menu path placeholder.
    * While these contexts are required to exist, they can be changed to a
    * different type of context. e.g. A layout at path "foo/%" could have a
    * required context at position 1 with either a "node" or "string" plugin. The
@@ -105,9 +101,20 @@ abstract class LayoutContext {
   var $restrictions = array();
 
   /**
+   * The storage state of the context.
+   *
+   * This represents whether this context is stored in configuration (TRUE) or
+   * if its generated on the fly (FALSE).
+   *
+   * @var bool
+   */
+  var $storage = FALSE;
+
+  /**
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {
+    parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
     $properties = array(
       'required',
@@ -115,6 +122,7 @@ abstract class LayoutContext {
       'position',
       'name',
       'label',
+      'storage',
     );
     foreach ($properties as $property) {
       if (isset($config[$property])) {
@@ -173,6 +181,35 @@ abstract class LayoutContext {
   function isA($plugin) {
     return $plugin === $this->plugin || in_array($plugin, $this->aliases);
   }
+
+  /**
+   * Settings form for configuring this context item.
+   */
+  function form(&$form, &$form_state) {
+  }
+
+  /**
+   * Validate handler for the settings form for this context item.
+   */
+  function formValidate($form, &$form_state) {
+
+  }
+
+  /**
+   * Submit handler for the settings form for this context item.
+   */
+  function formSubmit($form, &$form_state) {
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
+    $settings = array_diff_key($form_state['values'], $excluded);
+    $this->settings = array_merge($this->settings, $settings);
+  }
+
+  /**
+   * Return a summary for this context.
+   *
+   * The summary is displayed in the context table on Layout settings pages.
+   */
+  function getAdminSummary() {}
 }
 
 /**
@@ -208,5 +245,14 @@ class LayoutStringContext extends LayoutContext {
   }
   function label() {
     return t('String pass-through');
+  }
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary($path = NULL) {
+      $argument_parts = explode('/', $path);
+      $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
+
+      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
   }
 }

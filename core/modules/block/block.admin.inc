@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the block module.
+ * Admin page callbacks for the Block module.
  */
 
 /**
@@ -21,7 +21,7 @@ function block_admin_list() {
     $block = block_custom_block_load($delta);
     $row = array();
     $row[] = check_plain($block_info['info']);
-    $row[] = check_plain($block_info['description']);
+    $row[] = filter_xss($block_info['description']);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),

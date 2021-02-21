@@ -128,13 +128,10 @@ function _locale_translate_language_list($string, $limit_language) {
   backdrop_add_css(backdrop_get_path('module', 'locale') . '/css/locale.css');
 
   // Include both translated and not yet translated target languages in the
-  // list. The source language is English for built-in strings and the default
-  // language for other strings.
+  // list. The source language is English.
   $languages = language_list();
   if (!locale_translate_english()) {
-    $default = language_default();
-    $omit = empty($string['languages']) ? 'en' : $default->langcode;
-    unset($languages[$omit]);
+    unset($languages['en']);
   }
   $output = '';
   foreach ($languages as $langcode => $language) {

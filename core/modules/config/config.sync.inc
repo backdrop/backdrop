@@ -99,11 +99,12 @@ function _config_sync_finished($status, $results, $operations) {
   }
   if (!empty($results['completed_changes'])) {
     backdrop_set_message(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($results['completed_changes']))));
-
-    // Clean up the staging directory.
-    $config_dir = config_get_config_directory('staging');
-    $config_storage = new ConfigFileStorage($config_dir);
-    $config_storage->deleteAll();
+    if (config_get('system.core', 'config_sync_clear_staging')) {
+      // Clean up the staging directory.
+      $config_dir = config_get_config_directory('staging');
+      $config_storage = new ConfigFileStorage($config_dir);
+      $config_storage->deleteAll();
+    }
   }
 
   backdrop_flush_all_caches();

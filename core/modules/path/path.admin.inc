@@ -1,16 +1,18 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the path module.
+ * Admin page callbacks for the Path module.
  */
 
 /**
  * Returns a listing of all defined URL aliases.
  *
- * When filter key passed, perform a standard search on the given key,
- * and return the list of matching URL aliases.
+ * Any additional arguments passed by the redirect path in function
+ * path_admin_filter_form_submit_filter() will perform a search on given keys.
  */
-function path_admin_overview($keys = NULL) {
+function path_admin_overview() {
+  // Collect additional arguments, if any.
+  $keys = implode('/', func_get_args());
   // Add the filter form above the overview table.
   $build['path_admin_filter_form'] = backdrop_get_form('path_admin_filter_form', $keys);
   // Enable language column if language.module is enabled or if we have any
@@ -130,6 +132,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#required' => TRUE,
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['alias'] = array(
     '#type' => 'textfield',
@@ -459,7 +462,7 @@ function path_patterns_settings_form($form) {
   $config = config('path.settings');
 
   $form['#config'] = 'path.settings';
-  
+
   $form['verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose'),

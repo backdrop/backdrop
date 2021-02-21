@@ -585,13 +585,19 @@ class views_plugin_display extends views_plugin {
       // and therefore need special handling.
       'access' => array(
         'contains' => array(
-          'type' => array('default' => 'none'),
-         ),
+          'type' => array(
+            'default' => 'none',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
+        ),
       ),
       'cache' => array(
         'contains' => array(
-          'type' => array('default' => 'none'),
-         ),
+          'type' => array(
+            'default' => 'none',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
+        ),
       ),
       'query' => array(
         'contains' => array(
@@ -607,15 +613,21 @@ class views_plugin_display extends views_plugin {
       // should be copied.
       'exposed_form' => array(
         'contains' => array(
-          'type' => array('default' => 'basic'),
+          'type' => array(
+            'default' => 'basic',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
           'options' => array('default' => array()),
-         ),
+        ),
       ),
       'pager' => array(
         'contains' => array(
-          'type' => array('default' => 'full'),
+          'type' => array(
+            'default' => 'full',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
           'options' => array('default' => array()),
-         ),
+        ),
       ),
 
       // Note that the styles have their options completely independent.
@@ -623,12 +635,14 @@ class views_plugin_display extends views_plugin {
       // should not be repeated.
       'style_plugin' => array(
         'default' => 'default',
+        'unpack_translatable' => 'unpack_style',
       ),
       'style_options' => array(
         'default' => array(),
       ),
       'row_plugin' => array(
         'default' => 'fields',
+        'unpack_translatable' => 'unpack_style',
       ),
       'row_options' => array(
         'default' => array(),
@@ -638,26 +652,33 @@ class views_plugin_display extends views_plugin {
       ),
       'header' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'footer' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'empty' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
 
       // These are the 5 handler types.
       'relationships' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'fields' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'sorts' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'arguments' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'filter_groups' => array(
         'contains' => array(
@@ -667,6 +688,7 @@ class views_plugin_display extends views_plugin {
       ),
       'filters' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
     );
 
@@ -1121,7 +1143,7 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    $display_comment = check_plain(backdrop_substr($this->get_option('display_comment'), 0, 10));
+    $display_comment = check_plain(views_ui_truncate($this->get_option('display_comment'), 80));
     $options['display_comment'] = array(
       'category' => 'other',
       'title' => t('Comment'),
@@ -1389,10 +1411,9 @@ class views_plugin_display extends views_plugin {
     }
     $form['#title'] = check_plain($this->display->display_title) . ': ';
 
-    // Set the 'section' to hilite on the form.
-    // If it's the item we're looking at is pulling from the default display,
-    // reflect that. Don't use is_defaulted since we want it to show up even
-    // on the default display.
+    // Set the 'section' to highlight on the form. If it's the item we're
+    // looking at is pulling from the default display, reflect that. Don't use
+    // is_defaulted() since we want it to show up even on the default display.
     if (!empty($this->options['defaults'][$form_state['section']])) {
       $form['#section'] = 'default-' . $form_state['section'];
     }
@@ -1547,8 +1568,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('access');
         $form['#title'] .= t('Access options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
-          $form['#help_module'] = $plugin->definition['module'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['access_options'] = array(
             '#tree' => TRUE,
@@ -1589,8 +1614,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('cache');
         $form['#title'] .= t('Caching options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
-          $form['#help_module'] = $plugin->definition['module'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['cache_options'] = array(
             '#tree' => TRUE,
@@ -1609,11 +1638,10 @@ class views_plugin_display extends views_plugin {
         $form['#title'] .= t('Query options');
         $this->view->init_query();
         if ($this->view->query) {
-          if (isset($this->view->query->definition['help topic'])) {
+          if (!empty($this->view->query->definition['help topic'])) {
             $form['#help_topic'] = $this->view->query->definition['help topic'];
           }
-
-          if (isset($this->view->query->definition['module'])) {
+          if (!empty($this->view->query->definition['module'])) {
             $form['#help_module'] = $this->view->query->definition['module'];
           }
 
@@ -1708,8 +1736,10 @@ class views_plugin_display extends views_plugin {
         }
         $plugin = $this->get_plugin(empty($style) ? 'row' : 'style');
         if ($plugin) {
-          if (isset($plugin->definition['help topic'])) {
+          if (!empty($plugin->definition['help topic'])) {
             $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
             $form['#help_module'] = $plugin->definition['module'];
           }
           $form[$form_state['section']] = array(
@@ -1793,7 +1823,7 @@ class views_plugin_display extends views_plugin {
         break;
 
       case 'analyze-theme':
-        $form['#title'] .= t('Theming information');
+        $form['#title'] .= t('Theme developer information');
         $form['#help_topic'] = 'analyze-theme';
 
         if (isset($_POST['theme'])) {
@@ -1918,7 +1948,7 @@ class views_plugin_display extends views_plugin {
           $form['important']['new_id'] = array(
             '#prefix' => '<div class="description">',
             '#suffix' => '</div>',
-            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically (a template file, for example) may stop working until it is updated. To see updated theme suggestions, save the view."),
           );
         }
 
@@ -1943,6 +1973,9 @@ class views_plugin_display extends views_plugin {
           '#type' => 'submit',
           '#value' => t('Change theme'),
           '#submit' => array('views_ui_edit_display_form_change_theme'),
+          '#attributes' => array(
+            'class' => array('use-ajax-submit'),
+          ),
         );
 
         $form['analysis'] = array(
@@ -1957,6 +1990,9 @@ class views_plugin_display extends views_plugin {
           '#type' => 'submit',
           '#value' => t('Rescan template files'),
           '#submit' => array('views_ui_config_item_form_rescan'),
+          '#attributes' => array(
+            'class' => array('use-ajax-submit'),
+          ),
         );
         $form['rescan_button']['markup'] = array(
           '#markup' => '<div class="description">' . t("<strong>Important!</strong> When adding, removing, or renaming template files, it is necessary to make Backdrop aware of the changes by making it rescan the files on your system. By clicking this button you clear Backdrop's theme registry and thereby trigger this rescanning process. The highlighted templates above will then reflect the new state of your system.") . '</div>',
@@ -1966,11 +2002,11 @@ class views_plugin_display extends views_plugin {
         break;
 
       case 'analyze-theme-display':
-        $form['#title'] .= t('Theming information (display)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (display)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         if (empty($this->definition['theme'])) {
-          $output .= t('This display has no theming information');
+          $output .= t('This display has no theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this display.') . '</p>';
@@ -1991,13 +2027,13 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-style':
-        $form['#title'] .= t('Theming information (style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin();
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no style theming information');
+          $output .= t('This display has no style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this style.') . '</p>';
@@ -2018,13 +2054,13 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-row':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin('row');
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no row style theming information');
+          $output .= t('This display has no row style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
@@ -2045,8 +2081,8 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-field':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
 
@@ -2099,7 +2135,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('exposed_form');
         $form['#title'] .= t('Exposed form options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['exposed_form_options'] = array(
             '#tree' => TRUE,
@@ -2122,7 +2163,7 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $pager['type'],
         );
 
-        $pager_plugin = views_fetch_plugin_data('pager', $pager['type'], array($this->view->base_table));
+        $pager_plugin = views_fetch_plugin_data('pager', $pager['type']);
         if (!empty($pager_plugin['uses options'])) {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
@@ -2136,7 +2177,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('pager');
         $form['#title'] .= t('Pager options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['pager_options'] = array(
             '#tree' => TRUE,
@@ -2739,12 +2785,12 @@ class views_plugin_display extends views_plugin {
       foreach ($this->get_handlers($type) as $key => $handler) {
         if ($handler->can_expose() && $handler->is_exposed()) {
           if ($handler->is_a_group()) {
-            if ($id != $key && $identifier == $handler->options['group_info']['identifier']) {
+            if ($id != $key && isset($handler->options['group_info']['identifier']) && $identifier == $handler->options['group_info']['identifier']) {
               return FALSE;
             }
           }
           else {
-            if ($id != $key && $identifier == $handler->options['expose']['identifier']) {
+            if ($id != $key && isset($handler->options['expose']['identifier']) && $identifier == $handler->options['expose']['identifier']) {
               return FALSE;
             }
           }
@@ -2793,6 +2839,86 @@ class views_plugin_display extends views_plugin {
         );
       }
     }
+  }
+
+  /**
+   * Extract translatables from views styles.
+   */
+  public function unpack_style($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $style_plugin = $this->get_plugin();
+    if ($option == 'style_plugin') {
+      $type = 'style';
+      $options_field = 'style_options';
+      $plugin = $style_plugin;
+    }
+    else {
+      if (!$style_plugin || !$style_plugin->uses_row_plugin()) {
+        return;
+      }
+
+      $type = 'row';
+      $options_field = 'row_options';
+      $plugin = $this->get_plugin('row');
+      // If the style plugin doesn't use row plugins, don't even bother.
+    }
+
+    if ($plugin) {
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special handling for plugins when extracting translatables.
+   */
+  public function unpack_plugin(&$translatable, $storage, $option, $definition, $parents) {
+    $plugin_type = end($parents);
+    $plugin = $this->get_plugin($plugin_type);
+    if ($plugin) {
+      // Write which plugin to use.
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special method to unpack items that have handlers.
+   *
+   * This method was specified in the option_definition() as the method to
+   * utilize to export fields, filters, sort criteria, relationships and
+   * arguments. This passes the export off to the individual handlers so that
+   * they can export themselves properly.
+   */
+  public function unpack_handler(&$translatable, $storage, $option, $definition, $parents) {
+    $output = '';
+
+    // Cut the 's' off because the data is stored as the plural form but we need
+    // the singular form.
+    if ($option != 'header' && $option != 'footer' && $option != 'empty') {
+      $type = substr($option, 0, -1);
+    }
+    else {
+      $type = $option;
+    }
+    $types = views_object_types();
+    foreach ($storage[$option] as $id => $info) {
+      if (!empty($types[$type]['type'])) {
+        $handler_type = $types[$type]['type'];
+      }
+      else {
+        $handler_type = $type;
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
+      if ($handler) {
+        $handler->init($this->view, $info);
+        $items = array_merge($parents, array($type, $info['table'], $info['id']));
+        $handler->unpack_translatables($translatable, $items);
+      }
+
+      // Prevent reference problems.
+      unset($handler);
+    }
+
+    return $output;
   }
 
   /**
