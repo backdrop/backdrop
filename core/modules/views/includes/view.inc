@@ -1224,7 +1224,7 @@ class view {
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
-    $views_settings_config = config('views.settings');
+    $show_additional_queries = config_get('views.settings', 'show_additional_queries');
 
     // Check to see if the build failed.
     if (!empty($this->build_info['fail'])) {
@@ -1237,7 +1237,7 @@ class view {
     backdrop_theme_initialize();
 
     $start = microtime(TRUE);
-    if (!empty($this->live_preview) && $views_settings_config->get('show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->start_query_capture();
     }
 
@@ -1327,7 +1327,7 @@ class view {
       $function($this, $this->display_handler->output, $cache);
     }
 
-    if (!empty($this->live_preview) && $views_settings_config->get('show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->end_query_capture();
     }
 
