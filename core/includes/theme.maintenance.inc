@@ -15,7 +15,6 @@
  */
 function _backdrop_maintenance_theme() {
   global $theme, $theme_key;
-  $site_config = config('system.core');
 
   // If $theme is already set, assume the others are set too, and do nothing.
   if (isset($theme)) {
@@ -45,6 +44,7 @@ function _backdrop_maintenance_theme() {
     // We use the default theme as the maintenance theme. If a maintenance theme
     // isn't specified in the database or in settings.php, we use the default.
     try {
+      $site_config = config('system.core');
       $custom_theme = settings_get('maintenance_theme');
       if (empty($custom_theme)) {
         $custom_theme = $site_config->get('maintenance_theme');
