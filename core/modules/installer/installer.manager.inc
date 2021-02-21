@@ -59,7 +59,7 @@
  * @ingroup forms
  */
 function installer_manager_update_form($form, $form_state, $context) {
-  $installer_settings_config = config('installer.settings');
+  $core_update_enabled = config_get('installer.settings', 'core_update');
   switch ($context) {
     case 'module':
       backdrop_set_title('Update modules');
@@ -176,7 +176,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
     // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = ($project['project_type'] == 'core' && $installer_settings_config->get('core_update') != TRUE);
+    $needs_manual = ($project['project_type'] == 'core' && $core_update_enabled != TRUE);
 
     if ($needs_manual) {
       // There are no checkboxes in the 'Manual updates' table so it will be
@@ -202,7 +202,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     switch ($project['project_type']) {
       case 'core':
         // Core needs manual updates if automatic not enabled.
-        if ($installer_settings_config->get('core_update')) {
+        if ($core_update_enabled) {
           $projects['enabled'][$name] = $entry;
         }
         else {
