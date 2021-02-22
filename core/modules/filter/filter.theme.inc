@@ -225,25 +225,34 @@ function theme_filter_tips($variables) {
   return $output;
 }
 
-function theme_filter_format_editor_image_form($variables) {
-  $form = $variables['form'];
-
-  $library = backdrop_render($form['library_view']);
-  $actions = backdrop_render($form['actions']);
-
+/**
+  * Returns HTML for an image field modal.
+  *
+  */
+function theme_filter_format_editor_image_modal($variables) {
   $output = '';
   $output .= '<div class="image-form-wrapper">';
 
   $output .= '<div class="editor-image-fields">';
-  $output .= backdrop_render_children($form);
+  //$actions = backdrop_render($variables['element']['imageform']['actions']);
+  $output .= backdrop_render($variables['form']['imageform']);
+  //$output .= $actions;
   $output .= '</div>';
 
   $output .= '<div class="editor-image-library">';
-  $output .= $library;
+  $output .= backdrop_render($variables['form']['imagelibrary']);
   $output .= '</div>';
 
   $output .= '</div>';
+  return $output;
+}
 
-  $output .= $actions;
+/**
+  * Returns HTML for an image field form.
+  *
+  */
+function theme_filter_format_editor_image_form($variables) {
+  $form = $variables['form'];
+  $output = backdrop_render($form);
   return $output;
 }
