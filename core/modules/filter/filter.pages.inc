@@ -30,6 +30,43 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
+ * Form callback: Display image form alongside image library.
+ */
+function filter_format_editor_image_modal($format) {
+  /*
+  $image_form = backdrop_get_form('filter_format_editor_image_form', array($format));
+  $element['imageform']['form'] = $image_form;
+  $element['imagelibrary']['#markup'] = _filter_format_editor_image_library();
+  return $element;
+  */
+  
+  //TESTING ONLY CODE BELOW SINCE THE ABOVE ISN'T WORKING
+  $element['wrap']['#attributes']['class'][] = 'image-form-wrapper';
+  $image_form = '<form action="/submit_url2"><input type="hidden" value="hiddenvalue" /><input type="submit"></form>';
+  $element['wrap']['imageform']['#markup'] = '<div class="editor-image-fields">' . $image_form . '</div>';
+  $element['wrap']['imagelibrary']['#markup'] = '<div class="editor-image-library">' . _filter_format_editor_image_library() . '</div>';
+  return $element;
+}
+
+/**
+ * Render the image library.
+ */
+function _filter_format_editor_image_library() {
+  $output = '';
+  // Incorporate the Image Library view in the editor dialog form.
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+  $output .= '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  return $output;
+}
+
+/**
  * Form callback: Display a form for inserting/editing an image.
  */
 function filter_format_editor_image_form($form, &$form_state, $format) {
@@ -173,20 +210,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
-  );
-
-  // Incorporate the Library View in the editor dialog form.
-  $view_name = 'image_library';
-  $view = views_embed_view($view_name);
-  if (empty($view)) {
-    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
-    if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
-    }
-  }
-
-  $form['library_view'] = array(
-    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
   );
 
   $form['actions']['#type'] = 'actions';
