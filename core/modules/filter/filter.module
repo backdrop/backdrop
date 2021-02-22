@@ -34,6 +34,9 @@ function filter_theme() {
     'filter_guidelines' => array(
       'variables' => array('format' => NULL),
     ) + $base,
+    'filter_format_editor_image_modal' => array(
+        'render element' => 'form',
+    ) + $base,
     'filter_format_editor_image_form' => array(
         'render element' => 'form',
     ) + $base,
@@ -73,7 +76,7 @@ function filter_menu() {
     'file' => 'filter.pages.inc',
   );
   $items['editor/dialog/link/%filter_format'] = array(
-    'title' => 'Edit image',
+    'title' => 'Edit link',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_format_editor_link_form', 3),
     'access callback' => 'filter_dialog_access',
@@ -84,8 +87,8 @@ function filter_menu() {
   );
   $items['editor/dialog/image/%filter_format'] = array(
     'title' => 'Edit image',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('filter_format_editor_image_form', 3),
+    'page callback' => 'filter_format_editor_image_modal',
+    'page arguments' => array(3),
     'access callback' => 'filter_dialog_access',
     'access arguments' => array(3, 'image'),
     'theme callback' => 'ajax_base_page_theme',
