@@ -37,7 +37,7 @@ function TableResponsive (table) {
   // Add a link before the table for users to show or hide weight columns.
   this.$link = $('<a href="#" class="tableresponsive-toggle">' + this.showText + '</a>')
     .attr({
-      'title': Backdrop.t('Toogle visibility of table cells, that were hidden to make the table fit within a small screen.')
+      'title': Backdrop.t('Toggle visibility of table cells, that were hidden to make the table fit within a small screen.')
     })
     .on('click', $.proxy(this, 'eventhandlerToggleColumns'));
 
