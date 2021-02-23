@@ -408,6 +408,17 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Override server settings.
+ *
+ * By default, if the server specifies settings via the
+ * $_SERVER['BACKDROP_SETTINGS'] variable, those settings will take precedence
+ * over any settings set via the settings.php file(s). If you'd prefer the
+ * settings.php file(s) to take precedence over the server variable, uncomment
+ * the line below.
+ */
+// $settings['override_server_settings'] = TRUE;
+
+/**
  * Configuration overrides.
  *
  * These settings allow you to specify values for anything stored in config

@@ -860,8 +860,8 @@ function backdrop_settings_initialize() {
 
   $is_https = backdrop_is_https();
 
-  // Load settings specified by the server, if present
-  if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+  // Load settings specified by the server, if present and not overridden.
+  if (isset($_SERVER['BACKDROP_SETTINGS']) && empty($settings['override_server_settings'])) {
     $server_settings = @json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
     if (!is_array($server_settings)) {
       trigger_error('The values in $_SERVER[BACKDROP_SETTINGS] could not be read. Ensure it is a valid JSON string with no spaces.', E_USER_ERROR);
@@ -870,7 +870,7 @@ function backdrop_settings_initialize() {
       foreach ($server_settings as $key => $value) {
         // One level of depth should be enough for $settings and $databases.
         if ($key == 'settings') {
-          foreach($value as $settings_key => $settings_value) {
+          foreach ($value as $settings_key => $settings_value) {
             $settings[$settings_key] = $settings_value;
           }
         }
@@ -883,7 +883,7 @@ function backdrop_settings_initialize() {
           $databases = array_replace_recursive($databases, $value);
         }
         else {
-          $$key = $value;
+          $key = $value;
         }
       }
     }
