@@ -1024,9 +1024,10 @@ function file_usage_page($file) {
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
           // Unlike Node or Term entities File entities have a stream wrapper
-          // set as path, which needs to be converted to an URL.
+          // to the file set as their path, but the path to the entities' page
+          // is "path/[fid]".
           if ($entity_type == 'file') {
-            $uri = file_create_url($entity_uri['path']);
+            $uri = "file/{$entity_id}";
           }
           else {
             $uri = $entity_uri['path'];
