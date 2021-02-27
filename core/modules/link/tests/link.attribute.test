@@ -71,7 +71,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
       ),
     );
 
-    foreach ($link_tests as $key => $link_test) {
+    foreach ($link_tests as $link_test) {
       $link_text = $link_test['text'];
       $link_url = $link_test['url'];
       $this->createNodeForTesting($link_text, $link_url);
@@ -89,7 +89,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    foreach ($link_tests as $key => $link_test) {
+    foreach ($link_tests as $link_test) {
       $link_text = $link_test['text'];
       $link_url = $link_test['url'];
       $this->createNodeForTesting($link_text, $link_url);
@@ -106,7 +106,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    foreach ($link_tests as $key => $link_test) {
+    foreach ($link_tests as $link_test) {
       $link_text = $link_test['text'];
       $link_url = $link_test['url'];
       $this->createNodeForTesting($link_text, $link_url);
@@ -124,7 +124,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    foreach ($link_tests as $key => $link_test) {
+    foreach ($link_tests as $link_test) {
       $link_text = $link_test['text'];
       $link_url = $link_test['url'];
       $this->createNodeForTesting($link_text, $link_url);
@@ -158,7 +158,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
       ),
     );
 
-    foreach ($link_tests as $key => $link_test) {
+    foreach ($link_tests as $link_test) {
       $link_text = $link_test['text'];
       $link_url = $link_test['url'];
       $this->createNodeForTesting($link_text, $link_url);
