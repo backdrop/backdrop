@@ -577,7 +577,6 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
       'tt',
       'u',
     ));
-
     $item['html'] = TRUE;
   }
   $item['title'] = empty($title) ? $item['display_url'] : $title;
