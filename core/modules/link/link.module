@@ -548,7 +548,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
   }
 
   // Replace title tokens.
-  if ($title && ($instance['settings']['title'] == 'value' || $instance['settings']['enable_tokens'])) {
+  if ($title && $instance['settings']['enable_tokens']) {
     $text_tokens = token_scan($title);
     if (!empty($text_tokens)) {
       // Load the entity if necessary for entities in views.
@@ -560,7 +560,24 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
       }
       $title = token_replace($title, array($entity_token_type => $entity_loaded));
     }
-    $title = filter_xss($title, array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
+  }
+
+  if ($title && ($instance['settings']['title'] == 'value' || $instance['settings']['enable_tokens'])) {
+    $title = filter_xss($title, array(
+      'b',
+      'br',
+      'code',
+      'em',
+      'i',
+      'img',
+      'span',
+      'strong',
+      'sub',
+      'sup',
+      'tt',
+      'u',
+    ));
+
     $item['html'] = TRUE;
   }
   $item['title'] = empty($title) ? $item['display_url'] : $title;
