@@ -76,15 +76,15 @@ function link_field_instance_settings_form($field, $instance) {
   );
 
   $title_options = array(
-    'optional' => t('Optional title'),
-    'required' => t('Required title'),
-    'value' => t('Static title'),
-    'none' => t('No title'),
+    'optional' => t('Optional Title'),
+    'required' => t('Required Title'),
+    'value' => t('Static Title'),
+    'none' => t('No Title'),
   );
 
   $form['title'] = array(
     '#type' => 'radios',
-    '#title' => t('Link title'),
+    '#title' => t('Link Title'),
     '#default_value' => $instance['settings']['title'],
     '#options' => $title_options,
     '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title.'),
