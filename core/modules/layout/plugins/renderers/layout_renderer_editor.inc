@@ -27,6 +27,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     parent::addMeta();
     backdrop_add_library('system', 'ui.sortable');
     backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
+    backdrop_add_js('https://rawgit.com/jquery/jquery-ui/1-11-stable/external/jquery-simulate/jquery.simulate.js', 'external');
     backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
   }
 
@@ -106,7 +107,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $output = '<div class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $output = '<div tabindex="0" class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
     $output .= '<div class="layout-editor-block-title clearfix">';
     $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
