@@ -392,3 +392,7 @@
 [dir="rtl"] .edit-layout-top .dropbutton-wrapper {
   float: left;
 }
+
+*:focus .layout-editor-block-title {
+  background-color: #e9eebc;
+}

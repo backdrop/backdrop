@@ -78,6 +78,7 @@ Backdrop.behaviors.layoutConfigure = {
  */
 Backdrop.behaviors.layoutDisplayEditor = {
   attach: function(context) {
+    var synth = window.speechSynthesis;
     // Apply drag and drop to regions.
     var $regions = $('.layout-editor-region-content').once('layout-sortable');
     if ($regions.length) {
@@ -88,6 +89,144 @@ Backdrop.behaviors.layoutDisplayEditor = {
         items: '.layout-editor-block',
         placeholder: 'layout-editor-placeholder layout-editor-block',
         forcePlaceholderSize: true
+      });
+
+      // Get the list of droppables a.k.a regions where we can drop blocks.
+      var droppables = $.map($('.layout-editor-region'), function (item) {return $(item).attr('id')});
+
+      // Find the next region.
+      var findNextDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if(index >= 0 && index < arr.length - 1) {
+          return arr[index + 1]
+        }
+        return false;
+      }
+
+      // Find th previous region.
+      var findPreviousDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if(index > 0 && index <= arr.length - 1) {
+          return arr[index - 1]
+        }
+        return false;
+      }
+
+      var speak = function (destination) {
+        var utterThis = new SpeechSynthesisUtterance('moved to: ' + destination);
+        synth.speak(utterThis);
+      }
+
+      // Check if an element is in the viewport.
+      $.fn.isInViewport = function () {
+        let elementTop = $(this).offset().top;
+        let elementBottom = elementTop + $(this).outerHeight();
+
+        let viewportTop = $(window).scrollTop();
+        let viewportBottom = viewportTop + $(window).height();
+
+        return elementBottom > viewportTop && elementTop < viewportBottom;
+      }
+
+      // Scroll to a droppable if it's not visible.
+      var scrollIfNotVisible = function (nextDroppableId, droppables) {
+        if (findNextDroppable(nextDroppableId, droppables) && $('#' + findNextDroppable(nextDroppableId, droppables)).isInViewport() === false) {
+          console.log('scrolling');
+          var $nextDroppable = $('#' + findNextDroppable(nextDroppableId, droppables));
+          var _offset = $nextDroppable.offset();
+          $('html, body').animate({
+            scrollTop: _offset.top,
+            scrollLeft: _offset.left
+          });
+        }
+      }
+
+      $('.layout-editor-block').bind('keydown', function(event) {
+        // Press j to move down.
+        if(event.which == 74) {
+          var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
+          var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppableId) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId, droppables);
+
+          var droppable = $('#' + nextDroppableId + ' .layout-editor-region-content');
+          var draggable = $(this);
+          var droppableOffset = droppable.offset();
+          var draggableOffset = draggable.offset();
+          var dx = droppableOffset.left - draggableOffset.left;
+          var dy = droppableOffset.top - draggableOffset.top;
+          //var nextDestinationWidth = $('#' + nextDroppableId + ' .layout-editor-region-content')
+
+          draggable.width(droppable.width());
+
+
+          draggable.simulate("drag", {
+            dx: dx,
+            dy: dy
+          });
+          draggable.focus();
+          var currentRegionLabel = $('#' + findNextDroppable(currentDroppableId, droppables) + ' h2.label').text();
+          speak(currentRegionLabel);
+        }
+
+        // @Todo : move up
+        if(event.which == 75) {
+          var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
+          var nextDroppable = findPreviousDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppable) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId, droppables);
+
+          var droppable = $('#' + nextDroppable + ' .layout-editor-region-content');
+          var draggable = $(this);
+          var droppableOffset = droppable.offset();
+          var draggableOffset = draggable.offset();
+          var dx = droppableOffset.left - draggableOffset.left;
+          var dy = droppableOffset.top - draggableOffset.top;
+          //var nextDestinationWidth = $('#' + nextDroppable + ' .layout-editor-block')
+
+          draggable.width(droppable.width());
+
+          draggable.simulate("drag", {
+            dx: dx,
+            dy: dy
+          });
+          draggable.focus();
+          var currentRegionLabel = $('#' + findPreviousDroppable(currentDroppableId, droppables) + ' h2.label').text();
+          speak(currentRegionLabel);
+        }
+
+        if(event.which == 38) {
+          $(this).insertBefore($(this).prev());
+          $(this).focus();
+        }
+        if(event.which == 40) {
+          $(this).insertAfter($(this).next());
+          $(this).focus();
+        }
+        if (event.which == 84 || event.which == 33) {
+          $(this).parent().prepend($(this));
+          $(this).focus();
+        }
+        if (event.which == 66 || event.which == 34) {
+          $(this).parent().append($(this));
+          $(this).focus();
+        }
+        // @Todo: this duplicates Backdrop.behaviors.layoutDisplayEditor.updateLayout().
+        var region = $(this).parent();
+        var regionName = region.closest('.layout-editor-region').data('regionName');
+        var blockList = [];
+        region.find('.layout-editor-block').each(function(index) {
+          blockList.push($(this).data('blockId'));
+        });
+        $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
       });
 
       // Open a dialog if editing a particular block.
