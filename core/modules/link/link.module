@@ -128,11 +128,21 @@ function link_field_instance_settings_form($field, $instance) {
   $form['link_title_settings']['title']['required']['#description'] = t('A field will be displayed to the end user, to <em>require</em> entering a link title.');
   // $form['link_title_settings']['title']['required']['#attributes'] = array('class' => array('my-required-class'));
 
+  $static_title_description = array();
+  $static_title_description[] = array(
+    'data' => t('This title will be used:'),
+    'children' => array(
+      t('If the "Always use the same link title" option is selected above.'),
+      t('If the title is optional, and no title is entered when creating content.'),
+    ),
+  );
+  $static_title_description[] = t('The static title value may use tokens of any other entity field as its value.') . $token_link;
+  $static_title_description[] = t('Static and token-based titles may include most inline XHTML tags such as <code>strong</code>, <code>em</code>, <code>img</code>, <code>span</code>, etc.');
   $form['link_title_settings']['title_value'] = array(
     '#type' => 'textfield',
-    '#title' => t('Static link title'),
+    '#title' => t('Static or default link title'),
     '#default_value' => $instance['settings']['title_value'],
-    '#description' => t('This title will always be used if the "Always use the same link title" option is selected above. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;span&gt;</code>, etc.') . $token_link,
+    '#description' => theme('item_list', array('items' => $static_title_description)),
     '#states' => array(
       'visible' => array(
         ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'value'),
@@ -605,8 +615,13 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
     }
   }
   // Use the title defined by the user at the widget level.
-  elseif (isset($item['title'])) {
+  elseif (backdrop_strlen(trim($item['title']))) {
     $title = $item['title'];
+  }
+  // If a user-defined title is optional, and a static title has been defined,
+  // use the static title.
+  elseif ($instance['settings']['title'] == 'optional' && drupal_strlen(trim($instance['settings']['title_value']))) {
+    $title = $instance['settings']['title_value'];
   }
   else {
     $title = '';
