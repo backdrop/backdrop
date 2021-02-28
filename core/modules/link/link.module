@@ -60,14 +60,18 @@ function link_field_instance_settings_form($field, $instance) {
     '#element_validate' => array('link_field_settings_form_validate'),
   );
 
-  $form['validate_url'] = array(
+  // Link URL settings.
+  $form['link_url_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Link URL settings'),
+  );
+  $form['link_url_settings']['validate_url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Validate URL'),
     '#default_value' => $instance['settings']['validate_url'] !== '' ? $instance['settings']['validate_url'] : TRUE,
     '#description' => t('If checked, the URL field will be verified as a valid URL during validation.'),
   );
-
-  $form['url'] = array(
+  $form['link_url_settings']['url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Optional URL'),
     '#default_value' => $instance['settings']['url'],
@@ -75,113 +79,174 @@ function link_field_instance_settings_form($field, $instance) {
     '#description' => t('If checked, the URL field is optional and submitting a title alone will be acceptable. If the URL is omitted, the title will be displayed as plain text.'),
   );
 
-  $title_options = array(
-    'optional' => t('Optional Title'),
-    'required' => t('Required Title'),
-    'value' => t('Static Title'),
-    'none' => t('No Title'),
+  // Link title settings.
+  $form['link_title_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Link title settings'),
   );
-
-  $form['title'] = array(
-    '#type' => 'radios',
-    '#title' => t('Link Title'),
-    '#default_value' => $instance['settings']['title'],
-    '#options' => $title_options,
-    '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title.'),
-  );
-
-  $form['title_value'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Static title'),
-    '#default_value' => $instance['settings']['title_value'],
-    '#description' => t('This title will always be used if &quot;Static Title&quot; is selected above. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <em>strong</em>, <em>em</em>, <em>img</em>, <em>span</em>, etc.') . $token_link,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="instance[settings][title]"]' => array('value' => 'value'),
-      ),
-    ),
-  );
-
-  $form['title_label_use_field_label'] = array(
+  $form['link_title_settings']['no_url_title'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use field label for title label'),
+    '#title' => t('No link title'),
+    '#default_value' => isset($instance['settings']['no_url_title']) ? $instance['settings']['no_url_title'] : 0,
+    // '#description' => t('...'),
+  );
+
+  $title_label_description = array();
+  $title_label_description[] = t('Hides the label which groups the link title and link URL elements.');
+  $title_label_description[] = t('Replaces the "Tilte" label on the link title element, with the label of this field.');
+  $form['link_title_settings']['title_label_use_field_label'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the label of this field instead of the default "Title" label'),
     '#default_value' => $instance['settings']['title_label_use_field_label'],
-    '#description' => t('If checked, hides the label on the group of elements and instead uses the field label on the title element.'),
+    '#description' => theme('item_list', array('items' => $title_label_description)),
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
+        ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
       ),
     ),
   );
 
-  $form['title_maxlength'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Max length of title field'),
-    '#default_value' => $instance['settings']['title_maxlength'],
-    '#description' => t('Set a maximum length on the title field (applies only if Link Title is optional or required).  The maximum limit is 255 characters.'),
-    '#maxlength' => 3,
-    '#size' => 3,
+  $form['link_title_settings']['title'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link title'),
+    '#default_value' => $instance['settings']['title'],
+    '#options' => array(
+      'optional' => t('Optional'),
+      'required' => t('Required'),
+      'value' => t('Always use the same link title'),
+      'select' => t('Select from a list of allowed link titles'),
+      // 'none' => t('No title'),
+    ),
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][title]"]' => array('!value' => 'none'),
+        ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['link_title_settings']['title']['optional']['#description'] = t('A field will be displayed to the end user, to <em>allow</em> entering a link title.');
+  // $form['link_title_settings']['title']['optional']['#attributes'] = array('class' => array('my-optional-class'));
+  $form['link_title_settings']['title']['required']['#description'] = t('A field will be displayed to the end user, to <em>require</em> entering a link title.');
+  // $form['link_title_settings']['title']['required']['#attributes'] = array('class' => array('my-required-class'));
+
+  $form['link_title_settings']['title_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Static link title'),
+    '#default_value' => $instance['settings']['title_value'],
+    '#description' => t('This title will always be used if the "Always use the same link title" option is selected above. The static title value may use tokens of any other entity field as its value. Static and token-based titles may include most inline XHTML tags such as <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;span&gt;</code>, etc.') . $token_link,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'value'),
+        ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  // Using a fieldset here, because clicking the "Manual entry" toggle in the
+  // options element reveals a text area + a textfield to allow setting the
+  // default. These two elements + the global help text for the entire options
+  // element seem visually "disjoint" otherwise.
+  $form['link_title_settings']['title_select'] = array(
+    '#type' => 'fieldset',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'select'),
+        ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['link_title_settings']['title_select']['title_allowed_values'] = array(
+    '#type' => 'options',
+    '#title' => t('Allowed link titles'),
+    '#key_type' => 'none',
+    '#default_value' => isset($instance['settings']['title_allowed_values']) ? $instance['settings']['title_allowed_values'] : '',
+    '#description' => t('Limit the link title to a specific set of possible values (eg. Home, Office, Other).'),
+  );
+
+  $form['link_title_settings']['title_maxlength'] = array(
+    '#type' => 'number',
+    '#title' => t('Max length of title field'),
+    '#field_suffix' => t('characters'),
+    '#default_value' => $instance['settings']['title_maxlength'],
+    '#description' => t('The maximum length is 255 characters.'),
+    '#min' => 1,
+    '#max' => 255,
+    '#states' => array(
+      'visible' => array(
+        array(
+          ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'optional'),
+          ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
+        ),
+        array(
+          ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'required'),
+          ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
+        ),
+      ),
+    ),
+  );
+  $form['link_title_settings']['display']['url_cutoff'] = array(
+    '#type' => 'number',
+    '#title' => t('URL display cutoff'),
+    '#field_prefix' => t('Trim down to'),
+    '#field_suffix' => t('characters'),
+    '#min' => 0,
+    '#max' => 255,
+    '#default_value' => $instance['settings']['display']['url_cutoff'],
+    '#description' => t('If the user does not include a title for this link, the URL will be used as the link title, after being trimmed, and finished with an elipsis (&hellip;). Leave blank for no limit.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[settings][link_title_settings][title]"]' => array('value' => 'optional'),
+        ':input[name="instance[settings][link_title_settings][no_url_title]"]' => array('checked' => FALSE),
       ),
     ),
   );
 
   $form['advanced'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Advanced Options'),
+    '#title' => t('Advanced options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#parents' => array('instance', 'settings'),
   );
   $form['advanced']['enable_tokens'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow user-entered tokens'),
+    '#title' => t('Allow user-provided tokens in URLs and their titles'),
     '#default_value' => $instance['settings']['enable_tokens'],
-    '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
-  );
-  $form['advanced']['display']['url_cutoff'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL Display Cutoff'),
-    '#default_value' => $instance['settings']['display']['url_cutoff'],
-    '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an elipsis (&hellip;)? Leave blank for no limit.'),
-    '#maxlength' => 3,
-    '#size' => 3,
+    '#description' => t('This does not affect the field settings on this page, which always support tokens.'),
   );
 
-  $target_options = array(
-    LINK_TARGET_DEFAULT => t('Default (no target attribute)'),
-    LINK_TARGET_TOP => t('Open link in window root'),
-    LINK_TARGET_NEW_WINDOW => t('Open link in new window'),
-    LINK_TARGET_USER => t('Allow the user to choose'),
-  );
   $form['advanced']['attributes']['target'] = array(
     '#type' => 'radios',
-    '#title' => t('Link Target'),
+    '#title' => t('Link target'),
     '#default_value' => $instance['settings']['attributes']['target'],
-    '#options' => $target_options,
+    '#options' => array(
+      LINK_TARGET_DEFAULT => t('Default (no target attribute)'),
+      LINK_TARGET_TOP => t('Open link in window root'),
+      LINK_TARGET_NEW_WINDOW => t('Open link in new window'),
+      LINK_TARGET_USER => t('Allow the user to choose'),
+    ),
   );
   $form['advanced']['attributes']['rel'] = array(
     '#type' => 'textfield',
-    '#title' => t('Rel Attribute'),
-    '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
+    '#title' => t("Link 'rel' attribute"),
+    '#description' => t('The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a>, which prevents some search engines from spidering links.'),
     '#default_value' => $instance['settings']['attributes']['rel'],
     '#field_prefix' => 'rel = "',
     '#field_suffix' => '"',
     '#size' => 20,
-  );
-  $rel_remove_options = array(
-    'default' => t('Keep rel as set up above (untouched/default)'),
-    'rel_remove_external' => t('Remove rel if given link is external'),
-    'rel_remove_internal' => t('Remove rel if given link is internal'),
+    // Ensure this setting comes right before "Remove 'rel' attribute" below.
+    '#weight' => 1,
   );
   $form['advanced']['rel_remove'] = array(
     '#type' => 'radios',
-    '#title' => t('Remove rel attribute automatically'),
+    '#title' => t("Remove 'rel' attribute automatically"),
     '#default_value' => $instance['settings']['rel_remove'],
-    '#description' => t('Turn on/off if rel attribute should be removed automatically, if user given link is internal/external'),
-    '#options' => $rel_remove_options,
+    '#options' => array(
+      'default' => t('Keep rel as set up above (untouched/default)'),
+      'rel_remove_external' => t('Remove rel if given link is external'),
+      'rel_remove_internal' => t('Remove rel if given link is internal'),
+    ),
+    // Ensure this setting follows right after "Link 'rel' attribute".
+    '#weight' => 2,
   );
   $form['advanced']['attributes']['configurable_class'] = array(
     '#title' => t("Allow the user to enter a custom link class per link"),
@@ -190,7 +255,7 @@ function link_field_instance_settings_form($field, $instance) {
   );
   $form['advanced']['attributes']['class'] = array(
     '#type' => 'textfield',
-    '#title' => t('Additional CSS Classes'),
+    '#title' => t('Additional CSS classes'),
     '#description' => t('Add these classes on output (will be added to any user-provided classes). Multiple classes should be separated by spaces.'),
     '#default_value' => $instance['settings']['attributes']['class'],
   );
@@ -201,13 +266,13 @@ function link_field_instance_settings_form($field, $instance) {
   );
   $form['advanced']['attributes']['title'] = array(
     '#type' => 'textfield',
-    '#title' => t("Default link 'title' Attribute"),
+    '#title' => t("Default link 'title' attribute"),
     '#states' => array(
       'visible' => array(
         ':input[name="instance[settings][attributes][configurable_title]"]' => array('checked' => TRUE),
       ),
     ),
-    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
+    '#description' => t('When output, links will use this "title" attribute, if the user does not provide one, and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Token values will be evaluated.'),
     '#default_value' => $instance['settings']['attributes']['title'],
     '#field_prefix' => 'title = "',
     '#field_suffix' => '"',
