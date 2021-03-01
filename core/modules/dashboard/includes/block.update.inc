@@ -33,6 +33,10 @@ class DashboardUpdateBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Available updates');
   }
 
@@ -40,6 +44,10 @@ class DashboardUpdateBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Displays available updates for core, modules, themes, and layouts.');
   }
 
@@ -57,6 +65,11 @@ class DashboardUpdateBlock extends Block {
     $data = update_calculate_project_data($available);
 
     foreach ($data as $key => $project) {
+      // Filter out projects which are up to date already.
+      if ($project['status'] == UPDATE_CURRENT) {
+        continue;
+      }
+
       $type = $project['project_type'];
       if (in_array($type, $this->settings['project_types'])) {
         $name = $project['info']['name'];

@@ -414,6 +414,23 @@ Backdrop.relativeUrl = function (url) {
 };
 
 /**
+ * Sanitizes a URL for use with jQuery.ajax().
+ *
+ * @param url
+ *   The URL string to be sanitized.
+ *
+ * @return
+ *   The sanitized URL.
+ */
+Backdrop.sanitizeAjaxUrl = function (url) {
+  var regex = /\=\?(&|$)/;
+  while (url.match(regex)) {
+    url = url.replace(regex, '');
+  }
+  return url;
+}
+
+/**
  * Returns true if the URL is within Backdrop's base path.
  *
  * @param url

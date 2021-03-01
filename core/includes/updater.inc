@@ -175,19 +175,26 @@ abstract class Updater implements BackdropUpdaterInterface {
   }
 
   /**
-   * Return the project type from a Backdrop info file.
+   * Return the project type from a Backdrop info file or directory.
    *
    * @param string $directory
-   *   Directory to search for the info file.
+   *   Stream wrapper to directory to get the type from.
    *
    * @return string
-   *   The type of the project, either "module", "theme", or "layout".
+   *   The type of the project, either "core", "module", "theme", or "layout".
    *
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    if ($directory == BACKDROP_ROOT) {
-      return 'core';
+    if (basename($directory) == 'backdrop') {
+      $realpath = backdrop_realpath($directory);
+      if (is_dir($realpath . '/core')) {
+        return 'core';
+      }
+      else {
+        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', array('@directory' => $directory));
+        throw new UpdaterException($message);
+      }
     }
     else {
       $info_file = self::findInfoFile($directory);
