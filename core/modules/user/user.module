@@ -324,10 +324,9 @@ function user_load_by_name($name) {
  *
  * @param $account
  *   The user object to modify or add. If you want to modify an existing user
- *   account, you need to ensure that (a) $account is an object, and (b) you
+ *   account, you need to ensure that $account is an entity object, and you 
  *   have set $account->uid to the numeric user ID of the user account you wish
- *   to modify. If you want to create a new user account, you can set
- *   $account->is_new to TRUE or omit the $account->uid field.
+ *   to modify. To create a new account, use entity_create('user', array());
  *
  * @return int
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
