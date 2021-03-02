@@ -491,26 +491,167 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 
 /**
  * Element validation function.
+ *
+ * In addition to validing the URL, it will clean it up if necessary.
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
 
-  // If Link module is available, automatically clean up URL, automatically
-  // adding http:// or a prefixing slash if needed.
-  if (module_exists('link') && $type = link_validate_url($value)) {
-    $value = link_cleanup_url($value);
-    $form_state['values']['type'] = $type;
-    if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
-      $value = '/' . $value;
-    }
+  // Allow empty values, since this will not result in a link tag anyway.
+  if ($value === '') {
+    form_set_value($element, $value, $form_state);
+    return;
   }
+
+  // Cleanup the URL so it's more likely to pass validation.
+  $value = _filter_cleanup_url($value);
 
   form_set_value($element, $value, $form_state);
 
+  // If external URL ensure it doesn't have dangerous protocols.
+  $dangerous_protocols = _filter_check_dangerous_protocols($value);
+
   // Unlike #type = 'url' validation, we allow both relative and absolute paths.
-  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
+  if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
+}
+
+/**
+ * Clean up URL for validation.
+ *
+ * Attempts to create a URL that will pass validation: adds a protocol if it's
+ * missing; urlencodes an anchor link; attempts to find the proper multilingual
+ * URL; and urlencodes any internal Backdrop path.
+ *
+ * @param string $url
+ *
+ * @return string
+ *   A cleaned-up URL that is either a properly formatted external URL or an
+ *   internal path.
+ *
+ * @see _filter_format_editor_link_url_validate()
+ */
+function _filter_cleanup_url($url) {
+  // Will add a default protocol if missing on an external url.
+  $url = _filter_create_valid_external_url($url);
+
+  if (_filter_url_is_external($url)) {
+    return $url;
+  }
+
+  // Urlencode an anchor as it's more likely to be typed in with unicode.
+  if (substr($url, 0, 1) == '#' && preg_match('/^(#)([\S]+)$/', $url, $matches)) {
+    return $matches['1'] . backdrop_encode_path($matches['2']);
+  }
+
+  // Break up the components so we can build up an aliased internal path.
+  $url_parts = backdrop_parse_url($url);
+
+  // Lookup valid internal paths if multilingual
+  if (module_exists('locale') && language_multilingual()) {
+    if ($language = _filter_lookup_locale_path($url)) {
+      $url_parts['language'] = $language;
+    }
+  }
+
+  return url($url_parts['path'], $url_parts);
+}
+
+/**
+ * Forms a valid external URL if possible.
+ *
+ * Trims whitespace and automatically adds an http:// to addresses that
+ * appear to be external URLs but have no specified protocol.
+ *
+ * @param string $url
+ *   The URL entered by the user.
+ *
+ * @return string
+ *   The URL with the protocol prepended if needed.
+ *
+ * @see link_cleanup_url().
+ */
+function _filter_create_valid_external_url($url) {
+  $url = trim($url);
+
+  // Check if there is no protocol specified.
+  $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
+  if (empty($protocol_match)) {
+    // But should there be? Add an automatic http:// if it starts with a domain name.
+    $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+    if (!empty($domain_match)) {
+      $url = "http://" . $url;
+    }
+  }
+
+  return $url;
+}
+
+/**
+ * Checks if a URL is external to Backdrop.
+ *
+ * Checks for a protocol as a sign that the URL is external. We want to include
+ * all external URLs even if they have dangerous protocols.
+ *
+ * @param string $url
+ *
+ * @return bool
+ *   TRUE if URL is external.
+ *
+ * @see url_is_external()
+ */
+function _filter_url_is_external($url) {
+  $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
+  if (!empty($protocol_match)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Given a URL, find an alias and matching lanaguage.
+ *
+ * @param $url
+ *   The path to investigate for corresponding aliases.
+ *
+ * @return object|FALSE
+ *   The langcode.
+ */
+function _filter_lookup_locale_path($url) {
+  $languages = language_list(TRUE);
+    foreach ($languages as $language) {
+      $alias = backdrop_lookup_path('alias', $url, $language->langcode);
+      if ($alias) {
+        return $language;
+      }
+    }
+  return NULL;
+}
+
+/**
+ * Check for dangerous protocols.
+ *
+ * If it has a protocol that doesn't match any of the allowed protocols then
+ * flag it as dangerous.
+ *
+ * @param string $url
+ *
+ * @return bool
+ *   True if any dangerous protocols present.
+ */
+function _filter_check_dangerous_protocols($url) {
+  if (!_filter_url_is_external($url)) {
+    return FALSE;
+  }
+  $protocols = settings_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal'));
+  $protocols = implode(':(?://)?|', $protocols) . ':(?://)?';
+  $pattern = "`(?:$protocols)`";
+  $matches = preg_match($pattern, $url);
+  if ($matches) {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
