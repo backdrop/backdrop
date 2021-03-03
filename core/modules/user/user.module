@@ -322,7 +322,7 @@ function user_load_by_name($name) {
 /**
  * Save a new or updated user.
  *
- * @param $account
+ * @param User $account
  *   The user entity object to add or modify. 
  * @return int
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
