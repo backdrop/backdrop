@@ -3003,6 +3003,8 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  * @see backdrop_deliver_page()
  */
 function backdrop_deliver_html_page($page_callback_result) {
+  $site_config = config('system.core');
+  
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -3019,14 +3021,13 @@ function backdrop_deliver_html_page($page_callback_result) {
   // domain, but provide a variable to override this. If the code running for
   // this page request already set the X-Frame-Options header earlier, don't
   // overwrite it here.
-  $frame_options = config_get('system.core', 'x_frame_options');
+  $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
