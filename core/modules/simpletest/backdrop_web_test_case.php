@@ -1527,15 +1527,16 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function prepareEnvironment() {
     global $user, $language, $language_url, $settings, $config_directories;
+    $site_config = config('system.core');
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language;
     $this->originalLanguageUrl = $language_url;
     $this->originalConfigDirectories = $config_directories;
-    $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+    $this->originalFileDirectory = $site_config->get('file_public_path');
     $this->verboseDirectoryUrl = file_create_url($this->originalFileDirectory . '/simpletest/verbose');
     $this->originalProfile = backdrop_get_profile();
-    $this->originalCleanUrl = config_get('system.core', 'clean_url');
+    $this->originalCleanUrl = $site_config->get('clean_url');
     $this->originalUser = $user;
     $this->originalSettings = $settings;
 

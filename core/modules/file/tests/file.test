@@ -1830,7 +1830,7 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
 class FileUnitTestCase extends FileTestHelper {
 
   /**
-   * Regression tests for core issue http://backdrop.org/node/1239376.
+   * Regression tests for core issue https://www.drupal.org/node/1239376.
    */
   function testMimeTypeMappings() {
     $tests = array(

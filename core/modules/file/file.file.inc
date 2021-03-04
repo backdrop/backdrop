@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File hooks implemented by the Fil module.
+ * File hooks implemented by the File module.
  */
 
 /**
