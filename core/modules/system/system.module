@@ -4264,14 +4264,43 @@ function path_autocomplete($string = '') {
  * This wrapper around backdrop_goto_deprecated() should be used as the menu
  * callback in hook_menu() when redirecting from an old path to a new one.
  *
- * @since 1.8.0
+ * @param string $path
+ *   The path to which the user should be redirected. Because this is intended
+ *   to be used as a page callback, the old path is pulled from the current
+ *   menu location (the $_GET['q'] variable).
+ * @param array $argument_map
+ *   If the old path and new path have differing argument orders, this can be
+ *   used to map an argument from one position to another. An old path of
+ *   "my-module/%key-one/edit/%" could be redirected to
+ *   "my-module/configure/%key-one/%" by setting a map such as:
+ *    @code
+ *    array(
+ *      1 => 2
+ *      3 => 3
+ *    );
+ *    @endcode
+ *
+ *    Note that this map is zero-indexed.
+ *
+ * @see arg()
+ *
+ * @since 1.19.0
  */
-function system_redirect_deprecated_page($path) {
+function system_redirect_deprecated_page($path, $argument_map = array()) {
+  // The argument map is passed in as old => new. But we need to get the old
+  // keys based on the new position in $path. So flip to make retrieving easy.
+  $argument_map = array_flip($argument_map);
+
   // Perform any substitutions in the passed-in path with the current path.
   $parts = explode('/', $path);
   foreach ($parts as $index => $path_part) {
-    if (substr($path_part, 0, 1) === '%') {
-      $parts[$index] = arg($index);
+    if (backdrop_substr($path_part, 0, 1) === '%') {
+      if (!empty($argument_map)) {
+        $parts[$index] = arg($argument_map[$index]);
+      }
+      else {
+        $parts[$index] = arg($index);
+      }
     }
   }
   $path = implode('/', $parts);

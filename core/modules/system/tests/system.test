@@ -1007,6 +1007,63 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
   }
 }
 
+class DeprecatedRedirectPageCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Implement setUp().
+   */
+  function setUp() {
+    parent::setUp(array('deprecated_redirect_test', 'dblog'));
+    // Enable deprecated watchdog messages (level 8).
+    config_set('system.core', 'watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6, 8));
+  }
+
+  function testRedirects() {
+    // Message used in watchdog entries.
+    $watchdog_message = 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.';
+
+    // Check simple path redirection with no wildcards.
+    $this->backdropGet('old/path/simple');
+    $this->assertText('Current path: new/path/simple');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/simple',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for simple redirect.');
+
+    // Check path redirection with an implied one-to-one argument map.
+    $this->backdropGet('old/path/foo/same/bar/positions/baz');
+    $this->assertText('Current path: new/path/foo/with/bar/wildcards/baz');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/foo/same/bar/positions/baz',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for an implied argument map redirect.');
+
+    // Check path redirection with a specified argument map.
+    $this->backdropGet('old/path/different/foo/wildcard/bar/baz/positions');
+    $this->assertText('Current path: new/path/foo/with/bar/wildcards/baz');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/different/foo/wildcard/bar/baz/positions',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for an argument map redirect.');
+  }
+
+  /**
+   * Verifies that a watchdog message has been entered.
+   *
+   * @param $watchdog_message
+   *   The watchdog message.
+   * @param $variables
+   *   The array of variables passed to watchdog().
+   * @param $message
+   *   The assertion message.
+   */
+  private function assertWatchdogMessage($watchdog_message, $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+    return $this->assert($status, format_string('@message', array('@message' => $message)));
+  }
+}
+
 class CustomLogoTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
