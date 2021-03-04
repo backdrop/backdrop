@@ -3529,6 +3529,8 @@ function language_multilingual() {
  *
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
+ *
+ * @since 1.18.2 Added $native_names parameter.
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
