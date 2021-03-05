@@ -1028,9 +1028,11 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    * Test the use of a custom logo.
    */
   function testCustomLogo() {
+    $file_public_path = config_get('system.core', 'file_public_path');
+    
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
-    $file_relative = strtr($file->uri, array('public://' => config_get('system.core', 'file_public_path') . '/'));
+    $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));
     $default_theme_path = 'core/themes/stark';
 
     $supported_paths = array(
@@ -1082,7 +1084,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       if (file_uri_scheme($input) == 'public') {
         $implicit_public_file = file_uri_target($input);
         $explicit_file = $input;
-        $local_file = strtr($input, array('public://' => config_get('system.core', 'file_public_path') . '/'));
+        $local_file = strtr($input, array('public://' => $file_public_path . '/'));
       }
       // Adjust for fully qualified stream wrapper URI elsewhere.
       elseif (file_uri_scheme($input) !== FALSE) {
@@ -1092,7 +1094,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       elseif ($input == file_uri_target($file->uri)) {
         $implicit_public_file = $input;
         $explicit_file = 'public://' . $input;
-        $local_file = config_get('system.core', 'file_public_path') . '/' . $input;
+        $local_file = $file_public_path . '/' . $input;
       }
       $this->assertEqual((string) $elements[0], $implicit_public_file);
       $this->assertEqual((string) $elements[1], $explicit_file);
@@ -1120,9 +1122,9 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       // Relative path within the public filesystem to non-existing file.
       'whatever.png',
       // Relative path to non-existing file in public filesystem.
-      config_get('system.core', 'file_public_path') . '/whatever.png',
+      $file_public_path . '/whatever.png',
       // Semi-absolute path to non-existing file in public filesystem.
-      '/' . config_get('system.core', 'file_public_path') . '/whatever.png',
+      '/' . $file_public_path . '/whatever.png',
       // Relative path to arbitrary non-existing file.
       'core/misc/whatever.png',
       // Semi-absolute path to arbitrary non-existing file.
