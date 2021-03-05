@@ -323,7 +323,7 @@ function user_load_by_name($name) {
  * Save a new or updated user.
  *
  * @param User $account
- *   The user entity object to add or modify. 
+ *   The user entity object to add or modify.
  * @return int
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  *
@@ -3190,7 +3190,7 @@ function user_register_submit($form, &$form_state) {
   $user_email_verification = config_get('system.core', 'user_email_verification');
   $admin = $form_state['values']['administer_users'];
 
-  if (!$user_email_verification) || $admin) {
+  if (!$user_email_verification || $admin) {
     $pass = $form_state['values']['pass'];
   }
   else {
