@@ -876,6 +876,41 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test CSS Styles with attributes rendering.
+   *
+   * @todo make it more like JavaScriptTestCase::testAttributes() {
+   */
+  function testRenderStylesAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_css', 0);
+
+    backdrop_add_css(
+      'misc/print.css',
+      array(
+        'attributes' => array(
+          'foo' => 'bar',
+        ),
+      )
+    );
+
+    // Retrieve the rendered Styles.
+    $css = backdrop_get_css();
+
+    $expected = array(
+      'foo' => 'bar',
+      'media' => 'all',
+    );
+
+    foreach ($expected as $expected_string) {
+      $this->assertNotEqual(
+        strpos($css, $expected_string),
+        FALSE,
+        'Styles with attributes has been properly rendered.'
+      );
+    }
+  }
+
+  /**
    * Tests that the query string remains intact when adding CSS files that have
    * query string parameters.
    */
