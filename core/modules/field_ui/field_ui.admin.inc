@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative interface for custom field type creation.
+ * Admin page callbacks for the Field UI module.
  */
 
 /**
@@ -482,7 +482,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
         // 32 characters minus the 'field_' prefix.
         '#maxlength' => 26,
-        '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
+        '#prefix' => '<div class="add-new-placeholder element-invisible">&nbsp;</div>',
         '#machine_name' => array(
           'source' => array('fields', $name, 'label'),
           'exists' => '_field_ui_field_name_exists',
@@ -997,7 +997,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   $field_label_options = array(
     'above' => t('Above'),
     'inline' => t('Inline'),
-    'hidden' => '<' . t('Hidden') . '>',
+    'hidden' => t('Hidden'),
   );
   $extra_visibility_options = array(
     'visible' => t('Visible'),
@@ -1053,7 +1053,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     );
 
     $formatter_options = field_ui_formatter_options($field['type']);
-    $formatter_options['hidden'] = '<' . t('Hidden') . '>';
+    $formatter_options['hidden'] = t('Hidden');
     $table[$name]['format'] = array(
       'type' => array(
         '#type' => 'select',
@@ -1087,7 +1087,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
 
     $instance['display'][$view_mode]['type'] = $formatter_type;
     $formatter = field_info_formatter_types($formatter_type);
-    $instance['display'][$view_mode]['module'] = $formatter['module'];
+    $instance['display'][$view_mode]['module'] = !empty($formatter) ? $formatter['module'] : '';
     $instance['display'][$view_mode]['settings'] = $settings;
 
     // Base button element for the various formatter settings actions.
@@ -1158,7 +1158,10 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     }
     else {
       // Display a summary of the current formatter settings.
-      $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $instance, $view_mode);
+      $summary = '';
+      if (!empty($formatter)) {
+        $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $instance, $view_mode);
+      }
 
       // Allow other modules to alter the formatter summary.
       $context = array(

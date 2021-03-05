@@ -148,7 +148,7 @@ if (authorize_access_allowed()) {
     else {
       $links = array_merge($links, array(
         l(t('Administration pages'), 'admin'),
-        l(t('Front page'), '<front>'),
+        l(t('Home page'), '<front>'),
       ));
     }
 

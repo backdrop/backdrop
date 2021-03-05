@@ -18,7 +18,8 @@ function taxonomy_uninstall() {
 
   // Remove default, un-modified view.
   $config = config('views.view.taxonomy_term');
-  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+  // Only update if view isn't overridden (VIEWS_STORAGE_OVERRIDE).
+  if ($config->get('storage') != 2) {
     $config->delete();
   }
 }
@@ -162,6 +163,10 @@ function taxonomy_schema() {
       ),
     ),
   );
+
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_taxonomy_term'] = $cache_schema;
+  $schema['cache_entity_taxonomy_term']['description'] = "Cache table used to store Taxonomy Term entity records.";
 
   return $schema;
 }
@@ -353,6 +358,15 @@ function taxonomy_update_1007() {
     $config->set('module', 'taxonomy');
     $config->save();
   }
+}
+
+/**
+ * Creates the table to enable caching of Comment entities.
+ */
+function taxonomy_update_1008() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store Taxonomy Term entity records.";
+  db_create_table('cache_entity_taxonomy_term', $table);
 }
 
 /**

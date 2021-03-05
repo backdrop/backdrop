@@ -59,6 +59,7 @@
  * @ingroup forms
  */
 function installer_manager_update_form($form, $form_state, $context) {
+  $core_update_enabled = config_get('installer.settings', 'core_update');
   switch ($context) {
     case 'module':
       backdrop_set_title('Update modules');
@@ -175,7 +176,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
     // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = ($project['project_type'] == 'core' && config_get('installer.settings', 'core_update') != TRUE);
+    $needs_manual = ($project['project_type'] == 'core' && $core_update_enabled != TRUE);
 
     if ($needs_manual) {
       // There are no checkboxes in the 'Manual updates' table so it will be
@@ -201,7 +202,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     switch ($project['project_type']) {
       case 'core':
         // Core needs manual updates if automatic not enabled.
-        if (config_get('installer.settings', 'core_update')) {
+        if ($core_update_enabled) {
           $projects['enabled'][$name] = $entry;
         }
         else {
@@ -390,7 +391,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
 
   $form['backup'] = array(
     '#prefix' => '<strong>',
-    '#markup' => t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('http://drupal.org/node/22281'))),
+    '#markup' => t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/backups'))),
     '#suffix' => '</strong>',
   );
 
@@ -424,7 +425,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
  */
 function installer_manager_update_ready_form_submit($form, &$form_state) {
   // Store maintenance_mode setting so we can restore it when done.
-  $_SESSION['maintenance_mode'] = config_get('system.core', 'maintenance_mode');
+  $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
   if ($form_state['values']['maintenance_mode'] == TRUE) {
     state_set('maintenance_mode', TRUE);
   }

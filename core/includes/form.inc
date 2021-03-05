@@ -562,10 +562,12 @@ function form_get_cache($form_build_id, &$form_state) {
  * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
+  $site_config = config('system.core');
+  
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
-  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
+  $expire = settings_get('form_cache_expiration', $site_config->get('form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -587,7 +589,7 @@ function form_set_cache($form_build_id, $form, $form_state) {
   }
 
   // Cache form state.
-  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
+  if ($site_config->get('cache') && backdrop_page_is_cacheable()) {
     $form_state['build_info']['immutable'] = TRUE;
   }
   if ($data = array_diff_key($form_state, array_flip(form_state_keys_no_cache()))) {
@@ -1155,12 +1157,8 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
  * Helper function to call form_set_error() if there is a token error.
  */
 function _backdrop_invalid_token_set_form_error() {
-  $path = current_path();
-  $query = backdrop_get_query_parameters();
-  $url = url($path, array('query' => $query));
-
   // Setting this error will cause the form to fail validation.
-  form_set_error('form_token', t('The form has become outdated. Copy any unsaved work in the form below and then <a href="@link">reload this page</a>.', array('@link' => $url)));
+  form_set_error('form_token', t('The form has become outdated. Press the back button, copy any unsaved work in the form, and then reload the page.'));
 }
 
 /**
@@ -1201,6 +1199,11 @@ function backdrop_validate_form($form_id, &$form, &$form_state) {
   if (!empty($form['#token'])) {
     if (!backdrop_valid_token($form_state['values']['form_token'], $form['#token']) || !empty($form_state['invalid_token'])) {
       _backdrop_invalid_token_set_form_error();
+      // Ignore all submitted values.
+      $form_state['input'] = array();
+      $_POST = array();
+      // Make sure file uploads do not get processed.
+      $_FILES = array();
       // Stop here and don't run any further validation handlers, because they
       // could invoke non-safe operations which opens the door for CSRF
       // vulnerabilities.
@@ -1886,6 +1889,9 @@ function form_builder($form_id, &$element, &$form_state) {
           _backdrop_invalid_token_set_form_error();
           // This value is checked in _form_builder_handle_input_element().
           $form_state['invalid_token'] = TRUE;
+          // Ignore all submitted values.
+          $form_state['input'] = array();
+          $_POST = array();
           // Make sure file uploads do not get processed.
           $_FILES = array();
         }
@@ -2410,7 +2416,10 @@ function form_type_checkbox_value($element, $input = FALSE) {
     // common use-case for setting #return_value to either 0 or '0' is for the
     // first option within a 0-indexed array of checkboxes, and for this,
     // form_process_checkboxes() uses the string rather than the integer.
-    return isset($input) ? $element['#return_value'] : 0;
+    if (isset($input) && $input == $element['#return_value']) {
+      return $element['#return_value'];
+    }
+    return 0;
   }
 }
 
@@ -3166,6 +3175,175 @@ function map_month($month) {
     12 => 'Dec',
   ));
   return t($months[$month]);
+}
+
+/**
+ * Returns html5 markup for a date input form element.
+ */
+function theme_html_date($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-date';
+  $attributes['type'] = 'date';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a time input form element.
+ */
+function theme_html_time($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-time';
+  $attributes['type'] = 'time';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+  $attributes['step'] = 1;
+  if (isset($element['#attributes']['step'])) {
+    // Allow to set cardinality to "minute".
+    if ($element['#attributes']['step'] == 60) {
+      $attributes['step'] = 60;
+    }
+  }
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a combined date and time form element.
+ */
+function theme_html_datetime($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'container-inline';
+  return '<div' . backdrop_attributes($attributes) . '>' . backdrop_render_children($element) . '</div>';
+}
+
+/**
+ * Combine html_date and html_time form elements.
+ */
+function form_process_html_datetime($element) {
+  $value = $element['#value'];
+  // Conversion to a timestamp has happened, possibly in a preview.
+  // Get it back into an array for the form.
+  if (is_numeric($value) && (int) $value == $value) {
+    $value = array(
+      'date' => format_date($value, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($value, 'custom', DATE_FORMAT_TIME),
+    );
+  }
+  // Catch possible problems.
+  if (!is_array($value) || !isset($value['date']) || !isset($value['time'])) {
+    $value = array(
+      'date' => '',
+      'time' => '',
+    );
+  }
+  $element['#tree'] = TRUE;
+  $element['date'] = array(
+    '#type' => 'html_date',
+    '#default_value' => $value['date'],
+  );
+  $attributes = $element['#attributes'];
+  if (isset($attributes['date'])) {
+    $element['date']['#attributes'] = $attributes['date'];
+  }
+
+  $element['time'] = array(
+    '#type' => 'html_time',
+    '#default_value' => $value['time'],
+  );
+  if (isset($attributes['time'])) {
+    $element['time']['#attributes'] = $attributes['time'];
+  }
+
+  return $element;
+}
+
+/**
+ * Validate a date string.
+ */
+function html_date_validate($element, &$form_state) {
+  $date = $element['#value'];
+  if (!empty($date)) {
+    $valid_date = FALSE;
+    $created_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    if (is_object($created_date)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_date->format(DATE_FORMAT_DATE) == $date) {
+        $valid_date = TRUE;
+      }
+    }
+    if (!$valid_date) {
+      form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+    }
+  }
+}
+
+/**
+ * Validate a time string.
+ */
+function html_time_validate($element, &$form_state) {
+  $time = $element['#value'];
+  if (!empty($time)) {
+    // Pad time if seconds were omitted because of the step attribute,
+    // or a browser skipped it. Our date pattern contains seconds.
+    if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+      $time .= ':00';
+    }
+    $valid_time = FALSE;
+    $created_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    if (is_object($created_time)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_time->format(DATE_FORMAT_TIME) == $time) {
+        $valid_time = TRUE;
+      }
+    }
+    if (!$valid_time) {
+      form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+    }
+  }
+}
+
+/**
+ * Validate a combined date and time array.
+ */
+function html_datetime_validate($element, &$form_state) {
+  // Validation of parts actually happens in child fields.
+  if (is_array($element['#value'])) {
+    // If either is set, both are needed.
+    if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
+      if (empty($element['#value']['date'])) {
+        $element['#value']['date'] = format_date(REQUEST_TIME, DATE_FORMAT_DATE);
+      }
+      elseif (empty($element['#value']['time'])) {
+        $element['#value']['time'] = '00:00:00';
+      }
+    }
+  }
 }
 
 /**
