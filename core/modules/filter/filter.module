@@ -2401,7 +2401,7 @@ function _filter_url_trim($text, $length = NULL) {
  * @see filter_filter_info()
  */
 function _filter_url_tips($filter, $format, $long = FALSE) {
-  return t('Web page addresses and e-mail addresses turn into links automatically.');
+  return t("Web page addresses and e-mail addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
 }
 
 /**
