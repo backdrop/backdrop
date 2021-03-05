@@ -295,6 +295,14 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout_tempstore/move-block/%/%layout_tempstore_block'] = array(
+    'title' => 'Move block',
+    'load arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_block_move_form', 4, 7, 6),
+    'file' => 'layout.admin.inc',
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/clone'] = array(
     'title' => 'Clone layout',
     'page callback' => 'backdrop_get_form',
@@ -626,6 +634,9 @@ function layout_theme() {
       'template' => 'templates/layout',
     ) + $base,
     'layout_reorder_layouts' => array(
+      'render element' => 'element',
+    ) + $base,
+    'layout_reorder_blocks_in_region' => array(
       'render element' => 'element',
     ) + $base,
     'layout_content_form' => array(

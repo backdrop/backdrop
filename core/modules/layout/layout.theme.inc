@@ -38,6 +38,36 @@ function theme_layout_reorder_layouts($variables) {
 }
 
 /**
+ * Turn the rearrange form into a table with table sorting displayed.
+ */
+function theme_layout_reorder_blocks_in_region($variables) {
+  $element = $variables['element'];
+  $rows = array();
+
+  foreach (element_children($element) as $block) {
+    $row = array();
+    $row[] = array(
+      'data' => render($element[$block]['block']),
+      'class' => array('block-name'),
+    );
+    $element[$block]['weight']['#attributes']['class'][] = 'weight';
+    $row[] = render($element[$block]['weight']);
+    $rows[] = array('data' => $row, 'class' => array('draggable'));
+  }
+
+  $header = array(
+    array('data' => t('Layout'), 'class' => array('layout-name')),
+    t('Weight'),
+  );
+
+  backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'layout-reorder')));
+  $output .= backdrop_render_children($element);
+  return $output;
+}
+
+/**
  * Outputs information about a layout. Used in the layout listing page.
  *
  * @param $variables

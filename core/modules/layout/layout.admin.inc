@@ -1617,6 +1617,199 @@ function layout_block_configure_ajax_update($form, $form_state) {
 }
 
 /**
+ * Menu callback; Change a block's position in a region, or move to a new
+ * region.
+ */
+function layout_block_move_form($form, &$form_state, Layout $layout, Block $block, $renderer_name, $region_name = NULL) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $form_state['layout'] = $layout;
+  $form_state['block'] = $block;
+
+  if (!isset($form_state['renderer'])) {
+    $form_state['renderer'] = layout_create_renderer($renderer_name, $layout);
+  }
+  if (!isset($region_name)) {
+    $region_name = $layout->getBlockPosition($block->uuid);
+  }
+  $form_state['region_name'] = $region_name;
+  $form_state['original_block'] = $block;
+
+  $form['#tree'] = TRUE;
+  $form['#title'] = t('Move block "!title"', array('!title' => $block->getAdminTitle()));
+
+  $template_info = layout_get_layout_template_info($layout->layout_template);
+  $form['region'] = array(
+    '#type' => 'select',
+    '#title' => t('Region'),
+    '#default_value' => $region_name,
+    '#options' => $template_info['regions'],
+    // '#access' => backdrop_is_html(), // Only show this on non-JS requests.
+    '#ajax' => array(
+      'wrapper' => 'region_blocks',
+      'callback' => 'layout_block_move_ajax',
+    ),
+  );
+
+  $form['region_blocks'] = array(
+    '#type' => 'container',
+    '#id' => 'region_blocks',
+    '#parents' => array('region_blocks'),
+  );
+  $form['region_blocks']['content'] = layout_reorder_block_form($form['region_blocks'], $form_state);
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['load_context_nojs'] = array(
+    '#type' => 'submit',
+    '#value' => t('Load region'),
+    '#submit' => array(
+      'layout_load_region_blocks_nojs',
+    ),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update region blocks'),
+  );
+  if (backdrop_is_dialog() || backdrop_is_ajax()) {
+    $form['actions']['submit']['#ajax'] = array(
+      'callback' => 'layout_block_move_ajax_update',
+    );
+  }
+
+  return $form;
+}
+
+
+/**
+ * Submit handler to select a context. Hidden when JavaScript is enabled.
+ */
+function layout_load_region_blocks_nojs($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * AJAX callback to update the context settings.
+ */
+function layout_block_move_ajax($form, $form_state) {
+  return $form['region_blocks'];
+}
+
+/**
+ * Helper function to return a partial context settings form.
+ */
+function layout_reorder_block_form($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  $layout = $form_state['layout'];
+  $original_block = $form_state['original_block'];
+  $region_name = isset($form_state['values']['region']) ? $form_state['values']['region'] : $form_state['region_name'];
+
+  $module_blocks = layout_get_block_info();
+
+  $blocks_in_region = array();
+  foreach ($layout->positions[$region_name] as $index => $block_uuid) {
+    $block_data = $layout->content[$block_uuid];
+    $block_title = $module_blocks[$block_data->module][$block_data->delta]['info'];
+    $blocks_in_region[$block_uuid . ':' . $index] = $block_title;
+  }
+  if ($region_name != $form_state['region_name']) {
+    $original_block_title = $module_blocks[$original_block->module][$original_block->delta]['info'];
+    $max_key = count($blocks_in_region);
+    $blocks_in_region[$original_block->uuid . ':' . $max_key] = $original_block_title;
+  }
+    
+
+  $form_state['blocks_in_region'] = $blocks_in_region;
+
+  $form['region_block_table'] = array(
+    '#markup' => 'container',
+  );
+
+  $form['blocks_in_region'] = array(
+    '#theme' => 'layout_reorder_blocks_in_region',
+  );
+
+  $block_count = count($blocks_in_region);
+  foreach ($blocks_in_region as $key => $block) {
+    list($uuid, $index) = explode(':', $key);
+    $form['blocks_in_region'][$uuid]['block'] = array(
+      '#markup' => $block,
+    );
+    $form['blocks_in_region'][$uuid]['weight'] = array(
+      '#type' => 'weight',
+      '#delta' => $block_count,
+      '#default_value' => $index,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Form submit handler for layout_block_move_form().
+ */
+function layout_block_move_form_submit($form, &$form_state) {
+  $original_block = $form_state['original_block'];
+  $layout = $form_state['layout'];
+  $original_region = $form_state['region_name'];
+  $new_region = $form_state['values']['region'];
+
+  $new_block_order = $form_state['values']['region_blocks']['blocks_in_region'];
+  backdrop_sort($new_block_order, array('weight' => SORT_NUMERIC));
+
+  $layout->positions[$new_region] = array_keys($new_block_order);
+
+  if ($form_state['region_name'] != $new_region) {
+    if (($key = array_search($original_block->uuid, $layout->positions[$original_region])) !== false) {
+      unset($layout->positions[$original_region][$key]);
+    }
+  }
+
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
+  layout_set_layout_tempstore($layout);
+}
+
+/**
+ * AJAX callback to update the underlying layout form after updating a block.
+ */
+function layout_block_move_ajax_update($form, $form_state) {
+  /* @var Layout $layout */
+  $layout = $form_state['layout'];
+  /* @var LayoutRendererStandard $renderer */
+  $renderer = $form_state['renderer'];
+
+  // Display error messages in the form if any.
+  if (form_get_errors()) {
+    $html = '';
+    $html .= theme('status_messages');
+    $html .= backdrop_render($form);
+    $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+  }
+  else {
+    $commands[] = ajax_command_close_modal_dialog();
+    $commands[] = ajax_command_replace('#layout-edit-main', $renderer->render());
+  }
+
+  // Update the messages area.
+  if ($message = layout_locked_message($layout, 'layout')) {
+    backdrop_set_message($message, 'warning');
+  }
+  $commands[] = ajax_command_remove('#messages');
+  $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
  * Menu callback; Remove a block from a layout.
  */
 function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) {

@@ -229,6 +229,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       );
     }
 
+    $links['move'] = array(
+      'title' => t('Reorder or move'),
+      'href' => $this->getUrl('move-block', $block->uuid),
+      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+      'attributes' => array(
+        'class' => array('use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+      ),
+    );
+
     $links['remove'] = array(
       'title' => t('Remove'),
       'href' => $this->getUrl('remove-block', $block->uuid),
