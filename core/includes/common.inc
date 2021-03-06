@@ -3658,11 +3658,11 @@ function backdrop_group_css($css) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_css() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers'], $item['attributes']) : FALSE;
         break;
       case 'inline':
         // Always group inline items.
-        $group_keys = array($item['type'], $item['media'], $item['browsers']);
+        $group_keys = array($item['type'], $item['media'], $item['browsers'], $item['attributes']);
         break;
       case 'external':
         // Do not group external items.
