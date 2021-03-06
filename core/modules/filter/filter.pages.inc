@@ -508,8 +508,9 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
 
   form_set_value($element, $value, $form_state);
 
-  // If external URL ensure it doesn't have dangerous protocols.
-  $dangerous_protocols = _filter_check_dangerous_protocols($value);
+  // Flag if it has any dangerous protocols.
+  $cleaned_url = backdrop_strip_dangerous_protocols($value);
+  $dangerous_protocols = $cleaned_url !== $value ? TRUE : FALSE;
 
   // Unlike #type = 'url' validation, we allow both relative and absolute paths.
   if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
@@ -536,11 +537,12 @@ function _filter_cleanup_url($url) {
   // Will add a default protocol if missing on an external url.
   $url = _filter_create_valid_external_url($url);
 
+  // If it's an external URL we can skip the rest of the clean up.
   if (_filter_url_is_external($url)) {
     return $url;
   }
 
-  // Urlencode an anchor as it's more likely to be typed in with unicode.
+  // Encode an anchor as it might have been typed in with unicode.
   if (substr($url, 0, 1) == '#' && preg_match('/^(#)([\S]+)$/', $url, $matches)) {
     return $matches['1'] . backdrop_encode_path($matches['2']);
   }
@@ -573,16 +575,16 @@ function _filter_cleanup_url($url) {
  * @see link_cleanup_url().
  */
 function _filter_create_valid_external_url($url) {
-  $url = trim($url);
+  // Skip if it's already a valid external URL.
+  if (_filter_url_is_external($url)) {
+    return $url;
+  }
 
-  // Check if there is no protocol specified.
-  $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
-  if (empty($protocol_match)) {
-    // But should there be? Add an automatic http:// if it starts with a domain name.
-    $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
-    if (!empty($domain_match)) {
-      $url = "http://" . $url;
-    }
+  // Should there be a protocol? Add an automatic http:// if it starts with a
+  // domain name.
+  $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+  if (!empty($domain_match)) {
+    $url = "http://" . $url;
   }
 
   return $url;
@@ -627,31 +629,6 @@ function _filter_lookup_locale_path($url) {
       }
     }
   return NULL;
-}
-
-/**
- * Check for dangerous protocols.
- *
- * If it has a protocol that doesn't match any of the allowed protocols then
- * flag it as dangerous.
- *
- * @param string $url
- *
- * @return bool
- *   True if any dangerous protocols present.
- */
-function _filter_check_dangerous_protocols($url) {
-  if (!_filter_url_is_external($url)) {
-    return FALSE;
-  }
-  $protocols = settings_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal'));
-  $protocols = implode(':(?://)?|', $protocols) . ':(?://)?';
-  $pattern = "`(?:$protocols)`";
-  $matches = preg_match($pattern, $url);
-  if ($matches) {
-    return FALSE;
-  }
-  return TRUE;
 }
 
 /**
