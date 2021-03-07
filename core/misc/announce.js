@@ -24,12 +24,14 @@ var liveElement;
  */
 Backdrop.behaviors.backdropAnnounce = {
   attach: function (settings, context) {
-    liveElement = document.createElement('div');
-    liveElement.id = 'backdrop-live-announce';
-    liveElement.className = 'element-invisible';
-    liveElement.setAttribute('aria-live', 'polite');
-    liveElement.setAttribute('aria-busy', 'false');
-    document.body.appendChild(liveElement);
+    if (!liveElement) {
+      liveElement = document.createElement('div');
+      liveElement.id = 'backdrop-live-announce';
+      liveElement.className = 'element-invisible';
+      liveElement.setAttribute('aria-live', 'polite');
+      liveElement.setAttribute('aria-busy', 'false');
+      document.body.appendChild(liveElement);
+    }
   }
 };
 
