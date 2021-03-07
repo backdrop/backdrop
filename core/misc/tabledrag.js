@@ -345,6 +345,7 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
       self.rowObject = new self.row(item, 'keyboard', self.indentEnabled, self.maxDepth, true);
     }
 
+    var dragDirection = '';
     var keyChange = false;
     var groupHeight;
     switch (event.keyCode) {
@@ -352,6 +353,7 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
       case 63234: // Safari left arrow.
         keyChange = true;
         self.rowObject.indent(-1 * self.rtl);
+        dragDirection = 'left';
         break;
       case 38: // Up arrow.
       case 63232: // Safari up arrow.
@@ -388,6 +390,7 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
             self.rowObject.indent(0);
             window.scrollBy(0, -parseInt(item.offsetHeight, 10));
           }
+          dragDirection = 'up';
           handle.trigger('focus'); // Regain focus after the DOM manipulation.
         }
         break;
@@ -395,6 +398,7 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
       case 63235: // Safari right arrow.
         keyChange = true;
         self.rowObject.indent(self.rtl);
+        dragDirection = 'right';
         break;
       case 40: // Down arrow.
       case 63233: // Safari down arrow.
@@ -430,12 +434,14 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
             self.rowObject.indent(0);
             window.scrollBy(0, parseInt(item.offsetHeight, 10));
           }
+          dragDirection = 'down';
           handle.trigger('focus'); // Regain focus after the DOM manipulation.
         }
         break;
     }
 
     if (self.rowObject && self.rowObject.changed === true) {
+      Backdrop.announce(Backdrop.t('row dragged ' + dragDirection));
       $(item).addClass('drag');
       if (self.oldRowElement) {
         $(self.oldRowElement).removeClass('drag-previous');
