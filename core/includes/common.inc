@@ -774,9 +774,16 @@ function backdrop_encode_path($path) {
 }
 
 /**
- * A wrapper function for deprecated menu entries redirecting to their new path.
+ * Wraps backdrop_goto() to include a deprecated log message.
+ *
+ * In earlier versions of Backdrop, this was sometimes used directly as a menu
+ * callback. It is now recommended to use system_redirect_deprecated_page()
+ * instead when deprecating paths, because that function can handle wildcards
+ * and path mapping. It resolves the final path and then calls this function to
+ * perform the redirect.
  *
  * @see backdrop_goto()
+ * @see system_redirect_deprecated_page()
  *
  * @since 1.5.0
  */

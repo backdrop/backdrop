@@ -1011,7 +1011,7 @@ class DeprecatedRedirectPageCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   /**
-   * Implement setUp().
+   * {@inheritdoc}
    */
   function setUp() {
     parent::setUp(array('deprecated_redirect_test', 'dblog'));
@@ -1019,6 +1019,9 @@ class DeprecatedRedirectPageCase extends BackdropWebTestCase {
     config_set('system.core', 'watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6, 8));
   }
 
+  /**
+   * Tests redirecting from a old menu paths to new menu paths.
+   */
   function testRedirects() {
     // Message used in watchdog entries.
     $watchdog_message = 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.';
@@ -1046,21 +1049,6 @@ class DeprecatedRedirectPageCase extends BackdropWebTestCase {
       '%path' => 'old/path/different/foo/wildcard/bar/baz/positions',
       '%referrer' => '',
     ), 'Deprecated watchdog message found for an argument map redirect.');
-  }
-
-  /**
-   * Verifies that a watchdog message has been entered.
-   *
-   * @param $watchdog_message
-   *   The watchdog message.
-   * @param $variables
-   *   The array of variables passed to watchdog().
-   * @param $message
-   *   The assertion message.
-   */
-  private function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
-    return $this->assert($status, format_string('@message', array('@message' => $message)));
   }
 }
 

@@ -60,7 +60,7 @@ file = tests/system.test
 
 [DeprecatedRedirectPageCase]
 name = Deprecated Page Redirect
-description = Tests redirecting from an old menu path to a new menu path.
+description = Tests redirecting from a old menu paths to new menu paths.
 group = System
 file = tests/system.test
 

@@ -4284,7 +4284,7 @@ function path_autocomplete($string = '') {
  *
  * @see arg()
  *
- * @since 1.19.0
+ * @since 1.19.0 Function added.
  */
 function system_redirect_deprecated_page($path, $argument_map = array()) {
   // The argument map is passed in as old => new. But we need to get the old

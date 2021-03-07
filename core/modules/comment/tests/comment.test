@@ -1974,28 +1974,6 @@ class CommentActionsTestCase extends CommentHelperCase {
     comment_publish_action($comment);
     $this->assertEqual(comment_load($comment->cid)->status, COMMENT_PUBLISHED, 'Comment was published');
   }
-
-  /**
-   * Verifies that a watchdog message has been entered.
-   *
-   * @param $watchdog_message
-   *   The watchdog message.
-   * @param $variables
-   *   The array of variables passed to watchdog().
-   * @param $message
-   *   The assertion message.
-   */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
-    return $this->assert($status, format_string('@message', array('@message' => $message)));
-  }
-
-  /**
-   * Clears watchdog.
-   */
-  function clearWatchdog() {
-    db_truncate('watchdog')->execute();
-  }
 }
 
 /**

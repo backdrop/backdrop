@@ -3966,6 +3966,32 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->verbose(t('Email:') . '<pre>' . print_r($mail, TRUE) . '</pre>');
     }
   }
+
+  /**
+   * Verifies that a watchdog message has been entered.
+   *
+   * @param $watchdog_message
+   *   The watchdog message.
+   * @param $variables
+   *   The array of variables passed to watchdog().
+   * @param $message
+   *   The assertion message.
+   *
+   * @since 1.19.0 Method added.
+   */
+  function assertWatchdogMessage($watchdog_message, $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+    return $this->assert($status, format_string('@message', array('@message' => $message)));
+  }
+
+  /**
+   * Clears the watchdog database table.
+   *
+   * @since 1.19.0 Method added.
+   */
+  function clearWatchdog() {
+    db_truncate('watchdog')->execute();
+  }
 }
 
 /**
