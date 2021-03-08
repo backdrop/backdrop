@@ -1433,7 +1433,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
       // Only extract JSON files, ignoring anything else in the archive.
       $file_list = preg_grep('/.json$/', $archiver->listContents());
       if ($file_list) {
-        $archiver->extract($this->directory, $file_list);
+        $archiver->extract($this->directory, array_values($file_list));
       }
     }
     catch (\Exception $e) {
