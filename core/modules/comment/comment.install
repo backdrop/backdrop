@@ -66,9 +66,6 @@ function comment_uninstall() {
   if (db_field_exists('node', 'comment_close_override')) {
     db_drop_field('node', 'comment_close_override');
   }
-  // Reset the cached information about entity types.
-  backdrop_static_reset('entity_get_info');
-  cache()->deletePrefix('entity_info:');
 
   // Remove default, un-modified view.
   $config = config('views.view.comments_recent');
