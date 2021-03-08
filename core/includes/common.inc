@@ -3901,6 +3901,7 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3923,6 +3924,7 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3934,6 +3936,7 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
+          $element['#attributes'] += $item['attributes'];
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
