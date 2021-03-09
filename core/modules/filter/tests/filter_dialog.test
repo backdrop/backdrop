@@ -98,7 +98,6 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
       'node/1' => '/de/node/1',
       'ärger-im-büro' => '/de/%C3%A4rger-im-b%C3%BCro',
       '<front>?page=1#main-content' => '/de?page=1#main-content',
-      '#ärger' => '#%C3%A4rger',
       // Should stay untouched.
       '#main-content' => '#main-content',
       'http://domain.tld:8080/index.php?page=3&foo=bar' => 'http://domain.tld:8080/index.php?page=3&foo=bar',

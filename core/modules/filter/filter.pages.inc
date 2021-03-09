@@ -509,8 +509,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   // Flag if it has any dangerous protocols.
-  $cleaned_url = backdrop_strip_dangerous_protocols($value);
-  $dangerous_protocols = $cleaned_url !== $value ? TRUE : FALSE;
+  $stripped_url = backdrop_strip_dangerous_protocols($value);
+  $dangerous_protocols = $stripped_url !== $value ? TRUE : FALSE;
 
   // Unlike #type = 'url' validation, we allow both relative and absolute paths.
   if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
@@ -537,14 +537,10 @@ function _filter_cleanup_url($url) {
   // Will add a default protocol if missing on an external url.
   $url = _filter_create_valid_external_url($url);
 
-  // If it's an external URL we can skip the rest of the clean up.
-  if (_filter_url_is_external($url)) {
+  // If it's an external URL with a protocol we can skip the rest of the
+  // clean up.
+  if (_filter_url_has_protocol($url)) {
     return $url;
-  }
-
-  // Encode an anchor as it might have been typed in with unicode.
-  if (substr($url, 0, 1) == '#' && preg_match('/^(#)([\S]+)$/', $url, $matches)) {
-    return $matches['1'] . backdrop_encode_path($matches['2']);
   }
 
   // Break up the components so we can build up an aliased internal path.
@@ -575,8 +571,8 @@ function _filter_cleanup_url($url) {
  * @see link_cleanup_url().
  */
 function _filter_create_valid_external_url($url) {
-  // Skip if it's already a valid external URL.
-  if (_filter_url_is_external($url)) {
+  // Skip if it's already a valid external URL with a protocol.
+  if (_filter_url_has_protocol($url)) {
     return $url;
   }
 
@@ -591,7 +587,7 @@ function _filter_create_valid_external_url($url) {
 }
 
 /**
- * Checks if a URL is external to Backdrop.
+ * Checks if a URL has a protocol.
  *
  * Checks for a protocol as a sign that the URL is external. We want to include
  * all external URLs even if they have dangerous protocols.
@@ -599,13 +595,13 @@ function _filter_create_valid_external_url($url) {
  * @param string $url
  *
  * @return bool
- *   TRUE if URL is external.
- *
- * @see url_is_external()
+ *   TRUE if URL has protocol.
  */
-function _filter_url_is_external($url) {
-  $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
-  if (!empty($protocol_match)) {
+function _filter_url_has_protocol($url) {
+  $url_parts = parse_url($url);
+
+  // If it has a host and scheme then it has a protocol.
+  if (isset($url_parts['host']) && isset($url_parts['scheme'])) {
     return TRUE;
   }
   return FALSE;
