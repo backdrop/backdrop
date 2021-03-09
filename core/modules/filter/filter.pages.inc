@@ -543,6 +543,11 @@ function _filter_cleanup_url($url) {
     return $url;
   }
 
+  // Return anchors as is.
+  if (substr($url, 0, 1) == '#') {
+    return $url;
+  }
+
   // Break up the components so we can build up an aliased internal path.
   $url_parts = backdrop_parse_url($url);
 
@@ -598,10 +603,8 @@ function _filter_create_valid_external_url($url) {
  *   TRUE if URL has protocol.
  */
 function _filter_url_has_protocol($url) {
-  $url_parts = parse_url($url);
-
-  // If it has a host and scheme then it has a protocol.
-  if (isset($url_parts['host']) && isset($url_parts['scheme'])) {
+  // If it has a scheme then it has a protocol.
+  if (parse_url($url, PHP_URL_SCHEME)) {
     return TRUE;
   }
   return FALSE;
