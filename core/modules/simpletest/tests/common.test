@@ -877,37 +877,26 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
 
   /**
    * Test CSS Styles with attributes rendering.
-   *
-   * @todo make it more like JavaScriptTestCase::testAttributes() {
    */
   function testRenderStylesAttributes() {
     // Disable aggregation.
     config_set('system.core', 'preprocess_css', 0);
 
-    backdrop_add_css(
-      'misc/print.css',
-      array(
-        'attributes' => array(
-          'foo' => 'bar',
-        ),
-      )
-    );
-
-    // Retrieve the rendered Styles.
+    // Add internal and external CSS files that add custom attributes, and
+    // check that these attributes appear on the <link> tags.
+    $css_internal = 'core/misc/print.css';
+    $css_external = 'http://example.com/styles.css';
+    backdrop_add_css($css_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_css($css_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'type' => 'external',
+    ));
     $css = backdrop_get_css();
-
-    $expected = array(
-      'foo' => 'bar',
-      'media' => 'all',
-    );
-
-    foreach ($expected as $expected_string) {
-      $this->assertNotEqual(
-        strpos($css, $expected_string),
-        FALSE,
-        'Styles with attributes has been properly rendered.'
-      );
-    }
+    $this->backdropSetContent($css);
+    $this->assertTrue($this->xpath('//link[starts-with(@href, "' . file_create_url($css_internal) . '") and @custom="foo"]'), 'Rendered internal CSS with correct custom attribute.');
+    $this->assertTrue($this->xpath('//link[@href="' . $css_external . '" and @custom="foo"]'), 'Rendered external CSS with correct custom attribute.');
   }
 
   /**
