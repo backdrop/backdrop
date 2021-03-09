@@ -492,7 +492,8 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 /**
  * Element validation function.
  *
- * In addition to validing the URL, it will clean it up if necessary.
+ * Validate a URL, and clean it up if necessary. Instead of stripping
+ * dangerous protocols we flag them as invalid to make the user aware.
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
@@ -503,7 +504,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
     return;
   }
 
-  // Cleanup the URL so it's more likely to pass validation.
+  // Clean up the URL so it's more likely to pass validation.
   $value = _filter_cleanup_url($value);
 
   form_set_value($element, $value, $form_state);
@@ -519,11 +520,11 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
 }
 
 /**
- * Clean up URL for validation.
+ * Clean up the URL for validation.
  *
- * Attempts to create a URL that will pass validation: adds a protocol if it's
- * missing; urlencodes an anchor link; attempts to find the proper multilingual
- * URL; and urlencodes any internal Backdrop path.
+ * Attempts to create a URL that will pass validation: add a protocol if it's
+ * missing; create a valid internal multilingual URL; or create a valid,
+ * encoded internal Backdrop path.
  *
  * @param string $url
  *
