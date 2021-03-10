@@ -876,6 +876,30 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test CSS Styles with attributes rendering.
+   */
+  function testRenderStylesAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_css', 0);
+
+    // Add internal and external CSS files that add custom attributes, and
+    // check that these attributes appear on the <link> tags.
+    $css_internal = 'core/misc/print.css';
+    $css_external = 'http://example.com/styles.css';
+    backdrop_add_css($css_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_css($css_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'type' => 'external',
+    ));
+    $css = backdrop_get_css();
+    $this->backdropSetContent($css);
+    $this->assertTrue($this->xpath('//link[starts-with(@href, "' . file_create_url($css_internal) . '") and @custom="foo"]'), 'Rendered internal CSS with correct custom attribute.');
+    $this->assertTrue($this->xpath('//link[@href="' . $css_external . '" and @custom="foo"]'), 'Rendered external CSS with correct custom attribute.');
+  }
+
+  /**
    * Tests that the query string remains intact when adding CSS files that have
    * query string parameters.
    */
