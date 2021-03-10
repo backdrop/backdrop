@@ -91,7 +91,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
         forcePlaceholderSize: true
       });
 
-      // Get the list of droppables a.k.a regions where we can drop blocks.
+      // Allow keyboard navigation
+      // Get the list of droppables, that is regions where we can drop blocks.
       var droppables = $.map($('.layout-editor-region'), function (item) {return $(item).attr('id')});
 
       // Find the next region.
@@ -112,11 +113,6 @@ Backdrop.behaviors.layoutDisplayEditor = {
         return false;
       }
 
-      var speak = function (destination) {
-        var utterThis = new SpeechSynthesisUtterance('moved to: ' + destination);
-        synth.speak(utterThis);
-      }
-
       // Check if an element is in the viewport.
       $.fn.isInViewport = function () {
         let elementTop = $(this).offset().top;
@@ -129,10 +125,9 @@ Backdrop.behaviors.layoutDisplayEditor = {
       }
 
       // Scroll to a droppable if it's not visible.
-      var scrollIfNotVisible = function (nextDroppableId, droppables) {
-        if (findNextDroppable(nextDroppableId, droppables) && $('#' + findNextDroppable(nextDroppableId, droppables)).isInViewport() === false) {
-          console.log('scrolling');
-          var $nextDroppable = $('#' + findNextDroppable(nextDroppableId, droppables));
+      var scrollIfNotVisible = function (nextDroppableId) {
+        if ($('#' + nextDroppableId).isInViewport() === false) {
+          var $nextDroppable = $('#' + nextDroppableId);
           var _offset = $nextDroppable.offset();
           $('html, body').animate({
             scrollTop: _offset.top,
@@ -142,8 +137,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
       }
 
       $('.layout-editor-block').bind('keydown', function(event) {
-        // Press j to move down.
-        if(event.which == 74) {
+        // Press k to move block to next region.
+        if(event.which == 75) {
           var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
           var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
 
@@ -151,75 +146,50 @@ Backdrop.behaviors.layoutDisplayEditor = {
             return;
           }
 
-          scrollIfNotVisible(nextDroppableId, droppables);
+          scrollIfNotVisible(nextDroppableId);
 
           var droppable = $('#' + nextDroppableId + ' .layout-editor-region-content');
-          var draggable = $(this);
-          var droppableOffset = droppable.offset();
-          var draggableOffset = draggable.offset();
-          var dx = droppableOffset.left - draggableOffset.left;
-          var dy = droppableOffset.top - draggableOffset.top;
-          //var nextDestinationWidth = $('#' + nextDroppableId + ' .layout-editor-region-content')
-
-          draggable.width(droppable.width());
-
-
-          draggable.simulate("drag", {
-            dx: dx,
-            dy: dy
-          });
-          draggable.focus();
-          var currentRegionLabel = $('#' + findNextDroppable(currentDroppableId, droppables) + ' h2.label').text();
-          speak(currentRegionLabel);
+          droppable.append($(this));
+          $(this).focus();
         }
 
-        // @Todo : move up
-        if(event.which == 75) {
+        // Press j to block to previous region.
+        if(event.which == 74) {
           var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
-          var nextDroppable = findPreviousDroppable(currentDroppableId, droppables);
+          var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
 
-          if (!nextDroppable) {
+          if (!nextDroppableId) {
             return;
           }
 
-          scrollIfNotVisible(nextDroppableId, droppables);
+          scrollIfNotVisible(nextDroppableId);
 
-          var droppable = $('#' + nextDroppable + ' .layout-editor-region-content');
-          var draggable = $(this);
-          var droppableOffset = droppable.offset();
-          var draggableOffset = draggable.offset();
-          var dx = droppableOffset.left - draggableOffset.left;
-          var dy = droppableOffset.top - draggableOffset.top;
-          //var nextDestinationWidth = $('#' + nextDroppable + ' .layout-editor-block')
-
-          draggable.width(droppable.width());
-
-          draggable.simulate("drag", {
-            dx: dx,
-            dy: dy
-          });
-          draggable.focus();
-          var currentRegionLabel = $('#' + findPreviousDroppable(currentDroppableId, droppables) + ' h2.label').text();
-          speak(currentRegionLabel);
+          var droppable = $('#' + nextDroppableId + ' .layout-editor-region-content');
+          droppable.append($(this));
+          $(this).focus();
         }
 
+        // Press up to move block up by one position.
         if(event.which == 38) {
           $(this).insertBefore($(this).prev());
           $(this).focus();
         }
+        // Press down to move block down by one position.
         if(event.which == 40) {
           $(this).insertAfter($(this).next());
           $(this).focus();
         }
+        // Press t or "page up" to move block to top of region.
         if (event.which == 84 || event.which == 33) {
           $(this).parent().prepend($(this));
           $(this).focus();
         }
+        // Press b or "page down" to move block to bottom of region.
         if (event.which == 66 || event.which == 34) {
           $(this).parent().append($(this));
           $(this).focus();
         }
-        // @Todo: this duplicates Backdrop.behaviors.layoutDisplayEditor.updateLayout().
+
         var region = $(this).parent();
         var regionName = region.closest('.layout-editor-region').data('regionName');
         var blockList = [];
