@@ -2033,9 +2033,9 @@ function system_library_info() {
   // Announce.
   $libraries['announce'] = array(
     'title' => 'Announce',
-    'version' => '1.0.0',
+    'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/announce.js' => array(),
+      'core/misc/announce.js' => array('group' => JS_DEFAULT),
     ),
   );
 

@@ -14,7 +14,7 @@
  *     ));
  *   });
  */
-(function (Backdrop, debounce) {
+(function (Backdrop) {
   var liveElement;
   var announcements = [];
   Backdrop.behaviors.backdropAnnounce = {
@@ -22,7 +22,7 @@
       if (!liveElement) {
         liveElement = document.createElement('div');
         liveElement.id = 'backdrop-live-announce';
-        liveElement.className = 'visually-hidden';
+        liveElement.className = 'element-invisible';
         liveElement.setAttribute('aria-live', 'polite');
         liveElement.setAttribute('aria-busy', 'false');
         document.body.appendChild(liveElement);
@@ -59,6 +59,6 @@
       text: text,
       priority: priority
     });
-    return debounce(announce, 300)();
+    return Backdrop.debounce(announce, 300)();
   };
-})(Backdrop, Backdrop.debounce);
+})(Backdrop);
