@@ -1284,6 +1284,16 @@ function system_library_info() {
     ),
     // CSS is added conditionally below.
   );
+
+  // Announce.
+  $libraries['backdrop.announce'] = array(
+    'title' => 'Announce',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/announce.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   $libraries['backdrop.menu-toggle'] = array(
     'title' => 'Backdrop menu toggle',
     'version' => BACKDROP_VERSION,
@@ -2027,15 +2037,6 @@ function system_library_info() {
     'css' => array(
       $system_module_path . '/css/jquery.treetable.css' => array(),
       $system_module_path . '/css/jquery.treetable.theme.default.css' => array(),
-    ),
-  );
-
-  // Announce.
-  $libraries['announce'] = array(
-    'title' => 'Announce',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/announce.js' => array('group' => JS_DEFAULT),
     ),
   );
 
