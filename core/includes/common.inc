@@ -3323,6 +3323,8 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  *
  * @return array
  *   An array of key and values.
+ *
+ * @since 1.19.0 Function added.
 */
 function backdrop_css_defaults($data = NULL) {
   return array(
