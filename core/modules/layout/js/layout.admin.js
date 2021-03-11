@@ -139,7 +139,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
       $('.layout-editor-block').bind('keydown', function(event) {
         // Press k to move block to next region.
         if(event.which == 75) {
-          var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
+          var currentDroppable = $(this).closest('.layout-editor-region');
+          var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
 
           if (!nextDroppableId) {
@@ -155,7 +156,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
 
         // Press j to block to previous region.
         if(event.which == 74) {
-          var currentDroppableId = $(this).closest('.layout-editor-region').attr('id');
+          var currentDroppable = $(this).closest('.layout-editor-region');
+          var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
 
           if (!nextDroppableId) {
@@ -190,14 +192,23 @@ Backdrop.behaviors.layoutDisplayEditor = {
           $(this).focus();
         }
 
-        var region = $(this).parent();
-        var regionName = region.closest('.layout-editor-region').data('regionName');
+        var region = $(this).closest('.layout-editor-region');
+        updateLayoutOnKeyInput(region);
+
+        if (currentDroppable) {
+          updateLayoutOnKeyInput(currentDroppable);
+        }
+      });
+
+      // Update block list on hidden input element.
+      var updateLayoutOnKeyInput = function (region) {
+        var regionName = region.data('regionName');
         var blockList = [];
         region.find('.layout-editor-block').each(function(index) {
           blockList.push($(this).data('blockId'));
         });
         $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
-      });
+      }
 
       // Open a dialog if editing a particular block.
       var blockUuid = window.location.hash.replace(/#configure-block:/, '');
