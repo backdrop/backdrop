@@ -984,7 +984,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * Load all layouts at a given path.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
@@ -1219,7 +1219,7 @@ function layout_provides_path($path) {
  * are passed. In which case the current path will be used.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  * @param $router_item
  *   The menu router item for the page currently being loaded.
  *   The $path parameter will be ignored if $router_item is specified.
@@ -1890,7 +1890,7 @@ function layout_tempstore_block_load($layout_block_uuid, $layout_name) {
 }
 
 /**
- * Given a path with wildcard placeholders (%), determine the required contexts.
+ * Given a path with placeholders (%), determine the required contexts.
  *
  * @param string $path
  *   The path for which required contexts should be retrieved.
@@ -1913,7 +1913,7 @@ function layout_context_required_by_path($path) {
           'plugin' => $context_info['name'],
         );
       }
-      // If the path matches based on % wildcards, add this context as a
+      // If the path matches based on % placeholders, add this context as a
       // required context info in the correct order.
       elseif (strpos($path, $cleaned_path) === 0) {
         // Determine the argument placement within the path.
@@ -1930,7 +1930,7 @@ function layout_context_required_by_path($path) {
     }
   }
 
-  // If any wildcards are not filled, populate with a placeholder context
+  // If any placeholders are not filled, populate with a placeholder context
   // that can be modified.
   $parts = explode('/', $path);
   foreach ($parts as $part_index => $part) {
@@ -1958,6 +1958,24 @@ function layout_context_required_by_path($path) {
   }
 
   return $required_contexts[$path];
+}
+
+/**
+ * Returns the current user context, which is always available.
+ *
+ * @return EntityLayoutContext
+ *   The layout context for the current user.
+ *
+ * @since 1.17.5 Function added.
+ */
+function layout_current_user_context() {
+  $current_user_context = layout_create_context('user', array(
+    'name' => 'current_user',
+    'label' => t('Current user'),
+    'locked' => TRUE,
+  ));
+  $current_user_context->setData($GLOBALS['user']);
+  return $current_user_context;
 }
 
 /**

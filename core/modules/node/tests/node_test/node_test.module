@@ -126,10 +126,10 @@ function node_test_node_grants_alter(&$grants, $account, $op) {
  */
 function node_test_node_presave(Node $node) {
   if ($node->title == 'testing_node_presave') {
-    // Sun, 19 Nov 1978 05:00:00 GMT
-    $node->created = 280299600;
-    // Drupal 1.0 release.
-    $node->changed = 979534800;
+    // Backdrop v1.0.0 release.
+    $node->created = 1421394600;
+    // Backdrop v1.5.0 release.
+    $node->changed = 1474011660;
   }
   // Determine changes.
   if (!empty($node->original) && $node->original->title == 'test_changes') {

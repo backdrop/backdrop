@@ -1372,7 +1372,7 @@ function hook_boot() {
  * @see hook_boot()
  */
 function hook_init() {
-  // Since this file should only be loaded on the front page, it cannot be
+  // Since this file should only be loaded on the home page, it cannot be
   // declared in the info file.
   if (backdrop_is_front_page()) {
     backdrop_add_css(backdrop_get_path('module', 'foo') . '/foo.css');
@@ -2799,9 +2799,9 @@ function hook_install() {
  * - mymodule_update_1100(): This is the first update to get the database ready
  *   to run mymodule 1.x-1.*.
  * - mymodule_update_1200(): This is the first update to get the database ready
- *   to run mymodule 7.x-2.*. Users can directly update from 1.x-2.* to 2.x-2.*
- *   and they get all 10xx and 12xx updates, but not 11xx updates, because
- *   those reside in the 1.x-1.x branch only.
+ *   to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
+ *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
+ *   11xx updates, because those reside in the 1.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the

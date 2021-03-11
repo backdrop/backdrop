@@ -1515,7 +1515,7 @@ function theme_has_settings($theme) {
 function theme_has_color_support($theme) {
   $themes = list_themes();
   $theme_info = $themes[$theme];
-  if ($theme_info->info['settings']['color'] && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
+  if (!empty($theme_info->info['settings']['color']) && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
     return TRUE;
   }
   if (isset($theme_info->info['base theme'])) {
@@ -2693,7 +2693,7 @@ function template_preprocess_page(&$variables) {
   // This allows for easy CSS overrides based on context (home page, node of
   // certain type, etc.).
 
-  // Add a class that tells us whether we're on the front page or not.
+  // Add a class that tells us whether we're on the home page or not.
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';
   }

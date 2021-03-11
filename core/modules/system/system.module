@@ -928,7 +928,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default home page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -1133,6 +1133,8 @@ function system_page_delivery_callback_alter(&$delivery_callback, $page_output) 
  * Implements hook_library_info().
  */
 function system_library_info() {
+  $system_module_path = backdrop_get_path('module', 'system');
+
   // Backdrop's Ajax framework.
   $libraries['backdrop.ajax'] = array(
     'title' => 'Backdrop AJAX',
@@ -1270,7 +1272,7 @@ function system_library_info() {
     'title' => 'Modules Filter',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/modules.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1278,12 +1280,38 @@ function system_library_info() {
     'title' => 'Backdrop menu styles',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/menus.js' => array('group' => JS_DEFAULT),
     ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
-    ),
+    // CSS is added conditionally below.
   );
+  $libraries['backdrop.menu-toggle'] = array(
+    'title' => 'Backdrop menu toggle',
+    'version' => BACKDROP_VERSION,
+    // CSS is added conditionally below.
+  );
+
+  // Add conditional CSS to above libraries.
+  $menu_config = config('menu.settings');
+  if ($menu_config->get('menu_breakpoint') == 'custom') {
+    $libraries['backdrop.menus']['css'] = array(
+      $system_module_path . '/css/menu-dropdown.theme.breakpoint.css' => array('group' => CSS_DEFAULT),
+      $system_module_path . '/css/menu-dropdown.theme.breakpoint-queries.css' => array(
+        'group' => CSS_DEFAULT,
+        'media' => 'all and (min-width: ' . $menu_config->get('menu_breakpoint_custom') . ')',
+      ),
+    );
+    $libraries['backdrop.menu-toggle']['css'] = array(
+      $system_module_path . '/css/menu-toggle.theme.breakpoint.css' => array('group' => CSS_DEFAULT),
+      $system_module_path . '/css/menu-toggle.theme.breakpoint-queries.css' => array(
+        'group' => CSS_DEFAULT,
+        'media' => 'all and (min-width: ' . $menu_config->get('menu_breakpoint_custom') . ')',
+      ),
+    );
+  }
+  else {
+    $libraries['backdrop.menus']['css'][$system_module_path . '/css/menu-dropdown.theme.css'] = array('group' => CSS_DEFAULT);
+    $libraries['backdrop.menu-toggle']['css'][$system_module_path . '/css/menu-toggle.theme.css'] = array('group' => CSS_DEFAULT);
+  }
 
   // jQuery.
   $libraries['jquery'] = array(
@@ -1366,7 +1394,7 @@ function system_library_info() {
     'title' => 'Jump Menu',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1977,10 +2005,10 @@ function system_library_info() {
     'title' => 'Token behaviors',
     'version' => '1.0',
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+      $system_module_path . '/js/token.js' => array(),
     ),
     'css' => array(
-      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+      $system_module_path . '/css/token.css' => array(),
     ),
     'dependencies' => array(
       array('system', 'jquery.treetable'),
@@ -1994,11 +2022,11 @@ function system_library_info() {
     'website' => 'http://plugins.jquery.com/project/treetable',
     'version' => '3.2.0',
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+      $system_module_path . '/js/jquery.treetable.js' => array(),
     ),
     'css' => array(
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+      $system_module_path . '/css/jquery.treetable.css' => array(),
+      $system_module_path . '/css/jquery.treetable.theme.default.css' => array(),
     ),
   );
 
@@ -3710,7 +3738,7 @@ function system_time_zones($blank = NULL) {
  */
 function system_check_http_request() {
    watchdog_deprecated_function('system', __FUNCTION__);
-  // Try to get the content of the front page via backdrop_http_request().
+  // Try to get the content of the home page via backdrop_http_request().
   $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
@@ -3740,6 +3768,21 @@ function system_image_toolkits() {
       'available' => function_exists('image_gd_check_settings') && image_gd_check_settings(),
     ),
   );
+}
+
+/**
+ * Implements hook_image_supported_extensions_alter().
+ *
+ * Add webp to supported file extensions if GD is the active image toolkit and
+ * the GD version supports WebP.
+ */
+function system_image_supported_extensions_alter(&$supported_extensions) {
+  if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      $supported_extensions[] = 'webp';
+    }
+  }
 }
 
 /**
@@ -4110,7 +4153,7 @@ function path_autocomplete($string = '') {
     }
 
     // Get taxonomy term matches.
-    if ($match_count < $range) {
+    if (module_exists('taxonomy') && $match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
         ->condition('name', '%' . db_like($string) . '%', 'LIKE')
