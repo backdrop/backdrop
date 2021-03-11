@@ -393,6 +393,6 @@
   float: left;
 }
 
-*:focus .layout-editor-block-title {
-  background-color: #e9eebc;
+.layout-editor-block:focus {
+  box-shadow: 5px 5px 5px 0 #000;
 }

@@ -78,7 +78,6 @@ Backdrop.behaviors.layoutConfigure = {
  */
 Backdrop.behaviors.layoutDisplayEditor = {
   attach: function(context) {
-    var synth = window.speechSynthesis;
     // Apply drag and drop to regions.
     var $regions = $('.layout-editor-region-content').once('layout-sortable');
     if ($regions.length) {
