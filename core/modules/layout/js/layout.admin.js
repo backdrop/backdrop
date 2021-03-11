@@ -136,7 +136,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
         }
       }
 
-      $('.layout-editor-block').bind('keydown', function(event) {
+      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
         // Press k to move block to next region.
         if(event.which == 75) {
           var currentDroppable = $(this).closest('.layout-editor-region');
