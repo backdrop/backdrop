@@ -3003,6 +3003,8 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  * @see backdrop_deliver_page()
  */
 function backdrop_deliver_html_page($page_callback_result) {
+  $site_config = config('system.core');
+  
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -3019,14 +3021,13 @@ function backdrop_deliver_html_page($page_callback_result) {
   // domain, but provide a variable to override this. If the code running for
   // this page request already set the X-Frame-Options header earlier, don't
   // overwrite it here.
-  $frame_options = config_get('system.core', 'x_frame_options');
+  $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -3312,6 +3313,34 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 }
 
 /**
+ * Constructs an array of the defaults that are used for styles items.
+ *
+ * @param $data
+ *   (optional) The default data parameter for the style item array.
+ *
+ * @see backdrop_get_css()
+ * @see backdrop_add_css()
+ *
+ * @return array
+ *   An array of key and values.
+ *
+ * @since 1.19.0 Function added.
+*/
+function backdrop_css_defaults($data = NULL) {
+  return array(
+    'type' => 'file',
+    'group' => CSS_DEFAULT,
+    'weight' => 0,
+    'every_page' => FALSE,
+    'media' => 'all',
+    'preprocess' => TRUE,
+    'data' => $data,
+    'browsers' => array(),
+    'attributes' => array(),
+  );
+}
+
+/**
  * Adds a cascading stylesheet to the stylesheet queue.
  *
  * Calling backdrop_static_reset('backdrop_add_css') will clear all cascading
@@ -3409,6 +3438,10 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
+ *   - attributes: An associative array of attributes for the <link> tag.
+ *     This may be used to add 'integrity' or custom attributes. Note that
+ *     setting any attributes will disable preprocessing as though the
+ *     'preprocess' option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
  *     styles will be aggregated and compressed. Defaults to TRUE.
  *   - 'browsers': An array containing information specifying which browsers
@@ -3439,19 +3472,16 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     $options = array();
   }
 
+  $defaults = backdrop_css_defaults($data);
+  $options += $defaults;
+  $options['attributes'] += $defaults['attributes'];
+
+  // Preprocess can only be set if no attributes are set.
+  $options['preprocess'] = empty($options['attributes']) ? $options['preprocess'] : FALSE;
+
   // Create an array of CSS files for each media type first, since each type needs to be served
   // to the browser differently.
   if (isset($data)) {
-    $options += array(
-      'type' => 'file',
-      'group' => CSS_DEFAULT,
-      'weight' => 0,
-      'every_page' => FALSE,
-      'media' => 'all',
-      'preprocess' => TRUE,
-      'data' => $data,
-      'browsers' => array(),
-    );
     $options['browsers'] += array(
       'IE' => TRUE,
       '!IE' => TRUE,
@@ -3873,6 +3903,7 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3895,6 +3926,7 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3906,6 +3938,7 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
+          $element['#attributes'] += $item['attributes'];
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];

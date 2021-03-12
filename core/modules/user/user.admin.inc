@@ -559,7 +559,7 @@ function user_admin_roles($form, $form_state) {
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure role'),
-      'href' => 'admin/config/people/roles/edit/' . $role_name,
+      'href' => 'admin/config/people/roles/configure/' . $role_name,
       'weight' => 0,
     );
     $links['permissions'] = array(

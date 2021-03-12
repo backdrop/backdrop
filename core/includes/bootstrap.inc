@@ -3027,6 +3027,7 @@ function _backdrop_bootstrap_configuration() {
  */
 function _backdrop_bootstrap_page_cache() {
   global $user;
+  $site_config = config('system.core');
 
   // Allow specifying special cache handlers in settings.php, like
   // using memcached or files for storing cache information.
@@ -3036,7 +3037,7 @@ function _backdrop_bootstrap_page_cache() {
   }
 
   try {
-    $cache_enabled = config_get('system.core', 'cache') ? TRUE : FALSE;
+    $cache_enabled = $site_config->get('cache') ? TRUE : FALSE;
   }
   catch (ConfigException $e) {
     $cache_enabled = FALSE;
@@ -3052,7 +3053,7 @@ function _backdrop_bootstrap_page_cache() {
     // checked, hook_boot might check for anonymous user etc.
     $user = backdrop_anonymous_user();
     // Get the page from the cache.
-    $background_fetch_enabled = config_get('system.core', 'page_cache_background_fetch');
+    $background_fetch_enabled = $site_config->get('page_cache_background_fetch');
     $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
@@ -3061,7 +3062,7 @@ function _backdrop_bootstrap_page_cache() {
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
       // on its creation date.
-      $lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $lifetime = $site_config->get('page_cache_maximum_age');
       $expires_on = $cache->created + $lifetime;
       $cache_expired = REQUEST_TIME > $expires_on;
 
@@ -3523,11 +3524,16 @@ function language_multilingual() {
  *   (optional) Whether to return a list of options instead of objects. This
  *   list is suitable for use in a select list #options array. This list is
  *   ordered by weight and then language name.
+ * @param bool $native_names
+ *   (optional) Whether the option_list labels should use the native name
+ *   instead of the English language name. Only applies if $option_list is TRUE.
  *
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
+ *
+ * @since 1.18.2 Added $native_names parameter.
  */
-function language_list($only_enabled = FALSE, $option_list = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3560,6 +3566,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
       $languages['all']['en'] = (object) array(
         'langcode' => 'en',
         'name' => 'English',
+        'native' => 'English',
         'direction' => 0,
         'enabled' => TRUE,
         'weight' => 0,
@@ -3586,7 +3593,13 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
     require_once __DIR__ . '/common.inc';
     backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
     foreach ($this_list as $language) {
-      $list[$language->langcode] = $language->name;
+      if ($native_names && isset($language->native)) {
+        $label = $language->native;
+      }
+      else {
+        $label = $language->name;
+      }
+      $list[$language->langcode] = $label;
     }
     return $list;
   }
