@@ -161,7 +161,7 @@ function theme_user_permission_description($variables) {
 }
 
 /**
- * Returns HTML for the role order and new role form.
+ * Returns HTML for the role order form.
  *
  * @param $variables
  *   An associative array containing:
@@ -186,11 +186,6 @@ function theme_user_admin_roles($variables) {
     $row[] = backdrop_render($form['roles'][$role_name]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
-  $row = array();
-  $row[] = array('data' => backdrop_render($form['label']) . backdrop_render($form['name']), 'class' => 'edit-name');
-  $row[] = '';
-  $row[] = backdrop_render($form['add']);
-  $rows[] = $row;
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
