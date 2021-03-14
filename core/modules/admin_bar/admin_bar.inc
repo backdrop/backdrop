@@ -651,6 +651,7 @@ function admin_bar_links_search() {
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
 }
