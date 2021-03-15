@@ -33,6 +33,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array(
       'access user profiles',
       'access content',
+      'administer nodes',
     ));
 
     // Create content types for testing.
@@ -56,9 +57,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    * Test the support for contexts within conditions and blocks.
    */
   function testRelationships() {
-    // Attach a file to this node.
-    $this->addFileField($this->test_node1);
-
     // Make a new layout that creates a custom path with wildcards.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
