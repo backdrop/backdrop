@@ -26,25 +26,12 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'administer modules',
       'administer layouts',
       'administer nodes',
-      'bypass node access',
-      'access file overview',
-      'manage files',
-      'delete files',
-      'access content',
     ));
     $this->backdropLogin($this->admin_user);
 
     // Create a web user.
     $this->web_user = $this->backdropCreateUser(array(
-      'access administration pages',
-      'administer site configuration',
-      'administer modules',
-      'administer layouts',
-      'administer nodes',
-      'bypass node access',
-      'access file overview',
-      'manage files',
-      'delete files',
+      'access user profiles',
       'access content',
     ));
 
@@ -63,42 +50,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => $this->randomString(),
       'uid' => $this->web_user->uid,
     ));
-  }
-
-  /**
-   * Creates a new file field.
-   */
-  function addFileField($node) {
-    $field_name = $this->field_name = strtolower($this->randomName());
-    $cardinality = 1;
-    $field = array(
-      'field_name' => $field_name,
-      'type' => 'file',
-      'cardinality' => $cardinality,
-      'settings' => array(),
-    );
-    field_create_field($field);
-
-    $instance = array(
-      'field_name' => $field_name,
-      'label' => $field_name,
-      'entity_type' => 'node',
-      'bundle' => 'post',
-      'settings' => array(),
-      'widget' => array(
-        'type' => 'file_generic',
-        'settings' => array(),
-      ),
-    );
-    field_create_instance($instance);
-
-    $file = current($this->backdropGetTestFiles('text'));
-    $file->filesize = filesize($file->uri);
-    $file_entity = entity_create('file', (array) $file);
-    $this->file_entity = $file_entity;
-    $edit['files[' . $field_name . '_und_0]'] = backdrop_realpath($file_entity->uri);
-    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-
   }
 
   /**

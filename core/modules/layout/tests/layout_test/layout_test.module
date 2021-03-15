@@ -47,13 +47,6 @@ function layout_test_block_info() {
       'node' => 'node',
     ),
   );
-  $blocks['test_file_context'] = array(
-    'info' => t('File context test'),
-    'description' => t('A testing block for layouts that requires a file context.'),
-    'required contexts' => array(
-      'file' => 'file',
-    ),
-  );
   $blocks['test_passthrough'] = array(
     'info' => t('String pass-through test'),
     'description' => t('A testing block for layouts that shows string from the URL.'),
@@ -100,11 +93,6 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
     case 'test_node_title':
       $block['subject'] = 'Node title';
       $block['content'] = format_string('The node title is @title', array('@title' => $contexts['node']->title));
-      break;
-
-    case 'test_file_context':
-      $block['subject'] = 'File context';
-      $block['content'] = format_string('The file name is @title', array('@title' => $contexts['file']->filename));
       break;
 
     case 'test_passthrough':
