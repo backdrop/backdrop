@@ -100,6 +100,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
   }
+
   /**
    * Test the support for contexts within conditions and blocks.
    */
@@ -130,17 +131,21 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Load relationship'));
     $this->backdropPost(NULL, array(), t('Add relationship'));
 
-    $this->backdropPost('admin/structure/layouts/add', array(), t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Create layout'));
 
     // Add the test block that requires both node and user contexts.
     $this->clickLink(t('Add block'), 3);
     $this->assertText(t('A testing block for layouts with contexts.'));
     $this->clickLink(t('Layout bar block'));
-    $this->assertOption('edit-contexts-my-user', 'current_user', 'Current user context selection is shown.');
-    $this->assertOption('edit-contexts-my-user', 'relationship_0', 'Relationship context selection is shown.');
+    $select_options = $this->xpath('//*[@id=:select]//option', array(
+      ':select' => 'edit-contexts-my-user',
+    ));
+    $this->assertEqual(count($select_options), 2, 'Two options are found in the select list.');
+    $relationship_option = (string) $select_options[1]['value'];
+    $this->assertTrue(strpos($relationship_option, 'relationship') === 0);
 
     $edit = array(
-      'contexts[my_user]' => 'relationship_0',
+      'contexts[my_user]' => $relationship_option,
     );
     $this->backdropPost(NULL, $edit, t('Add block'));
 
@@ -180,7 +185,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
      // Remove the user from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
   }
-
 
   /**
    * Test that layout templates may be enabled and disabled.
