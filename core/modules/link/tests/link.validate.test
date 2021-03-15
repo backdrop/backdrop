@@ -148,10 +148,9 @@ class LinkValidateTest extends LinkBaseTestClass {
  *
  * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738!
  */
-class LinkValidateUnitTest extends LinkBaseTestClass {
+class LinkValidateApiTest extends LinkBaseTestClass {
   function setUp() {
     parent::setUp();
-    backdrop_load('module', 'link');
   }
 
   // Make sure that a link labelled <front> works.
@@ -188,7 +187,6 @@ class LinkValidateUnitTest extends LinkBaseTestClass {
   function testValidateInternalLinks() {
     $tempfile = backdrop_tempnam('public://files', 'test');
     $links = array(
-      'rss.xml',
       file_uri_target($tempfile),
       backdrop_realpath($tempfile),
     );
