@@ -290,7 +290,7 @@ function link_field_validate($entity_type, $entity, $field, $instance, $langcode
  */
 function link_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $value) {
-    _link_process($items[$delta], $delta, $field, $entity);
+    _link_process($items[$delta], $delta, $field, $entity, $instance);
   }
 }
 
@@ -299,7 +299,7 @@ function link_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  */
 function link_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $value) {
-    _link_process($items[$delta], $delta, $field, $entity);
+    _link_process($items[$delta], $delta, $field, $entity, $instance);
   }
 }
 
@@ -367,8 +367,23 @@ function _link_load($field, $item, $instance) {
 
 /**
  * Prepares the item attributes and URL for storage.
+ *
+ * @param $item
+ *    Link field values.
+ *
+ * @param $delta
+ *    The sequence number for current values.
+ *
+ * @param $field
+ *    The field structure array.
+ *
+ * @param $entity
+ *    Entity object.
+ *
+ * @param $instance
+ *    The instance structure for $field on $entity's bundle.
  */
-function _link_process(&$item, $delta, $field, $entity) {
+function _link_process(&$item, $delta, $field, $entity, $instance) {
   // Trim whitespace from URL.
   if (!empty($item['url'])) {
     $item['url'] = trim($item['url']);
@@ -387,7 +402,9 @@ function _link_process(&$item, $delta, $field, $entity) {
 
   // Don't save an invalid default value (e.g. 'http://').
   if ((isset($field['widget']['default_value'][$delta]['url']) && $item['url'] == $field['widget']['default_value'][$delta]['url']) && is_object($entity)) {
-    if (!link_validate_url($item['url'])) {
+    $langcode = !empty($entity) ? field_language($instance['entity_type'], $entity, $instance['field_name']) : LANGUAGE_NONE;
+    if (!link_validate_url($item['url'], $langcode)) {
+
       unset($item['url']);
     }
   }
@@ -400,8 +417,8 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
   if ($item['url'] && !(isset($instance['default_value'][$delta]['url']) && $item['url'] === $instance['default_value'][$delta]['url'] && !$instance['required'])) {
     // Validate the link.
     if ($instance['settings']['validate_url']) {
-      $url_valid = link_validate_url(trim($item['url']));
-      if ($url_valid === FALSE) {
+      $langcode = !empty($entity) ? field_language($instance['entity_type'], $entity, $instance['field_name']) : LANGUAGE_NONE;
+      if (!link_validate_url(trim($item['url']), $langcode)) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'link_required',
           'message' => t('The value %value provided for %field is not a valid URL.', array(
@@ -495,7 +512,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
     }
   }
 
-  $type = link_validate_url($item['url']);
+  $type = link_url_type($item['url']);
   // If the type of the URL cannot be determined and URL validation is disabled,
   // then assume LINK_EXTERNAL for later processing.
   if ($type == FALSE && $instance['settings']['validate_url'] === 0) {
@@ -1024,7 +1041,7 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
  */
 function link_cleanup_url($url, $protocol = 'http') {
   $url = trim($url);
-  $type = link_validate_url($url);
+  $type = link_url_type($url);;
 
   if ($type === LINK_EXTERNAL) {
     // Check if there is no protocol specified.
@@ -1044,17 +1061,84 @@ function link_cleanup_url($url, $protocol = 'http') {
 /**
  * Validates a URL.
  *
+ * @param $text
+ *   Url to be validated.
+ *
+ * @param $langcode
+ *   An optional language code to look up the path in.
+ *
+ * @return boolean
+ *   True if a valid link, FALSE otherwise.
+ */
+function link_validate_url($text, $langcode = NULL) {
+  $text = _link_clean_relative($text);
+  $text = link_cleanup_url($text);
+  $type = link_url_type($text);
+
+  if ($type && ($type == LINK_INTERNAL || $type == LINK_EXTERNAL)) {
+    $flag = valid_url($text, TRUE);
+    if (!$flag) {
+      $normal_path = backdrop_get_normal_path($text, $langcode);
+      $parsed_link = parse_url($normal_path, PHP_URL_PATH);
+      if ($normal_path != $parsed_link) {
+        $normal_path = $parsed_link;
+      }
+      $flag = backdrop_valid_path($normal_path);
+    }
+    if (!$flag) {
+      $flag = file_exists($normal_path);
+    }
+    if (!$flag) {
+      $uri = file_build_uri($normal_path);
+      $flag = file_exists($uri);
+    }
+  }
+  else {
+    $flag = (bool) $type;
+  }
+
+  return $flag;
+}
+
+/**
+ * Cleaner of relatives urls.
+ *
+ * @param string $url
+ *   The url to clean up the relative protocol.
+ */
+function _link_clean_relative($url) {
+  $check = substr($url, 0, 2);
+  if (isset($_SERVER['HTTPS']) &&
+    ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+    $protocol = 'https://';
+  }
+  else {
+    $protocol = 'http://';
+  }
+
+  if ($check == '//') {
+    $url = str_replace('//', $protocol, $url);
+  }
+
+  return $url;
+}
+
+/**
+ * Type check a URL.
+ *
  * Accepts all URLs following RFC 1738 standard for URL formation and all e-mail
  * addresses following the RFC 2368 standard for mailto address formation.
  *
  * @param string $text
- *   Url to be validated.
+ *   Url to be checked.
  *
  * @return mixed
  *   Returns boolean FALSE if the URL is not valid. On success, returns one of
  *   the LINK_(linktype) constants.
  */
-function link_validate_url($text) {
+function link_url_type($text) {
   $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
   $cleaned_text = _link_escape_domain($text);
 
