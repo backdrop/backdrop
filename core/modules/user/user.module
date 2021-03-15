@@ -1443,6 +1443,14 @@ function user_menu() {
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
   );
+  $items['admin/config/people/roles/add'] = array(
+    'title' => 'Add role',
+    'description' => 'Add a new user role.',
+    'page arguments' => array('user_admin_role'),
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'user.admin.inc',
+  );
   $items['admin/config/people/roles/configure/%user_role'] = array(
     'title' => 'Configure role',
     'page arguments' => array('user_admin_role', 5),
