@@ -494,6 +494,9 @@ function filter_format_editor_dialog_save($form, &$form_state) {
  *
  * Validate a URL, and clean it up if necessary. Instead of stripping
  * dangerous protocols we flag them as invalid to make the user aware.
+ *
+ * @see filter_format_editor_link_form()
+ * @see filter_format_editor_image_form()
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
@@ -522,9 +525,10 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
 /**
  * Clean up the URL for validation.
  *
- * Attempts to create a URL that will pass validation: add a protocol if it's
- * missing; create a valid internal multilingual URL; or create a valid,
- * encoded internal Backdrop path.
+ * Attempts to create a URL that will pass validation: add a protocol if it
+ * looks like a domain but it's missing; create a valid internal multilingual
+ * alias; or create a valid, encoded internal alias in case transliteration is
+ * disabled.
  *
  * @param string $url
  *
@@ -582,11 +586,20 @@ function _filter_create_valid_external_url($url) {
     return $url;
   }
 
-  // Should there be a protocol? Add an automatic http:// if it starts with a
-  // domain name.
+  // If it looks like a domain name but it's missing a protocol Add an
+  // an http:// or https://, depending on the site configuration.
   $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
   if (!empty($domain_match)) {
-    $url = "http://" . $url;
+    if (isset($_SERVER['HTTPS']) &&
+    ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+      $protocol = 'https://';
+    }
+    else {
+      $protocol = 'http://';
+    }
+    $url = $protocol . $url;
   }
 
   return $url;
