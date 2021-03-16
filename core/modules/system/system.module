@@ -2948,9 +2948,11 @@ function _system_rebuild_module_data() {
           }
         }
         if ($git_version) {
-          $git_version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $git_version);
-          $modules[$key]->info['version'] = $git_version . '-dev';
+          $modules[$key]->info['version'] = $git_version;
         }
+      }
+      else {
+        $modules[$key]->info['version'] = BACKDROP_CORE_COMPATIBILITY . '-unknown';
       }
     }
 
