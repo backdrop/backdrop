@@ -297,6 +297,7 @@ function config_install_default_config($module, $config_name = NULL) {
         if ($config->isNew()) {
           $config->setData($data);
           $config->save();
+          module_invoke_all('config_create', $config);
         }
       }
     }
