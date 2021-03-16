@@ -98,7 +98,7 @@ Backdrop.behaviors.formUpdated = {
 Backdrop.behaviors.formSingleSubmit = {
   attach: function () {
     function onFormSubmit (e) {
-      // Prevent this from fireing multiple times per request.
+      // Prevent this from firing multiple times per request.
       e.stopImmediatePropagation();
       if (e.isDefaultPrevented()) {
         // Don't act on form submissions that have been prevented by other JS.
