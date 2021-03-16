@@ -36,6 +36,7 @@ function link_field_info() {
         'title_label_use_field_label' => FALSE,
         'title_maxlength' => 128,
         'enable_tokens' => 0,
+        'convert_aliases',
         'display' => array(
           'url_cutoff' => 80,
         ),
@@ -140,6 +141,12 @@ function link_field_instance_settings_form($field, $instance) {
     '#title' => t('Allow user-entered tokens'),
     '#default_value' => $instance['settings']['enable_tokens'],
     '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
+  );
+  $form['advanced']['convert_aliases'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Convert local aliases'),
+    '#default_value' => isset($instance['settings']['convert_aliases']) ? $instance['settings']['convert_aliases'] : '',
+    '#description' => t('If checked, a path alias is converted to the internal system path, the same way as when saving menu links.'),
   );
   $form['advanced']['display']['url_cutoff'] = array(
     '#type' => 'textfield',
@@ -290,7 +297,7 @@ function link_field_validate($entity_type, $entity, $field, $instance, $langcode
  */
 function link_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $value) {
-    _link_process($items[$delta], $delta, $field, $entity);
+    _link_process($items[$delta], $delta, $field, $entity, $instance);
   }
 }
 
@@ -299,7 +306,7 @@ function link_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  */
 function link_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $value) {
-    _link_process($items[$delta], $delta, $field, $entity);
+    _link_process($items[$delta], $delta, $field, $entity, $instance);
   }
 }
 
@@ -367,11 +374,88 @@ function _link_load($field, $item, $instance) {
 
 /**
  * Prepares the item attributes and URL for storage.
+ *
+ * @param array $item
+ *    Link field values.
+ *
+ * @param int $delta
+ *    The sequence number for current values.
+ *
+ * @param array $field
+ *    The field structure array.
+ *
+ * @param object $entity
+ *    Entity object.
+ *
+ * @param array $instance
+ *    The instance structure for $field on $entity's bundle.
  */
-function _link_process(&$item, $delta, $field, $entity) {
+function _link_process(&$item, $delta, $field, $entity, $instance) {
   // Trim whitespace from URL.
   if (!empty($item['url'])) {
     $item['url'] = trim($item['url']);
+  }
+
+  // Optionally convert aliases to the system path.
+  if (!empty($instance['settings']['convert_aliases'])) {
+    global $base_url;
+
+    // Check if either the site's absolute URL or the relative base URL are at
+    // the start of the URL, if so remove them.
+    $base_paths = array(
+      $base_url . base_path(),
+      base_path(),
+    );
+
+    // Work out the correct base_path to use based on the HTTPS settings.
+    if (isset($GLOBALS['base_secure_url'])) {
+      $base_paths[] = $GLOBALS['base_secure_url'] . base_path();
+    }
+    if (isset($GLOBALS['base_insecure_url'])) {
+      $base_paths[] = $GLOBALS['base_insecure_url'] . base_path();
+    }
+
+    // Add any additional paths defined in the settings.php file.
+    if ($extra_paths = settings_get('link_base_urls', array())) {
+      // Create versions with and without the base path.
+      foreach ($extra_paths as $extra_path) {
+        $base_paths[] = $extra_path;
+        $base_paths[] = $extra_path . base_path();
+      }
+    }
+
+    $paths_to_test = array(
+      $item['url']
+    );
+
+    foreach ($base_paths as $path) {
+      // Verify the path is at the beginning of the URL string.
+      if (strpos($item['url'], $path) === 0) {
+        $strlen = backdrop_strlen($path);
+        $paths_to_test[] = backdrop_substr($item['url'], $strlen);
+      }
+    }
+
+    // Check each of the paths to see if one of them is a system path.
+    foreach (array_unique($paths_to_test) as $path) {
+      $language = NULL;
+
+      // If we have locale enabled attempt to remove the language prefix first.
+      if (module_exists('locale')) {
+        require_once BACKDROP_ROOT . '/core/includes/language.inc';
+        list($language, $path) = language_url_split_prefix($path, language_list());
+      }
+
+      // Attempt to get a system path.
+      $normal_path = backdrop_get_normal_path($path, $language);
+
+      // If we get back a different path it means Backdrop found a system path
+      // we can use.
+      if ($normal_path != $path) {
+        $item['url'] = $normal_path;
+        break;
+      }
+    }
   }
 
   // If no attributes are set then make sure $item['attributes'] is an empty
