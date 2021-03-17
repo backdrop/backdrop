@@ -8,7 +8,7 @@
 
     "block-opening-brace-space-before": "always",
     "color-hex-case": "lower",
-    "color-hex-length": "short",
+    "color-hex-length": "long",
     "comment-empty-line-before": [
       "always", {
         "except": "first-nested",
