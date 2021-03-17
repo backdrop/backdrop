@@ -526,9 +526,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * Clean up the URL for validation.
  *
  * Attempts to create a URL that will pass validation: add a protocol if it
- * looks like a domain but it's missing; create a valid internal multilingual
- * alias; or create a valid, encoded internal alias in case transliteration is
- * disabled.
+ * looks like a domain but it's missing; or create a valid, encoded internal
+ * alias in case transliteration is disabled.
  *
  * @param string $url
  *
@@ -555,13 +554,6 @@ function _filter_cleanup_url($url) {
 
   // Break up the components so we can build up an aliased internal path.
   $url_parts = backdrop_parse_url($url);
-
-  // Lookup valid internal paths if multilingual
-  if (module_exists('locale') && language_multilingual()) {
-    if ($language = _filter_lookup_locale_path($url)) {
-      $url_parts['language'] = $language;
-    }
-  }
 
   return url($url_parts['path'], $url_parts);
 }
@@ -590,10 +582,7 @@ function _filter_create_valid_external_url($url) {
   // an http:// or https://, depending on the site configuration.
   $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
   if (!empty($domain_match)) {
-    if (isset($_SERVER['HTTPS']) &&
-    ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
-    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
-    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+    if (backdrop_is_https()) {
       $protocol = 'https://';
     }
     else {
@@ -622,26 +611,6 @@ function _filter_url_has_protocol($url) {
     return TRUE;
   }
   return FALSE;
-}
-
-/**
- * Given a URL, find an alias and matching lanaguage.
- *
- * @param $url
- *   The path to investigate for corresponding aliases.
- *
- * @return object|FALSE
- *   The langcode.
- */
-function _filter_lookup_locale_path($url) {
-  $languages = language_list(TRUE);
-    foreach ($languages as $language) {
-      $alias = backdrop_lookup_path('alias', $url, $language->langcode);
-      if ($alias) {
-        return $language;
-      }
-    }
-  return NULL;
 }
 
 /**
