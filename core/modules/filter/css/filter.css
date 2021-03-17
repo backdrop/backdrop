@@ -46,6 +46,7 @@
   overflow: hidden;
   vertical-align: middle;
 }
+
 /* Make sure image size items fall in line. */
 .editor-image-size .form-item {
   display: inline;
@@ -53,13 +54,14 @@
 .editor-image-size .form-type-number input {
   display: inline;
 }
-.editor-image-size .form-type-number span{
+.editor-image-size .form-type-number span {
   display: inline;
 }
 .editor-image-size .form-number {
   width: 30%;
   max-width: 120px;
 }
+
 /* Make sure image alignment items fall in line. */
 .editor-image-align .form-item {
   display: inline;
@@ -81,11 +83,11 @@
   display: inline-block;
   padding: 0 1em;
   border-left: none;
-  border-right: 1px solid #CCC;
+  border-right: 1px solid #ccc;
 }
 [dir="rtl"] .editor-image-toggle {
   border-right: none;
-  border-left: 1px solid #CCC;
+  border-left: 1px solid #ccc;
 }
 [dir="ltr"] .editor-image-toggle.first {
   padding-left: 0;
@@ -140,8 +142,8 @@
   bottom: 20px;
   left: 0;
   right: 0;
-  background-color: #ffffff;
-  box-shadow: 2px 2px #bbbbbb;
+  background-color: #fff;
+  box-shadow: 2px 2px #bbb;
 }
 
 .library-view.form-item {
@@ -155,8 +157,8 @@
   height: 125px;
   width: 115px;
   position: relative;
-  border: 1px solid #ffffff;
-  background-color: #ffffff;
+  border: 1px solid #fff;
+  background-color: #fff;
   border-radius: 3px;
 }
 .image-library-choose-file:hover {

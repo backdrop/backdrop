@@ -26,7 +26,7 @@ abbr.ajax-changed {
 }
 
 .form-required {
-  color: #ff0000;
+  color: #f00;
 }
 
 .form-item-radios label,
@@ -108,7 +108,7 @@ td.checkbox .form-item input {
 .form-item .description,
 .password-strength,
 .password-match {
-  border-left: 0.25em solid #bbbbbb;
+  border-left: 0.25em solid #bbb;
   margin: 0.6875em 0 2.5em;
   padding: 0.5em 0.8em;
 }
@@ -134,7 +134,7 @@ td.checkbox .form-item input {
   margin: 0 0.5em;
   padding: 0.375em;
   border: 0.0625rem solid #dee2ea;
-  font-family: Consolas, 'Lucida Console', 'Courier New', monospace;
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
 }
 
 .password-strength {
@@ -158,12 +158,8 @@ button.form-submit,
   padding: 0 1.5625em;
   margin-bottom: 1em;
   margin-right: 1em; /* LTR */
-  -webkit-transition:
-    background-color 0.6s ease 0s,
-    color 0.6s ease 0s;
-  transition:
-    background-color 0.6s ease 0s,
-    color 0.6s ease 0s;
+  -webkit-transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
+  transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
 }
 
 [dir="rtl"] input.form-submit,
@@ -262,7 +258,7 @@ textarea.form-textarea:focus {
 }
 #autocomplete li.selected {
   background: #008be2;
-  color: #ffffff;
+  color: #fff;
 }
 
 ul.action-links {
@@ -295,7 +291,7 @@ ul.action-links a {
 
 ul.action-links a:before,
 ul.action-links a:after {
-  content: '';
+  content: "";
   display: block;
   position: absolute;
   background: #0074bd;

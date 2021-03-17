@@ -22,11 +22,11 @@ figure {
 }
 
 blockquote {
-  border-left: 0.25rem solid #bbbbbb; /* LTR */
+  border-left: 0.25rem solid #bbb; /* LTR */
 }
 [dir="rtl"] blockquote {
   border-left: none;
-  border-right: 0.25rem solid #bbbbbb;
+  border-right: 0.25rem solid #bbb;
 }
 
 blockquote {
@@ -44,14 +44,14 @@ blockquote > :last-child {
 
 pre,
 code {
-  font-family: Consolas, 'Lucida Console', 'Courier New', monospace;
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
   color: #20252e;
 }
 
 code {
   display: inline-block;
   padding: 0 0.375em;
-  border: 0.0625rem solid #bbbbbb;
+  border: 0.0625rem solid #bbb;
   background: #dee2ea;
 }
 
@@ -59,7 +59,7 @@ pre code {
   margin: 0;
   padding: 0.8em 1.3em;
   border: 0;
-  border-left: 0.25rem solid #bbbbbb;
+  border-left: 0.25rem solid #bbb;
   background: transparent;
 }
 
@@ -168,7 +168,7 @@ td {
 }
 
 th {
-  border-right: 0.0625rem solid #bbbbbb;
+  border-right: 0.0625rem solid #bbb;
   background: #dee2ea;
 }
 
@@ -177,7 +177,7 @@ th:last-child {
 }
 
 table [aria-sort] a:after {
-  content: '';
+  content: "";
   display: inline-block;
   width: 0;
   height: 0;
@@ -185,12 +185,12 @@ table [aria-sort] a:after {
 }
 
 table [aria-sort="descending"] a:after {
-  border-top-color: #333333;
+  border-top-color: #333;
   border-bottom-width: 0;
 }
 
 table [aria-sort="ascending"] a:after {
-  border-bottom-color: #333333;
+  border-bottom-color: #333;
   border-top-width: 0;
 }
 
@@ -219,7 +219,7 @@ fieldset {
  */
 .field-type-text-long:after,
 .field-type-text-with-summary:after {
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }

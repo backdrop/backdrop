@@ -102,9 +102,10 @@
   -ms-grid-columns: (1fr)[12];
   grid-template-columns: repeat(12, 1fr);
 }
-.views-view-grid .views-row, .views-view-grid .views-grid-box {
+.views-view-grid .views-row,
+.views-view-grid .views-grid-box {
   padding: 1rem;
-  border: 1px solid #cccccc;
+  border: 1px solid #ccc;
 }
 
 /* Remove the border on tbody that system puts in */

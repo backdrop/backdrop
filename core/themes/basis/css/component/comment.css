@@ -13,7 +13,7 @@
 
 .comments .indented:before,
 .comments .indented:after {
-  content: '';
+  content: "";
   position: absolute;
   display: block;
   border: 0.125em solid transparent;
@@ -29,7 +29,7 @@
 }
 
 .comments .indented:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0.6875em;
   left: 0.4375em;
@@ -63,7 +63,7 @@
   border-left-color: #dee2ea;
   -webkit-transform: rotate(-45deg) translate(0, -0.75em);
   transform: rotate(-45deg) translate(0, -0.75em);
-  background: #ffffff;
+  background: #fff;
   pointer-events: none;
   z-index: 0;
 }
@@ -154,7 +154,7 @@
   display: none;
 }
 
-.comment-footer .links.inline a{
+.comment-footer .links.inline a {
   display: inline-block;
   margin: 0 -0.5em; /* Prevent spacing on log in message */
   padding: 0 0.5em;

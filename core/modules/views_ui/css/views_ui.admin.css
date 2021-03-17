@@ -94,12 +94,12 @@
  *
  * The tabs that switch between sections
  */
- .views-displays .secondary {
-   border-bottom: 0 none;
-   margin: 0;
-   overflow: visible;
-   padding: 0;
- }
+.views-displays .secondary {
+  border-bottom: 0 none;
+  margin: 0;
+  overflow: visible;
+  padding: 0;
+}
 
 .views-displays .secondary > li {
   border-right: 0 none;
@@ -135,6 +135,7 @@
 .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   opacity: 1.0;
 }
+
 /* @end */
 
 /* @group Attachment details new section button */
@@ -378,6 +379,7 @@
 div.form-item-options-value-all {
   display: none;
 }
+
 /* @end */
 
 /* @group Backdrop overrides */
@@ -397,7 +399,10 @@ div.form-item-options-value-all {
 /* Base Page */
 #views-ui-list-page .ajax-progress-throbber,
 .views-admin .ajax-progress-throbber {
-  /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
+  /**
+   * Can't do center:50% middle: 50%, so approximate it for a typical window
+   * size.
+   */
   left: 49%;
   position: fixed;
   top: 48.5%;
@@ -410,7 +415,10 @@ div.form-item-options-value-all {
 
 /* Modal */
 #views-ajax-popup .ajax-progress-throbber {
-  /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
+  /**
+   * Can't do center:50% middle: 50%, so approximate it for a typical window
+   * size.
+   */
   left: 49%;
   position: fixed;
   top: 48.5%;

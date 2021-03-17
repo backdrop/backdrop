@@ -38,7 +38,7 @@ del {
   text-decoration: line-through;
 }
 tr.odd {
-  background-color: #dddddd;
+  background-color: #ddd;
 }
 img {
   outline: 0;

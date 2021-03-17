@@ -19,7 +19,10 @@
 /**
  * Style Header
  */
-/* Give the navigation bar a little extra padding below so it will clear the new contextual links overlay of the teasers below it. */
+/**
+ * Give the navigation bar a little extra padding below so it will clear the new
+ * contextual links overlay of the teasers below it.
+ */
 .date-nav {
   clear: both;
   padding-bottom: 1.5em;
@@ -34,7 +37,7 @@
   margin-bottom: 10px;
 }
 
-.date-nav-wrapper  {
+.date-nav-wrapper {
   position: relative;
   margin-top: 5px;
   width: 100%;
@@ -42,7 +45,7 @@
 
 .date-nav-wrapper .date-nav {
   background-color: transparent;
-  border: 0px;
+  border: 0;
   height: 30px;
   height: auto;
   min-height: 30px;
@@ -64,9 +67,9 @@
 .date-nav-wrapper .date-prev {
   padding: 5px 0;
   position: absolute;
-  left: 0px;
+  left: 0;
   text-align: left;
-  top: 0px;
+  top: 0;
   width: auto;
   z-index: 1;
   font-size: 12px;
@@ -85,7 +88,7 @@
 .date-nav-wrapper .date-heading {
   position: relative;
   width: 100%;
-  top: 0px;
+  top: 0;
   text-align: center;
   z-index: 0;
 }
@@ -98,9 +101,9 @@
 .date-nav-wrapper .date-next {
   padding: 5px 0;
   position: absolute;
-  right: 0px;
+  right: 0;
   text-align: right;
-  top: 0px;
+  top: 0;
   width: auto;
   z-index: 1;
   font-size: 12px;

@@ -7,8 +7,8 @@
     padding: 0 0 0 15em; /* LTR */
   }
   [dir="rtl"] .vertical-tabs {
-     padding-left: 0;
-     padding-right: 15em;
+    padding-left: 0;
+    padding-right: 15em;
   }
 }
 .vertical-tabs-list {
@@ -19,7 +19,7 @@
 }
 @media (min-width: 750px) {
   .vertical-tabs-list {
-    display:block;
+    display: block;
     float: left; /* LTR */
     margin: -1px 0 -1px -15em; /* LTR */
   }
@@ -51,6 +51,7 @@
     border: 0;
     background: transparent;
   }
+
   /* Show active pane */
   .vertical-tabs-pane.vertical-tab-selected {
     display: block;
@@ -63,6 +64,7 @@
     display: block;
   }
 }
+
 /* Layout of each tab */
 .vertical-tab-item {
   background: #eee;
@@ -78,7 +80,7 @@
   color: blue;
   cursor: pointer;
 }
-.vertical-tab-link span{
+.vertical-tab-link span {
   display: block;
 }
 .vertical-tab-link .fieldset-legend {
@@ -111,6 +113,7 @@
   line-height: normal;
   margin-bottom: 0;
 }
+
 /* Styles for legend at smaller screen sizes */
 .vertical-tabs-pane > .vertical-tab-link {
   position: relative;

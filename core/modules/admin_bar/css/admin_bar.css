@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Administration bar.
@@ -19,14 +18,14 @@
   padding: 0;
   margin: 0;
   z-index: 999;
-  background: #2D2D2D; /* Old browsers */
-  background: -moz-linear-gradient(#2D2D2D 0%, #171717 100%); /* FF3.6+ */
-  background: -webkit-gradient(color-stop(0%, #2D2D2D), color-stop(100%, #171717)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(#2D2D2D 0%, #171717 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(#2D2D2D 0%, #171717 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(#2D2D2D 0%, #171717 100%); /* IE10+ */
-  background: linear-gradient(#2D2D2D 0%, #171717 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2D2D2D', endColorstr='#171717',GradientType=0); /* IE6-9 */
+  background: #2d2d2d; /* Old browsers */
+  background: -moz-linear-gradient(#2d2d2d 0%, #171717 100%); /* FF3.6+ */
+  background: -webkit-gradient(color-stop(0%, #2d2d2d), color-stop(100%, #171717)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(#2d2d2d 0%, #171717 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(#2d2d2d 0%, #171717 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(#2d2d2d 0%, #171717 100%); /* IE10+ */
+  background: linear-gradient(#2d2d2d 0%, #171717 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#2D2D2D", endColorstr="#171717", GradientType=0); /* IE6-9 */
 }
 [dir="rtl"] #admin-bar {
   text-align: right;
@@ -34,13 +33,14 @@
 #admin-bar-wrapper {
   overflow: hidden;
 }
+
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
   top: -33px;
 }
 
 .admin-bar body {
-  border-top: 33px solid #2D2D2D !important;
+  border-top: 33px solid #2d2d2d !important;
 }
 
 /* Top level items. */
@@ -68,7 +68,7 @@
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
   text-shadow: #333 0 1px 0;
-  background-color: #9F9F9F;
+  background-color: #9f9f9f;
 }
 
 /* Home link */
@@ -197,10 +197,10 @@
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
 #admin-bar #admin-bar-icon li.admin-bar-icon > a:hover {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
-  background-color: #9F9F9F;
+  background-color: #9f9f9f;
 }
 
 #admin-bar li {
@@ -230,7 +230,7 @@
 #admin-bar li > span {
   background: transparent none;
   border: none;
-  color: #EEE;
+  color: #eee;
   font-weight: normal;
   text-align: left; /* LTR */
   text-decoration: none;
@@ -247,15 +247,15 @@
 
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
   border-left: none; /* LTR */
-  border-right: 1px solid #52565E; /* LTR */
+  border-right: 1px solid #52565e; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown .admin-bar-tab a {
-  border-left: 1px solid #52565E;
+  border-left: 1px solid #52565e;
   border-right: none;
 }
 #admin-bar .dropdown li li a {
@@ -293,7 +293,10 @@
 }
 
 /* Second-level lists */
-/* Note: We must hide sub-lists or scrollbars might appear (display: none is not read by screen readers). */
+/**
+ * Note: We must hide sub-lists or scrollbars might appear (display: none is not
+ * read by screen readers).
+ */
 #admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
@@ -326,7 +329,7 @@
 
 /* Second-and-more-level hovering */
 #admin-bar .dropdown li li.expandable > a {
-  background: #45454A url(../images/arrow.png) no-repeat 145px center; /* LTR */
+  background: #45454a url(../images/arrow.png) no-repeat 145px center; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable > a {
   background-image: url(../images/arrow-rtl.png);
@@ -335,7 +338,7 @@
 #admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;
   border-color: #444;
-  color: #EEE;
+  color: #eee;
 }
 
 /* Icon menu */
@@ -346,9 +349,10 @@
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: center;
 }
+
 /* Add a border when using the default Backdrop logo. */
 #admin-bar-icon .admin-bar-icon img[src$="core/misc/favicon.ico"] {
-  outline: 1px solid #45454A;
+  outline: 1px solid #45454a;
 }
 
 /* Extras menu */
@@ -410,7 +414,7 @@
 
 #admin-bar li.active-search-item > a,
 #admin-bar li.highlight > a {
-  background-color: #0074BD !important;
+  background-color: #0074bd !important;
   color: white !important;
 }
 

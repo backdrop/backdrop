@@ -1,6 +1,6 @@
 /* Layout listing form. */
 .layout-list .layout-group td {
-  background: #dddddd;
+  background: #ddd;
 }
 .layout-list .layout-group td:first-child {
   font-weight: bold;
@@ -125,14 +125,14 @@
 }
 .layout-block-add-row.form-item {
   padding: 5px;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid #ccc;
   margin: 0;
 }
 .layout-block-add-row.odd {
-  background-color: #F3F4EE;
+  background-color: #f3f4ee;
 }
 .layout-block-list-wrapper {
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   border-bottom: none;
 }
 
@@ -148,7 +148,7 @@
   min-height: 70px;
   margin: 0 0 15px;
   padding: 8px 8px 16px 8px;
-  border: 1px dashed #CCC;
+  border: 1px dashed #ccc;
   background: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -203,7 +203,7 @@
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
-  background: #FFF;
+  background: #fff;
   border-radius: 4px;
   -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
   -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
@@ -298,6 +298,7 @@
 .layout-content-form .title div.description {
   clear: both;
 }
+
 /* Remove the drop shadow indicating this item is movable */
 .layout-content-form .page-title .layout-editor-block {
   box-shadow: none;
@@ -350,7 +351,7 @@
 }
 
 .layout-flexible-editor .flexible-row:hover {
-  background-color: #ffffff;
+  background-color: #fff;
   -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
   -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
   box-shadow: 2px 2px 0 0 #d0d0d0;

@@ -27,7 +27,7 @@
 
 .l-footer .menu:after {
   /* Clearfix menus */
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }
@@ -58,12 +58,13 @@
 
 .drop-lounging {
   position: relative;
+
   /* To make Drop larger/smaller, adjust the width below. */
   width: 7em;
 }
 
 .drop-lounging:before {
-  content: '';
+  content: "";
   position: absolute;
   top: -0.75em;
   left: 50%;

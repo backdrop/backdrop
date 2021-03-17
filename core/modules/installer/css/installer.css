@@ -49,7 +49,7 @@
 }
 
 .installer-browser-sort-list li a {
-  color: #0074BD;
+  color: #0074bd;
 }
 
 .installer-browser-sort-list li.sort-active a {
@@ -111,7 +111,8 @@
   font-size: 0.9em;
 }
 
-.installer-browser-main ul, .installer-browser-main ol {
+.installer-browser-main ul,
+.installer-browser-main ol {
   list-style-position: inside;
 }
 
@@ -213,6 +214,7 @@
 .installer-browser-install-sidebar {
   display: none;
 }
+
 /* Larger screens show the progress steps when installing. */
 @media only screen and (min-width: 768px) {
   .installer-browser-install-sidebar {
@@ -291,7 +293,7 @@
 }
 
 .ui-dialog.project-dialog {
-  max-width:95%;
+  max-width: 95%;
 }
 
 .project-dialog-description {

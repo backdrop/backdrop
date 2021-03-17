@@ -55,7 +55,7 @@
  */
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:before,
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -65,20 +65,16 @@
 }
 
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:before {
-  -webkit-transform:
-    translate(0.5em, 0.125em)
+  -webkit-transform: translate(0.5em, 0.125em)
     rotate(45deg);
-  transform:
-    translate(0.5em, 0.125em)
+  transform: translate(0.5em, 0.125em)
     rotate(45deg);
 }
 
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:after {
-  -webkit-transform:
-    translate(0.5em, 0.125em)
+  -webkit-transform: translate(0.5em, 0.125em)
     rotate(-45deg);
-  transform:
-    translate(0.5em, 0.125em)
+  transform: translate(0.5em, 0.125em)
     rotate(-45deg);
 }
 
