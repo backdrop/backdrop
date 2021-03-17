@@ -2948,7 +2948,7 @@ function _system_rebuild_module_data() {
           }
         }
         if ($git_version) {
-          $modules[$key]->info['version'] = $git_version;
+          $modules[$key]->info['version'] = $git_version . '-dev';
         }
       }
       else {
