@@ -2952,7 +2952,8 @@ function _system_rebuild_module_data() {
         }
       }
       else {
-        $modules[$key]->info['version'] = 'unknown';
+        $t = get_t();
+        $modules[$key]->info['version'] = $t('unknown');
       }
     }
 
