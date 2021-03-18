@@ -136,8 +136,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
       }
 
       $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
-        // Press k to move block to next region.
-        if (event.which == 75) {
+        // Press right arrow to move block to next region.
+        if (event.which == 39) {
           var currentDroppable = $(this).closest('.layout-editor-region');
           var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
@@ -153,8 +153,8 @@ Backdrop.behaviors.layoutDisplayEditor = {
           $(this).focus();
         }
 
-        // Press j to block to previous region.
-        if (event.which == 74) {
+        // Press left arrow to move block to previous region.
+        if (event.which == 37) {
           var currentDroppable = $(this).closest('.layout-editor-region');
           var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
