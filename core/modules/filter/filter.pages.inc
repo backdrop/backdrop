@@ -492,7 +492,7 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 /**
  * Element validation function.
  *
- * Validate a URL, and clean it up if necessary. Instead of stripping
+ * Clean up a URL and see if it will pass validation. Instead of stripping
  * dangerous protocols we flag them as invalid to make the user aware.
  *
  * @see filter_format_editor_link_form()
@@ -516,7 +516,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $stripped_url = backdrop_strip_dangerous_protocols($value);
   $dangerous_protocols = $stripped_url !== $value ? TRUE : FALSE;
 
-  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
+  // If it has dangerous protocols the URL is invalid. Or if it isn't either
+  // a valid relative nor a valid absolute path.
   if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
@@ -526,8 +527,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * Clean up the URL for validation.
  *
  * Attempts to create a URL that will pass validation: add a protocol if it
- * looks like a domain but it's missing; or create a valid, encoded internal
- * alias in case transliteration is disabled.
+ * looks like a domain but the protocol is missing; or create a valid, encoded
+ * internal alias.
  *
  * @param string $url
  *
@@ -561,8 +562,8 @@ function _filter_cleanup_url($url) {
 /**
  * Forms a valid external URL if possible.
  *
- * Trims whitespace and automatically adds an http:// to addresses that
- * appear to be external URLs but have no specified protocol.
+ * Automatically adds an http:// to addresses that appear to be external URLs
+ * but have no specified protocol.
  *
  * @param string $url
  *   The URL entered by the user.
@@ -578,17 +579,14 @@ function _filter_create_valid_external_url($url) {
     return $url;
   }
 
-  // If it looks like a domain name but it's missing a protocol Add an
-  // an http:// or https://, depending on the site configuration.
+  // If it looks like a domain name but it's missing a protocol, add a protocol.
+  // The will catch domains like archive.org but will skip a valid external
+  // domains with a relative protocol like //archive.org.
   $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
   if (!empty($domain_match)) {
-    if (backdrop_is_https()) {
-      $protocol = 'https://';
-    }
-    else {
-      $protocol = 'http://';
-    }
-    $url = $protocol . $url;
+    // We add a relative protocol since we don't know if the address requires
+    // http or https.
+    $url = '//' . $url;
   }
 
   return $url;
