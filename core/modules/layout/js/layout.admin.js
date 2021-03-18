@@ -97,16 +97,16 @@ Backdrop.behaviors.layoutDisplayEditor = {
       // Find the next region.
       var findNextDroppable = function (current, arr) {
         var index = arr.indexOf(current);
-        if(index >= 0 && index < arr.length - 1) {
+        if (index >= 0 && index < arr.length - 1) {
           return arr[index + 1]
         }
         return false;
       }
 
-      // Find th previous region.
+      // Find the previous region.
       var findPreviousDroppable = function (current, arr) {
         var index = arr.indexOf(current);
-        if(index > 0 && index <= arr.length - 1) {
+        if (index > 0 && index <= arr.length - 1) {
           return arr[index - 1]
         }
         return false;
@@ -137,7 +137,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
 
       $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
         // Press k to move block to next region.
-        if(event.which == 75) {
+        if (event.which == 75) {
           var currentDroppable = $(this).closest('.layout-editor-region');
           var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
@@ -154,7 +154,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
         }
 
         // Press j to block to previous region.
-        if(event.which == 74) {
+        if (event.which == 74) {
           var currentDroppable = $(this).closest('.layout-editor-region');
           var currentDroppableId = currentDroppable.attr('id');
           var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
@@ -171,12 +171,12 @@ Backdrop.behaviors.layoutDisplayEditor = {
         }
 
         // Press up to move block up by one position.
-        if(event.which == 38) {
+        if (event.which == 38) {
           $(this).insertBefore($(this).prev());
           $(this).focus();
         }
         // Press down to move block down by one position.
-        if(event.which == 40) {
+        if (event.which == 40) {
           $(this).insertAfter($(this).next());
           $(this).focus();
         }

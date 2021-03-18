@@ -392,7 +392,3 @@
 [dir="rtl"] .edit-layout-top .dropbutton-wrapper {
   float: left;
 }
-
-.layout-editor-block:focus {
-  box-shadow: 5px 5px 5px 0 #000;
-}
