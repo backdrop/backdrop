@@ -2952,7 +2952,7 @@ function _system_rebuild_module_data() {
         }
       }
       else {
-        $modules[$key]->info['version'] = BACKDROP_CORE_COMPATIBILITY . '-unknown';
+        $modules[$key]->info['version'] = 'unknown';
       }
     }
 
