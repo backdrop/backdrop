@@ -553,8 +553,11 @@ function _filter_cleanup_url($url) {
     return $url;
   }
 
-  // Return if it begins with a slash to avoid extra language prefixes
-  // if it's a multilingual site.
+  // Return if it begins with a slash. Avoids issues such as:
+  // - extra language prefixes if it's a multilingual site;
+  // - adding extra prefixes if being re-edited;
+  // - a url getting double-encoded;
+  // - or domains with relative protocols.
   // E.g. /fr/node/1, //domain.tld
   if (substr($url, 0, 1) == '/') {
     return $url;
