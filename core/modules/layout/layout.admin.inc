@@ -1285,11 +1285,10 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   $template_info = layout_get_layout_template_info($layout->layout_template);
   $form['region'] = array(
     '#type' => 'select',
-    '#prefix' => '<div class="element-invisible">',
-    '#suffix' => '</div>',
     '#title' => t('Region'),
     '#default_value' => $region_name,
     '#options' => $template_info['regions'],
+    '#access' => backdrop_is_html(), // Only show this on non-JS requests.
   );
 
   // We overload the layout object with an "in_progress" key to hold information
