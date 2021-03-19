@@ -553,6 +553,13 @@ function _filter_cleanup_url($url) {
     return $url;
   }
 
+  // Return if it begins with a slash to avoid extra language prefixes
+  // if it's a multilingual site.
+  // E.g. /fr/node/1, //domain.tld
+  if (substr($url, 0, 1) == '/') {
+    return $url;
+  }
+
   // Break up the components so we can build up an aliased internal path.
   $url_parts = backdrop_parse_url($url);
 
