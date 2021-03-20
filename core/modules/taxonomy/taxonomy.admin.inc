@@ -800,6 +800,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     '#title' => t('Description'),
     '#default_value' => $term->description,
     '#format' => $term->format,
+    '#editor_uploads' => TRUE,
     '#weight' => 0,
   );
 
