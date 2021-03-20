@@ -19,6 +19,11 @@ table.stick-header {
   width: calc(100% - 3rem);
 }
 
+[dir="rtl"] .tabledrag-processed {
+  margin-left: 0;
+  margin-right: 3rem;
+}
+
 .tabledrag-processed .draggable > * {
   position: relative;
 }
@@ -35,6 +40,14 @@ table.stick-header {
   background: #ebeff7;
   -webkit-transform: translate(-100%, 0);
   transform: translate(-100%, 0);
+}
+
+[dir="rtl"] .draggable a.tabledrag-handle {
+  left: auto;
+  right: 0;
+  margin-right: -0.0625em;
+  -webkit-transform: translate(100%, 0);
+  transform: translate(100%, 0);
 }
 
 .draggable {
@@ -65,6 +78,10 @@ tr.draggable .handle {
   transform: translate(-50%, -50%) scale(0.5, 0.5);
   background: #333333;
   text-decoration: none;
+}
+[dir="rtl"] a.tabledrag-handle .handle {
+  margin: 0;
+  padding: 0;
 }
 tr.draggable .handle:before,
 tr.draggable .handle:after,
@@ -133,6 +150,11 @@ abbr.tabledrag-changed {
   text-indent: -9999em;
   z-index: 0;
   background: #fce400;
+}
+
+[dir="rtl"] abbr.tabledrag-changed {
+  left: auto;
+  right: -0.375em;
 }
 
 .tabledrag-changed[title] {
