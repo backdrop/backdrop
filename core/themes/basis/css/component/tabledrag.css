@@ -14,7 +14,7 @@ table.stick-header {
 }
 
 .tabledrag-processed {
-  margin-left: 3rem;
+  margin-left: 3rem; /* LTR */
   width: auto;
   width: calc(100% - 3rem);
 }
@@ -31,15 +31,15 @@ table.stick-header {
 .draggable a.tabledrag-handle {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 0; /* LTR */
   display: block;
   width: 3rem;
   height: 100%;
   margin: 0 0 0 -0.0625em; /* Nudge past the left border */
   padding: 0;
   background: #ebeff7;
-  -webkit-transform: translate(-100%, 0);
-  transform: translate(-100%, 0);
+  -webkit-transform: translate(-100%, 0); /* LTR */
+  transform: translate(-100%, 0); /* LTR */
 }
 
 [dir="rtl"] .draggable a.tabledrag-handle {
@@ -143,7 +143,7 @@ tr.draggable .handle .handle-inner:after {
 abbr.tabledrag-changed {
   position: absolute;
   top: 0;
-  left: -0.375em;
+  left: -0.375em; /* LTR */
   display: block;
   width: 0.375em;
   height: 100%;
