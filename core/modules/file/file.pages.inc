@@ -1027,7 +1027,7 @@ function file_usage_page($file) {
           // to the file set as their path, but the path to the entities' page
           // is "path/[fid]".
           if ($entity_type == 'file') {
-            $uri = "file/{$entity_id}";
+            $uri = 'file/' . $entity_id;
           }
           else {
             $uri = $entity_uri['path'];
