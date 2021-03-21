@@ -142,3 +142,7 @@ abbr.tabledrag-changed {
 .messages .tabledrag-changed {
   display: none;
 }
+
+div.indentation {
+  box-sizing: content-box;
+}
