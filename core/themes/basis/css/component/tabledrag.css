@@ -145,4 +145,14 @@ abbr.tabledrag-changed {
 
 div.indentation {
   box-sizing: content-box;
+  height: 1em;
+}
+
+div.indentation::after {
+  content: " ";
+  display: block;
+  float: left; /* LTR */
+  margin-top: 0.4em;
+  border: 4px solid;
+  border-color: transparent currentColor currentColor transparent;
 }
