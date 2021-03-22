@@ -1152,11 +1152,12 @@ function layout_get_all_configs($type) {
  */
 function layout_get_path_layout_names($path) {
   $path_map = &backdrop_static(__FUNCTION__, array());
-
-  $configs = layout_get_all_configs('layout');
-  foreach ($configs as $layout_name => $config) {
-    if (isset($config['path'])) {
-      $path_map[$config['path']][] = $layout_name;
+  if (empty($path_map)) {
+    $configs = layout_get_all_configs('layout');
+    foreach ($configs as $layout_name => $config) {
+      if (isset($config['path'])) {
+        $path_map[$config['path']][] = $layout_name;
+      }
     }
   }
 
