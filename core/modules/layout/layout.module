@@ -1221,18 +1221,18 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     // @ todo: This adds very specific code for node previews which too closely
     // couples Node and Layout modules. This needs to be reverted in a future
     // commit.
-    $data = NULL;
+    $preview_node = NULL;
     $node_types = node_type_get_types();
     foreach ($node_types as $type) {
-      $preview_path = 'node/' . $type->type . '/preview';
+      $preview_path = "node/preview/{$type->type}/%";
       if ($router_item['path'] == $preview_path) {
-        $tempstore_id = node_build_tempstore_id($type->type);
-        $data = node_get_node_tempstore($tempstore_id);
+        $tempstore_id = $router_item['map'][3];
+        $preview_node = node_get_node_tempstore($tempstore_id);
         break;
       }
     }
-    if ($data && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
-      $layouts = $node_layouts;
+    if ($preview_node) {
+      $layouts = layout_load_multiple_by_path('node/%', TRUE);
     }
     else {
       $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
@@ -1244,21 +1244,27 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       foreach ($contexts as $context) {
         if (isset($context->position)) {
 
-          // Check for an object loaded by the menu router. Use a preview from
-          // Tempstore if on a node preview page.
+          // If on a node preview page use the preview from tempstore.
           // @ todo: This is also specific code for node previews which needs
           // to be reverted in a future commit.
-          if (isset($router_item['map'][$context->position])) {
-            $data = isset($data) ? $data : $router_item['map'][$context->position];
-            $context->setData($data);
+          if ($preview_node) {
+            $context->setData($preview_node);
           }
-
-          // If no context is set, load one using the layout info.
-          if (!is_object($context->data)) {
-            $context_info = layout_get_context_info($context->plugin);
-            if (isset($context_info['load callback'])) {
-              $context_data = call_user_func_array($context_info['load callback'], $router_item['original_map'][$context->position]);
-              $context->setData($context_data);
+          else {
+            if (isset($router_item['map'][$context->position])) {
+              $context_data = $router_item['map'][$context->position];
+              // Check for an object loaded by the menu router.
+              if (is_object($context_data)) {
+                $context->setData($context_data);
+              }
+              else {
+                // If no context is set, load one using the layout info.
+                $context_info = layout_get_context_info($context->plugin);
+                if (isset($context_info['load callback'])) {
+                  $context_data = call_user_func_array($context_info['load callback'], $router_item['original_map'][$context->position]);
+                  $context->setData($context_data);
+                }
+              }
             }
           }
         }
