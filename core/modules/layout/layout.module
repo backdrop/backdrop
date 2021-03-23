@@ -1244,7 +1244,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       foreach ($contexts as $context) {
         if (isset($context->position)) {
 
-          // If on a node preview page use the preview from tempstore.
+          // If on a node preview page, use the preview from tempstore.
           // @ todo: This is also specific code for node previews which needs
           // to be reverted in a future commit.
           if ($preview_node) {
