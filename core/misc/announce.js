@@ -54,7 +54,30 @@
     }
   }
 
-  Backdrop.announce = function (text, priority) {
+  /**
+   * Triggers audio UAs to read the supplied text.
+   *
+   * The aria-live region will only read the text that currently populates its
+   * text node. Replacing text quickly in rapid calls to announce results in
+   * only the text from the most recent call to Backdrop.announce() being
+   * read. By wrapping the call to announce in a debounce function, we allow for
+   * time for multiple calls to Backdrop.announce() to queue up their
+   * messages. These messages are then joined and append to the aria-live region
+   * as one text node.
+   *
+   * @param string text
+   *   A string to be read by the UA.
+   * @param string priority
+   *   A string to indicate the priority of the message. Can be either
+   *   'polite' or 'assertive'.
+   *
+   * @return function
+   *   The return of the call to debounce.
+   *
+   * @see http://www.w3.org/WAI/PF/aria-practices/#liveprops
+   * @since 1.18.2 Method added.
+   */
+    Backdrop.announce = function (text, priority) {
     announcements.push({
       text: text,
       priority: priority
