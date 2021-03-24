@@ -2348,9 +2348,13 @@ class LayoutPreviewTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    // Edit the node, then preview.
+    // Edit the node with a new random body content, then preview.
     $this->backdropGet('node/1/edit');
-    $this->backdropPost(NULL, array(), t('Save'));
+   $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+     $this->backdropPost(NULL, $edit, t('Preview'));
 
     // Look for the taylor template (only in our layout).
     $this->assertText('taylor', 'Layout template "taylor" found.');
