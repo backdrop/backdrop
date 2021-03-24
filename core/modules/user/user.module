@@ -1458,7 +1458,7 @@ function user_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/people/roles/edit/%user_role'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/people/roles/configure/%user_role'),
     'access arguments' => array('administer permissions'),
     'type' => MENU_CALLBACK,
