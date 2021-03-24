@@ -827,6 +827,30 @@ Backdrop.optimizedResize = (function() {
   }
 }());
 
+/**
+ * Limits the invocations of a function in a given time frame.
+ *
+ * This can be useful to respond to an event that fires very frequently,
+ * such as a "keyup" event while a user is typing in a field.
+ *
+ * A common use of debouncing in other systems is window resizing,
+ * however Backdrop provides the Backdrop.optimizedResize() method,
+ * which should be used for that purpose.
+ *
+ * @param function func
+ *   The function to be invoked.
+ * @param number wait
+ *   The time period within which the callback function should only be
+ *   invoked once. For example if the wait period is 250ms, then the callback
+ *   will only be called at most 4 times per second.
+ * @param bool immediate
+ *   Whether we wait at the beginning or end to execute the function.
+ *
+ * @return function
+ *   The debounced function.
+ *
+ * @since 1.18.2 Method added.
+ */
 Backdrop.debounce = function (func, wait, immediate) {
   var timeout;
   var result;
