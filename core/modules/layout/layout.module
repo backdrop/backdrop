@@ -1224,7 +1224,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     $preview_node = NULL;
     $node_types = node_type_get_types();
     foreach ($node_types as $type) {
-      $preview_path = "node/preview/{$type->type}/%";
+      $preview_path = 'node/preview/' . $type->type . '/%';
       if ($router_item['path'] == $preview_path) {
         $tempstore_id = $router_item['map'][3];
         $preview_node = node_get_node_tempstore($tempstore_id);
