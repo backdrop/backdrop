@@ -787,8 +787,8 @@ function user_account_form(&$form, &$form_state) {
 
   $form['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail address'),
-    '#description' => t('A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.'),
+    '#title' => t('Email address'),
+    '#description' => t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
     '#required' => TRUE,
     '#default_value' => (!$register ? $account->mail : ''),
   );
@@ -1047,10 +1047,10 @@ function user_account_form_validate($form, &$form_state) {
     if ($mail_taken) {
       // Format error message dependent on whether the user is logged in or not.
       if ($GLOBALS['user']->uid) {
-        form_set_error('mail', t('The e-mail address %email is already taken.', array('%email' => $mail)));
+        form_set_error('mail', t('The email address %email is already taken.', array('%email' => $mail)));
       }
       else {
-        form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
+        form_set_error('mail', t('The email address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
       }
     }
   }
@@ -1112,7 +1112,7 @@ function user_password_policy_validate($form, &$form_state) {
     form_set_error('username_pass', t('The password cannot be the same as the username.'));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-    form_set_error('email_pass', t('The password cannot be the same as the e-mail.'));
+    form_set_error('email_pass', t('The password cannot be the same as the email.'));
   }
 }
 
@@ -1770,7 +1770,7 @@ function user_login_name_validate($form, &$form_state) {
       }
       // If can't find account, check if valid email address.
       elseif ($credentials === USER_LOGIN_EMAIL_ONLY && !valid_email_address($name)) {
-        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $form_state['values']['name'])));
+        form_set_error('name', t('The email address %email is not valid.', array('%email' => $form_state['values']['name'])));
       }
     }
     // If can find account, check if user is blocked.
@@ -3246,7 +3246,7 @@ function user_register_submit($form, &$form_state) {
   // New administrative account without notification.
   $uri = $account->uri();
   if ($admin && !$notify) {
-    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No email has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No email verification required; log in user immediately.
   elseif (!$admin && !$user_email_verification && $account->status) {
@@ -3261,17 +3261,17 @@ function user_register_submit($form, &$form_state) {
     $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
     _user_mail_notify($op, $account);
     if ($notify) {
-      backdrop_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+      backdrop_set_message(t('A welcome message with further instructions has been emailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
     }
     else {
-      backdrop_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      backdrop_set_message(t('A welcome message with further instructions has been sent to your email address.'));
       $form_state['redirect'] = '';
     }
   }
   // Administrator approval required.
   else {
     _user_mail_notify('register_pending_approval', $account);
-    backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
+    backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your email address.'));
     $form_state['redirect'] = '';
   }
 }

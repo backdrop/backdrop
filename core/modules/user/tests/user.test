@@ -49,7 +49,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
       switch ($login_method) {
         case USER_LOGIN_EMAIL_ONLY:
           if (!$by_email) {
-            $this->assertRaw(t('The e-mail address %email is not valid.', array('%email' => $account->name)));
+            $this->assertRaw(t('The email address %email is not valid.', array('%email' => $account->name)));
           }
           else {
             $this->assertRaw(t('Sorry, no account with that email address found.'));
@@ -77,7 +77,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationWithEmailVerification() {
     $config = config('system.core');
 
-    // Require e-mail verification.
+    // Require email verification.
     $config->set('user_email_verification', TRUE);
     // Set registration to administrator only.
     $config->set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
@@ -92,7 +92,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('A welcome message with further instructions has been sent to your e-mail address.'), 'User registered successfully.');
+    $this->assertText(t('A welcome message with further instructions has been sent to your email address.'), 'User registered successfully.');
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertTrue($new_user->status, 'New account is active after registration.');
@@ -111,7 +111,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationWithoutEmailVerification() {
     $config = config('system.core');
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config->set('user_email_verification', FALSE)->save();
 
     // Allow registration by site visitors without administrator approval.
@@ -162,7 +162,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationEmailDuplicates() {
     $config = config('system.core');
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config->set('user_email_verification', FALSE)->save();
 
     // Allow registration by site visitors without administrator approval.
@@ -175,15 +175,15 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit['name'] = $this->randomName();
     $edit['mail'] = $duplicate_user->mail;
 
-    // Attempt to create a new account using an existing e-mail address.
+    // Attempt to create a new account using an existing email address.
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('The e-mail address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
+    $this->assertRaw(t('The email address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
 
     // Attempt to bypass duplicate email registration validation by adding spaces.
     $edit['mail'] = '   ' . $duplicate_user->mail . '   ';
 
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('The e-mail address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
+    $this->assertRaw(t('The email address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
   }
 
   function testRegistrationDefaultValues() {
@@ -192,7 +192,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     // Allow registration by site visitors without administrator approval.
     $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config_user_settings->set('user_email_verification', FALSE)->save();
 
     // Set the default timezone to Brussels.
@@ -216,7 +216,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertEqual($new_user->name, $name, 'Username matches.');
-    $this->assertEqual($new_user->mail, $mail, 'E-mail address matches.');
+    $this->assertEqual($new_user->mail, $mail, 'Email address matches.');
     $this->assertEqual($new_user->signature, '', 'Correct signature field.');
     $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
     $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
@@ -662,7 +662,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Attempt bogus account cancellation request confirmation.
     $bogus_timestamp = $timestamp + 60;
@@ -707,7 +707,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $timestamp = time();
 
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -745,7 +745,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -795,7 +795,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -864,7 +864,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -950,7 +950,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue($status, 'Users deleted and not found in the database.');
 
     // Ensure that admin account was not cancelled.
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
     $admin_user = user_load($admin_user->uid);
     $this->assertTrue($admin_user->status == 1, 'Administrative user is found in the database and enabled.');
 
@@ -1774,12 +1774,12 @@ class UserCreateTestCase extends BackdropWebTestCase {
       $this->backdropPost('admin/people/create', $edit, t('Create new account'));
 
       if ($notify) {
-        $this->assertText(t('A welcome message with further instructions has been e-mailed to the new user @name.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->backdropGetMails()), 1, 'Notification e-mail sent');
+        $this->assertText(t('A welcome message with further instructions has been emailed to the new user @name.', array('@name' => $edit['name'])), 'User created');
+        $this->assertEqual(count($this->backdropGetMails()), 1, 'Notification email sent');
       }
       else {
-        $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->backdropGetMails()), 0, 'Notification e-mail not sent');
+        $this->assertText(t('Created a new user account for @name. No email has been sent.', array('@name' => $edit['name'])), 'User created');
+        $this->assertEqual(count($this->backdropGetMails()), 0, 'Notification email not sent');
       }
 
       $this->backdropGet('admin/people');
@@ -1799,7 +1799,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
       'notify' => FALSE,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
+    $this->assertText(t('Created a new user account for @name. No email has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
     $this->assertNoText('Password field is required');
   }
 
@@ -1832,7 +1832,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     $edit['pass'] = $email;
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password cannot be the same as the e-mail."));
+    $this->assertRaw(t("The password cannot be the same as the email."));
 
     $edit['pass'] = '123abcdef';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -1896,7 +1896,7 @@ class UserEditTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['mail'] = $this->randomName() . '@new.example.com';
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('E-mail address'))));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
 
     $edit['current_pass'] = $user1->pass_raw;
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));

@@ -432,7 +432,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * environment (staging, development, etc).
  *
  * Typically used to specify a different database connection information, to
- * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing emails,
  * Google Analytics, and other things that should not happen on development and
  * testing sites.
  *

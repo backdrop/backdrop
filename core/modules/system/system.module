@@ -47,7 +47,7 @@ define('BACKDROP_REQUIRED', 2);
 define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
- * Maximum length of e-mail fields.
+ * Maximum length of email fields.
  */
 define('EMAIL_MAX_LENGTH', 254);
 
@@ -928,7 +928,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default home page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, email address, default home page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),

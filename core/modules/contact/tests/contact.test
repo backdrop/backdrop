@@ -53,7 +53,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $invalid_recipients = array('invalid', 'invalid@', 'invalid@site.', '@site.', '@site.com');
     foreach ($invalid_recipients as $invalid_recipient) {
       $this->addCategory($this->randomName(16), $invalid_recipient, '', FALSE);
-      $this->assertRaw(t('%recipient is an invalid e-mail address.', array('%recipient' => $invalid_recipient)), format_string('Caught invalid recipient (@invalid_recipient).', array('@invalid_recipient' => $invalid_recipient)));
+      $this->assertRaw(t('%recipient is an invalid email address.', array('%recipient' => $invalid_recipient)), format_string('Caught invalid recipient (@invalid_recipient).', array('@invalid_recipient' => $invalid_recipient)));
     }
 
     // Test validation of empty category and recipients fields.
@@ -105,7 +105,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropLogout();
     $this->backdropGet('contact');
-    $this->assertText(t('Your e-mail address'), 'Contact form is shown when there is one category.');
+    $this->assertText(t('Your email address'), 'Contact form is shown when there is one category.');
     $this->assertNoText(t('Category'), 'When there is only one category, the category selection element is hidden.');
     $this->backdropLogin($this->admin_user);
 
@@ -141,9 +141,9 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->submitContact('', $recipients[0], $this->randomName(16), $test_category, $this->randomName(64));
     $this->assertText(t('Your name field is required.'), 'Name required.');
     $this->submitContact($this->randomName(16), '', $this->randomName(16), $test_category, $this->randomName(64));
-    $this->assertText(t('Your e-mail address field is required.'), 'E-mail required.');
+    $this->assertText(t('Your email address field is required.'), 'Email required.');
     $this->submitContact($this->randomName(16), $invalid_recipients[0], $this->randomName(16), $test_category, $this->randomName(64));
-    $this->assertRaw(t('The e-mail address %mail is not valid.', array('%mail' => 'invalid')), 'Valid e-mail required.');
+    $this->assertRaw(t('The email address %mail is not valid.', array('%mail' => 'invalid')), 'Valid email required.');
     $this->submitContact($this->randomName(16), $recipients[0], '', $test_category, $this->randomName(64));
     $this->assertText(t('Subject field is required.'), 'Subject required.');
     $this->submitContact($this->randomName(16), $recipients[0], $this->randomName(16), $test_category, '');
@@ -194,25 +194,25 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $subject = $this->randomName(64);
     $this->submitContact($this->randomName(16), $email, $subject, 2, $this->randomString(128));
 
-    // We are testing the auto-reply, so there should be one e-mail going to the sender.
+    // We are testing the auto-reply, so there should be one email going to the sender.
     $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'foo@example.com'));
-    $this->assertEqual(count($captured_emails), 1, 'Auto-reply e-mail was sent to the sender for category "foo".', 'Contact');
-    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($foo_autoreply), 'Auto-reply e-mail body is correct for category "foo".', 'Contact');
+    $this->assertEqual(count($captured_emails), 1, 'Auto-reply email was sent to the sender for category "foo".', 'Contact');
+    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($foo_autoreply), 'Auto-reply email body is correct for category "foo".', 'Contact');
 
     // Test the auto-reply for category 'bar'.
     $email = $this->randomName(32) . '@example.com';
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 3, $this->randomString(128));
 
-    // Auto-reply for category 'bar' should result in one auto-reply e-mail to the sender.
+    // Auto-reply for category 'bar' should result in one auto-reply email to the sender.
     $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'bar@example.com'));
-    $this->assertEqual(count($captured_emails), 1, 'Auto-reply e-mail was sent to the sender for category "bar".', 'Contact');
-    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($bar_autoreply), 'Auto-reply e-mail body is correct for category "bar".', 'Contact');
+    $this->assertEqual(count($captured_emails), 1, 'Auto-reply email was sent to the sender for category "bar".', 'Contact');
+    $this->assertEqual($captured_emails[0]['body'], backdrop_html_to_text($bar_autoreply), 'Auto-reply email body is correct for category "bar".', 'Contact');
 
     // Verify that no auto-reply is sent when the auto-reply field is left blank.
     $email = $this->randomName(32) . '@example.com';
     $this->submitContact($this->randomName(16), $email, $this->randomString(64), 4, $this->randomString(128));
     $captured_emails = $this->backdropGetMails(array('id' => 'contact_page_autoreply', 'to' => $email, 'reply-to' => 'no_autoreply@example.com'));
-    $this->assertEqual(count($captured_emails), 0, 'No auto-reply e-mail was sent to the sender for category "no-autoreply".', 'Contact');
+    $this->assertEqual(count($captured_emails), 0, 'No auto-reply email was sent to the sender for category "no-autoreply".', 'Contact');
   }
 
   /**
@@ -221,7 +221,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param string $category
    *   The category name.
    * @param string $recipients
-   *   The list of recipient e-mail addresses.
+   *   The list of recipient email addresses.
    * @param string $reply
    *   The auto-reply text that is sent to a user upon completing the contact
    *   form.
@@ -243,7 +243,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param string $category
    *   The category name.
    * @param string $recipients
-   *   The list of recipient e-mail addresses.
+   *   The list of recipient email addresses.
    * @param string $reply
    *   The auto-reply text that is sent to a user upon completing the contact
    *   form.
@@ -267,7 +267,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param string $name
    *   The name of the sender.
    * @param string $mail
-   *   The e-mail address of the sender.
+   *   The email address of the sender.
    * @param string $subject
    *   The subject of the message.
    * @param integer $cid

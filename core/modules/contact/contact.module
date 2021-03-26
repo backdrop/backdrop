@@ -280,7 +280,7 @@ function contact_mail($key, &$message, $params) {
       $message['subject'] .= t('[!site-name] !subject', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t('Hello !recipient-name,', $variables, array('langcode' => $language->langcode));
       $message['body'][] = t("!sender-name (!sender-url) has sent you a message via your contact form (!form-url) at !site-name.", $variables, array('langcode' => $language->langcode));
-      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings at !recipient-edit-url.", $variables, array('langcode' => $language->langcode));
+      $message['body'][] = t("If you don't want to receive such emails, you can change your settings at !recipient-edit-url.", $variables, array('langcode' => $language->langcode));
       if (!empty($params['phone'])) {
         $message['body'][] = t("!sender-name provided a phone number: !sender-phone", $variables, array('langcode' => $language->langcode));
       }
@@ -310,7 +310,7 @@ function contact_form_user_profile_form_alter(&$form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Personal contact form'),
     '#default_value' => isset($account->data['contact']) ? $account->data['contact'] : $config->get('contact_default_status'),
-    '#description' => t('Allow other users to contact you via a <a href="@url">personal contact form</a> which keeps your e-mail address hidden. Note that some privileged users such as site administrators are still able to contact you even if you choose to disable this feature.', array('@url' => url("user/$account->uid/contact"))),
+    '#description' => t('Allow other users to contact you via a <a href="@url">personal contact form</a> which keeps your email address hidden. Note that some privileged users such as site administrators are still able to contact you even if you choose to disable this feature.', array('@url' => url("user/$account->uid/contact"))),
   );
 }
 

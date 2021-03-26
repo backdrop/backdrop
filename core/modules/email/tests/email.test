@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests e-mail field functionality.
+ * Tests email field functionality.
  */
 class EmailFieldTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
@@ -20,7 +20,7 @@ class EmailFieldTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests e-mail field.
+   * Tests email field.
    */
   function testEmailField() {
     // Create a field with settings to validate.
@@ -48,7 +48,7 @@ class EmailFieldTestCase extends BackdropWebTestCase {
     $this->backdropGet('test-entity/add/test-bundle');
     $this->assertFieldByName("{$this->field['field_name']}[und][0][email]", '', 'Widget found.');
 
-    // Submit a valid e-mail address and ensure it is accepted.
+    // Submit a valid email address and ensure it is accepted.
     $value = 'test@example.com';
     $edit = array(
       "{$this->field['field_name']}[und][0][email]" => $value,

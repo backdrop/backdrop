@@ -39,7 +39,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => "User's e-mail address.",
+        'description' => "User's email address.",
       ),
       'signature' => array(
         'type' => 'varchar',
@@ -103,7 +103,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => 'E-mail address used for initial account creation.',
+        'description' => 'Email address used for initial account creation.',
       ),
       'data' => array(
         'type' => 'blob',
@@ -314,7 +314,7 @@ function user_update_1005() {
   $config->set('register_admin_created_subject', update_variable_get('register_admin_created_subject', 'An administrator created an account for you at [site:name]'));
   $config->set('register_admin_created_body', update_variable_get('register_admin_created_body', '[user:name],\n\nA site administrator at [site:name] has created an account for you. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('register_pending_approval_subject', update_variable_get('register_pending_approval_subject', 'Account details for [user:name] at [site:name] (pending admin approval)'));
-  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another e-mail containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
+  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
   $config->set('register_no_approval_required_subject', update_variable_get('register_no_approval_required_subject', 'Account details for [user:name] at [site:name]'));
   $config->set('register_no_approval_required_body', update_variable_get('register_no_approval_required_body', '[user:name],\n\nThank you for registering at [site:name]. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('password_reset_subject', update_variable_get('password_reset_subject', 'Password reset information for [user:name] at [site:name]'));
