@@ -32,7 +32,7 @@ function user_password_reject_weak($username) {
  */
 function _user_password_policy_help() {
   $help = array();
-  $help[] = t('The password cannot be the same as the username or e-mail address.');
+  $help[] = t('The password cannot be the same as the username or email address.');
   $help[] = t('The password must be sufficiently long or complex.');
   $variables = array(
     'items' => $help,

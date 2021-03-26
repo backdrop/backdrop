@@ -171,7 +171,7 @@ function theme_filter_admin_format_filter_order($variables) {
  *       array(
  *         'Raw HTML' => array(
  *           0 => array(
- *             'tip' => 'Web page addresses and e-mail addresses turn into links automatically.',
+ *             'tip' => 'Web page addresses and email addresses turn into links automatically.',
  *             'id' => 'filter/2',
  *           ),
  *         ),

@@ -1074,7 +1074,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    */
   function testCustomLogo() {
     $file_public_path = config_get('system.core', 'file_public_path');
-    
+
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
     $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));
@@ -1309,7 +1309,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Verify that custom site offline message is not displayed on user/password.
     $this->backdropGet('user/password');
-    $this->assertText('Username or e-mail address', 'Anonymous users can access user/password');
+    $this->assertText('Username or email address', 'Anonymous users can access user/password');
 
     // Submit password reset form.
     $edit = array(

@@ -1855,7 +1855,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
 
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => st('E-mail address'),
+    '#title' => st('Email address'),
     '#required' => TRUE,
     '#weight' => -5,
   );
@@ -1899,7 +1899,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#type' => 'checkboxes',
     '#options' => array(
       1 => st('Check for updates automatically'),
-      2 => st('Receive e-mail notifications'),
+      2 => st('Receive email notifications'),
     ),
     '#default_value' => array(1, 2),
     '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),

@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 

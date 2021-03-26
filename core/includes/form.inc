@@ -563,7 +563,7 @@ function form_get_cache($form_build_id, &$form_state) {
  */
 function form_set_cache($form_build_id, $form, $form_state) {
   $site_config = config('system.core');
-  
+
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
@@ -4301,7 +4301,7 @@ function form_validate_email(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   if ($value !== '' && !valid_email_address($value)) {
-    form_error($element, t('The e-mail address %mail is not valid.', array('%mail' => $value)));
+    form_error($element, t('The email address %mail is not valid.', array('%mail' => $value)));
   }
 }
 

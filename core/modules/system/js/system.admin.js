@@ -55,7 +55,7 @@ Backdrop.cleanURLsInstallCheck = function () {
 /**
  * When a field is filled out, apply its value to other fields that will likely
  * use the same value. In the installer this is used to populate the
- * administrator e-mail address with the same value as the site e-mail address.
+ * administrator email address with the same value as the site email address.
  */
 Backdrop.behaviors.copyFieldValue = {
   attach: function (context) {
