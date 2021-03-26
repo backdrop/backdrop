@@ -774,14 +774,21 @@ function backdrop_encode_path($path) {
 }
 
 /**
- * A wrapper function for deprecated menu entries redirecting to their new path.
+ * Wraps backdrop_goto() to include a deprecated log message.
+ *
+ * In earlier versions of Backdrop, this was sometimes used directly as a menu
+ * callback. It is now recommended to use system_redirect_deprecated_page()
+ * instead when deprecating paths, because that function can handle wildcards
+ * and path mapping. It resolves the final path and then calls this function to
+ * perform the redirect.
  *
  * @see backdrop_goto()
+ * @see system_redirect_deprecated_page()
  *
  * @since 1.5.0
  */
 function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $path, '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $_GET['q'], '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
