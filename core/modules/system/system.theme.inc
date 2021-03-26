@@ -143,11 +143,12 @@ function theme_system_themes_page($variables) {
  */
 function theme_system_modules_fieldset($variables) {
   $form = $variables['form'];
+  $mixed_major_versions = $form['#mixed_major_versions'];
 
   // Individual table headers.
   $rows = array();
-  // Iterate through all the modules, which are
-  // children of this fieldset.
+
+  // Iterate through all the modules, which are children of this fieldset.
   foreach (element_children($form) as $key) {
     // Stick the key into $module for easier access.
     $module = $form[$key];
@@ -168,6 +169,12 @@ function theme_system_modules_fieldset($variables) {
     // Add the second column: module label and expand/collapse functionalty.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
+    // If the module list does not have mixed/incompatible major versions, then
+    // remove the major version prefix ("1.x-") from all module versions, in
+    // order to show simplified version numbers.
+    if (!$mixed_major_versions) {
+      $module['version'] = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $module['version']);
+    }
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
 

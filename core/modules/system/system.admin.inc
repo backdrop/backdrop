@@ -506,13 +506,14 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 }
 
 /**
- * Menu callback; provides module enable/disable interface.
+ * Menu callback; provides the interface to enable/disable modules.
  *
- * The list of modules gets populated by module.info files, which contain each
- * module's name, description, and information about which modules it requires.
- * See backdrop_parse_info_file() for information on module.info descriptors.
+ * The list of modules gets populated with information pulled from module .info
+ * files, which contain each module's name, description, and information about
+ * which other module(s) it may require. See backdrop_parse_info_file() for
+ * details on descriptors contained in module .info files.
  *
- * Dependency checking is performed to ensure that a module:
+ * Dependency checking is performed, to ensure that a module:
  * - can not be enabled if there are disabled modules it requires.
  * - can not be disabled if there are enabled modules which depend on it.
  *
@@ -565,17 +566,33 @@ function system_modules($form, $form_state = array()) {
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
+  // Start by assuming that we only have modules that are built for the current
+  // major version of Backdrop core.
+  $mixed_major_versions = FALSE;
   $visible_files = $files;
   foreach ($visible_files as $filename => $file) {
     // Remove hidden modules from the modules list.
     if (!empty($file->info['hidden'])) {
       unset($visible_files[$filename]);
     }
+    // For each non-hidden module...
+    else {
+      // Determine if it is incompatible with the current major version of
+      // Backdrop core.
+      $incompatible_major_version = isset($file->info['backdrop']) && $file->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY;
+      // Determine if it is a Drupal 7 module.
+      $drupal7_module = isset($file->info['core']) && $file->info['core'] == '7.x';
+      // If any of the above is true, flag the module list as having mixed major
+      // versions.
+      if ($incompatible_major_version || $drupal7_module) {
+        $mixed_major_versions = TRUE;
+      }
+    }
   }
 
   uasort($visible_files, 'system_sort_modules_by_info_name');
 
-  // If the modules form was submitted, then system_modules_submit() runs first
+  // If the modules form was submitted, then system_modules_submit() runs first,
   // and if there are unfilled required modules, then $form_state['storage'] is
   // filled, triggering a rebuild. In this case we need to display a
   // confirmation form.
@@ -623,7 +640,8 @@ function system_modules($form, $form_state = array()) {
       elseif (isset($visible_files[$requires])) {
         $requires_name = $files[$requires]->info['name'];
 
-        // Disable this module if it is incompatible with the dependency's version.
+        // Disable this module if it is incompatible with the dependency's
+        // version.
         $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
         if ($incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
@@ -633,7 +651,8 @@ function system_modules($form, $form_state = array()) {
           $extra['disabled'] = TRUE;
         }
 
-        // Disable this module if the dependency is incompatible with this version of Backdrop core.
+        // Disable this module if the dependency is incompatible with this
+        // version of Backdrop core.
         elseif (isset($files[$requires]->info['backdrop']) && $files[$requires]->info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> this version of Backdrop core)', array(
             '@module' => $requires_name,
@@ -697,11 +716,12 @@ function system_modules($form, $form_state = array()) {
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
         array('class' => array('checkbox')),
-        t('Name'),
+        array('data' => t('Name')),
         array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
         array('data' => t('Operations')),
       ),
+      '#mixed_major_versions' => $mixed_major_versions,
     );
   }
   ksort($form['modules']);
