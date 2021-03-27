@@ -36,13 +36,14 @@ To submit bug reports and feature suggestions, or to track changes:
 Current Maintainers
 -------------------
 
-- Seeking maintainers.
+- [Herb v/d Dool](https://github.com/herbdool/)
+- Seeking co-maintainers.
 
 Credits
 -------
 
-- Ported to Backdrop by [Herb v/d Dool](https://github.com/herbdool/) 
-  and [Docwilmot](https://github.com/docwilmot)
+- Ported to Backdrop by [Herb v/d Dool](https://github.com/herbdool/)
+  and [Docwilmot](https://github.com/docwilmot).
 - Originally developed for Drupal by [amitaibu](https://www.drupal.org/u/amitaibu) 
   and [Damien Tournoud](https://www.drupal.org/u/damien-tournoud).
 
