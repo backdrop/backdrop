@@ -173,7 +173,7 @@ function theme_system_modules_fieldset($variables) {
     // remove the major version prefix ("1.x-") from all module versions, in
     // order to show simplified version numbers.
     if (!$mixed_major_versions) {
-      $module['version'] = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $module['version']);
+      $module['version']['#markup'] = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $module['version']['#markup']);
     }
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
