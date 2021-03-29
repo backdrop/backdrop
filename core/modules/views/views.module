@@ -196,7 +196,7 @@ function views_theme($existing, $type, $theme, $path) {
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
-  $regex = '/' . '\.tpl\.php' . '$' . '/';
+  $regex = '/\.tpl\.php$/';
 
   // Because backdrop_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
@@ -1013,10 +1013,6 @@ function views_add_css($file) {
  * Include views .js files.
  */
 function views_add_js($file) {
-  // If javascript has been disabled by the user, never add js files.
-  if (config_get('views.settings', 'no_javascript')) {
-    return;
-  }
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
@@ -1206,6 +1202,26 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
   }
+}
+
+/**
+ * Load the current enabled localization plugin.
+ *
+ * @return string
+ *   The name of the localization plugin.
+ */
+function views_get_localization_plugin() {
+  $plugin = config_get('views.settings', 'views_localization_plugin');
+  // Provide sane default values for the localization plugin.
+  if (empty($plugin)) {
+    if (module_exists('locale')) {
+      $plugin = 'core';
+    }
+    else {
+      $plugin = 'none';
+    }
+  }
+  return $plugin;
 }
 
 // -----------------------------------------------------------------------
@@ -2170,6 +2186,9 @@ function views_autoload_info() {
     'views_plugin_exposed_form_basic' => 'plugins/views_plugin_exposed_form_basic.inc',
     'views_plugin_exposed_form' => 'plugins/views_plugin_exposed_form.inc',
     'views_plugin_exposed_form_input_required' => 'plugins/views_plugin_exposed_form_input_required.inc',
+    'views_plugin_localization_core' => 'plugins/views_plugin_localization_core.inc',
+    'views_plugin_localization' => 'plugins/views_plugin_localization.inc',
+    'views_plugin_localization_none' => 'plugins/views_plugin_localization_none.inc',
     'views_plugin_pager' => 'plugins/views_plugin_pager.inc',
     'views_plugin_pager_full' => 'plugins/views_plugin_pager_full.inc',
     'views_plugin_pager_mini' => 'plugins/views_plugin_pager_mini.inc',

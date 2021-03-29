@@ -91,10 +91,10 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
     );
 
     // Verifies that backdrop_valid_http_host() prevents invalid characters.
-    $this->assertFalse(backdrop_valid_http_host('security/.backdrop.org:80'), 'HTTP_HOST with / is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security\\.backdrop.org:80'), 'HTTP_HOST with \\ is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security<.backdrop.org:80'), 'HTTP_HOST with &lt; is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security..backdrop.org:80'), 'HTTP_HOST with .. is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security/.backdropcms.org:80'), 'HTTP_HOST with / is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security\\.backdropcms.org:80'), 'HTTP_HOST with \\ is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security<.backdropcms.org:80'), 'HTTP_HOST with &lt; is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security..backdropcms.org:80'), 'HTTP_HOST with .. is invalid');
     // Verifies that host names are shorter than 1000 characters.
     $this->assertFalse(backdrop_valid_http_host(str_repeat('x', 1001)), 'HTTP_HOST with more than 1000 characters is invalid.');
     $this->assertFalse(backdrop_valid_http_host(str_repeat('.', 101)), 'HTTP_HOST with more than 100 subdomains is invalid.');
@@ -170,7 +170,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
@@ -180,7 +180,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header set to keep alive when getting a cached page.');
 
@@ -219,17 +219,17 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 
     // Check when background fetch is disabled that a delay takes place when
     // generating a new cache entry.
-    config_set('system.core', 'page_cache_maximum_age', 1);
+    config_set('system.core', 'page_cache_maximum_age', 5);
     config_set('system.core', 'page_cache_background_fetch', 0);
 
     // Create a new cache entry.
     $this->backdropGet('system-test/sleep/0', array(), $headers);
-    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=1');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=5');
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 3 seconds to wait past the maximum age (1). Fresh copy expected.
-    sleep(3);
+    // Wait 5 seconds to wait past the maximum age (6). Fresh copy expected.
+    sleep(5);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);
@@ -247,8 +247,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 3 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(3);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time2 = (string) $start_element[0];
@@ -276,7 +276,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->backdropLogout();
 
@@ -287,8 +287,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Disable access.
     state_set('system_test_access', FALSE);
 
-    // Wait 2 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(2);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/access');
     $this->assertResponse(200, 'Background fetch copy served after blocking access.');
     $this->assertText(t('Access granted'), 'Access granted page title shown.');
@@ -302,8 +302,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Enable access.
     state_set('system_test_access', TRUE);
 
-    // Wait 3 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(3);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/access');
     $this->assertResponse(403, 'Background fetch copy served after granting access.');
     $this->assertText(t('Access denied'), 'Access denied page title shown.');
@@ -605,9 +605,14 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Test that settings.php variables can be overridden by the server.
    */
   function testBackdropSettingsOverride() {
-    // This test only works on Travis CI through the SetEnv call in
-    // core/misc/travis-ci/vhost.conf. See backdrop_settings_initialize().
+    // This test only runs when the "BACKDROP_SETTINGS" environment variable is
+    // set. This usually is done through a Apache VirtualHost setting.
+    // See backdrop_settings_initialize().
+    $raw_settings = array();
     if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+      $raw_settings = json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
+    }
+    if (isset($raw_settings['test_setting'])) {
       $this->assertEqual(settings_get('test_setting'), 'foo', 'Custom setting set through the server environment variables in BACKDROP_SETTINGS.');
 
       $test_database_array = array(

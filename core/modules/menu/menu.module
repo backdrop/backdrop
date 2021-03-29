@@ -119,6 +119,16 @@ function menu_menu() {
     'access arguments' => array('administer menu'),
     'file' => 'menu.admin.inc',
   );
+  $items['admin/structure/menu/settings'] = array(
+    'title' => 'Menu settings',
+    'description' => 'Configure global settings for menus.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('menu_settings_form'),
+    'access arguments' => array('administer menu'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'menu.admin.inc',
+    'weight' => 99,
+  );
   return $items;
 }
 
@@ -147,6 +157,10 @@ function menu_config_info() {
   $prefixes['menu.menu'] = array(
     'name_key' => 'menu_name',
     'label_key' => 'title',
+    'group' => t('Menus'),
+  );
+  $prefixes['menu.settings'] = array(
+    'label' => t('Menu settings'),
     'group' => t('Menus'),
   );
   return $prefixes;
@@ -379,6 +393,34 @@ function menu_parent_options_js() {
 }
 
 /**
+ * Ajax callback to replace the menu item parent options.
+ *
+ * Whenever the item language changes, the available parents also have to get
+ * updated.
+ *
+ * @see menu_edit_item().
+ * @see menu_form_node_form_alter().
+ */
+function menu_update_parent_options_ajax($form, $form_state) {
+  if ($form['#form_id'] == 'menu_edit_item') {
+    $item = $form['original_item']['#value'];
+    if (isset($form_state['values']['langcode'])) {
+      $item['langcode'] = $form_state['values']['langcode'];
+      $form['parent']['#options'] = menu_parent_options(menu_get_menus(), $item);
+    }
+    return $form['parent'];
+  }
+  elseif (isset($form['#node'])) {
+    $item = $form['#node']->menu;
+    if (isset($form_state['values']['langcode'])) {
+      $item['langcode'] = $form_state['values']['langcode'];
+      $form['menu']['link']['parent']['#options'] = menu_parent_options(menu_get_menus(), $item, $form['#node']->type);
+    }
+    return $form['menu']['link']['parent'];
+  }
+}
+
+/**
  * Helper function to get the items of the given menu.
  */
 function _menu_get_options($menus, $available_menus, $item) {
@@ -391,9 +433,13 @@ function _menu_get_options($menus, $available_menus, $item) {
   }
 
   $options = array();
+  $langcode = NULL;
+  if (module_exists('language') && isset($item['langcode'])) {
+    $langcode = $item['langcode'];
+  }
   foreach ($menus as $menu_name => $title) {
     if (isset($available_menus[$menu_name])) {
-      $tree = menu_tree_all_data($menu_name, NULL);
+      $tree = menu_tree_all_data($menu_name, NULL, NULL, $langcode);
       $options[$menu_name . ':0'] = $title;
       _menu_parents_recurse($tree, $menu_name, '· ', $options, $item['mlid'], $limit);
     }
@@ -608,6 +654,10 @@ function menu_node_prepare(Node $node) {
         $item = menu_link_load($mlid);
       }
     }
+    // Set the dummy item langcode to the same language as the node.
+    if (module_exists('language') && empty($item)) {
+      $item['langcode'] = $node->langcode;
+    }
     // Set default values.
     $node->menu = $item + array(
       'link_title' => '',
@@ -650,13 +700,18 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $type = $form['#node']->type;
   $node_type = node_type_load($type);
 
-  // menu_parent_options() is goofy and can actually handle either a menu link
-  // or a node type both as second argument. Pick based on whether there is
-  // a link already (menu_node_prepare() sets mlid default to 0).
-  $options = menu_parent_options(menu_get_menus(), $link['mlid'] ? $link : $type, $type);
+  // Function menu_node_prepare() makes sure, that $node->menu always exists.
+  $options = menu_parent_options(menu_get_menus(), $link, $type);
   // If no possible parent menu items were found, there is nothing to display.
   if (empty($options)) {
     return;
+  }
+  // Attach ajax to the node form language select list.
+  if (module_exists('language')) {
+    $form['langcode']['#ajax'] = array(
+      'callback' => 'menu_update_parent_options_ajax',
+      'wrapper' => 'menu-parent-select-wrapper',
+    );
   }
 
   $form['menu'] = array(
@@ -723,6 +778,8 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#default_value' => $default,
     '#options' => $options,
     '#attributes' => array('class' => array('menu-parent-select')),
+    '#prefix' => '<div id="menu-parent-select-wrapper">',
+    '#suffix' => '</div>',
   );
   $form['menu']['link']['weight'] = array(
     '#type' => 'weight',

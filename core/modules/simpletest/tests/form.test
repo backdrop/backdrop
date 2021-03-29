@@ -738,7 +738,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
     $this->assertNoText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was not altered.');
-    $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+    $this->assertText('The form has become outdated.');
   }
 
   /**
@@ -882,9 +882,9 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
 
     // Check title attribute for radios and checkboxes.
     $elements = $this->xpath('//div[@id="edit-form-checkboxes-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Checkboxes test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Checkboxes test (' . t('Required') . ')', 'Title attribute found.');
     $elements = $this->xpath('//div[@id="edit-form-radios-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Radios test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Radios test (' . t('Required') . ')', 'Title attribute found.');
   }
 }
 
@@ -2106,7 +2106,42 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
       $name = (string) $checkbox['name'];
       $this->assertIdentical($checked, $name == 'checkbox_off[0]' || $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', format_string('Checkbox %name correctly checked', array('%name' => $name)));
     }
+
+    // Make sure that a single checkbox gets the correct value when set via
+    // $_GET parameters. The content overview page is a view with an exposed
+    // form, where changing the sorting via tablesort sets values with $_GET.
+    $admin_user = $this->backdropCreateUser(array(
+      'access content overview',
+      'bypass node access',
+      'access administration pages',
+    ));
+    $this->backdropLogin($admin_user);
+    $options = array(
+      'query' => array(
+        'status' => 'All',
+        'type' => 'All',
+        'title' => '',
+        'order' => 'title',
+        'sort' => 'asc',
+      ),
+    );
+    $values = array(
+      '0' => FALSE,
+      'foobar' => FALSE,
+      '1' => TRUE,
+    );
+    foreach ($values as $key => $checked) {
+      $options['query']['timestamp'] = $key;
+      $this->backdropGet('admin/content/node', $options);
+      $checkbox = $this->xpath('//input[@id="edit-timestamp"]');
+      $attributes = $checkbox[0]->attributes();
+
+      $this->assertEqual(isset($attributes['checked']), $values[$key], format_string('Expected checked status is set via GET for value %key.', array(
+        '%key' => $key,
+      )));
+    }
   }
+
 }
 
 /**

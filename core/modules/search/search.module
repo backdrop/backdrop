@@ -412,13 +412,14 @@ function search_dirty($word = NULL) {
  * @see search_dirty()
  */
 function search_cron() {
-  // We register a shutdown function to ensure that search_total is always up
-  // to date.
+  // We register a shutdown function to ensure that search_total is always up-to-date.
   backdrop_register_shutdown_function('search_update_totals');
 
-  foreach (config_get('search.settings', 'search_active_modules') as $module) {
-    // Update word index
-    module_invoke($module, 'update_index');
+  $search_active_modules = config_get('search.settings', 'search_active_modules');
+  if (isset($search_active_modules)) {
+    foreach ($search_active_modules as $module) {
+      module_invoke($module, 'update_index');
+    }
   }
 }
 
@@ -614,7 +615,8 @@ function search_invoke_preprocess(&$text) {
  * @ingroup search
  */
 function search_index($sid, $module, $text) {
-  $minimum_word_size = config_get('search.settings', 'search_minimum_word_size');
+  $search_settings_config = config('search.settings');
+  $minimum_word_size = $search_settings_config->get('search_minimum_word_size');
 
   // Link matching
   global $base_url;
@@ -623,7 +625,7 @@ function search_index($sid, $module, $text) {
   // Multipliers for scores of words inside certain HTML tags. The weights are stored
   // in a variable so that modules can overwrite the default weights.
   // Note: 'a' must be included for link ranking to work.
-  $tags = config_get('search.settings', 'search_tag_weights');
+  $tags = $search_settings_config->get('search_tag_weights');
 
   // Strip off all ignored tags to speed up processing, but insert space before/after
   // them to keep word boundaries.
@@ -1193,7 +1195,7 @@ function search_excerpt($keys, $text) {
       }
       else {
         $info = search_simplify_excerpt_match($key, $text, $included[$key], $boundary);
-        if ($info['where']) {
+        if (!empty($info) && $info['where']) {
           $p = $info['where'];
           if ($info['keyword']) {
             $foundkeys[] = $info['keyword'];

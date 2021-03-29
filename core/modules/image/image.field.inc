@@ -85,6 +85,9 @@ function image_field_instance_settings_form($field, $instance) {
   // Use the file field instance settings form as a basis.
   $form = file_field_instance_settings_form($field, $instance);
 
+  $form['#element_validate'] = isset($form['#element_validate']) ? $form['#element_validate'] : array();
+  $form['#element_validate'][] = 'image_field_instance_settings_form_validate';
+
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
   $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
@@ -96,7 +99,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -127,7 +130,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
@@ -198,6 +201,26 @@ function image_field_instance_settings_form($field, $instance) {
   }
 
   return $form;
+}
+
+/**
+ * Element validate handler for image_field_instance_settings_form().
+ */
+function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
+  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
+  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+
+  $min_dimensions_x = (int) $min_dimensions[0];
+  $min_dimensions_y = (int) $min_dimensions[1];
+  $max_dimensions_x = (int) $max_dimensions[0];
+  $max_dimensions_y = (int) $max_dimensions[1];
+
+  // Ensure that min dimensions are not set to be bigger than max dimensions,
+  // but only if max dimensions have been specified. This allows to set min
+  // dimensions, without having to restrict max dimensions.
+  if ((!empty($max_dimensions_x) && $min_dimensions_x > $max_dimensions_x) || (!empty($max_dimensions_y) && $min_dimensions_y > $max_dimensions_y)) {
+    form_set_error('instance][settings][min_dimensions', t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+  }
 }
 
 /**
@@ -414,6 +437,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
     // If not using custom extension validation, ensure this is an image.
     $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+    backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
@@ -533,6 +557,7 @@ function image_field_formatter_info() {
         'image_style' => '',
         'image_link' => '',
         'image_float' => '',
+        'image_load' => 'auto',
       ),
 	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
 	  'file formatter' => array(
@@ -584,6 +609,24 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     ),
   );
 
+  if (!isset($settings['image_load'])) {
+    $settings['image_load'] = 'auto';
+  }
+
+  $element['image_load'] = array(
+    '#title' => t('Image loading'),
+    '#type' => 'radios',
+    '#default_value' => $settings['image_load'],
+    '#options' => array(
+      'lazy' => t('Lazy'),
+      'auto' => t('Automatic'),
+      'eager' => t('Eager'),
+    ),
+  );
+  $element['image_load']['lazy']['#description'] = t('Defer loading offscreen images until viewers scroll nearby. "Nearby" is determined by each browser.');
+  $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
+  $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
+
   return $element;
 }
 
@@ -622,6 +665,10 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = t('Floated: @side', array('@side' => $settings['image_float']));
   }
 
+  if (!empty($settings['image_load']) && $settings['image_load'] != 'auto') {
+    $summary[] = t('Loading: @speed', array('@speed' => $settings['image_load']));
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -643,6 +690,15 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
     // Add class for floating the image
     if (!empty($display['settings']['image_float'])) {
       $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+    }
+
+    if (!empty($display['settings']['image_load'])) {
+      // Although available in Chromium, the 'auto' value is not mentioned in
+      // the specification. Since it may be subject to change, we recommend not
+      // to use it until it gets officially included.
+      if ($display['settings']['image_load'] != 'auto') {
+        $item['attributes']['loading'] = $display['settings']['image_load'];
+      }
     }
 
     if (isset($link_file)) {

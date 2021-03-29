@@ -163,7 +163,7 @@ function theme_pager($variables) {
   global $pager_page_array, $pager_total;
 
   // Return if there is no pager to be rendered.
-  if (!isset($pager_page_array[$element])) {
+  if (!isset($pager_page_array[$element]) || empty($pager_total)) {
     return '';
   }
 
