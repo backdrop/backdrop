@@ -13,45 +13,36 @@ table.stick-header {
   padding: 0.6em 0 0.6em 0.8em;
 }
 
-.tabledrag-processed {
-  margin-left: 3rem; /* LTR */
-  width: auto;
-  width: calc(100% - 3rem);
-}
-
-[dir="rtl"] .tabledrag-processed {
-  margin-left: 0;
-  margin-right: 3rem;
-}
-
 .tabledrag-processed .draggable > * {
   position: relative;
 }
 
 .draggable a.tabledrag-handle {
-  position: absolute;
-  top: 0;
-  left: 0; /* LTR */
-  display: block;
-  width: 3rem;
-  height: 100%;
-  margin: 0 0 0 -0.0625em; /* Nudge past the left border */
+  position: relative;
+  display: inline-block;
+  width: 2rem;
+  height: 2em;
+  margin: -0.5em 0;
+  margin-right: 1em;
   padding: 0;
   background: #ebeff7;
-  -webkit-transform: translate(-100%, 0); /* LTR */
-  transform: translate(-100%, 0); /* LTR */
 }
 
 [dir="rtl"] .draggable a.tabledrag-handle {
-  left: auto;
-  right: 0;
-  margin-right: -0.0625em;
-  -webkit-transform: translate(100%, 0);
-  transform: translate(100%, 0);
+  margin-right: 0;
+  margin-left: 1em;
 }
 
 .draggable {
   position: relative;
+}
+
+.draggable .indentation {
+  margin-top: 0;
+}
+
+.draggable .tree-child {
+  background: transparent;
 }
 
 .draggable.drag td:after {
