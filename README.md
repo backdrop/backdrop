@@ -89,7 +89,7 @@ orientation, sexual preferences, socioeconomic status, geographic location, or
 religion (or lack thereof).
 
 Our
-[code of conduct](https://github.com/backdrop-ops/conduct/blob/master/code_of_conduct.md)
+[code of conduct](https://github.com/backdrop-ops/conduct/blob/main/code_of_conduct.md)
 outlines our expectations for all those who participate in our community, as
 well as the consequences for unacceptable behavior.
 
