@@ -529,7 +529,7 @@ function node_type_form_permissions($type) {
   // these permissions here instead, and later in node_type_form_submit() we
   // recreate the proper permission strings (which include the content type
   // name).
-  $default_perms = array(
+  $placeholder_permissions = array(
     "create content" => array(
       'title' => t('Create new content'),
     ),
@@ -547,8 +547,9 @@ function node_type_form_permissions($type) {
     ),
   );
 
-  // Retrieve permissions for this content type (or use "default" permissions).
-  $permissions = !empty($type) ? node_list_permissions($type) : $default_perms;
+  // Retrieve permissions for this content type (or use placeholder
+  // permissions if creating a new content type).
+  $permissions = !empty($type) ? node_list_permissions($type) : $placeholder_permissions;
 
   module_load_include('inc', 'user', 'user.admin');
   $form = user_generate_form_permissions($permissions, $form_is_new);

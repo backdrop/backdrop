@@ -219,7 +219,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   // placeholders for these permissions here instead, and later in
   // taxonomy_form_vocabulary_submit() we recreate the proper permission strings
   // (which include the vocabulary name).
-  $default_perms = array(
+  $placeholder_permissions = array(
     "edit terms" => array(
       'title' => t('Edit terms'),
     ),
@@ -228,8 +228,9 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
     ),
   );
 
-  // Retrieve permissions for this vocabulary (or use "default" permissions).
-  $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $default_perms;
+  // Retrieve permissions for this vocabulary (or use placeholder permissions if
+  // creating a new vocabulary).
+  $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $placeholder_permissions;
 
   module_load_include('inc', 'user', 'user.admin');
   $form = user_generate_form_permissions($permissions, $form_is_new);
