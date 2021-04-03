@@ -404,76 +404,43 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
-
-  // Retrieve role names for columns.
-  $roles = user_roles(FALSE, NULL, TRUE);
-  if (isset($roles[$role_name])) {
-    $roles = array($role_name => $roles[$role_name]);
-  }
-  $form['roles'] = array(
-    '#type' => 'value',
-    '#value' => $roles,
-  );
-
-  // Render role/permission overview:
-  $options = array();
-  $module_info = system_get_info('module');
-
-  // Get a list of all the modules implementing a hook_permission() and sort by
-  // display name.
+  // Get a list of all the modules implementing a hook_permission().
   $modules = array();
+  $module_info = system_get_info('module');
   foreach (module_implements('permission') as $module) {
     $modules[$module] = $module_info[$module]['name'];
   }
+  // Sort modules by their display name.
   asort($modules);
 
+  // Collect all permissions, to be passed to user_generate_form_permissions().
+  $all_permissions = array();
+
+  // Create a list of all permissions, grouped by the modules that provide them.
   foreach ($modules as $module => $display_name) {
     if ($permissions = module_invoke($module, 'permission')) {
+      // Add module names as permission groupings, with appropriate HTML IDs.
       $form['permission'][] = array(
         '#markup' => $module_info[$module]['name'],
         '#id' => $module,
       );
       foreach ($permissions as $perm => $perm_item) {
-        // Fill in default values for the permission.
-        $perm_item += array(
-          'description' => '',
-          'restrict access' => FALSE,
-          'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
-        );
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
-        );
-        foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
-          if (in_array($perm, $role->permissions)) {
-            $status[$role_name][] = $perm;
-          }
-        }
+        $all_permissions[$perm] = $perm_item;
+        // Add a "placeholder" for each permission provided by this module.
+        $form['permission'][$perm] = array();
       }
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
-  foreach ($roles as $role_name => $role) {
-    $form['checkboxes'][$role_name] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
-      '#attributes' => array('class' => array('role-' . $role_name)),
-    );
-    $form['role_names'][$role_name] = array(
-      '#markup' => check_plain($role->label),
-      '#tree' => TRUE,
-    );
-  }
+  // Unlike the permission matrices in the vocabulary and content type forms,
+  // there is no notion of "new" for the permissions form. We set $form_is_new
+  // to alsways be FALSE, so that the Admin role checkboxes aren't always
+  // ticked. See user_generate_form_permissions().
+  $form_is_new = FALSE;
+  $form = array_replace_recursive($form, user_generate_form_permissions($all_permissions, FALSE, $role_name));
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-
-  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
   return $form;
 }
@@ -489,6 +456,93 @@ function user_admin_permissions_submit($form, &$form_state) {
   }
 
   backdrop_set_message(t('The changes have been saved.'));
+}
+
+/**
+ * Builds a matrix of permission checkboxes.
+ *
+ * Use this funtion to generate a matrix of checkboxes within a form. In the
+ * matrix each column is a user role, and each row is a permission. You can
+ * specify which set of permissions is to be included in the matrix, as well as
+ * which user role(s).
+ * 
+ * @param (array) $permissions
+ *   ...
+ * @param (boolean) $form_is_new
+ *   ...
+ * @param (string) $role_name
+ *   ...
+ *
+ * @return (array) $form
+ *   ...
+ *
+ * @see user_admin_permissions()
+ * @see contact_form_permissions()
+ * @see taxonomy_vocabulary_form_permissions()
+ * @see node_type_form_permissions()
+ */
+function user_generate_form_permissions($permissions = NULL, $form_is_new = FALSE, $role_name = NULL) {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  if (isset($roles[$role_name])) {
+    $roles = array($role_name => $roles[$role_name]);
+  }
+  // Retrieve the admin role name.
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Wrap the table in a form element, to make margins match other form
+  // elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Render role/permission overview.
+  $options = array();
+  $status = array();
+  foreach ($permissions as $perm => $perm_item) {
+    // Fill in default values for the permission.
+    $perm_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+    );
+    // Build arrays for the ticked permission checkboxes for each role. On
+    // permission matrices in new forms (i.e. when creating a new vocabulary or
+    // a new content type), always tick the permission checkboxes for the Admin
+    // role.
+    foreach ($roles as $role_name => $role) {
+      if (in_array($perm, $role->permissions) || ($form_is_new && $role->name == $admin_role)) {
+        $status[$role_name][] = $perm;
+      }
+    }
+  }
+
+  // Build checkboxes here, after the checkbox arrays have been built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+
+  return $form;
 }
 
 /**
