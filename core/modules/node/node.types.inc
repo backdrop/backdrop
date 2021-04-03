@@ -475,9 +475,10 @@ function node_type_form_submit($form, &$form_state) {
 
     foreach ($form_state['values']['roles'] as $role_name => $role) {
       $valid_perms = array();
-      // Before saving the permissions, they need to be recreated with the
-      // proper permissions string (for example, from the default format 'create
-      // content' to 'create $type content').
+      // Before saving the permissions, the temporary permission placeholders
+      // need to be replaced by the proper permission strings (for example, the
+      // placeholder 'create content' needs to be converted to 'create %type
+      // content').
       foreach ($form_state['values'][$role->name] as $string => $perm) {
         if ($perm) {
           $parts = explode('content', $string);

@@ -306,9 +306,10 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
 
     foreach ($form_state['values']['roles'] as $role_name => $role) {
       $valid_perms = array();
-      // Before saving the permissions, they need to be recreated with the
-      // proper permissions string (for example, from the default/placeholder
-      // format 'edit terms' to 'edit terms in $vocab').
+      // Before saving the permissions, the temporary permission placeholders
+      // need to be replaced by the proper permission strings (for example, the
+      // placeholder 'edit terms' needs to be converted to 'edit terms in
+      // %vocabulary').
       foreach ($form_state['values'][$role->name] as $string => $perm) {
         if ($perm) {
           $parts = explode(' terms in ', $string);
