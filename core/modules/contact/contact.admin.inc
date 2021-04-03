@@ -105,12 +105,6 @@ function contact_settings_form_submit($form, &$form_state) {
  * @see user_generate_form_permissions()
  */
 function contact_form_permissions() {
-  // Unlike the permission matrices in the vocabulary and content type forms,
-  // there is no notion of "new" for the contact form settings. We set
-  // $form_is_new to alsways be FALSE, so that the Admin role checkboxes aren't
-  // always ticked. See user_generate_form_permissions().
-  $form_is_new = FALSE;
-
   // Retrieve contact-related permissions.
   $permissions = contact_permission();
 

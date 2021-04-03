@@ -432,11 +432,8 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Unlike the permission matrices in the vocabulary and content type forms,
-  // there is no notion of "new" for the permissions form. We set $form_is_new
-  // to alsways be FALSE, so that the Admin role checkboxes aren't always
-  // ticked. See user_generate_form_permissions().
-  $form_is_new = FALSE;
+  // Replace the permission placeholders in the form array with actual
+  // permission checkboxes.
   $form = array_replace_recursive($form, user_generate_form_permissions($all_permissions, FALSE, $role_name));
 
   $form['actions'] = array('#type' => 'actions');
