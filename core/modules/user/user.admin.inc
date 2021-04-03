@@ -436,6 +436,8 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   // permission checkboxes.
   $form = array_replace_recursive($form, user_generate_form_permissions($all_permissions, FALSE, $role_name));
 
+  $form['#theme_wrappers'] = array('form');
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
