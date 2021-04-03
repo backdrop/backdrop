@@ -508,7 +508,7 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
     '#value' => $roles,
   );
 
-  // Render role/permission overview.
+  // Render the role/permission matrix.
   $options = array();
   $status = array();
   foreach ($permissions as $perm => $perm_item) {
@@ -524,11 +524,13 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
       '#markup' => $perm_item['title'],
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
-    // Build arrays for the ticked permission checkboxes for each role. On
-    // permission matrices in new forms (i.e. when creating a new vocabulary or
-    // a new content type), always tick the permission checkboxes for the Admin
-    // role.
+    // Build arrays for the ticked permission checkboxes for each role in the
+    // matrix.
     foreach ($roles as $role_name => $role) {
+      // The checkboxes need to be ticked upon form load:
+      // - If the permission has been previously granted to the role.
+      // - For the Admin role column, if the form is creating a new item (i.e.
+      //   when creating a new vocabulary or a new content type).
       if (in_array($perm, $role->permissions) || ($form_is_new && $role->name == $admin_role)) {
         $status[$role_name][] = $perm;
       }
