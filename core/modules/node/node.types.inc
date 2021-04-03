@@ -519,8 +519,8 @@ function node_type_form_submit($form, &$form_state) {
  * @see user_generate_form_permissions()
  */
 function node_type_form_permissions($type) {
-  // Set the checkboxes for Admin role to always be ticked when creating a new
-  // content type. See user_generate_form_permissions().
+  // Set the checkboxes for the Admin role to always be ticked when creating a
+  // new content type. See user_generate_form_permissions().
   $form_is_new = !$type;
 
   // When creating a new content type, the content type name is not known before
