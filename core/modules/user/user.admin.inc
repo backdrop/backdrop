@@ -467,14 +467,26 @@ function user_admin_permissions_submit($form, &$form_state) {
  * which user role(s).
  * 
  * @param (array) $permissions
- *   ...
+ *   An array of permissions, usually as provided by hook_permission().
  * @param (boolean) $form_is_new
- *   ...
+ *   Set this to:
+ *   - TRUE: if the form where the permission matrix is to be added is creating
+ *     a new item. For example, in the "Add vocabulary" and "Add content type"
+ *     forms. What this does in practice is to automatically tick all checkboxes
+ *     in the Admin user role column.
+ *   - FALSE (default): if the form where the permission matrix is to be added
+ *     is updating existing items, or if there is no notion of "new" (generic
+ *     form settings). For example, the entire "Permissions" form under
+ *     admin/config/people/permissions, or the permissions matrix in the Contact
+ *     module settings form. Prevents the permission checkboxes in the Admin
+ *     role column from being automatically ticked upon form load.
  * @param (string) $role_name
- *   ...
+ *   Limit the permission matrix to a single column of checkboxes, for a
+ *   specific role. For example, when clicking the "Set permissions" operation
+ *   for any role in admin/config/people/roles.
  *
  * @return (array) $form
- *   ...
+ *   The portion of the form array that includes the permission matrix.
  *
  * @see user_admin_permissions()
  * @see contact_form_permissions()
