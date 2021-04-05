@@ -34,6 +34,7 @@
         }
       ?>
       <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
+<<<<<<< HEAD
         <div class="<?php print $row['row_class']; ?>">
           <?php if ($region_buttons): ?>
             <div class="layout-flexible-region-top clearfix">
@@ -63,6 +64,22 @@
                 <?php else: ?>
                   <?php print $content[$region['content_key']]; ?>
                 <?php endif; ?>
+=======
+      <div class="<?php print $row['row_class']; ?>">
+        <?php if ($region_buttons): ?>
+          <div class="layout-flexible-region-buttons clearfix">
+            <?php print $region_buttons[$name]; ?>
+          </div>
+        <?php endif; ?>
+        <div class="l-flexible-row row">
+        <?php foreach ($row['regions'] as $region): ?>
+          <div class="l-col col-md-<?php print $region['region_md']; ?> <?php print backdrop_html_class($region['region_name']); ?>">
+            <?php if ($region_buttons): ?>
+              <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
+                <div class="layout-editor-region-title clearfix">
+                  <h2 class="label"><?php print $region['region_name']; ?></h2>
+                </div>
+>>>>>>> 8e105d3aa (Issue #5032: output the region name as a class)
               </div>
             <?php endforeach; ?>
           </div>
