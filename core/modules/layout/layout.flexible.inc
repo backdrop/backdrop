@@ -483,7 +483,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_names'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Region names'),
+    '#title' => t('Regions'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
     '#tree' => TRUE,
@@ -491,10 +491,21 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
-    $form['region_names']['region_name_' . $i] = array(
+    $form['region_names']['region_' . $i] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Region') . ' ' . ($i + 1),
+      '#collapsed' => TRUE,
+      '#collapsible' => TRUE,
+    );
+    $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
+      '#title' => t('Region name'),
       '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+    );
+    $form['region_names']['region_' . $i]['region_classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Additional classes'),
+      '#default_value' => !empty($row_data['region_classes']['region_classes_' . $i]) ? $row_data['region_classes']['region_classes_' . $i] : '',
     );
   }
 
@@ -577,12 +588,15 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
  */
 function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
   $last = 0;
+  $region_names = array();
   if ($form_state) {
-    $region_names = array_filter($form_state['values']['region_names']);
+    $regions = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
+    foreach ($regions as $key => $region) {
+      $region_names[] = $region['region_name'];
+    }
   }
   else {
-    $region_names = array();
     foreach ($flexible_template->rows as $row) {
       foreach ($row['region_names'] as $name) {
         $region_names[] = $name;
@@ -605,12 +619,23 @@ function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate 
  * layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
+  $region_names = array();
+  $region_classes = array();
+  foreach ($form_state['values']['region_names'] as $key => $region) {
+    $number = str_replace('region_', '', $key);
+    $region_names['region_name_' . $number] = $region['region_name'];
+    if (isset($region['region_classes'])){
+      $region_classes['region_classes_' . $number] = $region['region_classes'];
+    }
+  }
+
   $old_row = array(
     'contains' => $form_state['region_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
-    'region_names' => $form_state['values']['region_names'],
+    'region_names' => $region_names,
+    'region_classes' => $region_classes,
   );
   $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
 
@@ -633,9 +658,10 @@ function layout_flexible_template_region_count_load(&$form, &$form_state) {
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
   $last_region_number = layout_flexible_template_get_last_region_number($form_state['flexible_template'], $form_state);
 
-  foreach ($form_state['values']['region_names'] as $key => $region_name) {
-    if (empty($region_name)) {
-      $form_state['values']['region_names'][$key] = t('Region') . ' ' . ($last_region_number + $key + 1);
+  foreach ($form_state['values']['region_names'] as $key => $region) {
+    if (empty($region)) {
+      $number = str_replace('region_', '', $key);
+      $form_state['values']['region_names'][$key]['region_name'] = t('Region') . ' ' . ($last_region_number + $number + 1);
       $last_region_number++;
     }
   }
@@ -651,12 +677,23 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
+  $region_names = array();
+  $region_classes = array();
+  foreach ($form_state['values']['region_names'] as $key => $region) {
+    $number = str_replace('region_', '', $key);
+    $region_names['region_name_' . $number] = $region['region_name'];
+    if (isset($region['region_classes'])){
+      $region_classes['region_classes_' . $number] = $region['region_classes'];
+    }
+  }
+
   $new_row = array(
     'contains' => $form_state['region_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
-    'region_names' => $form_state['values']['region_names'],
+    'region_names' => $region_names,
+    'region_classes' => $region_classes,
   );
 
   if ($original_row == 'add') {

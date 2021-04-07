@@ -336,8 +336,15 @@ function layout_preprocess_layout(&$variables) {
         else {
           $region_name = $name;
         }
+        if (!empty($row['region_classes']['region_classes_0'])) {
+          $region_classes = $row['region_classes']['region_classes_0'];
+        }
+        else {
+          $region_classes = '';
+        }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
@@ -351,9 +358,16 @@ function layout_preprocess_layout(&$variables) {
           else {
             $region_name = $name . ' ' . $i;
           }
+          if (!empty($row['region_classes']['region_classes_' . $i])) {
+            $region_classes = $row['region_classes']['region_classes_' . $i];
+          }
+          else {
+            $region_classes = '';
+          }
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
+            'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;

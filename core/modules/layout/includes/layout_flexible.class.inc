@@ -34,6 +34,7 @@ class LayoutFlexibleTemplate {
    * - classes: Additional classes to be added to the row.
    * - container: The type of container such as "container" or "container-flex".
    * - region_names: An array of region names within this row.
+   * - region_classes: An array of classes for the row's regions.
    *
    * @var array
    */
@@ -58,6 +59,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Header')),
+        'region_classes' => array('region_classes_0' => ''),
       );
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
@@ -65,6 +67,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Content')),
+        'region_classes' => array('region_classes_0' => ''),
       );
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
@@ -72,6 +75,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Footer')),
+        'region_classes' => array('region_classes_0' => ''),
       );
     }
   }
