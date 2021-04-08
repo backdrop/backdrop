@@ -356,7 +356,7 @@ function layout_preprocess_layout(&$variables) {
           $region_classes = '';
           if (!empty($row['region_names']['region_name_' . $i])) {
             $region_name = $row['region_names']['region_name_' . $i];
-            $machine_name = isset($row['region_machine_names']['region_machine_name_' . $i]) ? $row['region_machine_names']['region_machine_name_' . $i] : backdrop_html_class($row['region_names']['region_name_' . $i]);
+            $machine_name = isset($row['region_machine_names']['machine_name_' . $i]) ? $row['region_machine_names']['machine_name_' . $i] : backdrop_html_class($row['region_names']['region_name_' . $i]);
             $region_classes .= 'region-' . $machine_name;
           }
           else {

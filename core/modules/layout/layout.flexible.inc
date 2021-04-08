@@ -503,7 +503,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     $form['region_names']['region_' . $i]['machine_name'] = array(
       '#type' => 'machine_name',
       '#description' => t('A machine name to be used as the CSS class. It is unique per region per row, and must only contain lowercase letters, numbers and hyphens.'),
-      '#default_value' => !empty($row_data['region_machine_names']['region_machine_name_' . $i]) ? $row_data['region_machine_names']['region_machine_name_' . $i] : '',
+      '#default_value' => !empty($row_data['region_machine_names']['machine_name_' . $i]) ? $row_data['region_machine_names']['machine_name_' . $i] : '',
       '#maxlength' => 255,
       '#disabled' => FALSE,
       '#machine_name' => array(
@@ -655,7 +655,9 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
   foreach ($form_state['values']['region_names'] as $key => $region) {
     $number = str_replace('region_', '', $key);
     $region_names['region_name_' . $number] = $region['region_name'];
-    $region_machine_names['region_machine_name_' . $number] = $region['region_machine_name'];
+    if (isset($region['machine_name'])) {
+      $region_machine_names['machine_name_' . $number] = $region['machine_name'];
+    }
     if (isset($region['region_classes'])){
       $region_classes['region_classes_' . $number] = $region['region_classes'];
     }
@@ -714,9 +716,12 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $region_machine_names = array();
   $region_classes = array();
   foreach ($form_state['values']['region_names'] as $key => $region) {
+    debug($region);
     $number = str_replace('region_', '', $key);
     $region_names['region_name_' . $number] = $region['region_name'];
-    $region_machine_names['region_machine_name_' . $number] = $region['machine_name'];
+    if (isset($region['machine_name'])) {
+      $region_machine_names['machine_name_' . $number] = $region['machine_name'];
+    }
     if (isset($region['region_classes'])){
       $region_classes['region_classes_' . $number] = $region['region_classes'];
     }
