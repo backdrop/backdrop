@@ -1279,5 +1279,16 @@ function user_update_1020() {
 }
 
 /**
+ * Moves the "log_user_flood_control" variable to config.
+ */
+function user_update_1021() {
+  $config = config('user.flood');
+  $config->set('log_user_flood_control', update_variable_get('log_user_flood_control', TRUE));
+  $config->save();
+
+  update_variable_del('log_user_flood_control');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
