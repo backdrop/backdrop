@@ -10,7 +10,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
   function setUp() {
-    parent::setUp('user_flood_test');
+    parent::setUp('dblog', 'user_flood_test');
   }
 
   /**
