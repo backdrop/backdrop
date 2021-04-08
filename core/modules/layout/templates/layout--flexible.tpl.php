@@ -43,7 +43,7 @@
         <?php endif; ?>
         <div class="l-flexible-row row">
         <?php foreach ($row['regions'] as $region): ?>
-          <div class="l-col <?php print 'region-' . backdrop_html_class($region['region_name']) ?> col-md-<?php print $region['region_md']; ?> <?php print $region['region_classes']; ?>">
+          <div class="l-col col-md-<?php print $region['region_md']; ?> <?php print $region['region_classes']; ?>">
             <?php if ($region_buttons): ?>
               <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
                 <div class="layout-editor-region-title clearfix">

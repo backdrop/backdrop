@@ -494,17 +494,32 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     $form['region_names']['region_' . $i] = array(
       '#type' => 'fieldset',
       '#title' => t('Region') . ' ' . ($i + 1),
-      '#collapsed' => TRUE,
-      '#collapsible' => TRUE,
     );
     $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
       '#title' => t('Region name'),
       '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
+    $form['region_names']['region_' . $i]['machine_name'] = array(
+      '#type' => 'machine_name',
+      '#description' => t('A machine name to be used as the CSS class. It is unique per region per row, and must only contain lowercase letters, numbers and hyphens.'),
+      '#default_value' => !empty($row_data['region_machine_names']['region_machine_name_' . $i]) ? $row_data['region_machine_names']['region_machine_name_' . $i] : '',
+      '#maxlength' => 255,
+      '#disabled' => FALSE,
+      '#machine_name' => array(
+        'exists' => '_layout_flexible_template_region_class_name_exists',
+        'source' => array('region_names', 'region_' . $i, 'region_name'),
+        'standalone' => TRUE,
+        'label' => t('CSS class'),
+        'replace_pattern' => '[^a-z0-9-]+',
+        'replace' => '-',
+        '#required' => FALSE,
+      ),
+    );
     $form['region_names']['region_' . $i]['region_classes'] = array(
       '#type' => 'textfield',
       '#title' => t('Additional classes'),
+      '#description' => t('Define multiples classes separated by spaces.'),
       '#default_value' => !empty($row_data['region_classes']['region_classes_' . $i]) ? $row_data['region_classes']['region_classes_' . $i] : '',
     );
   }
@@ -584,6 +599,21 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 }
 
 /**
+ * Callback: Checks if a region's class name is taken.
+ *
+ * @param $machine_name
+ *   The machine (class) name.
+ *
+ * @return
+ *   Whether or not the class name is taken.
+ *
+ * @see layout_flexible_template_edit_row_form()
+ */
+function _layout_flexible_template_region_class_name_exists($machine_name) {
+  return FALSE;
+}
+
+/**
  * Returns the last number of all regions named "Region X" where X is a number.
  */
 function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
@@ -620,10 +650,12 @@ function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate 
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
   $region_names = array();
+  $region_machine_names = array();
   $region_classes = array();
   foreach ($form_state['values']['region_names'] as $key => $region) {
     $number = str_replace('region_', '', $key);
     $region_names['region_name_' . $number] = $region['region_name'];
+    $region_machine_names['region_machine_name_' . $number] = $region['region_machine_name'];
     if (isset($region['region_classes'])){
       $region_classes['region_classes_' . $number] = $region['region_classes'];
     }
@@ -635,6 +667,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
     'region_names' => $region_names,
+    'region_machine_names' => $region_machine_names,
     'region_classes' => $region_classes,
   );
   $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
@@ -678,10 +711,12 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $original_row = $form_state['original_row'];
 
   $region_names = array();
+  $region_machine_names = array();
   $region_classes = array();
   foreach ($form_state['values']['region_names'] as $key => $region) {
     $number = str_replace('region_', '', $key);
     $region_names['region_name_' . $number] = $region['region_name'];
+    $region_machine_names['region_machine_name_' . $number] = $region['machine_name'];
     if (isset($region['region_classes'])){
       $region_classes['region_classes_' . $number] = $region['region_classes'];
     }
@@ -693,6 +728,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
     'region_names' => $region_names,
+    'region_machine_names' => $region_machine_names,
     'region_classes' => $region_classes,
   );
 

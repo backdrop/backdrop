@@ -59,6 +59,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Header')),
+        'region_machine_names' => array('region_machine_name_0' => 'header'),
         'region_classes' => array('region_classes_0' => ''),
       );
       $this->rows[$uuid->generate()] = array(
@@ -67,6 +68,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Content')),
+        'region_machine_names' => array('region_machine_name_0' => 'content'),
         'region_classes' => array('region_classes_0' => ''),
       );
       $this->rows[$uuid->generate()] = array(
@@ -75,6 +77,7 @@ class LayoutFlexibleTemplate {
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Footer')),
+        'region_machine_names' => array('region_machine_name_0' => 'footer'),
         'region_classes' => array('region_classes_0' => ''),
       );
     }
