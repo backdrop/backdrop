@@ -502,9 +502,12 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     );
     $form['region_names']['region_' . $i]['machine_name'] = array(
       '#type' => 'machine_name',
-      '#description' => t('A machine name to be used as the CSS class. It is unique per region per row, and must only contain lowercase letters, numbers and hyphens.'),
+      '#description' => t('A machine name to be used as the CSS class. It must only contain lowercase letters, numbers and hyphens.'),
       '#default_value' => !empty($row_data['region_machine_names']['machine_name_' . $i]) ? $row_data['region_machine_names']['machine_name_' . $i] : '',
       '#maxlength' => 255,
+      '#field_prefix' => '<span dir="ltr">region-',
+      '#field_suffix' => '</span>&lrm;',
+      '#size' => 15,
       '#disabled' => FALSE,
       '#machine_name' => array(
         'exists' => '_layout_flexible_template_region_class_name_exists',
@@ -599,7 +602,11 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 }
 
 /**
- * Callback: Checks if a region's class name is taken.
+ * Callback: Check if machine_name is unique.
+ *
+ * Even though callback is required for the Form API machine_name field type,
+ * the region classes are not required to be unique. It will accept any
+ * machine_name.
  *
  * @param $machine_name
  *   The machine (class) name.
@@ -608,6 +615,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
  *   Whether or not the class name is taken.
  *
  * @see layout_flexible_template_edit_row_form()
+ * @see form_validate_machine_name()
  */
 function _layout_flexible_template_region_class_name_exists($machine_name) {
   return FALSE;
