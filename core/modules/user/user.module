@@ -1899,7 +1899,7 @@ function user_login_final_validate($form, &$form_state) {
  * Implements hook_user_flood_control().
  */
 function user_user_flood_control($ip, $username = FALSE) {
-  if (config_get('user.flood', 'log_user_flood_control')) {
+  if (config_get('user.flood', 'flood_log_failed_attempts')) {
     if (!empty($username)) {
       watchdog('user', 'Flood control blocked login attempt for %user from %ip.', array('%user' => $username, '%ip' => $ip));
     }

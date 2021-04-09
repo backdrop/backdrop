@@ -393,10 +393,10 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
-  $form['log_user_flood_control'] = array(
+  $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),
-    '#default_value' => $flood_config->get('log_user_flood_control'),
+    '#default_value' => $flood_config->get('flood_log_failed_attempts'),
     '#description' => t('If there are excessive failed login attempts, a temporary block will be placed on the offending IP address or user account. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
