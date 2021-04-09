@@ -716,7 +716,6 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $region_machine_names = array();
   $region_classes = array();
   foreach ($form_state['values']['region_names'] as $key => $region) {
-    debug($region);
     $number = str_replace('region_', '', $key);
     $region_names['region_name_' . $number] = $region['region_name'];
     if (isset($region['machine_name'])) {
