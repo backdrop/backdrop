@@ -1118,6 +1118,11 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
     $langcode = $GLOBALS['language_content']->langcode;
   }
 
+  if (isset($node->preview) && ($node->preview == 'Preview')) {
+    backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
+    backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+  }
+
   // Populate $node->content with a render() array.
   node_build_content($node, $view_mode, $langcode);
 
@@ -1762,7 +1767,7 @@ function node_menu() {
 
   $items['admin/structure/types'] = array(
     'title' => 'Content types',
-    'description' => 'Manage content types, including default status, front page promotion, comment settings, etc.',
+    'description' => 'Manage content types, including default status, home page promotion, comment settings, etc.',
     'page callback' => 'node_overview_types',
     'access arguments' => array('administer content types'),
     'file' => 'node.types.inc',

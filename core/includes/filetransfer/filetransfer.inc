@@ -347,6 +347,7 @@ abstract class FileTransfer {
       '#type' => 'password',
       '#title' => t('Password'),
       '#description' => t('Your password is not saved in the database and is only used to establish a connection.'),
+      '#password_toggle' => TRUE,
     );
     $form['advanced'] = array(
       '#type' => 'fieldset',

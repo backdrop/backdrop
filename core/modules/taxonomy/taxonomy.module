@@ -1217,7 +1217,7 @@ function taxonomy_vocabulary_load($machine_name) {
 }
 
 /**
- * Legacy wrapper to return the parents of a term by TID.
+ * Legacy wrapper to return the vocabulary object matching a machine name.
  *
  * This function is no longer necessary, as all vocabularies are always loaded
  * by machine name. Simply call taxonomy_vocabulary_load() directly.
@@ -1705,7 +1705,7 @@ function taxonomy_allowed_values($field) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
+          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
         }
       }
     }

@@ -19,6 +19,12 @@
   font-size: 0.85em;
   padding-bottom: .5em;
 }
+#user-admin-settings .form-item-user-password-policy {
+  margin-bottom: 0;
+}
+#user-admin-settings .min-length-wrapper {
+  font-size: 0.923em;
+}
 
 #user-roles .required-role,
 #user-roles span.description {
@@ -34,8 +40,8 @@
 }
 
 /**
- * Override default textfield float to put the "Add role" button next to
- * the input textfield.
+ * Override default textfield float to put the "Add role" button next to the
+ * input textfield.
  */
 #user-admin-roles td.edit-name {
   clear: both;

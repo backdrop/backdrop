@@ -289,7 +289,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
       ->execute();
     menu_cache_clear('main-menu');
 
-    // Load front page.
+    // Load home page.
     $this->backdropGet('<front>');
     $this->assertLink(t('Menu link #1'), 0, 'Found menu link #1');
     $this->assertLink(t('Menu link #1-1'), 0, 'Found menu link #1-1');
@@ -496,7 +496,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     );
     menu_link_save($menu_link);
 
-    // Load front page.
+    // Load home page.
     $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
     $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
@@ -1276,7 +1276,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     ));
     $this->backdropLogout();
 
-    // Verify that there is no breadcrumb on front page.
+    // Verify that there is no breadcrumb on home page.
     $this->assertBreadcrumb('<front>', array());
 
     // Verify breadcrumb on user pages for anonymous user.
@@ -1592,4 +1592,34 @@ class MenuTrailTestCase extends MenuWebTestCase {
       $this->assertBreadcrumb(NULL, $expected_trail[$status_code]['final']);
     }
   }
+}
+
+/**
+ * Tests menu changes.
+ */
+class MenuChangeTestCase extends MenuWebTestCase {
+  /**
+   * Set up testing environment.
+   */
+  public function setUp() {
+    parent::setUp('menu_test');
+  }
+
+  /**
+   * Test that updating the type of a menu item works correctly.
+   */
+  public function testMenuChangeTypeTestCase() {
+    // Check that the test menu item exists.
+    $sql = "SELECT type FROM {menu_links}, {menu_router} WHERE {menu_links}.router_path = {menu_router}.path AND {menu_links}.router_path = 'menu-test/changes'";
+    $type = db_query($sql)->fetchField();
+    $this->assertEqual($type, MENU_NORMAL_ITEM, t('Menu item exists and is type MENU_NORMAL_ITEM.'));
+
+    // Change item type to MENU_CALLBACK and rebuild menu.
+    menu_test_change_menu_type('callback');
+    menu_rebuild();
+
+    $result = db_query($sql)->rowCount();
+    $this->assertEqual($result, 0, t('Menu item no longer exists in menu_links table after menu_rebuild.'));
+  }
+
 }

@@ -2186,7 +2186,7 @@ function drupal_get_normal_path($path, $langcode = NULL) {
 }
 
 /**
- * Check if the current page is the front page.
+ * Check if the current page is the home page.
  *
  * @deprecated since 1.0.0
  * @see backdrop_is_front_page()
@@ -2487,6 +2487,36 @@ function drupal_substr($text, $start, $length = NULL) {
 function drupal_var_export($var, $prefix = '') {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_var_export($var, $prefix);
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer_positive() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_number() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
