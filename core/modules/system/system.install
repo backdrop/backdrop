@@ -3177,7 +3177,7 @@ function system_update_1074() {
 /**
  * Re-arrange flexible layout configuration so we can save region classes.
  */
-function system_update_1079() {
+function system_update_1075() {
   $flexible_layouts = config_get_names_with_prefix('layout.flexible.');
   foreach ($flexible_layouts as $layout_name) {
     $config = config($layout_name);
