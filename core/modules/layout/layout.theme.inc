@@ -330,14 +330,19 @@ function layout_preprocess_layout(&$variables) {
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
       if ($row['contains'] == 'region_12') {
-        if (!empty($row['region_names']['region_name_0'])) {
-          $region_name = $row['region_names']['region_name_0'];
+        $region_classes = '';
+        if (!empty($row['region_names']['region_0'])) {
+          $region_name = $row['region_names']['region_0']['region_name'];
+          $class_name = isset($row['region_names']['region_0']['class_name']) ? $row['region_names']['region_0']['class_name'] : backdrop_html_class($row['region_names']['region_0']['region_name']);
+          $region_classes .= 'region-' . $class_name;
         }
         else {
           $region_name = $name;
+          $region_classes .= 'region-' . backdrop_html_class($name);
         }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
@@ -345,15 +350,20 @@ function layout_preprocess_layout(&$variables) {
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
-          if (!empty($row['region_names']['region_name_' . $i])) {
-            $region_name = $row['region_names']['region_name_' . $i];
+          $region_classes = '';
+          if (!empty($row['region_names']['region_' . $i])) {
+            $region_name = $row['region_names']['region_' . $i]['region_name'];
+            $class_name = isset($row['region_names']['region_' . $i]['class_name']) ? $row['region_names']['region_' . $i]['class_name'] : backdrop_html_class($row['region_names']['region_' . $i]['region_name']);
+            $region_classes .= 'region-' . $class_name;
           }
           else {
             $region_name = $name . ' ' . $i;
+            $region_classes .= 'region-' . backdrop_html_class($name . ' ' . $i);
           }
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
+            'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;

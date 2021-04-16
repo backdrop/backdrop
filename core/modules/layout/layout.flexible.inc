@@ -483,7 +483,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_names'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Region names'),
+    '#title' => t('Regions'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
     '#tree' => TRUE,
@@ -491,10 +491,33 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
-    $form['region_names']['region_name_' . $i] = array(
+    $form['region_names']['region_' . $i] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Region') . ' ' . ($i + 1),
+    );
+    $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
-      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+      '#title' => t('Region name'),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['name']) ? $row_data['region_names']['region_' . $i]['name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+    );
+    $form['region_names']['region_' . $i]['class_name'] = array(
+      '#type' => 'machine_name',
+      '#description' => t('A machine name to be used as the CSS class. It must only contain lowercase letters, numbers and hyphens.'),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['class_name']) ? $row_data['region_names']['region_' . $i]['class_name'] : '',
+      '#maxlength' => 255,
+      '#field_prefix' => '<span dir="ltr">region-',
+      '#field_suffix' => '</span>&lrm;',
+      '#size' => 15,
+      '#disabled' => FALSE,
+      '#machine_name' => array(
+        'exists' => '_layout_flexible_template_region_class_name_exists',
+        'source' => array('region_names', 'region_' . $i, 'region_name'),
+        'standalone' => TRUE,
+        'label' => t('CSS class'),
+        'replace_pattern' => '[^a-z0-9-]+',
+        'replace' => '-',
+        '#required' => FALSE,
+      ),
     );
   }
 
@@ -573,19 +596,42 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 }
 
 /**
+ * Callback: Check if machine_name is unique.
+ *
+ * Even though callback is required for the Form API machine_name field type,
+ * the region classes are not required to be unique. It will accept any
+ * machine_name.
+ *
+ * @param $machine_name
+ *   The machine (class) name.
+ *
+ * @return
+ *   Whether or not the class name is taken.
+ *
+ * @see layout_flexible_template_edit_row_form()
+ * @see form_validate_machine_name()
+ */
+function _layout_flexible_template_region_class_name_exists($machine_name) {
+  return FALSE;
+}
+
+/**
  * Returns the last number of all regions named "Region X" where X is a number.
  */
 function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
   $last = 0;
+  $region_names = array();
   if ($form_state) {
-    $region_names = array_filter($form_state['values']['region_names']);
+    $regions = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
+    foreach ($regions as $key => $region) {
+      $region_names[] = $region['region_name'];
+    }
   }
   else {
-    $region_names = array();
     foreach ($flexible_template->rows as $row) {
-      foreach ($row['region_names'] as $name) {
-        $region_names[] = $name;
+      foreach ($row['region_names'] as $key => $region) {
+        $region_names[] = $region['region_name'];
       }
     }
   }
@@ -633,9 +679,10 @@ function layout_flexible_template_region_count_load(&$form, &$form_state) {
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
   $last_region_number = layout_flexible_template_get_last_region_number($form_state['flexible_template'], $form_state);
 
-  foreach ($form_state['values']['region_names'] as $key => $region_name) {
-    if (empty($region_name)) {
-      $form_state['values']['region_names'][$key] = t('Region') . ' ' . ($last_region_number + $key + 1);
+  foreach ($form_state['values']['region_names'] as $key => $region) {
+    if (empty($region)) {
+      $number = str_replace('region_', '', $key);
+      $form_state['values']['region_names'][$key]['region_name'] = t('Region') . ' ' . ($last_region_number + $number + 1);
       $last_region_number++;
     }
   }

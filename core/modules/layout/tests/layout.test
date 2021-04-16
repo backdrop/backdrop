@@ -3046,11 +3046,16 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
     $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
 
+    // Check the header region class.
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-header'));
+    $this->assertEqual(count($rows), 1, 'The header region class is correct.');
+
     // Edit the header row and check that the changes are reflected on the
     // template editor page and the layout path.
     $this->clickLink(t('Configure row'), 0);
     $edit = array(
-      'region_names[region_name_0]' => 'New header',
+      'region_names[region_0][region_name]' => 'New header',
+      'region_names[region_0][class_name]' => 'new-header-new',
       'row_classes' => 'new-class another-class',
       'element' => 'main',
       'container' => 'no_container',
@@ -3066,6 +3071,10 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     $header_row = $this->xpath("//main[contains(@class, :row_class)]//h2[text()=:row_title]", array(':row_class' => 'l-' . $layout_region_names[0], ':row_title' => 'New header'));
     $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the block add page.');
+
+    // Check that header region class has changed.
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-new-header-new'));
+    $this->assertEqual(count($rows), 1, 'The header region class has been renamed in the block add page.');
 
     // Go to the layout path and check that the header region was renamed and
     // the block is still in the header region.
@@ -3093,7 +3102,11 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Continue'));
     // Rename just the first region.
     $edit = array(
-      'region_names[region_name_0]' => 'First region',
+      'region_names[region_0][region_name]' => 'First region',
+      // Machine names have to be set manually.
+      'region_names[region_0][class_name]' => 'first-region',
+      'region_names[region_1][class_name]' => 'region-2',
+      'region_names[region_2][class_name]' => 'region-3',
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->backdropPost(NULL, array(), t('Save layout template'));
