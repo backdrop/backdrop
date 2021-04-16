@@ -318,7 +318,7 @@ function ajax_render($commands = array()) {
  *   @endcode
  */
 function ajax_get_form() {
-    // Exit early if $_POST is empty.
+  // Exit early if $_POST is empty.
   if (empty($_POST)) {
     backdrop_exit();
   }
