@@ -318,6 +318,10 @@ function ajax_render($commands = array()) {
  *   @endcode
  */
 function ajax_get_form() {
+    // Exit early if $_POST is empty.
+  if (empty($_POST)) {
+    backdrop_exit();
+  }
   $form_state = form_state_defaults();
 
   $form_build_id = $_POST['form_build_id'];
