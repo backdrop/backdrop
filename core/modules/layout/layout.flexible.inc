@@ -524,6 +524,12 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
         '#required' => FALSE,
       ),
     );
+    $form['region_names']['region_' . $i]['classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Additional classes'),
+      '#description' => t('Define multiples classes separated by spaces.'),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
+    );
   }
 
   $form['region_styles'] = array(
