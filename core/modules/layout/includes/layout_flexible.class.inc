@@ -57,21 +57,21 @@ class LayoutFlexibleTemplate {
         'element' => 'header',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_name_0' => t('Header')),
+        'region_names' => array('region_0' => array('region_name' => t('Header'), 'class_name' => 'header')),
       );
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
         'element' => '',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_name_0' => t('Content')),
+        'region_names' => array('region_0' => array('region_name' => t('Content'), 'class_name' => 'content')),
       );
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
         'element' => 'footer',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_name_0' => t('Footer')),
+        'region_names' => array('region_0' => array('region_name' => t('Footer'), 'class_name' => 'footer')),
       );
     }
   }
