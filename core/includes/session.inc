@@ -387,7 +387,6 @@ function backdrop_session_regenerate() {
     $original_user = $user;
     backdrop_session_start();
     $user = $original_user;
-    backdrop_save_session($original_session_saving);
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
