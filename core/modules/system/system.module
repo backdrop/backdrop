@@ -2990,7 +2990,7 @@ function _system_rebuild_module_data() {
  *   Array of all available modules and their data.
  */
 function system_rebuild_module_data() {
-  $modules_cache = &backdrop_static(__FUNCTION__);
+  $modules_cache = &backdrop_static('modules_cache');
   // Only rebuild once per request. $modules and $modules_cache cannot be
   // combined into one variable, because the $modules_cache variable is reset by
   // reference from system_list_reset() during the rebuild.
