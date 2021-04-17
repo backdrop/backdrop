@@ -2297,6 +2297,17 @@ function drupal_session_regenerate() {
 }
 
 /**
+ * Regenerates an existing session.
+ *
+ * @deprecated since 1.18.3
+ * @see _backdrop_session_regenerate_existing()
+ */
+function _drupal_session_regenerate_existing() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  return _backdrop_session_regenerate_existing();
+}
+
+/**
  * Ends a specific user's session(s).
  *
  * @deprecated since 1.0.0
