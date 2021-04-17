@@ -383,10 +383,6 @@ function backdrop_session_regenerate() {
   }
 
   if (isset($old_session_id)) {
-    // Preserve and restore user object, as starting session will reset it.
-    $original_user = $user;
-    backdrop_session_start();
-    $user = $original_user;
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
