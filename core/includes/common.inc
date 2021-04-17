@@ -925,7 +925,7 @@ function backdrop_access_denied() {
  *   - data: An array or object containing the values for the request body or a
  *     string containing the request body, formatted as
  *     'param=value&param=value&...'.
- *     To generate this, use http_build_query(). Defaults to NULL.
+ *     To generate this, use backdrop_http_build_query(). Defaults to NULL.
  *   - max_redirects: An integer representing how many times a redirect
  *     may be followed. Defaults to 3.
  *   - timeout: A float representing the maximum number of seconds the function
@@ -950,6 +950,8 @@ function backdrop_access_denied() {
  *     HTTP header names are case-insensitive (RFC 2616, section 4.2), so for
  *     easy access the array keys are returned in lower case.
  *   - data: A string containing the response body that was received.
+ *
+ * @see backdrop_http_build_query()
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -1092,7 +1094,7 @@ function backdrop_http_request($url, array $options = array()) {
 
   // Convert array or object $options['data'] to query string.
   if (is_array($options['data']) || is_object($options['data'])) {
-    $options['data'] = http_build_query($options['data']);
+    $options['data'] = backdrop_http_build_query($options['data']);
   }
 
   // Only add Content-Length if we actually have any content or if it is a POST
