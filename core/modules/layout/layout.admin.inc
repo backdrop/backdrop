@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative functions for Layout module.
+ * Admin page callbacks for the Layout module.
  *
  * This provides the UI to list, create, edit and delete layouts.
  */
@@ -272,12 +272,21 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
+  $items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = theme('item_list', array('items' => $items));
+
   $form['path'] = array(
     '#title' => t('Path'),
+    '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => t('Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
+    '#description' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
     '#access' => !$layout->isDefault(),
   );
   $form['path_update'] = array(
@@ -308,14 +317,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
+    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
     // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
   $form['context_wrapper']['#suffix'] = '</div>';
   $form['context_wrapper']['context'] = array(
-    '#title' => t('Contexts'),
     '#type' => 'container',
     '#parents' => array('context'),
   );
@@ -419,7 +427,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   // Display a notice if overriding a system path that normally contains
-  // wildcards e.g. node/1 instead of node/%. This is usually (but not always)
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
@@ -436,7 +444,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['conditions'] = array(
     '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same wildcard path.'),
+    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same placeholder path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
@@ -542,7 +550,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   $path = $form_state['values']['path'] = trim($form_state['values']['path'], '/');
 
   if (strpos($path, '%') === 0) {
-    form_error($form['path'], t('The first part of a path may not be a wildcard.'));
+    form_error($form['path'], t('The first part of a path may not be a placeholder.'));
   }
 
   // Ensure the path is not already an alias to something else.
@@ -562,7 +570,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($parts as $part) {
     $wildcard_position = strpos($part, '%');
     if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
-      form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      form_error($form['path'], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
     }
   }
 
@@ -2983,7 +2991,7 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
     '#title' => t('CSS classes for inner wrapper'),
     '#type' => 'textfield',
     '#default_value' => isset($layout->settings[$region_name]['classes']) ? $layout->settings[$region_name]['classes'] : '',
-    '#description' => t('Available only after selecting an HTML element. Separate multiple classes with spaces.'),
+    '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
     '#states' => array(
       'disabled' => array(
         ':input[name="element"]' => array('value' => ''),

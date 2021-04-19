@@ -1217,7 +1217,7 @@ function taxonomy_vocabulary_load($machine_name) {
 }
 
 /**
- * Legacy wrapper to return the parents of a term by TID.
+ * Legacy wrapper to return the vocabulary object matching a machine name.
  *
  * This function is no longer necessary, as all vocabularies are always loaded
  * by machine name. Simply call taxonomy_vocabulary_load() directly.

@@ -12,6 +12,7 @@
  *   The taxonomy term entity.
  */
 function taxonomy_term_page(TaxonomyTerm $term) {
+  $site_config = config('system.core');
   // If there is a menu link to this term, the link becomes the last part of
   // the active trail, and the link name becomes the page title. Thus, we must
   // explicitly set the page title to be the term title.
@@ -35,7 +36,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
 
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
-  $canonical_secure = config_get('system.core', 'canonical_secure') == 1 ? TRUE : FALSE;
+  $canonical_secure = $site_config->get('canonical_secure') == 1 ? TRUE : FALSE;
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
 
@@ -50,7 +51,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
     'term' => taxonomy_term_view($term, 'full'),
   );
 
-  if ($nids = taxonomy_select_nodes($term->tid, TRUE, config_get('system.core', 'default_nodes_main'))) {
+  if ($nids = taxonomy_select_nodes($term->tid, TRUE, $site_config->get('default_nodes_main'))) {
     $nodes = node_load_multiple($nids);
     $build += node_view_multiple($nodes);
     $build['pager'] = array(

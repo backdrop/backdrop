@@ -107,13 +107,32 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * {@inheritdoc}
    */
-  public function prepareQuery($query) {
-    // DatabaseConnection::prepareQuery() is responsible for applying database
-    // table prefixes where curly brackets are around tables. Use this as an
-    // opportunity to apply backticks around table names.
-    $query = str_replace('{', '`{', $query);
-    $query = str_replace('}', '}`', $query);
-    return parent::prepareQuery($query);
+  protected function setPrefix($prefix) {
+    if (is_array($prefix)) {
+      $this->prefixes = $prefix + array('default' => '');
+    }
+    else {
+      $this->prefixes = array('default' => $prefix);
+    }
+
+    // This differs from the parent class implementation in that all tables
+    // are escaped with back-ticks. First, do table-specific replacements.
+    $this->prefixSearch = array();
+    $this->prefixReplace = array();
+    foreach ($this->prefixes as $key => $val) {
+      if ($key != 'default') {
+        $this->prefixSearch[] = '{' . $key . '}';
+        // Add backticks around the entire table name to avoid MySQL keywords,
+        // but also add backticks within the prefix value, in the event
+        // different database names are used as a prefix.
+        $this->prefixReplace[] = '`' . str_replace('.', '`.`', $val) . $key . '`';
+      }
+    }
+    // Then replace remaining tables with the default prefix.
+    $this->prefixSearch[] = '{';
+    $this->prefixReplace[] = '`' . $this->prefixes['default'];
+    $this->prefixSearch[] = '}';
+    $this->prefixReplace[] = '`';
   }
 
   /**
