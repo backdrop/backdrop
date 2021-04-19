@@ -824,7 +824,6 @@ function update_project_cache($cid) {
   // update status of the site to avoid presenting stale information.
   $q = $_GET['q'];
   $paths = array(
-    'admin/modules',
     'admin/modules/update',
     'admin/appearance',
     'admin/appearance/update',
