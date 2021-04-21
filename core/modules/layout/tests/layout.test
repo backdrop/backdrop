@@ -2350,7 +2350,7 @@ class LayoutPreviewTest extends BackdropWebTestCase {
 
     // Edit the node with a new random body content, then preview.
     $this->backdropGet('node/1/edit');
-   $body = $this->randomName();
+    $body = $this->randomName();
     $edit = array(
       'body[und][0][value]' => $body,
     );
