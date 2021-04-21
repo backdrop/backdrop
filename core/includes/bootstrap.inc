@@ -4009,6 +4009,7 @@ function backdrop_autoload($class) {
     // module_invoke_all() because it uses array_merge_recursive(), which is an
     // expensive O(n^2) operation. Instead we use module_implements() and merge
     // the array manually, which is O(n).
+    include_once BACKDROP_ROOT . '/core/includes/module.inc';
     foreach (module_implements('autoload_info') as $module) {
       $module_classes = module_invoke($module, 'autoload_info');
       $module_path = backdrop_get_path('module', $module);
