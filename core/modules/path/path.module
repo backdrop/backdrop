@@ -102,70 +102,70 @@ function path_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/list'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/list'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/edit/%path'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/edit/%path'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/delete/%path'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/delete/%path'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/add'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/add'),
     'access arguments' => array('administer url aliases'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/patterns'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/patterns'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/patterns/list'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/patterns/list'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/patterns/settings'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/patterns/settings'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/bulk-update'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/bulk-update'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/path/bulk-delete'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/path/bulk-delete'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_CALLBACK,
@@ -244,10 +244,11 @@ function path_form_node_form_alter(&$form, $form_state) {
  * Implements hook_form_FORM_ID_alter().
  */
 function path_form_node_type_form_alter(&$form, $form_state) {
-  $url_pattern = config_get('path.settings', 'node_pattern');
+  $path_settings_config = config('path.settings');
+  $url_pattern = $path_settings_config->get('node_pattern');
   if (!empty($form['type']['#default_value'])) {
     $type = $form['type']['#default_value'];
-    $specific_url_pattern = config_get('path.settings', 'node_' . $type . '_pattern');
+    $specific_url_pattern = $path_settings_config->get('node_' . $type . '_pattern');
     if ($specific_url_pattern != NULL) {
       $url_pattern = $specific_url_pattern;
     }
@@ -304,9 +305,10 @@ function path_form_taxonomy_form_term_alter(&$form, $form_state) {
  * Implements hook_form_FORM_ID_alter() for taxonomy_form_vocabulary().
  */
 function path_form_taxonomy_form_vocabulary_alter(&$form, $form_state) {
-  $url_pattern = config_get('path.settings', 'taxonomy_term_pattern');
+  $path_settings_config = config('path.settings');
+  $url_pattern = $path_settings_config->get('taxonomy_term_pattern');
   if (isset($form['#vocabulary']->machine_name)) {
-    $specific_url_pattern = config_get('path.settings', 'taxonomy_term_' . $form['#vocabulary']->machine_name . '_pattern');
+    $specific_url_pattern = $path_settings_config->get('taxonomy_term_' . $form['#vocabulary']->machine_name . '_pattern');
     if ($specific_url_pattern != NULL) {
       $url_pattern = $specific_url_pattern;
     }
@@ -593,7 +595,7 @@ function path_config_info() {
 function path_get_info() {
   $all_info = backdrop_static(__FUNCTION__);
 
-  if (!isset($info)) {
+  if (!isset($all_info)) {
     module_load_include('inc', 'path', 'path.path');
     $modules = module_implements('path_info');
     foreach ($modules as $module) {

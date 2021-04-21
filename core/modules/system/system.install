@@ -9,6 +9,7 @@
  */
 function system_requirements($phase) {
   global $base_url;
+  $site_config = config('system.core');
   $requirements = array();
   // Ensure translations don't break during installation.
   $t = get_t();
@@ -27,12 +28,13 @@ function system_requirements($phase) {
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
+      // If a version has been specified, append it to the profile.
+      $profile .= !empty($info['version']) ? '-' . $info['version'] : '';
       $requirements['install_profile'] = array(
         'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile-%version)', array(
+        'value' => $t('%profile_name (%profile)', array(
           '%profile_name' => $info['name'],
           '%profile' => $profile,
-          '%version' => $info['version']
         )),
         'severity' => REQUIREMENT_INFO,
         'weight' => -9
@@ -250,9 +252,9 @@ function system_requirements($phase) {
 
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => config_get('system.core', 'file_public_path'),
+      'directory' => $site_config->get('file_public_path'),
     );
-    if ($private_files_directory = config_get('system.core', 'file_private_path')) {
+    if ($private_files_directory = $site_config->get('file_private_path')) {
       $htaccess_files['private://.htaccess'] = array(
         'title' => $t('Private files directory'),
         'directory' => $private_files_directory,
@@ -325,8 +327,8 @@ function system_requirements($phase) {
   // Test files directories.
   $directories = array();
   if ($phase == 'runtime') {
-    $directories[] = config_get('system.core', 'file_public_path');
-    $directories[] = config_get('system.core', 'file_private_path');
+    $directories[] = $site_config->get('file_public_path');
+    $directories[] = $site_config->get('file_private_path');
     $directories[] = file_directory_temp();
   }
   else {
@@ -579,7 +581,7 @@ function system_requirements($phase) {
 
   if ($phase == 'runtime') {
     // Inform user about status of display error messages.
-    $error_level = config_get('system.core', 'error_level');
+    $error_level = $site_config->get('error_level');
     $description = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
     $logging_url = url('admin/config/development/logging');
     if ($error_level != ERROR_REPORTING_HIDE) {
@@ -603,7 +605,7 @@ function system_requirements($phase) {
 
   if ($phase == 'runtime') {
     // Inform the user if theme_debug is enabled.
-    $theme_debug_enabled = config_get('system.core', 'theme_debug');
+    $theme_debug_enabled = $site_config->get('theme_debug');
     if ($theme_debug_enabled) {
       $requirements['theme_debug'] = array(
         'title' => $t('Theme debug'),
@@ -3144,6 +3146,30 @@ function system_update_1073() {
   $config = config('system.core');
   if ($config->get('config_sync_clear_staging') == NULL) {
     $config->set('config_sync_clear_staging', 1);
+    $config->save();
+  }
+}
+
+/**
+ * Make sure that all config translatables are set for system core.
+ */
+function system_update_1074() {
+  $config = config('system.core');
+  $available = $config->get('_config_translatables');
+  if ($available === NULL || count($available) < 4 ) {
+    // @see core/modules/system/config/system.core.json
+    $system_translatables = array(
+      'anonymous',
+      'site_name',
+      'site_slogan',
+      'maintenance_mode_message',
+    );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $system_translatables = array_merge($available, $system_translatables);
+      $system_translatables = array_values(array_unique($system_translatables));
+    }
+    $config->set('_config_translatables', $system_translatables);
     $config->save();
   }
 }
