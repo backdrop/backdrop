@@ -654,7 +654,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
           continue;
         }
-        // The "type" key is required, skip over any (sub)module not specifying
+        // The "type" key is required. Skip over any (sub)module not specifying
         // it in its .info file.
         if (!isset($module->info['type'])) {
           continue;
@@ -697,7 +697,9 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
           }
         }
         // Build the list of options, but only include (sub)modules that are not
-        // hidden.
+        // hidden. This check also helps with the rare case where the main
+        // module within a project needs to be hidden, and submodules enabled
+        // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
         if (empty($modules[$project['name']]->info['hidden'])) {
           if ($dependency_check) {
             $options[$project['name']] = array(
