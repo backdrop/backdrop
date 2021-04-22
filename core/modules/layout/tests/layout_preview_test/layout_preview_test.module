@@ -1,0 +1,16 @@
+<?php
+/**
+ * @file
+ * Layout preview test module.
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function layout_preview_test_config_info() {
+  $prefixes['layout.layout.preview_test'] = array(
+    'label' => t('Layout Preview Test layout'),
+    'group' => t('Layouts'),
+  );
+  return $prefixes;
+}
