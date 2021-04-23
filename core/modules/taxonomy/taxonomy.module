@@ -201,14 +201,14 @@ function taxonomy_field_extra_fields() {
     $vocabulary = taxonomy_vocabulary_load($bundle);
     if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
       $return['taxonomy_term'][$bundle]['form'] += array(
-        'language' => array(
+        'langcode' => array(
           'label' => t('Language'),
           'description' => t('Term language'),
           'weight' => 0,
         ),
       );
       $return['taxonomy_term'][$bundle]['display'] += array(
-        'language' => array(
+        'langcode' => array(
           'label' => t('Language'),
           'description' => t('Term language'),
           'weight' => 0,
