@@ -1742,6 +1742,64 @@ function node_layout_context_info() {
 }
 
 /**
+ * Implements hook_layout_layouts_alter().
+ */
+function node_layout_layouts_alter(&$layouts, $router_item) {
+  if (!_node_path_is_preview($router_item['path'])) {
+    return;
+  }
+  $tempstore_id = $router_item['map'][3];
+  $temp_node = node_get_node_tempstore($tempstore_id);
+  if ($temp_node) {
+    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+    if ($node_layouts) {
+      $layouts = $node_layouts;
+    }
+  }
+}
+
+/**
+ * Implements hook_layout_contexts_alter().
+ */
+function node_layout_contexts_alter(&$layout, $router_item) {
+  if (!_node_path_is_preview($router_item['path'])) {
+    return;
+  }
+  foreach ($layout->getContexts() as $context) {
+    if (isset($context->position)) {
+      $tempstore_id = $router_item['map'][3];
+      $temp_node = node_get_node_tempstore($tempstore_id);
+      if ($temp_node) {
+        $context->setData($temp_node);
+      }
+    }
+  }
+}
+
+/**
+ * Returns whether the path is a node preview path.
+ */
+function _node_path_is_preview($path) {
+  $path_is_preview = &backdrop_static(__FUNCTION__ . '_' . $path);
+  if (isset($path_is_preview)) {
+    return $path_is_preview;
+  }
+  $parts = explode('/', $path);
+  // Check path structure before checking node type because
+  // node_type_get_types() is expensive.
+  if (count($parts) == 4 && $parts[0] == 'node' && $parts[1] == 'preview' && $parts[3] == '%') {
+    foreach (node_type_get_types() as $type_obj) {
+      if ($type_obj->type == $parts[2]) {
+        $path_is_preview = TRUE;
+        return $path_is_preview;
+      }
+    }
+  }
+  $path_is_preview = FALSE;
+  return $path_is_preview;
+}
+
+/**
  * Implements hook_menu().
  */
 function node_menu() {

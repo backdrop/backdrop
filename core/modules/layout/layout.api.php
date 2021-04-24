@@ -336,6 +336,108 @@ function hook_layout_presave(Layout $layout) {
 }
 
 /**
+ * Perform alterations to the list of layouts that match the path of a router
+ * item.
+ *
+ * Modules can implement this hook to allow a given layout to be used for
+ *  multiple or different paths than its defined path.
+ *
+ * This hook is called on every page load; your implementation should quickly
+ * and efficiently determine if it is applicable and return if not.
+ *
+ * Note that if a layout's path includes positioned contexts (e.g., 'node/%')
+ * and you apply the layout to a different path, you may need to set the context
+ * data beyond the default setting done by the layout module. Do this with
+ * hook_layout_contexts_alter().
+ *
+ * If you ever implement something that has reason to call
+ * layout_load_multiple_by_path(), it should probably be followed by a call to
+ * backdrop_alter('layout_layouts', ...)  and closely following,
+ * backdrop_alter('layout_contexts', ...) to allow other modules to modify the
+ * layout list and contexts via these hooks. See layout_get_layout_by_path()
+ * for an example.
+ *
+ * @param array $layouts
+ *   The list of layouts that should be considered for the path
+ *   $router_item['path']. Note that the final selection of layout will be based
+ *   on contexts and visibility conditions.
+ * @param array $router_item
+ *   The router item for the path. In addition to obtaining the system path at
+ *   $router_item['path'], you can use other elements of $router_item. For
+ *   example, $router_item['original_map'] contains an exploded version of the
+ *   normal path.
+ *
+ * @see layout_get_layout_by_path()
+ * @see node_layout_layouts_alter()
+ */
+function hook_layout_layouts_alter(&$layouts, $router_item) {
+  // If this is the display page for a node and the node is of type
+  // 'admin_node', use the default admin layout.
+
+  // If this path isn't one we handle, nothing more is needed. Check the system
+  // path to narrow things down.
+  if ($router_item['path'] != 'node/%') {
+    return;
+  }
+
+  // The node was loaded when the router item was created, so we can check its
+  // type from the router item.
+  $node = $router_item['map'];
+  if ($node->type != 'admin_node') {
+    return;
+  }
+
+  // This is a node of type 'admin_node' so we'll replace the default list of
+  // layouts with the admin default layout. Note, though, that access checks
+  // will be performed after this step so a user who doesn't have access to
+  // the admin layout would get directed back to the default layout.
+  $layout_names[] = 'admin_default';
+  $layouts = layout_load_multiple($layout_names, TRUE);
+}
+
+/**
+ * Perform alterations to the contexts associated with a given layout.
+ *
+ * Modules can implement this hook to alter the contexts of a given layout from
+ * the default setting done by the Layout module. This may be necessary when
+ * hook_layout_layouts_alter() introduces a layout whose contexts must be set
+ * differently from the default. For example, for previews of new nodes, the
+ * context parameter is interpreted as a tempstore ID rather than a node ID.
+ *
+ * Like hook_layout_layouts_alter(), this hook is called on every page load;
+ * your implementation should quickly and efficiently determine if it is
+ * applicable and return if not.
+ *
+ * @param Layout $layout
+ *   The layout under consideration. Access its contexts with
+ *   $layout->getContexts().
+ * @param array $router_item
+ *   The router item for the path. In addition to getting the system path at
+ *   $router_item['path'], you can use other elements of $router_item. For
+ *   example, $router_item['original_map'] contains an exploded version of the
+ *   normal path.
+ *
+ * @see layout_get_layout_by_path()
+ * @see node_layout_contexts_alter()
+ */
+function hook_layout_contexts_alter(Layout $layout, $router_item) {
+  // Just to confuse people, if we're looking at node 1, set node 2 as the context.
+
+  // If this path isn't the one we handle, nothing more is needed.
+  if ($router_item['path'] != 'node/%' || $router_item['original_map'][1] != 1) {
+    return;
+  }
+
+  // Change the contextual data.
+  foreach ($layout->getContexts() as $context) {
+     if (isset($context->position)) {
+      $data = node_load(2);
+      $context->setData($data);
+     }
+  }
+}
+
+/**
  * Defines to Backdrop what blocks are provided by your module.
  *
  * In hook_block_info(), each block your module provides is given a unique
