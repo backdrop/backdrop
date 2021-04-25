@@ -163,15 +163,7 @@ function lock_acquire($name, $timeout = 30.0) {
  *   TRUE if there is no lock or it was removed, FALSE otherwise.
  */
 function lock_may_be_available($name) {
-  try {
-    $lock = db_query('SELECT expire, value FROM {semaphore} WHERE name = :name', array(':name' => $name))->fetchAssoc();
-  }
-  catch (Exception $e) {
-//    echo '<pre>';
-//    print_r($e->getTrace());
-//    echo '</pre>';
-    throw $e;
-  }
+  $lock = db_query('SELECT expire, value FROM {semaphore} WHERE name = :name', array(':name' => $name))->fetchAssoc();
   if (!$lock) {
     return TRUE;
   }

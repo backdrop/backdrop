@@ -1876,8 +1876,14 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->fail('Failed to drop all prefixed tables.');
     }
 
+    // In PHP 8 some tests encounter problems as some shutdown code tries to
+    // access the database connection after it's been explicitly closed (for
+    // example the destructor of BackdropCacheArray). We avoid this by not fully
+    // destroying the test database connection.
+    $close = \PHP_VERSION_ID < 80000;
+
     // Get back to the original connection.
-    Database::removeConnection('default');
+    Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
 
     // Delete the database table prefix record.

@@ -2291,7 +2291,7 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
  */
 function parse_size($size) {
   $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
-  $size = preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+  $size = (float) preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
   if ($unit) {
     // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
     return round($size * pow(BACKDROP_KILOBYTE, stripos('bkmgtpezy', $unit[0])));
@@ -3017,7 +3017,7 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  */
 function backdrop_deliver_html_page($page_callback_result) {
   $site_config = config('system.core');
-  
+
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running

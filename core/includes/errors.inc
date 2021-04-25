@@ -253,7 +253,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
       // We fallback to a maintenance page at this point, because the page generation
       // itself can generate errors. Provide the error message to the end-user
       // but exclude PHP error information.
-      print theme('maintenance_page', array('content' => t('%type: !message in %function (line %line of %file).', $error)));
+      print theme('maintenance_page', array('content' => $error['!message']));
       exit;
     }
   }

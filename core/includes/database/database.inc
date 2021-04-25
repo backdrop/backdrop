@@ -1723,12 +1723,16 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
+   * @param $close
+   *   Whether to close the connection.
    * @return
    *   TRUE in case of success, FALSE otherwise.
    */
-  final public static function removeConnection($key) {
+  final public static function removeConnection($key, $close = TRUE) {
     if (isset(self::$databaseInfo[$key])) {
-      self::closeConnection(NULL, $key);
+      if ($close) {
+        self::closeConnection(NULL, $key);
+      }
       unset(self::$databaseInfo[$key]);
       return TRUE;
     }
@@ -2885,10 +2889,6 @@ function db_field_exists($table, $field) {
  */
 function db_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
-}
-
-function _db_create_keys_sql($spec) {
-  return Database::getConnection()->schema()->createKeysSql($spec);
 }
 
 /**
