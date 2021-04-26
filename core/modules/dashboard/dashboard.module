@@ -12,6 +12,8 @@ function dashboard_menu() {
 
   // Check if any dashboard is present and is not disabled.
   $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
+  $router_item = menu_get_item('admin/dashboard');
+  backdrop_alter('layout_layouts', $dashboard_layouts, $router_item);
   $dashboard_layout = array_pop($dashboard_layouts);
   if ($dashboard_layout->hasContexts(array('dashboard')) && !$dashboard_layout->disabled) {
     $items['admin/dashboard/overview'] = array(
@@ -201,7 +203,10 @@ function dashboard_user_login(&$edit, $account) {
 
   // Check access to any dashboard layouts, and redirect.
   $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
+  $router_item = menu_get_item('admin/dashboard');
+  backdrop_alter('layout_layouts', $dashboard_layouts, $router_item);
   foreach ($dashboard_layouts as $dashboard_layout) {
+    backdrop_alter('layout_contexts', $layout, $router_item);
     if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
       $_GET['destination'] = 'admin/dashboard';
       break;

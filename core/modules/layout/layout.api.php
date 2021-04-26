@@ -371,8 +371,8 @@ function hook_layout_presave(Layout $layout) {
  * @see node_layout_layouts_alter()
  */
 function hook_layout_layouts_alter(&$layouts, $router_item) {
-  // If this is the display page for a node and the node is of type
-  // 'admin_node', use the default admin layout.
+  // Example implementation: if this is the display page for a node and the node
+  // is of type 'admin_node', use the default admin layout.
 
   // If this path isn't one we handle, nothing more is needed. Check the system
   // path to narrow things down.
@@ -390,7 +390,7 @@ function hook_layout_layouts_alter(&$layouts, $router_item) {
   // This is a node of type 'admin_node' so we'll replace the default list of
   // layouts with the admin default layout. Note, though, that access checks
   // will be performed after this step so a user who doesn't have access to
-  // the admin layout would get directed back to the default layout.
+  // the admin layout would still get directed back to the default layout.
   $layout_names[] = 'admin_default';
   $layouts = layout_load_multiple($layout_names, TRUE);
 }
@@ -421,7 +421,8 @@ function hook_layout_layouts_alter(&$layouts, $router_item) {
  * @see node_layout_contexts_alter()
  */
 function hook_layout_contexts_alter(Layout $layout, $router_item) {
-  // Just to confuse people, if we're looking at node 1, set node 2 as the context.
+  // Example implementation: just to confuse people, if we're looking at node 1,
+  // set node 2 as the context.
 
   // If this path isn't the one we handle, nothing more is needed.
   if ($router_item['path'] != 'node/%' || $router_item['original_map'][1] != 1) {

@@ -12,8 +12,12 @@ function layout_page_callback() {
   $menu_item_name = array_shift($args);
   $menu_item = layout_menu_item_load($menu_item_name);
 
-  // Determine the correct layout to use at this path.
+  // Determine the correct layout to use at this path. Need to reconstruct the
+  // normal path so that we can pass the router item in backdrop_alter().
   $layouts = layout_load_multiple_by_path($menu_item->path);
+  $router_item = menu_get_item(implode('/', $args));
+  backdrop_alter('layout_layouts', $layouts, $router_item);
+
   $match_found = FALSE;
   $layout = NULL;
   foreach ($layouts as $layout) {
@@ -28,6 +32,7 @@ function layout_page_callback() {
         $context->setData($args[$context->position]);
       }
     }
+    backdrop_alter('layout_contexts', $layout, $router_item);
 
     // Check access to this layout.
     if ($layout->checkAccess()) {
