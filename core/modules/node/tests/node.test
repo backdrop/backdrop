@@ -816,10 +816,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 
   function setUp() {
-    parent::setUp();
-
-    // Enable the test module that contains our test layout in its config.
-    module_enable(array('layout_preview_test'));
+    parent::setUp('node_layout_preview_test');
 
     // Create a content type for checking node/edit page layouts.
     $this->content_type = $this->backdropCreateContentType();
