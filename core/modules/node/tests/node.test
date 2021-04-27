@@ -834,7 +834,7 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
   /**
    * Tests that the correct layout is used for node add and node edit previews.
    */
-  function testPages() {
+  function testNodeLayoutPreview() {
 
     // Create a node to test through the admin interface.
     $this->backdropGet('node/add/' . $this->content_type->type);

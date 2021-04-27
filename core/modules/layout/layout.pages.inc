@@ -12,10 +12,12 @@ function layout_page_callback() {
   $menu_item_name = array_shift($args);
   $menu_item = layout_menu_item_load($menu_item_name);
 
-  // Determine the correct layout to use at this path. Need to reconstruct the
-  // normal path so that we can pass the router item in backdrop_alter().
+  // Determine the correct layout to use at this path.
   $layouts = layout_load_multiple_by_path($menu_item->path);
-  $router_item = menu_get_item(implode('/', $args));
+  // Need to get the router item to pass to backdrop_alter(). This assumes we're
+  // only calling this function for the current path (as opposed to, say,
+  // constructing a page for some other path).
+  $router_item = menu_get_item();
   backdrop_alter('layout_layouts', $layouts, $router_item);
 
   $match_found = FALSE;
