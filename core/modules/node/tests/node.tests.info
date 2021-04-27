@@ -34,7 +34,7 @@ description = Test node preview functionality.
 group = Node
 file = node.test
 
-[LayoutPreviewTestCase]
+[NodeLayoutPreviewTestCase]
 name = Node layout preview test
 description = Tests that the correct layout is used for node previews.
 group = Node
