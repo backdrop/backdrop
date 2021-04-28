@@ -14,6 +14,7 @@ function layout_page_callback() {
 
   // Determine the correct layout to use at this path.
   $layouts = layout_load_multiple_by_path($menu_item->path);
+
   // Need to get the router item to pass to backdrop_alter(). This assumes we're
   // only calling this function for the current path (as opposed to, say,
   // constructing a page for some other path).

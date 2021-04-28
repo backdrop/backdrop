@@ -12,8 +12,6 @@ function dashboard_menu() {
 
   // Check if any dashboard is present and is not disabled.
   $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
-  $router_item = menu_get_item('admin/dashboard');
-  backdrop_alter('layout_layouts', $dashboard_layouts, $router_item);
   $dashboard_layout = array_pop($dashboard_layouts);
   if ($dashboard_layout->hasContexts(array('dashboard')) && !$dashboard_layout->disabled) {
     $items['admin/dashboard/overview'] = array(
