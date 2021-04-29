@@ -3017,7 +3017,7 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  */
 function backdrop_deliver_html_page($page_callback_result) {
   $site_config = config('system.core');
-  
+
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -3451,8 +3451,8 @@ function backdrop_css_defaults($data = NULL) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
- *   - attributes: An associative array of attributes for the <link> tag.
- *     This may be used to add 'integrity' or custom attributes. Note that
+ *   - attributes: (optional) An associative array of attributes for the <link>
+ *     tag. This may be used to add 'integrity' or custom attributes. Note that
  *     setting any attributes will disable preprocessing as though the
  *     'preprocess' option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
@@ -3923,7 +3923,9 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
-            $element['#attributes'] += $item['attributes'];
+            if (isset($item['attributes'])) {
+              $element['#attributes'] += $item['attributes'];
+            }
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3946,7 +3948,9 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
-            $element['#attributes'] += $item['attributes'];
+            if (isset($item['attributes'])) {
+              $element['#attributes'] += $item['attributes'];
+            }
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3958,7 +3962,9 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
-          $element['#attributes'] += $item['attributes'];
+          if (isset($item['attributes'])) {
+            $element['#attributes'] += $item['attributes'];
+          }
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
