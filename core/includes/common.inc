@@ -3451,8 +3451,8 @@ function backdrop_css_defaults($data = NULL) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
- *   - attributes: (optional) An associative array of attributes for the <link>
- *     tag. This may be used to add 'integrity' or custom attributes. Note that
+ *   - attributes: An associative array of attributes for the <link> tag. This
+ *     may be used to add 'integrity' or custom attributes. Note that
  *     setting any attributes will disable preprocessing as though the
  *     'preprocess' option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
