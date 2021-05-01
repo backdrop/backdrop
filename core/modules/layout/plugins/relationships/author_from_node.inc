@@ -4,19 +4,25 @@
  * @file
  * Class that holds information relating to the user from node relationship.
  */
-class LayoutRelationshipUserFromNode extends LayoutRelationship {
+class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
   /**
    * Get the context from this relationship.
+   *
+   * @param LayoutContext $source_context;
+   *   The source context on which this relationship is based.
+   *
+   * @return LayoutContext|FALSE
+   *   The additional context added once this relationship is joined.
    */
-  function getContext($context) {
+  function getContext(LayoutContext $source_context) {
     $account = NULL;
-    if (isset($context->data->uid)) {
+    if (isset($source_context->data->uid)) {
       // Load the user that is the author of the node.
-      $uid = $context->data->uid;
+      $uid = $source_context->data->uid;
       $account = user_load($uid);
     }
     $user_context = layout_create_context('user', array(
-      'position' => $context->position,
+      'position' => $source_context->position,
       'label' => $this->getAdminSummary(),
     ));
     $user_context->setData($account);

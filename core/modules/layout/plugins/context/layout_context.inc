@@ -5,6 +5,39 @@
  * Class that holds information relating to a layouts context.
  */
 abstract class LayoutContext extends LayoutHandler {
+
+  /**
+   * Declares a LayoutContext to be a manually specified custom context.
+   */
+  const USAGE_TYPE_CUSTOM = 1;
+
+  /**
+   * Declares a LayoutContext to be provided based on a menu item or path.
+   */
+  const USAGE_TYPE_MENU = 2;
+
+  /**
+   * Declares a LayoutContext to be a system-wide context
+   *
+   * Examples include the "current_user" context and "overrides_path" context.
+   */
+  const USAGE_TYPE_SYSTEM = 4;
+
+  /**
+   * Declares a LayoutContext is provided by a relationship to another context.
+   */
+  const USAGE_TYPE_RELATIONSHIP = 8;
+
+  /**
+   * The default list of context types when calling Layout::getContexts().
+   */
+  const USAGE_TYPE_DEFAULT = self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM;
+
+  /**
+   * All possible context types, including relationships.
+   */
+  const USAGE_TYPE_ALL = self::USAGE_TYPE_DEFAULT | self::USAGE_TYPE_RELATIONSHIP;
+
   /**
    * The name of the plugin that provides this context.
    *
@@ -111,6 +144,27 @@ abstract class LayoutContext extends LayoutHandler {
   var $storage = FALSE;
 
   /**
+   * Declares how this context is used by a Layout.
+   *
+   * For example a "user" context might be available in a Layout through
+   * multiple sources. If the layout overrides the path "user/%" one user
+   * context would have the $usageType LayoutContext::USAGE_TYPE_MENU.
+   *
+   * If the author of a node is added to a Layout through a relationship,
+   * a second context would be available with the $usageType
+   * LayoutContext::USAGE_TYPE_RELATIONSHIP.
+   *
+   * Checking a context's $usageType can help determine where and how a context
+   * was added to a Layout object.
+   *
+   * This value must be one of the USAGE_TYPE_* constants defined in the
+   * LayoutContext class.
+   *
+   * @var int
+   */
+  var $usageType = self::USAGE_TYPE_CUSTOM;
+
+  /**
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {
@@ -123,6 +177,7 @@ abstract class LayoutContext extends LayoutHandler {
       'name',
       'label',
       'storage',
+      'usageType',
     );
     foreach ($properties as $property) {
       if (isset($config[$property])) {
@@ -228,6 +283,7 @@ class LayoutContextBroken extends LayoutContext {
  * Pass-through context used when an unknown argument is encountered.
  */
 class LayoutOverridesPathContext extends LayoutContext {
+  var $usageType = LayoutContext::USAGE_TYPE_SYSTEM;
   function type() {
     return 'overrides_path';
   }

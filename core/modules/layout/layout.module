@@ -865,7 +865,7 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Relationships.
-    'LayoutRelationshipUserFromNode' => 'plugins/relationships/user_from_node.inc',
+    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
     'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
@@ -1260,10 +1260,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     }
     $selected_layout = NULL;
     foreach ($layouts as $layout) {
-      // Contexts must be set before the layout's access may be checked.
-      $contexts = $layout->getContexts();
+      // Set context data from the menu path.
+      $menu_contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_MENU);
 
-      foreach ($contexts as $context) {
+      foreach ($menu_contexts as $context) {
         if (isset($context->position)) {
 
           // Check for an object loaded by the menu router. Use a preview from
@@ -1284,13 +1284,6 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
             }
           }
         }
-      }
-
-      // Get contexts from relationships
-      $relationships = $layout->relationships;
-      layout_get_context_from_relationships($relationships, $contexts);
-      foreach ($contexts as $key => $context) {
-        $layout->setContexts($key, $context);
       }
 
       if (!$layout->disabled && $layout->checkAccess()) {
@@ -1540,61 +1533,6 @@ function layout_relationships_get_relevant_info($contexts) {
   }
 
   return $relevant;
-}
-
-
-/**
- * @param $relationship
- *   A relationship object.
- *
- * @param $source_context
- *   The context this relationship is based upon.
- *
- * @return
- *   A context object if one can be loaded.
- */
-function layout_get_context_from_relationship($relationship, $source_context) {
-  $new_context = clone($source_context);
-  $context = $relationship->getContext($new_context);
-  if ($context) {
-    return $context;
-  }
-  return array();
-}
-
-/**
- * Fetch all active relationships
- *
- * @param $relationships
- *   An keyed array of relationship objects.
- *
- * @param $contexts
- *   A keyed array of contexts used to figure out which relationships
- *   are relevant. New contexts will be added to this.
- */
-function layout_get_context_from_relationships($relationships, &$contexts) {
-  $contexts_from_relationships_list  = &backdrop_static('layout_get_context_from_relationships', array());
-  foreach ($relationships as $rname => $rdata) {
-    $key = 'relationship_' . $rname;
-    if (!isset($contexts_from_relationships_list[$key])) {
-      foreach ($contexts as $context) {
-        if ($context->plugin == $rdata->context) {
-          $plugin_array = explode(':', $rdata->settings['relationship']);
-          if ($plugin_array[1] != 'child') {
-            $rdata->childDelta = $plugin_array[1];
-          }
-          $contexts_from_relationships_list[$key] = layout_get_context_from_relationship($rdata, $context);
-        }
-      }
-    }
-  }
-  if ($contexts_from_relationships_list) {
-    foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
-      if (is_object($context_from_relationships)) {
-        $contexts[$key] = $context_from_relationships;
-      }
-    }
-  }
 }
 
 /**
@@ -1950,6 +1888,7 @@ function layout_context_required_by_path($path) {
   foreach ($required_context_info as $context_position => $context_info) {
     $context = layout_create_context($context_info['plugin']);
     $context->required = TRUE;
+    $context->usageType = LayoutContext::USAGE_TYPE_MENU;
     // String placeholders are not locked, allowing a new value to be set.
     $context->locked = $context_info['plugin'] !== 'string';
     $context->position = $context_position;
@@ -1973,6 +1912,7 @@ function layout_current_user_context() {
     'name' => 'current_user',
     'label' => t('Current user'),
     'locked' => TRUE,
+    'usageType' => LayoutContext::USAGE_TYPE_SYSTEM,
   ));
   $current_user_context->setData($GLOBALS['user']);
   return $current_user_context;

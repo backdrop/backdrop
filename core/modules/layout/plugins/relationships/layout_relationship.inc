@@ -4,7 +4,7 @@
  * @file
  * Class that holds information relating to a layout's context relationships.
  */
-abstract class LayoutRelationship extends LayoutHandler{
+abstract class LayoutRelationship extends LayoutHandler {
   /**
    * The name of the plugin that provides this relationship.
    *
@@ -62,6 +62,17 @@ abstract class LayoutRelationship extends LayoutHandler{
       $this->childDelta = ($child == 'relationship') ? NULL : $child;
     }
   }
+
+  /**
+   * Get the context from this relationship.
+   *
+   * @param LayoutContext $source_context;
+   *   The source context on which this relationship is based.
+   *
+   * @return LayoutContext|FALSE
+   *   The additional context added once this relationship is joined.
+   */
+  abstract function getContext(LayoutContext $source_context);
 
   /**
    * Assemble a human-readable label of this object.
@@ -166,6 +177,10 @@ abstract class LayoutRelationship extends LayoutHandler{
  * A class to be used for relationships whose handler cannot be found.
  */
 class LayoutRelationshipBroken extends LayoutRelationship {
+  function getContext(LayoutContext $source_context) {
+    return FALSE;
+  }
+
   function type() {
     return 'broken';
   }

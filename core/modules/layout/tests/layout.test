@@ -75,7 +75,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context relationship'));
 
     $edit = array(
-      'relationship' => 'user_from_node:relationship',
+      'relationship' => 'author_from_node:relationship',
     );
     $this->backdropPost(NULL, $edit, t('Load relationship'));
     $this->backdropPost(NULL, array(), t('Add relationship'));
@@ -131,7 +131,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
 
-     // Remove the user from node relationship.
+     // Remove the author from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
   }
 

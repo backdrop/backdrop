@@ -68,10 +68,7 @@ class LayoutAccess extends LayoutHandler {
     }
     else {
       $item = $form_state['layout'];
-      $contexts = $item->getContexts();
-
-      // Get contexts from relationships
-      layout_get_context_from_relationships($item->relationships, $contexts);
+      $contexts = $item->getAllContexts();
     }
     $access_info = layout_get_access_info($this->plugin);
 
