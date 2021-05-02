@@ -40,7 +40,7 @@ function installer_menu() {
     );
     // @deprecated: Remove these backwards-compatibility redirects in 2.0.
     $items[$path . '/update'] = array(
-      'page callback' => 'backdrop_goto_deprecated',
+      'page callback' => 'system_redirect_deprecated_page',
       'page arguments' => array('admin/config/system/updates'),
       'access arguments' => array('installer_update_access'),
       'type' => MENU_CALLBACK,
@@ -57,8 +57,6 @@ function installer_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_update_form'),
     'access callback' => 'installer_update_access',
-    // Making this a local task will hide it from admin/config/system.
-    // 'type' => MENU_LOCAL_TASK,
     'file' => 'installer.manager.inc',
   );
 
