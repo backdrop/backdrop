@@ -70,15 +70,26 @@ class DashboardUpdateBlock extends Block {
     module_load_include('inc', 'update', 'update.compare');
     $data = update_calculate_project_data($available);
 
+    $project_types = array(
+      'core' => t('Core'),
+      'module' => t('Module'),
+      'theme' => t('Theme'),
+      'layout' => t('Layout template'),
+    );
+
     foreach ($data as $key => $project) {
-      // Skip projects which are up to date already.
+      // Skip projects that are up to date already.
       if ($project['status'] == UPDATE_CURRENT) {
         continue;
       }
 
-      $project_type = $project['project_type'];
-      if (in_array($project_type, $this->settings['project_types'])) {
-        $project_type = $project_type == 'layout' ? t('layout template') : $project_type;
+      // Give core a proper title.
+      if ($project['project_type'] === 'core') {
+        $project['title'] = t('Backdrop');
+      }
+
+      if (in_array($project['project_type'], $this->settings['project_types'])) {
+        $project_type = $project_types[$project['project_type']];
 
         if (isset($project['recommended'])) {
           $update = $project['recommended'];
@@ -90,6 +101,7 @@ class DashboardUpdateBlock extends Block {
             'security' => t('security update'),
             'unsupported' => t('unsupported version'),
           );
+
           switch ($project['status']) {
             case UPDATE_NOT_SECURE:
             case UPDATE_REVOKED:
@@ -106,6 +118,7 @@ class DashboardUpdateBlock extends Block {
             case UPDATE_NOT_FETCHED:
             case UPDATE_NOT_CHECKED:
             case UPDATE_NOT_CURRENT:
+            default:
               $type = 'recommended';
               $weight = 2;
               break;
@@ -114,17 +127,17 @@ class DashboardUpdateBlock extends Block {
             $update .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
           }
           $class = array('update-' . $type);
-        }
 
-        $updates[] = array(
-          'data' => array(
-            $project['title'],
-            $project_type,
-            $update,
-          ),
-          'class' => $class,
-          'weight' => $weight,
-        );
+          $updates[] = array(
+            'data' => array(
+              $project['title'],
+              $project_type,
+              $update,
+            ),
+            'class' => $class,
+            'weight' => $weight,
+          );
+        }
       }
     }
 

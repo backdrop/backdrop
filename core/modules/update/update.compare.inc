@@ -197,26 +197,26 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     // or theme. If the project name is 'backdrop', we don't want it to show up
     // under the usual "Modules" section, we put it at a special "Core"
     // section at the top of the report.
-if ($project_name == 'backdrop') {
-  $project_display_type = 'core';
-}
-else {
-  $project_display_type = $project_type;
-}
+    if ($project_name == 'backdrop') {
+      $project_display_type = 'core';
+    }
+    else {
+      $project_display_type = $project_type;
+    }
+
     if (empty($status) && empty($file->enabled_sub_themes)) {
       // If we're processing disabled modules or themes, append a suffix.
       // However, we don't do this to a a base theme with enabled
       // subthemes, since we treat that case as if it is enabled.
-      // $project_display_type .= '-disabled';
+      $project_display_type .= '-disabled';
     }
+
     // Add a list of sub-themes that "depend on" the project and a list of base
     // themes that are "required by" the project.
     if ($project_name == 'backdrop') {
       // Backdrop core is always required, so this extra info would be noise.
       $sub_themes = array();
       $base_themes = array();
-      // Add a more distinguisable label for core.
-      // $projects[$project_name]['title'] = t('Backdrop CMS');
     }
     else {
       // Add list of enabled sub-themes.
