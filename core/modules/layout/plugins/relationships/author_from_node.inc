@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Class that holds information relating to the user from node relationship.
+ * Provides relationship to relate the Author from a piece of content (node).
  */
 class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
   /**
@@ -37,13 +37,13 @@ class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
     if (!empty($this->settings['context_parent'])) {
       list($label, $value) = explode(':', $this->settings['context_parent']);
       if ($label == 'position') {
-        return t('User from node in position @position', array('@position' => $value+1));
+        return t('Author from content in position @position', array('@position' => $value+1));
       }
       else {
-        return t('User from node @id', array('@id' => $value));
+        return t('Author from content @id', array('@id' => $value));
       }
     }
-    return t('User from node');
+    return t('Author from content');
   }
 
 }

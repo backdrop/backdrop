@@ -64,14 +64,12 @@ class LayoutAccess extends LayoutHandler {
     /* @var Layout|LayoutMenuItem $item */
     if ($form_state['menu_item']) {
       $item = $form_state['menu_item'];
-      $contexts = $item->getContexts();
     }
     else {
       $item = $form_state['layout'];
-      $contexts = $item->getAllContexts();
     }
     $access_info = layout_get_access_info($this->plugin);
-
+    $contexts = $item->getContexts();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $access_info);
   }

@@ -780,17 +780,14 @@ class Layout {
    *   LayoutContext class, which includes the following:
    *
    *   - USAGE_TYPE_ALL - All contexts from all possible sources.
-   *   - USAGE_TYPE_DEFAULT - All contexts except those from relationships.
    *   - USAGE_TYPE_CUSTOM - Contexts manually specified in configuration.
    *   - USAGE_TYPE_MENU - Contexts automatically provided from a menu path.
    *   - USAGE_TYPE_SYSTEM - Global contexts such as logged-in user.
    *   - USAGE_TYPE_RELATIONSHIP - Contexts added through relationships.
    *
    * @return LayoutContext[]
-   *
-   * @see Layout::getAllContexts()
    */
-  function getContexts($include_types = LayoutContext::USAGE_TYPE_DEFAULT) {
+  function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
     // Initialize a list of contexts if not defined.
     if (is_null($this->contexts)) {
       $this->contexts = array();
@@ -833,7 +830,12 @@ class Layout {
       ));
     }
 
-    // Trim down the list of contexts to only those requested.
+    // Return all contexts if requested.
+    if ($include_types === LayoutContext::USAGE_TYPE_ALL) {
+      return $this->contexts;
+    }
+
+    // Otherwise filter down the list of contexts to only those requested.
     $return_contexts = array();
     foreach ($this->contexts as $key => $context) {
       if ($context->usageType & $include_types) {
@@ -842,15 +844,6 @@ class Layout {
     }
 
     return $return_contexts;
-  }
-
-  /**
-   * Shortcut to Layout::getContexts() that loads all possible contexts.
-   *
-   * @return LayoutContext[]
-   */
-  function getAllContexts() {
-    return $this->getContexts(LayoutContext::USAGE_TYPE_ALL);
   }
 
   /**
@@ -893,7 +886,7 @@ class Layout {
    *   TRUE if this layout has all the required contexts, FALSE otherwise.
    */
   function hasContexts($required_contexts) {
-    $all_contexts = $this->getAllContexts();
+    $all_contexts = $this->getContexts();
     foreach ($required_contexts as $required_context_name) {
       $context_missing = TRUE;
       foreach ($all_contexts as $context) {

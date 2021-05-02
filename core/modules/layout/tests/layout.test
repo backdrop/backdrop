@@ -70,7 +70,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Check the path first to populate available contexts.
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Check path'));
 
-     // Test user from node relationship.
+     // Test Author from Content relationship.
     $edit = array();
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context relationship'));
 

@@ -81,7 +81,7 @@ function layout_layout_context_info() {
  */
 function layout_layout_relationship_info() {
   $info['author_from_node'] = array(
-    'title' => t('User from node'),
+    'title' => t('Author from content'),
     'class' => 'LayoutRelationshipAuthorFromNode',
     'context' => 'node',
     'context_label' => t('Node'),

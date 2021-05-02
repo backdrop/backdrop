@@ -180,7 +180,9 @@ class LayoutRelationshipBroken extends LayoutRelationship {
   function getContext(LayoutContext $source_context) {
     return FALSE;
   }
-
+  function getAdminSummary() {
+    return '<em>' . t('Missing relationship: @plugin', array('@plugin' => $this->plugin)) . '</em>';
+  }
   function type() {
     return 'broken';
   }

@@ -223,7 +223,7 @@ class Block extends LayoutHandler {
   function form(&$form, &$form_state) {
     /* @var Layout $layout */
     $layout = $form_state['layout'];
-    $contexts = $layout->getAllContexts();
+    $contexts = $layout->getContexts();
 
     $block_info = $this->getBlockInfo();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();

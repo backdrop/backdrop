@@ -29,14 +29,9 @@ abstract class LayoutContext extends LayoutHandler {
   const USAGE_TYPE_RELATIONSHIP = 8;
 
   /**
-   * The default list of context types when calling Layout::getContexts().
+   * All possible context types.
    */
-  const USAGE_TYPE_DEFAULT = self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM;
-
-  /**
-   * All possible context types, including relationships.
-   */
-  const USAGE_TYPE_ALL = self::USAGE_TYPE_DEFAULT | self::USAGE_TYPE_RELATIONSHIP;
+  const USAGE_TYPE_ALL = self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM | self::USAGE_TYPE_RELATIONSHIP;
 
   /**
    * The name of the plugin that provides this context.

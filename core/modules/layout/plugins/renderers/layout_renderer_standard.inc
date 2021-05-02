@@ -210,7 +210,7 @@ class LayoutRendererStandard {
       // Check access on each block.
       if (empty($this->admin)) {
         // Assign contexts to each block.
-        $layout_contexts = $this->layout->getAllContexts();
+        $layout_contexts = $this->layout->getContexts();
 
         $has_contexts = TRUE;
         $required_contexts = $block->getRequiredContexts();

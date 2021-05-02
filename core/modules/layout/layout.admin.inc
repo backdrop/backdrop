@@ -311,7 +311,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
 
-  $contexts = $layout->getContexts();
+  // Get all contexts except those provided by relationships.
+  $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),
@@ -379,7 +380,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   foreach ($contexts as $context_key => $layout_context) {
-    if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
+    if ($layout_context->usageType !== LayoutContext::USAGE_TYPE_SYSTEM) {
       // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
@@ -445,13 +446,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       }
     }
   }
+
   $all_relationship_info = _layout_get_all_info('layout_relationship');
   foreach ($layout->relationships as $relationship_key => $relationship) {
     $form['context_wrapper']['context']['required'][$relationship_key]['summary'] = array(
       '#markup' => $relationship->getAdminSummary(),
     );
     $form['context_wrapper']['context']['required'][$relationship_key]['plugin'] = array(
-      '#markup' => check_plain($all_relationship_info[$relationship->plugin]['title']),
+      '#markup' => isset($all_relationship_info[$relationship->plugin]['title']) ?
+        check_plain($all_relationship_info[$relationship->plugin]['title']) :
+        t('Broken'),
     );
     $form['context_wrapper']['context']['required'][$relationship_key]['operations'] = array(
       '#type' => 'container',
