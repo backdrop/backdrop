@@ -106,6 +106,13 @@ function installer_manager_update_form($form, $form_state) {
   module_load_include('inc', 'update', 'update.compare');
   $project_data = update_calculate_project_data($available);
 
+  $project_types = array(
+    'core' => t('Core'),
+    'module' => t('Module'),
+    'theme' => t('Theme'),
+    'layout' => t('Layout template'),
+  );
+
   foreach ($project_data as $name => $project) {
     // Filter out projects which are up to date already.
     if ($project['status'] == UPDATE_CURRENT) {
@@ -139,15 +146,14 @@ function installer_manager_update_form($form, $form_state) {
     $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
     $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
-      $recommended_version .= '<div title="Major upgrade warning" class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version. It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
+      $recommended_version .= '<div class="update-major-version-warning">' . t('This update is a major version update which means that it may not be backwards compatible with your currently running version. It is recommended that you read the release notes and proceed at your own risk.') . '</div>';
     }
 
     // Create an entry for this project.
     $entry = array(
       'title' => $project_name,
-      'project_type' => $project['project_type'] == 'layout' ? 'layout template' : $project['project_type'],
-      'project_status' => $project['project_status'] ? t('enabled') : t('disabled'),
-      // 'project_status' => $projects['disabled'][$name],
+      'project_type' => $project_types[$project['project_type']],
+      'project_status' => $project['project_status'] ? t('Enabled') : t('Disabled'),
       'installed_version' => $project['existing_version'],
       'recommended_version' => $recommended_version,
     );
