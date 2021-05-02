@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the system module.
+ * Admin page callbacks for the System module.
  */
 
 /**

@@ -903,7 +903,7 @@ function file_update_1005() {
     'audio' => array(
       'type' => 'audio',
       'name' => 'Audio',
-      'description' => 'An Audio file is a sound recording.',
+      'description' => 'An audio file is a sound recording.',
       'mimetypes' => array(
         'audio/*'
       ),
@@ -946,7 +946,7 @@ function file_update_1005() {
     'video' => array(
       'type' => 'video',
       'name' => 'Video',
-      'description' => 'A Video file is a moving visual recording.',
+      'description' => 'A video file is a moving visual recording.',
       'mimetypes' => array(
           'video/*',
       ),

@@ -110,21 +110,21 @@ function redirect_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect'),
     'access arguments' => array('administer redirects'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect/list'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect/list'),
     'access arguments' => array('administer redirects'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect/add'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect/add'),
     'access callback' => 'redirect_access',
     'access arguments' => array('create', 'redirect'),
@@ -132,7 +132,7 @@ function redirect_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect/edit/%redirect'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect/edit/%redirect'),
     'access callback' => 'redirect_access',
     'access arguments' => array('update', 5),
@@ -140,7 +140,7 @@ function redirect_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect/delete/%redirect'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect/delete/%redirect'),
     'access callback' => 'redirect_access',
     'access arguments' => array('delete', 5),
@@ -148,7 +148,7 @@ function redirect_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/redirect/settings'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/redirect/settings'),
     'access arguments' => array('administer redirects'),
     'type' => MENU_CALLBACK,
@@ -181,7 +181,7 @@ function redirect_menu() {
     );
     // @deprecated: Remove backwards-compatibility redirect in 2.0.
     $items['admin/config/search/redirect/404'] = array(
-      'page callback' => 'backdrop_goto_deprecated',
+      'page callback' => 'system_redirect_deprecated_page',
       'page arguments' => array('admin/config/urls/redirect/404'),
       'access arguments' => array('administer redirects'),
       'type' => MENU_CALLBACK,

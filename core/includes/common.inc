@@ -774,14 +774,21 @@ function backdrop_encode_path($path) {
 }
 
 /**
- * A wrapper function for deprecated menu entries redirecting to their new path.
+ * Wraps backdrop_goto() to include a deprecated log message.
+ *
+ * In earlier versions of Backdrop, this was sometimes used directly as a menu
+ * callback. It is now recommended to use system_redirect_deprecated_page()
+ * instead when deprecating paths, because that function can handle wildcards
+ * and path mapping. It resolves the final path and then calls this function to
+ * perform the redirect.
  *
  * @see backdrop_goto()
+ * @see system_redirect_deprecated_page()
  *
  * @since 1.5.0
  */
 function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $path, '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $_GET['q'], '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
@@ -1438,44 +1445,71 @@ function valid_url($url, $absolute = FALSE) {
  * The implementation assumes it is dealing with IEEE 754 double precision
  * floating point numbers that are used by PHP on most systems.
  *
- * This is based on the number/range verification methods of webkit.
- *
- * @param $value
- *   The value that needs to be checked.
- * @param $step
- *   The step scale factor. Must be positive.
- * @param $offset
+ * @param mixed $value
+ *   The numeric value that needs to be checked, integer or float.
+ * @param mixed $step
+ *   The step scale factor, integer or float. Must be positive.
+ * @param mixed $offset
  *   (optional) An offset, to which the difference must be a multiple of the
- *   given step.
+ *   given step, integer or float.
  *
  * @return bool
  *   TRUE if no step mismatch has occured, or FALSE otherwise.
- *
- * @see http://opensource.apple.com/source/WebCore/WebCore-1298/html/NumberInputType.cpp
  */
 function valid_number_step($value, $step, $offset = 0.0) {
-  $double_value = (double) abs($value - $offset);
+  // Avoid division by zero.
+  if ($step == 0) {
+    return FALSE;
+  }
 
-  // The fractional part of a double has 53 bits. The greatest number that could
-  // be represented with that is 2^53. If the given value is even bigger than
-  // $step * 2^53, then dividing by $step will result in a very small remainder.
-  // Since that remainder can't even be represented with a single precision
-  // float the following computation of the remainder makes no sense and we can
-  // safely ignore it instead.
-  if ($double_value / pow(2.0, 53) > $step) {
+  // Consider offset, get absolute values.
+  $value = abs($value - $offset);
+  $step = abs($step);
+
+  // Value and step are the same, no need for math.
+  if ($value == $step) {
     return TRUE;
   }
 
-  // Now compute that remainder of a division by $step.
-  $remainder = (double) abs($double_value - $step * round($double_value / $step));
+  // Both numbers are integers - use modulo right away.
+  if ((int) $value == $value && (int) $step == $step) {
+    return $value % $step == 0;
+  }
 
-  // $remainder is a double precision floating point number. Remainders that
-  // can't be represented with single precision floats are acceptable. The
-  // fractional part of a float has 24 bits. That means remainders smaller than
-  // $step * 2^-24 are acceptable.
-  $computed_acceptable_error = (double)($step / pow(2.0, 24));
+  // Convert from possible exponent notation to decimal strings to get the scale
+  // values. Note: sprintf also rounds values but seems to give more reliable
+  // results than number_format.
+  // "10" is the maximum value allowed by the number widget, so higher scale
+  // values do not make much sense.
+  // But as several (also unrelated) tests require a higher value, we have to
+  // provide at least a scale of 13 here.
+  $max_scale = 13;
+  $step_string = rtrim(sprintf("%.{$max_scale}F", $step), '0');
+  $value_string = rtrim(sprintf("%.{$max_scale}F", $value), '0');
 
-  return $computed_acceptable_error >= $remainder || $remainder >= ($step - $computed_acceptable_error);
+  // If the actual value has more significant decimals than expected, it has a
+  // higher precision than desired and is not divisible by the step.
+  // But if the scale value is high, and the length of string (minus comma) is
+  // beyond the php setting for precision, it's more likely that the conversion
+  // to string caused a problem with rounding. It's a compromise to allow it,
+  // because there's no way for php to handle it reliably.
+  $step_scale = strpos(strrev($step_string), '.');
+  $value_scale = strpos(strrev($value_string), '.');
+  if ($value_scale > $step_scale) {
+    if ($value_scale > 10 && $step_scale > 0 && strlen($value_string) - 1 > ini_get('precision')) {
+      $value = round($value, $step_scale);
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  // Because of the floating point precision problem, fmod() has a high error
+  // rate. We convert the floats to integers instead by multiplying powers of 10
+  // and use the modulo operator.
+  $step_int = intval($step * pow(10, $step_scale));
+  $value_int = intval($value * pow(10, $step_scale));
+  return $value_int % $step_int == 0;
 }
 
 /**
@@ -2621,7 +2655,7 @@ function url($path = NULL, array $options = array()) {
     }
   }
 
-  // The special path '<front>' links to the default front page.
+  // The special path '<front>' links to the default home page.
   if ($path == '<front>') {
     $path = '';
   }
@@ -2976,6 +3010,8 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  * @see backdrop_deliver_page()
  */
 function backdrop_deliver_html_page($page_callback_result) {
+  $site_config = config('system.core');
+  
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -2992,14 +3028,13 @@ function backdrop_deliver_html_page($page_callback_result) {
   // domain, but provide a variable to override this. If the code running for
   // this page request already set the X-Frame-Options header earlier, don't
   // overwrite it here.
-  $frame_options = config_get('system.core', 'x_frame_options');
+  $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -3285,6 +3320,34 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 }
 
 /**
+ * Constructs an array of the defaults that are used for styles items.
+ *
+ * @param $data
+ *   (optional) The default data parameter for the style item array.
+ *
+ * @see backdrop_get_css()
+ * @see backdrop_add_css()
+ *
+ * @return array
+ *   An array of key and values.
+ *
+ * @since 1.19.0 Function added.
+*/
+function backdrop_css_defaults($data = NULL) {
+  return array(
+    'type' => 'file',
+    'group' => CSS_DEFAULT,
+    'weight' => 0,
+    'every_page' => FALSE,
+    'media' => 'all',
+    'preprocess' => TRUE,
+    'data' => $data,
+    'browsers' => array(),
+    'attributes' => array(),
+  );
+}
+
+/**
  * Adds a cascading stylesheet to the stylesheet queue.
  *
  * Calling backdrop_static_reset('backdrop_add_css') will clear all cascading
@@ -3382,6 +3445,10 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
+ *   - attributes: An associative array of attributes for the <link> tag.
+ *     This may be used to add 'integrity' or custom attributes. Note that
+ *     setting any attributes will disable preprocessing as though the
+ *     'preprocess' option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
  *     styles will be aggregated and compressed. Defaults to TRUE.
  *   - 'browsers': An array containing information specifying which browsers
@@ -3412,19 +3479,16 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     $options = array();
   }
 
+  $defaults = backdrop_css_defaults($data);
+  $options += $defaults;
+  $options['attributes'] += $defaults['attributes'];
+
+  // Preprocess can only be set if no attributes are set.
+  $options['preprocess'] = empty($options['attributes']) ? $options['preprocess'] : FALSE;
+
   // Create an array of CSS files for each media type first, since each type needs to be served
   // to the browser differently.
   if (isset($data)) {
-    $options += array(
-      'type' => 'file',
-      'group' => CSS_DEFAULT,
-      'weight' => 0,
-      'every_page' => FALSE,
-      'media' => 'all',
-      'preprocess' => TRUE,
-      'data' => $data,
-      'browsers' => array(),
-    );
     $options['browsers'] += array(
       'IE' => TRUE,
       '!IE' => TRUE,
@@ -3492,6 +3556,13 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
   // Allow modules and themes to alter the CSS items.
   if (!$skip_alter) {
     backdrop_alter('css', $css);
+  }
+
+  // Fix 'every_page_weight' in case it is missing.
+  foreach ($css as $key => &$item) {
+    if (!isset($item['every_page_weight'])) {
+      $item['every_page_weight'] = $item['every_page'] ? -1 : 1;
+    }
   }
 
   // Sort CSS items, so that they appear in the correct order.
@@ -3846,6 +3917,7 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3868,6 +3940,7 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3879,6 +3952,7 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
+          $element['#attributes'] += $item['attributes'];
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
@@ -4707,6 +4781,13 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   foreach ($javascript as $key => $item) {
     if ($item['scope'] == $scope) {
       $items[$key] = $item;
+    }
+  }
+
+  // Fix 'every_page_weight' in case it is missing.
+  foreach ($items as $key => &$item) {
+    if (!isset($item['every_page_weight'])) {
+      $item['every_page_weight'] = $item['every_page'] ? -1 : 1;
     }
   }
 

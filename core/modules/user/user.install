@@ -1241,5 +1241,43 @@ function user_update_1019() {
 }
 
 /**
+ * Make sure that all config translatables are set for user mails.
+ */
+function user_update_1020() {
+  $mail_config = config('user.mail');
+  $available = $mail_config->get('_config_translatables');
+  if ($available === NULL || count($available) < 18 ) {
+    // @see core/modules/user/config/user.mail.json
+    $mail_translatables = array(
+      'cancel_confirm_body',
+      'cancel_confirm_subject',
+      'password_reset_body',
+      'password_reset_subject',
+      'register_admin_created_body',
+      'register_admin_created_subject',
+      'register_no_approval_required_body',
+      'register_no_approval_required_subject',
+      'register_pending_approval_body',
+      'register_pending_approval_subject',
+      'register_pending_approval_admin_body',
+      'register_pending_approval_admin_subject',
+      'status_activated_body',
+      'status_activated_subject',
+      'status_blocked_body',
+      'status_blocked_subject',
+      'status_canceled_body',
+      'status_canceled_subject',
+    );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $mail_translatables = array_merge($available, $mail_translatables);
+      $mail_translatables = array_values(array_unique($mail_translatables));
+    }
+    $mail_config->set('_config_translatables', $mail_translatables);
+    $mail_config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

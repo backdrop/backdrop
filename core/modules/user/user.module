@@ -41,6 +41,11 @@ define('USER_REGISTER_VISITORS', 'visitors');
 define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approval');
 
 /**
+ * Password strength modifier to encourage longer passwords.
+ */
+define('USER_PASSWORD_STRENGTH_MODIFIER', 0.7);
+
+/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -317,15 +322,13 @@ function user_load_by_name($name) {
 /**
  * Save a new or updated user.
  *
- * @param $account
- *   The user object to modify or add. If you want to modify an existing user
- *   account, you need to ensure that (a) $account is an object, and (b) you
- *   have set $account->uid to the numeric user ID of the user account you wish
- *   to modify. If you want to create a new user account, you can set
- *   $account->is_new to TRUE or omit the $account->uid field.
- *
+ * @param User $account
+ *   The user entity object to add or modify.
  * @return int
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
+ *
+ * @see entity_create()
+ * @see user_load()
  */
 function user_save($account) {
   return $account->save();
@@ -392,18 +395,19 @@ function user_validate_name($name) {
  * @see user_account_form()
  */
 function user_validate_picture(&$form, &$form_state) {
+  $site_config = config('system.core');
   // If required, validate the uploaded picture.
   $validators = array(
     'file_validate_is_image' => array(),
     'file_validate_image_orientation' => array(TRUE),
-    'file_validate_image_resolution' => array(config_get('system.core', 'user_picture_dimensions')),
-    'file_validate_size' => array((int) config_get('system.core', 'user_picture_file_size') * 1024),
+    'file_validate_image_resolution' => array($site_config->get('user_picture_dimensions')),
+    'file_validate_size' => array((int) $site_config->get('user_picture_file_size') * 1024),
   );
 
   // Save the file as a temporary file.
   $file = file_save_upload('picture_upload', $validators);
   if ($file === FALSE) {
-    form_set_error('picture_upload', t("Failed to upload the picture image; the %directory directory doesn't exist or is not writable.", array('%directory' => config_get('system.core', 'user_picture_path'))));
+    form_set_error('picture_upload', t("Failed to upload the picture image; the %directory directory doesn't exist or is not writable.", array('%directory' => $site_config->get('user_picture_path'))));
   }
   elseif ($file !== NULL) {
     $form_state['values']['picture_upload'] = $file;
@@ -744,6 +748,7 @@ function user_user_view($account) {
  */
 function user_account_form(&$form, &$form_state) {
   global $user;
+  $site_config = config('system.core');
 
   $account = $form['#user'];
   $register = ($form['#user']->uid > 0 ? FALSE : TRUE);
@@ -847,7 +852,7 @@ function user_account_form(&$form, &$form_state) {
       $description = ' ' . t('Weak passwords will be rejected.');
       $description .= _user_password_policy_help();
     }
-    if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+    if (!$site_config->get('user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
       $form['account']['pass'] = array(
         '#type' => 'password',
@@ -899,7 +904,7 @@ function user_account_form(&$form, &$form_state) {
     $status = isset($account->status) ? $account->status : 1;
   }
   else {
-    $status = $register ? config_get('system.core', 'user_register') == USER_REGISTER_VISITORS : $account->status;
+    $status = $register ? $site_config->get('user_register') == USER_REGISTER_VISITORS : $account->status;
   }
   $form['account_settings']['status'] = array(
     '#type' => 'radios',
@@ -927,7 +932,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Signature settings'),
     '#weight' => 2,
-    '#access' => (!$register && config_get('system.core', 'user_signatures')),
+    '#access' => (!$register && $site_config->get('user_signatures')),
   );
 
   $form['signature_settings']['signature'] = array(
@@ -943,7 +948,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Picture'),
     '#weight' => 2,
-    '#access' => (!$register && config_get('system.core', 'user_pictures')),
+    '#access' => (!$register && $site_config->get('user_pictures')),
   );
   $form['picture']['picture'] = array(
     '#type' => 'value',
@@ -962,7 +967,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'file',
     '#title' => t('Upload picture'),
     '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => config_get('system.core', 'user_picture_dimensions'))) . ' ' . filter_xss_admin(config_get('system.core', 'user_picture_guidelines')),
+    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
   );
   $form['#validate'][] = 'user_validate_picture';
 }
@@ -1112,7 +1117,8 @@ function user_password_policy_validate($form, &$form_state) {
 }
 
 function user_login_block($form) {
-  $credentials = config_get('system.core', 'user_login_method');
+  $site_config = config('system.core');
+  $credentials = $site_config->get('user_login_method');
 
   $form['#action'] = url(current_path(), array('query' => backdrop_get_destination(), 'external' => FALSE));
   $form['#id'] = 'user-login-form';
@@ -1143,7 +1149,7 @@ function user_login_block($form) {
     '#value' => t('Log in'),
   );
   $items = array();
-  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+  if ($site_config->get('user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
     $items[] = l(t('Create new account'), 'user/register', array('attributes' => array('title' => t('Create a new user account.'))));
   }
   $items[] = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
@@ -1437,10 +1443,25 @@ function user_menu() {
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
   );
-  $items['admin/config/people/roles/edit/%user_role'] = array(
-    'title' => 'Edit role',
+  $items['admin/config/people/roles/add'] = array(
+    'title' => 'Add role',
+    'description' => 'Add a new user role.',
+    'page arguments' => array('user_admin_role'),
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'user.admin.inc',
+  );
+  $items['admin/config/people/roles/configure/%user_role'] = array(
+    'title' => 'Configure role',
     'page arguments' => array('user_admin_role', 5),
     'access arguments' => array('administer permissions'),
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/people/roles/edit/%user_role'] = array(
+    'page callback' => 'system_redirect_deprecated_page',
+    'page arguments' => array('admin/config/people/roles/configure/%user_role'),
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_CALLBACK,
   );
   $items['admin/config/people/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
@@ -2885,6 +2906,9 @@ function user_form_process_password($element, $form_state = array()) {
         'username' => $username,
         'email' => $email,
       ),
+      'config' => array(
+        'strengthModifier' => USER_PASSWORD_STRENGTH_MODIFIER,
+      ),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
@@ -3178,9 +3202,10 @@ function user_register_validate($form, &$form_state) {
  * @see user_register_form()
  */
 function user_register_submit($form, &$form_state) {
+  $user_email_verification = config_get('system.core', 'user_email_verification');
   $admin = $form_state['values']['administer_users'];
 
-  if (!config_get('system.core', 'user_email_verification') || $admin) {
+  if (!$user_email_verification || $admin) {
     $pass = $form_state['values']['pass'];
   }
   else {
@@ -3224,7 +3249,7 @@ function user_register_submit($form, &$form_state) {
     backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No email verification required; log in user immediately.
-  elseif (!$admin && !config_get('system.core', 'user_email_verification') && $account->status) {
+  elseif (!$admin && !$user_email_verification && $account->status) {
     _user_mail_notify('register_no_approval_required', $account);
     $form_state['uid'] = $account->uid;
     user_login_submit(array(), $form_state);

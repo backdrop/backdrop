@@ -49,16 +49,12 @@
  * This presents a table with all projects that have available updates with
  * checkboxes to select which ones to upgrade.
  *
- * @param $context
- *   Deprecated since 1.18.0, after all the "Update" pages have been
- *   consolidated into a single one, under admin/config/system/updates.
- *
  * @see installer_manager_update_form_validate()
  * @see installer_manager_update_form_submit()
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state, $context = NULL) {
+function installer_manager_update_form($form, $form_state) {
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }

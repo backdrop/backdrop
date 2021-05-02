@@ -216,7 +216,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/blocks'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -230,7 +230,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/configure'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -1152,11 +1152,12 @@ function layout_get_all_configs($type) {
  */
 function layout_get_path_layout_names($path) {
   $path_map = &backdrop_static(__FUNCTION__, array());
-
-  $configs = layout_get_all_configs('layout');
-  foreach ($configs as $layout_name => $config) {
-    if (isset($config['path'])) {
-      $path_map[$config['path']][] = $layout_name;
+  if (empty($path_map)) {
+    $configs = layout_get_all_configs('layout');
+    foreach ($configs as $layout_name => $config) {
+      if (isset($config['path'])) {
+        $path_map[$config['path']][] = $layout_name;
+      }
     }
   }
 
@@ -1810,6 +1811,24 @@ function layout_context_required_by_path($path) {
   }
 
   return $required_contexts[$path];
+}
+
+/**
+ * Returns the current user context, which is always available.
+ *
+ * @return EntityLayoutContext
+ *   The layout context for the current user.
+ *
+ * @since 1.17.5 Function added.
+ */
+function layout_current_user_context() {
+  $current_user_context = layout_create_context('user', array(
+    'name' => 'current_user',
+    'label' => t('Current user'),
+    'locked' => TRUE,
+  ));
+  $current_user_context->setData($GLOBALS['user']);
+  return $current_user_context;
 }
 
 /**

@@ -20,8 +20,6 @@ Backdrop.tableSelect = function () {
     // Update table's select-all checkbox (and sticky header's if available).
     $(table).prev('table.sticky-header').addBack().find('th.select-all input[type="checkbox"]').each(function() {
       $(this).attr('title', state ? strings.selectNone : strings.selectAll);
-      $(this).toggleClass('select-none', state);
-      $(this).toggleClass('select-all', !state);
       this.checked = state;
     });
   };

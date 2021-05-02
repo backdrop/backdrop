@@ -693,6 +693,14 @@ function update_calculate_project_update_status(&$project_data, $available) {
       break;
     }
 
+    // Pre-releases and the like need version_compare() to prevent older
+    // releases from getting added to the list of available updates. For
+    // example, if the current version is 1.18.0-preview do not show versions
+    // older than 1.18.0.
+    if (version_compare($version, $project_data['existing_version'], '<')) {
+      break;
+    }
+
     // If we're running a dev snapshot and have a timestamp, stop
     // searching for security updates once we hit an official release
     // older than what we've got. Allow 100 seconds of leeway to handle

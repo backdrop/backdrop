@@ -1847,7 +1847,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("The password is too weak. Please consider making your password longer or more complex"));
 
-    $edit['pass'] = '123abcdefghijklmnop';
+    $edit['pass'] = '123abcdefghijklmnopqrstuvwx';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
 
@@ -2141,21 +2141,21 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test adding a role.
     $role_name = '123';
     $edit = array('name' => $role_name, 'label' => $role_name);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
 
     // Try adding a duplicate role.
-    $this->backdropPost(NULL, $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertRaw(t('The machine-readable name is already in use. It must be unique.'), 'Duplicate role warning displayed.');
 
     // Test renaming a role.
     $old_label = $role->label;
     $new_label = '456';
     $edit = array('label' => $new_label);
-    $this->backdropPost("admin/config/people/roles/edit/$role_name", $edit, t('Save role'));
+    $this->backdropPost("admin/config/people/roles/configure/$role_name", $edit, t('Save role'));
     $this->assertText(t('The 123 role has been renamed to 456.'), 'The role has been renamed.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
@@ -2164,9 +2164,9 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Make sure that the system-defined roles can still be edited, to adjust
     // their labels.
-    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_ANONYMOUS_ROLE);
+    $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
-    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_AUTHENTICATED_ROLE);
+    $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_AUTHENTICATED_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
 
     // Create a default role for site administrators, with all available permissions assigned.
@@ -2183,7 +2183,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role = user_role_load($role_name);
 
     // Test canceling the various actions that can be performed on user roles.
-    $actions = array('edit', 'delete');
+    $actions = array('configure', 'delete');
     foreach ($actions as $action) {
       $this->backdropGet("admin/config/people/roles/$action/$role_name");
       $this->clickLink(t('Cancel'));
@@ -2194,7 +2194,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test deleting the default administrator role.
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
     $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
-    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
+    $this->assertNoLinkByHref("admin/config/people/roles/configure/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
     // Since the administrator role that was previously set as admin has been
