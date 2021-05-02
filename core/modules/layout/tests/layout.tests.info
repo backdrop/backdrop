@@ -28,6 +28,12 @@ description = Tests that the correct layout is used in various situations.
 group = Layout
 file = layout.test
 
+[LayoutPreviewTest]
+name = Layout Preview Test
+description = Tests that the correct layout is used for node previews.
+group = Layout
+file = layout.test
+
 [LayoutUpgradePathTest]
 name = Layout Upgrade Test
 description = Tests the upgrade path from block-based regions to layouts.
