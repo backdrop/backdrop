@@ -229,11 +229,40 @@ function theme_layout_settings_context_table($variables) {
 
 /**
  * Output the list of visibility conditions for layouts.
+ *
+ * @deprecated since 1.19.0.
  */
 function theme_layout_conditions($variables) {
+  watchdog_deprecated_function('layout', __FUNCTION__);
+  $output = theme('layout_list', $variables);
+  return $output;
+}
+
+/**
+ * Output a list of items for layouts.
+ */
+function theme_layout_list($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+
+  $output = '<ul ' . backdrop_attributes($attributes) . '>';
+  foreach (element_children($element) as $key) {
+    $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+/**
+ * Output a list of action links for layouts.
+ */
+function theme_layout_action_links($variables) {
   $element = $variables['element'];
 
-  $output = '<ul>';
+  $output = '<ul class="action-links layout-action-links">';
   foreach (element_children($element) as $key) {
     $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
   }
