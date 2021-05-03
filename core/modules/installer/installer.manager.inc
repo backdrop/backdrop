@@ -55,8 +55,6 @@
  * @ingroup forms
  */
 function installer_manager_update_form($form, $form_state, $context = NULL) {
-  backdrop_set_title('Update Add-ons');
-
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
@@ -95,7 +93,7 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
 
   $last = state_get('update_last_check', 0);
   $form['last_check'] = array(
-    '#markup' => theme('update_last_check', array('last' => $last)),
+    '#markup' => theme('update_last_check__install', array('last' => $last)),
   );
 
   if (empty($available)) {
