@@ -14,7 +14,7 @@
   color: #EC351C;
 }
 .installer-manager-update-form .update-security:not(:hover),
-.block-dashboard-updates .update-security:not(:hover) .update-type {
+.block-dashboard-updates .update-security:not(:hover) {
   color: #9C1D0D;
 }
 

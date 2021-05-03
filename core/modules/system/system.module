@@ -2717,7 +2717,7 @@ function system_check_directory($form_element) {
  * @param $files
  *   An array of files to check.
  * @param $type
- *   The type of the files.
+ *   The type of the files ('module', 'theme', 'layout').
  */
 function system_get_files_database(&$files, $type) {
   // Extract current files from database.

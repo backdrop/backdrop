@@ -101,8 +101,8 @@ function _update_build_layout_data() {
 /**
  * Populates an array of project data.
  *
- * This function iterates over the list of installed modules, themes and
- * layout templates, and groups them by project type and status.
+ * This function iterates over the list of installed modules, themes and layout
+ * templates, and groups them by project type and status.
  *
  * Some parts of this function assume that enabled projects are always processed
  * first, and if disabled projects are being processed (depending on the
@@ -206,8 +206,8 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
 
     if (empty($status) && empty($file->enabled_sub_themes)) {
       // If we're processing disabled modules or themes, append a suffix.
-      // However, we don't do this to a a base theme with enabled
-      // subthemes, since we treat that case as if it is enabled.
+      // However, we don't do this for base themes that have enabled subthemes,
+      // since we treat that case as if the base theme is enabled.
       $project_display_type .= '-disabled';
     }
 
@@ -224,16 +224,24 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
       // Add list of base themes.
       $base_themes = !empty($file->base_themes) ? $file->base_themes : array();
     }
+
+    // The file info arrays for modules and themes have the human-readable name
+    // of the project in a 'name' key, whereas layout templates in a 'title'
+    // key.
+    // - the 'name' key holds the machine name for layouts
+    // - the 'title' key is not present in modules/themes
+    // @todo: Fix all that in https://github.com/backdrop/backdrop-issues/issues/2548
+    $includes_name = isset($file->info['title']) ? $file->info['title'] : $file->info['name'];
     if (!isset($projects[$project_name])) {
       // Only process this if we haven't done this project, since a single
-      // project can have multiple modules or themes.
+      // project can have multiple modules, themes, or layout templates.
       $projects[$project_name] = array(
         'name' => $project_name,
-        // Only save attributes from the .info file we care about so we do not
+        // Only save attributes from the .info file we care about, so we do not
         // bloat our RAM usage needlessly.
         'info' => update_filter_project_info($file->info),
         'datestamp' => $file->info['datestamp'],
-        'includes' => array($file->name => $file->info['name']),
+        'includes' => array($file->name => $includes_name),
         'project_type' => $project_name == 'backdrop' ? 'core' : $project_display_type,
         'project_status' => $status,
         'sub_themes' => $sub_themes,
@@ -243,10 +251,10 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     elseif ($projects[$project_name]['project_type'] == $project_display_type) {
       // Only add the file we're processing to the 'includes' array for this
       // project if it is of the same type and status (which is encoded in the
-      // $project_display_type). This prevents listing all the disabled
-      // modules included with an enabled project if we happen to be checking
-      // for disabled modules, too.
-      $projects[$project_name]['includes'][$file->name] = $file->info['name'];
+      // $project_display_type). This prevents listing all the disabled modules
+      // included within an enabled project, if we happen to be checking for
+      // disabled modules too.
+      $projects[$project_name]['includes'][$file->name] = $includes_name;
       $projects[$project_name]['info']['_info_file_ctime'] = max($projects[$project_name]['info']['_info_file_ctime'], $file->info['_info_file_ctime']);
       $projects[$project_name]['datestamp'] = max($projects[$project_name]['datestamp'], $file->info['datestamp']);
       if (!empty($sub_themes)) {
@@ -261,7 +269,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
       // does not, it means we're processing a disabled module, theme, or layout
       // that belongs to a project that has some enabled code. In this case, we
       // add the disabled thing into a separate array for separate display.
-      $projects[$project_name]['disabled'][$file->name] = $file->info['name'];
+      $projects[$project_name]['disabled'][$file->name] = $includes_name;
     }
   }
 }

@@ -68,9 +68,10 @@ function theme_update_report($variables) {
   $header = array();
   $rows = array();
 
-  // Create an array of status values keyed by module, theme, or layout name, since
-  // we'll need this while generating the report if we have to cross reference
-  // anything (e.g. subthemes which have base themes missing an update).
+  // Create an array of status values keyed by module, theme, or layout name,
+  // since we'll need this while generating the report if we have to
+  // cross-reference anything (e.g. subthemes which have base themes missing an
+  // update).
   foreach ($data as $project) {
     foreach ($project['includes'] as $key => $name) {
       $status[$key] = $project['status'];
