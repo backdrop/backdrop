@@ -2941,9 +2941,9 @@ function backdrop_get_user_timezone() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler($error_level, $message, $filename, $line) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-  _backdrop_error_handler_real($error_level, $message, $filename, $line, $context);
+  _backdrop_error_handler_real($error_level, $message, $filename, $line);
 }
 
 /**
