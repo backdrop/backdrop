@@ -71,7 +71,7 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])));
+    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])), 'info');
   }
   else {
     backdrop_set_message(t('Automatic update checks are disabled and will need to be run manually.') . ' ' . $settings, 'warning');
@@ -88,7 +88,7 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
     }
     else {
       $recipients = implode(', ', $update_emails);
-      backdrop_set_message(t('Update notifications for this site will be sent to: @recipients.', array('@recipients' => $recipients)) . ' ' . $settings);
+      backdrop_set_message(t('Update notifications for this site will be sent to: @recipients.', array('@recipients' => $recipients)) . ' ' . $settings, 'info');
     }
   }
 
