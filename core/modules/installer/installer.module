@@ -52,8 +52,8 @@ function installer_menu() {
   $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
 
   $items['admin/config/system/updates'] = array(
-    'title' => 'Updates',
-    'description' => 'Review and install available updates.',
+    'title' => 'System updates',
+    'description' => 'Review and perform updates for Backdrop core, modules, themes, and layouts..',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_update_form'),
     'access callback' => 'installer_update_access',
