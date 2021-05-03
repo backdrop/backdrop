@@ -38,10 +38,22 @@ function theme_update_manager_update_form($variables) {
  */
 function theme_update_last_check($variables) {
   $last = $variables['last'];
+
   $output = '<div class="update checked">';
+
   $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
   $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
-  $output .= "</div>\n";
+
+  if (module_exists('installer') && user_access('access_site_reports')) {
+    // Don't add this second button to the Dashboard block.
+    if ($variables['theme_hook_original'] == 'update_last_check') {
+      $options = array('attributes' => array('class' => array('button', 'button')));
+      $output .= l(t('Perform system updates'), 'admin/config/system/updates', $options);
+    }
+  }
+
+  $output .= '</div>';
+
   return $output;
 }
 

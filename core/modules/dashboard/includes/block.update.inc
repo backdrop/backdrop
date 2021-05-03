@@ -158,7 +158,7 @@ class DashboardUpdateBlock extends Block {
     backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
     $last = state_get('update_last_check', 0);
     $panel['last_check'] = array(
-      '#markup' => theme('update_last_check', array('last' => $last)),
+      '#markup' => theme('update_last_check__block', array('last' => $last)),
     );
 
     if (!empty($updates)) {
@@ -175,7 +175,7 @@ class DashboardUpdateBlock extends Block {
 
     if (!empty($updates) && module_exists('installer') && user_access('administer software updates')) {
       $link_path = 'admin/config/system/updates';
-      $link_text = t('Manage system updates');
+      $link_text = t('Perform system updates');
     }
     elseif (user_access('access_site_reports')) {
       $link_path = 'admin/reports/updates';
