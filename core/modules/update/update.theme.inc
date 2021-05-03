@@ -25,7 +25,7 @@ function theme_update_manager_update_form($variables) {
  * Returns HTML for the last time we checked for update data.
  *
  * In addition to properly formatting the given timestamp, this function also
- * provides a "Check manually" link that refreshes the available update and
+ * provides a "Check manually" button, that refreshes the available update, and
  * redirects back to the same page.
  *
  * @param $variables
@@ -45,9 +45,13 @@ function theme_update_last_check($variables) {
   $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
 
   if (module_exists('installer') && user_access('access_site_reports')) {
-    // Don't add this second button to the Dashboard block.
+    // Link to the updates installation page from the available updates report.
     if ($variables['theme_hook_original'] == 'update_last_check') {
       $output .= l(t('Install system updates'), 'admin/config/system/updates');
+    }
+    // Link to the updates settings page from the updates installation page.
+    if ($variables['theme_hook_original'] == 'update_last_check__install') {
+      $output .= l(t('Configure updates settings'), 'admin/reports/updates/settings');
     }
   }
 

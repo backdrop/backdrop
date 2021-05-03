@@ -64,32 +64,37 @@ function installer_manager_update_form($form, $form_state, $context = NULL) {
   $available = update_get_available(TRUE);
 
   // Run some basic health checks, and show messages/warnings accordingly.
-  $settings = l(t('Review settings'), 'admin/reports/updates/settings');
   $update_config = config('update.settings');
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])), 'info');
+    $frequency_message = t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days]));
+    $message_type = 'info';
   }
   else {
-    backdrop_set_message(t('Automatic update checks are disabled and will need to be run manually.') . ' ' . $settings, 'warning');
+    $frequency_message = t('Automatic update checks are disabled and will need to be run manually.');
+    $message_type = 'warning';
   }
+  backdrop_set_message($frequency_message, $message_type);
 
   $update_threshold = $update_config->get('update_threshold');
   if ($update_threshold == 'none') {
-    backdrop_set_message(t('Email notifications are disabled for for available updates.') . ' ' . $settings, 'warning');
+    $email_notifications_message = t('Email notifications are disabled for for available updates.');
+    $message_type = 'warning';
   }
   else {
     $update_emails = $update_config->get('update_emails');
     if (empty($update_emails)) {
-      backdrop_set_message(t('No email address has been provided for notifications about available updates.') . ' ' . $settings, 'warning');
+      $email_notifications_message = t('No email address has been provided for notifications about available updates.');
+      $message_type = 'warning';
     }
     else {
-      $recipients = implode(', ', $update_emails);
-      backdrop_set_message(t('Update notifications for this site will be sent to: @recipients.', array('@recipients' => $recipients)) . ' ' . $settings, 'info');
+      $recipients = count($update_emails) == 1 ? $update_emails[0] : theme('item_list', array('items' => $update_emails));
+      $email_notifications_message = t('Update notifications for this site will be sent to:' . ' ' . $recipients);
+      $message_type = 'info';
     }
   }
-
+  backdrop_set_message($email_notifications_message, $message_type);
 
   $last = state_get('update_last_check', 0);
   $form['last_check'] = array(
