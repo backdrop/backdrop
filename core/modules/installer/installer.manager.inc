@@ -54,7 +54,7 @@
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state, $context = NULL) {
+function installer_manager_update_form($form, $form_state) {
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
