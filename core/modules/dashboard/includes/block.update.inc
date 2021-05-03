@@ -93,9 +93,6 @@ class DashboardUpdateBlock extends Block {
 
         if (isset($project['recommended'])) {
           $update = $project['recommended'];
-          if (user_access('access_site_reports')) {
-            $update = l($update, 'admin/reports/updates');
-          }
 
           $update_types = array(
             'security' => t('security update'),

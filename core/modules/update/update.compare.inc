@@ -204,13 +204,6 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
       $project_display_type = $project_type;
     }
 
-    if (empty($status) && empty($file->enabled_sub_themes)) {
-      // If we're processing disabled modules or themes, append a suffix.
-      // However, we don't do this for base themes that have enabled subthemes,
-      // since we treat that case as if the base theme is enabled.
-      $project_display_type .= '-disabled';
-    }
-
     // Add a list of sub-themes that "depend on" the project and a list of base
     // themes that are "required by" the project.
     if ($project_name == 'backdrop') {

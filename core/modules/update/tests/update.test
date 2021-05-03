@@ -586,7 +586,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
       $config->set('update_disabled_extensions', $check_disabled)->save();
       $this->refreshUpdateStatus($xml_mapping);
       if ($check_disabled) {
-        $this->assertText(t('Disabled themes'));
+        $this->assertText(t('Themes'));
         $this->assertRaw($base_theme_project_link, 'Link to the Update test base theme project appears.');
         $this->assertRaw($sub_theme_project_link, 'Link to the Update test subtheme project appears.');
       }

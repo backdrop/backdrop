@@ -45,13 +45,10 @@ function theme_update_last_check($variables) {
   $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
 
   if (module_exists('installer') && user_access('access_site_reports')) {
-    // Link to the updates installation page from the available updates report.
+    // Link to the updates installation page from the available updates report
+    // (don't add this link to the "Available updates" Dashboard block).
     if ($variables['theme_hook_original'] == 'update_last_check') {
       $output .= l(t('Install system updates'), 'admin/config/system/updates');
-    }
-    // Link to the updates settings page from the updates installation page.
-    if ($variables['theme_hook_original'] == 'update_last_check__install') {
-      $output .= l(t('Configure updates settings'), 'admin/reports/updates/settings');
     }
   }
 
@@ -306,9 +303,6 @@ function theme_update_report($variables) {
     'module' => t('Modules'),
     'theme' => t('Themes'),
     'layout' => t('Layouts'),
-    'module-disabled' => t('Disabled modules'),
-    'theme-disabled' => t('Disabled themes'),
-    'layout-disabled' => t('Disabled layouts'),
   );
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {
