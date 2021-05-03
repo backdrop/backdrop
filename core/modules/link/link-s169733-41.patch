@@ -1,0 +1,171 @@
+diff --git a/link.module b/link.module
+index 184c3a8..7e61797 100644
+--- a/link.module
++++ b/link.module
+@@ -772,6 +772,23 @@ function _link_sanitize(&$item, $delta, &$field, $instance, &$entity) {
+     $item['attributes'] = (array) unserialize($item['attributes']);
+   }
+ 
++  // Filter attributes to only ones that are allowed by the field or by
++  // settings.php.
++  $allowed_attributes = _link_default_attributes();
++  if (isset($field['settings']['attributes']) && is_array($field['settings']['attributes'])) {
++    $allowed_attributes += $field['settings']['attributes'];
++  }
++  if (isset($instance['settings']['attributes']) && is_array($instance['settings']['attributes'])) {
++    $allowed_attributes += $instance['settings']['attributes'];
++  }
++  $allowed_attributes += array_flip(variable_get('link_field_attributes', array()));
++  $item['attributes'] = array_intersect_key($item['attributes'], $allowed_attributes);
++
++  // Remove the 'class' attribute if it was not enabled on the field.
++  if (empty($instance['settings']['attributes']['configurable_class'])) {
++    unset($item['attributes']['class']);
++  }
++
+   // Add default attributes.
+   if (!is_array($instance['settings']['attributes'])) {
+     $instance['settings']['attributes'] = _link_default_attributes();
+diff --git a/tests/LinkSanitizeTest.test b/tests/LinkSanitizeTest.test
+index 7b93c1c..7e4ee00 100644
+--- a/tests/LinkSanitizeTest.test
++++ b/tests/LinkSanitizeTest.test
+@@ -44,11 +44,28 @@ public function tearDown(array $modules = array()) {
+     parent::tearDown();
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  protected function verbose($message, $title = NULL) {
++    // Handle arrays, objects, etc.
++    if (!is_string($message)) {
++      $message = "<pre>\n" . print_r($message, TRUE) . "\n</pre>\n";
++    }
++
++    // Optional title to go before the output.
++    if (!empty($title)) {
++      $title = '<h2>' . check_plain($title) . "</h2>\n";
++    }
++
++    parent::verbose($title . $message);
++  }
++
+   /**
+    * Generate parameters for testing _link_sanitize().
+    */
+   protected function generateParams($settings = array()) {
+-    $field = array();
++    $field['settings'] = array();
+     $instance['entity_type'] = 'node';
+     $defaults['attributes'] = array();
+     $defaults['display']['url_cutoff'] = 20;
+@@ -67,7 +84,9 @@ public function testRelativeHash() {
+     $item['url'] = '#hash-only';
+     list($field, $instance, $entity) = $this->generateParams();
+     _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
+     $this->assertEqual('#hash-only', $item['url']);
++    $this->assertEqual(array(), $item['attributes']);
+   }
+ 
+   /**
+@@ -79,9 +98,11 @@ public function testAbsoluteHash() {
+       'absolute_url' => TRUE,
+     ));
+     _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
+     $this->assertEqual('test-path', $item['url']);
+     $this->assertEqual(NULL, $item['query']);
+     $this->assertEqual('hash-only', $item['fragment']);
++    $this->assertEqual(array(), $item['attributes']);
+   }
+ 
+   /**
+@@ -91,7 +112,9 @@ public function testRelativeQuery() {
+     $item['url'] = '?query=only';
+     list($field, $instance, $entity) = $this->generateParams();
+     _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
+     $this->assertEqual('?query=only', $item['url']);
++    $this->assertEqual(array(), $item['attributes']);
+   }
+ 
+   /**
+@@ -103,9 +126,76 @@ public function testAbsoluteQuery() {
+       'absolute_url' => TRUE,
+     ));
+     _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
+     $this->assertEqual('test-path', $item['url']);
+     $this->assertEqual(array('query' => 'only'), $item['query']);
+     $this->assertEqual(NULL, $item['fragment']);
++    $this->assertEqual(array(), $item['attributes']);
++  }
++
++  /**
++   * Test that unwanted attributes will be removed.
++   *
++   * This prevents against unwanted data being injected into the database and
++   * rendered as-is.
++   */
++  public function testUnwantedAttributes() {
++    $item['url'] = 'test-path';
++    $item['attributes']['foo']['#post_render'] = 'touch';
++    $item['attributes']['foo']['#children'] = '/tmp/keys-to-the-kingdom';
++    list($field, $instance, $entity) = $this->generateParams();
++    _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
++    $this->assertEqual('test-path', $item['url']);
++    $this->assertEqual(NULL, $item['query']);
++    $this->assertEqual(NULL, $item['fragment']);
++    $this->assertEqual(array(), $item['attributes']);
++  }
++
++  /**
++   * Test that "class" elements are allowed when configurable_class is enabled.
++   */
++  public function testClassWithConfigurableClass() {
++    $item['url'] = 'test-path';
++
++    // Store the value "something" in the "class" attribute.
++    $item['attributes']['class'] = 'something';
++    list($field, $instance, $entity) = $this->generateParams();
++
++    // Specifically enable the "configurable_class" option.
++    $instance['settings']['attributes']['configurable_class'] = 1;
++    _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
++    $this->assertEqual('test-path', $item['url']);
++    $this->assertEqual(NULL, $item['query']);
++    $this->assertEqual(NULL, $item['fragment']);
++
++    // Make sure that the "class" value is accessible.
++    $this->assertEqual('something', $item['attributes']['class']);
++  }
++
++  /**
++   * Test that "class" elements are not allowed when configurable_class is off.
++   *
++   * In normal circumstances it should not be possible to store a string in the
++   * "class" attribute if the option is disabled, so this should only occur if
++   * the data is compromised or if there's legacy data.
++   */
++  public function testClassWithoutConfigurableClass() {
++    $item['url'] = 'test-path';
++
++    // Store the value "something" in the "class" attribute.
++    $item['attributes']['class'] = 'something';
++    list($field, $instance, $entity) = $this->generateParams();
++
++    // Specifically disable the "configurable_class" option.
++    $instance['settings']['attributes']['configurable_class'] = 0;
++    _link_sanitize($item, NULL, $field, $instance, $entity);
++    $this->verbose($item);
++    $this->assertEqual('test-path', $item['url']);
++    $this->assertEqual(NULL, $item['query']);
++    $this->assertEqual(NULL, $item['fragment']);
++    $this->assertEqual(array(), $item['attributes']);
+   }
+ 
+ }

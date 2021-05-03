@@ -48,7 +48,7 @@ function theme_update_last_check($variables) {
     // Don't add this second button to the Dashboard block.
     if ($variables['theme_hook_original'] == 'update_last_check') {
       $options = array('attributes' => array('class' => array('button', 'button')));
-      $output .= l(t('Perform system updates'), 'admin/config/system/updates', $options);
+      $output .= l(t('Manage system updates'), 'admin/config/system/updates', $options);
     }
   }
 
