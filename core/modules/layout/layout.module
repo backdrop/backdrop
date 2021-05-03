@@ -340,7 +340,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/relationship/add'] = array(
-    'title' => 'Add context relationship',
+    'title' => 'Add relationship',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_context_relationship_add_form', 4),
     'type' => MENU_CALLBACK,

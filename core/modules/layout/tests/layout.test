@@ -72,7 +72,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
      // Test Author from Content relationship.
     $edit = array();
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add context relationship'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add relationship'));
 
     $edit = array(
       'relationship' => 'author_from_node:relationship',

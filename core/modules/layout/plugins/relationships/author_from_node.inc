@@ -37,13 +37,13 @@ class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
     if (!empty($this->settings['context_parent'])) {
       list($label, $value) = explode(':', $this->settings['context_parent']);
       if ($label == 'position') {
-        return t('Author from content in position @position', array('@position' => $value+1));
+        return t('Author of content in position @position', array('@position' => $value+1));
       }
       else {
-        return t('Author from content @id', array('@id' => $value));
+        return t('Author of content @id', array('@id' => $value));
       }
     }
-    return t('Author from content');
+    return t('Author of content');
   }
 
 }
