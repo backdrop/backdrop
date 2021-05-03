@@ -330,27 +330,26 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   $form['context_wrapper']['context']['links'] = array(
-    '#theme' => 'layout_list',
-    '#attributes' => array('class' => array('action-links', 'layout-action-links')),
-    'add' => array(
-      '#type' => 'submit',
-      '#value' => t('Add context'),
-      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-      '#validate' => array(),
-      '#submit' => array(
-        'layout_settings_form_update_layout',
-        'layout_settings_form_context_add',
-      ),
-      '#ajax' => array(
-        'callback' => 'layout_ajax_form_open_dialog',
-      ),
+    '#theme' => 'layout_action_links',
+  );
+  $form['context_wrapper']['context']['links']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add context'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_settings_form_update_layout',
+      'layout_settings_form_context_add',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
 
   // Get contexts from relationships
   $relevant_relationships = layout_relationships_get_relevant_info($contexts);
   if (!empty($relevant_relationships)) {
-    $form['context_wrapper']['context']['add_relationship'] = array(
+    $form['context_wrapper']['context']['links']['add_relationship'] = array(
       '#type' => 'submit',
       '#value' => t('Add relationship'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -362,8 +361,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#ajax' => array(
         'callback' => 'layout_ajax_form_open_dialog',
       ),
-      '#prefix' => '<ul class="action-links"><li>',
-      '#suffix' => '</li></ul>',
     );
   }
 
@@ -517,20 +514,19 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
   $form['conditions']['links'] = array(
-    '#theme' => 'layout_list',
-    '#attributes' => array('class' => array('action-links', 'layout-action-links')),
-    'add' => array(
-      '#type' => 'submit',
-      '#value' => t('Add visibility condition'),
-      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-      '#validate' => array(),
-      '#submit' => array(
-        'layout_settings_form_update_layout',
-        'layout_settings_form_condition_add',
-      ),
-      '#ajax' => array(
-        'callback' => 'layout_ajax_form_open_dialog',
-      ),
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add visibility condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_settings_form_update_layout',
+      'layout_settings_form_condition_add',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
   $form['conditions']['active'] = array(
@@ -1438,20 +1434,19 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#weight' => 20,
   );
   $form['conditions']['links'] = array(
-    '#theme' => 'layout_list',
-    '#attributes' => array('class' => array('action-links', 'layout-action-links')),
-    'add' => array(
-      '#type' => 'submit',
-      '#value' => t('Add visibility condition'),
-      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-      '#submit' => array(
-        'layout_block_configure_form_submit',
-        'layout_block_configure_form_condition_add',
-      ),
-      '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
-      '#ajax' => array(
-        'callback' => 'layout_ajax_form_open_dialog',
-      ),
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add visibility condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#submit' => array(
+      'layout_block_configure_form_submit',
+      'layout_block_configure_form_condition_add',
+    ),
+    '#save_in_progress' => TRUE, // See layout_block_configure_form_submit().
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
   $form['conditions']['active'] = array(
@@ -2544,18 +2539,17 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
     );
   }
   $form['conditions']['links'] = array(
-    '#theme' => 'layout_list',
-    '#attributes' => array('class' => array('action-links', 'layout-action-links')),
-    'add' => array(
-      '#type' => 'submit',
-      '#value' => t('Add visibility condition'),
-      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-      '#submit' => array(
-        'layout_menu_item_form_condition_add'
-      ),
-      '#ajax' => array(
-        'callback' => 'layout_ajax_form_open_dialog',
-      ),
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add visibility condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#submit' => array(
+      'layout_menu_item_form_condition_add'
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
 

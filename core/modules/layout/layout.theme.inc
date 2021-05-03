@@ -228,25 +228,11 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Output the list of visibility conditions for layouts.
- *
- * @deprecated since 1.19.0.
- */
-function theme_layout_conditions($variables) {
-  watchdog_deprecated_function('layout', __FUNCTION__);
-  $output = theme('layout_list', $variables);
-  return $output;
-}
-
-/**
  * Output a list of items for layouts.
  */
-function theme_layout_list($variables) {
+function theme_layout_action_links($variables) {
   $element = $variables['element'];
-  $attributes = array();
-  if (isset($element['#attributes'])) {
-    $attributes = $element['#attributes'];
-  }
+  $attributes = array('class' => array('action-links', 'layout-action-links'));
 
   $output = '<ul ' . backdrop_attributes($attributes) . '>';
   foreach (element_children($element) as $key) {
@@ -256,13 +242,14 @@ function theme_layout_list($variables) {
   return $output;
 }
 
+
 /**
- * Output a list of action links for layouts.
+ * Output the list of visibility conditions for layouts.
  */
-function theme_layout_action_links($variables) {
+function theme_layout_conditions($variables) {
   $element = $variables['element'];
 
-  $output = '<ul class="action-links layout-action-links">';
+  $output = '<ul>';
   foreach (element_children($element) as $key) {
     $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
   }
