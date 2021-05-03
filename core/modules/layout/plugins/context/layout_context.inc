@@ -30,8 +30,17 @@ abstract class LayoutContext extends LayoutHandler {
 
   /**
    * All possible context types.
+   *
+   * This is equivalent to the following bitwise addition of all the above:
+   *
+   * @code
+   *   self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM | self::USAGE_TYPE_RELATIONSHIP
+   * @endcode
+   *
+   * PHP 5.6 and higher is required to do this math in a constant however, so
+   * it is defined here as the equivalent integer value.
    */
-  const USAGE_TYPE_ALL = self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM | self::USAGE_TYPE_RELATIONSHIP;
+  const USAGE_TYPE_ALL = 15;
 
   /**
    * The name of the plugin that provides this context.
