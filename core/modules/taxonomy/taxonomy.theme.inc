@@ -25,7 +25,10 @@ function theme_taxonomy_overview_vocabularies($variables) {
 
       $row = array();
       $row[] = backdrop_render($vocabulary['name']);
-      $row[] = backdrop_render($vocabulary['items']);
+      $row[] = array(
+        'data' => backdrop_render($vocabulary['items']),
+        'class' => array('text-align-right'),
+      );
       if (isset($vocabulary['weight'])) {
         $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
         $row[] = backdrop_render($vocabulary['weight']);
@@ -36,13 +39,21 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
-  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'));
+  $header[] = array(
+    'data' => t('Number of terms'),
+    'class' => array('priority-low', 'text-align-right'),
+  );
   if (isset($form['actions'])) {
     $header[] = t('Weight');
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
   }
   $header[] = t('Operations');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy'))) . backdrop_render_children($form);
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))),
+    'attributes' => array('id' => 'taxonomy'),
+  )) . backdrop_render_children($form);
 }
 
 /**
