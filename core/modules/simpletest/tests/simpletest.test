@@ -199,9 +199,16 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
     // the function name 'simplexml_load_string'.
     $this->assertAssertion('simplexml_load_string', 'Warning', 'Fail', 'simpletest.test', 'SimpleTestFunctionalTest->stubTest()');
 
-    $this->assertAssertion("Debug: 'Foo'", 'Debug', 'Fail', 'simpletest.test', 'SimpleTestFunctionalTest->stubTest()');
+    // Some PHP versions create 3 exceptions in simplexml_load_string(), while
+    // others only create 1. So we may have 4 or 2 exceptions in total.
+    $acceptable_results = array(
+      '6 passes, 5 fails, 4 exceptions, and 1 debug message.',
+      '6 passes, 5 fails, 2 exceptions, and 1 debug message.',
+    );
+    $summary_correct = in_array($this->childTestResults['summary'], $acceptable_results);
+    $this->assertTrue($summary_correct,  'Stub test summary is correct');
 
-    $this->assertTrue((bool) strstr($this->childTestResults['summary'], '6 passes, 5 fails, 4 exceptions, and 1 debug message'), 'Stub test summary is correct');
+    $this->assertAssertion("Debug: 'Foo'", 'Debug', 'Fail', 'simpletest.test', 'SimpleTestFunctionalTest->stubTest()');
 
     $this->test_ids[] = $test_id = $this->getTestIdFromResults();
     $this->assertTrue($test_id, 'Found test ID in results.');
