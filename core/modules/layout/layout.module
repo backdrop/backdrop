@@ -669,6 +669,9 @@ function layout_theme() {
     'layout_settings_context_table' => array(
       'render element' => 'element',
     ) + $base,
+    'layout_list' => array(
+      'render element' => 'element',
+    ) + $base,
     'layout_conditions' => array(
       'render element' => 'element',
     ) + $base,
