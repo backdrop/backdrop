@@ -54,7 +54,7 @@
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state) {
+function installer_manager_update_form($form, $form_state, $context = NULL) {
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
@@ -64,22 +64,36 @@ function installer_manager_update_form($form, $form_state) {
   $available = update_get_available(TRUE);
 
   // Run some basic health checks, and show messages/warnings accordingly.
+  $settings = l(t('Review settings'), 'admin/reports/updates/settings');
   $update_config = config('update.settings');
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])));
+    backdrop_set_message(t('Automatic update checks are configured to run @frequency.', array('@frequency' => $frequency[$update_interval_days])), 'info');
   }
   else {
-    backdrop_set_message(t('Checks for updates are configured to be triggerred manually.'), 'warning');
+    backdrop_set_message(t('Automatic update checks are disabled and will need to be run manually.') . ' ' . $settings, 'warning');
   }
-  if (empty($update_config->get('update_emails'))) {
-    backdrop_set_message(t('No email configured to receive update notifications for this site.'), 'warning');
+
+  $update_threshold = $update_config->get('update_threshold');
+  if ($update_threshold == 'none') {
+    backdrop_set_message(t('Email notifications are disabled for for available updates.') . ' ' . $settings, 'warning');
   }
+  else {
+    $update_emails = $update_config->get('update_emails');
+    if (empty($update_emails)) {
+      backdrop_set_message(t('No email address has been provided for notifications about available updates.') . ' ' . $settings, 'warning');
+    }
+    else {
+      $recipients = implode(', ', $update_emails);
+      backdrop_set_message(t('Update notifications for this site will be sent to: @recipients.', array('@recipients' => $recipients)) . ' ' . $settings, 'info');
+    }
+  }
+
 
   $last = state_get('update_last_check', 0);
   $form['last_check'] = array(
-    '#markup' => theme('update_last_check', array('last' => $last)),
+    '#markup' => theme('update_last_check__install', array('last' => $last)),
   );
 
   if (empty($available)) {
@@ -191,8 +205,8 @@ function installer_manager_update_form($form, $form_state) {
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
-    // Set both contrib projects, as well as Backdrop core to be able to be
-    // updated via the admin UI by default.
+    // Backdrop CMS core and contrib projects are to be able to be updated from
+    // the administrative interface. Set this option as default.
     $update_method = 'admin_ui';
     // If self-update is disabled, Backdrop core needs to be updated manually.
     if ($project['project_type'] == 'core' && !config_get('installer.settings', 'core_update')) {
