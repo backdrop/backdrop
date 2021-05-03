@@ -247,7 +247,10 @@ class LayoutMenuItem {
     // Add in configured arguments.
     foreach ($this->arguments as $position => $argument_config) {
       if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
-        $context_config = $argument_config + array('required' => TRUE);
+        $context_config = $argument_config + array(
+          'required' => TRUE,
+          'usageType' => LayoutContext::USAGE_TYPE_MENU,
+        );
         $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
       }
     }

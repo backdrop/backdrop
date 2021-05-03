@@ -5,7 +5,8 @@
  */
 
 /**
- * Submit handler for layout_settings_form() that lets the user add a context.
+ * Submit handler for layout_settings_form() that lets the user add a context
+ * or relationship.
  */
 function layout_settings_form_context_add($form, &$form_state) {
   // Remove destination flags when adding contexts, otherwise the user will
@@ -14,7 +15,12 @@ function layout_settings_form_context_add($form, &$form_state) {
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
   }
-  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/context/add';
+  if ($form_state['clicked_button']['#array_parents'][2] == 'add_relationship') {
+    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/add';
+  }
+  else {
+    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/context/add';
+  }
 }
 
 /**
@@ -99,7 +105,134 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
+    '#name' => 'context_add_button',
     '#value' => $is_new_context ? t('Add context') : t('Save context'),
+    '#submit' => array(
+      'layout_context_add_form_submit',
+    ),
+    '#validate' => array(
+      'layout_context_add_form_validate',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_save_dialog',
+    ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('layout_context_add_form_cancel'),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_context_cancel_dialog',
+    ),
+  );
+  return $form;
+}
+
+
+/**
+ * Form callback; Displays form for adding new relationships to a layout.
+ *
+ * @param Layout $layout
+ *   The layout to which a context is being added.
+ * @param int|null $relationship_id
+ *   The ID of the relationship being configured. If adding a new
+ *   relationship, no value will be passed in.
+ *
+ * @ingroup forms
+ */
+function layout_context_relationship_add_form($form, &$form_state, Layout $layout = NULL, $relationship_id = NULL) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $contexts = $layout->getContexts();
+
+  // Get contexts from relationships
+  $form_state['relevant_info'] = layout_relationships_get_relevant_info($contexts);
+
+  $relevant_relationships = array();
+  $parent_relationship = array();
+
+  foreach ($form_state['relevant_info'] as $rid => $info) {
+    $relevant_relationships[$rid] = $info['title'];
+  }
+
+  $is_new_context = TRUE;
+  if (isset($relationship_id)) {
+    $is_new_context = FALSE;
+  }
+
+  // Ensure AJAX callbacks display the correct title by setting it here.
+  $form['#title'] = $is_new_context ? t('Add relationship') : t('Configure relationship');
+
+  $form_state['layout'] = $layout;
+  $form_state['contexts'] = $contexts;
+  if (!empty($relationship_id)) {
+    $form_state['relationship_id'] = $relationship_id;
+  }
+  elseif (isset($form_state['values']['context'])) {
+    $form_state['relationship_id'] = $form_state['values']['context'];
+  }
+
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => 'Relationships create contexts from data provided by existing contexts, like the author from node context.',
+  );
+
+  $current_relationships = $layout->relationships;
+  $form_state['relationships'] = $current_relationships;
+  if (isset($current_relationships[$relationship_id])) {
+    $handler = $current_relationships[$relationship_id];
+    $form_state['handler'] = $handler;
+  }
+  else {
+    $handler = NULL;
+  }
+  if (!empty($relevant_relationships)) {
+    backdrop_sort($relevant_relationships, array('title'));
+    $form['relationship'] = array(
+      '#type' => 'select',
+      '#title' => t('Available context relationships'),
+      '#options' => $relevant_relationships,
+      '#required' => TRUE,
+      '#default_value' => !empty($handler) ? $handler->plugin : NULL,
+      '#parents' => array('relationship'),
+      '#ajax' => array(
+        'wrapper' => 'context_settings',
+        'callback' => 'layout_context_ajax_style',
+      ),
+    );
+  }
+  else {
+    $form['no_relationship'] = array(
+      '#markup' => t('No relevant relationships available'),
+    );
+  }
+
+  $form['context_settings'] = array(
+    '#type' => 'container',
+    '#id' => 'context_settings',
+    '#parents' => array('context_settings'),
+  );
+  $form['context_settings']['content'] = layout_context_return_form($form['context_settings'], $form_state);
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['load_relationship_nojs'] = array(
+    '#type' => 'submit',
+    '#value' => t('Load relationship'),
+    '#submit' => array(
+      'layout_context_add_load_context_nojs',
+    ),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+  );
+  $form['actions']['add'] = array(
+    '#type' => 'submit',
+    '#name' => 'relationship_add_button',
+    '#access' => !empty($relevant_relationships),
+    '#value' => $is_new_context ? t('Add relationship') : t('Save relationship'),
     '#submit' => array(
       'layout_context_add_form_submit',
     ),
@@ -130,7 +263,7 @@ function layout_context_add_form_cancel($form, &$form_state) {
 }
 
 /**
- * AJAX callback to update the context settings.
+ * AJAX callback to update the context or relationship settings.
  */
 function layout_context_ajax_style($form, $form_state) {
   return $form['context_settings'];
@@ -138,26 +271,33 @@ function layout_context_ajax_style($form, $form_state) {
 
 
 /**
- * Submit handler to select a context. Hidden when JavaScript is enabled.
+ * Submit handler to select a context or relationship. Hidden when JavaScript
+ * is enabled.
  */
 function layout_context_add_load_context_nojs($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
 /**
- * Helper function to return a partial context settings form.
+ * Helper function to return a partial context or relationship settings form.
  */
 function layout_context_return_form($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   $layout = $form_state['layout'];
   
-  // If no context has yet been selected, there is no sub-form to display.
-  if (!isset($form_state['values']['context']) && !isset($form_state['handler'])) {
+  // If no context or relationship has yet been selected, there is no sub-form to display.
+  if (!isset($form_state['values']['context']) && !isset($form_state['values']['relationship']) && !isset($form_state['handler'])) {
     return array();
   }
 
   if (isset($form_state['values']['context'])) {
     $handler = layout_create_context($form_state['values']['context']);
+    $handler->is_new = TRUE;
+  }
+  elseif (isset($form_state['values']['relationship'])) {
+    list($plugin_name, $child_delta) = explode(':', $form_state['values']['relationship']);
+    $handler = layout_create_handler('layout_relationship', $plugin_name);
+    $handler->childDelta = $child_delta;
     $handler->is_new = TRUE;
   }
   else {
@@ -170,7 +310,6 @@ function layout_context_return_form($form, &$form_state) {
 
   return $form;
 }
-
 
 /**
  * Validation handler for layout_context_add_form().
@@ -185,7 +324,7 @@ function layout_context_add_form_validate($form, &$form_state) {
 /**
  * Submit handler for layout_context_add_form().
  *
- * Saves a context into the layout.
+ * Saves a context or relationship into the layout.
  */
 function layout_context_add_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
@@ -201,7 +340,14 @@ function layout_context_add_form_submit($form, &$form_state) {
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
     $handler->storage = TRUE;
-    $layout->setContexts($handler->name, $handler);
+    if ($form_state['clicked_button']['#name'] == 'context_add_button') {
+      $layout->setContexts($handler->name, $handler);
+    }
+    else {
+      $uuid = new Uuid();
+      $key = $uuid->generate();
+      $layout->relationships[$key] = $handler;
+    }
   }
   layout_set_layout_tempstore($layout);
 
@@ -220,11 +366,42 @@ function layout_settings_form_context_edit($form, &$form_state) {
 }
 
 /**
+ * Submit handler for layout_settings_form() that edits a relationship.
+ */
+function layout_settings_form_context_relationship_edit($form, &$form_state) {
+  $edit_relationship = $form_state['clicked_button']['#array_parents'][3];
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/edit/layout/' . $edit_relationship;
+}
+
+/**
  * Submit handler for layout_settings_form() that removes a context.
  */
 function layout_settings_form_context_remove($form, &$form_state) {
   $removed_context = $form_state['clicked_button']['#array_parents'][3];
+
+  // Find all relationships to this context and remove them too.
+  $contexts = $form_state['layout']->getContexts();
+  $id = $contexts[$removed_context]->settings['id'];
+  $relationships = $form_state['layout']->relationships;
+  foreach ($relationships as $key => $relationship) {
+    if ($relationship->settings['context_parent'] == 'id:' . $id) {
+      unset($form_state['layout']->relationships[$key]);
+    }
+  }
+  // Then finally remove the context.
   $form_state['layout']->clearContexts($removed_context);
+
+  layout_set_layout_tempstore($form_state['layout']);
+
+  $form_state['ajax_update'] = array('context_wrapper');
+}
+
+/**
+ * Submit handler for layout_settings_form() that removes a relationship.
+ */
+function layout_settings_form_context_relationship_remove($form, &$form_state) {
+  $removed_relationship = $form_state['clicked_button']['#array_parents'][3];
+  unset($form_state['layout']->relationships[$removed_relationship]);
   layout_set_layout_tempstore($form_state['layout']);
 
   $form_state['ajax_update'] = array('context_wrapper');
