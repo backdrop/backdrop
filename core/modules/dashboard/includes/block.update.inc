@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * "Update" dashboard block.
+ * Available Updates dashboard block.
  */
 
 class DashboardUpdateBlock extends Block {
@@ -175,7 +175,7 @@ class DashboardUpdateBlock extends Block {
 
     if (!empty($updates) && module_exists('installer') && user_access('administer software updates')) {
       $link_path = 'admin/config/system/updates';
-      $link_text = t('Update');
+      $link_text = t('Manage system updates');
     }
     elseif (user_access('access_site_reports')) {
       $link_path = 'admin/reports/updates';
