@@ -55,8 +55,28 @@ class DashboardUpdateBlock extends Block {
    * {@inheritdoc}
    */
   function getContent() {
+    $panel = array(
+      '#theme' => 'dashboard_panel__update',
+    );
+
     if (!module_exists('update')) {
-      return;
+      $panel['last_check'] = array(
+        '#markup' => t('The Update Manager module is not enabled.'),
+      );
+      if (user_access('administer modules')) {
+        $panel['link'] = array(
+          '#theme' => 'link',
+          '#path' => 'admin/modules',
+          '#text' => t('Enable'),
+          '#options' => array(
+            'query' => array(
+              'search' => 'update',
+            ),
+          ),
+        );
+      }
+
+      return $panel;
     }
 
     $header = array(
@@ -137,10 +157,6 @@ class DashboardUpdateBlock extends Block {
         }
       }
     }
-
-    $panel = array(
-      '#theme' => 'dashboard_panel__update',
-    );
 
     if (empty($updates)) {
       $panel['up_to_date'] = array(
