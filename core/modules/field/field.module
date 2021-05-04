@@ -626,6 +626,8 @@ function field_sync_field_status() {
  * @param $fields
  *   An optional array of field definitions to operate on. If left empty, all
  *   fields will be loaded.
+ *
+ * @since 1.18.4 Second parameter $fields added for performance optimization.
  */
 function field_associate_fields($module, &$fields = NULL) {
   // Associate field types.
