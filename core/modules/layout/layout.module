@@ -1259,10 +1259,15 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
                 $context->setData($context_data);
               }
               else {
-                // If no context is set, load one using the layout info.
+                // If no context is set, load one using the layout info. This
+                // branch is reached when a layout has a context whose data
+                // object is not already loaded into $router_item. The built-in
+                // contexts don't do that, but a contrib module that creates a
+                // LayoutContext can have its load_callback called at this
+                // point.
                 $context_info = layout_get_context_info($context->plugin);
                 if (isset($context_info['load callback'])) {
-                  $context_data = call_user_func_array($context_info['load callback'], $router_item['original_map'][$context->position]);
+                  $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
                   $context->setData($context_data);
                 }
               }
