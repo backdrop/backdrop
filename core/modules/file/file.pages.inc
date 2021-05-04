@@ -1026,6 +1026,7 @@ function file_usage_page($file) {
           // Unlike Node or Term entities File entities have a stream wrapper
           // to the file set as their path, but the path to the entities' page
           // is "path/[fid]".
+          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
           if ($entity_type == 'file') {
             $uri = 'file/' . $entity_id;
           }
