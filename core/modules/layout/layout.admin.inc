@@ -38,6 +38,18 @@ function layout_list_page() {
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
       $row[] = array('data' => $path_link);
+      $page_callback = db_query('
+        SELECT page_callback
+        FROM {menu_router}
+        WHERE path = :path
+        ', array(':path' => $path))
+        ->fetchField();
+      if (!$page_callback) {
+        $row[0]['class'] = 'missing-path';
+      }
+      elseif ($page_callback == 'layout_page_callback') {
+        $row[0]['class'] = 'layout-page';
+      }
       // Empty columns are intentional.
       $row[] = '';
       $row[] = '';
