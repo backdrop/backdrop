@@ -135,7 +135,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
    * Test the image_scale_and_crop() function.
    */
   function testScaleAndCrop() {
-    $this->assertTrue(image_scale_and_crop($this->image, 5, 10), 'Function returned the expected value.');
+    $this->assertTrue(image_scale_and_crop($this->image, 5, 10, 'center-center'), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize', 'crop'));
 
     // Check the parameters.
