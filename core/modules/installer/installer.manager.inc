@@ -207,6 +207,8 @@ function installer_manager_update_form($form, $form_state) {
       $entry['title'] .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
     }
 
+    $entry['#attributes'] = array('class' => array('update-' . $type));
+
     // Backdrop CMS core and contrib projects are to be able to be updated from
     // the administrative interface. Set this option as default.
     $update_method = 'admin_ui';
@@ -217,7 +219,6 @@ function installer_manager_update_form($form, $form_state) {
     }
 
     $entry['update_method'] = $update_method;
-    $entry['#attributes'] = array('class' => array('update-' . $type));
 
     $form['project_downloads'][$name] = array(
       '#type' => 'value',
@@ -297,7 +298,6 @@ function installer_manager_update_form_validate($form, &$form_state) {
  * @see installer_manager_update_form_validate()
  */
 function installer_manager_update_form_submit($form, &$form_state) {
-dpm($form_state);
   $projects = array();
   $operations = array();
   foreach ($projects as $project) {
