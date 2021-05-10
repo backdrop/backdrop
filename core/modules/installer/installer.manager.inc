@@ -215,7 +215,14 @@ function installer_manager_update_form($form, $form_state) {
     // If self-update is disabled, Backdrop core needs to be updated manually.
     if ($project['project_type'] == 'core' && !config_get('installer.settings', 'core_update')) {
       $update_method = 'manual';
+      $entry['#attributes']['class'][] = 'core-manual-update';
+
+      $manual_core_updates_info = '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
+      $manual_core_updates_info .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" target="_blank" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
+
       $entry['title'] .= ' <span>(' . t('manual update required') . ')</span>';
+      $entry['title'] .= ' <a class="core-manual-update-info-toggle" href="#">more</a>';
+      $entry['title'] .= '<div class="core-manual-update-info">' . $manual_core_updates_info . '</div>';
     }
 
     $entry['update_method'] = $update_method;
@@ -262,12 +269,6 @@ function installer_manager_update_form($form, $form_state) {
         // Disable the checkboxes for projects that require manual update.
         $form['projects'][$project]['#disabled'] = TRUE;
       }
-    }
-
-    if ($manual_updates_required) {
-      $manual_updates_message = t('Updates of Backdrop CMS core using the web interface are disabled.');
-      $manual_updates_message .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a   href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/  upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
-      backdrop_set_message($manual_updates_message, 'info');
     }
   }
   else {

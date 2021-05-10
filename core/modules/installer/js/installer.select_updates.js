@@ -1,11 +1,10 @@
-/**
- * @file
- * Disables the "Download updates" button if no project was selected.
- */
 (function ($) {
 
 "use strict";
 
+/**
+ * Disables the "Download updates" button if no project was selected.
+ */
 Backdrop.behaviors.installerDownloadUpdatesToggle = {
   attach: function (context) {
     var $context = $(context);
@@ -32,6 +31,35 @@ Backdrop.behaviors.installerDownloadUpdatesToggle = {
     // Repeat each time any checkbox is ticked/unticked.
     $(context).find('.form-checkbox').on('change', function () {
       toggleExecuteButton();
+    });
+  }
+};
+
+/**
+ * Toggles the more/less links that show/hide details in the "System updates"
+ * page.
+ */
+Backdrop.behaviors.systemUpdates = {
+  attach: function(context, settings) {
+    var $table = $('table.table-select-processed');
+
+    // Hide the manual core update info text.
+    $table.find('tr.core-manual-update').find('.core-manual-update-info').hide();
+
+    // Change the text on hidden items.
+    $table.find('tr.core-manual-update').find('a.core-manual-update-info-toggle').text(Backdrop.t('less'));
+
+    // Toggle the info text.
+    $('a.core-manual-update-info-toggle').click(function(e) {
+      var $description = $(this).closest('td').find('.core-manual-update-info').toggle();
+      if ($description.is(':visible')) {
+        $(this).text(Backdrop.t('less'));
+      }
+      else {
+        $(this).text(Backdrop.t('more'));
+      }
+      e.preventDefault();
+      e.stopPropagation();
     });
   }
 };
