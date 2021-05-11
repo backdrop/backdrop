@@ -405,3 +405,11 @@ th.installer-project-name {
     text-align: left;
   }
 }
+
+.install-system-updates td {
+  /* Prevent cell content from jumping when clicking the more/less toggle */
+  vertical-align: top;
+}
+.install-system-updates td.recommended_version {
+  white-space: nowrap;
+}

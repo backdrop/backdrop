@@ -170,7 +170,10 @@ function installer_manager_update_form($form, $form_state) {
       'project_type' => $project_types[$project['project_type']],
       'project_status' => $project['project_status'] ? t('Enabled') : t('Disabled'),
       'installed_version' => $project['existing_version'],
-      'recommended_version' => $recommended_version,
+      'recommended_version' => array(
+        'data' => $recommended_version,
+        'class' => array('recommended_version'),
+      ),
     );
 
     // Ensure that security updates and unsupported versions are listed at the
@@ -218,10 +221,12 @@ function installer_manager_update_form($form, $form_state) {
       $entry['#attributes']['class'][] = 'core-manual-update';
 
       $manual_core_updates_info = '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
-      $manual_core_updates_info .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" target="_blank" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
+      $manual_core_updates_info .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
 
       $entry['title'] .= ' <span>(' . t('manual update required') . ')</span>';
       $entry['title'] .= ' <a class="core-manual-update-info-toggle" href="#">more</a>';
+      $entry['title'] = '<div>' . $entry['title'] . '</div>';
+
       $entry['title'] .= '<div class="core-manual-update-info">' . $manual_core_updates_info . '</div>';
     }
 
@@ -237,20 +242,18 @@ function installer_manager_update_form($form, $form_state) {
 
   if (!empty($projects)) {
     $header = array(
-      'title' => array(
-        'data' => t('Name'),
-        'class' => array('installer-project-name'),
-      ),
-      'project_type' => t('Project type'),
-      'project_status' => t('Project status'),
-      'installed_version' => t('Installed version'),
-      'recommended_version' => t('Recommended version'),
+      'title' => array('data' => t('Name'), 'class' => array('installer-project-name'),),
+      'project_type' => array('data' => t('Project type'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+      'project_status' => array('data' => t('Project status'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+      'installed_version' => array('data' => t('Installed version'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+      'recommended_version' => array('data' => t('Recommended version'), 'class' => array('test_class')),
     );
 
     $form['projects'] = array(
       '#type' => 'tableselect',
       '#header' => $header,
       '#options' => $projects,
+      '#attributes' => array('class' => array('install-system-updates')),
     );
 
     $form['actions'] = array('#type' => 'actions');
@@ -266,7 +269,8 @@ function installer_manager_update_form($form, $form_state) {
     foreach ($projects as $project => $project_info) {
       if ($project_info['update_method'] == 'manual') {
         $manual_updates_required = TRUE;
-        // Disable the checkboxes for projects that require manual update.
+        // Disable the checkboxes for rows of projects that require manual
+        // update.
         $form['projects'][$project]['#disabled'] = TRUE;
       }
     }

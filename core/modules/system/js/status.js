@@ -5,7 +5,7 @@
  * page.
  */
 Backdrop.behaviors.statusReport = {
-  attach: function(context, settings) {
+  attach: function() {
     var $table = $('table.system-status-report');
 
     // Hide the description for non-urgent items.

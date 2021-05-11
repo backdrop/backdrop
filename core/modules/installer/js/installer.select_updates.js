@@ -40,14 +40,11 @@ Backdrop.behaviors.installerDownloadUpdatesToggle = {
  * page.
  */
 Backdrop.behaviors.systemUpdates = {
-  attach: function(context, settings) {
+  attach: function() {
     var $table = $('table.table-select-processed');
 
     // Hide the manual core update info text.
     $table.find('tr.core-manual-update').find('.core-manual-update-info').hide();
-
-    // Change the text on hidden items.
-    $table.find('tr.core-manual-update').find('a.core-manual-update-info-toggle').text(Backdrop.t('less'));
 
     // Toggle the info text.
     $('a.core-manual-update-info-toggle').click(function(e) {
