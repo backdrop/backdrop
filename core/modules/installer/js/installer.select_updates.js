@@ -43,12 +43,12 @@ Backdrop.behaviors.systemUpdates = {
   attach: function() {
     var $table = $('table.table-select-processed');
 
-    // Hide the manual core update info text.
-    $table.find('tr.core-manual-update').find('.core-manual-update-info').hide();
+    // Hide the manual update info text.
+    $table.find('tr.manual-update').find('.manual-update-info').hide();
 
     // Toggle the info text.
-    $('a.core-manual-update-info-toggle').click(function(e) {
-      var $description = $(this).closest('td').find('.core-manual-update-info').toggle();
+    $('a.manual-update-info-toggle').click(function(e) {
+      var $description = $(this).closest('td').find('.manual-update-info').toggle();
       if ($description.is(':visible')) {
         $(this).text(Backdrop.t('less'));
       }

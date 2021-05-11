@@ -166,15 +166,20 @@ function installer_manager_update_form($form, $form_state) {
 
     // Create an entry for this project.
     $entry = array(
-      'title' => $project_name,
+      'project_name' => $project_name,
       'project_type' => $project_types[$project['project_type']],
       'project_status' => $project['project_status'] ? t('Enabled') : t('Disabled'),
       'installed_version' => $project['existing_version'],
-      'recommended_version' => array(
-        'data' => $recommended_version,
-        'class' => array('recommended_version'),
-      ),
+      'recommended_version' => $recommended_version,
     );
+
+    // Add classes to the system updates table cells.
+    foreach ($entry as $key => $data) {
+      $entry[$key] = array(
+        'data' => $data,
+        'class' => array(backdrop_html_class($key)),
+      );
+    }
 
     // Ensure that security updates and unsupported versions are listed at the
     // top of the tableselect.
@@ -218,16 +223,16 @@ function installer_manager_update_form($form, $form_state) {
     // If self-update is disabled, Backdrop core needs to be updated manually.
     if ($project['project_type'] == 'core' && !config_get('installer.settings', 'core_update')) {
       $update_method = 'manual';
-      $entry['#attributes']['class'][] = 'core-manual-update';
+      $entry['#attributes']['class'][] = 'manual-update';
 
-      $manual_core_updates_info = '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
-      $manual_core_updates_info .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
+      // Indicator for manual updates + the more/less toggle link.
+      $manual_update_indicator = ' <span>(' . t('manual update required') . ')</span>';
+      $manual_update_indicator .= ' <a class="manual-update-info-toggle" href="#">more</a>';
+      // Manual update info - hidden by default.
+      $manual_update_info = '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
+      $manual_update_info .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
 
-      $entry['title'] .= ' <span>(' . t('manual update required') . ')</span>';
-      $entry['title'] .= ' <a class="core-manual-update-info-toggle" href="#">more</a>';
-      $entry['title'] = '<div>' . $entry['title'] . '</div>';
-
-      $entry['title'] .= '<div class="core-manual-update-info">' . $manual_core_updates_info . '</div>';
+      $entry['project_name']['data'] .= $manual_update_indicator . '<div class="manual-update-info">' . $manual_update_info . '</div>';
     }
 
     $entry['update_method'] = $update_method;
@@ -242,11 +247,11 @@ function installer_manager_update_form($form, $form_state) {
 
   if (!empty($projects)) {
     $header = array(
-      'title' => array('data' => t('Name'), 'class' => array('installer-project-name'),),
+      'project_name' => array('data' => t('Name'), 'class' => array('installer-project-name'),),
       'project_type' => array('data' => t('Project type'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
       'project_status' => array('data' => t('Project status'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
       'installed_version' => array('data' => t('Installed version'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-      'recommended_version' => array('data' => t('Recommended version'), 'class' => array('test_class')),
+      'recommended_version' => array('data' => t('Recommended version')),
     );
 
     $form['projects'] = array(

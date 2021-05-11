@@ -393,13 +393,13 @@ th.installer-project-name {
     float: left; /* LTR */
   }
 
-  .project-status {
+  .installer-browser .project-status {
     position: absolute;
     right: 10px; /* LTR */
     text-align: right; /* LTR */
     top: 5px;
   }
-  [dir="rtl"] .project-status {
+  [dir="rtl"] .installer-browser .project-status {
     right: auto;
     left: 10px;
     text-align: left;
@@ -410,6 +410,6 @@ th.installer-project-name {
   /* Prevent cell content from jumping when clicking the more/less toggle */
   vertical-align: top;
 }
-.install-system-updates td.recommended_version {
+.install-system-updates td.recommended-version {
   white-space: nowrap;
 }
