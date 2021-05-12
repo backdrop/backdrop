@@ -295,7 +295,9 @@ function installer_manager_update_form($form, $form_state) {
  * @see installer_manager_update_form_submit()
  */
 function installer_manager_update_form_validate($form, &$form_state) {
-  if (empty(array_filter($form_state['values']['projects']))) {
+  // Projects for which their checkbox has been ticked before form submission.
+  $projects = array_filter($form_state['values']['projects']);
+  if (empty($projects)) {
     form_set_error('projects', t('You must select at least one project to update.'));
   }
 }
