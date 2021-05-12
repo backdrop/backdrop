@@ -2291,7 +2291,7 @@ function theme_table(array $variables) {
       }
     }
 
-    $output .= "</" . $tag . ">\n";
+    $output .= "</$tag>\n";
   }
 
   // Add sticky headers if enabled.
