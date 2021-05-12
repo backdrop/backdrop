@@ -2238,7 +2238,7 @@ function theme_table(array $variables) {
   // tbody and tfoot have the same structure, and are built using the same
   // procedure.
   foreach ($sections as $tag => $content) {
-    $output .= "<" . $tag . ">\n";
+    $output .= "<$tag>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
     $default_no_striping = ($tag === 'tfoot');
