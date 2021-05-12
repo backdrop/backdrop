@@ -215,7 +215,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $this->backdropGet('admin/reports/updates');
     $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
 
-    $this->backdropGet('admin/reports/updates/settings');
+    $this->backdropGet('admin/config/system/updates/settings');
     $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
   }
 

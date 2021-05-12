@@ -59,6 +59,19 @@ function installer_menu() {
     'access callback' => 'installer_update_access',
     'file' => 'installer.manager.inc',
   );
+  $items['admin/config/system/updates/list'] = array(
+    'title' => 'Install system updates',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/system/updates/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('installer_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'installer.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
 
   $items['admin/installer/manual'] = array(
     'page callback' => 'backdrop_get_form',

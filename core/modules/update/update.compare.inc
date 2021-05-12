@@ -105,11 +105,11 @@ function _update_build_layout_data() {
  * templates, and groups them by project type and status.
  *
  * Some parts of this function assume that enabled projects are always processed
- * first, and if disabled projects are being processed (depending on the
+ * first. If disabled projects are being processed (depending on the
  * 'update_disabled_extensions' setting, as configured under
- * admin/reports/updates/settings), those are only processed after $projects has
- * been populated with information about the enabled code. Projects that are set
- * as hidden are always ignored.
+ * admin/config/system/updates/settings), then those are only processed after
+ * $projects has been populated with information about the enabled code.
+ * Projects that are set as hidden are always ignored.
  *
  * This function also records the latest change time on the .info files for each
  * module, theme, or layout template. This timestamp is used when deciding if
