@@ -1514,7 +1514,7 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
           $options[$widget_field_type][$name] = $widget_type['label'];
         }
       }
-      if (!empty($options)) {
+      if (isset($options[$widget_field_type])) {
         asort($options[$widget_field_type]);
       }
     }
