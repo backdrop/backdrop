@@ -3345,7 +3345,7 @@ function form_process_checkboxes($element) {
       // Only enabled checkboxes receive their values from the form submission;
       // disabled checkboxes use their default value.
       $default_value = NULL;
-      if (isset($value[$key]) || (in_array($key, $element['#default_value']) && isset($element[$key]['#disabled']))) {
+      if (isset($value[$key]) || (in_array($key, $element['#default_value'], TRUE) && isset($element[$key]['#disabled']))) {
         $default_value = $key;
       }
 
