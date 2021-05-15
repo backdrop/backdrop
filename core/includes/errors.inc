@@ -49,11 +49,15 @@ function backdrop_error_levels() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler_real($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler_real($error_level, $message, $filename, $line) {
   if ($error_level & error_reporting()) {
     $types = backdrop_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
     $caller = _backdrop_get_last_caller(debug_backtrace());
+
+    if (empty($caller)) {
+      return FALSE;
+    }
 
     if (!function_exists('filter_xss_admin')) {
       require_once BACKDROP_ROOT . '/core/includes/common.inc';

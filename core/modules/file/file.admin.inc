@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File type editing user interface.
+ * Admin page callbacks for the File module.
  */
 
 /**
@@ -28,7 +28,7 @@ function file_list_types_page() {
       array(
         'data' => theme('file_type_overview',
           array(
-            'name' => check_plain($type->name),
+            'name' => $type->name,
             'description' => $type->description,
           )
         ),
@@ -519,10 +519,10 @@ function file_settings_form($form, &$form_state) {
     '#dialog' => TRUE,
   );
 
-  $form['default_allowed_extensions('] = array(
+  $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => $config->get('default_allowed_extensions('),
+    '#default_value' => $config->get('default_allowed_extensions'),
     '#description' => t('Separate extensions with a space and do not include the leading dot.'),
     '#maxlength' => NULL,
   );

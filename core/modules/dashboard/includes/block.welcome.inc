@@ -16,6 +16,10 @@ class DashboardWelcomeBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Welcome to Backdrop CMS!');
   }
 
@@ -23,6 +27,10 @@ class DashboardWelcomeBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Welcome message, and links to getting-started tasks.');
   }
 
@@ -30,6 +38,7 @@ class DashboardWelcomeBlock extends Block {
    * {@inheritdoc}
    */
   function getContent() {
+    $site_config = config('system.core');
     $build = array(
       '#theme' => 'dashboard_panel__welcome',
     );
@@ -49,17 +58,9 @@ class DashboardWelcomeBlock extends Block {
     $links_col1 = array();
     $links_col1['<front>'] = t('View the home page');
     $links_col1['admin/config/system/site-information'] = t('Add a logo or change the site name');
-    $default_theme = config_get('system.core', 'theme_default');
-    if (theme_has_settings($default_theme)) {
-      $themes = list_themes();
-      $color_support = $themes[$default_theme]->info['settings']['color'];
-      if (module_exists('color') && $color_support) {
-        $theme_link_label = t('Change colors for the current theme');
-      }
-      else {
-        $theme_link_label = t('Change settings for the current theme');
-      }
-      $links_col1['admin/appearance/settings/' . $default_theme] = $theme_link_label;
+    $default_theme = $site_config->get('theme_default');
+    if (theme_has_settings($default_theme) || (module_exists('color') && theme_has_color_support($default_theme))) {
+      $links_col1['admin/appearance/settings/' . $default_theme] = t('Customize the current theme');
     }
     if (module_exists('installer')) {
       $links_col1['admin/appearance/install'] = t('Find a new theme for your site');
@@ -95,7 +96,7 @@ class DashboardWelcomeBlock extends Block {
     if (isset($system_menus['main-menu'])) {
       $links_col2['admin/structure/menu/manage/main-menu'] = t('Update the %menu_name menu', array('%menu_name' => $system_menus['main-menu']));
     }
-    $home_page_path = config_get('system.core', 'site_frontpage');
+    $home_page_path = $site_config->get('site_frontpage');
     $home_layout = layout_load('home');
     if ($home_layout && !$home_layout->disabled && $home_page_path == 'home') {
       $links_col2['admin/structure/layouts/manage/home'] = t('Modify the layout for your home page');

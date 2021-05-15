@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administration pages for image settings.
+ * Admin page callbacks for the Image module.
  */
 
 /**

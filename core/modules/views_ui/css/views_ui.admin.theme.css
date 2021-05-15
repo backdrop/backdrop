@@ -251,6 +251,13 @@ input.form-radio {
   box-sizing: border-box;
 }
 
+#edit-page-style .views-ui-ajax-wrapper,
+#edit-page-style .views-ui-ajax-wrapper div,
+#edit-block-style .views-ui-ajax-wrapper,
+#edit-block-style .views-ui-ajax-wrapper div {
+  display: block;
+}
+
 @media (max-width: 600px) {
   .edit-page-style-wrapper div,
   .edit-page-style-wrapper label,

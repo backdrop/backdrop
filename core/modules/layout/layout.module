@@ -83,7 +83,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
-    'title' => 'Settings',
+    'title' => 'Templates',
     'description' => 'Manage layout templates.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),
@@ -95,6 +95,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'layout_flexible_template_settings_add_form',
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -104,6 +105,7 @@ function layout_menu() {
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_settings_edit_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -113,6 +115,7 @@ function layout_menu() {
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_configure_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -122,6 +125,7 @@ function layout_menu() {
     'title' => 'Delete flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_delete_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -131,6 +135,7 @@ function layout_menu() {
     'title' => 'Delete row',
     'page callback' => 'layout_flexible_template_delete_row',
     'page arguments' => array(5,7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -140,6 +145,7 @@ function layout_menu() {
     'title' => 'Choose region widths',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_region_style_select', 5, 7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -149,6 +155,7 @@ function layout_menu() {
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -158,6 +165,7 @@ function layout_menu() {
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7, 9),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -208,7 +216,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/blocks'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -222,7 +230,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/configure'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -321,6 +329,39 @@ function layout_menu() {
     'page arguments' => array(4, 'layout'),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/add'] = array(
+    'title' => 'Add context',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/relationship/add'] = array(
+    'title' => 'Add relationship',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_relationship_add_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/edit/layout/%'] = array(
+    'title' => 'Configure context',
+    'load arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/relationship/edit/layout/%'] = array(
+    'title' => 'Configure relationship',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_relationship_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
@@ -451,7 +492,7 @@ function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_positio
   $contexts = $menu_item->getContexts();
   $context_info = layout_get_context_info($contexts[$arg_position]->plugin);
   if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-    return $context_info['load callback']($arg_value);
+    return call_user_func_array($context_info['load callback'], array($arg_value));
   }
 
   // Pass-through the string argument if no load callback specified.
@@ -693,6 +734,11 @@ function layout_permission() {
       'description' => t('Add and modify layouts on pages.'),
       'restrict access' => TRUE,
     ),
+    'administer flexible templates' => array(
+      'title' => t('Administer Flexible Templates'),
+      'description' => t('Create, configure and delete flexible layout templates.'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -817,6 +863,11 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+
+    // Relationships.
+    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
+    'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
+    'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
 }
 
@@ -933,7 +984,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * Load all layouts at a given path.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
@@ -963,9 +1014,6 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
-    foreach ($layouts as $layout) {
-      $layout->resetContexts();
-    }
     cache('layout_path')->set($path, $layouts);
   }
   return $layouts;
@@ -1125,11 +1173,12 @@ function layout_get_all_configs($type) {
  */
 function layout_get_path_layout_names($path) {
   $path_map = &backdrop_static(__FUNCTION__, array());
-
-  $configs = layout_get_all_configs('layout');
-  foreach ($configs as $layout_name => $config) {
-    if (isset($config['path'])) {
-      $path_map[$config['path']][] = $layout_name;
+  if (empty($path_map)) {
+    $configs = layout_get_all_configs('layout');
+    foreach ($configs as $layout_name => $config) {
+      if (isset($config['path'])) {
+        $path_map[$config['path']][] = $layout_name;
+      }
     }
   }
 
@@ -1171,7 +1220,7 @@ function layout_provides_path($path) {
  * are passed. In which case the current path will be used.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  * @param $router_item
  *   The menu router item for the page currently being loaded.
  *   The $path parameter will be ignored if $router_item is specified.
@@ -1192,47 +1241,58 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     // If the path is a node preview path, check if a custom layout exists for
     // nodes and use that instead.
     // @ todo: This adds very specific code for node previews which too closely
-    // couples Node and Layout modules. This needs to be reverted in a future 
+    // couples Node and Layout modules. This needs to be reverted in a future
     // commit.
-    $data = NULL;
+    $preview_node = NULL;
     $node_types = node_type_get_types();
     foreach ($node_types as $type) {
-      $preview_path = 'node/' . $type->type . '/preview';
+      $preview_path = 'node/preview/' . $type->type . '/%';
       if ($router_item['path'] == $preview_path) {
-        $tempstore_id = node_build_tempstore_id($type->type);
-        $data = node_get_node_tempstore($tempstore_id);
+        $tempstore_id = $router_item['map'][3];
+        $preview_node = node_get_node_tempstore($tempstore_id);
         break;
       }
     }
-    if ($data && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
-      $layouts = $node_layouts;
+    if ($preview_node) {
+      $layouts = layout_load_multiple_by_path('node/%', TRUE);
     }
     else {
       $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
     }
     $selected_layout = NULL;
     foreach ($layouts as $layout) {
-      // Contexts must be set before the layout's access may be checked.
-      $contexts = $layout->getContexts();
-      foreach ($contexts as $context) {
+      // Set context data from the menu path.
+      $menu_contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_MENU);
+
+      foreach ($menu_contexts as $context) {
         if (isset($context->position)) {
 
-          // Check for an object loaded by the menu router. Use a preview from
-          // Tempstore if on a node preview page.
-          // @ todo: This is also specific code for node previews which needs 
+          // If on a node preview page, use the preview from tempstore.
+          // @ todo: This is also specific code for node previews which needs
           // to be reverted in a future commit.
-          if (isset($router_item['map'][$context->position])) {
-            $data = isset($data) ? $data : $router_item['map'][$context->position];
-            $context->setData($data);
+          if ($preview_node) {
+            $context->setData($preview_node);
           }
-
-          // If no context is set, load one using the layout info.
-          if (!is_object($context->data)) {
-            $context_info = layout_get_context_info($context->plugin);
-            if (isset($context_info['load callback'])) {
-              $function = $context_info['load callback'];
-              $context_data = $function($router_item['original_map'][$context->position]);
-              $context->setData($context_data);
+          else {
+            if (isset($router_item['map'][$context->position])) {
+              $context_data = $router_item['map'][$context->position];
+              // Check for an object loaded by the menu router.
+              if (is_object($context_data)) {
+                $context->setData($context_data);
+              }
+              else {
+                // If no context is set, load one using the layout info. This
+                // branch is reached when a layout has a context whose data
+                // object is not already loaded into $router_item. The built-in
+                // contexts don't do that, but a contrib module that creates a
+                // LayoutContext can have its load_callback called at this
+                // point.
+                $context_info = layout_get_context_info($context->plugin);
+                if (isset($context_info['load callback'])) {
+                  $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
+                  $context->setData($context_data);
+                }
+              }
             }
           }
         }
@@ -1340,14 +1400,14 @@ function _layout_get_all_info($data_type, $init = array()) {
  *   Optionally specify a name of a single layout template, e.g. "boxton" or
  *   "simmons". If no layout template name is specified, information for all
  *   layout templates will be returned.
- * 
+ *
  * @param boolean $rebuild
  *   Whether or not the list of layout template info needs to be rebuilt (see
  *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
  *   required only on specific cases, so this defaults to FALSE. That way, the
  *   rest of the times the layout cache is used (when available) for performance
  *   reasons.
- * 
+ *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
@@ -1442,6 +1502,58 @@ function layout_get_layout_info($layout_name = NULL) {
  */
 function layout_get_context_info($plugin_name) {
   $info = _layout_get_all_info('layout_context');
+  return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
+}
+
+
+/**
+ * Fetch all relevant relationships.
+ *
+ * Relevant relationships are any relationship that can be created based upon
+ * the list of existing contexts. For example, the 'node author' relationship
+ * is relevant if there is a 'node' context, but makes no sense if there is
+ * not one.
+ *
+ * @param $contexts
+ *   An array of contexts used to figure out which relationships are relevant.
+ *
+ * @return
+ *   An array of relationship keys that are relevant for the given set of
+ *   contexts.
+ */
+function layout_relationships_get_relevant_info($contexts) {
+  $relevant = array();
+  $relationships = _layout_get_all_info('layout_relationship');
+
+  foreach ($contexts as $context) {
+    // Go through each relationship
+    foreach ($relationships as $rid => $relationship) {
+      $handler = layout_create_handler('layout_relationship', $rid);
+      if ($children = $handler->getChildren($rid)) {
+        foreach ($children as $child_rid => $child) {
+          if ($child['context'] == $context->plugin) {
+            $relevant[$child_rid] = $child;
+          }
+        }
+      }
+      else {
+        if ($relationship['context'] == $context->plugin) {
+          $relevant[$rid . ':relationship'] = $relationship;
+        }
+      }
+    }
+  }
+
+  return $relevant;
+}
+
+/**
+ * Load all layout relationship information from modules.
+ *
+ * @return array
+ */
+function layout_get_relationship_info($plugin_name) {
+  $info = _layout_get_all_info('layout_relationship');
   return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
 }
 
@@ -1566,6 +1678,9 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       case 'layout_context':
         $broken_class = 'LayoutContextBroken';
         break;
+      case 'layout_relationship':
+        $broken_class = 'LayoutRelationshipBroken';
+        break;
       case 'layout_style':
         $broken_class = 'LayoutStyle';
         break;
@@ -1596,6 +1711,15 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
 function layout_create_handler($plugin_type, $plugin_name, array $config = array()) {
   $handler_name = layout_get_handler_name($plugin_type, $plugin_name);
   return new $handler_name($plugin_name, $config);
+}
+
+/**
+ * Helper function to create a Layout Context.
+ *
+ * @return LayoutContext
+ */
+function layout_create_relationship($relationship_plugin_name, $config = array()) {
+  return layout_create_handler('layout_relationship', $relationship_plugin_name, $config);
 }
 
 /**
@@ -1671,9 +1795,6 @@ function layout_set_layout_tempstore($item, $type = 'layout') {
     return;
   }
 
-  // Layout contexts should not be stored in the tempstore, they're generated on
-  // the fly when needed after loading.
-  $item->resetContexts();
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
@@ -1719,7 +1840,7 @@ function layout_tempstore_block_load($layout_block_uuid, $layout_name) {
 }
 
 /**
- * Given a path with wildcard placeholders (%), determine the required contexts.
+ * Given a path with placeholders (%), determine the required contexts.
  *
  * @param string $path
  *   The path for which required contexts should be retrieved.
@@ -1742,7 +1863,7 @@ function layout_context_required_by_path($path) {
           'plugin' => $context_info['name'],
         );
       }
-      // If the path matches based on % wildcards, add this context as a
+      // If the path matches based on % placeholders, add this context as a
       // required context info in the correct order.
       elseif (strpos($path, $cleaned_path) === 0) {
         // Determine the argument placement within the path.
@@ -1759,7 +1880,7 @@ function layout_context_required_by_path($path) {
     }
   }
 
-  // If any wildcards are not filled, populate with a placeholder context
+  // If any placeholders are not filled, populate with a placeholder context
   // that can be modified.
   $parts = explode('/', $path);
   foreach ($parts as $part_index => $part) {
@@ -1779,6 +1900,7 @@ function layout_context_required_by_path($path) {
   foreach ($required_context_info as $context_position => $context_info) {
     $context = layout_create_context($context_info['plugin']);
     $context->required = TRUE;
+    $context->usageType = LayoutContext::USAGE_TYPE_MENU;
     // String placeholders are not locked, allowing a new value to be set.
     $context->locked = $context_info['plugin'] !== 'string';
     $context->position = $context_position;
@@ -1787,6 +1909,25 @@ function layout_context_required_by_path($path) {
   }
 
   return $required_contexts[$path];
+}
+
+/**
+ * Returns the current user context, which is always available.
+ *
+ * @return EntityLayoutContext
+ *   The layout context for the current user.
+ *
+ * @since 1.17.5 Function added.
+ */
+function layout_current_user_context() {
+  $current_user_context = layout_create_context('user', array(
+    'name' => 'current_user',
+    'label' => t('Current user'),
+    'locked' => TRUE,
+    'usageType' => LayoutContext::USAGE_TYPE_SYSTEM,
+  ));
+  $current_user_context->setData($GLOBALS['user']);
+  return $current_user_context;
 }
 
 /**
@@ -2056,6 +2197,25 @@ function layout_layout_info() {
 }
 
 /**
+ * Implements hook_layout_presave().
+ */
+function layout_layout_presave($layout) {
+  if (!empty($layout->removed_blocks)) {
+    foreach ($layout->removed_blocks as $uuid => $block) {
+      // @todo: Follow-up for other block types with files/images.
+      if (is_a($block, 'BlockHero')) {
+        if (!empty($block->settings['image'])) {
+          $image = file_load($block->settings['image']);
+          if ($image) {
+            file_usage_delete($image, 'layout', 'block', $image->fid);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * Reset all caches provided by Layout module.
  */
 function layout_flexible_reset_caches() {
@@ -2074,193 +2234,193 @@ function layout_flexible_row_styles() {
       'split' => '100:0',
       'bootstrap' => '12:0',
       'region_count' => 1,
-      'name' => 'One full-width region',
+      'name' => t('One full-width region'),
     ),
     'region_10_2' => array(
       'split' => '83:17',
       'bootstrap' => '10:2',
       'region_count' => 2,
-      'name' => 'Two regions 83% : 17%',
+      'name' => t('Two regions') . (' 83% : 17%'),
     ),
     'region_9_3' => array(
       'split' => '75:25',
       'bootstrap' => '9:3',
       'region_count' => 2,
-      'name' => 'Two regions 75% : 25%',
+      'name' => t('Two regions') . (' 75% : 25%'),
     ),
     'region_8_4' => array(
       'split' => '67:33',
       'bootstrap' => '8:4',
       'region_count' => 2,
-      'name' => 'Two regions 67% : 33%',
+      'name' => t('Two regions') . (' 67% : 33%'),
     ),
     'region_6_6' => array(
       'split' => '50:50',
       'bootstrap' => '6:6',
       'region_count' => 2,
-      'name' => 'Two regions 50% : 50%',
+      'name' => t('Two regions') . (' 50% : 50%'),
     ),
     'region_4_8' => array(
       'split' => '33:67',
       'bootstrap' => '4:8',
       'region_count' => 2,
-      'name' => 'Two regions 33% : 67%',
+      'name' => t('Two regions') . (' 33% : 67%'),
     ),
     'region_3_9' => array(
       'split' => '25:75',
       'bootstrap' => '3:9',
       'region_count' => 2,
-      'name' => 'Two regions 25% : 75%',
+      'name' => t('Two regions') . (' 25% : 75%'),
     ),
     'region_2_10' => array(
       'split' => '17:83',
       'bootstrap' => '2:10',
       'region_count' => 2,
-      'name' => 'Two regions 17% : 83%',
+      'name' => t('Two regions') . (' 17% : 83%'),
     ),
     'region_4_4_4' => array(
       'split' => '33:33:33',
       'bootstrap' => '4:4:4',
       'region_count' => 3,
-      'name' => 'Three regions 33% : 33% : 33%',
+      'name' => t('Three regions') . (' 33% : 33% : 33%'),
     ),
     'region_2_8_2' => array(
       'split' => '17:67:17',
       'bootstrap' => '2:8:2',
       'region_count' => 3,
-      'name' => 'Three regions 17% : 67% : 17%',
+      'name' => t('Three regions') . (' 17% : 67% : 17%'),
     ),
     'region_2_2_8' => array(
       'split' => '17:17:67',
       'bootstrap' => '2:2:8',
       'region_count' => 3,
-      'name' => 'Three regions 17% : 17% : 67%',
+      'name' => t('Three regions') . (' 17% : 17% : 67%'),
     ),
     'region_8_2_2' => array(
       'split' => '67:17:17',
       'bootstrap' => '8:2:2',
       'region_count' => 3,
-      'name' => 'Three regions 67% : 17% : 17%',
+      'name' => t('Three regions') . (' 67% : 17% : 17%'),
     ),
     'region_3_6_3' => array(
       'split' => '25:50:25',
       'bootstrap' => '3:6:3',
       'region_count' => 3,
-      'name' => 'Three regions 25% : 50% : 25%',
+      'name' => t('Three regions') . (' 25% : 50% : 25%'),
     ),
     'region_3_3_6' => array(
       'split' => '25:25:50',
       'bootstrap' => '3:3:6',
       'region_count' => 3,
-      'name' => 'Three regions 25% : 25% : 50%',
+      'name' => t('Three regions') . (' 25% : 25% : 50%'),
     ),
     'region_6_3_3' => array(
       'split' => '50:25:25',
       'bootstrap' => '6:3:3',
       'region_count' => 3,
-      'name' => 'Three regions 50% : 25% : 25%',
+      'name' => t('Three regions') . (' 50% : 25% : 25%'),
     ),
     'region_4_2_6' => array(
       'split' => '33:17:50',
       'bootstrap' => '4:2:6',
       'region_count' => 3,
-      'name' => 'Three regions 33% : 17% : 50%',
+      'name' => t('Three regions') . (' 33% : 17% : 50%'),
     ),
     'region_4_6_2' => array(
       'split' => '33:50:17',
       'bootstrap' => '4:6:2',
       'region_count' => 3,
-      'name' => 'Three regions 33% : 50% : 17%',
+      'name' => t('Three regions') . (' 33% : 50% : 17%'),
     ),
     'region_2_6_4' => array(
       'split' => '17:50:33',
       'bootstrap' => '2:6:4',
       'region_count' => 3,
-      'name' => 'Three regions 17% : 50% : 33%',
+      'name' => t('Three regions') . (' 17% : 50% : 33%'),
     ),
     'region_2_4_6' => array(
       'split' => '17:33:50',
       'bootstrap' => '2:4:6',
       'region_count' => 3,
-      'name' => 'Three regions 17% : 33% : 50%',
+      'name' => t('Three regions') . (' 17% : 33% : 50%'),
     ),
     'region_6_2_4' => array(
       'split' => '50:17:33',
       'bootstrap' => '6:2:4',
       'region_count' => 3,
-      'name' => 'Three regions 50% : 17% : 33%',
+      'name' => t('Three regions') . (' 50% : 17% : 33%'),
     ),
     'region_6_4_2' => array(
       'split' => '50:33:17',
       'bootstrap' => '6:4:2',
       'region_count' => 3,
-      'name' => 'Three regions 50% : 33% : 17%',
+      'name' => t('Three regions') . (' 50% : 33% : 17%'),
     ),
     'region_3_3_3_3' => array(
       'split' => '25:25:25:25',
       'bootstrap' => '3:3:3:3',
       'region_count' => 4,
-      'name' => 'Four regions 25% : 25% : 25% : 25%',
+      'name' => t('Four regions') . (' 25% : 25% : 25% : 25%'),
     ),
     'region_3_3_4_2' => array(
       'split' => '25:25:33:17',
       'bootstrap' => '3:3:4:2',
       'region_count' => 4,
-      'name' => 'Four regions 25% : 25% : 33% : 17%',
+      'name' => t('Four regions') . (' 25% : 25% : 33% : 17%'),
     ),
     'region_3_3_2_4' => array(
       'split' => '25:25:17:33',
       'bootstrap' => '3:3:2:4',
       'region_count' => 4,
-      'name' => 'Four regions 25% : 25% : 17% : 33%',
+      'name' => t('Four regions') . (' 25% : 25% : 17% : 33%'),
     ),
     'region_4_3_3_2' => array(
       'split' => '33:25:25:17',
       'bootstrap' => '4:3:3:2',
       'region_count' => 4,
-      'name' => 'Four regions 33% : 25% : 25% : 17%',
+      'name' => t('Four regions') . (' 33% : 25% : 25% : 17%'),
     ),
     'region_2_3_3_4' => array(
       'split' => '17:25:25:33',
       'bootstrap' => '2:3:3:4',
       'region_count' => 4,
-      'name' => 'Four regions 17% : 25% : 25% : 33%',
+      'name' => t('Four regions') . (' 17% : 25% : 25% : 33%'),
     ),
     'region_2_4_3_3' => array(
       'split' => '17:33:25:25',
       'bootstrap' => '2:4:3:3',
       'region_count' => 4,
-      'name' => 'Four regions 17% : 33% : 25% : 25%',
+      'name' => t('Four regions') . (' 17% : 33% : 25% : 25%'),
     ),
     'region_4_2_3_3' => array(
       'split' => '33:17:25:25',
       'bootstrap' => '4:2:3:3',
       'region_count' => 4,
-      'name' => 'Four regions 33% : 17% : 25% : 25%',
+      'name' => t('Four regions') . (' 33% : 17% : 25% : 25%'),
     ),
     'region_2_4_4_2' => array(
       'split' => '17:33:33:17',
       'bootstrap' => '2:4:4:2',
       'region_count' => 4,
-      'name' => 'Four regions 17% : 33% : 33% : 17%',
+      'name' => t('Four regions') . (' 17% : 33% : 33% : 17%'),
     ),
     'region_2_4_2_4' => array(
       'split' => '17:33:17:33',
       'bootstrap' => '2:4:2:4',
       'region_count' => 4,
-      'name' => 'Four regions 17% : 33% : 17% : 33%',
+      'name' => t('Four regions') . (' 17% : 33% : 17% : 33%'),
     ),
     'region_4_2_2_4' => array(
       'split' => '33:17:17:33',
       'bootstrap' => '4:2:2:4',
       'region_count' => 4,
-      'name' => 'Four regions 33% : 17% : 17% : 33%',
+      'name' => t('Four regions') . (' 33% : 17% : 17% : 33%'),
     ),
     'region_4_2_4_2' => array(
       'split' => '33:17:33:17',
       'bootstrap' => '4:2:4:2',
       'region_count' => 4,
-      'name' => 'Four regions 33% : 17% : 33% : 17%',
+      'name' => t('Four regions') . (' 33% : 17% : 33% : 17%'),
     ),
   );
 

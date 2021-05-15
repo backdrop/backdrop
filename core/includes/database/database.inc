@@ -181,7 +181,7 @@
  *
  * @see http://php.net/manual/book.pdo.php
  */
-abstract class DatabaseConnection extends PDO {
+abstract class DatabaseConnection {
 
   /**
    * The database target this connection is for.
@@ -209,6 +209,13 @@ abstract class DatabaseConnection extends PDO {
    * @var DatabaseLog
    */
   protected $logger = NULL;
+
+  /**
+   * The PDO object that is used for running database queries.
+   *
+   * @var PDO
+   */
+  protected $pdo = NULL;
 
   /**
    * Tracks the number of "layers" of transactions currently active.
@@ -315,11 +322,11 @@ abstract class DatabaseConnection extends PDO {
     $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
 
     // Call PDO::__construct and PDO::setAttribute.
-    parent::__construct($dsn, $username, $password, $driver_options);
+    $this->pdo = new PDO($dsn, $username, $password, $driver_options);
 
     // Set a Statement class, unless the driver opted out.
     if (!empty($this->statementClass)) {
-      $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
     }
   }
 
@@ -335,7 +342,7 @@ abstract class DatabaseConnection extends PDO {
     // Destroy all references to this connection by setting them to NULL.
     // The Statement class attribute only accepts a new value that presents a
     // proper callable, so we reset it to PDOStatement.
-    $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
     $this->schema = NULL;
   }
 
@@ -489,7 +496,7 @@ abstract class DatabaseConnection extends PDO {
     $query = $this->prefixTables($query);
 
     // Call PDO::prepare.
-    return parent::prepare($query);
+    return $this->pdo->prepare($query);
   }
 
   /**
@@ -674,7 +681,6 @@ abstract class DatabaseConnection extends PDO {
    * @throws PDOException
    */
   public function query($query, array $args = array(), $options = array()) {
-
     // Use default values if not already set.
     $options += $this->defaultOptions();
 
@@ -701,7 +707,7 @@ abstract class DatabaseConnection extends PDO {
         case Database::RETURN_AFFECTED:
           return $stmt->rowCount();
         case Database::RETURN_INSERT_ID:
-          return $this->lastInsertId();
+          return $this->pdo->lastInsertId();
         case Database::RETURN_NULL:
           return NULL;
         default:
@@ -1003,6 +1009,19 @@ abstract class DatabaseConnection extends PDO {
   }
 
   /**
+   * Provides a wrapper for the quote() function from the PDO object.
+   *
+   * @param string $string
+   *   The string to be quoted.
+   *
+   * @return
+   *   The quoted string.
+   */
+  public function quote($string) {
+    return $this->pdo->quote($string);
+  }
+
+  /**
    * Determines if there is an active transaction open.
    *
    * @return
@@ -1087,7 +1106,7 @@ abstract class DatabaseConnection extends PDO {
         $rolled_back_other_active_savepoints = TRUE;
       }
     }
-    parent::rollBack();
+    $this->pdo->rollBack();
     if ($rolled_back_other_active_savepoints) {
       throw new DatabaseTransactionOutOfOrderException();
     }
@@ -1115,7 +1134,7 @@ abstract class DatabaseConnection extends PDO {
       $this->query('SAVEPOINT ' . $name);
     }
     else {
-      parent::beginTransaction();
+      $this->pdo->beginTransaction();
     }
     $this->transactionLayers[$name] = $name;
   }
@@ -1166,7 +1185,7 @@ abstract class DatabaseConnection extends PDO {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!parent::commit()) {
+        if (!$this->pdo->commit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -1250,7 +1269,7 @@ abstract class DatabaseConnection extends PDO {
    * Returns the version of the database server.
    */
   public function version() {
-    return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
+    return $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
   }
 
   /**
@@ -1704,12 +1723,16 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
+   * @param $close
+   *   Whether to close the connection.
    * @return
    *   TRUE in case of success, FALSE otherwise.
    */
-  final public static function removeConnection($key) {
+  final public static function removeConnection($key, $close = TRUE) {
     if (isset(self::$databaseInfo[$key])) {
-      self::closeConnection(NULL, $key);
+      if ($close) {
+        self::closeConnection(NULL, $key);
+      }
       unset(self::$databaseInfo[$key]);
       return TRUE;
     }
@@ -2866,10 +2889,6 @@ function db_field_exists($table, $field) {
  */
 function db_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
-}
-
-function _db_create_keys_sql($spec) {
-  return Database::getConnection()->schema()->createKeysSql($spec);
 }
 
 /**

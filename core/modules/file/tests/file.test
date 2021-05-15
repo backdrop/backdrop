@@ -121,17 +121,17 @@ class FileTestHelper extends BackdropWebTestCase {
     }
 
     file_type_save($type);
-    return $type;
-  }
 
-  /**
-   * Overrides BackdropWebTestCase::backdropGetToken() to support the hash salt.
-   *
-   * @todo Remove when http://backdrop.org/node/1555862 is fixed in core.
-   */
-  protected function backdropGetToken($value = '') {
-    $private_key = backdrop_get_private_key();
-    return backdrop_hmac_base64($value, $this->session_id . $private_key . backdrop_get_hash_salt());
+    file_display_save($type->type, 'default', array(
+      'formatter' => 'file_field_file_download_link',
+      'settings' => array(
+        'file_field_file_download_link' => array(
+          'text' => 'Download [file:name]',
+        ),
+      ),
+    ));
+
+    return $type;
   }
 
   /**
@@ -501,7 +501,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
           'form_token' => 'invalid token',
         );
         $this->backdropPost($path, $edit, t('Save'));
-        $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+        $this->assertText('The form has become outdated.');
         $last_fid = $this->getLastFileId();
         $this->assertEqual($last_fid_prior, $last_fid, 'File was not saved when uploaded with an invalid form token.');
 
@@ -581,7 +581,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
         $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
 
         // Get the Ajax settings bound to the triggering element.
-        $xpath = '//*[@name="' . $input_base_name . '_upload_button' . '"]';
+        $xpath = '//*[@name="' . $input_base_name . '_upload_button"]';
         $element = $this->xpath($xpath);
         $element_id = (string) $element[0]['id'];
         $ajax_settings = $this->backdropSettings['ajax'][$element_id];
@@ -1830,7 +1830,7 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
 class FileUnitTestCase extends FileTestHelper {
 
   /**
-   * Regression tests for core issue http://backdrop.org/node/1239376.
+   * Regression tests for core issue https://www.drupal.org/node/1239376.
    */
   function testMimeTypeMappings() {
     $tests = array(
@@ -1917,8 +1917,9 @@ class FileUnitTestCase extends FileTestHelper {
     $this->assertEqual($file->metadata['width'], $width, 'Updated image width retrieved by file_load().');
 
     // Verify that the image dimension metadata is removed on file deletion.
+    $this->assertTrue(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => $file->fid))->fetchField(), 'Row exists in {file_metadata} before file_delete().');
     file_delete($file->fid);
-    $this->assertFalse(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => 'fid'))->fetchField(), 'Row deleted in {file_metadata} on file_delete().');
+    $this->assertFalse(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => $file->fid))->fetchField(), 'Row deleted in {file_metadata} on file_delete().');
   }
 }
 

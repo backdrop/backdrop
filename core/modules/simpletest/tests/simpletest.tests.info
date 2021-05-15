@@ -958,6 +958,12 @@ description = Tests the form API email element.
 group = Form API
 file = form.test
 
+[FormH5datetimeTestCase]
+name = Form API html5 datetime
+description = Tests the form API html5 date and time elements.
+group = Form API
+file = form.test
+
 [HTMLIdTestCase]
 name = Unique HTML IDs
 description = Tests functionality of backdrop_html_id().
@@ -1069,6 +1075,12 @@ file = menu.test
 [MenuTrailTestCase]
 name = Active trail
 description = Tests active menu trails and alteration functionality.
+group = Menu
+file = menu.test
+
+[MenuChangeTestCase]
+name = Menu changes
+description = Tests that menu links are updated on menu rebuild.
 group = Menu
 file = menu.test
 

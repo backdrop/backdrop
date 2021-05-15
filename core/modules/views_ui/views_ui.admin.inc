@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides the Views' administrative interface.
+ * Admin page callbacks for the Views UI module.
  */
 
 /**
@@ -472,6 +472,7 @@ function views_ui_add_form($form, &$form_state) {
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
+    '#weight' => -1,
   );
   $form['actions']['save'] = array(
     '#type' => 'submit',
@@ -2880,6 +2881,11 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
       $stack = $view->stack;
       $top = array_shift($stack);
       $top[0] = $js;
+
+      // Change view into a reference.
+      $stepview = $top[2];
+      $top[2] = &$stepview;
+
       $form_state = call_user_func_array('views_ui_build_form_state', $top);
       $form_state['input'] = array();
       $form_state['path'] = views_ui_build_form_path($form_state);
@@ -2973,7 +2979,7 @@ function views_ui_reorder_displays_form($form, &$form_state) {
       'weight' => array(
         '#type' => 'weight',
         '#value' => $display->position,
-        '#delta' => count($last_display->position),
+        '#delta' => count($view->display),
         '#title' => t('Weight for @display', array('@display' => $display->display_title)),
         '#title_display' => 'invisible',
       ),
@@ -4586,18 +4592,24 @@ function views_ui_admin_settings_advanced() {
     '#default_value' => $config->get('sql_signature'),
   );
 
-  $form['debug']['no_javascript'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Disable JavaScript with Views'),
-    '#description' => t("If you are having problems with the JavaScript, you can disable it here. The Views UI should degrade and still be usable without javascript; it's just not as good."),
-    '#default_value' => $config->get('no_javascript'),
-  );
-
   $form['debug']['devel_output'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable views performance statistics/debug messages via the Devel module'),
     '#description' => t("Check this to enable some Views query and performance statistics/debug messages <em>if Devel is installed</em>."),
     '#default_value' => $config->get('devel_output'),
+  );
+
+  $form['locale'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Localization'),
+  );
+
+  $form['locale']['views_localization_plugin'] = array(
+    '#type' => 'radios',
+    '#title' => t('Translation method'),
+    '#options' => views_fetch_plugin_names('localization', NULL, array()),
+    '#default_value' => views_get_localization_plugin(),
+    '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 
   $regions = array();
