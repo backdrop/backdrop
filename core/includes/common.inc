@@ -951,6 +951,8 @@ function backdrop_access_denied() {
  *   - data: A string containing the response body that was received.
  *
  * @see backdrop_http_build_query()
+ *
+ * @since 1.18.4 The $options['data'] key may now be passed as an array.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
