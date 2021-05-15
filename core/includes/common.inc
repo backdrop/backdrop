@@ -915,9 +915,9 @@ function backdrop_access_denied() {
  *   (optional) An array that can have one or more of the following elements:
  *   - headers: An array containing request headers to send as name/value pairs.
  *   - method: A string containing the request method. Defaults to 'GET'.
- *   - data: A string containing the request body, formatted as
- *     'param=value&param=value&...'; to generate this, use http_build_query().
- *     Defaults to NULL.
+ *   - data: An array containing the values for the request body or a string
+ *     containing the request body, formatted as 'param=value&param=value&...'.
+ *     To generate this, use backdrop_http_build_query(). Defaults to NULL.
  *   - max_redirects: An integer representing how many times a redirect
  *     may be followed. Defaults to 3.
  *   - timeout: A float representing the maximum number of seconds the function
@@ -942,6 +942,10 @@ function backdrop_access_denied() {
  *     HTTP header names are case-insensitive (RFC 2616, section 4.2), so for
  *     easy access the array keys are returned in lower case.
  *   - data: A string containing the response body that was received.
+ *
+ * @see backdrop_http_build_query()
+ *
+ * @since 1.18.4 The $options['data'] key may now be passed as an array.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -1080,6 +1084,11 @@ function backdrop_http_request($url, array $options = array()) {
   $path = isset($uri['path']) ? $uri['path'] : '/';
   if (isset($uri['query'])) {
     $path .= '?' . $uri['query'];
+  }
+
+  // Convert array $options['data'] to a query string.
+  if (is_array($options['data'])) {
+    $options['data'] = backdrop_http_build_query($options['data']);
   }
 
   // Only add Content-Length if we actually have any content or if it is a POST
