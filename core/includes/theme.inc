@@ -2124,6 +2124,8 @@ function theme_breadcrumb($variables) {
  *
  * @return string
  *   The HTML output.
+ *
+ * @since 1.18.4 "footer" key added to $variables parameter.
  */
 function theme_table(array $variables) {
   $header = (array) $variables['header'];
