@@ -465,8 +465,8 @@ class FormsTestCase extends BackdropWebTestCase {
     // All the elements should be marked as disabled, including the ones below
     // the disabled container.
     $actual_count = count($disabled_elements);
-    $expected_count = 44;
-    $this->assertEqual($expected_count, $actual_count, format_string('Found @actual elements with disabled property (expected @expected).', array('@actual' => $actual_count, '@expected' => $expected_count));
+    $expected_count = 41;
+    $this->assertEqual($expected_count, $actual_count, format_string('Found @actual elements with disabled property (expected @expected).', array('@actual' => $actual_count, '@expected' => $expected_count)));
 
     $this->backdropPost(NULL, $edit, t('Submit'));
     $returned_values['hijacked'] = backdrop_json_decode($this->content);
