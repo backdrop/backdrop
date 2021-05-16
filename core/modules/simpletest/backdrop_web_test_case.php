@@ -484,6 +484,40 @@ abstract class BackdropTestCase {
   }
 
   /**
+   * Asserts that an element has a given class.
+   *
+   * @param SimpleXMLElement $element
+   *   The element to test.
+   * @param string $class
+   *   The class to assert.
+   * @param string $message
+   *   (optional) A verbose message to output.
+   */
+  protected function assertClass(SimpleXMLElement $element, $class, $message = NULL) {
+    if (!isset($message)) {
+      $message = "Class .$class found.";
+    }
+    $this->assertTrue(strpos($element['class'], $class) !== FALSE, $message);
+  }
+
+  /**
+   * Asserts that an element does not have a given class.
+   *
+   * @param SimpleXMLElement $element
+   *   The element to test.
+   * @param string $class
+   *   The class to assert.
+   * @param string $message
+   *   (optional) A verbose message to output.
+   */
+  protected function assertNoClass(SimpleXMLElement $element, $class, $message = NULL) {
+    if (!isset($message)) {
+      $message = "Class .$class not found.";
+    }
+    $this->assertTrue(strpos($element['class'], $class) === FALSE, $message);
+  }
+
+  /**
    * Fire an assertion that is always positive.
    *
    * @param $message
