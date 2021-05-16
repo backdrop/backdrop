@@ -228,7 +228,7 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
- * Output a list of items for layouts.
+ * Output a list of action links for layouts.
  */
 function theme_layout_action_links($variables) {
   $element = $variables['element'];
