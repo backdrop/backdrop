@@ -157,6 +157,7 @@ function pager_get_query_parameters() {
  */
 function theme_pager($variables) {
   global $pager_page_array, $pager_total;
+  $element = $variables['element'];
 
   // Return early if there is no pager.
   if (!isset($pager_page_array[$element]) || !isset($pager_total[$element])) {
@@ -168,7 +169,6 @@ function theme_pager($variables) {
   }
 
   $tags = $variables['tags'];
-  $element = $variables['element'];
   $parameters = $variables['parameters'];
   $quantity = empty($variables['quantity']) ? 0 : (int) $variables['quantity'];
 
@@ -298,6 +298,7 @@ function theme_pager($variables) {
  */
 function theme_pager_first($variables) {
   global $pager_page_array;
+  $element = $variables['element'];
 
   // Return early if there is no pager.
   if (!isset($pager_page_array[$element])) {
@@ -305,7 +306,6 @@ function theme_pager_first($variables) {
   }
 
   $text = $variables['text'];
-  $element = $variables['element'];
   $parameters = $variables['parameters'];
   $output = '';
 
@@ -333,6 +333,7 @@ function theme_pager_first($variables) {
  */
 function theme_pager_previous($variables) {
   global $pager_page_array;
+  $element = $variables['element'];
 
   // Return early if there is no pager.
   if (!isset($pager_page_array[$element])) {
@@ -340,7 +341,6 @@ function theme_pager_previous($variables) {
   }
 
   $text = $variables['text'];
-  $element = $variables['element'];
   $interval = $variables['interval'];
   $parameters = $variables['parameters'];
   $output = '';
@@ -378,6 +378,7 @@ function theme_pager_previous($variables) {
  */
 function theme_pager_next($variables) {
   global $pager_page_array, $pager_total;
+  $element = $variables['element'];
 
   // Return early if there is no pager.
   if (!isset($pager_page_array[$element]) || !isset($pager_total[$element])) {
@@ -385,7 +386,6 @@ function theme_pager_next($variables) {
   }
 
   $text = $variables['text'];
-  $element = $variables['element'];
   $interval = $variables['interval'];
   $parameters = $variables['parameters'];
   $output = '';
@@ -421,6 +421,7 @@ function theme_pager_next($variables) {
  */
 function theme_pager_last($variables) {
   global $pager_page_array, $pager_total;
+  $element = $variables['element'];
 
   // Return early if there is no pager.
   if (!isset($pager_page_array[$element]) || !isset($pager_total[$element])) {
@@ -428,7 +429,6 @@ function theme_pager_last($variables) {
   }
 
   $text = $variables['text'];
-  $element = $variables['element'];
   $parameters = $variables['parameters'];
   $output = '';
 
