@@ -3291,7 +3291,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && is_string($key) && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && is_string($key) && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
