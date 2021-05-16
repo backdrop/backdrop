@@ -329,7 +329,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#parents' => array('context'),
   );
 
-  $form['context_wrapper']['context']['add'] = array(
+  $form['context_wrapper']['context']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['context_wrapper']['context']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add context'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -341,15 +344,14 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
 
   // Get contexts from relationships
   $relevant_relationships = layout_relationships_get_relevant_info($contexts);
   if (!empty($relevant_relationships)) {
-    $form['context_wrapper']['context']['add_relationship'] = array(
+    $form['context_wrapper']['context']['links']['add_relationship'] = array(
       '#type' => 'submit',
+      '#name' => 'relationship_add_button',
       '#value' => t('Add relationship'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
       '#validate' => array(),
@@ -360,8 +362,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#ajax' => array(
         'callback' => 'layout_ajax_form_open_dialog',
       ),
-      '#prefix' => '<ul class="action-links"><li>',
-      '#suffix' => '</li></ul>',
     );
   }
 
@@ -514,7 +514,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -526,8 +529,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
@@ -1433,7 +1434,10 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#id' => 'block-access',
     '#weight' => 20,
   );
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -1445,8 +1449,6 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
@@ -2537,7 +2539,10 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
       '#name' => 'conditions[' . $access_key . '][configure]',
     );
   }
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -2547,8 +2552,6 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
 
   $form['actions'] = array('#type' => 'actions');

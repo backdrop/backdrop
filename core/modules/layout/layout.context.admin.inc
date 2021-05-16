@@ -15,7 +15,7 @@ function layout_settings_form_context_add($form, &$form_state) {
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
   }
-  if ($form_state['clicked_button']['#array_parents'][2] == 'add_relationship') {
+  if ($form_state['clicked_button']['#name'] === 'relationship_add_button') {
     $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/add';
   }
   else {
@@ -284,7 +284,7 @@ function layout_context_add_load_context_nojs($form, &$form_state) {
 function layout_context_return_form($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   $layout = $form_state['layout'];
-  
+
   // If no context or relationship has yet been selected, there is no sub-form to display.
   if (!isset($form_state['values']['context']) && !isset($form_state['values']['relationship']) && !isset($form_state['handler'])) {
     return array();
@@ -340,7 +340,7 @@ function layout_context_add_form_submit($form, &$form_state) {
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
     $handler->storage = TRUE;
-    if ($form_state['clicked_button']['#name'] == 'context_add_button') {
+    if ($form_state['clicked_button']['#name'] === 'context_add_button') {
       $layout->setContexts($handler->name, $handler);
     }
     else {
