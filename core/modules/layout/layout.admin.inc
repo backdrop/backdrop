@@ -351,6 +351,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   if (!empty($relevant_relationships)) {
     $form['context_wrapper']['context']['links']['add_relationship'] = array(
       '#type' => 'submit',
+      '#name' => 'relationship_add_button',
       '#value' => t('Add relationship'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
       '#validate' => array(),
