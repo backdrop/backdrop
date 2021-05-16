@@ -7360,7 +7360,7 @@ function element_children(&$elements, $sort = FALSE) {
   $children = array();
   $sortable = FALSE;
   foreach ($elements as $key => $value) {
-    if (is_int($key) || $key === '' || $key[0] !== '#') {
+    if (is_int($key) || $key === '' || substr($key, 0, 1) !== '#') {
       if (is_array($value)) {
         $children[$key] = $value;
         if (isset($value['#weight'])) {
