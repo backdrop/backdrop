@@ -1,0 +1,6 @@
+/**
+ * Hide the admin bar when printing.
+ */
+#admin-bar {
+  display: none;
+}
