@@ -46,6 +46,14 @@ define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approva
 define('USER_PASSWORD_STRENGTH_MODIFIER', 0.7);
 
 /**
+ * Password strength levels: weak, fair, good and strong.
+ */
+define('USER_PASSWORD_STRENGTH_WEAK', 0);
+define('USER_PASSWORD_STRENGTH_FAIR', 50);
+define('USER_PASSWORD_STRENGTH_GOOD', 70);
+define('USER_PASSWORD_STRENGTH_STRONG', 90);
+
+/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -759,6 +767,22 @@ function user_account_form(&$form, &$form_state) {
   $form['#validate'][] = 'user_account_form_validate';
   module_load_include('password.inc', 'user', 'user');
   $reject_weak = user_password_reject_weak($user->name);
+  // Label the threshold for the password description.
+  $strength_threshold = $site_config->get('user_password_strength_threshold');
+  switch (TRUE) {
+    case $strength_threshold < USER_PASSWORD_STRENGTH_FAIR:
+      $threshold_label = t('Weak');
+      break;
+    case $strength_threshold < USER_PASSWORD_STRENGTH_GOOD:
+      $threshold_label = t('Fair');
+      break;
+    case $strength_threshold < USER_PASSWORD_STRENGTH_STRONG:
+      $threshold_label = t('Good');
+      break;
+    default:
+      $threshold_label = t('Excellent');
+      break;
+  }
   if ($reject_weak) {
     $form['#validate'][] = 'user_password_policy_validate';
   }
@@ -798,7 +822,7 @@ function user_account_form(&$form, &$form_state) {
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
     if ($reject_weak) {
-      $description .= ' ' . t('Weak passwords will be rejected.');
+      $description .= ' ' . t('Password must be <em>@threshold</em> or stronger.', array('@threshold' => $threshold_label));
       $description .= _user_password_policy_help();
     }
     $form['account']['pass'] = array(
@@ -849,7 +873,8 @@ function user_account_form(&$form, &$form_state) {
     $description = '';
     // Provide different help text if weak passwords are rejected.
     if ($reject_weak) {
-      $description = ' ' . t('Weak passwords will be rejected.');
+      //$description = ' ' . t('Weak passwords will be rejected.');
+      $description = ' ' . t('Password must be <em>@threshold</em> or stronger.', array('@threshold' => $threshold_label));
       $description .= _user_password_policy_help();
     }
     if (!$site_config->get('user_email_verification') && !$admin_users) {
@@ -2890,10 +2915,10 @@ function user_form_process_password($element, $form_state = array()) {
     }
     $strength_settings = array(
       'scores' => array(
-        'weak' => 0,
-        'fair' => 50,
-        'good' => 70,
-        'strong' => 90,
+        'weak' => USER_PASSWORD_STRENGTH_WEAK,
+        'fair' => USER_PASSWORD_STRENGTH_FAIR,
+        'good' => USER_PASSWORD_STRENGTH_GOOD,
+        'strong' => USER_PASSWORD_STRENGTH_STRONG,
       ),
       'labels' => array(
         'strengthTitle' => t('Password strength: '),
