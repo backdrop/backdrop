@@ -771,16 +771,16 @@ function user_account_form(&$form, &$form_state) {
   $strength_threshold = $site_config->get('user_password_strength_threshold');
   switch (TRUE) {
     case $strength_threshold < USER_PASSWORD_STRENGTH_FAIR:
-      $threshold_label = t('Weak');
+      $threshold_label = t('weak');
       break;
     case $strength_threshold < USER_PASSWORD_STRENGTH_GOOD:
-      $threshold_label = t('Fair');
+      $threshold_label = t('fair');
       break;
     case $strength_threshold < USER_PASSWORD_STRENGTH_STRONG:
-      $threshold_label = t('Good');
+      $threshold_label = t('good');
       break;
     default:
-      $threshold_label = t('Excellent');
+      $threshold_label = t('excellent');
       break;
   }
   if ($reject_weak) {
