@@ -378,6 +378,9 @@ details {
 details > summary {
   pointer-events: none;
 }
+details > summary a {
+  pointer-events: auto;
+}
 details > summary::after {
   color: #0074bd;
   cursor: pointer;
