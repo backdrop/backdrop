@@ -193,11 +193,13 @@ span.admin-missing {
   display: block;
   font-weight: normal;
 }
-.system-status-report .status-description {
+.system-status-report .status-summary .details-content {
   font-size: 0.9em;
   color: #444;
 }
-.system-status-report .report-error .status-summary {
+.system-status-report .report-error .status-summary,
+.system-status-report .report-error .status-summary .details-content,
+.system-status-report .report-error .status-summary-mobile {
   color: #EC351C;
 }
 @media all and (min-width: 721px) {
