@@ -510,6 +510,14 @@ function system_element_info() {
     '#pre_render' => array('form_pre_render_fieldset'),
     '#theme_wrappers' => array('fieldset'),
   );
+  $types['details'] = array(
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#value' => NULL,
+    '#process' => array('form_process_details', 'ajax_process_form'),
+    '#pre_render' => array('form_pre_render_details'),
+    '#theme_wrappers' => array('details'),
+  );
   $types['vertical_tabs'] = array(
     '#theme_wrappers' => array('vertical_tabs'),
     '#default_tab' => '',

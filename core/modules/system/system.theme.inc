@@ -181,11 +181,14 @@ function theme_system_modules_fieldset($variables) {
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
 
-    // Build a requirements toggle.
-    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
-
-    // Add the description, along with any modules it requires.
-    $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
+    $module_details = array(
+      '#title' => '<span class="text table-filter-text-source"> ' . backdrop_render($module['description']) . '</span>',
+      '#children' => $requirements,
+      '#collapsed' => TRUE,
+      '#open_label' => t('more'),
+      '#close_label' => t('less'),
+    );
+    $details = theme('details', array('element' => $module_details));
 
     // Add the fourth column: description, along with any modules it requires.
     $row[] = array('class' => array('description'), 'data' => $details);
@@ -356,14 +359,20 @@ function theme_status_report($variables) {
     $title = $requirement['title'] . '<br/>';
     $title .= '<span class="status-summary-mobile">' . $requirement['value'] . '</span>';
 
-    $more = ' ';
-    $details = '';
     if (!empty($requirement['description'])) {
-      $more .= '<a class="description-toggle" href="#">more</a>';
-      $details = '<div class="status-description">' . $requirement['description']. '</div>';
+      $description_details = array(
+        '#title' => $requirement['value'],
+        '#children' => $requirement['description'],
+        '#collapsed' => !in_array($requirement['severity'], array(REQUIREMENT_WARNING, REQUIREMENT_ERROR)),
+        '#open_label' => t('more'),
+        '#close_label' => t('less'),
+        '#attributes' => array('class' => array('status-summary')),
+      );
+      $description = theme('details', array('element' => $description_details));
     }
-
-    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+    else {
+      $description = '<span class="status-summary">' . $requirement['value'] . '</span>';
+    }
 
     $row = array(
       'data' => array(

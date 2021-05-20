@@ -12,22 +12,6 @@ Backdrop.behaviors.moduleFilter = {
     var $form = $('#system-modules');
     var $rowsAndFieldsets, $rows, $fieldsets;
 
-    // Hide the module requirements.
-    $form.find('.requirements').hide();
-
-    // Toggle the requirements info.
-    $('a.requirements-toggle').click(function(e) {
-      var $requirements = $(this).closest('td').find('.requirements').toggle();
-      if ($requirements.is(':visible')) {
-        $(this).text(Backdrop.t('less')).append('<span class="arrow close"></span>');
-      }
-      else {
-        $(this).text(Backdrop.t('more')).append('<span class="arrow"></span>');
-      }
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
     // Hide the package <fieldset> if it doesn't have any visible rows within.
     function hidePackageFieldset(index, element) {
       var $fieldset = $(element);

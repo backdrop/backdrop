@@ -371,3 +371,21 @@ section,
 summary {
   display: block;
 }
+
+details {
+  cursor: text;
+}
+details > summary {
+  pointer-events: none;
+}
+details > summary::after {
+  color: #0074bd;
+  cursor: pointer;
+  pointer-events: auto;
+}
+details[open] summary::after {
+  content: ' ' attr(data-close);
+}
+details:not([open]) summary::after {
+  content: ' ' attr(data-open);
+}
