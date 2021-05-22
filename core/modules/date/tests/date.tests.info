@@ -33,3 +33,9 @@ name = Date API tests
 description = Test Date API functions.
 group = Date
 file = date_api.test
+
+[DateThemeTestCase]
+name = Date Theme
+description = Test date theme functions.
+group = Date
+file = date_themes.test

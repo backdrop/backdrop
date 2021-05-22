@@ -5,6 +5,31 @@
  */
 
 /**
+ * Implements hook_schema_alter().
+ */
+function comment_schema_alter(&$schema) {
+  $schema['node']['fields']['comment_close_override'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+}
+
+/**
+ * Implements hook_install().
+ */
+function comment_install() {
+  if (!db_field_exists('node', 'comment_close_override')) {
+    $schema = array();
+    comment_schema_alter($schema);
+    db_add_field('node', 'comment_close_override', $schema['node']['fields']['comment_close_override']);
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function comment_uninstall() {
@@ -26,6 +51,8 @@ function comment_uninstall() {
       'comment_preview',
       'comment_subject_field',
       'comment_user_picture',
+      'comment_close_enabled',
+      'comment_close_days'
     );
     foreach ($comment_settings as $setting) {
       if (isset($node_type->settings[$setting])) {
@@ -33,6 +60,18 @@ function comment_uninstall() {
       }
     }
     node_type_save($node_type);
+  }
+
+  // Remove comment closer override.
+  if (db_field_exists('node', 'comment_close_override')) {
+    db_drop_field('node', 'comment_close_override');
+  }
+
+  // Remove default, un-modified view.
+  $config = config('views.view.comments_recent');
+  // Only update if view isn't overridden (VIEWS_STORAGE_OVERRIDE).
+  if ($config->get('storage') != 2) {
+    $config->delete();
   }
 }
 
@@ -264,6 +303,10 @@ function comment_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_comment'] = $cache_schema;
+  $schema['cache_entity_comment']['description'] = "Cache table used to store Comment entity records.";
+
   return $schema;
 }
 
@@ -312,13 +355,13 @@ function comment_update_1001() {
   foreach ($node_types as $node_type) {
     // Move the comment variables into each node type's config.
     $settings = array(
-      'comment_default' => update_variable_get('comment_' . $node_type->type, COMMENT_NODE_OPEN),
+      'comment_default' => update_variable_get('comment_' . $node_type->type, 2), // COMMENT_NODE_OPEN
       'comment_per_page' => update_variable_get('comment_default_per_page_' . $node_type->type, 50),
-      'comment_mode' => update_variable_get('comment_default_mode_' . $node_type->type, COMMENT_MODE_THREADED),
-      'comment_anonymous' => update_variable_get('comment_anonymous_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
-      'comment_subject_field' => update_variable_get('comment_subject_field_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
+      'comment_mode' => update_variable_get('comment_default_mode_' . $node_type->type, 1), // COMMENT_MODE_THREADED
+      'comment_anonymous' => update_variable_get('comment_anonymous_' . $node_type->type, 0), // COMMENT_ANONYMOUS_MAYNOT_CONTACT
+      'comment_subject_field' => update_variable_get('comment_subject_field_' . $node_type->type, 0), // COMMENT_ANONYMOUS_MAYNOT_CONTACT
       'comment_user_picture' => update_variable_get('comment_user_picture_' . $node_type->type, 1),
-      'comment_form_location' => update_variable_get('comment_form_location_' . $node_type->type, COMMENT_FORM_BELOW),
+      'comment_form_location' => update_variable_get('comment_form_location_' . $node_type->type, 1), // COMMENT_FORM_BELOW
       'comment_preview' => update_variable_get('comment_preview_' . $node_type->type, BACKDROP_OPTIONAL),
     );
     $node_type->settings = array_merge($node_type->settings, $settings);
@@ -356,11 +399,53 @@ function comment_update_1003() {
   foreach (config_get_names_with_prefix('node.type.') as $config_name) {
     $config = config($config_name);
     $comment_default = $config->get('settings.comment_default');
-    if ($comment_default == COMMENT_NODE_HIDDEN) {
-      $config->set('settings.comment_default', COMMENT_NODE_CLOSED);
+    // If comment hidden (COMMENT_NODE_HIDDEN).
+    if ($comment_default == 0) {
+      $config->set('settings.comment_default', 1); // COMMENT_NODE_CLOSED
       $config->save();
     }
   }
+}
+
+/**
+ * Add an Override column for automatic comment closing for individual nodes.
+ */
+function comment_update_1004() {
+  if (db_field_exists('node', 'comment_close_override')) {
+    return;
+  }
+
+  $comment_close_override_column = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+
+  db_add_field('node', 'comment_close_override', $comment_close_override_column);
+}
+
+/**
+ * Move default comment view to comment module.
+ */
+function comment_update_1005() {
+  // If the views config has not been deleted, update it's module.
+  $config = config('views.view.comments_recent');
+  if (!$config->isNew()) {
+    $config->set('module', 'comment');
+    $config->save();
+  }
+}
+
+/**
+ * Creates the table to enable caching of Comment entities.
+ */
+function comment_update_1006() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store Comment entity records.";
+  db_create_table('cache_entity_comment', $table);
 }
 
 /**

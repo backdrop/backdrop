@@ -1,5 +1,5 @@
 name = Bartik
-description = The default front-end theme for Backdrop CMS.
+description = Legacy front-end theme.
 version = BACKDROP_VERSION
 type = theme
 backdrop = 1.x
@@ -15,4 +15,3 @@ ckeditor_stylesheets[] = css/editor.css
 ; menu. Color module provides our defaults, so we just register a dummy setting.
 settings[color] = true
 settings[main_menu_tabs] = no-tabs
-

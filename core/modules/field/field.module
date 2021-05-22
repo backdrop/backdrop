@@ -602,8 +602,9 @@ function field_sync_field_status() {
   // Refresh the 'active' and 'storage_active' columns according to the current
   // set of enabled modules.
   $modules = module_list();
+  $fields = field_read_fields();
   foreach ($modules as $module_name) {
-    field_associate_fields($module_name);
+    field_associate_fields($module_name, $fields);
   }
 
   $fields = field_read_fields(array(), array('include_inactive' => TRUE, 'include_deleted' => TRUE));
@@ -622,24 +623,40 @@ function field_sync_field_status() {
  *
  * @param $module
  *   The name of the module to update on.
+ * @param $fields
+ *   An optional array of field definitions to operate on. If left empty, all
+ *   fields will be loaded.
+ *
+ * @since 1.18.4 Second parameter $fields added for performance optimization.
  */
-function field_associate_fields($module) {
+function field_associate_fields($module, &$fields = NULL) {
   // Associate field types.
   $field_types = (array) module_invoke($module, 'field_info');
   $storage_types = (array) module_invoke($module, 'field_storage_info');
-  $fields = field_read_fields();
-  foreach ($fields as $field) {
-    $old_field = $field;
-    if (array_key_exists($field['type'], $field_types)) {
-      $field['module'] = $module;
-      $field['active'] = 1;
+
+  // If this module does not provide any field types or storage types, then
+  // nothing needs to be done.
+  if (empty($field_types) && empty($storage_types)) {
+    return;
+  }
+
+  // If no fields were provided, then load all of them.
+  if (is_null($fields)) {
+    $fields = field_read_fields();
+  }
+
+  foreach (array_keys($fields) as $field_name) {
+    $old_field = $fields[$field_name];
+    if (array_key_exists($fields[$field_name]['type'], $field_types)) {
+      $fields[$field_name]['module'] = $module;
+      $fields[$field_name]['active'] = 1;
     }
-    if (array_key_exists($field['storage']['type'], $storage_types)) {
-      $field['storage']['module'] = $module;
-      $field['storage']['active'] = 1;
+    if (array_key_exists($fields[$field_name]['storage']['type'], $storage_types)) {
+      $fields[$field_name]['storage']['module'] = $module;
+      $fields[$field_name]['storage']['active'] = 1;
     }
-    if ($old_field !== $field) {
-      field_update_field($field);
+    if ($old_field !== $fields[$field_name]) {
+      field_update_field($fields[$field_name]);
     }
   }
 }
@@ -668,6 +685,64 @@ function field_get_default_value($entity_type, $entity, $field, $instance, $lang
     $items = $instance['default_value'];
   }
   return $items;
+}
+
+/**
+ * Returns the first value from a field.
+ *
+ * @param Entity $entity
+ *   The fully-loaded entity containing the field value requested.
+ * @param string $field_name
+ *   The machine name of the field.
+ * @param string $value_key
+ *   The key indicating the primary data value for the field. Defaults to
+ *   'value' which is used in both text and number fields. For fields which do
+ *   not have a 'value' key such as terms (which use a 'tid' key) or files
+ *   (which use a 'fid' key), the key must be specified.
+ * @param string $langcode (optional)
+ *   The language code for the requested language. Defaults to the
+ *   current language.
+ *
+ * @return
+ *   The first field value, or NULL if the field is empty, if the field does not
+ *   contain the $value_key specified, or if the entity does not contain the
+ *   $field_name specified.
+ *
+ * @since 1.13.0 Function added.
+ *
+ * @see field_get_values()
+ */
+function field_get_value(Entity $entity, $field_name, $value_key = 'value', $langcode = NULL) {
+  return $entity->getFieldValue($field_name, $value_key, $langcode);
+}
+
+/**
+ * Returns all values from a field.
+ *
+ * @param Entity $entity
+ *   The fully-loaded entity containing the field value requested.
+ * @param string $field_name
+ *   The machine name of the field.
+ * @param string $value_key
+ *   The key indicating the primary data value for the field. Defaults to
+ *   'value' which is used in both text and number fields. For fields which do
+ *   not have a 'value' key such as terms (which use a 'tid' key) or files
+ *   (which use a 'fid' key), the key must be specified.
+ * @param string $langcode (optional)
+ *   The language code for the requested language. Defaults to the
+ *   current language.
+ *
+ * @return (array)
+ *   All field values, or an empty array if the field is empty, if the field does not
+ *   contain the $value_key specified, or if the entity does not contain the
+ *   $field_name specified.
+ *
+ * @since 1.13.0 Function added.
+ *
+ * @see field_get_value()
+ */
+function field_get_values(Entity $entity, $field_name, $value_key = 'value', $langcode = NULL) {
+  return $entity->getFieldValues($field_name, $value_key, $langcode);
 }
 
 /**
@@ -942,9 +1017,9 @@ function field_cache_clear() {
 /**
  * Like filter_xss_admin(), but with a shorter list of allowed tags.
  *
- * Used for items entered by administrators, like field descriptions,
- * allowed values, where some (mainly inline) mark-up may be desired
- * (so check_plain() is not acceptable).
+ * Used for items entered by administrators, like field descriptions, allowed
+ * values, where some (mainly inline) mark-up may be desired (so check_plain()
+ * is not acceptable).
  */
 function field_filter_xss($string) {
   return filter_xss($string, _field_filter_xss_allowed_tags());
@@ -958,7 +1033,8 @@ function _field_filter_xss_allowed_tags() {
 }
 
 /**
- * Human-readable list of allowed tags, for display in help texts.
+ * Human-readable list of tags allowed tags by field_filter_xss(), for display
+ * in help texts.
  */
 function _field_filter_xss_display_allowed_tags() {
   return '<' . implode('> <', _field_filter_xss_allowed_tags()) . '>';
@@ -1044,7 +1120,7 @@ function field_view_value($entity_type, $entity, $field_name, $item, $display = 
  *     $instance definitions. The following key/value pairs are allowed:
  *     - label: (string) Position of the label. The default 'field' theme
  *       implementation supports the values 'inline', 'above' and 'hidden'.
- *       Defaults to 'above'.
+ *       Defaults to 'hidden'.
  *     - type: (string) The formatter to use. Defaults to the
  *       'default_formatter' for the field type, specified in
  *       hook_field_info(). The default formatter will also be used if the
@@ -1376,4 +1452,30 @@ function field_entity_view_mode_delete($view_mode, $entity_type) {
       }
     }
   }
+}
+
+/**
+ * Assembles a partial entity structure with initial IDs.
+ *
+ * This can be used to create an entity based on the the ids object returned by
+ * EntityFieldQuery.
+ *
+ * @param stdClass $ids
+ *   An object with the properties entity_type (required), entity_id (required),
+ *   revision_id (optional) and bundle (optional).
+ *
+ * @return
+ *   An entity, initialized with the provided IDs.
+ */
+function _field_create_entity_from_ids($ids) {
+  $id_properties = array();
+  $info = entity_get_info($ids->entity_type);
+  $id_properties[$info['entity keys']['id']] = $ids->entity_id;
+  if (!empty($info['entity keys']['revision']) && isset($ids->revision_id)) {
+    $id_properties[$info['entity keys']['revision']] = $ids->revision_id;
+  }
+  if (!empty($info['entity keys']['bundle']) && isset($ids->bundle)) {
+    $id_properties[$info['entity keys']['bundle']] = $ids->bundle;
+  }
+  return entity_create($ids->entity_type, $id_properties);
 }

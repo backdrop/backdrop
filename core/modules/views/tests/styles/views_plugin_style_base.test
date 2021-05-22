@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsPluginStyleTestBase.
@@ -26,8 +25,8 @@ abstract class ViewsPluginStyleTestBase extends ViewsSqlTest {
     $htmlDom = new DOMDocument();
     @$htmlDom->loadHTML($output);
     if ($htmlDom) {
-      // It's much easier to work with simplexml than DOM, luckily enough
-      // we can just simply import our DOM tree.
+      // It's much easier to work with simplexml than DOM, luckily enough we can
+      // import our DOM tree.
       $this->elements = simplexml_import_dom($htmlDom);
     }
   }

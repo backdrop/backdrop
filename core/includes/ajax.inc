@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for use with Backdrop's Ajax framework.
@@ -171,8 +170,8 @@
  * class to a link, the link will be loaded via an Ajax call. When using this
  * method, the href of the link can contain '/nojs/' as part of the path. When
  * the Ajax framework makes the request, it will convert this to '/ajax/'.
- * The server is then able to easily tell if this request was made through an
- * actual Ajax request or in a degraded state, and respond appropriately.
+ * The server is then able to tell if this request was made through an actual
+ * Ajax request or in a degraded state, and respond appropriately.
  *
  * Similarly, submit buttons can be given the class 'use-ajax-submit'. The
  * form will then be submitted via Ajax to the path specified in the #action.
@@ -293,6 +292,7 @@ function ajax_render($commands = array()) {
 
   // Now add a command to merge changes and additions to Backdrop.settings.
   $scripts = backdrop_add_js();
+  backdrop_alter('js', $scripts);
   if (!empty($scripts['settings'])) {
     $settings = $scripts['settings'];
     array_unshift($commands, ajax_command_settings(backdrop_array_merge_deep_array($settings['data']), TRUE));
@@ -319,6 +319,11 @@ function ajax_render($commands = array()) {
  *   @endcode
  */
 function ajax_get_form() {
+  // Exit early if $_POST is empty.
+  if (empty($_POST) || !isset($_POST['form_build_id'])) {
+    backdrop_exit();
+  }
+
   $form_state = form_state_defaults();
 
   $form_build_id = $_POST['form_build_id'];
@@ -590,7 +595,7 @@ function ajax_prepare_response($page_callback_result) {
         break;
 
       case MENU_SITE_OFFLINE:
-        $commands[] = ajax_command_alert(filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name')))));
+        $commands[] = ajax_command_alert(filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message'))));
         break;
     }
   }

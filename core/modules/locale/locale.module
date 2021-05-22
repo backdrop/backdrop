@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  *   Add language handling functionality and enables the translation of the
@@ -136,6 +135,8 @@ function locale_autoload_info() {
   return array(
     'views_handler_field_node_language' => 'views/views_handler_field_node_language.inc',
     'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
+    'views_handler_field_term_language' => 'views/views_handler_field_term_language.inc',
+    'views_handler_filter_term_language' => 'views/views_handler_filter_term_language.inc',
     'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
     'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
     'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
@@ -168,7 +169,7 @@ function locale_config_info() {
 function locale_language_selector_form($user) {
   global $language;
   // Get list of enabled languages only.
-  $language_options = language_list(TRUE, TRUE);
+  $language_options = language_list(TRUE, TRUE, TRUE);
 
   // If the user is being created, we set the user language to the page language.
   $user_preferred_language = $user->uid ? user_preferred_language($user) : $language;
@@ -279,10 +280,10 @@ function locale_field_language_alter(&$display_language, $context) {
 /**
  * Applies language fallback rules to the fields attached to the given entity.
  *
- * Core language fallback rules simply check if fields have a field translation
- * for the requested language code. If so the requested language is returned,
- * otherwise all the fallback candidates are inspected to see if there is a
- * field translation available in another language.
+ * Core language fallback rules check if fields have a field translation for the
+ * requested language code. If so the requested language is returned, otherwise
+ * all the fallback candidates are inspected to see if there is a field
+ * translation available in another language.
  * By default this is called by locale_field_language_alter(), but this
  * behavior can be disabled by setting the 'locale_field_language_fallback'
  * variable to FALSE.
@@ -562,12 +563,25 @@ function locale($string = NULL, $context = NULL, $langcode = NULL) {
         // Refresh database stored cache of translations for given language.
         // We only store short strings used in current version, to improve
         // performance and consume less memory.
-        $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(':language' => $langcode, ':version' => BACKDROP_VERSION, ':length' => config_get('locale.settings', 'cache_length')));
-        foreach ($result as $data) {
-          $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+        try {
+          $result = db_query("SELECT s.source, s.context, t.translation, t.language FROM {locales_source} s LEFT JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.version = :version AND LENGTH(s.source) < :length", array(
+            ':language' => $langcode,
+            ':version' => BACKDROP_VERSION,
+            ':length' => config_get('locale.settings', 'cache_length'),
+          ));
+          foreach ($result as $data) {
+            $locale_t[$langcode][$data->context][$data->source] = (empty($data->translation) ? TRUE : $data->translation);
+          }
+          cache()->set('locale:' . $langcode, $locale_t[$langcode]);
+          lock_release('locale_cache_' . $langcode);
         }
-        cache()->set('locale:' . $langcode, $locale_t[$langcode]);
-        lock_release('locale_cache_' . $langcode);
+        catch (PDOException $e) {
+          // Throw exception for any problem except for missing database tables.
+          if ($e->getCode() !== '42S02') {
+            throw $e;
+          }
+          return $string;
+        }
       }
     }
   }
@@ -1033,6 +1047,34 @@ function locale_preprocess_node(&$variables) {
         $dir = array('ltr', 'rtl');
         $variables['attributes']['dir'] = $dir[$node_language->direction];
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create().
+ */
+function locale_config_create($staging_config) {
+  _locale_get_config_translatables($staging_config);
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function locale_config_update($staging_config, $active_config) {
+  _locale_get_config_translatables($staging_config);
+}
+
+/**
+ * Get translatable config strings.
+ *
+ * @param $config
+ *   Configuration object.
+ */
+function _locale_get_config_translatables($config) {
+  if ($config->get('_config_translatables') !== NULL) {
+    foreach ($config->get('_config_translatables') as $translatable) {
+      $translation = locale($config->get($translatable), 'config:' . $config->get('_config_name') . ':' . $translatable);
     }
   }
 }

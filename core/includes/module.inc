@@ -403,7 +403,11 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
     // Create an associative array with weights as values.
     $module_list = array_flip(array_values($module_list));
 
-    while (list($module) = each($module_list)) {
+    // The array is iterated over manually (instead of using a foreach) because
+    // modules may be added to the list within the loop and we need to process
+    // them.
+    while ($module = key($module_list)) {
+      next($module_list);
       if (!isset($module_data[$module])) {
         // This module is not found in the filesystem, abort.
         return FALSE;
@@ -470,6 +474,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       backdrop_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
       backdrop_theme_rebuild();
+      // Refresh Entity info static cache.
+      entity_info_cache_clear();
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
@@ -546,7 +552,11 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     $module_list = array_flip(array_values($module_list));
 
     $profile = backdrop_get_profile();
-    while (list($module) = each($module_list)) {
+    // The array is iterated over manually (instead of using a foreach) because
+    // modules may be added to the list within the loop and we need to process
+    // them.
+    while ($module = key($module_list)) {
+      next($module_list);
       if (!isset($module_data[$module]) || !$module_data[$module]->status) {
         // This module doesn't exist or is already disabled, skip it.
         unset($module_list[$module]);
@@ -567,6 +577,9 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     asort($module_list);
     $module_list = array_keys($module_list);
   }
+
+  // Refresh Entity info static cache.
+  entity_info_cache_clear();
 
   $invoke_modules = array();
 
@@ -605,12 +618,12 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * @{
  * Allow modules to interact with the Backdrop core.
  *
- * Backdrop's module system is based on the concept of "hooks". A hook is a PHP
- * function that is named foo_bar(), where "foo" is the name of the module
+ * Backdrop's module system is based on the concept of "hooks". A hook is simply
+ * a PHP function that is named foo_bar(), where "foo" is the name of the module
  * (whose filename is thus foo.module) and "bar" is the name of the hook. Each
  * hook has a defined set of parameters and a specified result type.
  *
- * To extend Backdrop, a module need simply implement a hook. When Backdrop wishes
+ * To extend Backdrop, a module needs to implement a hook. When Backdrop wishes
  * to allow intervention from modules, it determines which modules implement a
  * hook and calls that hook in all enabled modules that implement it.
  *
@@ -977,7 +990,10 @@ function backdrop_merged_modules() {
     'pathauto', // Backdrop 1.1.0.
     'transliteration', // Backdrop 1.3.0.
     'project_browser', // Backdrop 1.4.0.
-    'entity_view_mode' // Backdrop 1.6.0.
+    'entity_view_mode', // Backdrop 1.6.0.
+    'options_element', // Backdrop 1.12.0.
+    'field_formatter_settings', // Backdrop 1.13.0.
+    'imagecache_token', // Backdrop 1.17.0.
   );
 }
 
@@ -1168,4 +1184,23 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
   foreach ($functions[$cid] as $function) {
     $function($data, $context1, $context2, $context3);
   }
+}
+
+/**
+ * Set the weight of a module in the 'system' table, thereby determining the
+ * order in which its hooks will be executed in relation to other modules.
+ *
+ * @param string $module
+ *   The name of the module (without the .module extension).
+ * @param integer $weight
+ *   The weight to set, as an integer.
+ *
+ * @since 1.17.2 Function added.
+ */
+function module_set_weight($module, $weight) {
+  db_update('system')
+    ->fields(array('weight' => $weight))
+    ->condition('type', 'module')
+    ->condition('name', $module)
+    ->execute();
 }

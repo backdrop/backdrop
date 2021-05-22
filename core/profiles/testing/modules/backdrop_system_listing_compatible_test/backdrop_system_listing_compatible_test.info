@@ -1,0 +1,7 @@
+name = "Backdrop system listing compatible test"
+description = "Support module for testing the backdrop_system_listing function."
+package = Testing
+type = module
+version = BACKDROP_VERSION
+backdrop = 1.x
+hidden = TRUE

@@ -47,6 +47,13 @@ function layout_test_block_info() {
       'node' => 'node',
     ),
   );
+  $blocks['test_passthrough'] = array(
+    'info' => t('String pass-through test'),
+    'description' => t('A testing block for layouts that shows string from the URL.'),
+    'required contexts' => array(
+      'string_value' => 'string',
+    ),
+  );
   return $blocks;
 }
 
@@ -86,6 +93,11 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
     case 'test_node_title':
       $block['subject'] = 'Node title';
       $block['content'] = format_string('The node title is @title', array('@title' => $contexts['node']->title));
+      break;
+
+    case 'test_passthrough':
+      $block['subject'] = 'Passthrough title';
+      $block['content'] = format_string('The page argument is @string', array('@string' => $contexts['string_value']));
       break;
   }
   return $block;
@@ -187,4 +199,22 @@ function layout_test_layout_revert($layout) {
   $return = state_get('layout_test');
   $return[] = (__FUNCTION__ . ' called');
   state_set('layout_test', $return);
+}
+/**
+ * Implements hook_autoload_info().
+ */
+function layout_test_autoload_info() {
+  return array(
+    'LayoutTestRenderer' => 'layout_test_renderer.inc',
+  );
+}
+
+/**
+ * Implements hook_layout_renderer_info().
+ */
+function layout_test_layout_renderer_info() {
+  $info['test_renderer'] = array(
+    'class' => 'LayoutTestRenderer',
+  );
+  return $info;
 }
