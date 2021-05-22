@@ -114,6 +114,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     ),
     '#weight' => -8,
     '#maxlength' => 256,
+    '#autocomplete_path' => 'image-autocomplete',
   );
 
   // If no current value or an existing file exists, default to showing

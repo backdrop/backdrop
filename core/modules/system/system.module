@@ -597,7 +597,13 @@ function system_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-
+  $items['image-autocomplete'] = array(
+    'title' => 'Image autocomplete',
+    'page callback' => 'image_autocomplete',
+    'access callback' => 'user_access',
+    'access arguments' => array('manage files'),
+    'type' => MENU_CALLBACK,
+  );
   $items['admin'] = array(
     'title' => 'Administration',
     'access arguments' => array('access administration pages'),
@@ -4084,6 +4090,41 @@ function system_404() {
  */
 function system_403() {
   return t('You are not authorized to access this page.');
+}
+
+/**
+ * Menu callback; Autocomplete callback for images.
+ *
+ * @param string $string
+ *   The string to find matches for.
+ */
+function image_autocomplete($string = '') {
+  $matches = array();
+  $match_count = 0;
+  $range = 10;
+
+  $results = db_select('file_managed')
+    ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
+    ->condition('filename', '%' . db_like($string) . '%', 'LIKE')
+    ->condition('status', 1)
+    ->condition('filemime', 'image%', 'LIKE')
+    ->orderBy('fid', 'DESC')
+    ->range(0, $range - $match_count)
+    ->execute();
+  foreach ($results as $result) {
+    // If possible, try to make a local path for better portability.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+    $url = file_create_url($result->uri);
+    $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+    $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
+    $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
+    $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
+    $match_count++;
+  }
+
+  // Allow modules to alter the matches.
+  backdrop_alter('image_autocomplete', $matches, $string);
+  backdrop_json_output($matches);
 }
 
 /**
