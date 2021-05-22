@@ -1819,9 +1819,11 @@ function system_file_system_settings() {
     '#description' => t('A local file system path where temporary files will be stored. This directory should not be accessible over the web.'),
     '#after_build' => array('system_check_directory'),
   );
+
   // Any visible, writeable wrapper can potentially be used for the files
   // directory, including a remote file system that integrates with a CDN.
-  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+  $stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  foreach ($stream_wrappers as $scheme => $info) {
     $options[$scheme] = check_plain($info['description']);
   }
 
@@ -1833,8 +1835,21 @@ function system_file_system_settings() {
       '#title' => t('Default download method'),
       '#default_value' => $default_scheme,
       '#options' => $options,
-      '#description' => t('This setting is used as the preferred download method. The use of public files is more efficient, but does not provide any access control.'),
     );
+    if (isset($options['public'])) {
+      $form['file_default_scheme']['public']['#description'] = t('The use of public files is more efficient, but does not provide any access control.');
+    }
+    // If the private files path has not been configured, still add it as an
+    // option, but disabled.
+    if (isset($options['private'])) {
+      $form['file_default_scheme']['private']['#description'] = t('Private file storage has significantly more overhead than public files, but allows restricted access to files.');
+    }
+    else {
+      $private_wrapper_info = _system_get_private_stream_wrapper_info();
+      $form['file_default_scheme']['#options'] += array('private' => $private_wrapper_info['description']);
+      $form['file_default_scheme']['private']['#disabled'] = TRUE;
+      $form['file_default_scheme']['private']['#description'] = t('For this option to be enabled, a valid path needs to be provided in the "Private file system path" field above.');
+    }
   }
 
   $form['transliteration'] = array(
@@ -1872,6 +1887,18 @@ function system_file_system_settings() {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Validates the submitted file system settings form.
+ */
+function system_file_system_settings_validate($form, &$form_state) {
+  // If the private files path setting was cleared, then reset the default
+  // scheme to "public".
+  if (empty($form_state['values']['file_private_path']) && config_get('system.core', 'file_default_scheme') == 'private') {
+    $form_state['values']['file_default_scheme'] = 'public';
+    backdrop_set_message(t('The configured path for private files has been removed, so the default download method has been reset to public files.'));
+  }
 }
 
 /**

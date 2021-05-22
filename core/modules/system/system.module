@@ -2064,15 +2064,24 @@ function system_stream_wrappers() {
 
   // Only register the private file stream wrapper if a file path has been set.
   if (config_get('system.core', 'file_private_path')) {
-    $wrappers['private'] = array(
-      'name' => t('Private files'),
-      'class' => 'BackdropPrivateStreamWrapper',
-      'description' => t('Private local files served by Backdrop'),
-      'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
-    );
+    $wrappers['private'] = _system_get_private_stream_wrapper_info();
   }
 
   return $wrappers;
+}
+
+/**
+ * Helper function. Allows retrieving private files wrapper info like name and
+ * description, even if the wrapper is not registered (no private files
+ * directory specified).
+ */
+function _system_get_private_stream_wrapper_info() {
+  return array(
+    'name' => t('Private files'),
+    'class' => 'BackdropPrivateStreamWrapper',
+    'description' => t('Private local files served by Backdrop'),
+    'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
+  );
 }
 
 /**

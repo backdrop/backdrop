@@ -558,6 +558,26 @@ function file_manage_form($form, &$form_state, File $file) {
     '#options' => $options,
     '#default_value' => file_uri_scheme($file->uri),
   );
+  if (isset($options['public'])) {
+    $form['destination']['scheme']['public']['#description'] = t('The use of public files is more efficient, but does not provide any access control.');
+  }
+  if (isset($options['private'])) {
+    $form['destination']['scheme']['private']['#description'] = t('Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.');
+  }
+  // If the private files path has not been configured, still add it as an
+  // option, but disabled.
+  else {
+    $private_wrapper_info = _system_get_private_stream_wrapper_info();
+    $form['destination']['scheme']['#options'] += array('private' => $private_wrapper_info['name']);
+    $form['destination']['scheme']['private']['#disabled'] = TRUE;
+    if (user_access('administer site configuration')) {
+      $description = t('For this option to be enabled, a valid path needs to be provided for private files in the <a href="@file-system" target="_blank">File system setttings</a>.', array('@file-system' => url('admin/config/media/file-system')));
+    }
+    else {
+      $description = t('No private files directory configured.');
+    }
+    $form['destination']['scheme']['private']['#description'] = $description;
+  }
 
   // File user information for administrators.
   $anonymous = config_get_translated('system.core', 'anonymous');

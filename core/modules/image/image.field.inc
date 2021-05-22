@@ -37,7 +37,7 @@ function image_field_info() {
 /**
  * Implements hook_field_settings_form().
  */
-function image_field_settings_form($field, $instance) {
+function image_field_settings_form($field, $instance, $has_data) {
   $defaults = field_info_field_settings($field['type']);
   $settings = array_merge($defaults, $field['settings']);
 
@@ -50,8 +50,28 @@ function image_field_settings_form($field, $instance) {
     '#title' => t('Upload destination'),
     '#options' => $scheme_options,
     '#default_value' => $settings['uri_scheme'],
-    '#description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
+    '#disabled' => $has_data,
   );
+  if (isset($scheme_options['public'])) {
+    $form['uri_scheme']['public']['#description'] = t('The use of public files is more efficient, but does not provide any access control.');
+  }
+  if (isset($scheme_options['private'])) {
+    $form['uri_scheme']['private']['#description'] = t('Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.');
+  }
+  // If the private files path has not been configured, still add it as an
+  // option, but disabled.
+  else {
+    $private_wrapper_info = _system_get_private_stream_wrapper_info();
+    $form['uri_scheme']['#options'] += array('private' => $private_wrapper_info['name']);
+    $form['uri_scheme']['private']['#disabled'] = TRUE;
+    if (user_access('administer site configuration')) {
+      $description = t('For this option to be enabled, a valid path needs to be provided for private files in the <a href="@file-system" target="_blank">File system setttings</a>.', array('@file-system' => url('admin/config/media/file-system')));
+    }
+    else {
+      $description = t('No private files directory configured.');
+    }
+    $form['uri_scheme']['private']['#description'] = $description;
+  }
 
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
