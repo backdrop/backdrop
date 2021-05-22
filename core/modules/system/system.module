@@ -4104,7 +4104,7 @@ function image_autocomplete($string = '') {
   $range = 10;
 
   $results = db_select('file_managed')
-    ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
+    ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'timestamp'))
     ->condition('filename', '%' . db_like($string) . '%', 'LIKE')
     ->condition('status', 1)
     ->condition('filemime', 'image%', 'LIKE')
@@ -4117,7 +4117,7 @@ function image_autocomplete($string = '') {
     $url = file_create_url($result->uri);
     $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
     $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
-    $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
+    $match_description = format_date($result->timestamp, 'short');
     $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
     $match_count++;
   }
