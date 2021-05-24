@@ -2198,7 +2198,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
       // Step 2: Scheme selection.
       if ($skipped_step != 'schemes') {
         debug('Step 2: Scheme selection.');
-        $this->assertText('Private local files', 'Schemes step confirmed.');
+        $this->assertText('Private files', 'Schemes step confirmed.');
         $edit = array();
         $edit['scheme'] = 'private';
         $this->backdropPost(NULL, $edit, t('Next'));
