@@ -51,15 +51,22 @@ function field_ui_fields_list() {
 
         // Add the current instance.
         $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
-        $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
         $bundle_label = $bundles[$entity_type][$bundle]['label'];
+        $bundle_manage_fields_link = $admin_path . '/fields';
+        $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
+        $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
+
+        $t_vars = array(
+          '@field_configure_link' => url($field_configure_link),
+          '%field_label' => $field_label,
+          '@bundle_manage_fields_link' => url($bundle_manage_fields_link),
+          '@bundle_label' => $bundle_label,
+        );
         if ($admin_path) {
-          $bundle_manage_fields_link = $admin_path . '/fields';
-          $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
-          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', $t_vars);
         }
         else {
-          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', $t_vars);
         }
 
       }
