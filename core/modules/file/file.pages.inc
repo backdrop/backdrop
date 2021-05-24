@@ -102,17 +102,17 @@ function file_add_upload_step_filetype($form, &$form_state, array $options = arr
  * Generate form fields for the third step in the add file wizard.
  */
 function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
-  backdrop_set_title(t('Configure file scheme'));
+  backdrop_set_title(t('Select upload destination'));
   $file = file_load($form_state['storage']['upload']);
 
-  $schemes = array();
-  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-    $schemes[$scheme] = check_plain($info['description']);
+  $scheme_options = array();
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $stream_wrapper) {
+    $scheme_options[$scheme] = check_plain($stream_wrapper['name']);
   }
 
   // Remove any schemes not found in the instance settings.
   if (!empty($options['schemes'])) {
-    $schemes = array_intersect_key($schemes, array_flip($options['schemes']));
+    $scheme_options = array_intersect_key($scheme_options, array_flip($options['schemes']));
   }
 
   // Determine which scheme to use as the default value.
@@ -129,10 +129,16 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
   $form['scheme'] = array(
     '#type' => 'radios',
     '#title' => t('Destination'),
-    '#options' => $schemes,
+    '#options' => $scheme_options,
     '#default_value' => $fallback_scheme,
     '#required' => TRUE,
   );
+  if (isset($scheme_options['public'])) {
+    $form['scheme']['public']['#description'] = t('Select this option if there is no need for access control for the uploaded file(s).');
+  }
+  if (isset($scheme_options['private'])) {
+    $form['scheme']['private']['#description'] = t('Select this option if there is need to restrict access to the uploaded file(s).');
+  }
 
   $form['actions']['previous'] = array(
     '#type' => 'submit',
@@ -559,10 +565,10 @@ function file_manage_form($form, &$form_state, File $file) {
     '#default_value' => file_uri_scheme($file->uri),
   );
   if (isset($options['public'])) {
-    $form['destination']['scheme']['public']['#description'] = t('The use of public files is more efficient, but does not provide any access control.');
+    $form['destination']['scheme']['public']['#description'] = t('Select this option if there is no need for access control for the uploaded file(s).');
   }
   if (isset($options['private'])) {
-    $form['destination']['scheme']['private']['#description'] = t('Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.');
+    $form['destination']['scheme']['private']['#description'] = t('Select this option if there is need to restrict access to the uploaded file(s).');
   }
   // If the private files path has not been configured, still add it as an
   // option, but disabled.
