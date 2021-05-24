@@ -144,7 +144,6 @@ Backdrop.behaviors.editorImageDialog = {
     // Initialize styles of Dialog.
     if ($newToggles.length) {
       // Hide the library image browser on load.
-      $(".editor-image-library").css({ "display": "none" });
       $(".editor-dialog").removeClass("editor-dialog-with-library");
       // Set the class for the left-hand part.
       $(".editor-image-fields").addClass("editor-image-fields-full");
@@ -209,8 +208,9 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
-          $('.editor-image-library').css({ 'display': 'block' });
-          $('.form-item-image-directory').css({ 'display': 'block' });
+          $('.editor-image-library').load(Backdrop.settings.basePath + 'filter_image_library_ajax');
+          $('.editor-image-library').addClass('shown');
+          $('.form-item-image-directory').addClass('shown');
 
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library')
@@ -238,12 +238,18 @@ Backdrop.behaviors.editorImageDialog = {
               var $submit = $form.find('.form-actions input[type=submit]:first');
               $submit.trigger('mousedown').trigger('click').trigger('mouseup');
             });
+          // Use autocomplete field as exposed filter for image library.
+          $('#edit-attributes-src').keyup(function () {
+            var value = $(this).val();
+            $('#views-exposed-form-image-library-default #edit-filename').val(value);
+            $('#edit-submit-image-library').click();
+          });
         }
       }
       else {
         // Hide the library part of the dialog form.
-        $('.editor-image-library').css({ 'display': 'none' });
-        $('.form-item-image-directory').css({ 'display': 'none' });
+        $('.editor-image-library').removeClass('shown');
+        $('.form-item-image-directory').removeClass('shown');
         // Restore the previous dialog position.
         if (DialogLeftPosition) {
           $(".editor-dialog").css('left', DialogLeftPosition + 'px');

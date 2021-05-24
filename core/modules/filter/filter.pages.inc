@@ -176,20 +176,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
-  // Incorporate the Library View in the editor dialog form.
-  $view_name = 'image_library';
-  $view = views_embed_view($view_name);
-  if (empty($view)) {
-    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
-    if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
-    }
-  }
-
-  $form['library_view'] = array(
-    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
-  );
-
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -201,6 +187,23 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Render the image library.
+ */
+function _filter_image_library_ajax() {
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+
+  return $rendered_library;
 }
 
 /**

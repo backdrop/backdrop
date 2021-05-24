@@ -46,6 +46,15 @@
   overflow: hidden;
   vertical-align: middle;
 }
+/* Show/hide image library */
+.editor-image-library,
+.form-item-image-directory {
+  display: none;
+}
+.editor-image-library.shown,
+.form-item-image-directory.shown {
+  display: block;
+}
 /* Make sure image size items fall in line. */
 .editor-image-size .form-item {
   display: inline;
