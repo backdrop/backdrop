@@ -424,6 +424,17 @@ function file_menu() {
     'file' => 'file.pages.inc',
   );
 
+  // A page in the Reports section to list all directories where files have been
+  // configured to be uploaded.
+  $items['admin/reports/file_upload_dir_list'] = array(
+    'title' => 'File upload directories',
+    'description' => 'Overview of all directories where files have been configured to be uploaded.',
+    'page callback' => 'file_upload_dir_list',
+    'access callback' => 'user_access',
+    'access arguments' => array('access site reports'),
+    'file' => 'file.admin.inc',
+  );
+
   return $items;
 }
 

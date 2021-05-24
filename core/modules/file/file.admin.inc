@@ -586,6 +586,185 @@ function file_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
+ * Menu callback; Lists all blocks and their modules.
+ */
+function file_upload_dir_list() {
+  $instances = field_info_instances();
+  $field_types = field_info_field_types();
+  $entity_types = entity_get_info();
+  $bundles = field_info_bundles();
+
+  $stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+
+  $header = array(
+    array('data' => t('Directory'), 'field' => 'field_name', 'sort' => 'asc'),
+    array('data' => t('Storage'), 'field' => 'field_scheme', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Used by')),
+  );
+  $rows = array();
+
+  // Add stream wrapper default directories (such as public/private dir roots).
+  foreach ($stream_wrappers as $default_dir => $info) {
+    $directory = file_stream_wrapper_get_instance_by_uri($default_dir . '://')->realpath();
+    $rows[$directory] = array(
+      'data' => array(
+        'dir' => $directory,
+        'scheme' => $stream_wrappers[$default_dir]['name'],
+        'used_by' => array(),
+      ),
+      'class' => array($default_dir, 'default-' . $default_dir),
+    );
+    $rows[$directory]['data']['used_by'][] = '<strong>' . t('This is the default/root directory for %stream', array('%stream' => $stream_wrappers[$default_dir]['name'])) . '</strong>';
+  }
+
+  // Collect file upload directories as they have been configured in the various
+  // field instancess, across all entity types.
+  $file_types = array(
+    'file' => t('files'),
+    'image' => t('images'),
+  );
+
+  foreach ($instances as $entity_type => $type_bundles) {
+    foreach ($type_bundles as $bundle => $bundle_instances) {
+      foreach ($bundle_instances as $field_name => $instance) {
+        $field = field_info_field($field_name);
+
+        // We only need image and file fields.
+        if (in_array($field['module'], array('image', 'file'))) {
+          $scheme = $field['settings']['uri_scheme'];
+          $realpath = file_stream_wrapper_get_instance_by_scheme($scheme)->realpath();
+          if (!empty($instances[$entity_type][$bundle][$field_name]['settings']['file_directory'])) {
+            $realpath .= '/' . $instances[$entity_type][$bundle][$field_name]['settings']['file_directory'];
+          }
+          $directory = $realpath;
+
+          // Initialize the row if we encounter the directory for the first
+          // time.
+          if (!isset($rows[$directory])) {
+            $rows[$directory] = array(
+              'data' => array(
+                'dir' => $directory,
+                'scheme' => $stream_wrappers[$scheme]['name'],
+                'used_by' => array(),
+              ),
+              'class' => array($scheme),
+            );
+          }
+
+          // Add the current instance.
+          $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+          $entity_type_label = strtolower($entity_types[$entity_type]['label']);
+          $bundle_label = $bundles[$entity_type][$bundle]['label'];
+          $bundle_manage_fields_link = $admin_path . '/fields';
+          $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
+          $field_name = $instances[$entity_type][$bundle][$field_name]['field_name'];
+          $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
+          $file_type = $file_types[$field['module']];
+
+          $t_vars = array(
+            '@file_type' => $file_type,
+            '@field_configure_link' => url($field_configure_link),
+            '%field_label' => $field_label,
+            '@entity_type' => $entity_type_label,
+            '@bundle_manage_fields_link' => url($bundle_manage_fields_link),
+            '%bundle_label' => $bundle_label,
+          );
+          if ($admin_path) {
+            $rows[$directory]['data']['used_by'][] = t('@file_type uploaded in the <a href="@field_configure_link">%field_label</a> field in the @entity_type <a href="@bundle_manage_fields_link">%bundle_label</a>', $t_vars);
+          }
+          else {
+            $rows[$directory]['data']['used_by'][] = t('@file_type uploaded in the %field_label field in the @entity_type %bundle_label', $t_vars);
+          }
+        }
+      }
+    }
+  }
+
+  // Collect file upload directories as they may have been configured in the
+  // various text formats that have CKEditor enabled.
+  $upload_types = array(
+    'image_upload' => t('files'),
+    'file_upload' => t('images'),
+  );
+
+  $formats = filter_formats(NULL, TRUE);
+  foreach ($formats as $format => $format_info) {
+    $editor_settings = $format_info->editor_settings;
+
+    // We only need text formats that allow uploading files.
+    if (!empty($editor_settings)) {
+      $format_name = $format_info->name;
+
+      foreach ($upload_types as $upload_type => $file_type) {
+        $upload_type = $editor_settings[$upload_type]['status'] ? $editor_settings[$upload_type] : FALSE;
+        if ($upload_type) {
+          $scheme = $upload_type['scheme'];
+          $directory = $upload_type['directory'];
+          $realpath = file_stream_wrapper_get_instance_by_scheme($scheme)->realpath();
+          if (!empty($directory)) {
+            $realpath .= '/' . $directory;
+          }
+          $directory = $realpath;
+
+          // Initialize the row if we encounter the directory for the first
+          // time.
+          if (!isset($rows[$directory])) {
+            $rows[$directory] = array(
+              'data' => array(
+                'dir' => $directory,
+                'scheme' => $stream_wrappers[$scheme]['name'],
+                'used_by' => array(),
+              ),
+              'class' => array($scheme),
+            );
+          }
+
+          $t_vars = array(
+            '@upload_type' => $file_type,
+            '@format_configure_link' => url('admin/config/content/formats/' . $format),
+            '%format_name' => $format_name
+          );
+          if (user_access('administer filters')) {
+            $rows[$directory]['data']['used_by'][] = t('@upload_type uploaded via the <a href="@format_configure_link">%format_name</a> text format', $t_vars);
+          }
+          else {
+            $rows[$directory]['data']['used_by'][] = t('@upload_type uploaded via the %format_name text format', $t_vars);
+          }
+        }
+      }
+    }
+  }
+
+  foreach ($rows as $directory => $dir_data) {
+    // The same directory may have been configured to be used across various
+    // file or image fields, which may have been added to various bundles, as
+    // well as in various text formats. So for each directory we render the
+    // items in the respective cell in the "Used by" column as a list.
+    $rows[$directory]['data']['used_by'] = theme('item_list', array('items' => $rows[$directory]['data']['used_by']));
+  }
+
+  $order = tablesort_get_order($header);
+  $sort = tablesort_get_sort($header);
+
+  backdrop_sort($rows, array($order['sql'] => SORT_STRING));
+  $rows = ($sort == 'asc') ? $rows : array_reverse($rows);
+
+  $page['description'] = array(
+    '#type' => 'help',
+    '#markup' => t("Provides a summary of all directories where files have been configured to be uploaded to. "),
+  );
+
+  $page['paths_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No file upload directories specified.'),
+  );
+
+  return $page;
+}
+
+/**
  * Updates an existing file type or creates a new one.
  *
  * This function can be called on its own, or via the CTools exportables
