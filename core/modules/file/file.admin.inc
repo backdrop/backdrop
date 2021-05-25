@@ -696,7 +696,7 @@ function file_upload_dir_list() {
       $format_name = $format_info->name;
 
       foreach ($upload_types as $upload_type => $file_type) {
-        $upload_type = $editor_settings[$upload_type]['status'] ? $editor_settings[$upload_type] : FALSE;
+        $upload_type = isset($editor_settings[$upload_type]) && $editor_settings[$upload_type]['status'] ? $editor_settings[$upload_type] : FALSE;
         if ($upload_type) {
           $scheme = $upload_type['scheme'];
           $directory = $upload_type['directory'];
