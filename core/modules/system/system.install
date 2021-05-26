@@ -3180,6 +3180,9 @@ function system_update_1074() {
  * This will make it so that the Google Federated Learning of Cohorts (FLoC)
  * feature that gathers user data without cookies is blocked by default, unless
  * overridden in settings.php.
+ * 
+ * For more information, see the change record at:
+ * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
  */
 function system_update_1075() {
   $config = config('system.core');
