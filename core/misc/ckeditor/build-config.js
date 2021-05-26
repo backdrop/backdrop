@@ -1,7 +1,7 @@
 ﻿/**
  * This is a Backdrop-optimized build of CKEditor.
  *
- * You may re-use it at any time at http://ckeditor.com/builder to build 
+ * You may re-use it at any time at http://ckeditor.com/builder to build
  * CKEditor again. Alternatively, use the "build.sh" script to build it locally.
  * If you do so, be sure to pass it the "-s" flag. So: "sh build.sh -s".
  *
@@ -11,7 +11,7 @@
  */
 
 /**
- * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/license
  */
 
@@ -25,10 +25,10 @@
  * (1) https://ckeditor.com/cke4/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) https://ckeditor.com/cke4/builder/52db0501b506570ee02f9e8a95a9d2a3
+ * (2) https://ckeditor.com/cke4/builder/229b9083b896637b1446ef874bb2176b
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) https://ckeditor.com/cke4/builder/download/52db0501b506570ee02f9e8a95a9d2a3
+ * (3) https://ckeditor.com/cke4/builder/download/229b9083b896637b1446ef874bb2176b
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -51,6 +51,7 @@ var CKBUILDER_CONFIG = {
 		'.jshintrc',
 		'.mailmap',
 		'.npm',
+		'.nvmrc',
 		'.travis.yml',
 		'bender-err.log',
 		'bender-out.log',
@@ -60,19 +61,20 @@ var CKBUILDER_CONFIG = {
 		'gruntfile.js',
 		'less',
 		'node_modules',
+		'package-lock.json',
 		'package.json',
 		'tests'
 	],
-  // So that they are not shipped with Backdrop, after using this config file
-  // for rebuilding, the following are removed manually, because adding them
-  // to the ignore array does not cause them to be ignored:
-  // 'README.md',
-  // 'adapters',
-  // 'config.js',
-  // 'contents.css',
-  // 'samples',
-  // 'skins/moono-lisa/readme.md',
-  // 'styles.js',
+// So that they are not shipped with Backdrop, after using this config file
+// for rebuilding, the following are removed manually, because adding them
+// to the ignore array does not cause them to be ignored:
+// 'README.md',
+// 'adapters',
+// 'config.js',
+// 'contents.css',
+// 'samples',
+// 'skins/moono-lisa/readme.md',
+// 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
