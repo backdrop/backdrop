@@ -3049,7 +3049,7 @@ function backdrop_deliver_html_page($page_callback_result) {
   }
 
   if ($site_config->get('block_interest_cohort', TRUE)) {
-    $permissions_policy = drupal_get_http_header('Permissions-Policy');
+    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
     if (is_null($permissions_policy)) {
       backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
     }
