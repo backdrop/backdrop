@@ -3442,8 +3442,7 @@ class BlockInterestCohortTest extends BackdropWebTestCase {
    */
   function testExistingPolicyHeader() {
     $this->backdropGet('common-test/existing_permissions_policy_header');
-    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=()') !== FALSE), 'The existing header is appended to.');
-    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
+    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=(),interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
   }
 
   /**
