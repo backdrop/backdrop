@@ -3417,9 +3417,9 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
  * Test for block_interest_cohort.
  */
 class BlockInterestCohortTest extends BackdropWebTestCase {
-    protected $profile = 'testing';
+  protected $profile = 'testing';
 
-    function setUp() {
+  function setUp() {
     parent::setUp('common_test');
   }
 
