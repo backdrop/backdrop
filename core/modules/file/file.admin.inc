@@ -609,7 +609,7 @@ function file_upload_dir_list() {
     $rows[$directory] = array(
       'data' => array(
         'dir' => $directory,
-        'scheme' => $stream_wrappers[$default_dir]['name'],
+        'scheme' => ucfirst($default_dir),
         'used_by' => array(),
       ),
       'class' => array($default_dir, 'default-' . $default_dir),
@@ -644,7 +644,7 @@ function file_upload_dir_list() {
             $rows[$directory] = array(
               'data' => array(
                 'dir' => $directory,
-                'scheme' => $stream_wrappers[$scheme]['name'],
+                'scheme' => ucfirst($scheme),
                 'used_by' => array(),
               ),
               'class' => array($scheme),
@@ -653,27 +653,27 @@ function file_upload_dir_list() {
 
           // Add the current instance.
           $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
-          $entity_type_label = strtolower($entity_types[$entity_type]['label']);
+          $entity_type_label = strtolower($entity_types[$entity_type]['bundle label']);
           $bundle_label = $bundles[$entity_type][$bundle]['label'];
           $bundle_manage_fields_link = $admin_path . '/fields';
           $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
           $field_name = $instances[$entity_type][$bundle][$field_name]['field_name'];
           $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
-          $file_type = $file_types[$field['module']];
+          $file_type = strtolower($field['module']);
 
           $t_vars = array(
             '@file_type' => $file_type,
             '@field_configure_link' => url($field_configure_link),
             '%field_label' => $field_label,
-            '@entity_type' => $entity_type_label,
             '@bundle_manage_fields_link' => url($bundle_manage_fields_link),
             '%bundle_label' => $bundle_label,
+            '@entity_type' => $entity_type_label,
           );
           if ($admin_path) {
-            $rows[$directory]['data']['used_by'][] = t('@file_type uploaded in the <a href="@field_configure_link">%field_label</a> field in the @entity_type <a href="@bundle_manage_fields_link">%bundle_label</a>', $t_vars);
+            $rows[$directory]['data']['used_by'][] = t('<a href="@field_configure_link">%field_label</a> @file_type field, <a href="@bundle_manage_fields_link">%bundle_label</a> @entity_type', $t_vars);
           }
           else {
-            $rows[$directory]['data']['used_by'][] = t('@file_type uploaded in the %field_label field in the @entity_type %bundle_label', $t_vars);
+            $rows[$directory]['data']['used_by'][] = t('%field_label @file_type field, %bundle_label @entity_type', $t_vars);
           }
         }
       }
@@ -712,7 +712,7 @@ function file_upload_dir_list() {
             $rows[$directory] = array(
               'data' => array(
                 'dir' => $directory,
-                'scheme' => $stream_wrappers[$scheme]['name'],
+                'scheme' => ucfirst($scheme),
                 'used_by' => array(),
               ),
               'class' => array($scheme),
@@ -720,15 +720,15 @@ function file_upload_dir_list() {
           }
 
           $t_vars = array(
-            '@upload_type' => $file_type,
             '@format_configure_link' => url('admin/config/content/formats/' . $format),
-            '%format_name' => $format_name
+            '%format_name' => $format_name,
+            '@upload_type' => $file_type,
           );
           if (user_access('administer filters')) {
-            $rows[$directory]['data']['used_by'][] = t('@upload_type uploaded via the <a href="@format_configure_link">%format_name</a> text format', $t_vars);
+            $rows[$directory]['data']['used_by'][] = t('<a href="@format_configure_link">%format_name</a> text format @upload_type', $t_vars);
           }
           else {
-            $rows[$directory]['data']['used_by'][] = t('@upload_type uploaded via the %format_name text format', $t_vars);
+            $rows[$directory]['data']['used_by'][] = t('%format_name text format @upload_type', $t_vars);
           }
         }
       }
