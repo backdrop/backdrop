@@ -475,7 +475,7 @@ function file_entity_info() {
   $entity_info = array(
     'file' => array(
       'label' => t('File'),
-      'bundle label' => t('Type'),
+      'bundle label' => t('File type'),
       'base table' => 'file_managed',
       'controller class' => 'FileStorageController',
       'fieldable' => TRUE,
