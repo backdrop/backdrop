@@ -32,7 +32,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Create a web user.
     $this->web_user = $this->backdropCreateUser(array(
       'access user profiles',
-      'access content'
+      'access content',
+      'administer nodes',
     ));
 
     // Create content types for testing.
@@ -42,11 +43,96 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->test_node1 = $this->backdropCreateNode(array(
       'type' => 'post',
       'title' => $this->randomString(),
+      'uid' => $this->admin_user->uid,
     ));
+
     $this->test_node2 = $this->backdropCreateNode(array(
       'type' => 'page',
       'title' => $this->randomString(),
+      'uid' => $this->web_user->uid,
     ));
+  }
+
+  /**
+   * Test the support for contexts within conditions and blocks.
+   */
+  function testRelationships() {
+    // Make a new layout that creates a custom path with wildcards.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_path,
+    );
+    // Check the path first to populate available contexts.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Check path'));
+
+     // Test Author from Content relationship.
+    $edit = array();
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Add relationship'));
+
+    $edit = array(
+      'relationship' => 'author_from_node:relationship',
+    );
+    $this->backdropPost(NULL, $edit, t('Load relationship'));
+    $this->backdropPost(NULL, array(), t('Add relationship'));
+
+    $this->backdropPost(NULL, array(), t('Create layout'));
+
+    // Add the test block that requires both node and user contexts.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts with contexts.'));
+    $this->clickLink(t('Layout bar block'));
+    $select_options = $this->xpath('//*[@id=:select]//option', array(
+      ':select' => 'edit-contexts-my-user',
+    ));
+    $this->assertEqual(count($select_options), 2, 'Two options are found in the select list.');
+    $relationship_option = (string) $select_options[0]['value'];
+    $this->assertTrue(strpos($relationship_option, 'relationship') === 0, 'First select list option is the user context from the author relationship.');
+
+    $edit = array(
+      'contexts[my_user]' => $relationship_option,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+    $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Visit a node created by another user. The user context from that node,
+    // rather than the current user, should be available.
+    // The current user is User 2.
+    $this->backdropGet('node/' . $this->test_node2->nid);
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+
+    // Change the user context on the test block to use the current user and
+    // test that the node user is no longer displayed.
+    $edit = array(
+      'contexts[my_user]' => 'current_user',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node2->nid);
+    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+
+    // Visit a node created by the current user (User 2) and test that the
+    // correct user is displayed.
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+
+     // Remove the author from node relationship.
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
   }
 
   /**
@@ -2284,6 +2370,88 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   private function assertIsAdminLayout($message = '') {
     $result = $this->xpath('//div[contains(@class, "layout--boxton")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
+  }
+}
+
+/**
+ * Tests that the correct layout is used for node previews.
+ */
+class LayoutPreviewTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $content_type;
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout'));
+
+    // Enable the test module that contains our test layout in its config.
+    module_enable(array('layout_preview_test'));
+
+    // Create a content type for checking node/edit page layouts.
+    $this->content_type = $this->backdropCreateContentType();
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that the correct layout is used for node add and node edit previews.
+   */
+  function testPages() {
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the node with a new random body content, then preview.
+    $this->backdropGet('node/1/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+     $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
   }
 }
 
