@@ -541,7 +541,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Edit condition to show this block only on post nodes.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
     $this->backdropPost(NULL, array(), t('Configure'));
-    $this->assertRaw('<label for="edit-bundles">Node Type </label>');
+    $this->assertRaw('<label for="edit-bundles">Node Content type </label>');
 
     $edit = array(
       'condition' => 'node_type',
