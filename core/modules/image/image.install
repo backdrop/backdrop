@@ -106,7 +106,7 @@ function image_requirements($phase) {
     );
 
     // Check for GD WebP support in PHP.
-    if (imagetypes() & IMG_WEBP) {
+    if (imagetypes() & defined('IMG_WEBP')) {
       $severity = REQUIREMENT_OK;
       $value = t('Enabled');
       $description = '';
