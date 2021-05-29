@@ -1167,16 +1167,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       '%extensions' => 'jpg',
     ));
 
-    // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
+    // Both, PHP and GD must support WebP. PHP ships with support since 7.0.10+,
     // the bundled GD version still might not support it.
-    $gd_info = gd_info();
-    $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
-    if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {
-      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused');
-      // Also check the field description.
-      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension');
-    }
-    else {
+    if (imagetypes() & IMG_WEBP) {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused');
       $node = node_load($nid);
@@ -1187,6 +1180,11 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       $this->backdropGet(image_style_url('thumbnail', $image_uri));
       $this->assertResponse(200, 'Received a 200 response for derivative image.');
       $this->assertNoText('Error generating image.');
+    }
+    else {
+      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused');
+      // Also check the field description.
+      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension');
     }
   }
 

@@ -349,8 +349,7 @@ function image_gd_get_info(stdClass $image) {
   if (isset($data) && is_array($data)) {
     $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
     if (defined('IMAGETYPE_WEBP')) {
-      $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      if (imagetypes() & IMG_WEBP) {
         // Extend mapping of constants to extensions, as the PHP and GD
         // versions support WebP.
         // @see https://www.php.net/manual/en/image.constants.php

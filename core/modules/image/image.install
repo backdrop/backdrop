@@ -77,10 +77,10 @@ function image_requirements($phase) {
   $requirements = array();
 
   if ($phase == 'runtime') {
-    $gd_info = gd_info();
 
     // Check for the PHP GD library.
     if (function_exists('imagegd2')) {
+      $gd_info = gd_info();
       $value = $gd_info['GD Version'];
       $description = '';
 
@@ -106,8 +106,7 @@ function image_requirements($phase) {
     );
 
     // Check for GD WebP support in PHP.
-    $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
-    if (version_compare(PHP_VERSION, '7.1.0', '>=') && $webp_supported) {
+    if (imagetypes() & IMG_WEBP) {
       $severity = REQUIREMENT_OK;
       $value = t('Enabled');
       $description = '';
@@ -115,10 +114,10 @@ function image_requirements($phase) {
     else {
       $severity = REQUIREMENT_WARNING;
       $value = t('Not enabled');
-      if (version_compare(PHP_VERSION, '7.1.0', '<')) {
-        $description = t('This site is running on PHP version @php. WebP support has been added to PHP after 7.1.0.', array('@php' => PHP_VERSION));
+      if (version_compare(PHP_VERSION, '7.0.10', '<')) {
+        $description = t('This site is running on PHP version @php. WebP support has been added to PHP after 7.0.10.', array('@php' => PHP_VERSION));
       }
-      elseif (!$webp_supported) {
+      else {
         $php_webp_switch = version_compare(PHP_VERSION, '7.4.0', '>=') ? '--with-webp' : '--with-webp-dir=DIR';
         $description = t('Both, PHP and GD must support WebP. The minimum PHP version requirement has been met, but the bundled GD version does not support WebP. You should recompile PHP with the @php-webp-switch option. See <a href="@url" target="_blank">the PHP GD installation manual</a>.', array('@php-webp-switch' => $php_webp_switch, '@url' => 'https://www.php.net/manual/image.installation.php'));
       }
