@@ -348,13 +348,11 @@ function image_gd_get_info(stdClass $image) {
 
   if (isset($data) && is_array($data)) {
     $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    if (defined('IMAGETYPE_WEBP')) {
-      if (imagetypes() & defined('IMG_WEBP')) {
-        // Extend mapping of constants to extensions, as the PHP and GD
-        // versions support WebP.
-        // @see https://www.php.net/manual/en/image.constants.php
-        $extensions['18'] = 'webp';
-      }
+    if (imagetypes() && defined('IMG_WEBP') && defined('IMAGETYPE_WEBP') {
+      // Extend mapping of constants to extensions, as the PHP and GD
+      // versions support WebP.
+      // @see https://www.php.net/manual/en/image.constants.php
+      $extensions['18'] = 'webp';
     }
     $extension = isset($extensions[$data[2]]) ?  $extensions[$data[2]] : '';
     $details = array(

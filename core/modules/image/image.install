@@ -106,7 +106,7 @@ function image_requirements($phase) {
     );
 
     // Check for GD WebP support in PHP.
-    if (imagetypes() & defined('IMG_WEBP')) {
+    if (imagetypes() && defined('IMG_WEBP') && defined('IMAGETYPE_WEBP') {
       $severity = REQUIREMENT_OK;
       $value = t('Enabled');
       $description = '';
@@ -114,8 +114,8 @@ function image_requirements($phase) {
     else {
       $severity = REQUIREMENT_WARNING;
       $value = t('Not enabled');
-      if (version_compare(PHP_VERSION, '7.0.10', '<')) {
-        $description = t('This site is running on PHP version @php. WebP support has been added to PHP after 7.0.10.', array('@php' => PHP_VERSION));
+      if (version_compare(PHP_VERSION, '7.1.0', '<')) {
+        $description = t('This site is running on PHP version @php. WebP support has been added to PHP after 7.1.0.', array('@php' => PHP_VERSION));
       }
       else {
         $php_webp_switch = version_compare(PHP_VERSION, '7.4.0', '>=') ? '--with-webp' : '--with-webp-dir=DIR';

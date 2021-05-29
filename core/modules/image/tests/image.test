@@ -1167,9 +1167,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       '%extensions' => 'jpg',
     ));
 
-    // Both, PHP and GD must support WebP. PHP ships with support since 7.0.10+,
+    // Both, PHP and GD must support WebP. PHP ships with support since 7.1.0+,
     // the bundled GD version still might not support it.
-    if (imagetypes() & defined('IMG_WEBP')) {
+    if (imagetypes() && defined('IMG_WEBP') && defined('IMAGETYPE_WEBP') {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused');
       $node = node_load($nid);
