@@ -3787,10 +3787,8 @@ function system_image_toolkits() {
  * the GD version supports WebP.
  */
 function system_image_supported_extensions_alter(&$supported_extensions) {
-  if (config_get('system.core', 'image_toolkit') == 'gd') {
-    if (imagetypes() && defined('IMG_WEBP') && defined('IMAGETYPE_WEBP')) {
-      $supported_extensions[] = 'webp';
-    }
+  if (config_get('system.core', 'image_toolkit') == 'gd' && image_webp_support()) {
+    $supported_extensions[] = 'webp';
   }
 }
 
