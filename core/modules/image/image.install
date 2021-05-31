@@ -81,17 +81,19 @@ function image_requirements($phase) {
     // Check for the PHP GD library.
     if (function_exists('imagegd2')) {
       $gd_info = gd_info();
-      $value = $gd_info['GD Version'];
       $description = '';
 
       // Check for filter and rotate support.
       if (function_exists('imagefilter') && function_exists('imagerotate')) {
         $severity = REQUIREMENT_OK;
+        $value = t('Supported');
       }
       else {
         $severity = REQUIREMENT_WARNING;
-        $description = t('The GD Library for PHP is enabled, but was compiled without support for functions used by the rotate and desaturate effects. It was probably compiled using the official GD libraries from http://www.libgd.org instead of the GD library bundled with PHP. You should recompile PHP --with-gd using the bundled GD library. See <a href="@url" target="_blank">the PHP manual</a>.', array('@url' => 'http://www.php.net/manual/book.image.php'));
+        $value = t('Not supported by the current GD library');
+        $description = t('The GD library for PHP is enabled, but was compiled without support for functions used by the rotate and desaturate effects. It was probably compiled using the official GD libraries from http://www.libgd.org instead of the GD library bundled with PHP. You should recompile PHP --with-gd using the bundled GD library. See <a href="@url" target="_blank">the PHP manual</a>.', array('@url' => 'http://www.php.net/manual/book.image.php'));
       }
+      $value .= ' - ' . $gd_info['GD Version'];
     }
     else {
       $severity = REQUIREMENT_ERROR;
@@ -106,7 +108,7 @@ function image_requirements($phase) {
     );
 
     // Check for GD WebP support in PHP.
-    if (image_webp_support()) {
+    if (image_gd_webp_support()) {
       $severity = REQUIREMENT_OK;
       $value = t('Enabled');
       $description = '';
@@ -119,7 +121,7 @@ function image_requirements($phase) {
       }
       else {
         $php_webp_switch = version_compare(PHP_VERSION, '7.4.0', '>=') ? '--with-webp' : '--with-webp-dir=DIR';
-        $description = t('Both, PHP and GD must support WebP. The minimum PHP version requirement has been met, but the bundled GD version does not support WebP. You should recompile PHP with the @php-webp-switch option. See <a href="@url" target="_blank">the PHP GD installation manual</a>.', array('@php-webp-switch' => $php_webp_switch, '@url' => 'https://www.php.net/manual/image.installation.php'));
+        $description = t('Both, PHP and the GD library must support WebP. The minimum PHP version requirement has been met, but the bundled GD library version does not support WebP. You should recompile PHP with the @php-webp-switch option. See <a href="@url" target="_blank">the PHP GD installation manual</a>.', array('@php-webp-switch' => $php_webp_switch, '@url' => 'https://www.php.net/manual/image.installation.php'));
       }
     }
     $requirements['webp_support'] = array(

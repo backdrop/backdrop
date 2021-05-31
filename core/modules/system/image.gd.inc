@@ -48,6 +48,51 @@ function image_gd_check_settings() {
 }
 
 /**
+ * Detect whether WebP is supported in current version of PHP/GD.
+ *
+ * @return
+ *   A boolean indicating whether WebP is supported on this machine.
+ */
+function image_gd_webp_support() {
+  // Assume no WebP support.
+  $webp_support = FALSE;
+
+  // If PHP has been compiled with WebP support, the "IMAGETYPE_WEBP" and
+  // "IMG_WEBP" constants are defined (by default in PHP v7.1.0+ and PHP
+  // v7.0.10+ respectively). See:
+  // https://www.php.net/manual/en/image.constants.php#constant.img-webp
+  // https://www.php.net/manual/en/image.constants.php#constant.imagetype-webp
+  if (defined('IMG_WEBP') && defined('IMAGETYPE_WEBP')) {
+    // This is a bitwise "&" check intentionally, since imagetypes() returns a
+    // bit-field corresponding to the image formats supported by the version of
+    // GD linked into PHP. See https://www.php.net/manual/en/function.imagetypes.php
+    if (imagetypes() & IMG_WEBP) {
+      // If we reach this point, WebP support should be built into PHP. To be
+      // absolutely certain that that is the case, we also attempt to process an
+      // actual test .webp image, and check if we get expected values.
+      $path = backdrop_get_path('module', 'image') . '/tests/images';
+      $filename = 'testimage.webp';
+      $files = file_scan_directory($path, '/' . $filename . '/');
+      $webp_image = reset($files);
+      $image_size = getimagesize($webp_image->uri);
+
+      $expected_values = array(
+        0 => 8,
+        1 => 6,
+        2 => 18,
+        3 => 'width="8" height="6"',
+        'bits' => 8,
+        'mime' => 'image/webp',
+      );
+
+      $webp_support = $image_size == $expected_values;
+    }
+  }
+
+  return $webp_support;
+}
+
+/**
  * Scale an image to the specified size using GD.
  *
  * @param $image
@@ -348,7 +393,7 @@ function image_gd_get_info(stdClass $image) {
 
   if (isset($data) && is_array($data)) {
     $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    if (image_webp_support()) {
+    if (image_gd_webp_support()) {
       // Extend mapping of constants to extensions, as the PHP and GD
       // versions support WebP.
       // @see https://www.php.net/manual/en/image.constants.php
