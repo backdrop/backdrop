@@ -797,6 +797,7 @@ function filter_editor_image_upload_settings_form($format) {
   $settings += array(
     'status' => FALSE,
     'scheme' => file_default_scheme(),
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
@@ -851,6 +852,14 @@ function filter_editor_image_upload_settings_form($format) {
   foreach ($stream_wrappers as $scheme => $info) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
   }
+
+  $form['alt_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('<em>Alt</em> text required'),
+    '#description' => t('Require the alternative text on images.'),
+    '#default_value' => $settings['alt_required'],
+    '#states' => $show_if_image_uploads_enabled,
+  );
 
   $form['directory'] = array(
     '#type' => 'textfield',

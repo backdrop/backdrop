@@ -127,6 +127,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
   $form['size'] = array(
     '#title' => t('Image size'),
