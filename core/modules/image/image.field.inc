@@ -20,7 +20,7 @@ function image_field_info() {
         'file_extensions' => 'png gif jpg jpeg',
         'file_directory' => '',
         'max_filesize' => '',
-        'alt_field' => 0,
+        'alt_field' => 1,
         'alt_field_required' => 0,
         'title_field' => 0,
         'title_field_required' => 0,
@@ -168,6 +168,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('<em>Alt</em> field required'),
     '#default_value' => $settings['alt_field_required'],
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility for all users.'),
     '#weight' => $form['alt_field']['#weight'] + .1,
     '#states' => array(
       'visible' => array(
