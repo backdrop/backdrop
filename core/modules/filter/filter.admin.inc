@@ -856,7 +856,7 @@ function filter_editor_image_upload_settings_form($format) {
   $form['alt_required'] = array(
     '#type' => 'checkbox',
     '#title' => t('<em>Alt</em> text required'),
-    '#description' => t('Require the alternative text on images.'),
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility for all users.'),
     '#default_value' => $settings['alt_required'],
     '#states' => $show_if_image_uploads_enabled,
   );
