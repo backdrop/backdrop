@@ -886,7 +886,7 @@ function user_account_form(&$form, &$form_state) {
     }
   }
 
-  $description = !$register ? t('The current password must be entered to set a new password.') : '';
+  $description = !$register && $user->uid == $account->uid ? t('The current password must be entered to set a new password.') : '';
   // If weak passwords are being rejected, append the list of password strength
   // criteria to the help text of the password field.
   if ($reject_weak) {
