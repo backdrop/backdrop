@@ -272,7 +272,6 @@ function hook_taxonomy_term_view_alter(&$build) {
   $build['#post_render'][] = 'my_module_taxonomy_term_post_render';
 }
 /**
- *backdrop_alter('taxonomy_term_page', $build); implies implementation of hook_taxonomy_term_page_alter()
  * This hook is called to remove the list of nodes with a renderable array representing
  *the taxonomy term content passed as an argument and pager for the list of nodes.
  *@PadminiRai $var_list
