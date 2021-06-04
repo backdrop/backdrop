@@ -98,7 +98,7 @@ function filter_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('upload editor images'),
     'theme callback' => 'ajax_base_page_theme',
-    'delivery callback' => 'backdrop_deliver_page',
+    'delivery callback' => '_filter_image_library_ajax_deliver',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );

@@ -207,6 +207,13 @@ function _filter_image_library_ajax() {
 }
 
 /**
+ * Render the image library.
+ */
+function _filter_image_library_ajax_deliver($page_callback_result) {
+  print backdrop_render_page($page_callback_result);
+}
+
+/**
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
