@@ -168,6 +168,16 @@ function filter_menu() {
 }
 
 /**
+ * Implements hook_admin_paths().
+ */
+function filter_admin_paths() {
+  $paths = array(
+    'filter_image_library_ajax' -> TRUE,
+  );
+  return $paths;
+}
+
+/**
  * Access callback: Checks a user's access to a particular text format.
  *
  * @param $format
