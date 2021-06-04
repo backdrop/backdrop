@@ -172,7 +172,7 @@ function filter_menu() {
  */
 function filter_admin_paths() {
   $paths = array(
-    'filter_image_library_ajax' -> TRUE,
+    'filter_image_library_ajax' => TRUE,
   );
   return $paths;
 }
