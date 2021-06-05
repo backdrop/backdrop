@@ -289,7 +289,6 @@ function hook_taxonomy_term_page_alter(&$build) {
   // To remove the pager for the list of nodes.
   unset($build['pager']);
 }
-
 /**
  * @} End of "addtogroup hooks".
  */
