@@ -1500,9 +1500,9 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           // file_managed_file_process().
           elseif (!$GLOBALS['user']->uid) {
             $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
-            // if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
-            $force_default = TRUE;
-            // }
+            if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
+              $force_default = TRUE;
+            }
           }
         }
         // If all checks pass, allow the file to be changed.
