@@ -275,8 +275,9 @@ function hook_taxonomy_term_view_alter(&$build) {
 /**
  * Alter the results of taxonomy_term_page()
  *
- * This hook is called after the node listing for a taxonomy term page has been assembled in a structured array
- * and may be used for altering that listing.
+ * This hook is called after the node listing for a taxonomy term page has
+ * been assembled in a structured array and may be used for altering that
+ * listing.
  *
  * @param $build
  *   A renderable array representing the taxonomy term content.
