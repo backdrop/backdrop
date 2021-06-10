@@ -73,13 +73,12 @@ function update_init() {
   if (arg(0) == 'admin' && user_access('administer site configuration')) {
     switch ($_GET['q']) {
       // These pages don't need additional nagging.
-      case 'admin/config/system/updates':
       case 'admin/appearance/install':
       case 'admin/modules/install':
       case 'admin/structure/layouts/install':
+      case 'admin/config/system/updates':
+      case 'admin/config/system/updates/settings':
       case 'admin/reports/updates':
-      case 'admin/reports/updates/update':
-      case 'admin/reports/updates/install':
       case 'admin/reports/updates/settings':
       case 'admin/reports/status':
       case 'admin/update/ready':
@@ -92,8 +91,8 @@ function update_init() {
       case 'admin/structure/layouts':
         $verbose = TRUE;
         break;
-
     }
+
     module_load_install('update');
     $status = update_requirements('runtime');
     foreach (array('core', 'contrib') as $report_type) {

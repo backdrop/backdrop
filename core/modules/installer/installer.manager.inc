@@ -63,7 +63,9 @@ function installer_manager_update_form($form, $form_state) {
 
   $available = update_get_available(TRUE);
 
-  // Run some basic health checks, and show messages/warnings accordingly.
+  // Run some basic health checks, and show messages/warnings accordingly. The
+  // Project Installer module has a dependency on the Update Manager module, so
+  // it is safe to assume that the latter will be enabled.
   $settings_link = url('admin/reports/updates/settings');
   $update_config = config('update.settings');
   $update_interval_days = $update_config->get('update_interval_days');
