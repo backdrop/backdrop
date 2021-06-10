@@ -176,11 +176,7 @@ function user_admin_settings($form, &$form_state) {
   );
 
   module_load_include('password.inc', 'user', 'user');
-  $criteria = _user_password_policy_help();
-
-  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
-  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
-  $description .= $criteria;
+  $description = _user_password_policy_help();
 
   $form['password_policy']['user_password_reject_weak'] = array(
     '#type' => 'checkbox',
