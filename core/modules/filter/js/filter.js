@@ -211,6 +211,7 @@ Backdrop.behaviors.editorImageDialog = {
           $('.editor-image-fields').removeClass('editor-image-fields-full');
           $('.editor-image-library').css({ 'display': 'block' });
           $('.form-item-image-directory').css({ 'display': 'block' });
+          $('.editor-image-library').load(Backdrop.settings.basePath + '?q=filter_image_library_ajax');
 
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library')
