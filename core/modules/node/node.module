@@ -144,7 +144,7 @@ function node_entity_info() {
   $entity_info = array(
     'node' => array(
       'label' => t('Node'),
-      'bundle label' => t('Type'),
+      'bundle label' => t('Content type'),
       'controller class' => 'NodeStorageController',
       'entity class' => 'Node',
       'base table' => 'node',
