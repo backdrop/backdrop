@@ -2978,6 +2978,45 @@ function theme_fieldset($variables) {
 }
 
 /**
+ * Returns HTML for a DETAILS form element and its children.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #attributes, #children, #collapsed, #collapsible,
+ *     #description, #id, #open_label, #close_label, #title, #value.
+ *
+ * @ingroup themeable
+ */
+function theme_details($variables) {
+  $element = $variables['element'];
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $collapsed = isset($variables['element']['#collapsed']) && $variables['element']['#collapsed'];
+  $open = $collapsed ? '' : ' open';
+
+  $summary = !empty($element['#title']) ? $element['#title'] : '';
+
+  $open_label = isset($variables['element']['#open_label']) ? ' data-open="' . $variables['element']['#open_label'] . '"' : '';
+  $close_label = isset($variables['element']['#close_label']) ? ' data-close="' . $variables['element']['#close_label'] . '"' : '';
+
+  $output = '<details' . backdrop_attributes($element['#attributes']) . $open . '>';
+  $output .= '<summary' . $open_label . $close_label . '>' . $summary . '</summary>';
+  if (!empty($element['#description'])) {
+    $output .= '<div class="details-description">' . $element['#description'] . '</div>';
+  }
+  $output .= '<div class="details-content">';
+  $output .= $element['#children'];
+  if (isset($element['#value'])) {
+    $output .= $element['#value'];
+  }
+  $output .= '</div>';
+  $output .= "</details>\n";
+  return $output;
+}
+
+/**
  * Returns HTML for a radio button form element.
  *
  * Note: The input "name" attribute needs to be sanitized before output, which
@@ -4001,6 +4040,45 @@ function form_process_fieldset(&$element, &$form_state) {
 }
 
 /**
+ * Arranges fieldsets into groups.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   fieldset. Note that $element must be taken by reference here, so processed
+ *   child elements are taken over into $form_state.
+ * @param $form_state
+ *   The $form_state array for the form this fieldset belongs to.
+ *
+ * @return
+ *   The processed element.
+ */
+function form_process_details(&$element, &$form_state) {
+  $parents = implode('][', $element['#parents']);
+
+  // Contains form element summary functionalities.
+  $element['#attached']['library'][] = array('system', 'backdrop.form');
+
+  // The .form-wrapper class is required for #states to treat DETAILS elements
+  // like containers.
+  if (!isset($element['#attributes']['class'])) {
+    $element['#attributes']['class'] = array();
+  }
+
+  // DETAILS elements do not need 'collapsible'/'collapsed' classes, since they
+  // use their own "open" attribute by which they can be targetted in CSS. No
+  // need for collapse.js either - but we may need to add a polyfill here.
+  // if (!empty($element['#collapsible'])) {
+  //   $element['#attached']['library'][] = array('system', 'backdrop.collapse');
+  //   $element['#attributes']['class'][] = 'collapsible';
+  //   if (!empty($element['#collapsed'])) {
+  //     $element['#attributes']['class'][] = 'collapsed';
+  //   }
+  // }
+
+  return $element;
+}
+
+/**
  * Adds members of this group as actual elements for rendering.
  *
  * @param $element
@@ -4044,6 +4122,63 @@ function form_pre_render_fieldset($element) {
     }
     // If we injected this element into the group, then we want to render it.
     elseif (!empty($element['#group_fieldset'])) {
+      // Intentionally empty to clarify the flow. Return $element.
+    }
+    // Otherwise, this element belongs to a group and the group exists, so we do
+    // not render it.
+    elseif (element_children($element['#groups'][$group])) {
+      $element['#printed'] = TRUE;
+    }
+  }
+
+  return $element;
+}
+
+/**
+ * Adds members of this group as actual elements for rendering.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   fieldset.
+ *
+ * @return
+ *   The modified element with all group members.
+ */
+function form_pre_render_details($element) {
+  // Details may be rendered outside of a Form API context.
+  if (!isset($element['#parents']) || !isset($element['#groups'])) {
+    return $element;
+  }
+
+  // Inject group member elements belonging to this group.
+  $parents = implode('][', $element['#parents']);
+  $children = element_children($element['#groups'][$parents]);
+  if (!empty($children)) {
+    foreach ($children as $key) {
+      // Break references and indicate that the element should be rendered as
+      // group member.
+      $child = (array) $element['#groups'][$parents][$key];
+      $child['#group_details'] = TRUE;
+      // Inject the element as new child element.
+      $element[] = $child;
+
+      $sort = TRUE;
+    }
+    // Re-sort the element's children if we injected group member elements.
+    if (isset($sort)) {
+      $element['#sorted'] = FALSE;
+    }
+  }
+
+  if (isset($element['#group'])) {
+    $group = $element['#group'];
+    // If this element belongs to a group, but the group-holding element does
+    // not exist, we need to render it (at its original location).
+    if (!isset($element['#groups'][$group]['#group_exists'])) {
+      // Intentionally empty to clarify the flow. Return $element.
+    }
+    // If we injected this element into the group, then we want to render it.
+    elseif (!empty($element['#group_details'])) {
       // Intentionally empty to clarify the flow. Return $element.
     }
     // Otherwise, this element belongs to a group and the group exists, so we do
