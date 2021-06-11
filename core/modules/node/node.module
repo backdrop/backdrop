@@ -1742,7 +1742,7 @@ function node_layout_context_info() {
 }
 
 /**
- * Implements hook_layout_layouts_alter().
+ * Implements hook_layout_load_by_router_item_alter().
  *
  * For create node preview pages, the path will be of the form
  * node/preview/<type>/<id>, where <type> is the node type and <id> is the
@@ -1750,7 +1750,7 @@ function node_layout_context_info() {
  * layout whose system path is node/%. So we choose those layouts and set the
  * context from the tempstore node.
  */
-function node_layout_layouts_alter(&$layouts, $router_item) {
+function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
   $map = $router_item['map'];
   if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
     return;

@@ -341,7 +341,7 @@ function hook_layout_presave(Layout $layout) {
  * item.
  *
  * Modules can implement this hook to allow a given layout to be used for
- *  multiple or different paths than its defined path.
+ * multiple or different paths than its defined path.
  *
  * This hook is called on every page load; your implementation should quickly
  * and efficiently determine if it is applicable and return if not.
@@ -371,17 +371,18 @@ function hook_layout_presave(Layout $layout) {
  *   example, $router_item['original_map'] contains an exploded version of the
  *   normal path.
  *
- * @since 1.20.0 (?)
+ * @since 1.20.0
  *
  * @see layout_get_layout_by_path()
- * @see node_layout_layouts_alter()
+ * @see node_layout_load_by_router_item_alter()
  */
-function hook_layout_layouts_alter(&$layouts, $router_item) {
-  // Example taken from node_layout_layouts_alter(). For create node preview
-  // pages, the path will be of the form node/preview/<type>/<id>, where <type>
-  // is the node type and <id> is the tempstore ID of the node begin previewed.
-  // But we want to display it using a layout whose system path is node/%. So we
-  // choose those layouts and set the context from the tempstore node.
+function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  // Example taken from node_layout_load_by_router_item_alter(). For create node
+  // preview pages, the path will be of the form node/preview/<type>/<id>, where
+  // <type> is the node type and <id> is the tempstore ID of the node begin
+  // previewed. But we want to display it using a layout whose system path is
+  // node/%. So we choose those layouts and set the context from the tempstore
+  // node.
 
   // Check path structure before checking node type because
   // node_type_get_types() is expensive; don't call it if we don't need to.

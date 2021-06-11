@@ -997,7 +997,7 @@ function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NU
     return $layouts_by_item[$href];
   }
   $layouts = layout_load_multiple_by_path($router_item['path'], $skip_menu_items);
-  backdrop_alter('layout_layouts', $layouts, $router_item);
+  backdrop_alter('layout_load_by_router_item', $layouts, $router_item);
   $layouts_by_item[$href] = $layouts;
   return $layouts;
 }
@@ -1005,15 +1005,15 @@ function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NU
 /**
  * Load all layouts at a given path.
  *
- * This function does not invoke hook_layout_layouts_alter(). In general,
- * developers should use layout_load_multiple_by_router_item() rather than
- * layout_load_multiple_by_path() to allow client modules to alter the layouts
- * and only call this function in situations where client alteration is not
- * desired and/or the router item is not available. Examples where this might be
- * needed:
+ * This function does not invoke hook_layout_load_by_router_item_alter(). In
+ * general, developers should use layout_load_multiple_by_router_item() rather
+ * than layout_load_multiple_by_path() to allow client modules to alter the
+ * layouts and only call this function in situations where client alteration is
+ * not desired and/or the router item is not available. Examples where this
+ * might be needed:
  * - Inside of a hook_menu() implementation (see dashboard_menu()).
- * - Inside of a hook_layout_layouts_alter() implementation (see
- *   node_layout_layouts_alter()).
+ * - Inside of a hook_layout_load_by_router_item_alter() implementation (see
+ *   node_layout_load_by_router_item_alter()).
  *
  * @param string $path
  *   The menu routing path, with all placeholders represented by "%" symbols.
@@ -1024,7 +1024,7 @@ function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NU
  *   An array of load Layout object instances.
  *
  * @see dashboard_menu()
- * @see node_layout_layouts_alter()
+ * @see node_layout_load_by_router_item_alter()
  */
 function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
   if ($cache = cache('layout_path')->get($path)) {
@@ -1275,8 +1275,9 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
     $router_item = menu_get_item($path);
   }
 
-  // Use the static cache, but keyed on the normal path (not system path) since
-  // client modules might serve up different layouts for the same system path.
+  // Use the static cache, but keyed on the normal path (such as node/1), rather
+  // than the system path (such as node/%), since client modules might serve up
+  // different layouts for the same system path.
   $href = $router_item['href'];
   $layouts_by_path = &backdrop_static(__FUNCTION__, array());
   if (isset($layouts_by_path[$href])) {
@@ -1292,10 +1293,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
     foreach ($contexts as $context) {
       if (isset($context->position)) {
         // If the menu router set the data for a context object or a client did
-        // so via hook_layout_layouts_alter(), we don't need to do any setting
-        // here. But if $context->data is not an object, then it is either a raw
-        // string that must be converted to an object by a load callback or it
-        // is a string pass-through.
+        // so via hook_layout_load_by_router_item_alter(), we don't need to do
+        // any setting here. But if $context->data is not an object, then it is
+        // either a raw string that must be converted to an object by a load
+        // callback or it is a string pass-through.
         if (!is_object($context->data)) {
           // If clients replaced any layout with one whose placeholders are in a
           // new position, they need to have altered $context->position so that
