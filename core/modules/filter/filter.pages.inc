@@ -209,7 +209,16 @@ function _filter_image_library_ajax() {
  * Menu delivery callback to print the image library page without any wrappers.
  */
 function _filter_image_library_ajax_deliver($page_callback_result) {
-  print backdrop_render_page($page_callback_result);
+  //dpm($page_callback_result);
+  $library_page = array(
+    '#markup' => $page_callback_result,
+    '#attached' => array(
+      'library' => array(
+        array('system', 'backdrop.dialog'),
+      ),
+    ),
+  );
+  print backdrop_render_page($library_page);
 }
 
 /**

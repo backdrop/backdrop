@@ -144,7 +144,6 @@ Backdrop.behaviors.editorImageDialog = {
     // Initialize styles of Dialog.
     if ($newToggles.length) {
       // Hide the library image browser on load.
-      $(".editor-image-library").css({ "display": "none" });
       $(".editor-dialog").removeClass("editor-dialog-with-library");
       // Set the class for the left-hand part.
       $(".editor-image-fields").addClass("editor-image-fields-full");
@@ -209,8 +208,9 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
-          $('.editor-image-library').css({ 'display': 'block' });
-          $('.form-item-image-directory').css({ 'display': 'block' });
+          //$('.form-item-image-directory').css({ 'display': 'block' });
+          //$('.editor-image-library').load(Backdrop.settings.basePath + '?q=filter_image_library_ajax');
+          $('form.filter-format-editor-image-form').after('<div class="editor-image-library"></div>');
           $('.editor-image-library').load(Backdrop.settings.basePath + '?q=filter_image_library_ajax');
 
           // Now add click event to images
@@ -220,7 +220,7 @@ Backdrop.behaviors.editorImageDialog = {
               var absoluteImgSrc = $selectedImg.data('file-url');
               var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
 
-              var $form = $(this).closest('form');
+              var $form = $('.filter-format-editor-image-form');
               $form.find('[name="attributes[src]"]').val(relativeImgSrc);
               $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
@@ -242,9 +242,9 @@ Backdrop.behaviors.editorImageDialog = {
         }
       }
       else {
-        // Hide the library part of the dialog form.
-        $('.editor-image-library').css({ 'display': 'none' });
-        $('.form-item-image-directory').css({ 'display': 'none' });
+        // Remove the library part of the dialog form.
+        $('.editor-image-library').remove();
+        //$('.form-item-image-directory').css({ 'display': 'none' });
         // Restore the previous dialog position.
         if (DialogLeftPosition) {
           $(".editor-dialog").css('left', DialogLeftPosition + 'px');
