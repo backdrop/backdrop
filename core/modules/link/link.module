@@ -165,7 +165,7 @@ function link_field_instance_settings_form($field, $instance) {
   $form['advanced']['attributes']['rel'] = array(
     '#type' => 'textfield',
     '#title' => t('Rel Attribute'),
-    '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
+    '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow" target="blank">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
     '#default_value' => $instance['settings']['attributes']['rel'],
     '#field_prefix' => 'rel = "',
     '#field_suffix' => '"',
@@ -207,7 +207,7 @@ function link_field_instance_settings_form($field, $instance) {
         ':input[name="instance[settings][attributes][configurable_title]"]' => array('checked' => TRUE),
       ),
     ),
-    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
+    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links" target="blank">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
     '#default_value' => $instance['settings']['attributes']['title'],
     '#field_prefix' => 'title = "',
     '#field_suffix' => '"',
