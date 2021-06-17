@@ -1279,5 +1279,30 @@ function user_update_1020() {
 }
 
 /**
+ * Ensure role-related config files use role names instead of RIDs in their
+ * filename.
+ */
+function user_update_1021() {
+  include_once backdrop_get_path('module', 'system') . '/system.admin.inc';
+
+  $names = config_get_names_with_prefix('user.role.');
+
+  foreach ($names as $config_name) {
+    $config = config($config_name);
+    $role_name = $config->get('name');
+    $role_label = $config->get('label');
+    if (is_numeric($role_name) && $role_label != NULL) {
+      $role_name = system_transliterate_machine_name(backdrop_strtolower($role_label), array('maxlength' => 64));
+      $role_data = $config->get();
+      $new_config = config('user.role.' . $role_name);
+      $new_config->setData($role_data);
+      $new_config->save();
+      // Delete the old config file with the RID in its filename.
+      $config->delete();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
