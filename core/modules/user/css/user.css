@@ -14,6 +14,7 @@
 #permissions tr.even .form-item {
   white-space: normal;
 }
+
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
   padding-bottom: .5em;
@@ -23,6 +24,19 @@
 }
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
+}
+
+#user-roles .required-role,
+#user-roles span.description {
+  color: #666;
+}
+/**
+ * Ensure that the role description is vertically aligned with the role name
+ * when toggling between row weights and drag handles.
+ */
+#user-roles span.description {
+  display: block;
+  position: relative;
 }
 
 /**

@@ -496,6 +496,16 @@ function user_admin_permissions_submit($form, &$form_state) {
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
+  $form['roles_help_before'] = array(
+    '#type' => 'help',
+    '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of individually to each user account).', array('@permissions' => url('admin/config/people/permissions'))),
+  );
+  $form['roles_help_after'] = array(
+    '#type' => 'help',
+    '#markup' => t('To make the permissions page easier to navigate, we recommended ordering roles from the least permissive (Anonymous) to the most permissive (usually Administrator).'),
+    '#weight' => -30,
+  );
+
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
@@ -572,8 +582,10 @@ function user_admin_roles($form, $form_state) {
           'name' => 'user.role.' . $role_name,
         ),
       );
+      $order++;
     }
-    if ($role_name !== BACKDROP_ANONYMOUS_ROLE && $role_name !== BACKDROP_AUTHENTICATED_ROLE) {
+    // System-provided roles cannot be deleted.
+    if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
       $links['delete'] = array(
         'title' => t('Delete role'),
         'href' => 'admin/config/people/roles/delete/' . $role_name,
@@ -584,7 +596,6 @@ function user_admin_roles($form, $form_state) {
       '#type' => 'operations',
       '#links' => $links,
     );
-    $order++;
   }
 
   $form['actions'] = array('#type' => 'actions');
@@ -602,7 +613,7 @@ function user_admin_roles($form, $form_state) {
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
-  // Save admin role and anon name.
+  // Save the administrator role and the anonymous name.
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
