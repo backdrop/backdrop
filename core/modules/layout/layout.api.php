@@ -377,12 +377,12 @@ function hook_layout_presave(Layout $layout) {
  * @see node_layout_load_by_router_item_alter()
  */
 function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
-  // Example taken from node_layout_load_by_router_item_alter(). For create node
-  // preview pages, the path will be of the form node/preview/<type>/<id>, where
-  // <type> is the node type and <id> is the tempstore ID of the node begin
-  // previewed. But we want to display it using a layout whose system path is
-  // node/%. So we choose those layouts and set the context from the tempstore
-  // node.
+  // Example taken from node_layout_load_by_router_item_alter(). When creating
+  // node preview pages, the path will be of the form node/preview/<type>/<id>,
+  // where <type> is the node type and <id> is the tempstore ID of the node
+  // begin previewed. But we want to display it using a layout whose system path
+  // is node/%. So we choose those layouts and set the context from the
+  // tempstore node.
 
   // Check path structure before checking node type because
   // node_type_get_types() is expensive; don't call it if we don't need to.
