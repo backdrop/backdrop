@@ -276,7 +276,7 @@ class LinkUITest extends LinkBaseTestClass {
     $this->assertFalse($instance['required'], 'Make sure field is not required.');
     $this->assertEqual($instance['settings']['title'], 'optional', 'Title should be optional by default.');
     $this->assertTrue($instance['settings']['validate_url'], 'Make sure validation is on.');
-    //$this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
+    // $this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
     $this->assertEqual($instance['settings']['display']['url_cutoff'], 80, 'Url cutoff should be at 80 characters.');
     $this->assertEqual($instance['settings']['attributes']['target'], 'default', 'Target should be "default"');
     $this->assertFalse($instance['settings']['attributes']['rel'], 'Rel should be blank by default.');
@@ -334,7 +334,7 @@ class LinkUITest extends LinkBaseTestClass {
     $this->assertFalse($instance['required'], 'Make sure field is not required.');
     $this->assertEqual($instance['settings']['title'], 'optional', 'Title should be optional by default.');
     $this->assertTrue($instance['settings']['validate_url'], 'Make sure validation is on.');
-    //$this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
+    // $this->assertTrue($instance['settings']['enable_tokens'], 'Enable Tokens should be on by default.');
     $this->assertEqual($instance['settings']['display']['url_cutoff'], 80, 'Url cutoff should be at 80 characters.');
     $this->assertEqual($instance['settings']['attributes']['target'], 'default', 'Target should be "default"');
     $this->assertFalse($instance['settings']['attributes']['rel'], 'Rel should be blank by default.');
