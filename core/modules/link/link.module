@@ -563,7 +563,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
     $title = filter_xss($title, array('b', 'br', 'code', 'em', 'i', 'img', 'span', 'strong', 'sub', 'sup', 'tt', 'u'));
     $item['html'] = TRUE;
   }
-  $item['title'] = empty($title) ? $item['display_url'] : $title;
+  $item['title'] = empty($title) && $title !== '0' ? $item['display_url'] : $title;
 
   if (!isset($item['attributes'])) {
     $item['attributes'] = array();
