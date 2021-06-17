@@ -234,12 +234,13 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
   function testInvalidExternalLinks() {
     $links = array(
       'http://www.ex ample.com/',
+      'http://.www.example.com/', // Bad TLD.
       'http://@www.example.com/',
       'http://username:@www.example.com/',
-      'http://25.0.0/', // Bad ip!
+      'http://25.0.0/', // Bad ip.
       'http://4827.0.0.2/',
       '//www.example.com/',
-      'http://www.-fudge.com/', // Domains can't have sections starting with a dash.
+      'http://www.-example.com/', // Domains can't have sections starting with a dash.
     );
     foreach ($links as $link) {
       $valid = link_validate_url($link);
