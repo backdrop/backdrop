@@ -483,7 +483,7 @@ abstract class DatabaseConnection {
    * Provides a pass-through to the PDO prepare method.
    *
    * In adding support for PHP 8, the Backdrop DatabaseConnection no longer
-   * directly extends the PHP PDO object directly. A side-effect is that calls
+   * directly extends the PHP PDO object. A side-effect is that calls
    * directly to the PDO object no longer worked. This provides a pass-through
    * to this method specifically for compatibility with previous versions of
    * Backdrop. See https://github.com/backdrop/backdrop-issues/issues/5094.
