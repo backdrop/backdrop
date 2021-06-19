@@ -13,7 +13,7 @@ Requirements
   strongly recommend that you use a
   [supported version of PHP](https://secure.php.net/supported-versions.php).
 - MySQL 5.0.15 or higher with PDO enabled
-- Apache (recommended) or Nginx web server
+- Apache (recommended) or Nginx webserver
 - 50 MB of disk space (recommended), 15 MB (minimum)
 
 Installation
@@ -55,7 +55,7 @@ join Backdrop's developer community by
 
 When submitting a pull request, please make sure there is an open issue in the
 [issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
-reference it in the description on the pull request.
+reference it in the description of the pull request.
 
 Thanks to the following companies for providing sponsorship through services and
 products which may be used by Backdrop contributors to build and improve the
@@ -72,11 +72,11 @@ project:
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+Please see the [Backdrop Handbook](https://backdropcms.org/handbook).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
+Please see the [Backdrop API Documentation](https://api.backdropcms.org).
 
 Code of Conduct
 ---------------
