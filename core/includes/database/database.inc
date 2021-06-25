@@ -2927,10 +2927,10 @@ function db_drop_table($table) {
  *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
  *   Optional. An array containing the specification for keys and indexes to be 
- *   created on the table along with the field. The format is the same as a schema 
- *   definition, but without the 'columns' element. If you are adding a 'serial' 
- *   type field, you MUST specify at least one key or index in this array. See
- *   db_change_field() for more explanation why.
+ *   created on the table along with the field. The format is the same as a
+ *   schema definition, but without the 'columns' element. If you are adding a
+ *   'serial' type field, you MUST specify at least one key or index in this
+ *   array. See db_change_field() for more explanation why.
  *
  * @see db_change_field()
  */
