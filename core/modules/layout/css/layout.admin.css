@@ -5,6 +5,13 @@
 .layout-list .layout-group td:first-child {
   font-weight: bold;
 }
+.layout-list .layout-group td.missing-path,
+.layout-list .layout-group td.missing-path a {
+  color: red;
+}
+.layout-list .layout-group td .path-parenthetical {
+  font-weight: normal;
+}
 .layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
