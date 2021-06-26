@@ -29,7 +29,7 @@ function layout_list_page() {
     $row = array();
     // Default layouts have a null path.
     if ($path === '') {
-      $row[] = array('data' => t('Default layouts') . ' ' . '<span class="path-parenthetical">' . t('(used on all paths without a specific layout)') . '</span>');
+      $row[] = array('data' => t('Default layouts') . ' <span class="path-parenthetical">(' . t('used on all paths without a specific layout') . ')</span>');
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';
@@ -46,14 +46,14 @@ function layout_list_page() {
         ->fetchField();
       if (!$page_callback) {
         $cell['class'] = 'missing-path';
-        $path_link .= ' ' . '<span class="path-parenthetical">' .t('(no callback)'). '</span>';
+        $path_link .= ' <span class="path-parenthetical">(' .t('no callback'). ')</span>';
       }
       elseif ($page_callback == 'layout_page_callback') {
         $cell['class'] = 'layout-page';
       }
       else {
         $cell['class'] = 'module-page';
-        $path_link .= ' ' . '<span class="path-parenthetical">' .t('(module-provided)'). '</span>';
+        $path_link .= ' <span class="path-parenthetical">(' .t('module-provided'). ')</span>';
       }
       $cell['data'] = $path_link;
       $row[] = $cell;
