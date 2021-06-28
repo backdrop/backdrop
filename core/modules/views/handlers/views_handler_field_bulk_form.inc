@@ -84,7 +84,7 @@ class views_handler_field_bulk_form extends views_handler_field {
   }
 
   /**
-   * Form constructor for the bulk form.
+   * Form constructor for the bulk operations form.
    *
    * @param array $form
    *   An associative array containing the structure of the form.
@@ -94,6 +94,7 @@ class views_handler_field_bulk_form extends views_handler_field {
   function views_form(&$form, &$form_state) {
     // Add the tableselect javascript.
     $form['#attached']['js'][] = 'core/misc/tableselect.js';
+    $form['#attached']['js'][] = backdrop_get_path('module', 'views') . '/js/views_bulk_actions.js';
 
     // Render checkboxes for all rows.
     $form[$this->options['id']]['#tree'] = TRUE;
@@ -122,24 +123,25 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#attributes' => array('class' => array('views-bulk-form')),
     );
     $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Action'),
-      '#title_display' => 'none',
       '#type' => 'select',
+      '#title' => t('Action'),
+      '#title_display' => 'invisible',
       '#options' => $this->get_bulk_options(),
       '#empty_option' => '- ' . t('Choose an action') . ' -',
       '#required' => TRUE,
     );
 
-    // Set the form actions container in the header.
     $actions['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Execute'),
+      '#value' => t('Apply to selected items'),
+      '#id' => 'views-bulk-form-apply',
     );
+    // Set the form actions container in the header.
     $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
   /**
-   * Submit handler for the bulk form.
+   * Submit handler for the bulk operations form.
    *
    * @param array $form
    *   An associative array containing the structure of the form.

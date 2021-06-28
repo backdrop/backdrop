@@ -296,7 +296,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $edit = array();
     $edit['operation'] = $operation;
     $edit['comments[' . $comment->id . ']'] = TRUE;
-    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Execute'));
+    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Apply to selected items'));
 
     if ($operation == 'delete') {
       $this->backdropPost(NULL, array(), t('Delete comments'));
@@ -1649,7 +1649,7 @@ class CommentApprovalTest extends CommentHelperCase {
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Execute'));
+    $this->backdropPost(NULL, $edit, t('Apply to selected items'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
     // Delete multiple comments in one operation.
@@ -1659,7 +1659,7 @@ class CommentApprovalTest extends CommentHelperCase {
       "comments[{$comments[1]->id}]" => 1,
       "comments[{$anonymous_comment4->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Execute'));
+    $this->backdropPost(NULL, $edit, t('Apply to selected items'));
     $this->assertText(t('Are you sure you want to delete these comments and all their children?'), 'Confirmation required.');
     $this->backdropPost(NULL, $edit, t('Delete comments'));
     $this->assertText(t('No comments available.'), 'All comments were deleted.');
