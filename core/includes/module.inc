@@ -321,6 +321,10 @@ function module_load_install($module) {
  *
  * @return
  *   The name of the included file, if successful; FALSE otherwise.
+ *
+ * @deprecated since 1.19.0
+ *
+ * @see backdrop_load_file()
  */
 function module_load_include($type, $module, $name = NULL) {
   static $files = array();
