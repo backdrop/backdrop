@@ -105,6 +105,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
         '#columns' => array_keys($field['columns']),
         '#title' => check_plain($instance['label']),
         '#description' => field_filter_xss(token_replace($instance['description'])),
+        '#description_before' => $instance['description_before'],
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
@@ -195,6 +196,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
 
   $title = check_plain($instance['label']);
   $description = field_filter_xss($instance['description']);
+  $description_before = $instance['description_before'];
 
   $id_prefix = implode('-', array_merge($parents, array($field_name)));
   $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');
@@ -216,6 +218,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         // For multiple fields, title and description are handled by the wrapping table.
         '#title' => $multiple ? '' : $title,
         '#description' => $multiple ? '' : $description,
+        '#description_before' => $multiple ? 0 : $description_before,
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
@@ -260,6 +263,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#title' => $title,
         '#required' => $instance['required'],
         '#description' => $description,
+        '#description_before' => $description_before,
         '#max_delta' => $max,
       );
       if ($field['cardinality'] != 1) {

@@ -18,6 +18,7 @@ function theme_text_format_wrapper($variables) {
   $output = '<div class="text-format-wrapper">';
   $output .= $element['#children'];
   if (!empty($element['#description'])) {
+    // This displays description immediately after text area.
     $output .= '<div class="description">' . $element['#description'] . '</div>';
   }
   $output .= "</div>\n";

@@ -392,6 +392,14 @@ function image_field_widget_settings_form($field, $instance) {
   // Use the file widget settings form.
   $form = file_field_widget_settings_form($field, $instance);
 
+  $form['description_before'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Place help text immediately after the field label and before the field'),
+    '#default_value' => !empty($settings['description_before']) ? $settings['description_before'] : 0,
+    '#description' => t('By default, help text is rendered after the input field. Use this option to move it between the field label and the input field.'),
+    '#weight' => -6,
+  );
+
   $form['browser_view'] = array(
     '#title' => t('Enable image browser'),
     '#type' => 'checkbox',
@@ -445,6 +453,11 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     // Set any view used as a browser.
     if (!empty($instance['widget']['settings']['browser_view'])) {
       $elements[$delta]['#browser_view'] = $instance['widget']['settings']['browser_view'];
+    }
+
+    // Set position of help text.
+    if (isset($instance['widget']['settings']['description_before'])) {
+      $elements[$delta]['#description_before'] = $instance['widget']['settings']['description_before'];
     }
 
     // Add all extra functionality provided by the image widget.
