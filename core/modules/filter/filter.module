@@ -50,6 +50,7 @@ function filter_element_info() {
   $type['text_format'] = array(
     // The text format selected by default for this element.
     '#format' => NULL,
+    '#allowed_formats' => array(),
     // Whether file uploads are permitted through the editor (if supported).
     // Disable by default, modules must specifically implement saving files as
     // permanent when they save their text data. See filter_entity_insert().
@@ -1281,8 +1282,13 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of formats to which the current user has access.
+  // Get a list of allowed formats to which the current user has access.
   $formats = filter_formats($user);
+  foreach ($formats as $format) {
+    if (!in_array($format->format, array_filter($element['#allowed_formats']))) {
+      unset($formats[$format->format]);
+    }
+  }
 
   // Turn original element into a text format wrapper.
   if (isset($element['#attached'])) {
@@ -1301,7 +1307,7 @@ function filter_process_format($element) {
   }
 
   // Remove the Plain text format if not set and other options are available.
-  $fallback_format = config_get('system.core', 'filter_fallback_format');
+  $fallback_format = filter_fallback_format();
   if (($element['#format'] != $fallback_format) && (count($formats) > 1) && array_key_exists($fallback_format, $formats)) {
     unset($formats[$fallback_format]);
   }
@@ -1321,6 +1327,7 @@ function filter_process_format($element) {
     '#attributes' => array('class' => array('filter-guidelines')),
     '#weight' => 20,
   );
+  $options = array();
   foreach ($formats as $format) {
     $options[$format->format] = $format->name;
     $element['format']['guidelines'][$format->format] = array(
@@ -1367,30 +1374,33 @@ function filter_process_format($element) {
     $element['format']['format']['#access'] = TRUE;
   }
   // Disable this widget, if the user is not allowed to use the stored format,
-  // or if the stored format does not exist. The 'administer filters' permission
-  // only grants access to the filter administration, not to all formats.
+  // or if the stored format does not exist, and only if the field is not empty.
+  // The 'administer filters' permission only grants access to the filter
+  // administration, not to all formats.
   elseif (!$user_has_access || !$format_exists) {
-    // Overload default values into #value to make them unalterable.
-    $element['value']['#value'] = $element['value']['#default_value'];
-    $element['format']['format']['#value'] = $element['format']['format']['#default_value'];
+    if (!empty($element['#default_value'])) {
+      // Overload default values into #value to make them unalterable.
+      $element['value']['#value'] = $element['value']['#default_value'];
+      $element['format']['format']['#value'] = $element['format']['format']['#default_value'];
 
-    // Prepend #pre_render callback to replace field value with user notice
-    // prior to rendering.
-    $element['value'] += array('#pre_render' => array());
-    array_unshift($element['value']['#pre_render'], 'filter_form_access_denied');
+      // Prepend #pre_render callback to replace field value with user notice
+      // prior to rendering.
+      $element['value'] += array('#pre_render' => array());
+      array_unshift($element['value']['#pre_render'], 'filter_form_access_denied');
 
-    // Cosmetic adjustments.
-    if (isset($element['value']['#rows'])) {
-      $element['value']['#rows'] = 3;
-    }
-    $element['value']['#disabled'] = TRUE;
-    $element['value']['#resizable'] = FALSE;
+      // Cosmetic adjustments.
+      if (isset($element['value']['#rows'])) {
+        $element['value']['#rows'] = 3;
+      }
+      $element['value']['#disabled'] = TRUE;
+      $element['value']['#resizable'] = FALSE;
 
-    // Hide the text format selector and any other child element (such as text
-    // field's summary).
-    foreach (element_children($element) as $key) {
-      if ($key != 'value') {
-        $element[$key]['#access'] = FALSE;
+      // Hide the text format selector and any other child element (such as text
+      // field's summary).
+      foreach (element_children($element) as $key) {
+        if ($key != 'value') {
+          $element[$key]['#access'] = FALSE;
+        }
       }
     }
   }
