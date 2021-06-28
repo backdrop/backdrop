@@ -188,6 +188,7 @@ function image_theme() {
         'title' => NULL,
         'uri' => NULL,
         'attributes' => array(),
+        'timestamp' => NULL,
       ),
     ) + $base,
     'image_style_list' => array(
