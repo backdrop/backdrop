@@ -98,7 +98,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
-      '#default_value' => TRUE,
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.page'),
       '#id' => 'edit-page-create',
     );
 
@@ -249,6 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.block'),
       '#id' => 'edit-block-create',
     );
 

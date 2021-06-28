@@ -1,5 +1,9 @@
 {
     "_config_name": "views_ui.settings",
+    "wizard_default_display": {
+        "page": "page",
+        "block": 0
+    },
     "show_master_display": false,
     "show_sql_query": false,
     "show_preview_information": false,
