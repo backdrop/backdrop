@@ -666,6 +666,9 @@ fieldset {
   border: 2px solid #eaeaea;
   min-width: 0;
 }
+fieldset.legend-invisible {
+  padding-top: 0;
+}
 fieldset .fieldset-legend {
   position: relative;
   left: 0; /* LTR */
