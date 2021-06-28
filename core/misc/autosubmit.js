@@ -36,19 +36,31 @@
  */
 Backdrop.behaviors.autosubmit = {
   attach: function(context) {
-    // 'this' references the form element
+    // 'this' references the form element.
     function triggerSubmit (e) {
       var $this = $(this);
+      // Save the field's ID, to refer to it later. Get the current cursor
+      // position.
+      var searchFieldID = '#' + $this.find('.autosubmit-processed').attr('id');
+      var searchFieldCursor = $(searchFieldID)[0].selectionStart;
+      
       $this.find('.autosubmit-click').click();
+
+      // Wait some time for the view to refresh; then find the new field by
+      // its id, and place the cursor back where it was.
+      setTimeout(function() {
+        $(searchFieldID).focus();
+        $(searchFieldID)[0].setSelectionRange(searchFieldCursor,searchFieldCursor);
+      }, 100);
     }
 
-    // the change event bubbles so we only need to bind it to the outer form
+    // The change event bubbles, so we only need to bind it to the outer form.
     $('form.autosubmit-full-form', context)
       .add('.autosubmit', context)
       .filter('form, select, input:not(:text, :submit)')
       .once('autosubmit')
       .change(function (e) {
-        // don't trigger on text change for full-form
+        // Don't trigger on text change for full-form.
         if ($(e.target).is(':not(:text, :submit, .autosubmit-exclude)')) {
           triggerSubmit.call(e.target.form);
         }
@@ -72,11 +84,11 @@ Backdrop.behaviors.autosubmit = {
       13, // enter
       27  // esc
     ];
-    // Don't wait for change event on textfields
+    // Don't wait for change event on textfields.
     $('.autosubmit-full-form input:text, input:text.autosubmit', context)
       .filter(':not(.autosubmit-exclude)')
       .once('autosubmit', function () {
-        // each textinput element has his own timeout
+        // Each textinput element has its own timeout.
         var timeoutID = 0;
         $(this)
           .bind('keydown keyup', function (e) {
