@@ -11,6 +11,17 @@
  */
 
 /**
+ * Implements hook_permission().
+ */
+function dblog_permission() {
+  return array(
+    'clear log messages' => array(
+      'title' => t('Clear log messages'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function dblog_menu() {
