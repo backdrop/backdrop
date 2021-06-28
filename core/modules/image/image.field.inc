@@ -45,13 +45,25 @@ function image_field_settings_form($field, $instance) {
   foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $stream_wrapper) {
     $scheme_options[$scheme] = $stream_wrapper['name'];
   }
-  $form['uri_scheme'] = array(
-    '#type' => 'radios',
-    '#title' => t('Upload destination'),
-    '#options' => $scheme_options,
-    '#default_value' => $settings['uri_scheme'],
-    '#description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
-  );
+  // Render the "Upload destination" section as a set of radio buttons only if
+  // there are more than one options.
+  if (count($scheme_options) !== 1) {
+    $form['uri_scheme'] = array(
+      '#type' => 'radios',
+      '#title' => t('Upload destination'),
+      '#options' => $scheme_options,
+      '#default_value' => $settings['uri_scheme'],
+      '#description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
+    );
+  }
+  else {
+    $form['uri_scheme'] = array(
+      '#type' => 'item',
+      '#title' => t('Upload destination'),
+      '#markup' =>  '<p>' . t('%stream_wrapper is the only upload destination currently available.', array('%stream_wrapper' => $stream_wrapper['name'])) . '</p>',
+      '#description' => t('You can set up any additional file system paths in the <a href="!file_system_admim_path">File system</a> settings and these will then be made available here to be used as upload destinations.', array('!file_system_admim_path' => url('admin/config/media/file-system'))),
+    );
+  }
 
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
