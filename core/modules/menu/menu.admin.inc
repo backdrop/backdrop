@@ -419,11 +419,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#suffix' => '</div>',
   );
   $form['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#delta' => 50,
-    '#default_value' => $item['weight'],
-    '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
+    '#type' => 'hidden',
+    '#value' => $item['weight'],
   );
 
   return $form;
