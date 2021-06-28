@@ -7,7 +7,7 @@
  * result to post the response back to Zen.ci.
  *
  * This script is called by the gitlc.yml file on backdropcms.org:
- * https://github.com/backdrop-ops/backdropcms.org/tree/master/www/modules/custom/borg_qa
+ * https://github.com/backdrop-ops/backdropcms.org/tree/main/www/modules/custom/borg_qa
  */
 
 $home = getenv('HOME');
@@ -38,7 +38,7 @@ $content = file_get_contents('/tmp/summary');
 
 if ($status) {
   $content = explode("\n", $content);
-  
+
   $message = $content[0];
   unset($content[0]);
   $summary = implode("\n", $content);
@@ -73,9 +73,9 @@ else {
 function zenci_put_request($data) {
   $token = getenv('GITLC_API_TOKEN');
   $status_url = getenv('GITLC_STATUS_URL');
-  
+
   $data = json_encode($data);
-  
+
   $ch = curl_init();
 
   curl_setopt($ch, CURLOPT_URL, $status_url);
@@ -85,12 +85,12 @@ function zenci_put_request($data) {
 
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
   curl_setopt($ch, CURLOPT_HEADER, true);
-  
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       'Content-Type: application/json',
-      'Token: ' . $token,                                                                                
-      'Content-Length: ' . strlen($data)                                                                       
-  )); 
+      'Token: ' . $token,
+      'Content-Length: ' . strlen($data)
+  ));
   curl_exec($ch);
   curl_close($ch);
 }

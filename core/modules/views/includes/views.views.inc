@@ -138,7 +138,7 @@ function views_views_plugins() {
     'display' => array(
       // Default settings for all display plugins.
       'default' => array(
-        'title' => t('Master'),
+        'title' => t('Default'),
         'help' => t('Default settings for this view.'),
         'handler' => 'views_plugin_display_default',
         'theme' => 'views_view',

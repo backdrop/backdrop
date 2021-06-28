@@ -4,7 +4,7 @@
 # Prepare an environment on a Zen.ci test server in preparation to run tests.
 #
 # This script is called by the gitlc.yml file on backdropcms.org:
-# https://github.com/backdrop-ops/backdropcms.org/tree/master/www/modules/custom/borg_qa
+# https://github.com/backdrop-ops/backdropcms.org/tree/main/www/modules/custom/borg_qa
 ##
 
 #set site path

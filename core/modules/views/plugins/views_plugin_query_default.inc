@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -220,7 +219,7 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
-    $options['slave'] = array(
+    $options['replica'] = array(
       'default' => FALSE,
       'bool' => TRUE,
     );
@@ -264,11 +263,11 @@ class views_plugin_query_default extends views_plugin_query {
         ),
       ),
     );
-    $form['slave'] = array(
+    $form['replica'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use Slave Server'),
-      '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
-      '#default_value' => !empty($this->options['slave']),
+      '#title' => t('Use Replica Server'),
+      '#description' => t('This will make the query attempt to connect to a replica server if available.  If no replica server is defined or available, it will fall back to the default server.'),
+      '#default_value' => !empty($this->options['replica']),
     );
     $form['query_comment'] = array(
       '#type' => 'textfield',
@@ -1283,9 +1282,9 @@ class views_plugin_query_default extends views_plugin_query {
       $key = $this->view->base_database;
     }
 
-    // Set the slave target if the slave option is set
-    if (!empty($this->options['slave'])) {
-      $target = 'slave';
+    // Set the replica target if the replica option is set
+    if (!empty($this->options['replica'])) {
+      $target = 'replica';
     }
 
     // Go ahead and build the query.
