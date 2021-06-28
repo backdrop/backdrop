@@ -403,9 +403,9 @@
   left: auto !important;
   top: 100%;
 }
-#admin-bar .admin-bar-search-results,
-#admin-bar .admin-bar-search-results li {
-  width: 186px;
+#admin-bar .admin-bar-search-results .dropdown,
+#admin-bar .admin-bar-search-results .dropdown li {
+  width: 250px;
 }
 
 #admin-bar li.active-search-item > a,
