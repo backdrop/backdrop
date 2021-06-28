@@ -38,6 +38,9 @@ function book_permission() {
     'administer book outlines' => array(
       'title' => t('Administer book outlines'),
     ),
+    'bypass content types for books' => array(
+      'title' => t('Bypass content type restrictions for book outlines'),
+    ),
     'create new books' => array(
       'title' => t('Create new books'),
     ),

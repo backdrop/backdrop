@@ -113,6 +113,21 @@ function book_update_1000() {
 }
 
 /**
+ * Grant the newly-introduced 'Bypass content type restrictions for book
+ * outlines' permission to all roles that already have the 'Administer book
+ * outlines' (to retain current functionality).
+ */
+function book_update_1001() {
+  foreach (user_roles() as $rid => $role) {
+    $role = array($role => $rid);
+    $role_permissions = user_role_permissions($role);
+    if (in_array('administer book outlines', $role_permissions)) {
+      user_role_grant_permissions($rid, array('bypass content types for books'));
+    }
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
