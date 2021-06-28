@@ -505,19 +505,10 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     '#collapsible' => TRUE,
   );
 
-  $options = array(
-    'div' => 'DIV',
-    'nav' => 'NAV',
-    'aside' => 'ASIDE',
-    'section' => 'SECTION',
-    'header' => 'HEADER',
-    'footer' => 'FOOTER',
-    'main' => 'MAIN',
-  );
   $form['region_styles']['element'] = array(
     '#title' => t('Row wrapper tag'),
     '#type' => 'select',
-    '#options' => $options,
+    '#options' => backdrop_html_elements(array('layout')),
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
 
