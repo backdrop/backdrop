@@ -1,4 +1,11 @@
+/**
+ * @file
+ * Styles for administration pages.
+ */
 
+/**
+ * Menu manage links form.
+ */
 .menu-operations {
   width: 100px;
 }
@@ -9,4 +16,15 @@
 
 .menu-enabled input {
   margin-left:25px;
+}
+
+/**
+ * Menu listing page.
+ */
+.menu-name .menu-label {
+  font-weight: bold;
+}
+
+.menu-name .menu-machine-name {
+  font-size: smaller;
 }
