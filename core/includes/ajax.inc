@@ -294,6 +294,7 @@ function ajax_render($commands = array()) {
   $scripts = backdrop_add_js();
   backdrop_alter('js', $scripts);
   if (!empty($scripts['settings'])) {
+    backdrop_alter('js', $scripts);
     $settings = $scripts['settings'];
     array_unshift($commands, ajax_command_settings(backdrop_array_merge_deep_array($settings['data']), TRUE));
   }
