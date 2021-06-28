@@ -43,9 +43,17 @@ function system_menu_block_defaults($menu_name) {
  *   The form array. This is a form fragment and not in full Form API format.
  */
 function system_menu_block_form($config) {
+  $menus = menu_load_all();
+  backdrop_sort($menus, array('title' => SORT_STRING));
+  foreach($menus as $menu => $menu_name) {
+    $options[$menu] = $menu_name['title'];
+  }
+
   $form['menu_name'] = array(
-    '#type' => 'value',
-    '#value' => $config['menu_name'],
+    '#type' => 'select',
+    '#title' => t('Menu'),
+    '#options' => $options,
+    '#default_value' => $config['menu_name'],
   );
 
   $form['style'] = array(
