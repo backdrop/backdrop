@@ -3175,6 +3175,26 @@ function system_update_1074() {
 }
 
 /**
+ * Re-arrange flexible layout configuration so we can save region classes.
+ */
+function system_update_1079() {
+  $flexible_layouts = config_get_names_with_prefix('layout.flexible.');
+  foreach ($flexible_layouts as $layout_name) {
+    $config = config($layout_name);
+    $rows = $config->get('rows');
+    foreach ($rows as $row_key => $row) {
+      foreach ($row['region_names'] as $region_key => $region_name) {
+        $number = str_replace('region_name_', '', $region_key);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.region_name', $region_name);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.class_name', backdrop_html_class($region_name));
+        $config->clear('rows.' . $row_key . '.region_names.' . $region_key);
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
