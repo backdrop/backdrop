@@ -12,6 +12,8 @@ function user_path_info() {
     'entity type' => 'user',
     'label' => t('User account'),
     'pattern description' => t('URL alias pattern for user account URLs'),
+    'alias bulk actions description' => t('All <em>user account</em> URL aliases'),
+    'pattern default' => 'users/[user:name]',
     'pattern default' => 'users/[user:name]',
     'batch update callback' => 'user_path_bulk_update_batch_process',
     'batch file' => 'user.path.inc',

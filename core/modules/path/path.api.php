@@ -116,7 +116,14 @@ function hook_path_delete($path) {
  *   - label: Translated label for the settings group.
  *   - pattern description: The translated label for the default URL alias
  *       pattern (e.g. t('Default path pattern (applies to all content types
- *       with blank patterns)')
+ *       with blank patterns)').
+ *   - alias bulk actions description: The translated label for the checkboxes
+ *       of the various entity categories in the "URL aliases bulk actions"
+ *       page (/admin/config/urls/path/bulk-update). For example:
+ *       t('All <em>taxonomy term</em> URL aliases')
+ *   - alias bulk actions items: The translated label for the checkboxes of the
+ *       various bundles in the "URL aliases bulk actions" page
+ *       (/admin/config/urls/path/bulk-update).
  *   - pattern default: Default URL alias pattern (e.g. 'content/[node:title]')
  *   - type delete callback: The name of the function that should be run for
  *       bulk deletion of entity bundle types.
