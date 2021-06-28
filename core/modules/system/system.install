@@ -100,6 +100,18 @@ function system_requirements($phase) {
     $requirements['php_register_globals']['value'] = $t('Disabled');
   }
 
+  // Test PHP max_input_vars setting.
+  $max_input_vars = ini_get('max_input_vars');
+  $requirements['php_max_input_vars'] = array(
+    'title' => $t('PHP form value limit'),
+    'value' => $t('PHP limits the number of values in a single form to @value items.', array('@value' => number_format($max_input_vars, 0, '.', ','))),
+  );
+  // 1000 is the default value and indicates potential issues.
+  if ($max_input_vars <= 1000) {
+    $requirements['php_max_input_vars']['description'] = $t('When set too low, the <code>max_input_vars</code> PHP setting can cause silent failures on forms with a large number of input fields, such as the permissions page. <a href="@documentation" target="_blank">Read more about increasing the <code>max_input_vars setting</code></a>.', array('@documentation' => url('https://api.backdropcms.org/max-input-vars')));
+    $requirements['php_max_input_vars']['severity'] = REQUIREMENT_WARNING;
+  }
+
   // Test for PHP extensions.
   $requirements['php_extensions'] = array(
     'title' => $t('PHP extensions'),
