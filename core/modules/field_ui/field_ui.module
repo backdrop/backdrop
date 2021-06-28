@@ -149,6 +149,9 @@ function field_ui_menu() {
           // Display modes, and use an access callback to determine which ones
           // are actually visible for a given bundle.
           $items["$path/display/%"] = array(
+            'title' => 'Manage display mode',
+            'title callback' => 'field_ui_manage_display_link_title',
+            'title arguments' => array($entity_type, $bundle_arg, $view_mode_position),
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
             // The access callback needs to check both the current 'custom
@@ -168,27 +171,31 @@ function field_ui_menu() {
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
             'type' => MENU_LOCAL_ACTION,
+            'weight' => 10,
           );
           $items["$path/display/%/configure"] = array(
-            'title' => 'Configure Display mode',
+            'title' => 'Configure display mode',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_view_mode_form', $entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
+            'type' => MENU_VISIBLE_IN_BREADCRUMB,
           );
           $items["$path/display/%/delete"] = array(
-            'title' => 'Delete Display mode',
+            'title' => 'Delete display mode',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_view_mode_delete_form', $entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
+            'type' => MENU_VISIBLE_IN_BREADCRUMB,
           );
           $items["$path/display/%/enable"] = array(
-            'title' => 'Enable Display mode',
+            'title' => 'Enable display mode',
             'page callback' => 'field_ui_view_mode_enable',
             'page arguments' => array($entity_type, $bundle_arg, $view_mode_position),
             'access callback' => 'field_ui_view_mode_enable_access',
             'file' => 'field_ui.admin.inc',
+            'type' => MENU_VISIBLE_IN_BREADCRUMB,
           );
           $items["$path/display/%/reset"] = array(
             'title' => 'Reset to default',
@@ -196,12 +203,42 @@ function field_ui_menu() {
             'page arguments' => array('field_ui_view_mode_reset_form', $entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
+            'type' => MENU_VISIBLE_IN_BREADCRUMB,
           );
         }
       }
     }
   }
   return $items;
+}
+
+/**
+ * Title callback. Generates the menu link for each view mode.
+ *
+ * @param object $bundle
+ *   The loaded bundle object.
+ * @param string $view_mode
+ *   The machine name of the view mode.
+ *
+ * @return string
+ *   The menu link title (for use in Admin bar).
+ */
+function field_ui_manage_display_link_title($entity_type, $bundle, $view_mode) {
+  if (is_object($bundle)) {
+    $type = $bundle->name;
+
+    $view_mode_label = $view_mode;
+    $view_mode_info = entity_view_mode_load($entity_type, $view_mode);
+    if ($view_mode_info && isset($view_mode_info['label'])) {
+      $view_mode_label = $view_mode_info['label'];
+    }
+  }
+  // Account for the user case where there is no loaded bundle.
+  elseif ($bundle == 'user') {
+    $type = 'User account';
+  }
+
+  return t('@type: @mode display', array('@type' => $type, '@mode' => $view_mode_label));
 }
 
 /**

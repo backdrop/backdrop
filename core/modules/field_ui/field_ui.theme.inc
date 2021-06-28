@@ -110,40 +110,31 @@ function theme_field_ui_view_modes($variables) {
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
-  $label = t('Default');
-  $label_desc = t('Used for all display modes which are not customized');
-
-  // Add the row for the default display mode.
-  $row = array();
-  $row['label'] = $label . '<div class="description">' . $label_desc . '</div>';
-  $row['machine'] = t('default');
-  $row['operations'] = array(
-    'data' => array(
-      '#type' => 'dropbutton',
-      '#links' => array(
-        'manage' => array(
-          'title' => t('Manage display'),
-          'href' => "$path/default",
-        ),
-      ),
-    ),
-  );
-  $rows[] = array(
-    'data' => $row,
-    'class' => array('default-view-mode'),
-  );
-
   $customized_count = 0;
   $default_count = 0;
   foreach ($view_modes as $view_mode_name => $view_mode_info) {
     $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
-    $row = array();
 
     $row['label'] = check_plain(t($view_mode_info['label']));
     $row['machine'] = $view_mode_name;
 
     $operations = array();
-    if ($view_modes[$view_mode_name]['custom settings']) {
+    if ($view_mode_name == 'default') {
+      // Add the special row class.
+      $row_classes[] = 'default-view-mode';
+      // Add the special label handling.
+      $description = t('Used for all display modes which are not customized');
+      $row['label'] .= '<div class="description">' . $description . '</div>';
+      // Add the operations for the default display mode.
+      $operations = array(
+        'manage' => array(
+          'title' => t('Manage display'),
+          'href' => "$path/default",
+        ),
+      );
+
+    }
+    else if ($view_modes[$view_mode_name]['custom settings']) {
       $customized_count++;
       $operations['manage'] = array(
         'title' => t('Manage display'),
