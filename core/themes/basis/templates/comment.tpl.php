@@ -53,7 +53,7 @@
  * @see theme_comment()
  */
 ?>
-<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">
+<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
   <header class="comment-header">
     <div class="attribution">
       <?php print $user_picture; ?>
