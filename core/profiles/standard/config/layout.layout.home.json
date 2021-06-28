@@ -6,7 +6,7 @@
     "description": null,
     "module": "standard",
     "weight": 0,
-    "storage": 4,
+    "storage": 2,
     "layout_template": "boxton",
     "disabled": false,
     "settings": {
@@ -23,7 +23,7 @@
             "094cbc03-d088-4b3c-8361-977733540ae8"
         ],
         "content": [
-            "578243cf-a4c8-46ad-9504-04aaf4ec9ccc"
+            "209098f9-8e8f-4be6-8000-0033df223bdd"
         ],
         "bottom": [],
         "footer": [
@@ -31,6 +31,7 @@
         ],
         "title": []
     },
+    "contexts": [],
     "content": {
         "9bd5a524-3670-4922-8b12-18b00a2858b9": {
             "plugin": "system:header",
@@ -114,19 +115,27 @@
                 }
             }
         },
-        "578243cf-a4c8-46ad-9504-04aaf4ec9ccc": {
-            "plugin": "views:promoted-block",
+        "209098f9-8e8f-4be6-8000-0033df223bdd": {
+            "plugin": "node:content",
             "data": {
-                "module": "views",
-                "delta": "promoted-block",
+                "module": "node",
+                "delta": "content",
                 "settings": {
-                    "title_display": "default",
+                    "title_display": "none",
                     "title": "",
                     "style": "default",
                     "block_settings": [],
-                    "contexts": []
+                    "contexts": [],
+                    "admin_label": "Home Page Content",
+                    "admin_description": "A node with content for the home page.",
+                    "nid": 1,
+                    "links": false,
+                    "leave_node_title": false,
+                    "link_node_title": false,
+                    "display_submitted": false,
+                    "view_mode": "full"
                 },
-                "uuid": "578243cf-a4c8-46ad-9504-04aaf4ec9ccc",
+                "uuid": "209098f9-8e8f-4be6-8000-0033df223bdd",
                 "style": {
                     "plugin": "default",
                     "data": {
