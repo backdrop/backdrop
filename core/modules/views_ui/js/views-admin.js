@@ -148,7 +148,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     else {
       var transliterated = this.getTransliterated();
       var self = this;
-      transliterated.done(function(machine) {
+      transliterated.done(function (machine) {
         // Replace the machine name placeholder with the specific one for this
         // field. e.g. A hyphen instead of an underscore for the path.
         machine = machine.replace(new RegExp(self.transliterationOptions.replace,  'g'), self.replace);
@@ -179,7 +179,7 @@ Backdrop.behaviors.addItemForm = {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
-    $form.once('views-ui-add-item-form', function() {
+    $form.once('views-ui-add-item-form').each(function () {
       new Backdrop.viewsUi.AddItemForm($form);
     });
   }
@@ -292,7 +292,7 @@ Backdrop.behaviors.viewsUiSearchOptions = {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
-    $form.once('views-ui-filter-options', function() {
+    $form.once('views-ui-filter-options').each(function () {
       new Backdrop.viewsUi.OptionsSearch($form);
     });
   }
@@ -401,7 +401,7 @@ $.extend(Backdrop.viewsUi.OptionsSearch.prototype, {
   /**
    * Filter down the list of all options based on group.
    */
-  filterGroup: function() {
+  filterGroup: function () {
     var groupName = this.$filterGroup.val();
     if (groupName === 'all') {
       this.$form.find('.views-filterable-group').show();
@@ -444,7 +444,7 @@ Backdrop.behaviors.viewsUiPreview = {
  */
 Backdrop.behaviors.viewsUiRemoveLink = {
   attach: function (context) {
-    $('a.views-remove-link').once('views-processed').click(function(event) {
+    $('a.views-remove-link').once('views-processed').click(function (event) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
@@ -506,7 +506,7 @@ Backdrop.viewsUi.RearrangeFilterHandler = function ($table, $operator) {
   // next to the filters in each group, and bind a handler so that they change
   // based on the values of the operator dropdown within that group.
   var self = this;
-  window.setTimeout(function() {
+  window.setTimeout(function () {
     self.redrawOperatorLabels();
   }, 100);
 
@@ -819,8 +819,8 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
  */
 Backdrop.behaviors.viewsImplicitFormSubmission = {
   attach: function (context, settings) {
-    $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
-      $(this).keypress(function(event) {
+    $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission').each(function () {
+      $(this).keypress(function (event) {
         if (event.which == 13) {
           var formId = this.form.id;
           if (formId && settings.viewsImplicitFormSubmission && settings.viewsImplicitFormSubmission[formId] && settings.viewsImplicitFormSubmission[formId].defaultButton) {
@@ -847,7 +847,7 @@ Backdrop.behaviors.viewsImplicitFormSubmission = {
  */
 Backdrop.behaviors.viewsRemoveIconClass = {
   attach: function (context) {
-    $(context).find('.dropbutton').once('dropbutton-icon', function () {
+    $(context).find('.dropbutton').once('dropbutton-icon').each(function () {
       $(this).find('.icon').removeClass('icon');
     });
   }
@@ -923,7 +923,7 @@ Backdrop.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
  */
 Backdrop.behaviors.viewsUiOverrideSelect = {
   attach: function (context) {
-    $(context).find('#edit-override-dropdown').once('views-ui-override-button-text', function () {
+    $(context).find('#edit-override-dropdown').once('views-ui-override-button-text').each(function () {
       var $select = $(this);
       var $submit = $select.closest('form').find('.form-submit[value="' + Backdrop.t('Apply') + '"]');
       var old_value = $submit.val();

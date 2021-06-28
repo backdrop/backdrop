@@ -13,7 +13,7 @@
  */
 Backdrop.behaviors.verticalTabs = {
   attach: function (context) {
-    $('.vertical-tabs-panes', context).once('vertical-tabs', function () {
+    $('.vertical-tabs-panes', context).once('vertical-tabs').each(function () {
       var focusID = $(':hidden.vertical-tabs-active-tab', this).val();
       var tab_focus;
 
@@ -87,7 +87,7 @@ Backdrop.verticalTab = function (settings) {
 
   // Keyboard events added:
   // Pressing the Enter key will open the tab pane.
-  this.link.keydown(function(event) {
+  this.link.keydown(function (event) {
     if (event.keyCode == 13) {
       self.focus();
       // Set focus on the first input field of the visible fieldset/tab pane.

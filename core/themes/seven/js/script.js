@@ -7,7 +7,7 @@
 "use strict";
 
 Backdrop.behaviors.responsivePrimaryTabs = {
-  attach: function(context, settings) {
+  attach: function (context, settings) {
     var $primaryTabs = $(context).find('ul.tabs.primary').once('responsive-tabs');
     if ($primaryTabs.length === 0) {
       return;
@@ -39,13 +39,13 @@ Backdrop.behaviors.responsivePrimaryTabs = {
 
     function initResponsivePrimaryTabs() {
       tabHeight = $('li:first-child', $primaryTabs).outerHeight();
-      $tabsWrapper.once('responsive-tabs', function(){
+      $tabsWrapper.once('responsive-tabs').each(function () {
         $primaryTabs.after(
           '<div class="expand-dropdown-tabs-control" aria-hidden="true" style="height: ' + tabHeight + 'px">' +
             '<span class="expand-dropdown-tabs-label"></span>' +
           '</div>'
         );
-        $('.expand-dropdown-tabs-control', $tabsWrapper).click(function(){
+        $('.expand-dropdown-tabs-control', $tabsWrapper).click(function (){
           $tabsWrapper.toggleClass('expand-dropdown-tabs');
           $(this).toggleClass('js-active');
           // If there's not enough room for mobile tabs.
@@ -84,7 +84,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
       activeTabAndBeforeWidth = expandControlWidth;
       activeTabAndAfterWidth = expandControlWidth;
       // Add each tab width.
-      $tabs.each(function(i) {
+      $tabs.each(function (i) {
         // Tab width is text width + 20px padding on both sides + 2px border-right
         var currentTabWidth = $('.responsive-tabs-link-text-wrapper', this).outerWidth() + 42;
         tabWidths.push(currentTabWidth);
@@ -167,7 +167,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
 
             var $lastVisibleTab = null;
             // Manage classes on tabs.
-            $tabs.each(function(i) {
+            $tabs.each(function (i) {
               accumulatedTabWidth += tabWidths[i];
               if (responsiveTabsType === 'andBefore') {
                 if (i <= activeTabNth || accumulatedTabWidth <= tabArea) {
@@ -205,7 +205,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             // In order to get this dropdown to lay out correctly
             // making new element that comes after the shown tabs.
             // Iterate through tabs in reverse and give appropriate classes.
-            $($tabs.get().reverse()).each(function(reverseI) {
+            $($tabs.get().reverse()).each(function (reverseI) {
               var i = $tabs.length - 1 - reverseI;
               accumulatedTabWidth += tabWidths[i];
               if (i >= activeTabNth || accumulatedTabWidth <= tabArea) {
@@ -273,14 +273,14 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     }
 
     // If they click outside of the responsive tabs, shut them
-    $('html').click(function(e){
+    $('html').click(function (e){
       var $target = $(e.target);
       if (responsiveTabs && !$target.is('.responsive-tabs-processed') && $target.parents('.responsive-tabs-processed').length < 1) {
         closeTabsDropdown();
       }
     });
 
-    Backdrop.isFontLoaded('Open Sans', function() {
+    Backdrop.isFontLoaded('Open Sans', function () {
       adjustTabsDisplay();
       calculateTabWidths();
     });
@@ -292,13 +292,13 @@ Backdrop.behaviors.responsivePrimaryTabs = {
 };
 
 Backdrop.behaviors.sevenDropButtonWidths = {
-  attach: function(context, settings) {
+  attach: function (context, settings) {
     function adjustDropButtonWidths() {
       var $dropbutton = $(this);
 
       // Get widest item width.
       var widestItem = 0, $item;
-      $dropbutton.find('li:hidden').each(function() {
+      $dropbutton.find('li:hidden').each(function () {
         // Use a clone element to avoid altering element CSS properties.
         $item = $(this).clone().insertAfter($(this)).show().css('visibility','hidden');
         widestItem = Math.max($item.outerWidth(), widestItem);
@@ -314,7 +314,7 @@ Backdrop.behaviors.sevenDropButtonWidths = {
     }
 
     // Calculate dropbutton elements width once the font is loaded.
-    Backdrop.isFontLoaded('Open Sans', function() {
+    Backdrop.isFontLoaded('Open Sans', function () {
       $(context).find('.dropbutton-wrapper').once('dropbutton-width', adjustDropButtonWidths);
     });
 

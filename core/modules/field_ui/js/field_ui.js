@@ -3,11 +3,11 @@
  * Attaches the behaviors for the Field UI module.
  */
 
-(function($) {
+(function ($) {
 
 Backdrop.behaviors.fieldUIFieldOverview = {
   attach: function (context, settings) {
-    $('table#field-overview', context).once('field-overview', function () {
+    $('table#field-overview', context).once('field-overview').each(function () {
       Backdrop.fieldUIFieldOverview.attachUpdateSelects(this, settings);
     });
   }
@@ -17,7 +17,7 @@ Backdrop.fieldUIFieldOverview = {
   /**
    * Implements dependent select dropdowns on the 'Manage fields' screen.
    */
-  attachUpdateSelects: function(table, settings) {
+  attachUpdateSelects: function (table, settings) {
     var widgetTypes = settings.fieldWidgetTypes;
     var fields = settings.fields;
     var fieldInfo = settings.fieldInfo;
@@ -115,7 +115,7 @@ jQuery.fn.fieldUIPopulateOptions = function (options, selected, widgetDefault) {
 
 Backdrop.behaviors.fieldUIDisplayOverview = {
   attach: function (context, settings) {
-    $('table#field-display-overview', context).once('field-display-overview', function() {
+    $('table#field-display-overview', context).once('field-display-overview').each(function () {
       Backdrop.fieldUIOverview.attach(this, settings.fieldUIRowsData, Backdrop.fieldUIDisplayOverview);
     });
   }

@@ -5,7 +5,7 @@
  */
 Backdrop.behaviors.passwordStrength = {
   attach: function (context, settings) {
-    $('input[data-password-strength]', context).once('password-strength', function () {
+    $('input[data-password-strength]', context).once('password-strength').each(function () {
       var $passwordInput = $(this);
       var passwordStrengthSettings = $passwordInput.data('passwordStrength');
       var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.labels.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
@@ -42,7 +42,7 @@ Backdrop.behaviors.passwordStrength = {
  */
 Backdrop.behaviors.passwordToggle = {
   attach: function (context, settings) {
-    $('input[data-password-toggle]', context).once('password-toggle', function () {
+    $('input[data-password-toggle]', context).once('password-toggle').each(function () {
       var $passwordInput = $(this);
       var passwordToggleSettings = $passwordInput.data('passwordToggle');
       var $passwordToggle = $('<a href="#" class="password-toggle" />').text(passwordToggleSettings.toggleShowTitle);
@@ -83,7 +83,7 @@ Backdrop.behaviors.passwordToggle = {
 
       // When submitting the form, convert back to a password field for the
       // sake of password managers.
-      $($passwordInput[0].form).submit(function() {
+      $($passwordInput[0].form).submit(function () {
         if ($passwordWrapper.is('.password-shown')) {
           $passwordToggle.triggerHandler('click');
         }
@@ -98,7 +98,7 @@ Backdrop.behaviors.passwordToggle = {
  */
 Backdrop.behaviors.passwordConfirm = {
   attach: function (context, settings) {
-    $('input[data-password-confirm]', context).once('password-confirm', function () {
+    $('input[data-password-confirm]', context).once('password-confirm').each(function () {
       var $confirmInput = $(this);
       var $innerWrapper = $confirmInput.parent();
       var $outerWrapper = $innerWrapper.parent();
@@ -238,7 +238,7 @@ Backdrop.behaviors.fieldUserRegistration = {
     var $checkbox = $('form#field-ui-field-edit-form input#edit-instance-settings-user-register-form');
 
     if ($checkbox.length) {
-      $('input#edit-instance-required', context).once('user-register-form-checkbox', function () {
+      $('input#edit-instance-required', context).once('user-register-form-checkbox').each(function () {
         $(this).bind('change', function (e) {
           if ($(this).prop('checked')) {
             $checkbox.prop('checked', true);

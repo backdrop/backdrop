@@ -5,7 +5,7 @@
  */
 Backdrop.behaviors.simpleTestGroupCollapse = {
   attach: function (context, settings) {
-      $(context).find('.simpletest-group').once('simpletest-group-collapse', function () {
+      $(context).find('.simpletest-group').once('simpletest-group-collapse').each(function () {
         var $group = $(this);
         var $image = $group.find('.simpletest-image');
         $image
@@ -26,7 +26,7 @@ Backdrop.behaviors.simpleTestGroupCollapse = {
  */
 Backdrop.behaviors.simpleTestSelectAll = {
   attach: function (context, settings) {
-    $(context).find('.simpletest-group').once('simpletest-group-select-all', function () {
+    $(context).find('.simpletest-group').once('simpletest-group-select-all').each(function () {
       var $group = $(this);
       var $cell = $group.find('.simpletest-group-select-all');
       var $groupCheckbox = $('<input data-tableselect-id="'+ $cell.attr('id') + '" type="checkbox" id="' + $cell.attr('id') + '-group-select-all" class="form-checkbox" />');

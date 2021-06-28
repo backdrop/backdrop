@@ -38,7 +38,7 @@ Backdrop.behaviors.filterEditors = {
     }
 
     var $context = $(context);
-    $context.find('.filter-list:input').once('filterEditors', function () {
+    $context.find('.filter-list:input').once('filterEditors').each(function () {
       var $this = $(this);
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
@@ -58,7 +58,7 @@ Backdrop.behaviors.filterEditors = {
       }
       // Attach onChange handlers to input format selector elements.
       if ($this.is('select')) {
-        $this.change(function() {
+        $this.change(function () {
           // Detach the current editor (if any) and attach a new editor.
           if (Backdrop.settings.filter.formats[activeEditor]) {
             Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
@@ -92,13 +92,13 @@ Backdrop.behaviors.filterEditors = {
   }
 };
 
-Backdrop.filterEditorAttach = function(field, format) {
+Backdrop.filterEditorAttach = function (field, format) {
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].attach(field, format);
   }
 };
 
-Backdrop.filterEditorDetach = function(field, format, trigger) {
+Backdrop.filterEditorDetach = function (field, format, trigger) {
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].detach(field, format, trigger);
   }
@@ -111,7 +111,7 @@ Backdrop.behaviors.editorImageDialog = {
 
   attach: function (context, settings) {
     var $newToggles = $('[data-editor-image-toggle]', context).once('editor-image-toggle');
-    $newToggles.each(function() {
+    $newToggles.each(function () {
       var $toggleItems = $('[data-editor-image-toggle]');
 
       // Remove any previous toggles next to all labels.
@@ -119,9 +119,9 @@ Backdrop.behaviors.editorImageDialog = {
 
       // Add toggles next to all labels.
       var $toggleLink, toggleLabel;
-      $toggleItems.each(function(n) {
+      $toggleItems.each(function (n) {
         $toggleItems.eq(n).find('label:first').addClass('editor-image-toggle');
-        $toggleItems.each(function(m) {
+        $toggleItems.each(function (m) {
           toggleLabel = $toggleItems.eq(m).attr('data-editor-image-toggle');
           $toggleLink = $('<a class="editor-image-toggle" href="#"></a>').text(toggleLabel);
           if (n > m) {
@@ -151,7 +151,7 @@ Backdrop.behaviors.editorImageDialog = {
     }
 
     var DialogLeftPosition;
-    $newToggles.on('click', function(e) {
+    $newToggles.on('click', function (e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
@@ -171,18 +171,18 @@ Backdrop.behaviors.editorImageDialog = {
       return false;
     });
 
-    $newToggles.on('editor-image-hide', function() {
+    $newToggles.on('editor-image-hide', function () {
       var $input;
-      $(this).find('input[type="url"], input[type="text"], textarea').each(function() {
+      $(this).find('input[type="url"], input[type="text"], textarea').each(function () {
         $input = $(this);
         $input.data('editor-previous-value', $input.val());
         $input.val('');
       });
     });
 
-    $newToggles.on('editor-image-show', function() {
+    $newToggles.on('editor-image-show', function () {
       var $input, previousValue;
-      $(this).find('input[type="url"], input[type="text"], textarea').each(function() {
+      $(this).find('input[type="url"], input[type="text"], textarea').each(function () {
         $input = $(this);
         previousValue = $input.data('editor-previous-value');
         if (previousValue && previousValue.length) {
@@ -201,7 +201,7 @@ Backdrop.behaviors.editorImageDialog = {
           DialogLeftPosition = $('.editor-dialog').position().left;
           $('.editor-dialog').css('left', '');
           // Re-center the dialog by triggering a window resize.
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             Backdrop.optimizedResize.trigger();
           }, 500);
           // Increase width of dialog form.
@@ -214,7 +214,7 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library')
-            .on('click', '.image-library-choose-file', function() {
+            .on('click', '.image-library-choose-file', function () {
               var $selectedImg = $(this).find('img');
               var absoluteImgSrc = $selectedImg.data('file-url');
               var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
@@ -232,7 +232,7 @@ Backdrop.behaviors.editorImageDialog = {
               // Add style to this selection.
               $(this).addClass('image-library-image-selected');
             })
-            .on('dblclick', '.image-library-choose-file', function() {
+            .on('dblclick', '.image-library-choose-file', function () {
               $(this).trigger('click');
               var $form = $(this).closest('form');
               var $submit = $form.find('.form-actions input[type=submit]:first');
@@ -248,7 +248,7 @@ Backdrop.behaviors.editorImageDialog = {
         if (DialogLeftPosition) {
           $(".editor-dialog").css('left', DialogLeftPosition + 'px');
           // Re-center the dialog by triggering a window resize.
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             Backdrop.optimizedResize.trigger();
           }, 500);
         }

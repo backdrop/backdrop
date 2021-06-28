@@ -6,7 +6,7 @@
 Backdrop.behaviors.autocomplete = {
   attach: function (context, settings) {
     var acdb = [];
-    $('input.autocomplete', context).once('autocomplete', function () {
+    $('input.autocomplete', context).once('autocomplete').each(function () {
       var uri = this.value;
       if (!acdb[uri]) {
         acdb[uri] = new Backdrop.ACDB(uri);

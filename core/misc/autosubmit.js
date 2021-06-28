@@ -1,4 +1,4 @@
-(function($){
+(function ($) {
 /**
  * To make a form auto submit, all you have to do is 3 things:
  *
@@ -35,7 +35,7 @@
  * supported.
  */
 Backdrop.behaviors.autosubmit = {
-  attach: function(context) {
+  attach: function (context) {
     // 'this' references the form element
     function triggerSubmit (e) {
       var $this = $(this);
@@ -75,7 +75,7 @@ Backdrop.behaviors.autosubmit = {
     // Don't wait for change event on textfields
     $('.autosubmit-full-form input:text, input:text.autosubmit', context)
       .filter(':not(.autosubmit-exclude)')
-      .once('autosubmit', function () {
+      .once('autosubmit').each(function () {
         // each textinput element has his own timeout
         var timeoutID = 0;
         $(this)
@@ -84,7 +84,7 @@ Backdrop.behaviors.autosubmit = {
               timeoutID && clearTimeout(timeoutID);
             }
           })
-          .keyup(function(e) {
+          .keyup(function (e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
               timeoutID = setTimeout($.proxy(triggerSubmit, this.form), 500);
             }

@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
 
 /**
  * Automatically enables required permissions on demand.
@@ -10,7 +10,7 @@
  */
 Backdrop.behaviors.adminBarPermissionsSetupHelp = {
   attach: function (context, settings) {
-    $('#permissions', context).once('admin-bar-permissions-setup', function () {
+    $('#permissions', context).once('admin-bar-permissions-setup').each(function () {
       // Retrieve matrix/mapping - these need to use the same indexes for the
       // same permissions and roles.
       var $roles = $(this).find('th:not(:first)');

@@ -2,7 +2,7 @@
 
 Backdrop.behaviors.textarea = {
   attach: function (context, settings) {
-    $('.form-textarea-wrapper.resizable', context).once('textarea', function () {
+    $('.form-textarea-wrapper.resizable', context).once('textarea').each(function () {
       var staticOffset = null;
       var textarea = $(this).addClass('resizable-textarea').find('textarea');
       var grippie = $('<div class="grippie"></div>').mousedown(startDrag);

@@ -126,7 +126,7 @@ Backdrop.behaviors.formSingleSubmit = {
  */
 Backdrop.behaviors.fillUserInfoFromCookie = {
   attach: function (context, settings) {
-    $('form.user-info-from-cookie').once('user-info-from-cookie', function () {
+    $('form.user-info-from-cookie').once('user-info-from-cookie').each(function () {
       var formContext = this;
       $.each(['name', 'mail', 'homepage'], function () {
         var $element = $('[name=' + this + ']', formContext);
