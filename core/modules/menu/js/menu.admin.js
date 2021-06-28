@@ -8,7 +8,7 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
       if ($enabledMenus.length) {
         var vals = [];
         $enabledMenus.each(function(n, checkbox) {
-          vals.push($(checkbox).siblings('label').text());
+          vals.push($(checkbox).siblings('label').text().trim());
         });
         return vals.join(', ');
       }

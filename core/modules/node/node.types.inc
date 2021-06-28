@@ -179,6 +179,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#group' => 'additional_settings',
     '#weight' => -10,
   );
+  $form['workflow']['scheduling_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show option for scheduling'),
+    '#default_value' => $type->settings['scheduling_enabled'],
+  );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
     '#title' => t('Default status'),
@@ -188,7 +193,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
       NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => $type->settings['status_default'],
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
     '#required' => TRUE,
   );
   $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
@@ -196,11 +200,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
       'input[name="scheduling_enabled"]' => array('checked' => TRUE),
     ),
   );
-  $form['workflow']['scheduling_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show option for scheduling'),
-    '#default_value' => $type->settings['scheduling_enabled'],
-  );
+  $form['workflow']['status_default'][NODE_PUBLISHED]['#description'] = t('Content becomes immediately available to user roles with the <a>View published content</a> permission.');
+  $form['workflow']['status_default'][NODE_NOT_PUBLISHED]['#description'] = t('Content is accessible only to user roles with the <a>View any unpublished content</a> permission. Content creators may still be able to view their <em>own</em> unpublished content, if they have the <a>View own unpublished content</a> permission.');
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#description'] = t('Content will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
