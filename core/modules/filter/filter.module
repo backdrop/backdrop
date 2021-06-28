@@ -1329,8 +1329,8 @@ function filter_process_format($element) {
     );
   }
 
-  // If there are multiple options OR if the current text format is no
-  // longer available to the current user, then show as a select.
+  // If there are multiple options OR if the current text format is no longer
+  // available to the current user, then show as a select.
   if (count($options) > 1 || !array_key_exists($element['#format'], $options)) {
     $element['format']['format'] = array(
       '#type' => 'select',
@@ -1342,12 +1342,19 @@ function filter_process_format($element) {
       '#parents' => array_merge($element['#parents'], array('format')),
     );
   }
+  // If there's only a single text format available to the current user, then
+  // render it as a hidden form element.
   else {
     $element['format']['format'] = array(
       '#type' => 'hidden',
       '#value' => $element['#format'],
       '#default_value' => $element['#format'],
-      '#attributes' => array('class' => array('filter-list')),
+      '#attributes' => array(
+        'class' => array('filter-list'),
+        // Add the human-readable name of the text format, so it can be used as
+        // the fieldset summary.
+        'data-text-format-name' => check_plain($options[$element['#format']]),
+      ),
       '#parents' => array_merge($element['#parents'], array('format')),
     );
   }
@@ -1362,8 +1369,8 @@ function filter_process_format($element) {
   if (!$format_exists && $user_is_admin) {
     $element['format']['format']['#required'] = TRUE;
     $element['format']['format']['#default_value'] = NULL;
-    // Force access to the format selector (it may have been denied above if
-    // the user only has access to a single format).
+    // Force access to the format selector (it may have been denied above if the
+    // user only has access to a single format).
     $element['format']['format']['#access'] = TRUE;
   }
   // Disable this widget, if the user is not allowed to use the stored format,
@@ -2653,5 +2660,4 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
-
 

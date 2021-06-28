@@ -6,7 +6,7 @@
 (function ($) {
 
 /**
- * Initialize an empty object where editors where place their attachment code.
+ * Initialize an empty object where editors can place their attachment code.
  */
 Backdrop.editors = {};
 
@@ -101,6 +101,32 @@ Backdrop.filterEditorAttach = function(field, format) {
 Backdrop.filterEditorDetach = function(field, format, trigger) {
   if (format.editor && Backdrop.editors[format.editor]) {
     Backdrop.editors[format.editor].detach(field, format, trigger);
+  }
+};
+
+/**
+ * Provides summary text for the "Formatting options" fieldset, under each
+ * textarea field with a text editor.
+ */
+Backdrop.behaviors.filterFieldsetSummaries = {
+  attach: function (context) {
+    $(context).find('fieldset.filter-wrapper').backdropSetSummary(function (element) {
+      var summary = '';
+      // Look for a select list of text formats.
+      var $select_list = $(element).find('select.filterEditors-processed :selected');
+      // Otherwise look for a hidden input element (when the current user has
+      // access to only a single text format).
+      var $input_element = $(element).find('input.filterEditors-processed');
+
+      if ($select_list.length) {
+        summary = $select_list.text();
+      }
+      else if ($input_element.length) {
+        summary = $input_element.attr('data-text-format-name');
+      }
+
+      return summary;
+    });
   }
 };
 
