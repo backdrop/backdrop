@@ -1056,6 +1056,17 @@ input.form-disabled:focus {
   box-shadow: none;
   transition-property: none;
 }
+/* Style the cancel action buttons to look like links. */
+input#edit-cancel,
+input#edit-actions-cancel {
+  color: #0074bd;
+  background: transparent;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  text-transform: none;
+  padding: 0;
+}
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
@@ -1891,4 +1902,87 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+
+/**
+ * Sticky submit buttons
+ */
+@media (min-height: 32em) {
+  form.sticky-enabled {
+    padding-bottom: 6em;
+  }
+  #views-preview-wrapper {
+    padding-bottom: 11em;
+  }
+
+  form.sticky-enabled > div > .form-actions,
+  form.sticky-enabled > div >  #layout-edit > .form-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    margin-bottom: 0;
+    padding: 1rem 2.1875rem;
+    background: #fff;
+    -webkit-box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+    -moz-box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+    box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+  }
+
+  form.sticky-enabled > div > .form-actions input.form-submit,
+  form.sticky-enabled > div >  #layout-edit > .form-actions input.form-submit {
+    margin-bottom: 0;
+  }
+
+  .view-changed.messages {
+    position: fixed;
+    bottom: 5em;
+    z-index: 99;
+    width: calc(100% - 4.375rem);
+    max-width: 72.25rem;
+    margin-right: 2.1875rem;
+    margin-bottom: 0;
+    -webkit-animation-name: slideInUp;
+    animation-name: slideInUp;
+    animation-duration: 1s;
+  }
+}
+
+/* This magic number on min-width is "content area max-width" + "container padding" */
+@media (min-width: 74.4375em) and (min-height: 32em) {
+  form.sticky-enabled > div > .form-actions,
+  form.sticky-enabled > div >  #layout-edit > .form-actions {
+    padding-right: calc(50vw - 578px);
+    padding-left: calc(50vw - 578px);
+  }
+}
+
+/**
+ * Slide In and Up Animation
+ * Originally from https://github.com/daneden/animate.css
+ */
+@-webkit-keyframes slideInUp {
+  from {
+    -webkit-transform: translate(0, 100%);
+    transform: translate(0, 100%);
+  }
+
+  to {
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    -webkit-transform: translate(0, 100%);
+    transform: translate(0, 100%);
+    visibility: visible;
+  }
+
+  to {
+    -webkit-transform: translate(0, 0);
+    transform: translate(0, 0);
+  }
 }

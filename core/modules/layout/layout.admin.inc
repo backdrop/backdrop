@@ -948,6 +948,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   // Although layout is already set in $form_state, we need this to make it
   // available to the theme layer.
   $form['#layout'] = $layout;
+  $form['#attributes']['class'][] = 'sticky-enabled';
 
   $form['#attached'] = array(
     'library' => array(

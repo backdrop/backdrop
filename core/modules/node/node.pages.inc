@@ -148,6 +148,7 @@ function node_form($form, &$form_state, Node $node) {
   // Override the default CSS class name, since the user-defined node type name
   // in 'TYPE-node-form' potentially clashes with third-party class names.
   $form['#attributes']['class'][0] = backdrop_html_class('node-' . $node->type . '-form');
+  $form['#attributes']['class'][1] = 'sticky-enabled';
 
   $form['help'] = array(
     '#type' => 'help',
