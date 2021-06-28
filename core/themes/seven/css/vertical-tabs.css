@@ -143,9 +143,6 @@
 }
 .vertical-tab-link:focus,
 .vertical-tab-link:active,
-.vertical-tab-link:hover,
-.vertical-tab-link:focus,
-.vertical-tab-link:active,
 .vertical-tab-link:hover {
   text-decoration: none;
   background: #d5d5d5;
