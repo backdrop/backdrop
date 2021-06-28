@@ -578,6 +578,27 @@ function layout_page_access() {
 }
 
 /**
+ * Suppress use of layout.
+ *
+ * This function should be called from within another module's hook_init
+ * callback, when an empty layout (content only) should be displayed. This is
+ * useful for modules that implement popup pages or other special pages, where
+ * the default layout would be distracting, or just wasted space.
+ *
+ * @param $suppress
+ *   If set to TRUE, and called before menu_execute_active_handler(), the layout
+ *   will default to menu_default_route_handler().
+ *   The suppression state is returned.
+ */
+function layout_suppress($suppress = NULL) {
+  static $suppression_state = FALSE;
+  if (isset($suppress)) {
+    $suppression_state = $suppress;
+  }
+  return $suppression_state;
+}
+
+/**
  * Route handler callback; Execute the current route item or wrap in a layout.
  *
  * @param $router_item
@@ -591,8 +612,9 @@ function layout_page_access() {
 function layout_route_handler($router_item) {
   // If a different delivery callback is specified, we're probably not returning
   // HTML and it definitely should not be wrapped in a layout. Call the default
-  // route handler and return its response directly.
-  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback') {
+  // route handler, and return its response directly. Do the same if requested
+  // by layout_suppress().
+  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback' || layout_suppress()) {
     return menu_default_route_handler($router_item);
   }
 
