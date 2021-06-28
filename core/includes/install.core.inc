@@ -165,6 +165,9 @@ function install_state_defaults() {
     'profile_info' => array(),
     // An array of available installation profiles.
     'profiles' => array(),
+    // An array of base profiles of the chosen installation profile (e.g.,
+    // chosen profile > base_profiles[0] > base_profiles[1] > etc.).
+    'base_profiles' => array(),
     // An array of server variables that will be substituted into the global
     // $_SERVER array via backdrop_override_server_variables(). Used by
     // non-interactive installations only.
@@ -592,19 +595,28 @@ function install_tasks($install_state) {
     ),
   );
 
-  // Now add any tasks defined by the installation profile.
+  // Now add any tasks defined by the installation profile(s).
+  $profiles = array();
+  if (!empty($install_state['base_profiles'])) {
+    $profiles = array_reverse(array_keys($install_state['base_profiles']));
+  }
   if (!empty($install_state['parameters']['profile'])) {
-    // Load the profile install file, because it is not always loaded when
-    // hook_install_tasks() is invoked (e.g. batch processing).
-    $profile_install_file = _install_find_profile_file($install_state['parameters']['profile'], 'install');
-    if ($profile_install_file) {
-      include_once $profile_install_file;
-    }
-    $function = $install_state['parameters']['profile'] . '_install_tasks';
-    if (function_exists($function)) {
-      $result = $function($install_state);
-      if (is_array($result)) {
-        $tasks += $result;
+    $profiles[] = $install_state['parameters']['profile'];
+  }
+  if ($profiles) {
+    foreach ($profiles as $profile) {
+      // Load the profile install file, because it is not always loaded when
+      // hook_install_tasks() is invoked (e.g. batch processing).
+      $profile_install_file = _install_find_profile_file($profile, 'install');
+      if ($profile_install_file) {
+        include_once $profile_install_file;
+      }
+      $function = $profile . '_install_tasks';
+      if (function_exists($function)) {
+        $result = $function($install_state);
+        if (is_array($result)) {
+          $tasks += $result;
+        }
       }
     }
   }
@@ -621,14 +633,16 @@ function install_tasks($install_state) {
     ),
   );
 
-  // Allow the installation profile to modify the full list of tasks.
-  if (!empty($install_state['parameters']['profile'])) {
-    $profile_file = _install_find_profile_file($install_state['parameters']['profile']);
-    if ($profile_file) {
-      include_once $profile_file;
-      $function = $install_state['parameters']['profile'] . '_install_tasks_alter';
-      if (function_exists($function)) {
-        $function($tasks, $install_state);
+  // Allow the installation profile(s) to modify the full list of tasks.
+  if (!empty($profiles)) {
+    foreach ($profiles as $profile) {
+      $profile_file = _install_find_profile_file($profile);
+      if ($profile_file) {
+        include_once $profile_file;
+        $function = $profile . '_install_tasks_alter';
+        if (function_exists($function)) {
+          $function($tasks, $install_state);
+        }
       }
     }
   }
@@ -831,9 +845,19 @@ function install_system_module(&$install_state) {
   // Save the list of other modules to install for the upcoming tasks.
   // state_set() can be used now that system.module is installed.
   $modules = $install_state['profile_info']['dependencies'];
+  if (!empty($install_state['base_profiles'])) {
+    foreach ($install_state['base_profiles'] as $base_profile) {
+      $modules = array_unique(array_merge($modules, $base_profile['dependencies']));
+    }
+  }
 
-  // The installation profile is also a module, which needs to be installed
+  // The installation profile(s) are also modules, which need to be installed
   // after all the dependencies have been installed.
+  if (!empty($install_state['base_profiles'])) {
+    foreach (array_reverse(array_keys($install_state['base_profiles'])) as $base_name) {
+      $modules[] = $base_name;
+    }
+  }
   $modules[] = $install_state['parameters']['profile'];
 
   state_set('install_profile_modules', array_diff($modules, array('system')));
@@ -1501,6 +1525,27 @@ function install_load_profile(&$install_state) {
   else {
     throw new Exception(st('Sorry, the profile you have chosen cannot be loaded.'));
   }
+
+  // Generate a list of base profile(s).
+  $info = $install_state['profile_info'];
+  while (isset($info['base profile'])) {
+    $base_name = $info['base profile'];
+    $info = install_profile_info($base_name, $install_state['parameters']['langcode']);
+    $install_state['base_profiles'][$base_name] = $info;
+  }
+
+  // Include any base profile(s).
+  if (!empty($install_state['base_profiles'])) {
+    foreach ($install_state['base_profiles'] as $base_name => $base_profile) {
+      $base_file = _install_find_profile_file($base_name);
+      if ($base_file) {
+        include_once $base_file;
+      }
+      else {
+        throw new Exception(st('Sorry, the base profile cannot be loaded.'));
+      }
+    }
+  }
 }
 
 /**
@@ -1531,10 +1576,15 @@ function install_profile_modules(&$install_state) {
   // the modules.
   $required = array();
   $non_required = array();
-  // Although the profile module is marked as required, it needs to go after
-  // every dependency, including non-required ones. So clear its required
-  // flag for now to allow it to install late.
+  // Although profile module(s) are marked as required, they need to go after
+  // every dependency, including non-required ones. So clear their required flag
+  // for now to allow them to install late.
   $files[$install_state['parameters']['profile']]->info['required'] = FALSE;
+  if (!empty($install_state['base_profiles'])) {
+    foreach ($install_state['base_profiles'] as $base_name => $base_profile) {
+      $files[$base_name]->info['required'] = FALSE;
+    }
+  }
   // Add modules that other modules depend on.
   foreach ($modules as $module) {
     if ($files[$module]->requires) {
