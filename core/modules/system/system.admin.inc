@@ -2792,10 +2792,20 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
  */
 function system_transliteration_file_query() {
   $operator = 'NOT REGEXP';
-  if (config_get('system.core', 'file_transliterate_lowercase')) {
-    $operator .= ' BINARY';
-  }
   $regex = '/[a-z0-9_.-]+$';
+
+  if (config_get('system.core', 'file_transliterate_lowercase')) {
+    // As of version 8.0.22 MySQL throws an error on binary comparison, but
+    // recent versions support setting a flag for case sensitive comparison in
+    // the regex.
+    $connection = Database::getConnection();
+    if ($connection->databaseType() == 'mysql' && version_compare($connection->version(), '8.0.22', '>=')) {
+      $regex = '/(?-i)[a-z0-9_.-]+$';
+    }
+    else {
+      $operator .= ' BINARY';
+    }
+  }
 
   return db_select('file_managed')
     ->fields('file_managed')
