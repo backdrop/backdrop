@@ -282,7 +282,7 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   foreach ($items as $item) {
     if (!in_array($item['fid'], $original_fids)) {
       if ($file = file_load($item['fid'])) {
-        file_usage_add($file, 'file', $entity_type, $id);
+        file_usage_add($file, 'file', $entity_type, $item['fid']);
       }
     }
   }
