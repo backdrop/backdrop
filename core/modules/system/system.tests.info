@@ -214,3 +214,9 @@ name = Menu Block tests
 description = Tests limiting menu block level and depth.
 group = System
 file = tests/system.test
+
+[FormRadiosTestCase]
+name = Form Radios tests
+description = Test for radios functionailty using the Form API.
+group = System
+file = tests/system.test

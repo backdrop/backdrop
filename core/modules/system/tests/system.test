@@ -2968,3 +2968,55 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     return $item;
   }
 }
+
+/**
+ * Test radio button Form API functionality.
+ */
+class FormRadiosTestCase extends BackdropWebTestCase {
+
+  public function setUp() {
+    parent::setUp(array('menu', 'system_forms_test'));
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test radios default values.
+   */
+  function testRadiosDefaultValue() {
+
+    $this->backdropGet('admin/tests/forms_test/radios');
+
+    // Only numeric keys starting at 0. #default_value is set to 0 and checked.
+    $this->assertFieldChecked('edit-numeric-default-zero-0');
+    $this->assertNoFieldChecked('edit-numeric-default-zero-1');
+
+    // Only numeric keys, starting at 0.
+    // #default_value to FALSE and not checked.
+    $this->assertNoFieldChecked('edit-numeric-default-false-0');
+    $this->assertNoFieldChecked('edit-numeric-default-false-2');
+
+    // Mixed numeric & alpha keys, starting at 0. #default_value to 0, and first
+    // element is selected.
+    $this->assertFieldChecked('edit-mixed-default-zero-0');
+    $this->assertNoFieldChecked('edit-mixed-default-zero-b');
+
+    // Mixed numeric & alpha keys, starting at 0. #default_value to FALSE.
+    // No radios selected.
+    $this->assertNoFieldChecked('edit-mixed-default-false-0');
+    $this->assertNoFieldChecked('edit-mixed-default-false-b');
+
+    // No radios should be checked. #default_value is set to 0, but the keys are
+    // letters not numbers.
+    $this->assertNoFieldChecked('edit-alpha-default-zero-b');
+    $this->assertNoFieldChecked('edit-alpha-default-zero-a');
+
+    // Only alpha keys. #default_value set to FALSE, and no radios should be
+    // selected.
+    $this->assertNoFieldChecked('edit-alpha-default-false-a');
+    $this->assertNoFieldChecked('edit-alpha-default-false-b');
+  }
+}

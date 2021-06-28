@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function system_forms_test_menu() {
+
+  $items['admin/tests/forms_test/radios'] = array(
+    'title' => 'Test Radio Default Values',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('radio_default_values_form'),
+    'access arguments' => array('access administration pages'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Form callback for testing radio default values.
+ *
+ * @return array
+ */
+function radio_default_values_form() {
+  $form = array();
+
+  $form['numeric_default_zero'] = array(
+    '#type' => 'radios',
+    '#title' => "Only numeric keys, starting at 0. #default_value to 0",
+    '#default_value' => 0,
+    '#options' => array(
+      0 => "key: 0",
+      1 => "key: 1",
+      2 => "key: 2",
+    ),
+    '#description' => "GOOD: radio 0 is selected",
+  );
+  $form['numeric_default_false'] = array(
+    '#type' => 'radios',
+    '#title' => "Only numeric keys, starting at 0. #default_value to FALSE",
+    '#default_value' => FALSE,
+    '#options' => array(
+      0 => "key: 0",
+      1 => "key: 1",
+      2 => "key: 2",
+    ),
+    '#description' => "GOOD: no radio selected",
+  );
+  $form['mixed_default_zero'] = array(
+    '#type' => 'radios',
+    '#title' => "Mixed numeric & alpha keys, starting at 0. #default_value to 0",
+    '#default_value' => 0,
+    '#options' => array(
+      0 => "key: 0",
+      1 => "key: 1",
+      'a' => "key: a",
+      'b' => "key: b",
+    ),
+    '#description' => "<strong>BAD</strong>: 0 and alpha radios have 'checked' attribute, last one appear as selected",
+  );
+  $form['mixed_default_false'] = array(
+    '#type' => 'radios',
+    '#title' => "Mixed numeric & alpha keys, starting at 0. #default_value to FALSE",
+    '#default_value' => FALSE,
+    '#options' => array(
+      0 => "key: 0",
+      1 => "key: 1",
+      'a' => "key: a",
+      'b' => "key: b",
+    ),
+    '#description' => "GOOD: no radio selected",
+  );
+  $form['alpha_default_zero'] = array(
+    '#type' => 'radios',
+    '#title' => "Only alpha keys. #default_value to 0",
+    '#default_value' => 0,
+    '#options' => array(
+      'a' => "key: a",
+      'b' => "key: b",
+    ),
+    '#description' => "<strong>BAD</strong>: every radios have 'checked' attribute, last one appear as selected",
+  );
+  $form['alpha_default_false'] = array(
+    '#type' => 'radios',
+    '#title' => "Only alpha keys. #default_value to FALSE",
+    '#default_value' => FALSE,
+    '#options' => array(
+      'a' => "key: a",
+      'b' => "key: b",
+    ),
+    '#description' => "GOOD: no radio selected",
+  );
+
+  return $form;
+}
