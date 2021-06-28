@@ -2957,14 +2957,17 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
   /**
    * Checks block usage.
    */
-  protected function checkBlockUsage($delta, $layout, $position) {
+  protected function checkBlockUsage($delta, $layout_name, $position) {
     backdrop_static_reset('layout_get_block_usage');
     layout_reset_caches();
     module_load_include('inc', 'layout', 'layout.admin');
+    $layout = layout_load($layout_name);
+    $layout_template = layout_get_layout_template_info($layout->layout_template);
+    $position = $layout_template['regions'][$position];
     $usage = layout_get_block_usage();
-    $this->assertTrue(isset($usage['system'][$delta][$layout][$position]), 'Block usage returned correctly. Block found in array.');
-    if (isset($usage['system'][$delta][$layout][$position])) {
-      return count($usage['system'][$delta][$layout][$position]);
+    $this->assertTrue(isset($usage['system'][$delta][$layout->name][$position]), 'Block usage returned correctly. Block found in array.');
+    if (isset($usage['system'][$delta][$layout->name][$position])) {
+      return count($usage['system'][$delta][$layout->name][$position]);
     }
     return FALSE;
   }
@@ -2972,12 +2975,15 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
   /**
    * Checks block not in usage.
    */
-  protected function checkBlockNoUsage($delta, $layout, $position) {
+  protected function checkBlockNoUsage($delta, $layout_name, $position) {
     backdrop_static_reset('layout_get_block_usage');
     layout_reset_caches();
     module_load_include('inc', 'layout', 'layout.admin');
+    $layout = layout_load($layout_name);
+    $layout_template = layout_get_layout_template_info($layout->layout_template);
+    $position = $layout_template['regions'][$position];
     $usage = layout_get_block_usage();
-    $this->assertFalse(isset($usage[$delta][$layout][$position]), 'Block usage returned correctly. Block not found in array.');
+    $this->assertFalse(isset($usage[$delta][$layout->name][$position]), 'Block usage returned correctly. Block not found in array.');
     return TRUE;
   }
 }

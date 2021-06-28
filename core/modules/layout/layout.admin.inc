@@ -914,12 +914,12 @@ function layout_settings_form_save_submit($form, &$form_state) {
 }
 
 /**
- * Form callback; Main form for editing a layout's content.
+ * Form callback; Main form for editing a layout's content ("Manage blocks").
  *
- * No validation function is necessary, as all 'validation' is handled
- * either in the lead-up to form rendering (through the selection of
- * specified content types) or by the validation functions specific to
- * the ajax modals & content types.
+ * No validation function is necessary, as all 'validation' is handled either in
+ * the lead-up to form rendering (through the selection of specified content
+ * types) or by the validation functions specific to the AJAX modals & content
+ * types.
  *
  * @ingroup forms
  */
@@ -1062,9 +1062,8 @@ function layout_content_form_validate($form, &$form_state) {
 /**
  * Handle form submission of the display content editor.
  *
- * This reads the location of the various blocks from the form, which will
- * have been modified via JavaScript, rearranges them and then saves
- * the display.
+ * This reads the location of the various blocks from the form, which will have
+ * been modified via JavaScript, rearranges them and then saves the display.
  */
 function layout_content_form_submit($form, &$form_state) {
   /* @var Layout $layout */
@@ -3099,6 +3098,7 @@ function layout_configure_region_page_submit($form, &$form_state) {
 function layout_block_list() {
   $rows = array();
 
+  $module_info = system_get_info('module');
   $module_blocks = layout_get_block_info();
   $usage = layout_get_block_usage();
 
@@ -3116,13 +3116,13 @@ function layout_block_list() {
                 $instances[$position][] = $instance;
               }
             }
-            $positions = implode(', ', array_map('ucfirst', array_keys($instances)));
+            $positions = implode(', ', array_keys($instances));
             $usages[] = l($instance->layout_title . ' (' . $positions . ')', 'admin/structure/layouts/manage/' . $layout);
           }
         }
         $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
         $block_name = check_plain($block['info']) . ' (' . $delta . ')';
-        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
+        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module_info[$module]['name'], 'contexts' => $contexts);
       }
     }
   }
@@ -3138,14 +3138,11 @@ function layout_block_list() {
   $sort = tablesort_get_sort($header);
 
   backdrop_sort($rows, array($order['sql'] => SORT_STRING));
-  $rows = ($sort == 'asc') ? $rows : array_reverse($rows);
+  $rows = ($sort == 'asc') ? array_reverse($rows) : $rows;
 
-  $page['description_container'] = array(
-    '#type' => 'container',
-  );
-
-  $page['description_container']['description'] = array(
-    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'.") . '<p>',
+  $page['description'] = array(
+    '#type' => 'help',
+    '#markup' => t('A summary of all available blocks. The <em>Usage</em> column shows the layouts and regions to which each block is currently placed, in the format <em>Layout name (region)</em>.'),
   );
 
   $page['table'] = array(
@@ -3164,8 +3161,8 @@ function layout_block_list() {
  * @param string $module
  *   The module providing the required blocks.
  * @param string $delta
- *   The block delta. If $delta is provided, $module is also required since
- *   block deltas are not required to be unique.
+ *   The block delta. If $delta is provided, then $module is also required
+ *   (since block deltas are not required to be unique).
  *
  * @return array
  *   An array of block usage instances keyed by block module, delta, layout
@@ -3177,11 +3174,13 @@ function layout_get_block_usage($module = NULL, $delta = NULL) {
   if (empty($blocks)) {
     $layout_info = layout_load_all();
     foreach ($layout_info as $layout) {
+      $layout_template = layout_get_layout_template_info($layout->layout_template);
+      $regions = $layout_template['regions'];
       foreach ($layout->positions as $position => $uuids) {
         foreach ($uuids as $uuid) {
           $block = $layout->content[$uuid];
           $block->layout_title = $layout->title;
-          $blocks[$block->module][$block->delta][$layout->name][$position][] = $block;
+          $blocks[$block->module][$block->delta][$layout->name][$regions[$position]][] = $block;
         }
       }
     }
