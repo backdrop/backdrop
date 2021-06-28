@@ -90,26 +90,20 @@ class BlockText extends Block {
         $form['convert']['reusable']['#description'] .= ' ' . t('Reusable blocks may also be translated.');
       }
     }
-    $form['admin_label'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Admin label'),
-      '#tree' => FALSE,
-      '#collapsed' => empty($this->settings['admin_label']),
-      '#states' => array(
-        'collapsed' => array(
-          ':input[name="reusable"]' => array('checked' => FALSE),
-        ),
+
+    // Adjust the admin label fieldset based on block reusability.
+    $form['admin_label']['#weight'] = 4;
+    $form['admin_label']['#collapsible'] = TRUE;
+    $form['admin_label']['#states'] = array(
+      'collapsed' => array(
+        ':input[name="reusable"]' => array('checked' => FALSE),
       ),
-      '#collapsible' => TRUE,
-      '#weight' => 4,
     );
-    $form['admin_label']['admin_label'] = array(
-      '#type' => 'textfield',
-      '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
-      '#title' => t('Admin label'),
-      '#description' => t('Used to identify the block on layout pages. Required for reusable blocks.'),
-      '#maxlength' => 255,
-    );
+
+    // Add additional description text for reusable blocks.
+    $form['admin_label']['admin_label']['#description'] .= t('Required for reusable blocks.');
+
+    // Add additional machine name for reusable blocks.
     $form['admin_label']['delta'] = array(
       '#type' => 'machine_name',
       '#title' => t('Internal name'),
@@ -121,14 +115,6 @@ class BlockText extends Block {
       '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
       '#weight' => 3,
       '#required' => FALSE,
-    );
-    $form['admin_label']['admin_description'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Admin description'),
-      '#maxlength' => 128,
-      '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
-      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
-      '#weight' => 4,
     );
   }
 
