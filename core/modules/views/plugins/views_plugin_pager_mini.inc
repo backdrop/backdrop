@@ -26,7 +26,7 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
   function option_definition() {
     $options = parent::option_definition();
 
-    unset($options['quantity']);
+    $options['quantity'] = NULL;
     unset($options['tags']['first']);
     unset($options['tags']['last']);
     $options['tags']['previous']['default'] = '‹‹';
@@ -42,7 +42,8 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    unset($form['quantity']);
+
+    $options['quantity'] = NULL;
     unset($form['tags']['first']);
     unset($form['tags']['last']);
   }
