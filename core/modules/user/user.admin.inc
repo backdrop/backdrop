@@ -423,36 +423,38 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   }
   asort($modules);
 
+  $all_permissions = array();
   foreach ($modules as $module => $display_name) {
-    if ($permissions = module_invoke($module, 'permission')) {
+    if ($module_permissions = module_invoke($module, 'permission')) {
+      $all_permissions += $module_permissions;
       $form['permission'][] = array(
         '#markup' => $module_info[$module]['name'],
         '#id' => $module,
       );
-      foreach ($permissions as $perm => $perm_item) {
+      foreach ($module_permissions as $permission_key => $permission_item) {
         // Fill in default values for the permission.
-        $perm_item += array(
+        $permission_item += array(
           'description' => '',
           'restrict access' => FALSE,
-          'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+          'warning' => !empty($permission_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
         );
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
+        $options[$permission_key] = '';
+        $form['permission'][$permission_key] = array(
           '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+          '#markup' => $permission_item['title'],
+          '#description' => theme('user_permission_description', array('permission_item' => $permission_item)),
         );
         foreach ($roles as $role_name => $role) {
           // Builds arrays for checked boxes for each role
-          if (in_array($perm, $role->permissions)) {
-            $status[$role_name][] = $perm;
+          if (in_array($permission_key, $role->permissions)) {
+            $status[$role_name][] = $permission_key;
           }
         }
       }
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Build the entire list of permissions per role as a checkboxes element.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -464,6 +466,14 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
       '#markup' => check_plain($role->label),
       '#tree' => TRUE,
     );
+
+    // Amend the entire list of checkboxes with AIRA labels for screen readers.
+    foreach ($all_permissions as $permission_key => $permission_item) {
+      $form['checkboxes'][$role_name][$permission_key]['#attributes']['aria-label'] = t('!role permission: !permission', array(
+        '!role' => $role->label,
+        '!permission' => $permission_item['title'],
+      ));
+    }
   }
 
   $form['actions'] = array('#type' => 'actions');
