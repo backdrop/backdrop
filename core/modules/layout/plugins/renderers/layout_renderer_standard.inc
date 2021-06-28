@@ -594,6 +594,7 @@ class LayoutRendererStandard {
    */
   function renderRegion($region_id, $blocks) {
     $style_settings = $this->prepared['regions'][$region_id]['style settings'];
+
     $tag = isset($style_settings['element']) ? $style_settings['element'] : '';
     $classes = array();
     if (isset($style_settings['classes'])) {
@@ -604,7 +605,18 @@ class LayoutRendererStandard {
       $classes = array_filter($classes);
     }
 
-    return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes));
+    $title = $style_settings['title_enabled'] && isset($style_settings['title']) ? $style_settings['title'] : '';
+    $title_tag = isset($style_settings['title_tag']) ? $style_settings['title_tag'] : '';
+    $title_classes = array();
+    if (isset($style_settings['title_classes'])) {
+      $title_classes = explode(' ', $style_settings['title_classes']);
+      foreach ($title_classes as $n => $title_class) {
+        $title_classes[$n] = backdrop_clean_css_identifier($title_class);
+      }
+      $title_classes = array_filter($title_classes);
+    }
+
+    return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes, 'title' => $title, 'title_tag' => $title_tag, 'title_classes' => $title_classes));
   }
 
   /**
