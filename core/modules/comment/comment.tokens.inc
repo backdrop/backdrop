@@ -154,7 +154,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           break;
 
         case 'title':
-          $replacements[$original] = $sanitize ? filter_xss($comment->subject) : $comment->subject;
+          $replacements[$original] = $sanitize ? check_plain($comment->subject) : $comment->subject;
           break;
 
         case 'body':
@@ -178,13 +178,16 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $replacements[$original] = $sanitize ? filter_xss($comment->name) : $comment->name;
+          $replacements[$original] = $sanitize ? check_plain($comment->name) : $comment->name;
+          if (empty($comment->uid)) {
+            $replacements[$original] .= ' (' . t('not verified') . ')';
+          }
           break;
 
         case 'parent':
           if (!empty($comment->pid)) {
             $parent = comment_load($comment->pid);
-            $replacements[$original] = $sanitize ? filter_xss($parent->subject) : $parent->subject;
+            $replacements[$original] = $sanitize ? check_plain($parent->subject) : $parent->subject;
           }
           break;
 
@@ -199,7 +202,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
         case 'node':
           $node = node_load($comment->nid);
           $title = $node->title;
-          $replacements[$original] = $sanitize ? filter_xss($title) : $title;
+          $replacements[$original] = $sanitize ? check_plain($title) : $title;
           break;
       }
     }
