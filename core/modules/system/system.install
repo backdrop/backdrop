@@ -74,6 +74,11 @@ function system_requirements($phase) {
     );
   }
 
+  if (defined('PHP_VERSION_ID') && PHP_VERSION_ID < MINIMUM_SUPPORTED_PHP_VERSION_ID) {
+    $requirements['php']['description'] = $t('Your site is running on a version of PHP that has reached <a href="@eol_wikipedia">End of life</a> status. We strongly recommend to upgrade to <a href="@php_supported_versions">a supported version</a>, in order to take advantage of security and performance improvements.', array('@eol_wikipedia' => 'https://en.wikipedia.org/wiki/End-of-life_(product)', '@php_supported_versions' => 'http://php.net/supported-versions.php'));
+    $requirements['php']['severity'] = REQUIREMENT_WARNING;
+  }
+
   if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
     $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
