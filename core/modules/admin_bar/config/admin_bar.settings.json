@@ -8,5 +8,6 @@
         "admin_bar.search",
         "admin_bar.users",
         "admin_bar.account"
-    ]
+    ],
+    "back_to_site": 0
 }
