@@ -144,6 +144,10 @@ function hook_field_extra_fields_alter(&$info) {
  *     to create fields and instances of this field type through the UI. Such
  *     fields can only be created programmatically with field_create_field()
  *     and field_create_instance(). Defaults to FALSE.
+ *   - property_type: For providing entity property info for fields each field type may
+ *	   specify a property type to map to in its field info using the key 'property_type'. 
+ * 	   With that info in place useful defaults are generated, which is already suiting for
+ *	   a lot of field types.
  *
  * @see hook_field_info_alter()
  */
