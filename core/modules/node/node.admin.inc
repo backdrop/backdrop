@@ -196,11 +196,12 @@ function node_multiple_delete_confirm($form, &$form_state) {
       '#type' => 'hidden',
       '#value' => $nid,
     );
-    $form['node_list']['#items'][] = check_plain($title);
+    $delete_list[] = format_string("%title @type", array('%title' => $title, '@type' => $node->type));
   }
 
+  backdrop_set_message(t('This action cannot be undone!'), 'warning');
   $confirm_question = format_plural(count($rows), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
-  return confirm_form($form, $confirm_question, 'admin/content', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+  return confirm_form($form, $confirm_question, 'admin/content', theme('item_list', array('items' => $delete_list)) , t('Delete'), t('Cancel'));
 }
 
 /**
@@ -210,8 +211,8 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
   node_delete_multiple(array_keys($form_state['values']['nodes']));
   cache_clear_all();
   $count = count($form_state['values']['nodes']);
-  watchdog('content', 'Deleted @count posts.', array('@count' => $count));
+  watchdog('content', 'Deleted @count items.', array('@count' => $count));
 
-  backdrop_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));
+  backdrop_set_message(format_plural($count, 'Deleted 1 item.', 'Deleted @count items.'));
   $form_state['redirect'] = 'admin/content';
 }
