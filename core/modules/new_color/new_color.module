@@ -1,0 +1,61 @@
+<?php
+/**
+ * @file new_color.module
+ *  Provide form for users to specify their branding colors and write out a
+ *  default stylesheet for them.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function new_color_menu() {
+  $items['admin/appearance/settings/new-color'] = array(
+    'title' => 'Branding form',
+    'description' => 'Enter the colors for your brand.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('new_color_settings_form'),
+    'access arguments' => array('administer themes'),
+    //'file' => 'block.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ *  Create the form to get the colors from the user.
+ */
+function new_color_settings_form($form, &$form_state) {
+  $form['primary-color'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Primary brand color:',
+    '#description' => t('Enter the primary color for your brand (for example: blue).'),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  return $form;
+}
+
+/**
+ *  Submit handler for the new_color_form().
+ */
+function new_color_settings_form_submit(&$form, &$form_state) {
+  $color = $form_state['values']['primary-color'];
+  $css_contents =<<<CSS
+  body {
+    background-color: $color;
+  }
+CSS;
+  $path = config_get('system.core', 'file_public_path');
+  if (file_exists($path . '/new-color.css')) {
+    $css = fopen($path . '/new-color.css', 'w+');
+      fwrite($css, $css_contents);
+    fclose($css);
+  }
+  else {
+    $css = fopen($path . '/new-color.css', 'x+');
+      fwrite($css, $css_contents);
+    fclose($css);
+  }
+  backdrop_set_message(t('Your branding colors have been saved!'));
+}
