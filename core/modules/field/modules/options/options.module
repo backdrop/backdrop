@@ -29,7 +29,11 @@ function options_library_info() {
     'title' => 'Options',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      $path . '/js/options.js' => array(),
+      // Make sure that options.js is loaded after states.js, as #states break
+      // otherwise (if a form element of type 'options' is added to a form,
+      // #states-controlled form elements are loaded without their #states
+      // applied on initial page load).
+      $path . '/js/options.js' => array('weight' => 2),
       'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
       'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
     ),
