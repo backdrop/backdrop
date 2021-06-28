@@ -111,7 +111,10 @@ function system_themes_page() {
   $themes = system_rebuild_theme_data();
   uasort($themes, 'system_sort_modules_by_info_name');
 
-  $theme_default = config_get('system.core', 'theme_default');
+  $config = config('system.core');
+  $theme_default = $config->get('theme_default');
+  $admin_theme = $config->get('admin_theme');
+
   $theme_groups  = array(
     'enabled' => array(),
     'disabled' => array(),
@@ -123,6 +126,7 @@ function system_themes_page() {
     }
     $admin_theme_options[$theme->name] = $theme->info['name'];
     $theme->is_default = ($theme->name == $theme_default);
+    $theme->is_admin = ($theme->name == $admin_theme);
 
     // Identify theme screenshot.
     $theme->screenshot = NULL;
@@ -202,6 +206,13 @@ function system_themes_page() {
     if ($theme->is_default) {
       $theme->classes[] = 'theme-default';
       $theme->notes[] = t('default theme');
+    }
+
+    // When the admin theme is set to be the same as the default theme, then
+    // admin_theme in system.core.json is set to the string "0".
+    if ($theme->is_admin || ($admin_theme == FALSE && $theme->is_default)) {
+      $theme->classes[] = 'theme-admin';
+      $theme->notes[] = t('administration theme');
     }
 
     // Sort enabled and disabled themes into their own groups.
