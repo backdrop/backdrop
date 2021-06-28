@@ -156,12 +156,22 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     ),
     '#default_value' => config_get('locale.settings', 'language_negotiation_url_part'),
   );
+  $form['language_negotiation_url_part'][LANGUAGE_NEGOTIATION_URL_PREFIX]['#description'] = t('For example: <code>https://example.com<strong>/de</strong>/contact</code>');
+  $form['language_negotiation_url_part'][LANGUAGE_NEGOTIATION_URL_DOMAIN]['#description'] = t('For example: <code>https://<strong>de.</strong>example.com/contact</code>');
+
+  $warning_message['message_wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'warning')),
+  );
+  $warning_message['message_wrapper']['warning'] = array(
+    '#markup' => t('Modifying this value may break existing URLs. Use with caution in a production environment.'),
+  );
 
   $form['prefix'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Path prefix configuration'),
-    '#description' => t('Language codes or other custom text to use as a path prefix for URL language detection. For the default language, this value may be left blank. <strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "deutsch" as the path prefix code for German results in URLs like "example.com/deutsch/contact".'),
+    '#description' => t('Language codes or other custom text to use as a path prefix for URL language detection. For the default language, this value may be left blank. Example: Specifying <strong><code>de</code></strong> as the path prefix code for German results in URLs like <strong><code>https://example.com/de/contact</code></strong>.'),
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
@@ -170,11 +180,13 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       ),
     ),
   );
+  $form['prefix'] += $warning_message;
+
   $form['domain'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Domain configuration'),
-    '#description' => t('The domain names to use for these languages. Leave blank for the default language. Use with caution in a production environment.<strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "de.example.com" as language domain for German will result in an URL like "http://de.example.com/contact".'),
+    '#description' => t('The domain names to use for these languages. Leave blank for the default language. Example: Specifying <strong><code>de.example.com</code></strong> as language domain for German will result in an URL like <strong><code>https://de.example.com/contact</code></strong>.'),
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
@@ -183,6 +195,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       ),
     ),
   );
+  $form['domain'] += $warning_message;
 
   // Get the enabled languages only.
   $language_list = language_list(TRUE, TRUE);
@@ -207,6 +220,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       '#title' => t('%language (%langcode) domain', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 128,
       '#default_value' => isset($domains[$langcode]) ? $domains[$langcode] : '',
+      '#field_prefix' => backdrop_is_https() ? 'https://' : 'http://',
     );
   }
 
