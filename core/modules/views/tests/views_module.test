@@ -192,13 +192,13 @@ class ViewsModuleTest extends ViewsSqlTest {
     // See https://www.drupal.org/node/2475669 for details.
     // Make sure we start with an empty cache.
     $this->resetStaticViewsDataCache();
-    cache_clear_all('*', 'cache_views', TRUE);
+    cache_flush('cache_views');
 
     // Prime the static cache of _views_fetch_data(), by calling it with a table
     // first.
     views_fetch_data('views_test');
     // Remove the general cache.
-    cache_clear_all('views_data:en', 'cache_views');
+    cache('cache_views')->delete('views_data:en');
     // Reset the static cache, to see if fetches from the persistent cache
     // properly rebuild the static cache.
     $this->resetStaticViewsDataCache();

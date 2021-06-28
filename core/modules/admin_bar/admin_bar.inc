@@ -835,7 +835,7 @@ function _admin_bar_flush_cache($name = NULL) {
 
       // Clear the page cache, since cached HTML pages might link to old CSS and
       // JS aggregates.
-      cache_clear_all('*', 'cache_page', TRUE);
+      cache_flush('cache_page');
       break;
 
     case 'theme':

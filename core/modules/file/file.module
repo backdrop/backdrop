@@ -2447,7 +2447,7 @@ function file_invalidate_field_caches($file) {
     foreach ($records as $record) {
       $cids[] = 'field:' . $record->type . ':' . $record->id;
     }
-    cache_clear_all($cids, 'cache_field');
+    cache('cache_field')->delete($cids);
   }
 }
 

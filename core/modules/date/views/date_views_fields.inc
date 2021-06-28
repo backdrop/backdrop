@@ -20,7 +20,7 @@ function _date_views_fields($base = 'node') {
   }
 
   $cid = 'date_views_fields_' . $base;
-  cache_clear_all($cid, 'cache_views');
+  cache('cache_views')->delete($cid);
 
   // We use fields that provide filter handlers as our universe of possible
   // fields of interest.

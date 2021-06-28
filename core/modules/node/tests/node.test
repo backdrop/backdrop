@@ -1059,7 +1059,8 @@ class NodeBlockTestCase extends BackdropWebTestCase {
       'syndicate_settings' => 'page_content',
     );
     $layout->save();
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     $this->backdropGet('test-view-view');
     $elements = $this->xpath($syndicate_selector);
@@ -1075,7 +1076,8 @@ class NodeBlockTestCase extends BackdropWebTestCase {
       'syndicate_settings' => 'promoted',
     );
     $layout->save();
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     $this->backdropGet('test-view-view');
     $elements = $this->xpath($syndicate_selector);
@@ -2416,7 +2418,8 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $default_settings['type'] = 'page';
     $node4 = $this->backdropCreateNode($default_settings);
     // Clear page caches.
-    cache_clear_all();
+    cache_flush('layout_path');
+    cache_flush('page');
 
     // Test that all four nodes are shown.
     $this->backdropGet('');
