@@ -385,6 +385,16 @@ function file_menu() {
     'context' => MENU_CONTEXT_PAGE,
     'file' => 'file.pages.inc',
   );
+  $items['file/%file/details'] = array(
+    'title' => 'File details',
+    'page callback' => 'file_details_page',
+    'page arguments' => array(1),
+    'access callback' => 'file_access',
+    'access arguments' => array('update', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE,
+    'file' => 'file.pages.inc',
+  );
   $items['file/%file/download'] = array(
     'title' => 'Download',
     'page callback' => 'file_download_page',
