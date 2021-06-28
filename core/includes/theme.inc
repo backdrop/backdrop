@@ -1830,30 +1830,32 @@ function theme_link($variables) {
  *     is used as its CSS class. Each link should be itself an array, with the
  *     following elements:
  *     - title: The link text.
- *     - href: The link URL. If omitted, the 'title' is shown as a plain text
- *       item in the links list.
- *     - html: (optional) Whether or not 'title' is HTML. If set, the title
- *       will not be passed through check_plain().
- *     - attributes: (optional) Attributes for the anchor, or for the <span>
- *       tag used in its place if no 'href' is supplied. If element 'class' is
+ *     - href: The link URL.
+ *       - If supplied, the entire link array is passed to l() as its $options
+ *       parameter.
+ *       - If omitted, the 'title' is shown as a plain text item in the links
+ *       list.
+ *     - html: (optional) Whether or not 'title' is HTML. If set, the title will
+ *       not be passed through check_plain().
+ *     - attributes: (optional) Attributes for the anchor, or for the <span> tag
+ *       used in its place if no 'href' is supplied. If element 'class' is
  *       included, it must be an array of one or more class names.
- *     If the 'href' element is supplied, the entire link array is passed to
- *     l() as its $options parameter.
- *   - attributes: A keyed array of attributes for the UL containing the
- *     list of links.
- *   - heading: (optional) A heading to precede the links. May be an
- *     associative array or a string. If it's an array, it can have the
- *     following elements:
- *     - text: The heading text.
- *     - level: The heading level (e.g. 'h2', 'h3').
- *     - class: (optional) An array of the CSS classes for the heading.
- *     When using a string it will be used as the text of the heading and the
- *     level will default to 'h2'. Headings should be used on navigation menus
+ *   - attributes: A keyed array of attributes for the UL containing the list of
+ *     links.
+ *   - li_attributes: (optional) A keyed array of attributes for each LI.
+ *   - heading: (optional) A heading to precede the links. May be an associative
+ *     array or a string.
+ *     - If it's an array, it can have the following elements:
+ *       - text: The heading text.
+ *       - level: The heading level (e.g. 'h2', 'h3').
+ *       - class: (optional) An array of the CSS classes for the heading.
+ *     - If it's a string, it will be used as the text of the heading, and the
+ *     level will default to 'h2'. Headings should be used on navigation menus,
  *     and any list of links that consistently appears on multiple pages. To
- *     make the heading invisible use the 'element-invisible' CSS class. Do not
+ *     make the heading invisible, use the 'element-invisible' CSS class. Do not
  *     use 'display:none', which removes it from screen-readers and assistive
- *     technology. Headings allow screen-reader and keyboard only users to
- *     navigate to or skip the links. See
+ *     technology. Headings allow screen-reader and keyboard-only users to
+ *     navigate to, or skip the links. See
  *     http://juicystudio.com/article/screen-readers-display-none.php and
  *     http://www.w3.org/TR/WCAG-TECHS/H42.html for more information.
  */
@@ -1862,6 +1864,7 @@ function theme_links($variables) {
 
   $links = (array) $variables['links'];
   $attributes = (array) $variables['attributes'];
+  $li_attributes = isset($variables['li_attributes']) ? (array) $variables['li_attributes'] : array();
   $heading = $variables['heading'];
   $output = '';
 
@@ -1894,7 +1897,7 @@ function theme_links($variables) {
     foreach ($links as $key => $link) {
       $i++;
 
-      $class = array();
+      $class = !empty($li_attributes['class']) ? $li_attributes['class'] : array();
       // Use the array key as class name.
       $class[] = backdrop_html_class($key);
       // Add odd/even, first, and last classes.
@@ -1928,7 +1931,7 @@ function theme_links($variables) {
         $item .= '</span>';
       }
 
-      $output .= '<li' . backdrop_attributes(array('class' => $class)) . '>';
+      $output .= '<li' . backdrop_attributes($li_attributes) . '>';
       $output .= $item;
       $output .= '</li>';
     }
