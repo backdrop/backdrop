@@ -13,7 +13,7 @@ function layout_page_callback() {
   $menu_item = layout_menu_item_load($menu_item_name);
 
   // Determine the correct layout to use at this path.
-  $layouts = layout_load_multiple_by_path($menu_item->path);
+  $layouts = layout_load_multiple_by_path($menu_item->path, FALSE, TRUE);
   $match_found = FALSE;
   $layout = NULL;
   foreach ($layouts as $layout) {

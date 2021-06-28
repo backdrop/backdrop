@@ -2259,47 +2259,6 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
   }
 
-  /**
-   * Tests the correct layout is used on 404 and 403 pages.
-   */
-  function testPages() {
-    // Check that a known page is using the admin (one-column) layout.
-    $this->backdropGet('admin/config/content/formats/plain_text');
-    $this->assertIsAdminLayout();
-
-    // Check that node/add uses the admin layout for the admin user.
-    $this->backdropGet('node/add/' . $this->content_type->type);
-    $this->assertIsAdminLayout();
-
-    // Check that a 403 page uses the admin layout.
-    $this->backdropGet('admin/appearance');
-    $this->assertIsAdminLayout();
-
-    // Check that a 404 page uses the admin layout.
-    $this->backdropGet('admin/config/content/formats/fake-format');
-    $this->assertIsAdminLayout();
-
-    // Check that the front-end is using the default layout.
-    $this->backdropGet('node');
-    $this->assertIsDefaultLayout();
-
-    // Check that anonymous users get the Default layout for admin paths.
-    $this->backdropLogout();
-
-    // Anonymous 403.
-    $this->backdropGet('admin/config/content/formats/plain_text');
-    $this->assertIsDefaultLayout();
-
-    // Anonymous 404.
-    $this->backdropGet('admin/config/content/formats/fake-format');
-    $this->assertIsDefaultLayout();
-
-    // Check that a logged in user that can access an admin page but not the
-    // admin theme uses the default layout.
-    $this->backdropLogin($this->web_user);
-    $this->backdropGet('node/add/' . $this->content_type->type);
-    $this->assertIsDefaultLayout();
-  }
 
   /**
    * Test role-based selection of layouts.
@@ -2307,59 +2266,102 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   function testRoleSelection() {
     // Create and login admin user.
     $admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'create ' . $this->content_type->type . ' content',
+      'edit any ' . $this->content_type->type . ' content',
       'access administration pages',
+      'view the administration theme',
       'administer site configuration',
-      'administer modules',
       'administer layouts',
-      'administer nodes',
+      'administer filters',
     ));
     $this->backdropLogin($admin_user);
+    $node1 = $this->backdropCreateNode(array('type' => $this->content_type->type, 'promote' => 1));
 
-    // Create a web user.
-    $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
+    $paths = array(
+      'boxton' => 'admin/config/content/formats/plain_text',
+      'boxton' => 'admin/config/content/formats',
+      'boxton' => 'admin/config/content',
+      'boxton' => 'admin/config',
+      'boxton' => 'admin',
+      );
+    $this->assertIsCorrectLayout($paths);
 
-    // Create a layout at a custom path.
-    $layout_name = strtolower($this->randomName());
-    $layout_path = $layout_name;
+    // Create a new layout using the UI.
     $edit = array(
-      'name' => $layout_name,
-      'title' => $layout_name,
-      'path' => $layout_path,
+      'title' => 'Test layout 1',
+      'name' => 'test_layout_1',
       'layout_template' => 'moscone_flipped',
+      'path' => 'admin/%',
     );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Note that this adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
+    $paths = array(
+      'moscone_flipped' => 'admin/config/content/formats/plain_text',
+      'moscone_flipped' => 'admin/config/content/formats',
+      'moscone_flipped' => 'admin/config/content',
+      'moscone_flipped' => 'admin/config',
+      'boxton' => 'admin',
+      );
+    $this->assertIsCorrectLayout($paths);
 
-    // Select the condition to add.
+    // Create a new layout using the UI.
     $edit = array(
-      'condition' => 'user_role',
+      'title' => 'Test layout 2',
+      'name' => 'test_layout_2',
+      'layout_template' => 'rolph',
+      'path' => 'admin/config/content/%',
     );
-    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Allow authenticated users to see the layout only.
+    $paths = array(
+      'rolph' => 'admin/config/content/formats/plain_text',
+      'rolph' => 'admin/config/content/formats',
+      'moscone_flipped' => 'admin/config/content',
+      'moscone_flipped' => 'admin/config',
+      'boxton' => 'admin',
+      );
+    $this->assertIsCorrectLayout($paths);
+
+    // Create a new layout using the UI.
     $edit = array(
-      'roles[authenticated]' => TRUE,
+      'title' => 'Test layout 3',
+      'name' => 'test_layout_3',
+      'layout_template' => 'taylor',
+      'path' => 'node/%/%',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Create layout'));
+    $paths = array(
+      'taylor' => 'node/1/edit',
+      'moscone_flipped' => 'node/1',
+      'moscone_flipped' => 'node',
+      );
+    $this->assertIsCorrectLayout($paths);
 
-    // View as an administrator.
-    $this->backdropGet($layout_path);
-    $this->assertResponse(200);
-    $this->backdropLogout();
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 4',
+      'name' => 'test_layout_4',
+      'layout_template' => 'simmons',
+      'path' => 'non-existent-path/%',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // View as a basic user.
-    $this->backdropLogin($web_user);
-    $this->backdropGet($layout_path);
-    $this->assertResponse(200);
-    $this->backdropLogout();
+    $paths = array(
+      'simmons' => 'non-existent-path/blank',
+      );
+    $this->assertIsCorrectLayout($paths);
 
-    // View as anonymous, where they should get a 404.
-    $this->backdropGet($layout_path);
-    $this->assertResponse(404);
+  }
+
+  private function assertIsCorrectLayout($paths) {
+    foreach ($paths as $layout_template => $path) {
+      $this->backdropGet($path);
+      $class = 'layout--' . str_replace('_', '-', $layout_template);
+      $result = $this->xpath('//div[contains(@class, :class)]', array(':class' => $class));
+      $this->assertEqual(count($result), 1, format_string('@layout used at @path', array('@path' => $this->getUrl(), '@layout' => $layout_template)));
+    }
   }
 
   private function assertIsDefaultLayout($message = '') {
