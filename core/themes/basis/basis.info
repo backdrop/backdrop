@@ -32,6 +32,7 @@ stylesheets[print][] = css/print.css
 ; Include a style sheet in the rich-text editor.
 ckeditor_stylesheets[] = css/base.css
 ckeditor_stylesheets[] = css/component/caption.css
+ckeditor_stylesheets[] = css/skin.css
 
 ; Remove unwanted core CSS
 stylesheets[all][] = system.theme.css
