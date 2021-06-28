@@ -1765,8 +1765,17 @@ function user_login_default_validators() {
  * Check for invalid email addresses and blocked accounts.
  */
 function user_login_name_validate($form, &$form_state) {
-  if (isset($form_state['values']['name'])) {
-    $name = $form_state['values']['name'];
+  // Ensure POST values are a strings, arrays may come from malformed HTML or
+  // malicious attacks.
+  if (is_array($form_state['values']['name'])) {
+    $form_state['values']['name'] = reset($form_state['values']['name']);
+  }
+  if (is_array($form_state['values']['pass'])) {
+    $form_state['values']['pass'] = reset($form_state['values']['pass']);
+  }
+
+  $name = trim($form_state['values']['name']);
+  if (strlen($name)) {
     $credentials = config_get('system.core', 'user_login_method');
     if ($credentials !== USER_LOGIN_USERNAME_ONLY) {
       if ($account = db_query("SELECT * FROM {users} WHERE mail = :mail", array(':mail' => $name))->fetchObject()) {
@@ -1774,12 +1783,12 @@ function user_login_name_validate($form, &$form_state) {
       }
       // If can't find account, check if valid email address.
       elseif ($credentials === USER_LOGIN_EMAIL_ONLY && !valid_email_address($name)) {
-        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $form_state['values']['name'])));
+        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $name)));
       }
     }
     // If can find account, check if user is blocked.
     if ($name && user_is_blocked($name)) {
-      form_set_error('name', t('The account for %name has not been activated or is blocked.', array('%name' => $form_state['values']['name'])));
+      form_set_error('name', t('The account for %name has not been activated or is blocked.', array('%name' => $name)));
     }
   }
 }
@@ -1793,9 +1802,10 @@ function user_login_name_validate($form, &$form_state) {
  * fail even if an account is found.
  */
 function user_login_authenticate_validate($form, &$form_state) {
+  $name = trim($form_state['values']['name']);
   $password = trim($form_state['values']['pass']);
   $flood_config = config('user.flood');
-  if (!empty($form_state['values']['name']) && strlen(trim($password)) > 0) {
+  if (strlen($name) && strlen($password)) {
     // Do not allow any login from the current user's IP if the limit has been
     // reached. Default is 50 failed attempts allowed in one hour. This is
     // independent of the per-user limit to catch attempts from one IP to log
@@ -1807,11 +1817,11 @@ function user_login_authenticate_validate($form, &$form_state) {
     }
     $account = FALSE;
     $credentials = config_get('system.core', 'user_login_method');
-    if (($credentials === USER_LOGIN_USERNAME_OR_EMAIL || $credentials === USER_LOGIN_EMAIL_ONLY) && valid_email_address($form_state['values']['name'])) {
-      $account = db_query("SELECT * FROM {users} WHERE mail = :mail AND status = 1", array(':mail' => $form_state['values']['name']))->fetchObject();
+    if (($credentials === USER_LOGIN_USERNAME_OR_EMAIL || $credentials === USER_LOGIN_EMAIL_ONLY) && valid_email_address($name)) {
+      $account = db_query("SELECT * FROM {users} WHERE mail = :mail AND status = 1", array(':mail' => $name))->fetchObject();
     }
     if (!$account && $credentials !== USER_LOGIN_EMAIL_ONLY) {
-      $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $form_state['values']['name']))->fetchObject();
+      $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $name))->fetchObject();
     }
 
     if ($account) {
