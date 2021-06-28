@@ -65,6 +65,44 @@ function book_admin_settings($form, &$form_state) {
     '#options' => $types,
     '#required' => TRUE,
   );
+  // Navigation options.
+  $form['book_navigation_options'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book navigation options'),
+    '#default_value' => $config->get('book_navigation_options'),
+    '#options' => array(
+      'tree' => t('Table of contents'),
+      'prev' => t('Previous link'),
+      'next' => t('Next link'),
+      'up' => t('Up link (aka parent page)'),
+    ),
+  );
+  // Links options.
+  $form['book_links'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book links options'),
+    '#default_value' => $config->get('book_links'),
+    '#options' => array(
+      'book_add_child' => t('Add child page'),
+      //'book_printer' => t('Printer-friendly version'),
+    ),
+  );
+  // Remove book navigation.
+  $form['book_remove_book_navigation'] = array(
+    '#type' => 'radios',
+    '#title' => t('Remove book navigation from all book pages'),
+    '#description' => t("This removes the book default navigation from the node content and assumes book navigation will being implemented using either a 'Book navigation' block or another book/menu-related module."),
+    '#default_value' => $config->get('book_remove_book_navigation'),
+    '#options' => array('0' => t('No'), '1' => t('Yes')),
+  );
+  // Menus tree set path.
+  $form['book_menu_tree_set_path'] = array(
+    '#type' => 'radios',
+    '#title' => t("Keep a book's main page's menu link active while navigating to lower-level book pages."),
+    '#description' => t('If set to \'Yes\', when a book\'s main page is added to a <a href="@">menu</a> it will remain active as users navigate to lower-level pages of the book.', array('@href' => url('admin/structure/menu'))),
+    '#default_value' => $config->get('book_menu_tree_set_path'),
+    '#options' => array('0' => t('No'), '1' => t('Yes')),
+  );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
 
@@ -97,6 +135,10 @@ function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
+    ->set('book_navigation_options', $form_state['values']['book_navigation_options'])
+    ->set('book_links', $form_state['values']['book_links'])
+    ->set('book_remove_book_navigation', $form_state['values']['book_remove_book_navigation'])
+    ->set('book_menu_tree_set_path', $form_state['values']['book_menu_tree_set_path'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }

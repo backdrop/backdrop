@@ -91,7 +91,8 @@ function book_node_view_link(Node $node, $view_mode) {
   if (isset($node->book['depth'])) {
     if ($view_mode == 'full' && node_is_page($node)) {
       $child_type = config_get('book.settings', 'book_child_type');
-      if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH) {
+      $book_links = config_get('book.settings', 'book_links');
+      if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH && !empty($book_links['book_add_child'])) {
         $links['book_add_child'] = array(
           'title' => t('Add child page'),
           'href' => 'node/add/' . str_replace('_', '-', $child_type),
@@ -849,8 +850,10 @@ function book_node_load($nodes, $types) {
  * Implements hook_node_view().
  */
 function book_node_view(Node $node, $view_mode) {
+  $remove_navigation = config_get('book.settings', 'book_remove_book_navigation');
   if ($view_mode == 'full') {
-    if (!empty($node->book['bid']) && empty($node->in_preview)) {
+    if (!empty($node->book['bid']) && empty($node->in_preview)
+      && !$remove_navigation) {
       $node->content['book_navigation'] = array(
         '#markup' => theme('book_navigation', array('book_link' => $node->book)),
         '#weight' => 100,
@@ -875,10 +878,44 @@ function book_node_view(Node $node, $view_mode) {
  * viewing a book page.
  */
 function book_init() {
-  if (($node = menu_get_object()) && !empty($node->book['bid'])) {
+  $node = menu_get_object();
+  $book_menu_tree_set_path = config_get('book_helper.settings', 'book_menu_tree_set_path');
+
+  if (!empty($node->book['bid'])) {
     $active_menus = menu_get_active_menu_names();
     $active_menus[] = $node->book['menu_name'];
     menu_set_active_menu_names($active_menus);
+  }
+
+  // Set main book page in menu tree path.
+  if ($book_menu_tree_set_path) {
+    // Skip setting the menu tree path if we are on the main page of the book.
+    if (isset($node->book) && ($node->book['nid'] != $node->book['bid'])) {
+      // Get active menu names for this node.
+      $active_menu_names = db_select('menu_links')
+        ->distinct()
+        ->fields('menu_links', array('menu_name'))
+        ->condition('module', 'menu')
+        ->condition('link_path', 'node/' . $node->nid)
+        ->execute()->fetchCol();
+
+      // Only set path for core's 'menu' module.
+      $menu_names = db_select('menu_links')
+        ->distinct()
+        ->fields('menu_links', array('menu_name'))
+        ->condition('module', 'menu')
+        ->orderBy('menu_name')
+        ->execute()->fetchCol();
+
+      $path = 'node/' . $node->book['bid'];
+      foreach ($menu_names as $menu_name) {
+        // Make sure we don't reset the menu tree path if this node (aka page)
+        // is already active in this menu.
+        if (!in_array($menu_name, $active_menu_names)) {
+          menu_tree_set_path($menu_name, $path);
+        }
+      }
+    }
   }
 }
 
