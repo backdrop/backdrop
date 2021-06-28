@@ -296,6 +296,24 @@ function search_is_active() {
 }
 
 /**
+ * Implements hook_requirements().
+ */
+function search_requirements($phase) {
+  $requirements = array();
+
+  if ($phase === 'runtime' && config_get('search.settings', 'search_logging')) {
+    $requirements['search_logging'] = array(
+      'title' => t('Search logging'),
+      'value' =>  t('Enabled'),
+      'severity' => REQUIREMENT_WARNING,
+      'description' => t('The Search module provides the ability to log all searches, which can be useful while a site is in development, or when troubleshooting search-related issues. This setting may affect performance, so do not forget to <a href="@url">disable search logging</a> when you have finished testing and this site goes live.', array('@url' => url('/admin/config/search/settings'))),
+    );
+  }
+
+  return $requirements;
+}
+
+/**
  * Returns information about available search modules.
  *
  * @param $all
