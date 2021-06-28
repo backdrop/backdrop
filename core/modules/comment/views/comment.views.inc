@@ -117,7 +117,7 @@ function comment_views_data() {
   // hostname
   $data['comment']['hostname'] = array(
     'title' => t('Hostname'),
-    'help' => t('Hostname of user that posted the comment.'),
+    'help' => t('Hostname of user that added the comment.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -136,7 +136,7 @@ function comment_views_data() {
   // mail
   $data['comment']['mail'] = array(
     'title' => t('Mail'),
-    'help' => t('Email of user that posted the comment. Will be empty if the author is a registered user.'),
+    'help' => t('Email of user that added the comment. Will be empty if the author is a registered user.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -152,10 +152,10 @@ function comment_views_data() {
     ),
   );
 
-  // created (when comment was posted)
+  // Comment creation date.
   $data['comment']['created'] = array(
-    'title' => t('Post date'),
-    'help' => t('Date and time of when the comment was created.'),
+    'title' => t('Created date'),
+    'help' => t('Date and time of when the comment was added.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -169,7 +169,7 @@ function comment_views_data() {
   );
 
   $data['comment']['changed_fulldata'] = array(
-    'title' => t('Post date'),
+    'title' => t('Created date'),
     'help' => t('Date in the form of CCYYMMDD.'),
     'argument' => array(
       'field' => 'changed',
@@ -479,7 +479,7 @@ function comment_views_data() {
   // last_comment_timestamp
   $data['node_comment_statistics']['last_comment_timestamp'] = array(
     'title' => t('Last comment time'),
-    'help' => t('Date and time of when the last comment was posted.'),
+    'help' => t('Date and time of when the last comment was added.'),
     'field' => array(
       'handler' => 'views_handler_field_last_comment_timestamp',
       'click sortable' => TRUE,
@@ -495,7 +495,7 @@ function comment_views_data() {
   // last_comment_name (author's name)
   $data['node_comment_statistics']['last_comment_name'] = array(
     'title' => t("Last comment author"),
-    'help' => t('The name of the author of the last posted comment.'),
+    'help' => t('The name of the author of the last-added comment.'),
     'field' => array(
       'handler' => 'views_handler_field_ncs_last_comment_name',
       'click sortable' => TRUE,
@@ -529,7 +529,7 @@ function comment_views_data() {
   // last_comment_timestamp
   $data['node_comment_statistics']['last_updated'] = array(
     'title' => t('Updated/commented date'),
-    'help' => t('The most recent of last comment posted or node updated time.'),
+    'help' => t('The most recent of last comment added or content updated time.'),
     'field' => array(
       'handler' => 'views_handler_field_ncs_last_updated',
       'click sortable' => TRUE,
@@ -633,8 +633,8 @@ function comment_views_data_alter(&$data) {
   );
 
   $data['node']['uid_touch'] = array(
-    'title' => t('User posted or commented'),
-    'help' => t('Display nodes only if a user posted the node or commented on the node.'),
+    'title' => t('User creted content or added comment'),
+    'help' => t('Display pieces of content only if a user created the content or commented on it.'),
     'argument' => array(
       'field' => 'uid',
       'name table' => 'users',

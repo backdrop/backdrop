@@ -6,8 +6,8 @@
  */
 
 /**
- * Filter handler to accept a user id to check for nodes that user posted or
- * commented on.
+ * Filter handler to accept a user ID to check for pieces of contnet that user
+ * created or commented on.
  *
  * @ingroup views_filter_handlers
  */

@@ -128,7 +128,7 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nothing']['hide_alter_empty'] = 0;
     $handler->display->display_options['fields']['nothing']['exclude'] = 1;
 
-    /* Sort criterion: Content: Post date */
+    /* Sort criterion: Content: Created date */
     $handler->display->display_options['sorts']['created']['id'] = 'created';
     $handler->display->display_options['sorts']['created']['table'] = 'node';
     $handler->display->display_options['sorts']['created']['field'] = 'created';

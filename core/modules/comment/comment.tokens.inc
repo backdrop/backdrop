@@ -11,18 +11,18 @@
 function comment_token_info() {
   $type = array(
     'name' => t('Comments'),
-    'description' => t('Tokens for comments posted on the site.'),
+    'description' => t('Tokens for comments added on the site.'),
     'needs-data' => 'comment',
   );
 
   // Comment-related tokens for nodes
   $node['comment-count'] = array(
     'name' => t('Comment count'),
-    'description' => t('The number of comments posted on a node.'),
+    'description' => t('The number of comments added on a node.'),
   );
   $node['comment-count-new'] = array(
     'name' => t('New comment count'),
-    'description' => t('The number of comments posted on a node since the reader last viewed it.'),
+    'description' => t('The number of comments added on a node since the reader last viewed it.'),
   );
 
   // Core comment tokens
@@ -32,7 +32,7 @@ function comment_token_info() {
   );
   $comment['hostname'] = array(
     'name' => t('IP Address'),
-    'description' => t('The IP address of the computer the comment was posted from.'),
+    'description' => t('The IP address of the computer the comment was added from.'),
   );
   $comment['name'] = array(
     'name' => t('Name'),
@@ -69,7 +69,7 @@ function comment_token_info() {
   // Chained tokens for comments
   $comment['created'] = array(
     'name' => t('Date created'),
-    'description' => t('The date the comment was posted.'),
+    'description' => t('The date the comment was added.'),
     'type' => 'date',
   );
   $comment['changed'] = array(
@@ -84,7 +84,7 @@ function comment_token_info() {
   );
   $comment['node'] = array(
     'name' => t('Node'),
-    'description' => t('The node the comment was posted to.'),
+    'description' => t('The piece of content the comment was added to.'),
     'type' => 'node',
   );
   $comment['author'] = array(
@@ -128,7 +128,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           $replacements[$original] = $comment->cid;
           break;
 
-        // Poster identity information for comments
+        // Comment author identity information.
         case 'hostname':
           $replacements[$original] = $sanitize ? check_plain($comment->hostname) : $comment->hostname;
           break;

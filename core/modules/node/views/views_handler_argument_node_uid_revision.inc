@@ -6,8 +6,8 @@
  */
 
 /**
- * Filter handler to accept a user id to check for nodes that
- * user posted or created a revision on.
+ * Filter handler to accept a user ID to check for content that user created or
+ * created a revision on.
  */
 class views_handler_argument_node_uid_revision extends views_handler_argument_comment_user_uid {
   function query($group_by = FALSE) {

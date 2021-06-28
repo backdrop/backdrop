@@ -45,62 +45,62 @@ function node_token_info() {
   );
   $node['title'] = array(
     'name' => t('Title'),
-    'description' => t('The title of the node.'),
+    'description' => t('The title of the content.'),
   );
   $node['body'] = array(
     'name' => t('Body'),
-    'description' => t('The main body text of the node.'),
+    'description' => t('The main body text of the content.'),
   );
   $node['summary'] = array(
     'name' => t('Summary'),
-    'description' => t("The summary of the node's main body text."),
+    'description' => t("The summary of the main body text of the content."),
   );
   $node['langcode'] = array(
     'name' => t('Language code'),
-    'description' => t('The language code of the language the node is written in.'),
+    'description' => t('The language code of the language the content is written in.'),
   );
   $node['url'] = array(
     'name' => t('URL'),
-    'description' => t('The URL of the node.'),
+    'description' => t('The URL of the content.'),
     'type' => 'url',
   );
   $node['edit-url'] = array(
     'name' => t('Edit URL'),
-    'description' => t("The URL of the node's edit page."),
+    'description' => t("The URL of the edit page of the content."),
     'type' => 'url',
   );
   $node['tnid'] = array(
     'name' => t('Translation set ID'),
-    'description' => t('The unique ID of the original-language version of this node, if one exists.'),
+    'description' => t('The unique ID of the original-language version of this content, if one exists.'),
   );
   $node['source'] = array(
-    'name' => t('Translation source node'),
-    'description' => t("The source node for this current node's translation set."),
+    'name' => t('Translation source content'),
+    'description' => t("The source content for the translation set of the current content."),
     'type' => 'node',
   );
   $node['vid'] = array(
     'name' => t('Revision ID'),
-    'description' => t("The unique ID of the node's latest revision."),
+    'description' => t("The unique ID of the latest revision of the content."),
   );
   $node['log'] = array(
     'name' => t('Revision log message'),
-    'description' => t('The explanation of the most recent changes made to the node.'),
+    'description' => t('The explanation of the most recent changes made to the content.'),
   );
 
   // Chained tokens for nodes.
   $node['created'] = array(
     'name' => t('Date created'),
-    'description' => t('The date the node was posted.'),
+    'description' => t('The date the content was created.'),
     'type' => 'date',
   );
   $node['changed'] = array(
     'name' => t('Date changed'),
-    'description' => t('The date the node was most recently updated.'),
+    'description' => t('The date the content was most recently updated.'),
     'type' => 'date',
   );
   $node['author'] = array(
     'name' => t('Author'),
-    'description' => t('The author of the node.'),
+    'description' => t('The author of the content.'),
     'type' => 'user',
   );
 
