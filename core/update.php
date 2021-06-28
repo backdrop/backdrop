@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
@@ -449,7 +448,7 @@ function update_check_requirements($skip_warnings = FALSE) {
 }
 
 // Some unavoidable errors happen because the database is not yet up-to-date.
-// Our custom error handler is not yet installed, so we just suppress them.
+// Our custom error handler is not yet installed, so we suppress them.
 ini_set('display_errors', FALSE);
 
 // We prepare a minimal bootstrap for the update requirements check to avoid

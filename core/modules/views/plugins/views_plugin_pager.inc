@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_pager.
@@ -147,7 +146,7 @@ class views_plugin_pager extends views_plugin {
   }
 
   /**
-   * Execute the count query, which will be done just prior to the query
+   * Execute the count query, which will be done immediatley prior to the query
    * itself being executed.
    */
   function execute_count_query(&$count_query) {
@@ -164,9 +163,7 @@ class views_plugin_pager extends views_plugin {
    * If there are pagers that need global values set, this method can
    * be used to set them. It will be called when the count query is run.
    */
-  function update_page_info() {
-
-  }
+  function update_page_info() { }
 
   /**
    * Modify the query for paging
@@ -176,17 +173,17 @@ class views_plugin_pager extends views_plugin {
   function query() { }
 
   /**
-   * Perform any needed actions just prior to the query executing.
+   * Perform any needed actions immediatley prior to the query executing.
    */
   function pre_execute(&$query) { }
 
   /**
-   * Perform any needed actions just after the query executing.
+   * Perform any needed actions immediately after the query executing.
    */
   function post_execute(&$result) { }
 
   /**
-   * Perform any needed actions just before rendering.
+   * Perform any needed actions immediately before rendering.
    */
   function pre_render(&$result) { }
 

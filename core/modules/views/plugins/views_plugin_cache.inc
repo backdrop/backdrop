@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_cache.
@@ -145,7 +144,7 @@ class views_plugin_cache extends views_plugin {
   /**
    * Clear out cached data for a view.
    *
-   * We're just going to nuke anything related to the view, regardless of display,
+   * We're going to nuke anything related to the view, regardless of display,
    * to be sure that we catch everything. Maybe that's a bad idea.
    */
   function cache_flush() {

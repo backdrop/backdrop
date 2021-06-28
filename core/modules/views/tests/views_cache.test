@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsCacheTest.
@@ -68,7 +67,7 @@ class ViewsCacheTest extends ViewsSqlTest {
    * @see views_plugin_cache_time
    */
   function testTimeCaching() {
-    // Create a basic result which just 2 results.
+    // Create a basic result which only 2 results.
     $view = $this->getBasicView();
     $view->set_display();
     $view->display_handler->override_option('cache', array(
@@ -109,7 +108,7 @@ class ViewsCacheTest extends ViewsSqlTest {
    * @see views_plugin_cache_time
    */
   function testNoneCaching() {
-    // Create a basic result which just 2 results.
+    // Create a basic result which only 2 results.
     $view = $this->getBasicView();
     $view->set_display();
     $view->display_handler->override_option('cache', array(

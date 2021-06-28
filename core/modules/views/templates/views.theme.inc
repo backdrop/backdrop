@@ -1000,7 +1000,8 @@ function template_preprocess_views_view_rss(&$variables) {
       $url_options['query'] = $view->exposed_raw_input;
     }
 
-    // Compare the link to the default home page; if it's the default home page, just use $base_url.
+    // Compare the link to the default home page. If it's the default home page,
+    // use $base_url.
     if ($path == config_get('system.core', 'site_frontpage')) {
       $path = '';
     }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsHandlerFilterDateTest.
@@ -111,7 +110,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
 
-    // Test between with just max.
+    // Test between with only max.
     $view = $this->views_test_between();
     $view->set_display('default');
     $view->init_handlers();
@@ -141,7 +140,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
 
-    // Test not between with just max.
+    // Test not between with only max.
     $view = $this->views_test_between();
     $view->set_display('default');
     $view->init_handlers();

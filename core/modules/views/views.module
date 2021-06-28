@@ -437,7 +437,7 @@ function views_menu_alter(&$callbacks) {
 
       // Remove any conflicting items that were found.
       foreach ($matches as $path) {
-        // Don't remove the paths we just added!
+        // Don't remove the paths we recently added!
         if (!isset($our_paths[$path])) {
           unset($callbacks[$path]);
         }
@@ -570,7 +570,7 @@ function views_preprocess_layout(&$variables) {
  * Implement hook_block_info().
  */
 function views_block_info() {
-  // Try to avoid instantiating all the views just to get the blocks info.
+  // Try to avoid instantiating all the views only to get the blocks info.
   views_include('cache');
   $cache = views_cache_get('views_block_items', TRUE);
   if ($cache && is_array($cache->data)) {
@@ -1422,9 +1422,9 @@ function views_view_is_disabled($view) {
 /**
  * Get a view from the database or from default views.
  *
- * This function is just a static wrapper around views::load(). This function
- * isn't called 'views_load()' primarily because it might get a view
- * from the default views which aren't technically loaded from the database.
+ * This function is a static wrapper around views::load(). This function isn't
+ * called 'views_load()' primarily because it might get a view from the default
+ * views which aren't technically loaded from the database.
  *
  * @param $name
  *   The name of the view.
@@ -1493,7 +1493,7 @@ function views_view_has_form_elements($view) {
 }
 
 /**
- * This is the entry function. Just gets the form for the current step.
+ * This is the entry function. It gets the form for the current step.
  * The form is always assumed to be multistep, even if it has only one
  * step (the default 'views_form_views_form' step). That way it is actually
  * possible for modules to have a multistep form if they need to.

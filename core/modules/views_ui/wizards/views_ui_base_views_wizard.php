@@ -701,7 +701,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       }
       $table_data = views_fetch_data($table);
       // Check whether the entity key filter handler is or an child of it views_handler_filter_in_operator
-      // If it's not just use a single value instead of an array.
+      // If it's not, use a single value instead of an array.
       $handler = $table_data[$entity_key]['filter']['handler'];
       if ($handler == 'views_handler_filter_in_operator' || is_subclass_of($handler, 'views_handler_filter_in_operator')) {
         $value = backdrop_map_assoc(array($form_state['values']['show']['type']));

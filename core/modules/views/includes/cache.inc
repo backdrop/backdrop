@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Load Views' data so that it knows what is available to build queries from.
@@ -170,7 +169,7 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
 /**
  * Set a cached item in the views cache.
  *
- * This is just a convenience wrapper around cache_set().
+ * This is a convenience wrapper around cache_set().
  *
  * @param $cid
  *   The cache ID of the data to store.
@@ -192,7 +191,7 @@ function views_cache_set($cid, $data, $use_language = FALSE) {
 /**
  * Return data from the persistent views cache.
  *
- * This is just a convenience wrapper around cache_get().
+ * This is a convenience wrapper around cache_get().
  *
  * @param int $cid
  *   The cache ID of the data to retrieve.

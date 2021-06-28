@@ -599,7 +599,7 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
     // Keep a list of the operator dropdowns, so we can sync their behavior later.
     $dropdowns = this.operator;
 
-    // Move the operator to a new row just above the second group.
+    // Move the operator to a new row directly above the second group.
     $titleRow = $('tr#views-group-title-2');
     $newRow = $('<tr class="filter-group-operator-row"><td colspan="5"></td></tr>');
     $newRow.find('td').append(this.operator);
@@ -661,9 +661,9 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
      */
     tableDrag.row.prototype.onSwap = function () {
       if (filterHandler.hasGroupOperator) {
-        // Make sure the row that just got moved (this.group) is inside one of
-        // the filter groups (i.e. below an empty marker row or a draggable). If
-        // it isn't, move it down one.
+        // Make sure the row that got moved (this.group) is inside one of the
+        // filter groups (i.e. below an empty marker row or a draggable). If it
+        // isn't, move it down one.
         var thisRow = $(this.group);
         var previousRow = thisRow.prev('tr');
         if (previousRow.length && !previousRow.hasClass('group-message') && !previousRow.hasClass('draggable')) {

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the base query class, which is the underlying layer in a View.
@@ -43,7 +42,7 @@ class views_plugin_query extends views_plugin {
   function query($get_count = FALSE) { }
 
   /**
-   * Let modules modify the query just prior to finalizing it.
+   * Let modules modify the query prior to finalizing it.
    *
    * @param view $view
    *   The view which is executed.
