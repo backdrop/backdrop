@@ -1236,10 +1236,10 @@ class views_plugin_display extends views_plugin {
 
     $options['pager'] = array(
       'category' => 'pager',
-      'title' => t('Use pager'),
+      'title' => t('Pager type'),
       'value' => $pager_plugin->plugin_title(),
       'setting' => $pager_str,
-      'desc' => t("Change this display's pager setting."),
+      'desc' => t('Change pager type.'),
     );
 
     // If pagers aren't allowed, change the text of the item:
@@ -2947,9 +2947,20 @@ class views_plugin_display extends views_plugin {
    *   - items per page title
    */
   function get_pager_text() {
+    $pager = $this->get_option('pager');
+    $items_per_page_title = t('Items to display');
+    $items_per_page_description = t('The number of items to display.');
+
+    if (in_array($pager['type'], array('full', 'mini'))) {
+      $items_per_page_title = t('Items to display per page');
+      $items_per_page_description = t('The number of items to display per page.');
+    }
+
+    $items_per_page_description .= ' ' . t('Enter 0 for no limit');
+
     return array(
-      'items per page title' => t('Items to display'),
-      'items per page description' => t('The number of items to display. Enter 0 for no limit.')
+      'items per page title' => $items_per_page_title,
+      'items per page description' => $items_per_page_description,
     );
   }
 }
