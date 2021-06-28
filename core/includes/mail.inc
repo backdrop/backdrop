@@ -186,7 +186,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
       // Log errors.
       if (!$message['result']) {
         watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
-        backdrop_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
+        backdrop_set_message(t('Unable to send e-mail.'), 'error');
       }
     }
   }
