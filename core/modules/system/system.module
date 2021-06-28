@@ -99,6 +99,12 @@ function system_theme() {
       'variables' => array('settings' => NULL, 'child_delta' => NULL),
       'template' => 'templates/page-components',
     ) + $base,
+    'system_site_maintenance_mode_form_permissions' => array(
+      'render element' => 'form',
+      // Reusing theme_user_admin_permissions() to make it identical to the user
+      // module permissions page.
+      'function' => 'theme_user_admin_permissions',
+    ) + $base,
     'system_admin_index' => array(
       'variables' => array('menu_items' => NULL),
     ) + $base,
