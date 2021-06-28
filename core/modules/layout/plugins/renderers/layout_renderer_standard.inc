@@ -375,6 +375,8 @@ class LayoutRendererStandard {
     }
 
     $this->renderRegions();
+    // This is the fix for views page display contextual links.
+    $this->rendered['regions']['#type'] = 'page';
 
     if ($this->page_title) {
       backdrop_set_title($this->page_title);
@@ -388,6 +390,7 @@ class LayoutRendererStandard {
       $theme = str_replace('-', '_', $this->layout_info['template']);
     }
     $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 
