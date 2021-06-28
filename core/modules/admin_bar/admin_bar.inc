@@ -494,7 +494,7 @@ function admin_bar_links_menu($tree) {
     // They might appear first already, but only as long as there is no link
     // that comes alphabetically first (e.g., a node type with label "Ad").
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      $data['link']['weight'] -= 1000;
+      $data['link']['weight'] = 9999;
     }
 
     $links[$data['link']['href']] = array(
