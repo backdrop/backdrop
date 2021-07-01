@@ -69,3 +69,9 @@ name = Editor access
 description = Tests access to editors and their associated dialogs.
 group = Filter
 file = filter.test
+
+[FilterEditorLinkValidateTestCase]
+name = Editor link validation
+description = Validate correct handling of URLs inserted via editor link dialog.
+group = Filter
+file = filter_dialog.test
