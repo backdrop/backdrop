@@ -40,13 +40,27 @@ class DashboardNewsBlock extends Block {
    */
   public function getContent() {
     $news = $this->getNews();
+    $days_before_news_is_old = 14;
+
     $links = array();
     if ($news) {
       foreach ($news as $key => $notifications) {
-        $links[] = '<p>' . l(
-            $notifications['title'],
-            $notifications['url']
-          ) . ' - ' . filter_xss($notifications['summary']) . '</p>';
+        $is_new = (time() - $notifications['timestamp']) < $days_before_news_is_old * 24 * 60 * 60;
+        $is_new_marker = $is_new ? '<span class="marker">' . t('new') . '</span> ' : '';
+
+        $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
+        $notification_link = l($notifications['title'], $notifications['url'], array('attributes' => array('target'=>'_blank')));
+        $notification_summary = filter_xss($notifications['summary']);
+
+        $notification = array(
+          'data' => '<p>' . $is_new_marker . $notification_date . ': ' . $notification_link . ' - ' . $notification_summary . '</p>',
+        );
+
+        if ($is_new) {
+          $notification['class'] = array('is-new');
+        }
+
+        $links[] = $notification;
       }
     }
 
