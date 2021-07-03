@@ -100,16 +100,17 @@ function theme_field_ui_view_modes($variables) {
   $element = $variables['element'];
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
+  $entity_bundle = $element['#bundle'];
   $path = $element['#admin_path'] . '/display';
 
-  // Get the node type machine name.
-  $node_type = '';
-  foreach (node_type_get_types() as $node_type_name => $node_type) {
-    if ($node_type->name == $element['#bundle']) {
-      $node_type = $node_type_name;
-      break;
-    }
+  // Get the machine name of the entity bundle.
+  $entity_info = entity_get_info($entity_type);
+  $bundle_machine_name = '';
+  $bundles_by_label = array();
+  foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
+    $bundles_by_label[$bundle_info['label']] = $bundle;
   }
+  $bundle_machine_name = $bundles_by_label[$entity_bundle];
 
   $rows = array();
 
@@ -124,7 +125,7 @@ function theme_field_ui_view_modes($variables) {
 
   // Add the row for the default display mode.
   $row = array();
-  $row['label'] = theme('label_machine_name__node_display__' . $node_type, array(
+  $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
     'label' => $label,
     'machine_name' => t('default'),
   ));
@@ -151,7 +152,7 @@ function theme_field_ui_view_modes($variables) {
     $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
     $row = array();
 
-    $row['label'] = theme('label_machine_name__node_display__' . $node_type, array(
+    $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
       'label' => $view_mode_info['label'],
       'machine_name' => $view_mode_name,
     ));
