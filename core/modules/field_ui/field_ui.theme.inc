@@ -100,13 +100,23 @@ function theme_field_ui_view_modes($variables) {
   $element = $variables['element'];
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
+  $entity_bundle = $element['#bundle'];
   $path = $element['#admin_path'] . '/display';
+
+  // Get the machine name of the entity bundle.
+  $entity_info = entity_get_info($entity_type);
+  $bundle_machine_name = '';
+  $bundles_by_label = array();
+  foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
+    $bundles_by_label[$bundle_info['label']] = $bundle;
+  }
+  $bundle_machine_name = $bundles_by_label[$entity_bundle];
 
   $rows = array();
 
   $header = array(
     array('data' => t('Display modes')),
-    array('data' => t('Machine name'), 'class' => array('priority-low')),
+    array('data' => t('Description'), 'class' => array('priority-low')),
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
@@ -115,8 +125,11 @@ function theme_field_ui_view_modes($variables) {
 
   // Add the row for the default display mode.
   $row = array();
-  $row['label'] = $label . '<div class="description">' . $label_desc . '</div>';
-  $row['machine'] = t('default');
+  $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
+    'label' => $label,
+    'machine_name' => t('default'),
+  ));
+  $row['description'] = $label_desc;
   $row['operations'] = array(
     'data' => array(
       '#type' => 'dropbutton',
@@ -139,11 +152,14 @@ function theme_field_ui_view_modes($variables) {
     $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
     $row = array();
 
-    $row['label'] = check_plain(t($view_mode_info['label']));
-    $row['machine'] = $view_mode_name;
+    $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
+      'label' => $view_mode_info['label'],
+      'machine_name' => $view_mode_name,
+    ));
 
     $operations = array();
     if ($view_modes[$view_mode_name]['custom settings']) {
+      $row[] = '';
       $customized_count++;
       $operations['manage'] = array(
         'title' => t('Manage display'),
@@ -158,7 +174,7 @@ function theme_field_ui_view_modes($variables) {
     else {
       $default_count++;
       $row_classes[] = 'uses-default';
-      $row['label'] .= '&nbsp;<small>(<em>' . t('Uses the Default display mode') . '</em>)</small>';
+      $row['description'] = '<em>' . t('Uses the Default display mode') . '</em>';
       if (user_access('administer view modes')) {
         $operations['enable'] = array(
           'title' => t('Enable'),

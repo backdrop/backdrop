@@ -316,7 +316,9 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($instance['label']),
+        '#markup' => theme('label_machine_name__node_fields__' . $bundle, array(
+          'label' => $instance['label'],
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -387,7 +389,9 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'extra_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($extra_field['label']),
+        '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
+          'label' => $extra_field['label'],
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',

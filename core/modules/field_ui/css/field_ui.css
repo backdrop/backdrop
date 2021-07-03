@@ -84,7 +84,8 @@
 .field-ui-view-modes tr.default-view-mode td {
   font-weight: bold;
 }
-.field-ui-view-modes tr.default-view-mode td div.description {
+.field-ui-view-modes tr.default-view-mode td div.description,
+.field-ui-view-modes tr.default-view-mode td div.machine-name {
   font-weight: normal;
 }
 .field-ui-view-modes th.operations {
