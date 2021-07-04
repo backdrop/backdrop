@@ -70,6 +70,47 @@ project:
 - [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
 - [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
 
+<details>
+  <summary>How to begin contributing</summary>
+  
+1. Fork the [repository](https://github.com/backdrop/backdrop.git).
+
+2. Clone the forked repository and configure the upstream remote:
+
+```sh
+git clone https://github.com/<your username>/backdrop.git
+cd backdrop
+git remote add upstream https://github.com/backdrop/backdrop.git
+```
+
+3. Fetch the updates from the upstream branch and synchronize with the local `1.x` branch:
+
+```sh
+git fetch upstream
+git checkout 1.x
+git merge upstream/1.x
+```
+4. Create a new branch:
+
+```sh
+git checkout -b my-new-branch
+```
+
+5. Make changes to the code, then commit the changes and push to the forked repo:
+
+```sh
+git add .
+git commit -m "This is my first commit"
+git push -u origin my-new-branch
+```
+
+6. Go to the [repository](https://github.com/backdrop/backdrop.git) and link a Pull Request to the issue.
+
+After reviewing the pull request, we will provide you with feedback, request further changes and approve the PR to merge the work.
+
+</details>
+
+
 User Guide
 ----------
 Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
