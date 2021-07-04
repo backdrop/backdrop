@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callback file for the user module.
+ * Admin page callbacks for the User module.
  */
 
 /**
@@ -176,11 +176,7 @@ function user_admin_settings($form, &$form_state) {
   );
 
   module_load_include('password.inc', 'user', 'user');
-  $criteria = _user_password_policy_help();
-
-  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
-  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
-  $description .= $criteria;
+  $description = _user_password_policy_help();
 
   $form['password_policy']['user_password_reject_weak'] = array(
     '#type' => 'checkbox',
@@ -492,7 +488,7 @@ function user_admin_permissions_submit($form, &$form_state) {
 }
 
 /**
- * Form to re-order roles or add a new one.
+ * Form to re-order roles.
  *
  * @ingroup forms
  * @see theme_user_admin_roles()
@@ -508,15 +504,19 @@ function user_admin_roles($form, $form_state) {
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
-  // Do not allow the anonymous or authenticated user roles as administrator.
   $roles = user_roles();
+  // Do not allow the anonymous or authenticated roles to be set as the
+  // administrator.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
+  // Add the "disabled" option to the top of the roles list (makes sure that
+  // this is the selected option if the role that was previously set as admin is
+  // deleted).
+  array_unshift($roles, t('disabled'));
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role'),
+    '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
@@ -555,7 +555,7 @@ function user_admin_roles($form, $form_state) {
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure role'),
-      'href' => 'admin/config/people/roles/edit/' . $role_name,
+      'href' => 'admin/config/people/roles/configure/' . $role_name,
       'weight' => 0,
     );
     $links['permissions'] = array(
@@ -587,31 +587,6 @@ function user_admin_roles($form, $form_state) {
     $order++;
   }
 
-  $form['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Add role'),
-    '#title_display' => 'invisible',
-    '#required' => TRUE,
-    '#size' => 32,
-    '#maxlength' => 64,
-  );
-  $form['name'] = array(
-    '#type' => 'machine_name',
-    '#required' => TRUE,
-    '#size' => 32,
-    '#maxlength' => 64,
-    '#machine_name' => array(
-      'source' => array('label'),
-      'exists' => 'user_role_load',
-      'standalone' => TRUE,
-    ),
-    '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
-  );
-  $form['add'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add role'),
-    '#submit' => array('user_admin_roles_add_submit'),
-  );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -643,31 +618,21 @@ function user_admin_roles_order_submit($form, &$form_state) {
 }
 
 /**
- * Form submit function. Create a new user role.
- */
-function user_admin_roles_add_submit($form, &$form_state) {
-  $role = (object) array(
-    'name' => $form_state['values']['name'],
-    'label' => $form_state['values']['label'],
-  );
-  user_role_save($role);
-  backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
-  $form_state['redirect'] = 'admin/config/people/roles';
-}
-
-/**
- * Form to configure a single role.
+ * Form to add or configure a single role.
  *
  * @ingroup forms
  * @see user_admin_role_submit()
  */
-function user_admin_role($form, &$form_state, $role) {
+function user_admin_role($form, &$form_state, $role = NULL) {
   $form_state['role'] = $role;
+  if (empty($role)) {
+    backdrop_set_title('Add role');
+  }
 
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Role name'),
-    '#default_value' => $role->label,
+    '#default_value' => empty($role->label) ? '' : $role->label,
     '#size' => 30,
     '#required' => TRUE,
     '#maxlength' => 64,
@@ -677,22 +642,29 @@ function user_admin_role($form, &$form_state, $role) {
     '#type' => 'machine_name',
     '#size' => 32,
     '#maxlength' => 64,
-    '#default_value' => $role->name,
-    '#disabled' => TRUE,
+    '#default_value' => empty($role->name) ? '' : $role->name,
+    '#disabled' => empty($role->name) ? FALSE : TRUE,
     '#machine_name' => array(
       'exists' => 'user_role_load',
+      'source' => array('label'),
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
   $form['weight'] = array(
     '#type' => 'value',
-    '#value' => $role->weight,
+    '#value' => empty($role->weight) ? 0 : $role->weight,
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save role'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
@@ -701,12 +673,25 @@ function user_admin_role($form, &$form_state, $role) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
-  $role = $form_state['role'];
-  $old_role = $role->label;
-  $role->label = $form_state['values']['label'];
-  user_role_save($role);
-  $new_role = $role->label;
-  backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+  if (empty($form_state['role'])) {
+    // Save a new role.
+    $role = (object) array(
+      'name' => $form_state['values']['name'],
+      'label' => $form_state['values']['label'],
+    );
+    user_role_save($role);
+    backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
+  }
+  else {
+    // Update existing role.
+    $role = $form_state['role'];
+    $old_role = $role->label;
+    $role->label = $form_state['values']['label'];
+    user_role_save($role);
+    $new_role = $role->label;
+    backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+  }
+
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 

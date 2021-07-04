@@ -55,7 +55,7 @@ class Layout {
    *
    * This represents whether this layout is has a default, user-created, or
    * overridden configuration. Possible values for this variable include the
-   * constants LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or 
+   * constants LAYOUT_STORAGE_NORMAL, LAYOUT_STORAGE_OVERRIDE, or
    * LAYOUT_STORAGE_DEFAULT.
    *
    * @var int
@@ -107,7 +107,7 @@ class Layout {
    *
    * @var array
    */
-  //var $relationship = array();
+  var $relationships = array();
 
   /**
    * A LayoutMenuItem containing menu properties for this layout.
@@ -240,6 +240,7 @@ class Layout {
       'content' => 'block',
       'conditions' => 'layout_access',
       'contexts' => 'layout_context',
+      'relationships' => 'layout_relationship',
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
@@ -293,6 +294,7 @@ class Layout {
       'settings' => $this->settings,
       'positions' => $this->positions,
       'contexts' => $this->contexts,
+      'relationships' => $this->relationships,
     );
 
     // Basic validation to prevent data corruption.
@@ -306,7 +308,7 @@ class Layout {
       'content',
       'conditions',
       'contexts',
-      // 'relationships',
+      'relationships',
     );
     foreach ($sub_parts as $config_type) {
       foreach ($this->$config_type as $config_type_key => $config_type_data) {
@@ -771,9 +773,22 @@ class Layout {
   /**
    * Return all contexts (from both the layout and menu item) for this Layout.
    *
-   * return LayoutContext[]
+   * @var int $include_types
+   *   Include a specific list of contexts based on how they are used.
+   *
+   *   This is loaded from the list of constants provided in the
+   *   LayoutContext class, which includes the following:
+   *
+   *   - USAGE_TYPE_ALL - All contexts from all possible sources.
+   *   - USAGE_TYPE_CUSTOM - Contexts manually specified in configuration.
+   *   - USAGE_TYPE_MENU - Contexts automatically provided from a menu path.
+   *   - USAGE_TYPE_SYSTEM - Global contexts such as logged-in user.
+   *   - USAGE_TYPE_RELATIONSHIP - Contexts added through relationships.
+   *
+   * @return LayoutContext[]
    */
-  function getContexts() {
+  function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
+    // Initialize a list of contexts if not defined.
     if (is_null($this->contexts)) {
       $this->contexts = array();
     }
@@ -797,14 +812,14 @@ class Layout {
       $this->contexts += layout_context_required_by_path($this->path);
     }
 
+    // Load contexts from relationships.
+    if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
+      $this->contexts += $this->getContextsFromRelationships();
+    }
+
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
-      $this->contexts['current_user'] = layout_create_context('user', array(
-        'name' => 'current_user',
-        'label' => t('Current user'),
-        'locked' => TRUE,
-      ));
-      $this->contexts['current_user']->setData($GLOBALS['user']);
+      $this->contexts['current_user'] = layout_current_user_context();
     }
 
     // Add on the overrides path context, which is always available.
@@ -815,7 +830,20 @@ class Layout {
       ));
     }
 
-    return $this->contexts;
+    // Return all contexts if requested.
+    if ($include_types === LayoutContext::USAGE_TYPE_ALL) {
+      return $this->contexts;
+    }
+
+    // Otherwise filter down the list of contexts to only those requested.
+    $return_contexts = array();
+    foreach ($this->contexts as $key => $context) {
+      if ($context->usageType & $include_types) {
+        $return_contexts[$key] = $context;
+      }
+    }
+
+    return $return_contexts;
   }
 
   /**
@@ -874,6 +902,56 @@ class Layout {
     }
 
     return TRUE;
+  }
+
+  /**
+   * @param LayoutRelationship $relationship
+   *   A relationship object.
+   *
+   * @param LayoutContext $source_context
+   *   The context this relationship is based upon.
+   *
+   * @return LayoutContext|FALSE
+   *   A context object if one can be loaded.
+   */
+  private function getContextFromRelationship(LayoutRelationship $relationship, LayoutContext $source_context) {
+    $new_context = clone($source_context);
+    $context = $relationship->getContext($new_context);
+    if ($context) {
+      $context->usageType = LayoutContext::USAGE_TYPE_RELATIONSHIP;
+      return $context;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Load the contexts based on this Layout's relationship configuration.
+   */
+  private function getContextsFromRelationships() {
+    $contexts = array();
+    $contexts_from_relationships_list = array();
+    foreach ($this->relationships as $relationship_name => $relationship_data) {
+      $key = 'relationship_' . $relationship_name;
+      if (!isset($contexts_from_relationships_list[$key])) {
+        foreach ($this->contexts as $context) {
+          if ($context->plugin == $relationship_data->context) {
+            $plugin_array = explode(':', $relationship_data->settings['relationship']);
+            if ($plugin_array[1] != 'child') {
+              $relationship_data->childDelta = $plugin_array[1];
+            }
+            $contexts_from_relationships_list[$key] = $this->getContextFromRelationship($relationship_data, $context);
+          }
+        }
+      }
+    }
+    if ($contexts_from_relationships_list) {
+      foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
+        if (is_object($context_from_relationships)) {
+          $contexts[$key] = $context_from_relationships;
+        }
+      }
+    }
+    return $contexts;
   }
 
   /**

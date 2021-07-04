@@ -61,13 +61,13 @@
  * - $view_mode: Display mode, e.g. 'full', or 'teaser'.
  * - $teaser: Flag for the teaser state (shortcut for $view_mode == 'teaser').
  * - $page: Flag for the full page state.
- * - $promote: Flag for front page promotion state.
+ * - $promote: Flag for home page promotion state.
  * - $sticky: Flags for sticky post setting.
  * - $status: Flag for published status.
  * - $comment: State of comment settings for the node.
  * - $readmore: Flags true if the teaser content of the node cannot hold the
  *   main body content.
- * - $is_front: Flags true when presented in the front page.
+ * - $is_front: Flags true when presented in the home page.
  * - $logged_in: Flags true when the current user is a logged-in member.
  * - $is_admin: Flags true when the current user is an administrator.
  *

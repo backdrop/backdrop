@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative functions for Layout module.
+ * Admin page callbacks for the Layout module.
  *
  * This provides the UI to list, create, edit and delete layouts.
  */
@@ -272,12 +272,21 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
+  $items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = theme('item_list', array('items' => $items));
+
   $form['path'] = array(
     '#title' => t('Path'),
+    '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => t('Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
+    '#description' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
     '#access' => !$layout->isDefault(),
   );
   $form['path_update'] = array(
@@ -302,25 +311,28 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
 
-  $contexts = $layout->getContexts();
+  // Get all contexts except those provided by relationships.
+  $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
+    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
     // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
   $form['context_wrapper']['#suffix'] = '</div>';
   $form['context_wrapper']['context'] = array(
-    '#title' => t('Contexts'),
     '#type' => 'container',
     '#parents' => array('context'),
   );
 
-  $form['context_wrapper']['context']['add'] = array(
+  $form['context_wrapper']['context']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['context_wrapper']['context']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add context'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -332,9 +344,26 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
+
+  // Get contexts from relationships
+  $relevant_relationships = layout_relationships_get_relevant_info($contexts);
+  if (!empty($relevant_relationships)) {
+    $form['context_wrapper']['context']['links']['add_relationship'] = array(
+      '#type' => 'submit',
+      '#name' => 'relationship_add_button',
+      '#value' => t('Add relationship'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+      '#validate' => array(),
+      '#submit' => array(
+        'layout_settings_form_update_layout',
+        'layout_settings_form_context_add',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+    );
+  }
 
   $all_context_info = _layout_get_all_info('layout_context');
   $context_options = array();
@@ -351,7 +380,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   foreach ($contexts as $context_key => $layout_context) {
-    if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
+    if ($layout_context->usageType !== LayoutContext::USAGE_TYPE_SYSTEM) {
       // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
@@ -418,8 +447,53 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
+  $all_relationship_info = _layout_get_all_info('layout_relationship');
+  foreach ($layout->relationships as $relationship_key => $relationship) {
+    $form['context_wrapper']['context']['required'][$relationship_key]['summary'] = array(
+      '#markup' => $relationship->getAdminSummary(),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['plugin'] = array(
+      '#markup' => isset($all_relationship_info[$relationship->plugin]['title']) ?
+        check_plain($all_relationship_info[$relationship->plugin]['title']) :
+        t('Broken'),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('layout-operations')),
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations']['remove'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-context-remove')),
+      '#validate' => array(),
+      '#submit' => array(
+        'layout_settings_form_context_relationship_remove',
+        'layout_settings_form_update_layout',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_update',
+      ),
+      '#name' => 'conditions_' . $relationship_key . '_remove',
+    );
+    $form['context_wrapper']['context']['required'][$relationship_key]['operations']['configure'] = array(
+      '#type' => 'submit',
+      '#value' => t('Configure'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
+      '#validate' => array(
+        'layout_settings_form_validate',
+      ),
+      '#submit' => array(
+        'layout_settings_form_context_relationship_edit',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+      '#name' => 'conditions_' . $relationship_key . '_configure',
+    );
+  }
+
   // Display a notice if overriding a system path that normally contains
-  // wildcards e.g. node/1 instead of node/%. This is usually (but not always)
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
@@ -436,11 +510,14 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['conditions'] = array(
     '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same wildcard path.'),
+    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same placeholder path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -452,8 +529,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
@@ -542,7 +617,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   $path = $form_state['values']['path'] = trim($form_state['values']['path'], '/');
 
   if (strpos($path, '%') === 0) {
-    form_error($form['path'], t('The first part of a path may not be a wildcard.'));
+    form_error($form['path'], t('The first part of a path may not be a placeholder.'));
   }
 
   // Ensure the path is not already an alias to something else.
@@ -562,7 +637,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($parts as $part) {
     $wildcard_position = strpos($part, '%');
     if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
-      form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      form_error($form['path'], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
     }
   }
 
@@ -901,7 +976,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     $form['top']['button']['#links'] = array(
       array(
         'title' => t('View page'),
-        'href' => url($link_path),
+        'href' => $link_path,
       )
     );
   }
@@ -1359,7 +1434,10 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#id' => 'block-access',
     '#weight' => 20,
   );
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -1371,8 +1449,6 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
   $form['conditions']['active'] = array(
     '#type' => 'container',
@@ -2463,7 +2539,10 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
       '#name' => 'conditions[' . $access_key . '][configure]',
     );
   }
-  $form['conditions']['add'] = array(
+  $form['conditions']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
     '#value' => t('Add visibility condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
@@ -2473,8 +2552,6 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -2983,7 +3060,7 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
     '#title' => t('CSS classes for inner wrapper'),
     '#type' => 'textfield',
     '#default_value' => isset($layout->settings[$region_name]['classes']) ? $layout->settings[$region_name]['classes'] : '',
-    '#description' => t('Available only after selecting an HTML element. Separate multiple classes with spaces.'),
+    '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
     '#states' => array(
       'disabled' => array(
         ':input[name="element"]' => array('value' => ''),
