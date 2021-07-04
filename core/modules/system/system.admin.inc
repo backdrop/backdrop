@@ -1619,7 +1619,7 @@ function system_message_settings($form, &$form_state) {
   $form['messages']['messages_dismissable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow messages to be dismissed'),
-    '#description' => t('A link will be added to all messages allowing users to manually dismiss them.'),
+    '#description' => t('A link will be added to all messages, allowing users to manually dismiss them.'),
     '#default_value' => config_get('system.core', 'messages_dismissable'),
   );
 
