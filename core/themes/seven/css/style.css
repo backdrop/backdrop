@@ -290,7 +290,7 @@ ul.primary li.active a,
   border: none;
   overflow: visible;
   line-height: 1;
-  color: #757575;
+  color: #606060;
   font-weight: normal;
   background-color: #DBDBD9;
   transition:
@@ -629,6 +629,11 @@ tr.selected td {
 @media screen and (max-width: 720px) {
   th.priority-low,
   td.priority-low {
+    display: none;
+  }
+}
+@media screen and (min-width: 721px) {
+  .tableresponsive-toggle-columns {
     display: none;
   }
 }

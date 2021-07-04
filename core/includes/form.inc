@@ -562,10 +562,12 @@ function form_get_cache($form_build_id, &$form_state) {
  * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
+  $site_config = config('system.core');
+  
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
-  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
+  $expire = settings_get('form_cache_expiration', $site_config->get('form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -587,7 +589,7 @@ function form_set_cache($form_build_id, $form, $form_state) {
   }
 
   // Cache form state.
-  if (config_get('system.core', 'cache') && backdrop_page_is_cacheable()) {
+  if ($site_config->get('cache') && backdrop_page_is_cacheable()) {
     $form_state['build_info']['immutable'] = TRUE;
   }
   if ($data = array_diff_key($form_state, array_flip(form_state_keys_no_cache()))) {

@@ -1,9 +1,9 @@
 <?php
 
 /**
-* @file
-* API functions for installing modules and themes.
-*/
+ * @file
+ * API functions for installing modules and themes.
+ */
 
 /**
  * Indicates that a module has not been installed yet.

@@ -637,11 +637,18 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are only shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Change the view mode.
     $teaser_edit = array();
     $teaser_edit['view_mode'] = 'teaser';
     $this->backdropPost(NULL, $teaser_edit, t('Switch'));
+    // Make sure that the warnings are still shown, and that they are only shown
+    // once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Check that the preview is displaying the title, body, and term.
     $this->assertText($edit[$title_key], 'Title displayed.');
@@ -663,6 +670,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     $this->backdropPost(NULL, array(), t('Save'));
 
@@ -671,6 +682,9 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
 
     // Edit an existing node to check preview works.
     $this->clickLink('Edit');
@@ -679,6 +693,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Login as a second user with path permissions.
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
@@ -692,6 +710,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit[$body_key] = $this->randomName(16);
     $edit['status'] = 0;
     $this->backdropPost('node/add/page', $edit, t('Preview'));
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
 
@@ -700,13 +722,16 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
 
-    // Return to preview and save.
+    // Save changes.
     $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
     $this->backdropPost(NULL, array(), t('Save'));
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
-    // Edit the node, check status then preview and save.
+    // Edit the node, check status, then preview and save.
     $this->clickLink('Edit');
     $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
 
@@ -717,7 +742,14 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
     $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
     $this->backdropPost(NULL, array(), t('Save'));
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
     $node = $this->backdropGetNodeByTitle($name, TRUE);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
@@ -739,6 +771,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Test that a user with permissions to edit, but not create, can still
     // access preview.
@@ -754,6 +790,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->clickLink('Edit');
     $this->backdropPost(NULL, array(), t('Preview'));
     $this->assertText($name, 'Title displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
     $url = $this->getUrl();
 
     // Test that a user with no create or edit permissions cannot access

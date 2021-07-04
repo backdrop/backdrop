@@ -1108,6 +1108,12 @@ description = Tests the hook_module_implements_alter.
 group = Module
 file = module.test
 
+[PagerFunctionalWebTestCase]
+name = Pager functionality
+description = Tests pager functionality.
+group = Pager
+file = pager.test
+
 [PasswordHashingTest]
 name = Password hashing
 description = Password hashing unit tests.

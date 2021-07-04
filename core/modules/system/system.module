@@ -974,21 +974,21 @@ function system_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls/check'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings/check'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1284,6 +1284,16 @@ function system_library_info() {
     ),
     // CSS is added conditionally below.
   );
+
+  // Announce.
+  $libraries['backdrop.announce'] = array(
+    'title' => 'Announce',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/announce.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   $libraries['backdrop.menu-toggle'] = array(
     'title' => 'Backdrop menu toggle',
     'version' => BACKDROP_VERSION,
@@ -2707,7 +2717,7 @@ function system_check_directory($form_element) {
  * @param $files
  *   An array of files to check.
  * @param $type
- *   The type of the files.
+ *   The type of the files ('module', 'theme', 'layout').
  */
 function system_get_files_database(&$files, $type) {
   // Extract current files from database.
@@ -4256,6 +4266,56 @@ function path_autocomplete($string = '') {
   // Allow modules to alter the matches.
   backdrop_alter('path_autocomplete', $matches, $string);
   backdrop_json_output($matches);
+}
+
+/**
+ * Menu callback; Redirects a deprecated menu location to a new path.
+ *
+ * This wrapper around backdrop_goto_deprecated() should be used as the menu
+ * callback in hook_menu() when redirecting from an old path to a new one.
+ *
+ * @param string $path
+ *   The path to which the user should be redirected. Because this is intended
+ *   to be used as a page callback, the old path is pulled from the current
+ *   menu location (the $_GET['q'] variable).
+ * @param array $argument_map
+ *   If the old path and new path have differing argument orders, this can be
+ *   used to map an argument from one position to another. An old path of
+ *   "my-module/%key-one/edit/%" could be redirected to
+ *   "my-module/configure/%key-one/%" by setting a map such as:
+ *    @code
+ *    array(
+ *      1 => 2
+ *      3 => 3
+ *    );
+ *    @endcode
+ *
+ *    Note that this map is zero-indexed.
+ *
+ * @see arg()
+ *
+ * @since 1.19.0 Function added.
+ */
+function system_redirect_deprecated_page($path, $argument_map = array()) {
+  // The argument map is passed in as old => new. But we need to get the old
+  // keys based on the new position in $path. So flip to make retrieving easy.
+  $argument_map = array_flip($argument_map);
+
+  // Perform any substitutions in the passed-in path with the current path.
+  $parts = explode('/', $path);
+  foreach ($parts as $index => $path_part) {
+    if (backdrop_substr($path_part, 0, 1) === '%') {
+      if (!empty($argument_map)) {
+        $parts[$index] = arg($argument_map[$index]);
+      }
+      else {
+        $parts[$index] = arg($index);
+      }
+    }
+  }
+  $path = implode('/', $parts);
+
+  backdrop_goto_deprecated($path);
 }
 
 /**

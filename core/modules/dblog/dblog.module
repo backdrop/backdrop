@@ -151,15 +151,16 @@ function dblog_watchdog(array $log_entry) {
  * Implements hook_form_FORM_ID_alter() for system_logging_settings().
  */
 function dblog_form_system_logging_settings_alter(&$form, $form_state) {
+  $site_config = config('system.core');
   $form['dblog_row_limit'] = array(
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
-    '#default_value' => config_get('system.core', 'log_row_limit'),
+    '#default_value' => $site_config->get('log_row_limit'),
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
 
-  $format = config_get('system.core', 'log_date_format');
+  $format = $site_config->get('log_date_format');
   $pattern = isset($form_state['values']['dblog_date_format']) ? $form_state['values']['dblog_date_format'] : $format;
   $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
 
