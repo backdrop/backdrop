@@ -242,7 +242,7 @@ function block_add_block_form_validate($form, &$form_state) {
  */
 function block_add_block_form_submit($form, &$form_state) {
   block_custom_block_save($form_state['values'], $form_state['values']['delta']);
-  backdrop_set_message(t('The block has been created.'));
+  backdrop_set_message(t('The block has been created. You can place it in one or more <a href="@layouts">layouts</a>.', array('@layouts' => url('admin/structure/layouts'))));
   $form_state['redirect'] = 'admin/structure/block';
 }
 
