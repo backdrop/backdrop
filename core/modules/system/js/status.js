@@ -1,13 +1,11 @@
 (function ($) {
 
 /**
- * Filters the module list table by a text input search string.
- *
- * Additionally accounts for multiple tables being wrapped in "package" fieldset
- * elements.
+ * Toggles the more/less links that show/hide details in the "Status report"
+ * page.
  */
 Backdrop.behaviors.statusReport = {
-  attach: function(context, settings) {
+  attach: function() {
     var $table = $('table.system-status-report');
 
     // Hide the description for non-urgent items.
