@@ -197,10 +197,11 @@ function config_export_full_form_submit(array $form, array &$form_state) {
  * Downloads a tarball of the site configuration.
  */
 function config_download_full_export() {
-  $file_path = file_create_filename('config.tar.gz', file_directory_temp());
+  $temp = config_get('system.core', 'file_temporary_path');
+  $file_path = file_create_filename('config.tar.gz', $temp);
   $config_storage = config_get_config_storage();
   $config_storage->exportArchive($file_path);
-  $filename = str_replace(file_directory_temp() . '/', '', $file_path);
+  $filename = str_replace($temp . '/', '', $file_path);
   $headers = array(
     'Content-Disposition' => 'attachment; filename=config.tar.gz',
     'Content-type' => 'application/x-gzip',
