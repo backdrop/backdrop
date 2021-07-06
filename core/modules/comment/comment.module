@@ -668,17 +668,18 @@ function comment_node_view(Node $node, $view_mode) {
         }
       }
     }
-    elseif ($view_mode != 'search_index' && $view_mode != 'search_result') {
-      // Node in other display modes: add a "post comment" link if the user is
+    elseif ($view_mode != 'search_index' && $view_mode != 'search_result' && arg(0) == 'node') {
+      // Node in other display modes: add an "Add comment" link if the user is
       // allowed to post comments and if this node is allowing new comments.
       // But we don't want this link if we're building the node for search
-      // indexing or constructing a search result excerpt.
+      // indexing, or constructing a search result excerpt, or posting a 
+      // reply not on a node page, but a separate comment form page.
       if ($node->comment == COMMENT_NODE_OPEN) {
         $comment_form_location = $node_type->settings['comment_form_location'];
         if (Comment::createAccess()) {
-          // Show the "post comment" link if the form is on another page, or
+          // Show the "Add comment" link if the form is on another page, or
           // if there are existing comments that the link will skip past.
-          if ($comment_form_location == COMMENT_FORM_SEPARATE_PAGE || (!empty($node->comment_count) && user_access('access comments'))) {
+          if (!empty($node->comment_count) && user_access('access comments')) {
             $links['comment-add'] = array(
               'title' => t('Add comment'),
               'attributes' => array('title' => t('Share your thoughts and opinions related to this posting.')),
