@@ -39,11 +39,10 @@ jobs:
 
       - name: Setup webserver
         run: |
-          ps aux|grep php
-          ls -lR /usr/local/php/*
           ls -la /run/php
           #cat /usr/local/php/5.3/etc/php-fpm.conf
           #ls -l /etc/apache2/conf-available/php*
+          ls -l /etc/alternatives/php-fpm.sock
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
