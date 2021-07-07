@@ -5,9 +5,10 @@ jobs:
     name: Run Simpletest in batches
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         php-versions: ['5.3', '7.4']
-        fraction: ['1/4', '2/4']
+        fraction: ['1/20']
 
     steps:
       - name: Setup MySQL and create database
@@ -42,7 +43,7 @@ jobs:
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
           sudo apache2ctl -M
-          sudo a2dismod php
+          #sudo a2dismod php
           sudo apt-get install libapache2-mod-fcgid
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
           sudo systemctl start apache2.service
