@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['5.4']
+        php-versions: ['5.3']
         fraction: ['1/20']
 
     steps:
