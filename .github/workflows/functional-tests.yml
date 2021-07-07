@@ -40,8 +40,6 @@ jobs:
 
       - name: Setup webserver
         run: |
-          cat /etc/hosts
-          sudo echo "127.0.0.1 localhost" >> /etc/hosts
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
