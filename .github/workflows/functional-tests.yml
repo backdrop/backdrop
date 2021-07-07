@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['5.3', '7.4']
+        php-versions: ['5.3']
         fraction: ['1/20']
 
     steps:
@@ -39,8 +39,9 @@ jobs:
 
       - name: Setup webserver
         run: |
-          ls -l /etc/php/*
-          ls -l /usr/local/php/*
+          ls -l /usr/local/php/etc/*
+          ps aux|grep php
+          ls -la /run/php
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
