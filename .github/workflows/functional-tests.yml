@@ -1,0 +1,13 @@
+name: Functional tests
+on: [push, pull_request]
+jobs:
+  batches:
+    name: Run Simpletest in batches
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Setup MySQL and create database
+        run: |
+          sudo grep -r datadir /etc/mysql/
+          sudo grep -r tmpdir /etc/mysql/
+          echo $PWD
