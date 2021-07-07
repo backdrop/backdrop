@@ -53,8 +53,11 @@ jobs:
           # Also php 5.3, which has its configuration under /usr/local.
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
-          sudo /usr/local/php/5.3/etc/init.d/php5.3-fpm restart
+          sudo systemctl stop php5.3-fpm.service
+          sudo systemctl start php5.3-fpm.service
           ls -la /run/php
+          sudo systemctl list-unit-files
+          sudo cat /etc/apache2/sites-available/000-default.conf
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
 
