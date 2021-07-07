@@ -8,6 +8,12 @@ jobs:
     steps:
       - name: Setup MySQL and create database
         run: |
-          sudo grep -r datadir /etc/mysql/
-          sudo grep -r tmpdir /etc/mysql/
-          echo $PWD
+          sudo mkdir /dev/shm/mysql_tmp
+          sudo chown mysql:mysql /dev/shm/mysql_tmp
+          sudo sed -i -e 's?datadir\s*=.*?datadir = /dev/shm/mysql?' \
+            -e 's?tmpdir\s*=.*?tmpdir = /dev/shm/mysql_tmp?' /etc/mysql/mysql.conf.d/mysqld.cnf
+          sudo mv /var/lib/mysql /dev/shm
+          sudo systemctl start mysql.service
+          echo -e '[client]\nuser = root\npassword = root' > .my.cnf
+          mysql -V
+          mysql -e 'SHOW VARIABLES LIKE "innodb_buffer_pool%";'
