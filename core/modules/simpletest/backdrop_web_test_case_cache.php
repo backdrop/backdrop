@@ -38,8 +38,10 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
 
   /**
    * Prepare cache tables and config directories.
+   *
+   * @todo Make skip_myisam a commandline option.
    */
-  public function prepareCache($skip_myisam = FALSE) {
+  public function prepareCache($skip_myisam = TRUE) {
     $this->setUp();
 
     if (!$skip_myisam) {
