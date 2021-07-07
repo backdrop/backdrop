@@ -39,14 +39,16 @@ jobs:
 
       - name: Setup webserver
         run: |
+          php -m
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
+          sudo systemctl start apache2.service
           sudo apache2ctl -M
           #sudo a2dismod php
           sudo apt-get install libapache2-mod-fcgid
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
-          sudo systemctl start apache2.service
+          sudo systemctl restart apache2.service
           # Let php process run as user "runner".
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
