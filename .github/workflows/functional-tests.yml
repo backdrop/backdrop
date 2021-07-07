@@ -40,8 +40,10 @@ jobs:
       - name: Setup webserver
         run: |
           ps aux|grep php
-          ls -lR /usr/local/php/*
+          ls -lR /usr/local/php/etc/*
           ls -la /run/php
+          cat /usr/local/php/5.3/etc/php-fpm.conf
+          ls -l /etc/apache2/conf-available/php*
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
@@ -53,8 +55,8 @@ jobs:
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           # Also php 5.3, which has its configuration under /usr/local.
-          sudo sed -i -e 's/user = www-data/user = runner/' \
-            -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
+          #sudo sed -i -e 's/user = www-data/user = runner/' \
+          #  -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           curl -sI 'http://localhost/'
 
