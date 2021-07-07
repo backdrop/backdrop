@@ -48,6 +48,7 @@ jobs:
           sudo apt-get install libapache2-mod-fcgid
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
           # Let php process run as user "runner".
+          sudo chown runner /var/run
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           # Also php 5.3, which has its configuration under /usr/local.
@@ -56,8 +57,6 @@ jobs:
           sudo systemctl stop php5.3-fpm.service
           sudo systemctl start php5.3-fpm.service
           ls -la /run/php
-          sudo systemctl list-unit-files
-          sudo cat /etc/apache2/sites-available/000-default.conf
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
 
