@@ -170,11 +170,11 @@
   border: 1px solid #99d1ff;
 }
 
-.image-form-wrapper {
+.editor-dialog-with-library .ui-dialog-content {
   display: flex;
   flex-direction: row;
 }
-.editor-image-fields {
+.filter-format-editor-image-form {
   width: 350px;
   flex-grow: 0;
   padding-top: 0;

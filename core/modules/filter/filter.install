@@ -481,6 +481,68 @@ function filter_update_1003() {
 }
 
 /**
+ * Add an exposed filename filter to the image_library view.
+ */
+function filter_update_1004() {
+  // See if the image_library view has been modified on this site.
+  $config = config('views.view.image_library');
+
+  // Only update if view isn't overridden
+  if ($config->get('storage') == VIEWS_STORAGE_OVERRIDE) {
+    return;
+  }
+  else {
+    $path = config_get_config_directory();
+    $contents = file_get_contents($path . '/views.view.image_library.json');
+    $data = json_decode($contents, true);
+    $data['display']['default']['display_options']['filters']['filename'] = array(
+      'id' => 'filename',
+      'table' => 'file_managed',
+      'field' => 'filename',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'ui_name' => '',
+      'operator' => 'contains',
+      'value' => '',
+      'group' => '1',
+      'exposed' => true,
+      'expose' => array(
+          'operator_id' => 'filename_op',
+          'label' => 'Filename',
+          'description' => '',
+          'use_operator' => 0,
+          'operator' => 'filename_op',
+          'identifier' => 'filename',
+          'required' => 0,
+          'remember' => 0,
+          'multiple' => false,
+          'remember_roles' => array(
+              'authenticated' => 'authenticated',
+              'anonymous' => 0,
+              'editor' => 0,
+              'administrator' => 0
+          ),
+      ),
+      'is_grouped' => false,
+      'group_info' => array(
+          'label' => '',
+          'description' => '',
+          'identifier' => '',
+          'optional' => true,
+          'widget' => 'select',
+          'multiple' => false,
+          'remember' => 0,
+          'default_group' => 'All',
+          'default_group_multiple' => [],
+          'group_items' => []
+      ),
+    );
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

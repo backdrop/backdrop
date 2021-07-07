@@ -92,6 +92,16 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['filter_image_library_ajax'] = array(
+    'title' => 'Image library',
+    'page callback' => '_filter_image_library_ajax',
+    'access callback' => 'user_access',
+    'access arguments' => array('upload editor images'),
+    'theme callback' => 'ajax_base_page_theme',
+    'delivery callback' => '_filter_image_library_ajax_deliver',
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
   $items['filter/tips/%filter_format'] = array(
     'title' => 'Compose tips',
     'page callback' => 'filter_tips_long',
@@ -155,6 +165,16 @@ function filter_menu() {
     'file' => 'filter.admin.inc',
   );
   return $items;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function filter_admin_paths() {
+  $paths = array(
+    'filter_image_library_ajax' => TRUE,
+  );
+  return $paths;
 }
 
 /**
