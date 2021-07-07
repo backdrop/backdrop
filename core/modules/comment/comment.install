@@ -50,6 +50,7 @@ function comment_uninstall() {
       'comment_form_location',
       'comment_preview',
       'comment_subject_field',
+      'comment_subject_hide',
       'comment_user_picture',
       'comment_close_enabled',
       'comment_close_days'
