@@ -53,4 +53,4 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --verbose --color --split=${{ matrix.fraction }} --concurrency 5
+          core/scripts/run-tests.sh --force --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 5
