@@ -36,6 +36,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
+          tools: none
 
       - name: Setup webserver
         run: |
@@ -43,7 +44,6 @@ jobs:
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
           sudo apt-get install libapache2-mod-fcgid
-          sudo a2enmod rewrite proxy fcgid proxy_fcgi
           # Let php process run as user "runner".
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
@@ -56,11 +56,12 @@ jobs:
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           # At that point no more socket in older php.
           sudo ls -la /run/php
+          sudo a2enmod rewrite proxy fcgid proxy_fcgi
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
 
       - name: Install Backdrop
-        run: core/scripts/install.sh --db-url=mysql://root:root@localhost/backdrop
+        run: core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
 
       - name: Run tests
         run: |
