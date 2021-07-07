@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['5.3', '7.4']
-        fraction: ['1/30']
+        fraction: ['1/5', '2/5', '3/5', '4/5', '5/5']
 
     steps:
       - name: Setup MySQL and create database
@@ -57,7 +57,6 @@ jobs:
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           sudo a2enmod rewrite proxy fcgid proxy_fcgi headers
           sudo systemctl start apache2.service
-          sudo apache2ctl -M
           curl -sI 'http://localhost/'
 
       - name: Install Backdrop
