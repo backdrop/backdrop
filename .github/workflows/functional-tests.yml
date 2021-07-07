@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.4']
-        fraction: ['1/20']
+        php-versions: ['5.3', '7.4']
+        fraction: ['1/4', '2/4']
 
     steps:
       - name: Setup MySQL and create database
@@ -48,7 +48,7 @@ jobs:
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
-          curl -I 'http://localhost/'
+          curl -sI 'http://localhost/'
 
       - name: Install Backdrop
         run: core/scripts/install.sh --db-url=mysql://root:root@localhost/backdrop
