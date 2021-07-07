@@ -4,21 +4,41 @@ jobs:
   batches:
     name: Run Simpletest in batches
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['7.4']
 
     steps:
       - name: Setup MySQL and create database
         run: |
+          # Disable apparmor for mysql.
           sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
           sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+          # Move datadir and tmpdir to shared memory.
           sudo mkdir /dev/shm/mysql_tmp
           sudo chown mysql:mysql /dev/shm/mysql_tmp
           sudo sed -i -e 's?datadir\s*=.*?datadir = /dev/shm/mysql?' \
             -e 's?tmpdir\s*=.*?tmpdir = /dev/shm/mysql_tmp?' /etc/mysql/mysql.conf.d/mysqld.cnf
-          sudo cat /etc/mysql/mysql.conf.d/mysqld.cnf
           sudo mv /var/lib/mysql /dev/shm
           sudo systemctl start mysql.service
-          sudo systemctl status mysql.service
+          # Use .my.cnf to avoid user / password on commandline.
           echo -e '[client]\nuser = root\npassword = root' > ~/.my.cnf
-          cat ~/.my.cnf
           mysql -V
-          mysql -e 'SHOW VARIABLES LIKE "innodb_buffer_pool%";'
+          mysql -e 'CREATE DATABASE backdrop;'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Setup webserver
+        run: |
+          sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
+          sudo apt-get install libapache2-mod-fcgid
+          sudo a2enmod rewrite proxy fcgid proxy_fcgi
+          sudo systemctl start apache2.service
+          # Let php process run as user "runner".
+          sudo sed -i -e 's/user = www-data/user = runner/' \
+            -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
+          sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
