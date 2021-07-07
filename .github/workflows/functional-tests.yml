@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['5.3', '7.4']
-        fraction: ['1/5', '2/5', '3/5', '4/5', '5/5']
+        fraction: ['1/5']
 
     steps:
       - name: Setup MySQL and create database
@@ -40,6 +40,8 @@ jobs:
 
       - name: Setup webserver
         run: |
+          cat /etc/hosts
+          sudo echo "127.0.0.1 localhost" >> /etc/hosts
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
@@ -55,7 +57,7 @@ jobs:
               -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
           fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
-          sudo a2enmod rewrite proxy fcgid proxy_fcgi headers
+          sudo a2enmod rewrite proxy fcgid proxy_fcgi
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
 
@@ -65,4 +67,4 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 4
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 8
