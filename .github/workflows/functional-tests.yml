@@ -38,7 +38,9 @@ jobs:
 
       - name: Setup webserver
         run: |
+          # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
+          sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/"
           sudo apt-get install libapache2-mod-fcgid
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
           sudo systemctl start apache2.service
@@ -46,8 +48,7 @@ jobs:
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
-          curl --silent http://localhost/
-          curl --silent http://localhost/user
+          curl -I 'http://localhost/'
 
       - name: Install Backdrop
         run: core/scripts/install.sh --db-url=mysql://root:root@localhost/backdrop
