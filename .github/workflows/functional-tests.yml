@@ -39,8 +39,8 @@ jobs:
 
       - name: Setup webserver
         run: |
-          ls -l /usr/local/php/etc/*
           ps aux|grep php
+          ls -lR /usr/local/php/*
           ls -la /run/php
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
