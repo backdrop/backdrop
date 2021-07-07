@@ -51,6 +51,7 @@ jobs:
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           # Also php 5.3, which has its configuration under /usr/local.
+          ls -la /usr/local/php/5.3/etc/php-fpm.d/
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
           sudo systemctl status php${{ matrix.php-versions }}-fpm.service
