@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         php-versions: ['7.4']
-        fraction: ['1/10', '2/10']
+        fraction: ['1/20']
 
     steps:
       - name: Setup MySQL and create database
@@ -46,6 +46,8 @@ jobs:
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
+          curl --silent http://localhost/
+          curl --silent http://localhost/user
 
       - name: Install Backdrop
         run: core/scripts/install.sh --db-url=mysql://root:root@localhost/backdrop
