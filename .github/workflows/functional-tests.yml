@@ -47,15 +47,14 @@ jobs:
           # Let php process run as user "runner".
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
-          # Also php 5.x, which has its configuration under /usr/local.
-          sudo a2query -M
-          sudo a2dismod mpm_event
-          sudo a2enmod mpm_prefork
-          sudo sed -i -e 's/user = www-data/user = runner/' \
-            -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
+          # PHP 5.x needs some extra steps.
+          if (( $(echo "${{ matrix.php-versions }} < 7" | bc -l) )); then
+            sudo a2dismod mpm_event
+            sudo a2enmod mpm_prefork
+            sudo sed -i -e 's/user = www-data/user = runner/' \
+              -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
+          fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
-          # At that point no more socket in older php.
-          sudo ls -la /run/php
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
