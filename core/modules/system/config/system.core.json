@@ -11,6 +11,7 @@
     "active_menus_default": [],
     "admin_theme": "",
     "anonymous": "Anonymous",
+    "block_interest_cohort": 1,
     "cache": 0,
     "canonical_secure": 0,
     "clean_url": 0,
