@@ -54,7 +54,7 @@ jobs:
             sudo sed -i -e 's/user = www-data/user = runner/' \
               -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
             # Debug.
-            sudo cat /usr/local/php/{{ matrix.php-versions }}/etc/php-fpm.conf
+            sudo cat /usr/local/php/${{ matrix.php-versions }}/etc/php-fpm.conf
           fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
