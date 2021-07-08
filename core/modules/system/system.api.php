@@ -3001,6 +3001,7 @@ function hook_update_last_removed() {
  */
 function hook_uninstall() {
   state_del('my_module_last_cron');
+  config('my_module.settings')->delete();
 }
 
 /**
