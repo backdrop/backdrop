@@ -288,8 +288,11 @@ function user_admin_settings($form, &$form_state) {
  */
 function user_admin_settings_submit($form, &$form_state) {
   system_settings_form_submit($form, $form_state);
-  // Clear the token cache.
+  // Clear the token cache, which also resets token-related static variables.
   token_cache_clear();
+
+  // Clear all other caches, because menu items and permissions may have changed.
+  backdrop_flush_all_caches();
 }
 
 /**
