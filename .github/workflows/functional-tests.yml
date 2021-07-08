@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
+      max-parallel: 5
       matrix:
         php-versions: ['5.3', '7.4']
         fraction: ['1/4', '2/4', '3/4', '4/4']
