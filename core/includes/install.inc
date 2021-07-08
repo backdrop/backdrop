@@ -219,7 +219,12 @@ function backdrop_install_profile_distribution_name() {
   else {
     $profile = backdrop_get_profile();
     $info = system_get_info('module', $profile);
-    return $info['distribution_name'];
+    if (!empty($info['distribution_name'])) {
+      return $info['distribution_name'];
+    }
+    else {
+      return 'Backdrop CMS';
+    }
   }
 }
 
