@@ -1189,8 +1189,7 @@ div.filter-options select {
 .admin-panel .block-content {
   padding: 0 9px 9px;
 }
-.admin-panel .block-title,
-.admin-panel h3 {
+.admin-panel .block-title {
   margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
@@ -1199,8 +1198,7 @@ div.filter-options select {
   background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
   background-size: 23px;
 }
-[dir="rtl"] .admin-panel .block-title,
-[dir="rtl"] .admin-panel h3 {
+[dir="rtl"] .admin-panel .block-title {
   margin-left: 0;
   margin-right: 9px;
   padding: 6px 35px 6px 0;
@@ -1211,10 +1209,13 @@ div.filter-options select {
   .admin-panel .block-content {
     padding: 0 15px 15px;
   }
-  .admin-panel .block-title,
-  .admin-panel h3 {
+  .admin-panel .block-title {
     margin: 15px;
   }
+}
+
+.block-dashboard-welcome h3 {
+  font-size: 1.154em;
 }
 
 /* Add special icons for admin/config */
