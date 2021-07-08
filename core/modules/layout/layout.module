@@ -914,7 +914,6 @@ function layout_load($layout_name, $skip_menu_items = NULL) {
   return $layouts[$layout_name];
 }
 
-
 /**
  * Load multiple layouts based on a particular criteria.
  *
@@ -982,15 +981,53 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
   return $layouts;
 }
 
+/**
+ * Load all layouts for a given router item and allow other modules to alter
+ * them and/or set their contexts.
+ *
+ * @param array $router_item
+ *   The fully built menu router item, e.g., what is returned by menu_get_item().
+ * @param bool $skip_menu_items
+ *   Flag to skip the attempted loading of menu items for the loaded layouts.
+ *
+ * @return Layout[]
+ *   An array of load Layout object instances.
+ */
+function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NULL) {
+  $href = $router_item['href'];
+  $layouts_by_item = &backdrop_static(__FUNCTION__, array());
+  if (isset($layouts_by_item[$href])) {
+    return $layouts_by_item[$href];
+  }
+  $layouts = layout_load_multiple_by_path($router_item['path'], $skip_menu_items);
+  backdrop_alter('layout_load_by_router_item', $layouts, $router_item);
+  $layouts_by_item[$href] = $layouts;
+  return $layouts;
+}
 
 /**
  * Load all layouts at a given path.
  *
+ * This function does not invoke hook_layout_load_by_router_item_alter(). In
+ * general, developers should use layout_load_multiple_by_router_item() rather
+ * than layout_load_multiple_by_path() to allow client modules to alter the
+ * layouts and only call this function in situations where client alteration is
+ * not desired and/or the router item is not available. Examples where this
+ * might be needed:
+ * - Inside of a hook_menu() implementation (see dashboard_menu()).
+ * - Inside of a hook_layout_load_by_router_item_alter() implementation (see
+ *   node_layout_load_by_router_item_alter()).
+ *
  * @param string $path
  *   The menu routing path, with all placeholders represented by "%" symbols.
+ * @param bool $skip_menu_items
+ *   Flag to skip the attempted loading of menu items for the loaded layouts.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
+ *
+ * @see dashboard_menu()
+ * @see node_layout_load_by_router_item_alter()
  */
 function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
   if ($cache = cache('layout_path')->get($path)) {
@@ -1224,90 +1261,79 @@ function layout_provides_path($path) {
  *
  * @param string $path
  *   The menu routing path, with all placeholders represented by "%" symbols.
- * @param $router_item
+ * @param array $router_item
  *   The menu router item for the page currently being loaded.
  *   The $path parameter will be ignored if $router_item is specified.
+ * @param bool $is_layout_page
+ *   Flag that says whether this is being called from the page callback for a
+ *   layout-provided page.
  *
  * @return Layout
  *   The Layout object for the specified path.
  *
  * @since 1.4.0
  */
-function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
+function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout_page = FALSE) {
   if (!isset($router_item)) {
     $router_item = menu_get_item($path);
   }
 
-  $cache = &backdrop_static(__FUNCTION__);
+  // Use the static cache, but keyed on the normal path (such as node/1), rather
+  // than the system path (such as node/%), since client modules might serve up
+  // different layouts for the same system path.
+  $href = $router_item['href'];
+  $layouts_by_path = &backdrop_static(__FUNCTION__, array());
+  if (isset($layouts_by_path[$href])) {
+    return $layouts_by_path[$href];
+  }
 
-  if (empty($cache[$router_item['path']])) {
-    // If the path is a node preview path, check if a custom layout exists for
-    // nodes and use that instead.
-    // @ todo: This adds very specific code for node previews which too closely
-    // couples Node and Layout modules. This needs to be reverted in a future
-    // commit.
-    $preview_node = NULL;
-    $node_types = node_type_get_types();
-    foreach ($node_types as $type) {
-      $preview_path = 'node/preview/' . $type->type . '/%';
-      if ($router_item['path'] == $preview_path) {
-        $tempstore_id = $router_item['map'][3];
-        $preview_node = node_get_node_tempstore($tempstore_id);
-        break;
-      }
-    }
-    if ($preview_node) {
-      $layouts = layout_load_multiple_by_path('node/%', TRUE);
-    }
-    else {
-      $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
-    }
-    $selected_layout = NULL;
-    foreach ($layouts as $layout) {
-      // Set context data from the menu path.
-      $menu_contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_MENU);
-
-      foreach ($menu_contexts as $context) {
-        if (isset($context->position)) {
-
-          // If on a node preview page, use the preview from tempstore.
-          // @ todo: This is also specific code for node previews which needs
-          // to be reverted in a future commit.
-          if ($preview_node) {
-            $context->setData($preview_node);
-          }
-          else {
-            if (isset($router_item['map'][$context->position])) {
-              $context_data = $router_item['map'][$context->position];
-              // Check for an object loaded by the menu router.
-              if (is_object($context_data)) {
-                $context->setData($context_data);
+  $layouts = layout_load_multiple_by_router_item($router_item, !$is_layout_page);
+  $selected_layout = NULL;
+  foreach ($layouts as $layout) {
+    // Contexts must have their data set before the layout's access may be
+    // checked.
+    $contexts = $layout->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->position)) {
+        // If the menu router set the data for a context object or a client did
+        // so via hook_layout_load_by_router_item_alter(), we don't need to do
+        // any setting here. But if $context->data is not an object, then it is
+        // either a raw string that must be converted to an object by a load
+        // callback or it is a string pass-through.
+        if (!is_object($context->data)) {
+          // If clients replaced any layout with one whose placeholders are in a
+          // new position, they need to have altered $context->position so that
+          // it points to the right place in the router item to get the data
+          // object.
+          if (isset($router_item['map'][$context->position])) {
+            $context_data = $router_item['map'][$context->position];
+            // If the router item contains the context object in the right
+            // position, then we can just set the data from that.
+            if (is_object($context_data)) {
+              $context->setData($context_data);
+            }
+            else {
+              // If the context data was not an object, then we can try to set
+              // it using the plugin's load callback. If there is no callback,
+              // then it must be a string pass-through, so we leave it as is.
+              $context_info = layout_get_context_info($context->plugin);
+              if (isset($context_info['load callback'])) {
+                $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
               }
-              else {
-                // If no context is set, load one using the layout info. This
-                // branch is reached when a layout has a context whose data
-                // object is not already loaded into $router_item. The built-in
-                // contexts don't do that, but a contrib module that creates a
-                // LayoutContext can have its load_callback called at this
-                // point.
-                $context_info = layout_get_context_info($context->plugin);
-                if (isset($context_info['load callback'])) {
-                  $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
-                  $context->setData($context_data);
-                }
-              }
+              $context->setData($context_data);
             }
           }
         }
       }
-
-      if (!$layout->disabled && $layout->checkAccess()) {
-        $selected_layout = $layout;
-        break;
-      }
     }
+    if (!$layout->disabled && $layout->checkAccess()) {
+      $selected_layout = $layout;
+      break;
+    }
+  }
 
-    // If no layout matches at the path, use the default layout.
+  if (!$is_layout_page) {
+    // If no layout matches at the path, use a default layout.
     if (!$selected_layout) {
       if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
         $selected_layout = layout_load('admin_default');
@@ -1316,11 +1342,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         $selected_layout = layout_load('default');
       }
     }
-
-    $cache[$router_item['path']] = $selected_layout;
   }
 
-  return $cache[$router_item['path']];
+  $layouts_by_path[$href] = $selected_layout;
+  return $selected_layout;
 }
 
 /**
