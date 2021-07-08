@@ -53,8 +53,6 @@ jobs:
             sudo a2enmod mpm_prefork
             sudo sed -i -e 's/user = www-data/user = runner/' \
               -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
-            # Debug.
-            sudo cat /usr/local/php/${{ matrix.php-versions }}/etc/php-fpm.conf
           fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
@@ -67,4 +65,4 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 4
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 3
