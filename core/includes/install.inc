@@ -995,11 +995,12 @@ function backdrop_install_system() {
  *   (optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules
  *     dependent on the passed-in module(s) are checked to see if they're
- *     already uninstalled, or if they're included in $module_list. If the
- *     latter, they will all be uninstalled in the correct order. If, however,
- *     dependent modules are still installed and not included in $module_list,
- *     the passed-in module(s) will not be uninstalled. Note that
- *     dependency-checking incurs a significant performance cost.
+ *     already uninstalled, or if they're included in $module_list. If all
+ *     dependents are in $module_list, they will all be uninstalled in the
+ *     correct order. If, however, dependent modules are still installed and not
+ *     included in $module_list, the passed-in module(s) will not be
+ *     uninstalled. Note that dependency-checking incurs a significant
+ *     performance cost.
  *   - If FALSE, dependency-checking is bypassed. Dependent modules not included
  *     in $module_list will not be uninstalled, and modules in the list may not
  *     be uninstalled in the correct order. This could lead to problems, and so
