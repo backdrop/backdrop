@@ -968,6 +968,10 @@ function _views_ui_get_displays($view) {
         // the Master display" setting is enabled in the Views UI settings.
         if ($display->display_plugin != 'default' || $show_master_display) {
           $display_item = $display->display_title;
+          // Indicate individual disabled displays.
+          if (isset($display->display_options['enabled']) && $display->display_options['enabled'] == FALSE) {
+            $display_item .= ' ' . t('(disabled)');
+          }
           if (!empty($display->handler->options['block_description'])) {
             $display_item .= ': <em>' . $display->handler->options['block_description'] . '</em>';
           }
