@@ -47,7 +47,6 @@ jobs:
           # Let php process run as user "runner".
           sudo sed -i -e 's/user = www-data/user = runner/' \
             -e 's/listen.owner = www-data/listen.owner = runner/' \
-            -e 's/pm.max_children = 5/pm.max_children = 10/' \
             /etc/php/*/fpm/pool.d/www.conf
           # PHP 5.x needs some extra steps.
           if (( $(echo "${{ matrix.php-versions }} < 7" | bc -l) )); then
@@ -55,10 +54,6 @@ jobs:
             sudo a2enmod mpm_prefork
             sudo sed -i -e 's/user = www-data/user = runner/' \
               -e 's/listen.owner = www-data/listen.owner = runner/' \
-              -e 's/pm.max_children = 5/pm.max_children = 10/' \
-              -e 's/pm.start_servers = 2/pm.start_servers = 4/' \
-              -e 's/pm.min_spare_servers = 1/pm.min_spare_servers = 2/' \
-              -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
               /usr/local/php/*/etc/php-fpm.conf
           fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
@@ -72,7 +67,7 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 6
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 5
 
       - name: Debug
         if: ${{ always() }}
