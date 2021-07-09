@@ -163,6 +163,12 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
         '#markup' => check_plain($langcode_label),
         '#access' => module_exists('language'),
       );
+      $form[$mlid]['expanded'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Expand @title menu link', array('@title' => $item['title'])),
+        '#title_display' => 'invisible',
+        '#default_value' => $item['expanded'],
+      );
       $form[$mlid]['hidden'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable @title menu link', array('@title' => $item['title'])),
@@ -236,7 +242,7 @@ function menu_overview_form_submit($form, &$form_state) {
   $form = array_intersect_key(array_merge($order, $form), $form); // Update our original form with the new order.
 
   $updated_items = array();
-  $fields = array('weight', 'plid');
+  $fields = array('weight', 'plid', 'expanded');
   foreach (element_children($form) as $mlid) {
     if (isset($form[$mlid]['#item'])) {
       $element = $form[$mlid];
