@@ -46,7 +46,9 @@ jobs:
           sudo apt-get install libapache2-mod-fcgid
           # Let php process run as user "runner".
           sudo sed -i -e 's/user = www-data/user = runner/' \
-            -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/*/fpm/pool.d/www.conf
+            -e 's/listen.owner = www-data/listen.owner = runner/' \
+            -e 's/pm.max_children = 5/pm.max_children = 10/' \
+            /etc/php/*/fpm/pool.d/www.conf
           # PHP 5.x needs some extra steps.
           if (( $(echo "${{ matrix.php-versions }} < 7" | bc -l) )); then
             sudo a2dismod mpm_event
@@ -77,9 +79,13 @@ jobs:
         run: |
           echo Get load
           uptime
+          echo Get top
+          top -n1
           echo Get mem usage
           free -m
           echo Get disk usage
           df -h
           echo Get php log
-          cat /var/log/php${{ matrix.php-versions }}-fpm.log
+          sudo cat /var/log/php${{ matrix.php-versions }}-fpm.log
+          echo Get running procs by user
+          pgrep -au runner
