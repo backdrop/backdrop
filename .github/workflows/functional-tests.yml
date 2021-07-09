@@ -69,20 +69,13 @@ jobs:
           sudo systemctl start apache2.service
           curl -sI 'http://localhost/'
 
-      - name: Move files dir to /dev/shm
-        run: |
-          sudo mkdir /dev/shm/backdropfiles
-          sudo chown runner:runner /dev/shm/backdropfiles
-          mv files /dev/shm/backdropfiles/
-          ln -s /dev/shm/backdropfiles/files files
-
       - name: Install Backdrop
         run: core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
 
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 7
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 9
 
       - name: Debug
         if: ${{ always() }}
