@@ -220,6 +220,12 @@ description = Check our clearing is done the proper way.
 group = Cache
 file = cache.test
 
+[CacheTagsUnitTestCase]
+name = Cache Tags
+description = Tests the cache tags system.
+group = Cache
+file = cache.test
+
 [CacheIsEmptyCase]
 name = Cache emptiness test
 description = Check if a cache bin is empty after performing clear operations.

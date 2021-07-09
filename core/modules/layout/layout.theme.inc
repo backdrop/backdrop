@@ -292,6 +292,10 @@ function layout_preprocess_layout(&$variables) {
     'title' => NULL,
   );
 
+  $tags = array(
+    'layout:' . $variables['layout']->name,
+  );
+
   if (!$variables['admin']) {
     if (!isset($variables['title']) && !$block_exists['title']) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
@@ -378,7 +382,10 @@ function layout_preprocess_layout(&$variables) {
       $variables['row_data'][$name] = $row;
     }
 
+    $tags[] = 'layout:flexible:' . $variables['layout']->layout_template;
   }
+
+  backdrop_add_cache_tags($tags);
 }
 
 /**
