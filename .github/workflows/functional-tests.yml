@@ -6,10 +6,9 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
-      max-parallel: 5
       matrix:
         php-versions: ['5.3', '7.4']
-        fraction: ['1/4', '2/4', '3/4', '4/4']
+        fraction: ['1/3', '2/3', '3/3']
 
     steps:
       - name: Setup MySQL and create database
@@ -53,7 +52,12 @@ jobs:
             sudo a2dismod mpm_event
             sudo a2enmod mpm_prefork
             sudo sed -i -e 's/user = www-data/user = runner/' \
-              -e 's/listen.owner = www-data/listen.owner = runner/' /usr/local/php/*/etc/php-fpm.conf
+              -e 's/listen.owner = www-data/listen.owner = runner/' \
+              -e 's/pm.max_children = 5/pm.max_children = 10/' \
+              -e 's/pm.start_servers = 2/pm.start_servers = 4/' \
+              -e 's/pm.min_spare_servers = 1/pm.min_spare_servers = 2/' \
+              -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
+              /usr/local/php/*/etc/php-fpm.conf
           fi
           sudo systemctl restart php${{ matrix.php-versions }}-fpm.service
           sudo a2enmod rewrite proxy fcgid proxy_fcgi
@@ -66,4 +70,16 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 3
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 6
+
+      - name: Debug
+        if: ${{ always() }}
+        run: |
+          echo Get load
+          uptime
+          echo Get mem usage
+          free -m
+          echo Get disk usage
+          df -h
+          echo Get php log
+          cat /var/log/php${{ matrix.php-versions }}-fpm.log
