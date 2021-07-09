@@ -261,15 +261,6 @@ function field_validate_field($field, $update = FALSE) {
       throw new FieldException(t('The field "@name" could not be created because a database table with the name "@table" already exists.', array('@name' => $field['field_name'], '@table' => 'field_revision_' . $field['field_name'])));
     }
 
-    // Ensure the field name is unique.
-    $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE, 'include_deleted' => TRUE));
-    if (!empty($prior_field)) {
-      $message = $prior_field['active']?
-        t('The field "@name" already exists.', array('@name' => $field['field_name'])):
-        t('The field "@name" already exists, but it is inactive. To create a field with the same name, the configuration and data from the old field must be manually deleted.', array('@name' => $field['field_name']));
-      throw new FieldException($message);
-    }
-
     // Field name cannot be longer than 32 characters. We use backdrop_strlen()
     // because the DB layer assumes that column widths are given in characters,
     // not bytes.
