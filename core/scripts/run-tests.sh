@@ -520,6 +520,9 @@ function simpletest_script_execute_batch($test_id, $test_classes) {
         'class' => $test_class,
         'pipes' => $pipes,
       );
+
+      // Delay for 10ms to avoid forking multiple processes at once.
+      usleep(10000);
     }
 
     // Wait for children every 200ms.
