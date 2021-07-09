@@ -563,7 +563,9 @@ ul.tips {
 .l-header ul.menu > li > a {
   display: block;
 }
-.l-header ul.menu a {
+.l-header ul.menu a,
+.l-header ul.menu a:hover,
+.l-header ul.menu a:focus {
   color: #333;
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
@@ -601,27 +603,23 @@ ul.tips {
 }
 
 
-.l-header ul.menu > li.last > a {
+.l-header ul.menu-dropdown {
   margin-bottom: 1em;
+  -moz-border-radius: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.l-header .no-tabs ul.menu-dropdown {
+  -moz-border-radius: 0;
+  border-radius: 0;
 }
 
-/* Only the first tab is rounded on mobile. */
-.l-header .rounded-tabs ul.menu > li.first > a {
-  -moz-border-radius-topleft: 8px;
-  -moz-border-radius-topright: 8px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-}
-/* Likewise, the last tab is rounded on the bottom. */
-.l-header .rounded-tabs ul.menu > li.last > a {
-  -moz-border-radius-bottomleft: 8px;
-  -moz-border-radius-bottomright: 8px;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
 @media (min-width: 768px) {
-  .l-header ul.menu > li.last > a {
+  .l-header ul.menu-dropdown {
     margin-bottom: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    overflow: initial;
   }
   .l-header .rounded-tabs ul.menu > li > a {
     -moz-border-radius-topleft: 8px;
@@ -645,14 +643,8 @@ ul.tips {
   }
 
   /* Drop down specific styling. */
-  .l-header ul.menu-dropdown ul {
-    background-color: white;
-  }
   .l-header ul.menu-dropdown > li.has-children > a {
     padding-right: 2.5em;
-  }
-  .l-header ul.menu-dropdown > li > a.highlighted {
-    background-color: white;
   }
   .l-header ul.menu-dropdown ul {
     border: 0;
@@ -664,18 +656,16 @@ ul.tips {
 }
 .l-header ul.menu a:hover,
 .l-header ul.menu a:focus {
-  background: #f6f6f2;
   background: rgba(255, 255, 255, 0.60);
+}
+.l-header .no-tabs ul.menu a:hover,
+.l-header .no-tabs ul.menu a:focus {
+  background: rgba(255, 255, 255, 0.2);
 }
 .l-header ul.menu li a.active {
   border-bottom: none;
 }
-.l-header .no-tabs ul.menu a,
-.l-header .no-tabs ul.menu a:hover,
-.l-header .no-tabs ul.menu a:focus,
-.l-header .no-tabs ul.menu a:active,
-.l-header .no-tabs ul.menu a.highlighted,
-.l-header .no-tabs ul.menu li a.active {
+.l-header .no-tabs ul.menu a {
   background: none;
 }
 

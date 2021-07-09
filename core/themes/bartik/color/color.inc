@@ -16,7 +16,6 @@ $info = array(
     'text' => t('Text color'),
     'link' => t('Link color'),
     'menu' => 'Menu link',
-    'activemenu' => t('Active menu link color'),
   ),
   // Pre-defined color schemes.
   'schemes' => array(
@@ -33,7 +32,6 @@ $info = array(
         'text' => '#3b3b3b',
         'link' => '#27ace2',
         'menu' => '#e3e3e3',
-        'activemenu' => '#fefeff',
       ),
     ),
     'blue_lagoon' => array(
@@ -49,7 +47,6 @@ $info = array(
         'text' => '#3b3b3b',
         'link' => '#0071b3',
         'menu' => '#f3f7fa',
-        'activemenu' => '#fefeff',
       ),
     ),
     'ice' => array(
@@ -64,8 +61,7 @@ $info = array(
         'titleslogan' => '#000000',
         'text' => '#4a4a4a',
         'link' => '#019dbf',
-        'menu' => '#fefeff',
-        'activemenu' => '#ffffff',
+        'menu' => '#000000',
       ),
     ),
     'plum' => array(
@@ -81,7 +77,6 @@ $info = array(
         'text' => '#301313',
         'link' => '#9d408d',
         'menu' => '#f3f7fa',
-        'activemenu' => '#fefeff',
       ),
     ),
     'goldfish' => array(
@@ -97,7 +92,6 @@ $info = array(
         'text' => '#3b3b3b',
         'link' => '#fa6900',
         'menu' => '#798053',
-        'activemenu' => '#4c5037',
       ),
     ),
     'mocha' => array(
@@ -113,7 +107,6 @@ $info = array(
         'text' => '#3b3738',
         'link' => '#c63d0f',
         'menu' => '#fefeff',
-        'activemenu' => '#ffffff',
       ),
     ),
   ),
