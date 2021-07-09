@@ -1836,6 +1836,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    */
   function testThemeSettings() {
     theme_enable(array('basis'));
+    module_enable(array('color'));
     // Change Basis settings so config file is created.
     $edit = array();
     $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));
