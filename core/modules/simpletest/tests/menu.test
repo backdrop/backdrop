@@ -600,6 +600,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
       'link_title' => 'Menu link test',
       'module' => $module,
       'menu_name' => 'menu_test',
+      'customized' => 1,
     );
 
     $links['parent'] = $base_options + array(
