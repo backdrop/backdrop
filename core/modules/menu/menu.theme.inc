@@ -46,6 +46,7 @@ function theme_menu_overview_form($variables) {
   if (module_exists('language')) {
     $header[] = t('Language');
   }
+  $header[] = array('data' => t('Expanded'), 'class' => array('checkbox', 'priority-low'));
   $header[] = array('data' => t('Enabled'), 'class' => array('checkbox'));
   $header[] = t('Weight');
   $header[] = t('Operations');
@@ -68,6 +69,7 @@ function theme_menu_overview_form($variables) {
       if (module_exists('language')) {
         $row[] = backdrop_render($element['langcode']);
       }
+      $row[] = array('data' => backdrop_render($element['expanded']), 'class' => array('checkbox', 'priority-low'));
       $row[] = array('data' => backdrop_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
       $row[] = backdrop_render($element['weight']) . backdrop_render($element['plid']) . backdrop_render($element['mlid']);
       $row[] = backdrop_render($element['operations']);
