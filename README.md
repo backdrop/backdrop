@@ -72,11 +72,11 @@ project:
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+Please see the the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
+Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
 
 Code of Conduct
 ---------------
