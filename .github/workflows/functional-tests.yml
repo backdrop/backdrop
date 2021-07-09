@@ -75,7 +75,7 @@ jobs:
       - name: Run tests
         run: |
           echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
-          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 9
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 7
 
       - name: Debug
         if: ${{ always() }}
