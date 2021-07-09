@@ -50,6 +50,7 @@ jobs:
             -e 's/pm.max_children = 5/pm.max_children = 15/' \
             -e 's/pm.start_servers = 2/pm.start_servers = 4/' \
             -e 's/pm.min_spare_servers = 1/pm.min_spare_servers = 2/' \
+            -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
             /etc/php/*/fpm/pool.d/www.conf
           # PHP 5.x needs some extra steps.
           if (( $(echo "${{ matrix.php-versions }} < 7" | bc -l) )); then
