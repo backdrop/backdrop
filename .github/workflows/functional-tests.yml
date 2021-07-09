@@ -79,8 +79,6 @@ jobs:
         run: |
           echo Get load
           uptime
-          echo Get top
-          top -n1
           echo Get mem usage
           free -m
           echo Get disk usage
