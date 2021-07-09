@@ -1,0 +1,238 @@
+<?php
+
+
+/**
+ * Implements hook_views_post_render().
+ */
+function media_views_post_render(&$view, &$output, &$cache) {
+  // Attach the quick_create form to the administrator's view
+  if ($view->name == 'media_admin' && $view->display_handler->display->id == 'page') {
+    $form = backdrop_get_form('media_quick_create_form');
+    $output = backdrop_render($form).$output;
+  }
+}
+
+/**
+ *
+ */
+function media_quick_create_form($form, &$form_state){
+  $instance = field_info_instance('node', 'field_media_file', 'media');
+
+  $form['#attach']['library'][] = array('system', 'ajax');
+  $form['file_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="media_quick_create_form_ajax_wrapper">',
+    '#suffix' => '</div>',
+  );
+  $form['file_wrapper']['file_upload'] = array(
+    '#title' => t('Media file'),
+    '#type' => 'managed_file',
+    '#description' => t('Upload a file'),
+    '#upload_location' => "public://{$instance['settings']['file_directory']}/",
+    '#required' => TRUE,
+  );
+
+  $form['actions']['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create'),
+    '#ajax' => array(
+      'callback' => 'media_quick_create_form_ajax_callback',
+      'wrapper' => 'media_quick_create_form_ajax_wrapper',
+      'method' => 'replace',
+    )
+  );
+
+  return $form;
+}
+
+/**
+ *
+ */
+function media_quick_create_form_ajax_callback($form, &$form_state) {
+  return $form['file_wrapper'];
+}
+
+/**
+ * Implements hook_form_submit()
+ *
+ * Create a 'media' node from a single file upload
+ */
+function media_quick_create_form_submit(&$form, &$form_state){
+  global $user;
+  $fid = $form_state['values']['file_upload'];
+  $file = file_load($fid);
+
+  $node = new Node();
+  $node->type = 'media';
+  node_object_prepare($node);
+
+  $node->uid = $user->uid;
+  $node->language = LANGUAGE_NONE;
+  $node->title = $file->filename;
+  $node->field_media_file[LANGUAGE_NONE][] = array(
+    'fid' => $file->fid,
+    'display' => 1,
+    'description' => '',
+  );
+  $result = $node->save();
+
+  if ($result && $node->nid) {
+    backdrop_set_message(t('New media created: ').l($node->title, "node/{$node->nid}"));
+  }
+
+  // Clear the form.
+  $form_state['input'] = array();
+  $form_state['values'] = array();
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function media_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'node/add/media' on 'admin/content/media' page.
+  if ($root_path == 'admin/content/media') {
+    $item = menu_get_item('node/add/media');
+    $item['title'] = t('Add media');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function media_node_presave($node) {
+  if ($node->type !== 'media'){
+    return;
+  }
+
+  // Save the filename as the node title.
+  $medias = field_get_items('node', $node, 'field_media_file', LANGUAGE_NONE);
+  if (!empty($medias) && is_array($medias)) {
+    $media = array_shift($medias);
+    $file = file_load($media['fid']);
+    $node->title = $file->filename;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function media_field_formatter_info() {
+  return array(
+    'media_dynamic' => array(
+      'label' => t('Media Dynamic'),
+      'field types' => array('file'),
+      'settings' => array(
+        'image_style' => '',
+        'file_formatter' => 'file_generic',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function media_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = array();
+
+  $image_styles = image_style_options(FALSE, PASS_THROUGH);
+  // Unset possible 'No defined styles' option.
+  unset($image_styles['']);
+  // Styles could be lost because of enabled/disabled modules that defines
+  // their styles in code.
+  if (isset($image_styles[$settings['image_style']])) {
+    $summary[] = t('Image style: @style', array('@style' => $image_styles[$settings['image_style']]));
+  }
+  else {
+    $summary[] = t('Original image');
+  }
+
+  $field_formatters = file_field_formatter_info();
+  if (isset($field_formatters[$settings['file_formatter']])) {
+    $summary[] = t('Fallback file style: @style', array('@style' => $field_formatters[$settings['file_formatter']]['label']));
+  }
+  else {
+    $summary[] = t('Generic file');
+  }
+
+  return implode('<br />', $summary);
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function media_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $image_styles = image_style_options(FALSE, PASS_THROUGH);
+  $element['image_style'] = array(
+    '#title' => t('Default image style'),
+    '#description' => t('Image style used to display this media if it is an image, and if no other style overrides the output.'),
+    '#type' => 'select',
+    '#default_value' => $settings['image_style'],
+    '#empty_option' => t('None (original image)'),
+    '#options' => $image_styles,
+  );
+
+  $file_formatters = array();
+  foreach (file_field_formatter_info() as $name => $formatter) {
+    $file_formatters[$name] = $formatter['label'];
+  }
+
+  $element['file_formatter'] = array(
+    '#title' => t('Default file style'),
+    '#description' => t('File style used to display this media as a fallback when the field contents do not match another formatter.'),
+    '#type' => 'select',
+    '#default_value' => $settings['file_formatter'],
+    '#options' => $file_formatters,
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_prepare_view().
+ */
+function media_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  // modify $items
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function media_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'media_dynamic':
+      if (isset($items[0], $items[0]['filemime'])){
+
+        // Image
+        if (stripos($items[0]['filemime'], 'image/') === 0){
+          $image_display = $display;
+          $image_display['settings']['image_link'] = '';
+          return image_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $image_display);
+        }
+
+        // File
+        $file_display = $display;
+        $file_display['type'] = $settings['file_formatter'];
+        return file_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $file_display);
+      }
+      break;
+  }
+
+  return $element;
+}

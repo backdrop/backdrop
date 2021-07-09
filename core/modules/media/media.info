@@ -1,0 +1,8 @@
+name = Media
+description = something for sure
+backdrop = 1.x
+version = 0.1
+package = Media
+dependencies[] = node
+dependencies[] = file
+dependencies[] = image
