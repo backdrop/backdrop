@@ -124,6 +124,16 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function cloneTableSql($source, $target) {
+    $statements[] = 'CREATE TABLE ' . $target . ' LIKE ' . $source;
+    $statements[] = 'INSERT ' . $target . ' SELECT * FROM ' . $source;
+
+    return $statements;
+  }
+
+  /**
    * Create an SQL string for a field to be used in table creation or alteration.
    *
    * Before passing a field out of a schema definition into this function it has
