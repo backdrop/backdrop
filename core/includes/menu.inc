@@ -2991,6 +2991,8 @@ function _menu_link_build($item) {
  * Builds menu links for the items in the menu router.
  */
 function _menu_navigation_links_rebuild($menu) {
+  $menu_links_cache = &_menu_links_cache(TRUE);
+
   // Add normal and suggested items as links.
   $menu_links = array();
   $default_menu_link_paths = array();
@@ -3001,6 +3003,7 @@ function _menu_navigation_links_rebuild($menu) {
       $sort[$path] = $item['_number_parts'];
     }
   }
+
   if ($menu_links) {
     // Keep an array of processed menu links, to allow menu_link_save() to
     // check this for parents instead of querying the database.
@@ -3009,11 +3012,11 @@ function _menu_navigation_links_rebuild($menu) {
     array_multisort($sort, SORT_NUMERIC, $menu_links);
 
     foreach ($menu_links as $key => $item) {
-      $existing_item = db_select('menu_links')
-        ->fields('menu_links')
-        ->condition('link_path', $item['path'])
-        ->condition('module', 'system')
-        ->execute()->fetchAssoc();
+      $existing_item = FALSE;
+      if (isset($menu_links_cache[$item['path']])
+        && $menu_links_cache[$item['path']]->module === 'system') {
+        $existing_item = (array) $menu_links_cache[$item['path']];
+      }
       if ($existing_item) {
         $item['mlid'] = $existing_item['mlid'];
         // A change in hook_menu may move the link to a different menu
@@ -3073,20 +3076,34 @@ function _menu_navigation_links_rebuild($menu) {
         ->execute();
     }
   }
-  // Find any item that is no longer visible.
-  $result = db_select('menu_links')
-    ->fields('menu_links')
-    ->condition('router_path', $default_menu_link_paths, 'NOT IN')
-    ->condition('external', 0)
-    ->condition('updated', 0)
-    ->condition('customized', 0)
-    ->orderBy('depth', 'DESC')
-    ->execute();
-  // Remove all such items. Starting from those with the greatest depth will
-  // minimize the amount of re-parenting done by menu_link_delete().
-  foreach ($result as $item) {
-    _menu_delete_item($item, TRUE);
+
+  // Remove any item that is no longer visible.
+  foreach ($menu_links_cache as $menu_link) {
+    if ($menu_link->external == 0
+      && $menu_link->updated == 0
+      && $menu_link->customized == 0
+      && !in_array($menu_link->router_path, $default_menu_link_paths)) {
+      _menu_delete_item($menu_link, TRUE);
+    }
   }
+}
+
+/**
+ * Stores a copy of menu_links in memory for when lots of functions need to
+ * query from the table.
+ */
+function &_menu_links_cache($reset = FALSE) {
+  $menu_links = &backdrop_static(__FUNCTION__);
+
+
+  if (empty($menu_links) || $reset) {
+    $menu_links = db_select('menu_links')
+      ->fields('menu_links')
+      ->orderBy('depth', 'DESC')
+      ->execute()->fetchAllAssoc('link_path');
+  }
+
+ return $menu_links;
 }
 
 /**
@@ -3251,6 +3268,7 @@ function _menu_delete_item($item, $force = FALSE) {
  *   saved.
  */
 function menu_link_save(&$item, $existing_item = array(), $parent_candidates = array()) {
+  $menu_links_cache = &_menu_links_cache();
   backdrop_alter('menu_link', $item);
 
   // This is the easiest way to handle the unique internal path '<front>',
@@ -3313,6 +3331,8 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'updated' => $item['updated'],
       ))
       ->execute();
+    // Update the cache so that other calls to menu_link_save() have correct data.
+    $menu_links_cache[$item['link_path']] = (object) $item;
   }
 
   // Directly fill parents for top-level links.
@@ -3388,6 +3408,9 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
       ))
       ->condition('mlid', $item['mlid'])
       ->execute();
+    // Update the cache so that other calls to menu_link_save() have correct data.
+    $menu_links_cache[$item['link_path']] = (object) $item;
+
     // Check the has_children status of the parent.
     _menu_update_parental_status($item);
     menu_cache_clear($menu_name);
@@ -3403,6 +3426,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
     // Now clear the cache.
     _menu_clear_page_cache();
   }
+
   return $item['mlid'];
 }
 
@@ -3427,6 +3451,8 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
  *   has been found.
  */
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
+  $menu_links_cache = &_menu_links_cache();
+
   $parent = FALSE;
 
   // This item is explicitely top-level, skip the rest of the parenting.
@@ -3452,7 +3478,12 @@ function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
       $parent = $parent_candidates[$mlid];
     }
     else {
-      $parent = db_query("SELECT * FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
+      foreach ($menu_links_cache as $cached_menu_link) {
+        if ($cached_menu_link->mlid === $mlid) {
+          $parent = (array) $cached_menu_link;
+          break;
+        }
+      }
     }
     if ($parent) {
       return $parent;
@@ -3463,22 +3494,18 @@ function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   // hierarchy. This only makes sense for links derived from menu router
   // items (ie. from hook_menu()).
   if ($menu_link['module'] == 'system') {
-    $query = db_select('menu_links');
-    $query->condition('module', 'system');
-    // We always respect the link's 'menu_name'; inheritance for router items is
-    // ensured in _menu_router_build().
-    $query->condition('menu_name', $menu_link['menu_name']);
 
     // Find the parent - it must be unique.
     $parent_path = $menu_link['link_path'];
     do {
       $parent = FALSE;
       $parent_path = substr($parent_path, 0, strrpos($parent_path, '/'));
-      $new_query = clone $query;
-      $new_query->condition('link_path', $parent_path);
-      // Only valid if we get a unique result.
-      if ($new_query->countQuery()->execute()->fetchField() == 1) {
-        $parent = $new_query->fields('menu_links')->execute()->fetchAssoc();
+      // We always respect the link's 'menu_name'; inheritance for router items is
+      // ensured in _menu_router_build().
+      if (isset($menu_links_cache[$parent_path])
+        && $menu_links_cache[$parent_path]->menu_name === $menu_link['menu_name']
+        && $menu_links_cache[$parent_path]->module === 'system') {
+        $parent = (array) $menu_links_cache[$parent_path];
       }
     } while ($parent === FALSE && $parent_path);
   }
@@ -3612,20 +3639,26 @@ function menu_link_maintain($module, $op, $link_path, $link_title) {
  *
  */
 function menu_link_children_relative_depth($item) {
-  $query = db_select('menu_links');
-  $query->addField('menu_links', 'depth');
-  $query->condition('menu_name', $item['menu_name']);
-  $query->orderBy('depth', 'DESC');
-  $query->range(0, 1);
+  $menu_link_cache = _menu_links_cache();
 
-  $i = 1;
-  $p = 'p1';
-  while ($i <= MENU_MAX_DEPTH && $item[$p]) {
-    $query->condition($p, $item[$p]);
-    $p = 'p' . ++$i;
+  $depths = array();
+  foreach ($menu_link_cache as $menu_link) {
+    if ($menu_link->menu_name === $item['menu_name']) {
+      $match = TRUE;
+      $i = 1;
+      $p = 'p1';
+      while ($i <= MENU_MAX_DEPTH && $item[$p]) {
+        if ($menu_link->$p !== $item[$p]) {
+          $match = FALSE;
+        }
+        $p = 'p' . ++$i;
+      }
+      if ($match) {
+        $depths[] = $menu_link->depth;
+      }
+    }
   }
-
-  $max_depth = $query->execute()->fetchField();
+  $max_depth = max($depths);
 
   return ($max_depth > $item['depth']) ? $max_depth - $item['depth'] : 0;
 }
@@ -3685,21 +3718,31 @@ function _menu_link_move_children($item, $existing_item) {
 function _menu_update_parental_status($item, $exclude = FALSE) {
   // If plid == 0, there is nothing to update.
   if ($item['plid']) {
+    $menu_links_cache = _menu_links_cache();
+
     // Check if at least one visible child exists in the table.
-    $query = db_select('menu_links');
-    $query->addField('menu_links', 'mlid');
-    $query->condition('menu_name', $item['menu_name']);
-    $query->condition('hidden', 0);
-    $query->condition('plid', $item['plid']);
-    $query->range(0, 1);
-    if ($exclude) {
-      $query->condition('mlid', $item['mlid'], '<>');
+    $parent_has_children = 0;
+    foreach ($menu_links_cache as $menu_link) {
+      if ($menu_link->menu_name === $item['menu_name']
+        && $menu_link->hidden === 0
+        && $menu_link->plid === $item['plid']
+        && (($exclude && $menu_link->mlid !== $item['mlid']) || !$exclude)) {
+        $parent_has_children = 1;
+        break;
+      }
     }
-    $parent_has_children = ((bool) $query->execute()->fetchField()) ? 1 : 0;
-    db_update('menu_links')
-      ->fields(array('has_children' => $parent_has_children))
-      ->condition('mlid', $item['plid'])
-      ->execute();
+
+    foreach ($menu_links_cache as $link_path => $menu_link) {
+      if ($menu_link->mlid === $item['plid']) {
+        if ($menu_link->has_children !== $parent_has_children) {
+          db_update('menu_links')
+            ->fields(array('has_children' => $parent_has_children))
+            ->condition('mlid', $item['plid'])
+            ->execute();
+          $menu_links_cache[$link_path]->has_children = $parent_has_children;
+        }
+      }
+    }
   }
 }
 
