@@ -1,0 +1,241 @@
+<?php
+
+/**
+ * @file
+ * Provieds a framework for signing and verification of arbirary data.
+ *
+ * This module works with other modules that provide algorithm-specific support.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function code_sign_menu() {
+  $items = array();
+
+  $items['admin/config/system/code-sign'] = array(
+    'title' => 'Code Sign',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'code_sign.admin.inc',
+  );
+  $items['admin/config/system/code-sign/settings'] = array(
+    'title' => 'Settings',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/reports/code-sign'] = array(
+    'title' => 'Code Sign',
+    'page callback' => 'code_sign_report_page',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function code_sign_theme() {
+  $items = array();
+
+  // A report on the code signatures for all active modules.
+  $items['code_sign_report'] = array(
+    'variables' => array(),
+    'file' => 'code_sign.theme.inc',
+  );
+
+  // Display the short result of a signature verification check.  Signing
+  // modules should implement their own versions of this theme function.
+  $items['code_sign_result'] = array(
+    'variables' => array(
+      'signer' => NULL,
+      'signature' => NULL,
+      'profile' => NULL,
+      'result' => NULL,
+    ),
+    'file' => 'code_sign.theme.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_code_sign_info().
+ *
+ * No signing modules are implemented in code_sign.  A site must include at
+ * least one signing module to use code_sign. See code_sign_hash for an example
+ * of a signing module.
+ */
+function code_sign_code_sign_info() {
+  $all_signers = array();
+
+  // None defined in code_sign.  Use a contrib module.
+
+  return $all_signers;
+}
+
+/**
+ * Returns a list of signature modules that implement hook_code_sign_info().
+ *
+ * @return
+ *   An array of code_sign modules and their callbacks.  Each module includes a
+ *   title, and a list of callbacks.  See hook_code_sign_info() for more details.
+ *
+ * @see hook_code_sign_info()
+ */
+function code_sign_get_signature_backends() {
+  $all_signers = &backdrop_static(__FUNCTION__);
+
+  if (empty($all_signers)) {
+    $all_signers = module_invoke_all('code_sign_info');
+  }
+
+  return $all_signers;
+}
+
+/**
+ * Returns a list of code_sign profiles suitable for signing.  Typically, this is
+ * a list of private keys IDs.
+ *
+ * Each entry includes:
+ *
+ * - crypto_engine - The machine name of the backend.
+ * - name - A name for the profile, intended for humans.
+ * - profile_id - The profile ID, typically the private key fingerprint or ID.
+ * - signing_key - A structure specific to the crypto engine with additional
+ *   information about the profile.
+ *
+ * @return
+ *   An array of signign profiles, indexed by the profile_id.
+ */
+function code_sign_get_signing_profiles() {
+  $signing_profiles = &backdrop_static(__FUNCTION__, array());
+
+  if (!$signing_profiles) {
+    $all_signers = code_sign_get_signature_backends();
+
+    foreach ($all_signers as $engine => $info) {
+      $key_list = code_sign_get_private_keychain($engine);
+      foreach ($key_list as $key_id => $key_info) {
+        $signing_profiles[$key_id] = array(
+          '#crypto_engine' => $engine,
+          '#name' => $key_info['name'],
+          '#profile_id' => $key_id,
+          '#signing_key' => $key_info,
+        );
+      }
+    }
+  }
+
+  return $signing_profiles;
+}
+
+/**
+ * Generates the Code Sign report page at admin/reports/code-sign.
+ *
+ * @return
+ *   A renderable array with the report for admin/reports/code-sign.
+ */
+function code_sign_report_page() {
+  $all_signers = code_sign_get_signature_backends();
+  $renderable = array();
+
+  foreach ($all_signers as $key => $info) {
+    $renderable[$key . '_title'] = array(
+      '#type' => 'markup',
+      '#markup' => t('<h2>@title</h2>', array('@title' => $info['title'])),
+    );
+    $renderable[$key] = code_sign_get_signer_status($key);
+  }
+
+  if (empty($renderable)) {
+    $renderable['empty'] = array(
+      '#type' => 'markup',
+      '#markup' => t('No algorithm modules have been enabled.  Try enabling !code_sign_hash.', array('!code_sign_hash' => l('Hahsing Code Sign', 'admin/modules/list'))),
+    );
+  }
+
+  return $renderable;
+}
+
+/**
+ * Validate and execute a specific callback.
+ *
+ * @param $callback
+ *   The name of the callback to execute.
+ * @param $signer
+ *   The name of the crypto engine to call
+ * @return
+ *   Returns NULL on failure and te results of the callback otherwise.
+ * @throws CodeSignException
+ *   Throws an exception if the callback or signer are not specified.
+ */
+function code_sign_execute_callback() {
+  $args = func_get_args();
+  if (count($args) < 2) {
+    watchdog('code sign', 'Must specify a callback and a signer.', array(), WATCHDOG_CRITICAL);
+    throw new CodeSignException('Must specify a callback and a signer.');
+  }
+  $callback = array_shift($args);
+  $signer = array_shift($args);
+
+
+  // Verify the signer module exists and supports the callback.
+  $all_signers = code_sign_get_signature_backends();
+  if (empty($all_signers[$signer])) {
+    watchdog('code sign', 'Unknown Code Sign module %signer', array('%signer' => $signer), WATCHDOG_ERROR);
+    return NULL;
+  }
+  if (!empty($all_signers[$signer]['file'])) {
+    require_once $all_signers[$signer]['file'];
+  }
+  if (empty($all_signers[$signer][$callback]) || !function_exists($all_signers[$signer][$callback])) {
+    watchdog('code sign', 'Code Sign module %signer does not implement %callback.',
+      array('%signer' => $signer, '%callback' => $callback), WATCHDOG_ERROR);
+    return NULL;
+  }
+
+  return call_user_func_array($all_signers[$signer][$callback], $args);
+}
+
+/**
+ * Callback wrapper functions
+ */
+
+function code_sign_sign($signer, $profile, $data, $options = array()) {
+  if (empty($data)) {
+    watchdog('code sign', 'Nothing to sign.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return code_sign_execute_callback('sign callback', $signer, $profile, $data, $options);
+}
+
+function code_sign_verify($signer, $data, $signature = NULL, $options = array()) {
+  if (empty($data)) {
+    watchdog('code sign', 'Nothing to verify.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  return code_sign_execute_callback('verify callback', $signer, $data, $signature, $options);
+}
+
+function code_sign_get_signer_status($signer) {
+  return code_sign_execute_callback('status callback', $signer);
+}
+
+function code_sign_get_private_keychain($signer) {
+  return code_sign_execute_callback('private keychain callback', $signer);
+}
+
+function code_sign_get_public_keychain($signer) {
+  return code_sign_execute_callback('public keychain callback', $signer);
+}
+
+/**
+ * An exception class for Code Sign.
+ */
+class CodeSignException extends Exception {};

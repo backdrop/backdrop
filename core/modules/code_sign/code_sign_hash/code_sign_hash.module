@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * Implements hook_code_sign_info().
+ *
+ * Returns an array of signing engines supported by this module, keyed by the
+ * machine name for the signing engine.  Each entry is an array with the
+ * following keys and values:
+ *
+ * - title - A human readable name for the module.
+ * - sign callback - The name of the function that signs some data.
+ * - verify callback - The name of the function that verifies some data.
+ * - status callback - The name of the function that returns some information
+ *   about the engine.  Typically, this is a list of available signing profiles.
+ * - public keychain callback - The name of the function that returns a list of
+ *   public keys.
+ * - file - The full path to the file that implements the callbacks.
+ */
+function code_sign_hash_code_sign_info() {
+  $signers = array();
+
+  $signers['hash'] = array(
+    'title' => t('Hash'),
+    'sign callback' => 'code_sign_hash_sign',
+    'verify callback' => 'code_sign_hash_verify',
+    'status callback' => 'code_sign_hash_status',
+    'public keychain callback' => 'code_sign_hash_get_public_keychain',
+    'private keychain callback' => 'code_sign_hash_get_private_keychain',
+    'file' => backdrop_get_path('module', 'code_sign_hash') . '/hash.code_sign.inc',
+  );
+
+  return $signers;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function code_sign_hash_menu() {
+  $items = array();
+
+  $items['admin/config/system/code-sign/hash'] = array(
+    'title' => 'Hash Signing',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_hash_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'code_sign_hash.admin.inc',
+  );
+  $items['admin/config/system/code-sign/hash/add'] = array(
+    'title' => 'Add Hash Signature Profile',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_hash_edit_profile_form', NULL),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'code_sign_hash.admin.inc',
+  );
+  $items['admin/config/system/code-sign/hash/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_hash_edit_profile_form', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'code_sign_hash.admin.inc',
+  );
+  $items['admin/config/system/code-sign/hash/%/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('code_sign_hash_delete_profile_form', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'code_sign_hash.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function code_sign_hash_config_info() {
+  $prefixes['code_sign_hash.settings'] = array(
+    'label' => t('Code Sign Hash settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Returns a list of supported hash algorithms suitable for form fields.
+ *
+ * @return
+ *   An array of supported hash algorithm names, keyed by the same.
+ */
+function code_sign_hash_algorithms() {
+  $algos = hash_algos();
+  return array_combine($algos, $algos);
+}
