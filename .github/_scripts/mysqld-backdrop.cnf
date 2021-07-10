@@ -1,0 +1,6 @@
+[mysqld]
+innodb_large_prefix=true
+innodb_file_format=barracuda
+innodb_file_per_table=true
+table_open_cache=8000
+default_storage_engine=innodb

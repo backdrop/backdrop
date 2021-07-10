@@ -185,7 +185,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     foreach ($tables as $table) {
       $original_table_name = substr($table, strlen($this->databasePrefix));
       if(!in_array($original_table_name, $skip_alter)){
-        db_query('ALTER TABLE ' . $table . ' ENGINE=MyISAM');
+        db_query('ALTER TABLE ' . $table . ' ENGINE=ARIA');
       }
     }
   }

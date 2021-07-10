@@ -1,0 +1,86 @@
+name: Simpletest PHP 7.4
+on:
+  pull_request:
+    branches: [ 1.x ]
+
+env:
+  CI: true
+
+jobs:
+  # This job will run on the runner machine.
+  simpletest:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Set PHP version.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: gd, mbstring, pdo, pdo_mysql, zip
+          coverage: none
+          tools: none
+
+      # Check out the code.
+      - uses: actions/checkout@v2
+
+      # The checkout will always do it at the $GITHUB_WORKSPACE directory, which
+      # is not where we want our code to be. See
+      # https://github.com/actions/checkout/issues/197 for more info.
+      - name: Copy the checkout to the working dir
+        run: |
+          sudo rm -rf /var/www/html
+          sudo cp -Rf $GITHUB_WORKSPACE /var/www/html
+          sudo chown -R runner:runner /var/www/
+          ls -lsah /var/www/html
+
+      - name: Start MySQL
+        run: |
+          # Add MySQL configuration.
+          sudo cp $GITHUB_WORKSPACE/.github/_scripts/mysqld-backdrop.cnf /etc/mysql/mysql.conf.d/mysqld.conf
+          # Start MySQL
+          sudo systemctl start mysql.service
+
+      - name: Prepare environment
+        run: |
+          # Install Apache
+          sudo apt-get install -y apache2-bin apache2 --no-install-recommends
+          #sudo rm -rf /var/lib/apt/lists/*
+          #sudo sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' /etc/apache2/envvars
+          #sudo sed -i 's/Require local/#Require local/' /etc/apache2/mods-available/status.conf
+          sudo a2enmod rewrite proxy_fcgi
+          sudo a2enconf php7.4-fpm
+          sudo a2ensite 000-default.conf
+          sudo $GITHUB_WORKSPACE/.github/_scripts/define-ci-vhost.sh
+          echo "new 000-default.conf file:"
+          sudo cat /etc/apache2/sites-available/000-default.conf
+          # Start apache.
+          sudo service apache2 restart
+
+      - name: Install Backdrop
+        run: |
+          echo "Creating database."
+          sudo mysql -u root -proot -e "CREATE DATABASE backdrop; GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"
+          cd /var/www/html
+          echo "Setting file system permissions."
+          sudo mkdir -p /var/www/html/files
+          sudo chown www-data:www-data /var/www/html/files
+          sudo chmod -R 777 /var/www/html/settings.php
+          echo "Installing the site."
+          sudo -u www-data -g www-data ./core/scripts/install.sh --db-url=mysql://root:root@localhost/backdrop
+
+      - name: Confirm PHP through Apache
+        run: |
+          echo "Hello world test"
+          echo "<?php echo 'Hello from PHP ' . PHP_VERSION; ?>" > /var/www/html/test.php
+          curl --silent http://localhost/test.php
+
+      - name: Run SimpleTests
+        run: |
+          echo "Running tests."
+          cd /var/www/html
+          sudo -u www-data -g www-data ./core/scripts/run-tests.sh --cache --force --verbose --color --all --concurrency 4
