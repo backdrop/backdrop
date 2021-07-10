@@ -593,7 +593,9 @@ function menu_default_route_handler($router_item) {
  *   An array of path arguments; for example, array('node', '5').
  *
  * @return
- *   Returns TRUE for success, FALSE if an object cannot be loaded.
+ *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
+ *   if the $map contains the placeholders (e.g., '%node'), not arguments for
+ *   the load functions (e.g., '5').
  *   Names of object loading functions are placed in $item['load_functions'].
  *   Loaded objects are placed in $map[]; keys are the same as keys in the
  *   $item['load_functions'] array.
@@ -601,6 +603,12 @@ function menu_default_route_handler($router_item) {
  */
 function _menu_load_objects(&$item, &$map) {
   if ($load_functions = $item['load_functions']) {
+    // If the path map is the same as the router path, don't bother loading
+    // placeholders.
+    if (!empty($item['path']) && $item['path'] === implode('/', $map)) {
+      return NULL;
+    }
+
     // If someone calls this function twice, then unserialize will fail.
     if (!is_array($load_functions)) {
       $load_functions = unserialize($load_functions);
@@ -639,7 +647,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = (backdrop_substr($value, 0, 1) === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
