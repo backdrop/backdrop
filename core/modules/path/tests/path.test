@@ -194,6 +194,13 @@ class PathTestCase extends BackdropWebTestCase {
     $this->backdropGet($edit['path[alias]']);
     $this->assertNoText($node1->title, 'Alias was successfully deleted.');
     $this->assertResponse(404);
+
+    // Try to use a system path on $node2.
+    $edit['path[alias]'] = 'node';
+    $this->backdropPost('node/' . $node2->nid . '/edit', $edit, t('Save'));
+
+    // Confirm that the alias didn't make a duplicate.
+    $this->assertText(t('The alias is already in use.'), 'Attempt to use system path alias was rejected.');
   }
 
   /**
