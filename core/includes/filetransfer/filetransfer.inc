@@ -168,10 +168,58 @@ abstract class FileTransfer {
    */
   protected final function checkPath($path) {
     $full_jail = $this->chroot . $this->jail;
+    $real_jail = backdrop_realpath($full_jail);
     $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
+    $real_path = backdrop_realpath($this->chroot . $path);
     $full_path = $this->fixRemotePath($full_path, FALSE);
     if ($full_jail !== $full_path) {
-      throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
+      if (!$real_jail) {
+        watchdog('FileTransfer', '@jail (@full_jail:@real_jail) does not seem to exist', array(
+          '@jail' => $this->jail,
+          '@full_jail' => $full_jail,
+          '@real_jail' => $real_jail,
+        ));
+        return;
+      }
+      if (!$real_path) {
+        watchdog('FileTransfer', '@path (@real_path) does not seem to exist', array(
+          '@path' => $path,
+          '@real_path' => $real_path,
+        ));
+        return;
+      }
+      $full_path = substr($real_path, 0, strlen($real_jail));
+      $fixed_path = $this->fixRemotePath($full_path, FALSE);
+      if ($real_jail !== $fixed_path) {
+        throw new FileTransferException('@path (@real_path:@full_path:@fixed_path) is outside of the @jail (@full_jail:@real_jail)', NULL, array(
+          '@path' => $path,
+          '@real_path' => $real_path,
+          '@full_path' => $full_path,
+          '@fixed_path' => $fixed_path,
+          '@jail' => $this->jail,
+          '@full_jail' => $full_jail,
+          '@real_jail' => $real_jail,
+        ));
+      }
+    }
+    else {
+      // $full_jail === $full_path
+      if (!$real_jail) {
+        watchdog('FileTransfer', 'jail "@jail" does not seem to exist but full_jail "@full_jail" === full_path "@full_path" ?', array(
+          '@jail' => $this->jail,
+          '@full_jail' => $full_jail,
+          '@real_jail' => $real_jail,
+        ));
+        return;
+      }
+      if (!$real_path) {
+        watchdog('FileTransfer', 'path "@path" does not seem to exist but full_jail "@full_jail" === full_path "@full_path" ?', array(
+          '@path' => $path,
+          '@full_jail' => $full_jail,
+          '@full_path' => $full_path,
+        ));
+        return;
+      }
     }
   }
 
