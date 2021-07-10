@@ -587,6 +587,20 @@ class Config {
   }
 
   /**
+   * Gets all data from this configuration object.
+   *
+   * This call provides API symmetry with Config::setData().
+   *
+   * @return array
+   *   All of the data from this config object.
+   *
+   * @see Config::get()
+   */
+  public function getData() {
+    return $this->get();
+  }
+
+  /**
    * Gets data from this configuration object.
    *
    * @param string $key

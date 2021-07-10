@@ -87,7 +87,9 @@ class ConfigurationTest extends BackdropWebTestCase {
       'favorite_animal' => 'cats',
       'favorite_color' => 'blue',
     );
-    $this->assertEqual($config->get(), $expected_config, 'The configuration file contained the expected configuration.');
+    // Test both paths.
+    $this->assertEqual($config->get(), $expected_config, 'The configuration file via Config::get() contained the expected configuration.');
+    $this->assertEqual($config->getData(), $expected_config, 'The configuration file via Config::getData() contained the expected configuration.');
   }
 
   /**
