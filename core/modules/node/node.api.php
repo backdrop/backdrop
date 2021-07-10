@@ -379,7 +379,7 @@ function hook_node_grants_alter(&$grants, $account, $op) {
   // array for roles specified in our variable setting.
 
   // Get our list of banned roles.
-  $restricted = config_get('my_module.settings', 'example_restricted_roles', array());
+  $restricted = config_get('my_module.settings', 'example_restricted_roles');
 
   if ($op != 'view' && !empty($restricted)) {
     // Now check the roles for this account against the restrictions.
