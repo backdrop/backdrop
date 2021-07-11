@@ -29,6 +29,46 @@ function contact_install() {
 }
 
 /**
+ * Implements hook_enable().
+ */
+function contact_enable() {
+  // Build menu router before creating a menu item to the /contact path.
+  menu_router_build();
+
+  // Get main-menu max weight
+  $query = db_select('menu_links')
+    ->condition('menu_name' , 'main-menu');
+  $query->addExpression('MAX(weight)');
+  $weight = $query->execute()->fetchField();
+
+  // Create a Contact link in the main menu.
+  $item = array(
+    'link_title' => t('Contact'),
+    'link_path' => 'contact',
+    'menu_name' => 'main-menu',
+    'weight' => $weight + 1, // Last menu item.
+  );
+  menu_link_save($item);
+}
+
+/**
+ * Implements hook_disable().
+ */
+function contact_disable() {
+  // Delete contact menu item from main-menu.
+  $menu_links = db_select('menu_links' , 'ml')
+    ->fields('ml', array('mlid'))
+    ->condition('menu_name' , 'main-menu')
+    ->condition('link_path' , 'contact')
+    ->execute()
+    ->fetchAll();
+
+  foreach($menu_links as $menu_link) {
+    menu_link_delete($menu_link->mlid);
+  }
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
