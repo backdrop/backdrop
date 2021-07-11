@@ -55,7 +55,7 @@ join Backdrop's developer community by
 
 When submitting a pull request, please make sure there is an open issue in the
 [issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
-reference it in the description on the pull request.
+reference it in the description on the pull request. Please follow [Backdrop Contribution Guide](https://docs.backdropcms.org/documentation/contribute-to-backdrop-core) to submit a pull request.
 
 Thanks to the following companies for providing sponsorship through services and
 products which may be used by Backdrop contributors to build and improve the
