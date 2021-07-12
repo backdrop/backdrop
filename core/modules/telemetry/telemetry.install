@@ -5,6 +5,18 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function project_uninstall() {
+  $state_settings = array(
+    'telemetry_cron_last',
+  );
+  foreach ($state_settings as $setting) {
+    state_del($setting);
+  }
+}
+
+/**
  * Implements hook_requirements().
  */
 function telemetry_requirements($phase) {
