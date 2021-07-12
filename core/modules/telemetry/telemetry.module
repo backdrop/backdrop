@@ -105,7 +105,6 @@ function telemetry_cron() {
   $interval = 1; // TODO: Testing, delete this line.
   if (REQUEST_TIME - $last_run > $interval) {
     $telemetry_data = telemetry_get_data();
-    //dsm($telemetry_data); // TODO: Testing, delete this line.
     $destination_url = config_get('telemetry.settings', 'destination');
     $response = backdrop_http_request($destination_url, array(
       'method' => 'POST',
@@ -127,13 +126,15 @@ function telemetry_cron() {
  * @return string
  */
 function _telemetry_destination_server_name() {
-  return parse_url(config_get('telemetry.settings', 'destination', PHP_URL_HOST));
+  return parse_url(config_get('telemetry.settings', 'destination'), PHP_URL_HOST);
 }
 
 /**
  * Get an anonymous, unique identifier for this site.
  */
 function _telemetry_site_key() {
-  global $base_url;
-  return backdrop_hmac_base64($base_url, backdrop_get_private_key());
+  // The $base_url is not used as the $data here intentionally, as different
+  // environments of the same site should all only count as a single
+  // installation.
+  return backdrop_hmac_base64('telemetry_site_key', backdrop_get_private_key());
 }
