@@ -967,13 +967,13 @@ class views_handler_filter extends views_handler {
         }
         if ($has_state) {
           foreach ($states as $key => $state) {
-            $row['value'][$children]['#states']['visible'][] = array(
+            $row['value'][$children]['#states']['visible'][$key] = array(
               ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => array('value' => $state),
             );
-            unset($row['value'][$children]['#states']['visible'][$key]);
           }
 
-          $row['value'][$children]['#title'] = '';
+          $row['value'][$children]['#title_display'] = 'invisible';
+          $row['value'][$children]['#placeholder'] = $row['value'][$children]['#title'];
 
           if (!empty($this->options['group_info']['group_items'][$item_id]['value'][$children])) {
             $row['value'][$children]['#default_value'] = $this->options['group_info']['group_items'][$item_id]['value'][$children];
