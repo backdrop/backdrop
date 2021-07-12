@@ -1,0 +1,38 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Telemetry module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function project_uninstall() {
+  $state_settings = array(
+    'telemetry_cron_last',
+  );
+  foreach ($state_settings as $setting) {
+    state_del($setting);
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function telemetry_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break during installation.
+  $t = get_t();
+
+  // Report Backdrop version
+  if ($phase == 'runtime') {
+    $requirements['teletry'] = array(
+      'title' => $t('Telemetry'),
+      'value' => $t('Enabled'),
+      'severity' => REQUIREMENT_INFO,
+      'description' => $t('Anonymous information about how your site is configured is being sent to @domain to help improve the project. See the <a href="!telemetry_report">Telemetry report page</a> for more information.', array('@domain' => _telemetry_destination_server_name(), '!telemetry_report' => url('admin/reports/telemetry'))),
+    );
+  }
+
+  return $requirements;
+}
