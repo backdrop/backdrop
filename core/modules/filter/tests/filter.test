@@ -301,9 +301,9 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats/' . $plain . '/disable');
     $this->assertResponse(403, 'The fallback format cannot be disabled.');
 
-    // Verify access permissions to Full HTML format.
-    $this->assertTrue(filter_access(filter_format_load($full), $this->admin_user), 'Admin user may use Full HTML.');
-    $this->assertFalse(filter_access(filter_format_load($full), $this->web_user), 'Web user may not use Full HTML.');
+    // Verify access permissions to Raw HTML (full_html) format.
+    $this->assertTrue(filter_access(filter_format_load($full), $this->admin_user), 'Admin user may use Raw HTML.');
+    $this->assertFalse(filter_access(filter_format_load($full), $this->web_user), 'Web user may not use Raw HTML.');
 
     // Add an additional tag.
     $edit = array();
@@ -367,25 +367,50 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByName('filters[' . $second_filter . '][status]', '', 'Line break filter found.');
     $this->assertFieldByName('filters[' . $first_filter . '][status]', '', 'Url filter found.');
 
-    // Disable new filter.
+    // Order the new text format and check its position in the markup.
+    $edit_weight = array();
+    $edit_weight['formats[' . $format->format . '][weight]'] = -10;
+    $edit_weight['formats[filtered_html][weight]'] = -9;
+    $edit_weight['formats[full_html][weight]'] = -8;
+    $edit_weight['formats[plain_text][weight]'] = 0;
+    $this->backdropPost('admin/config/content/formats', $edit_weight, t('Save changes'));
+
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[' . $format->format . '][weight]',
+      ':second' => 'formats[filtered_html][weight]',
+      ':third' => 'formats[full_html][weight]',
+      ':fourth' => 'formats[plain_text][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with new format at top.');
+
+    // Disable the new text format.
     $this->backdropPost('admin/config/content/formats/' . $format->format . '/disable', array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %format.', array('%format' => $edit['name'])), 'Format successfully disabled.');
 
-    // Allow authenticated users on full HTML.
+    // Check that the disabled text format is at the bottom of the list.
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[filtered_html][weight]',
+      ':second' => 'formats[full_html][weight]',
+      ':third' => 'formats[plain_text][weight]',
+      ':fourth' => 'formats[' . $format->format . '][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with disabled format at bottom.');
+
+    // Allow authenticated users on Raw HTML (full_html).
     $format = filter_format_load($full);
     $edit = array();
     $edit['roles[anonymous]'] = 0;
     $edit['roles[authenticated]'] = 1;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully updated.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Raw HTML format successfully updated.');
 
     // Switch user.
     $this->backdropLogout();
     $this->backdropLogin($this->web_user);
 
     $this->backdropGet('node/add/page');
-    // Ensure Full HTML is allowed.
-    $this->assertRaw('<option value="' . $full . '">Full HTML</option>', 'Full HTML filter accessible.');
+    // Ensure Raw HTML (full_html) is allowed.
+    $this->assertRaw('<option value="' . $full . '">Raw HTML</option>', 'Raw HTML filter accessible.');
 
     // Switch user.
     $this->backdropLogout();
@@ -400,11 +425,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
 
-    // Full HTML.
+    // Raw HTML (full_html).
     $edit = array();
     $edit['roles[authenticated]'] = FALSE;
     $this->backdropPost('admin/config/content/formats/' . $full, $edit, t('Save configuration'));
-    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Full HTML format successfully reverted.');
+    $this->assertRaw(t('Updated text format %format.', array('%format' => $format->name)), 'Raw HTML format successfully reverted.');
     $this->backdropGet('admin/config/content/formats/' . $full);
     $this->assertFieldByName('roles[authenticated]', $edit['roles[authenticated]'], 'Changes reverted.');
 
@@ -1598,6 +1623,26 @@ www.example.com with a newline in comments -->
         '<li><a href="http://listitem.com">http://listitem.com</a></li>' => TRUE,
         '<li class="odd"><a href="http://www.class.listitem.com">www.class.listitem.com</a></li>' => TRUE,
       ),
+      // 'nolink' class.
+      '
+<p class="nolink">www.no-example.com</p>
+<p class="no-link">www.example.com</p>
+<span class="link nolink button">www.button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">www.divitis.com</div>
+<p class="nolink">me@no-example.com</p>
+<p class="nolink2">me@example.com</p>
+<span class="link nolink button">you@button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">us@divitis.com</div>
+' => array(
+        '<p class="nolink"><a href="http://www.no-example.com">www.no-example.com</a></p>' => FALSE,
+        '<p class="no-link"><a href="http://www.example.com">www.example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="www.button-me.com">www.button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="http://www.divitis.com">www.divitis.com</a></div>' => FALSE,
+        '<p class="nolink"><a href="mailto:me@no-example.com">me@no-example.com</a></p>' => FALSE,
+        '<p class="nolink2"><a href="mailto:me@example.com">me@example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="mailto:you@button-me.com">you@button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="mailto:us@divitis.com">us@divitis.com</a></div>' => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 
@@ -1631,6 +1676,8 @@ www.example.com with a newline in comments -->
    *   ),
    * );
    * @endcode
+   * This means that after passing 'Input string' through the given filter, we
+   * should find '<p>Input string</p>' in the output, but not 'Input string<br'.
    */
   function assertFilteredString($filter, $tests) {
     foreach ($tests as $source => $tasks) {

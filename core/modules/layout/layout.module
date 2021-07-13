@@ -216,7 +216,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/blocks'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -230,7 +230,7 @@ function layout_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/configure'),
     'access arguments' => array('administer layouts'),
     'type' => MENU_CALLBACK,
@@ -329,6 +329,39 @@ function layout_menu() {
     'page arguments' => array(4, 'layout'),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/add'] = array(
+    'title' => 'Add context',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/relationship/add'] = array(
+    'title' => 'Add relationship',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_relationship_add_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/context/edit/layout/%'] = array(
+    'title' => 'Configure context',
+    'load arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/relationship/edit/layout/%'] = array(
+    'title' => 'Configure relationship',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_context_relationship_add_form', 4, 8),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.context.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
@@ -459,7 +492,7 @@ function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_positio
   $contexts = $menu_item->getContexts();
   $context_info = layout_get_context_info($contexts[$arg_position]->plugin);
   if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-    return $context_info['load callback']($arg_value);
+    return call_user_func_array($context_info['load callback'], array($arg_value));
   }
 
   // Pass-through the string argument if no load callback specified.
@@ -634,6 +667,9 @@ function layout_theme() {
       'render element' => 'element',
     ) + $base,
     'layout_settings_context_table' => array(
+      'render element' => 'element',
+    ) + $base,
+    'layout_action_links' => array(
       'render element' => 'element',
     ) + $base,
     'layout_conditions' => array(
@@ -830,6 +866,11 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+
+    // Relationships.
+    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
+    'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
+    'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
 }
 
@@ -872,7 +913,6 @@ function layout_load($layout_name, $skip_menu_items = NULL) {
   $layouts = layout_load_multiple(array($layout_name), $skip_menu_items);
   return $layouts[$layout_name];
 }
-
 
 /**
  * Load multiple layouts based on a particular criteria.
@@ -941,15 +981,53 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
   return $layouts;
 }
 
+/**
+ * Load all layouts for a given router item and allow other modules to alter
+ * them and/or set their contexts.
+ *
+ * @param array $router_item
+ *   The fully built menu router item, e.g., what is returned by menu_get_item().
+ * @param bool $skip_menu_items
+ *   Flag to skip the attempted loading of menu items for the loaded layouts.
+ *
+ * @return Layout[]
+ *   An array of load Layout object instances.
+ */
+function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NULL) {
+  $href = $router_item['href'];
+  $layouts_by_item = &backdrop_static(__FUNCTION__, array());
+  if (isset($layouts_by_item[$href])) {
+    return $layouts_by_item[$href];
+  }
+  $layouts = layout_load_multiple_by_path($router_item['path'], $skip_menu_items);
+  backdrop_alter('layout_load_by_router_item', $layouts, $router_item);
+  $layouts_by_item[$href] = $layouts;
+  return $layouts;
+}
 
 /**
  * Load all layouts at a given path.
  *
+ * This function does not invoke hook_layout_load_by_router_item_alter(). In
+ * general, developers should use layout_load_multiple_by_router_item() rather
+ * than layout_load_multiple_by_path() to allow client modules to alter the
+ * layouts and only call this function in situations where client alteration is
+ * not desired and/or the router item is not available. Examples where this
+ * might be needed:
+ * - Inside of a hook_menu() implementation (see dashboard_menu()).
+ * - Inside of a hook_layout_load_by_router_item_alter() implementation (see
+ *   node_layout_load_by_router_item_alter()).
+ *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
+ * @param bool $skip_menu_items
+ *   Flag to skip the attempted loading of menu items for the loaded layouts.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
+ *
+ * @see dashboard_menu()
+ * @see node_layout_load_by_router_item_alter()
  */
 function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
   if ($cache = cache('layout_path')->get($path)) {
@@ -976,9 +1054,6 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
-    foreach ($layouts as $layout) {
-      $layout->resetContexts();
-    }
     cache('layout_path')->set($path, $layouts);
   }
   return $layouts;
@@ -1138,11 +1213,12 @@ function layout_get_all_configs($type) {
  */
 function layout_get_path_layout_names($path) {
   $path_map = &backdrop_static(__FUNCTION__, array());
-
-  $configs = layout_get_all_configs('layout');
-  foreach ($configs as $layout_name => $config) {
-    if (isset($config['path'])) {
-      $path_map[$config['path']][] = $layout_name;
+  if (empty($path_map)) {
+    $configs = layout_get_all_configs('layout');
+    foreach ($configs as $layout_name => $config) {
+      if (isset($config['path'])) {
+        $path_map[$config['path']][] = $layout_name;
+      }
     }
   }
 
@@ -1184,80 +1260,80 @@ function layout_provides_path($path) {
  * are passed. In which case the current path will be used.
  *
  * @param string $path
- *   The menu routing path, with all wildcards represented by "%" symbols.
- * @param $router_item
+ *   The menu routing path, with all placeholders represented by "%" symbols.
+ * @param array $router_item
  *   The menu router item for the page currently being loaded.
  *   The $path parameter will be ignored if $router_item is specified.
+ * @param bool $is_layout_page
+ *   Flag that says whether this is being called from the page callback for a
+ *   layout-provided page.
  *
  * @return Layout
  *   The Layout object for the specified path.
  *
  * @since 1.4.0
  */
-function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
+function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout_page = FALSE) {
   if (!isset($router_item)) {
     $router_item = menu_get_item($path);
   }
 
-  $cache = &backdrop_static(__FUNCTION__);
+  // Use the static cache, but keyed on the normal path (such as node/1), rather
+  // than the system path (such as node/%), since client modules might serve up
+  // different layouts for the same system path.
+  $href = $router_item['href'];
+  $layouts_by_path = &backdrop_static(__FUNCTION__, array());
+  if (isset($layouts_by_path[$href])) {
+    return $layouts_by_path[$href];
+  }
 
-  if (empty($cache[$router_item['path']])) {
-    // If the path is a node preview path, check if a custom layout exists for
-    // nodes and use that instead.
-    // @ todo: This adds very specific code for node previews which too closely
-    // couples Node and Layout modules. This needs to be reverted in a future
-    // commit.
-    $data = NULL;
-    $node_types = node_type_get_types();
-    foreach ($node_types as $type) {
-      $preview_path = 'node/' . $type->type . '/preview';
-      if ($router_item['path'] == $preview_path) {
-        $tempstore_id = node_build_tempstore_id($type->type);
-        $data = node_get_node_tempstore($tempstore_id);
-        break;
-      }
-    }
-    if ($data && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
-      $layouts = $node_layouts;
-    }
-    else {
-      $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
-    }
-    $selected_layout = NULL;
-    foreach ($layouts as $layout) {
-      // Contexts must be set before the layout's access may be checked.
-      $contexts = $layout->getContexts();
-      foreach ($contexts as $context) {
-        if (isset($context->position)) {
-
-          // Check for an object loaded by the menu router. Use a preview from
-          // Tempstore if on a node preview page.
-          // @ todo: This is also specific code for node previews which needs
-          // to be reverted in a future commit.
+  $layouts = layout_load_multiple_by_router_item($router_item, !$is_layout_page);
+  $selected_layout = NULL;
+  foreach ($layouts as $layout) {
+    // Contexts must have their data set before the layout's access may be
+    // checked.
+    $contexts = $layout->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->position)) {
+        // If the menu router set the data for a context object or a client did
+        // so via hook_layout_load_by_router_item_alter(), we don't need to do
+        // any setting here. But if $context->data is not an object, then it is
+        // either a raw string that must be converted to an object by a load
+        // callback or it is a string pass-through.
+        if (!is_object($context->data)) {
+          // If clients replaced any layout with one whose placeholders are in a
+          // new position, they need to have altered $context->position so that
+          // it points to the right place in the router item to get the data
+          // object.
           if (isset($router_item['map'][$context->position])) {
-            $data = isset($data) ? $data : $router_item['map'][$context->position];
-            $context->setData($data);
-          }
-
-          // If no context is set, load one using the layout info.
-          if (!is_object($context->data)) {
-            $context_info = layout_get_context_info($context->plugin);
-            if (isset($context_info['load callback'])) {
-              $function = $context_info['load callback'];
-              $context_data = $function($router_item['original_map'][$context->position]);
+            $context_data = $router_item['map'][$context->position];
+            // If the router item contains the context object in the right
+            // position, then we can just set the data from that.
+            if (is_object($context_data)) {
+              $context->setData($context_data);
+            }
+            else {
+              // If the context data was not an object, then we can try to set
+              // it using the plugin's load callback. If there is no callback,
+              // then it must be a string pass-through, so we leave it as is.
+              $context_info = layout_get_context_info($context->plugin);
+              if (isset($context_info['load callback'])) {
+                $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
+              }
               $context->setData($context_data);
             }
           }
         }
       }
-
-      if (!$layout->disabled && $layout->checkAccess()) {
-        $selected_layout = $layout;
-        break;
-      }
     }
+    if (!$layout->disabled && $layout->checkAccess()) {
+      $selected_layout = $layout;
+      break;
+    }
+  }
 
-    // If no layout matches at the path, use the default layout.
+  if (!$is_layout_page) {
+    // If no layout matches at the path, use a default layout.
     if (!$selected_layout) {
       if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
         $selected_layout = layout_load('admin_default');
@@ -1266,11 +1342,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         $selected_layout = layout_load('default');
       }
     }
-
-    $cache[$router_item['path']] = $selected_layout;
   }
 
-  return $cache[$router_item['path']];
+  $layouts_by_path[$href] = $selected_layout;
+  return $selected_layout;
 }
 
 /**
@@ -1458,6 +1533,58 @@ function layout_get_context_info($plugin_name) {
   return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
 }
 
+
+/**
+ * Fetch all relevant relationships.
+ *
+ * Relevant relationships are any relationship that can be created based upon
+ * the list of existing contexts. For example, the 'node author' relationship
+ * is relevant if there is a 'node' context, but makes no sense if there is
+ * not one.
+ *
+ * @param $contexts
+ *   An array of contexts used to figure out which relationships are relevant.
+ *
+ * @return
+ *   An array of relationship keys that are relevant for the given set of
+ *   contexts.
+ */
+function layout_relationships_get_relevant_info($contexts) {
+  $relevant = array();
+  $relationships = _layout_get_all_info('layout_relationship');
+
+  foreach ($contexts as $context) {
+    // Go through each relationship
+    foreach ($relationships as $rid => $relationship) {
+      $handler = layout_create_handler('layout_relationship', $rid);
+      if ($children = $handler->getChildren($rid)) {
+        foreach ($children as $child_rid => $child) {
+          if ($child['context'] == $context->plugin) {
+            $relevant[$child_rid] = $child;
+          }
+        }
+      }
+      else {
+        if ($relationship['context'] == $context->plugin) {
+          $relevant[$rid . ':relationship'] = $relationship;
+        }
+      }
+    }
+  }
+
+  return $relevant;
+}
+
+/**
+ * Load all layout relationship information from modules.
+ *
+ * @return array
+ */
+function layout_get_relationship_info($plugin_name) {
+  $info = _layout_get_all_info('layout_relationship');
+  return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
+}
+
 /**
  * Load all layout access information from modules.
  *
@@ -1579,6 +1706,9 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       case 'layout_context':
         $broken_class = 'LayoutContextBroken';
         break;
+      case 'layout_relationship':
+        $broken_class = 'LayoutRelationshipBroken';
+        break;
       case 'layout_style':
         $broken_class = 'LayoutStyle';
         break;
@@ -1609,6 +1739,15 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
 function layout_create_handler($plugin_type, $plugin_name, array $config = array()) {
   $handler_name = layout_get_handler_name($plugin_type, $plugin_name);
   return new $handler_name($plugin_name, $config);
+}
+
+/**
+ * Helper function to create a Layout Context.
+ *
+ * @return LayoutContext
+ */
+function layout_create_relationship($relationship_plugin_name, $config = array()) {
+  return layout_create_handler('layout_relationship', $relationship_plugin_name, $config);
 }
 
 /**
@@ -1684,9 +1823,6 @@ function layout_set_layout_tempstore($item, $type = 'layout') {
     return;
   }
 
-  // Layout contexts should not be stored in the tempstore, they're generated on
-  // the fly when needed after loading.
-  $item->resetContexts();
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
@@ -1732,7 +1868,7 @@ function layout_tempstore_block_load($layout_block_uuid, $layout_name) {
 }
 
 /**
- * Given a path with wildcard placeholders (%), determine the required contexts.
+ * Given a path with placeholders (%), determine the required contexts.
  *
  * @param string $path
  *   The path for which required contexts should be retrieved.
@@ -1755,7 +1891,7 @@ function layout_context_required_by_path($path) {
           'plugin' => $context_info['name'],
         );
       }
-      // If the path matches based on % wildcards, add this context as a
+      // If the path matches based on % placeholders, add this context as a
       // required context info in the correct order.
       elseif (strpos($path, $cleaned_path) === 0) {
         // Determine the argument placement within the path.
@@ -1772,7 +1908,7 @@ function layout_context_required_by_path($path) {
     }
   }
 
-  // If any wildcards are not filled, populate with a placeholder context
+  // If any placeholders are not filled, populate with a placeholder context
   // that can be modified.
   $parts = explode('/', $path);
   foreach ($parts as $part_index => $part) {
@@ -1792,6 +1928,7 @@ function layout_context_required_by_path($path) {
   foreach ($required_context_info as $context_position => $context_info) {
     $context = layout_create_context($context_info['plugin']);
     $context->required = TRUE;
+    $context->usageType = LayoutContext::USAGE_TYPE_MENU;
     // String placeholders are not locked, allowing a new value to be set.
     $context->locked = $context_info['plugin'] !== 'string';
     $context->position = $context_position;
@@ -1800,6 +1937,25 @@ function layout_context_required_by_path($path) {
   }
 
   return $required_contexts[$path];
+}
+
+/**
+ * Returns the current user context, which is always available.
+ *
+ * @return EntityLayoutContext
+ *   The layout context for the current user.
+ *
+ * @since 1.17.5 Function added.
+ */
+function layout_current_user_context() {
+  $current_user_context = layout_create_context('user', array(
+    'name' => 'current_user',
+    'label' => t('Current user'),
+    'locked' => TRUE,
+    'usageType' => LayoutContext::USAGE_TYPE_SYSTEM,
+  ));
+  $current_user_context->setData($GLOBALS['user']);
+  return $current_user_context;
 }
 
 /**

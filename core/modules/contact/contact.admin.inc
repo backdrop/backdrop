@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the Contact module.
@@ -21,6 +20,17 @@ function contact_settings_form($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#title' => t("Fields"),
+  );
+  $form['fields']['phone'] = array(
+    '#type' => 'select',
+    '#title' => t('Phone number'),
+    '#description' => t('Allow users to enter their phone number.'),
+    '#options' => array(
+      'optional' => t('Optional'),
+      'required' => t('Required'),
+    ),
+    '#empty_value' => '',
+    '#default_value' => $config->get('phone'),
   );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',

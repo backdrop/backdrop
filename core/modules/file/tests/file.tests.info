@@ -64,12 +64,6 @@ description = Test file administration page functionality.
 group = File
 file = file.test
 
-[FileAdminTestCase]
-name = File administration
-description = Test file administration page functionality.
-group = File
-file = file.test
-
 [FileTestHelper]
 name = FileTestHelper
 description = FileTestHelper
@@ -91,12 +85,6 @@ file = file.test
 [FileEditTestCase]
 name = File edit
 description = Create a file and test file edit functionality.
-group = File
-file = file.test
-
-[FileAdminTestCase]
-name = File administration
-description = Test file administration page functionality.
 group = File
 file = file.test
 

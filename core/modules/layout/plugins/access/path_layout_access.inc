@@ -71,7 +71,7 @@ class PathLayoutAccess extends LayoutAccess {
       '#type' => 'textarea',
       '#title' => t('Paths'),
       '#default_value' => $this->settings['paths'],
-      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the front page.', array('@front' => '<front>')),
+      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the home page.', array('@front' => '<front>')),
       '#required' => TRUE,
     );
   }

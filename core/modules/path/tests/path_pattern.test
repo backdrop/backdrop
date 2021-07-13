@@ -208,6 +208,16 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $expected = 'add-accents'; // "a" and "the" is stripped out.
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
+
+    // German transiteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
+    $input = 'Ärger im Büro ist möglich';
+    $expected = 'aerger-im-buero-ist-moeglich';
+    $output = path_clean_string($input, array('langcode' => 'de'));
+    $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array(
+      '@input' => $input,
+      '@expected' => $expected,
+      '@output' => $output,
+    )));
   }
 
   /**
@@ -803,13 +813,19 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $modules[] = 'translation';
     parent::setUp($modules, array('administer languages'));
 
-    // Add predefined French language and reset the locale cache.
-    $language = (object) array(
+    // Add predefined French and German languages and reset the locale cache.
+    $french = (object) array(
       'langcode' => 'fr',
       'name' => 'French',
       'direction' => LANGUAGE_LTR,
     );
-    language_save($language);
+    language_save($french);
+    $german = (object) array(
+      'langcode' => 'de',
+      'name' => 'German',
+      'direction' => LANGUAGE_LTR,
+    );
+    language_save($german);
     backdrop_language_initialize();
   }
 
@@ -848,6 +864,34 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $this->assertEntityAlias('node', $node, 'french-node', 'fr');
     $this->assertAliasExists(array('pid' => $english_alias['pid'], 'alias' => 'content/english-node-1'));
   }
+
+  /**
+   * Language neutral German node has the correct transliteration applied.
+   */
+  public function testNeutralTransliteration() {
+    config_set('system.core', 'language_default', 'de');
+    config_set('path.settings', 'transliterate', TRUE);
+    $title_de = 'Lückenbüßer stören DE';
+    $title_en = 'Lückenbüßer stören EN';
+    $edit = array(
+      'title' => $title_de,
+      'path[auto]' => TRUE,
+    );
+    // We need to get rid of the session.
+    $this->backdropLogout($this->admin_user);
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title_de);
+    // DE: "ü" -> "ue", "ß" -> "ss", "ö" -> "oe".
+    $this->assertEntityAlias('node', $node, 'content/lueckenbuesser-stoeren-de');
+    config_set('system.core', 'language_default', 'en');
+    $edit['title'] = $title_en;
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title_en);
+    // EN: "ü" -> "u", "ß" -> "ss", "ö" -> "o".
+    $this->assertEntityAlias('node', $node, 'content/luckenbusser-storen-en');
+  }
+
 }
 
 /**

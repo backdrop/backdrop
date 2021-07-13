@@ -3,3 +3,9 @@ name = CKEditor
 description = Check the functionality of CKEditor module.
 group = CKEditor
 file = ckeditor.test
+
+[CKEditorRtlTestCase]
+name = CKEditor RTL
+description = Check the functionality of CKEditor with right-to-left languages.
+group = CKEditor
+file = ckeditor_rtl.test

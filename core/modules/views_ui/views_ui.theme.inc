@@ -283,7 +283,7 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       // Row which will only appear if the group has nothing in it.
       $row = array();
       $class = 'group-' . (count($contents) ? 'populated' : 'empty');
-      $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-only">' . t('Drag to add filters.') . '</span>';
+      $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-show">' . t('Drag to add filters.') . '</span>';
       // When JavaScript is enabled, the button for removing the group (if it's
       // present) should be hidden, since it will be replaced by a link on the
       // client side.
