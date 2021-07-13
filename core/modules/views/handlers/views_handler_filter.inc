@@ -1046,6 +1046,9 @@ class views_handler_filter extends views_handler {
       '#type' => 'submit',
       '#value' => t('Add another item'),
       '#submit' => array('views_ui_config_item_form_add_group'),
+      '#attributes' => array(
+        'class' => array('use-ajax-submit'),
+      ),
     );
 
     $js = array();
