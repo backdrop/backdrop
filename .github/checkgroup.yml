@@ -1,5 +1,7 @@
-custom_service_name: Functional tests
+custom_service_name: Integration Tests
 subprojects:
   - id: simpletest
+    paths:
+      - "./**"
     checks:
       - "simpletest"
