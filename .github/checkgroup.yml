@@ -1,0 +1,5 @@
+custom_service_name: Functional tests
+subprojects:
+  - id: simpletest
+    checks:
+      - "simpletest"

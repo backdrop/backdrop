@@ -1,9 +1,10 @@
 name: Functional tests
 on: [push, pull_request]
 jobs:
-  batches:
+  simpletest:
     name: Run Simpletest in batches
     runs-on: ubuntu-18.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
