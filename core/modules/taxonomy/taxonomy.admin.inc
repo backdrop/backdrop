@@ -193,8 +193,18 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save vocabulary'),
+    '#weight' => 2,
   );
+
+  if ($vocabulary->machine_name == NULL) {
+    // Only show 'Save and add terms' button when creating new vocabulary.
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and add terms'),
+      '#weight' => 1,
+    );
+  }
 
   return $form;
 }
@@ -335,6 +345,11 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
         }
         user_role_grant_permissions($role->name, $valid_perms);
       }
+
+      if ($form_state['triggering_element']['#value'] == t('Save and add terms')) {
+        $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add';
+      }
+
       break;
 
     case SAVED_UPDATED:
@@ -739,7 +754,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
   }
-  
+
   // During initial form build, add the term entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
