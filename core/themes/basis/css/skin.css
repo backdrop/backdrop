@@ -29,6 +29,10 @@ a:active {
   background: #dddddd;
 }
 
+a.form-delete {
+  text-decoration: none;
+}
+
 blockquote,
 figcaption {
   border-left-color: #bbbbbb;
