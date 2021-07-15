@@ -5,55 +5,63 @@
  */
 
 /**
- * Returns HTML for the vocabulary overview form as a sortable list of vocabularies.
+ * Returns HTML for the vocabulary human readable name, and its machine name.
  *
  * @param $variables
  *   An associative array containing:
- *   - form: A render element representing the form.
+ *   - 'vocabulary': An object containing the human readable name, and the
+ *     machine name of the vocabulary.
  *
  * @see taxonomy_overview_vocabularies()
  * @ingroup themeable
  */
-function theme_taxonomy_overview_vocabularies($variables) {
-  $form = $variables['form'];
+function theme_taxonomy_vocabulary_name($variables) {
+  $vocabulary = $variables['vocabulary'];
 
-  $rows = array();
+  $output = '';
+  $output .= '<div class="vocabulary-label">' . check_plain($vocabulary->name) . '</div>';
+  $output .= '<div class="vocabulary-machine-name">(<span>' . check_plain($vocabulary->machine_name) . '</span>)</div>';
+  return $output;
+}
 
-  foreach (element_children($form) as $key) {
-    if (isset($form[$key]['name'])) {
-      $vocabulary = &$form[$key];
+/**
+ * Returns HTML for the vocabulary description.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - 'vocabulary': An object containing the description of the vocabulary.
+ *
+ * @see taxonomy_overview_vocabularies()
+ * @ingroup themeable
+ */
+function theme_taxonomy_vocabulary_description($variables) {
+  $vocabulary = $variables['vocabulary'];
 
-      $row = array();
-      $row[] = backdrop_render($vocabulary['name']);
-      $row[] = array(
-        'data' => backdrop_render($vocabulary['items']),
-        'class' => array('text-align-right'),
-      );
-      if (isset($vocabulary['weight'])) {
-        $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
-        $row[] = backdrop_render($vocabulary['weight']);
-      }
-      $row[] = backdrop_render($vocabulary['operations']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
-    }
+  $output = '';
+  if ($vocabulary->description) {
+    $output = '<div class="vocabulary-description">' . filter_xss_admin($vocabulary->description) . '</div>';
   }
+  return $output;
+}
 
-  $header = array(t('Vocabulary name'));
-  $header[] = array(
-    'data' => t('Number of terms'),
-    'class' => array('priority-low', 'text-align-right'),
-  );
-  if (isset($form['actions'])) {
-    $header[] = t('Weight');
-    backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
-  }
-  $header[] = t('Operations');
-  return theme('table', array(
-    'header' => $header,
-    'rows' => $rows,
-    'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))),
-    'attributes' => array('id' => 'taxonomy'),
-  )) . backdrop_render_children($form);
+
+/**
+ * Returns HTML for the vocabulary term_count.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - 'term_count': the number of terms within the vocabulary.
+ *
+ * @see taxonomy_overview_vocabularies()
+ * @ingroup themeable
+ */
+function theme_taxonomy_vocabulary_term_count($variables) {
+
+  $output  = '<div class="vocabulary-term-count">';
+  $output .= check_plain($variables['term_count']);
+  $output .= '</div>';
+
+  return $output;
 }
 
 /**
@@ -71,8 +79,8 @@ function theme_taxonomy_overview_terms($variables) {
 
   $page_increment  = $form['#page_increment'];
   $page_entries    = $form['#page_entries'];
-  $back_step     = $form['#back_step'];
-  $forward_step  = $form['#forward_step'];
+  $back_step       = $form['#back_step'];
+  $forward_step    = $form['#forward_step'];
 
   // Add drag and drop if parent fields are present in the form.
   if ($form['#parent_fields']) {
