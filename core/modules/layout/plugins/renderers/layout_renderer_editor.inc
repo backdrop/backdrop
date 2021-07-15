@@ -103,17 +103,18 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderBlock($block) {
+    $aria_label = $this->getAriaLabel($block);
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $output = '<div tabindex="0" class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $output = '<div tabindex="0" aria-label="' . $aria_label . '" class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
     $output .= '<div class="layout-editor-block-title clearfix">';
     $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
     $output .= '</div>'; // layout-block-title
-    $output .= '<div class="layout-editor-block-content">' . render($content) . '</div>';
+    $output .= '<div tabindex="0" class="layout-editor-block-content">' . render($content) . '</div>';
     $output .= '</div>'; // layout-block
 
     return $output;
@@ -129,6 +130,18 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       $this->rendered['blocks'][$uuid] = $this->renderBlock($block);
     }
     return $this->rendered['blocks'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function getAriaLabel($block) {
+    $content = $block->getAdminPreview();
+
+    $label = t('Draggable block');
+    $label .= $block->getAdminTitle();
+
+    return $label;
   }
 
   /**
