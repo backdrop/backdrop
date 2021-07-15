@@ -161,7 +161,7 @@ function theme_field_ui_view_modes($variables) {
       $row['label'] .= '&nbsp;<small>(<em>' . t('Uses the Default display mode') . '</em>)</small>';
       if (user_access('administer view modes')) {
         $operations['enable'] = array(
-          'title' => t('Enable'),
+          'title' => t('Customize'),
           'href' => "$path/{$view_mode_name}/enable",
           'query' => array(
             'token' => backdrop_get_token('view_mode_enable'),
