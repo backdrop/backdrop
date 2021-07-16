@@ -136,8 +136,6 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function getAriaLabel($block) {
-    $content = $block->getAdminPreview();
-
     $label = t('Draggable block ');
     $label .= strip_tags($block->getAdminTitle());
 
