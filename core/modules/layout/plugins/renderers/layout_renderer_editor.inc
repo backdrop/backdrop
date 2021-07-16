@@ -133,13 +133,10 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns an aria label for a block.
    */
   function getAriaLabel($block) {
-    $label = t('Draggable block ');
-    $label .= strip_tags($block->getAdminTitle());
-
-    return $label;
+    return t('Draggable block !title', array('!title' => strip_tags($block->getAdminTitle())));
   }
 
   /**
