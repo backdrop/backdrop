@@ -149,12 +149,17 @@ Backdrop.behaviors.layoutDisplayEditor = {
           var blockPosition = that.index() + 1;
           var announceMessage = '';
           if (changedRegion) {
-            announceMessage = Backdrop.t('Block moved to region ') + regionTitle;
+            announceMessage = Backdrop.t('Block moved to region !region_title', {
+              '!region_title': regionTitle
+            });
           }
           else {
             announceMessage = Backdrop.t('Block moved.');
           }
-          announceMessage += Backdrop.t('Now in position') +  blockPosition +  Backdrop.t('of') + countBlocks;
+          announceMessage += Backdrop.t('Now in position !block_position of !count_blocks', {
+            '!block_position': blockPosition,
+            '!count_blocks': countBlocks,
+          });
           Backdrop.announce(announceMessage);
         }
 
