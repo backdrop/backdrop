@@ -1189,7 +1189,8 @@ div.filter-options select {
 .admin-panel .block-content {
   padding: 0 9px 9px;
 }
-.admin-panel .block-title {
+.admin-panel .block-title,
+.admin-panel h3.has-icon {
   margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
@@ -1219,34 +1220,34 @@ div.filter-options select {
 }
 
 /* Add special icons for admin/config */
-.admin-panel-people h3 {
+.admin-panel-people h3.has-icon {
   background-image: url('../images/users--black--64.png');
 }
-.admin-panel-content h3 {
+.admin-panel-content h3.has-icon {
   background-image: url('../images/pencil-square-o--black--64.png');
 }
-.admin-panel-system h3 {
+.admin-panel-system h3.has-icon {
   background-image: url('../images/hdd-o--black--64.png');
 }
-.admin-panel-administration h3 {
+.admin-panel-administration h3.has-icon {
   background-image: url('../images/cog--black--64.png');
 }
-.admin-panel-media h3 {
+.admin-panel-media h3.has-icon {
   background-image: url('../images/picture-o--black--64.png');
 }
-.admin-panel-search h3 {
+.admin-panel-search h3.has-icon {
   background-image: url('../images/search--black--64.png');
 }
-.admin-panel-regional h3 {
+.admin-panel-regional h3.has-icon {
   background-image: url('../images/globe--black--64.png');
 }
-.admin-panel-urls h3 {
+.admin-panel-urls h3.has-icon {
   background-image: url('../images/link--black--64.png');
 }
-.admin-panel-development h3 {
+.admin-panel-development h3.has-icon {
   background-image: url('../images/wrench--black--64.png');
 }
-.admin-panel-services h3 {
+.admin-panel-services h3.has-icon {
   background-image: url('../images/rss--black--64.png');
 }
 

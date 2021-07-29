@@ -462,7 +462,7 @@ function theme_admin_block($variables) {
 
   $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
-    $output .= '<h3>' . $block['title'] . '</h3>';
+    $output .= '<h3 class="has-icon">' . $block['title'] . '</h3>';
   }
   if (!empty($block['content'])) {
     $output .= '<div class="body">' . $block['content'] . '</div>';
