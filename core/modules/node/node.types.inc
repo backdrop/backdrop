@@ -92,10 +92,19 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
   // Create the body field by default on form submission. This may be altered by
   // other modules.
-  $form['body'] = array(
-    '#type' => 'value',
-    '#value' => TRUE,
-  );
+  $body_config = config_get('field.field.body');
+  if (isset($body_config) && $body_config['deleted'] == TRUE) {
+    // Avoid FieldException on submit, if the body field is still getting
+    // purged. That happens when all content types got deleted.
+    $hint = t('The body field is marked for deletion, but the purge job did not complete yet. Not adding a body field now.');
+    backdrop_set_message($hint, 'warning', FALSE);
+  }
+  else {
+    $form['body'] = array(
+      '#type' => 'value',
+      '#value' => TRUE,
+    );
+  }
 
   $form['name'] = array(
     '#title' => t('Name'),
