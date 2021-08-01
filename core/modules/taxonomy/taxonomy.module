@@ -1139,7 +1139,7 @@ function taxonomy_term_load_multiple($tids = array(), $conditions = array()) {
  *  An array of vocabulary objects, indexed by machine name.
  */
 function taxonomy_vocabulary_load_multiple($machine_names = array()) {
-  $static = backdrop_static(__FUNCTION__, array(
+  $static = &backdrop_static(__FUNCTION__, array(
     'vocabularies' => array(),
     'machine_names' => NULL,
   ));
