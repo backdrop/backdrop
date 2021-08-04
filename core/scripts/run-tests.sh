@@ -193,7 +193,6 @@ if ($args['cache']) {
   echo "\nPreparing database and configuration cache for profiles\n";
   $skip_myisam = $args['skip-myisam'];
   if ($skip_myisam) {
-    $skip_myisam = TRUE;
     echo "Skipping conversion to MyISAM\n";
   }
   foreach($profiles as $profile){
