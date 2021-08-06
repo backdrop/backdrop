@@ -450,7 +450,8 @@ ul.admin-list li {
 .admin-list li:first-child {
   border-top: none;
 }
-.admin-list {
+.admin-list,
+[dir="rtl"] .admin-list {
   margin: 0;
   padding: 0;
 }
@@ -1176,7 +1177,8 @@ div.filter-options select {
   margin: 0;
 }
 .admin-panel,
-.admin-panel .body {
+.admin-panel .body,
+[dir="rtl"] .admin-panel .body {
   padding: 0;
   clear: left;
 }
@@ -1191,7 +1193,7 @@ div.filter-options select {
 }
 .admin-panel .block-title,
 .admin-panel h3.has-icon {
-  margin: 9px 9px 0;
+  margin: 15px;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
@@ -1205,6 +1207,10 @@ div.filter-options select {
   padding: 6px 35px 6px 0;
   background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
+}
+[dir="rtl"] .admin-panel h3.has-icon {
+  padding: 6px 35px 6px 0;
+  background-position: right center;
 }
 @media (min-width: 34em) { /* 544px @ 16px font size -- SM */
   .admin-panel .block-content {
