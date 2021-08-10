@@ -96,8 +96,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
   if (!empty($body_config['deleted'])) {
     // Avoid FieldException on submit, if the body field is still getting
     // purged. That happens when all content types got deleted.
-    $hint = t("The Body field has been marked for deletion so it's not added.");
-    backdrop_set_message($hint, 'warning', FALSE);
+    $hint = t('The Body field was previously deleted. Run cron to restore it, or try again in 1 hour.');
+    $form['messages'] = array(
+      '#theme' => 'status_messages',
+      '#messages' => array(
+        'warning' => array($hint),
+      ),
+    );
+    $form['body'] = array(
+      '#type' => 'value',
+      '#value' => FALSE,
+    );
   }
   else {
     $form['body'] = array(
