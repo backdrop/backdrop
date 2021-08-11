@@ -44,18 +44,16 @@ function _config_sync_validate(&$context) {
     $context['sandbox']['current_index'] = 0;
   }
 
-  $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
-  try {
+    $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
     foreach ($config_files as $config_file => $config_change_type) {
-      config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
-      $context['sandbox']['current_index']++;
+        try {
+            config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
+        }
+        catch (ConfigValidateException $e) {
+            $context['results']['errors'][] = $e->getMessage();
+        }
+        $context['sandbox']['current_index']++;
     }
-  }
-  catch (ConfigValidateException $e) {
-    $context['results']['errors'][] = $e->getMessage();
-    $context['finished'] = 1;
-    return;
-  }
 
   $context['finished'] = $context['sandbox']['total_size'] ? $context['sandbox']['current_index'] / $context['sandbox']['total_size'] : 1;
 }
@@ -99,12 +97,11 @@ function _config_sync_finished($status, $results, $operations) {
   }
   if (!empty($results['completed_changes'])) {
     backdrop_set_message(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($results['completed_changes']))));
-    if (config_get('system.core', 'config_sync_clear_staging')) {
-      // Clean up the staging directory.
-      $config_dir = config_get_config_directory('staging');
-      $config_storage = new ConfigFileStorage($config_dir);
-      $config_storage->deleteAll();
-    }
+
+    // Clean up the staging directory.
+    $config_dir = config_get_config_directory('staging');
+    $config_storage = new ConfigFileStorage($config_dir);
+    $config_storage->deleteAll();
   }
 
   backdrop_flush_all_caches();
