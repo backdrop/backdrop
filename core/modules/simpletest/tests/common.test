@@ -2782,6 +2782,10 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
     $this->assertText(t('Date format updated.'));
 
+    // Reset the statically cached date formats so that these calls to
+    // format_date() will pick up the newly created date formats from config.
+    backdrop_static_reset('system_get_date_formats');
+
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');
     $this->assertIdentical(format_date($timestamp, 'example_style_uppercase', '', 'America/Los_Angeles'), '9 Mar 2007', 'Test format_date() using an admin-defined date type with different case.');

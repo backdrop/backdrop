@@ -2083,7 +2083,7 @@ function file_get_download_token($file) {
  * @see file_file_predelete()
  */
 function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file', $check_access = TRUE) {
-  $references = backdrop_static(__FUNCTION__, array());
+  $references = &backdrop_static(__FUNCTION__, array());
   $fields = isset($field) ? array($field['field_name'] => $field) : field_info_fields();
 
   foreach ($fields as $field_name => $file_field) {
