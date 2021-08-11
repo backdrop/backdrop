@@ -3885,7 +3885,7 @@ function system_run_automated_cron() {
  *   string.
  */
 function system_get_date_formats($date_format_name = NULL) {
-  $date_formats = backdrop_static(__FUNCTION__, array());
+  $date_formats = &backdrop_static(__FUNCTION__, array());
   if (empty($date_formats)) {
     $date_formats = config_get('system.date', 'formats');
     foreach ($date_formats as $name => $format) {
