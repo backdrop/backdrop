@@ -191,9 +191,9 @@ if ($args['cache']) {
   simpletest_script_init(NULL);
 
   echo "\nPreparing database and configuration cache for profiles\n";
-  $skip_myisam = $args['skip-myisam'];
-  if ($skip_myisam) {
-    echo "Skipping conversion to MyISAM\n";
+  $skip_myisam = !$args['myisam-convert'];
+  if (!$skip_myisam) {
+    echo "Cache table conversion to MyISAM is enabled\n";
   }
   foreach($profiles as $profile){
     simpletest_script_prepare_profile_cache($profile, $skip_myisam);
@@ -300,9 +300,9 @@ All arguments are long options.
 
   --cache     Generate cache for instalation profiles to boost tests speed.
 
-  --skip-myisam
-              Do not convert cache tables to MyISAM. Use if you see "Specified
-              key was too long" errors with "--cache".
+  --myisam-convert
+              Convert cache tables to MyISAM. Improves test performance but is
+              not recommended with MySQL 5.7+ or MariaDB 10.2.2+.
 
   --summary [file]
 
@@ -341,7 +341,7 @@ function simpletest_script_parse_args() {
     'php' => '',
     'concurrency' => 1,
     'cache' => FALSE,
-    'skip-myisam' => FALSE,
+    'myisam-convert' => FALSE,
     'split' => '',
     'force' => FALSE,
     'all' => FALSE,
