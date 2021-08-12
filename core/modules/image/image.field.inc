@@ -180,7 +180,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Title</em> field'),
     '#default_value' => $settings['title_field'],
-    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
+    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image. Enabling this field is not recommended, as it can cause problems with screen readers.'),
     '#weight' => 11,
   );
   $form['title_field_required'] = array(
