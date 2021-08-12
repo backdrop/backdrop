@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.18.7');
+define('BACKDROP_VERSION', '1.18.x-dev');
 
 /**
  * Core API compatibility.
