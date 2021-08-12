@@ -1785,6 +1785,7 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'create page content',
       'access content',
+      'create url aliases'
     ));
   }
 
@@ -1804,6 +1805,8 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
       'title' => $node_title,
       'body[und][0][value]' => 'Test page',
       'body[und][0][format]' => 'filtered_html',
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertResponse(200);
@@ -1843,6 +1846,8 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
       'body[und][0][value]' => 'Test page',
       'body[und][0][format]' => 'filtered_html',
       'files[' . $field_name .'_und_0]' => backdrop_realpath($test_file->uri),
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertResponse(200);
@@ -1874,6 +1879,7 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
       'bypass node access',
       'access content overview',
       'administer nodes',
+      'create url aliases',
     ));
     $this->backdropLogin($admin_user);
     $this->_testNodeWithFileWithoutTitle();
@@ -1903,6 +1909,8 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
       'body[und][0][value]' => 'Test page',
       'body[und][0][format]' => 'filtered_html',
       'files[' . $field_name .'_und_0]' => backdrop_realpath($test_file->uri),
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertResponse(200);

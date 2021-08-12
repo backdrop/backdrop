@@ -53,8 +53,8 @@ group = File
 file = file.test
 
 [FileFieldAnonymousSubmission]
-name = File form anonymous submission
-description = Test anonymous form submission.
+name = File field anonymous submission
+description = Test anonymous file field submission.
 group = File
 file = file.test
 
