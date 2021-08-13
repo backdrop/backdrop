@@ -245,7 +245,8 @@ function installer_browser_fetch_results($filters) {
   $local_filters = $filters;
   $local_filters['method'] = 'query';
 
-  $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1?' . http_build_query($local_filters, FALSE, '&');
+  $query_symbol = strpos($server['url'], '?') === FALSE ? '?' : '&';
+  $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1' . $query_symbol . http_build_query($local_filters, FALSE, '&');
   $response = backdrop_http_request($query_url);
 
   if ($response->code == '200') {
@@ -512,7 +513,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
         ),
       ),
     );
-    
+
   }
 
   return backdrop_render($build);
