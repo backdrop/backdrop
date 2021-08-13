@@ -607,9 +607,26 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   if ($main_widget) {
     // Conditionally alter the form element's type if text processing is enabled.
     if ($instance['settings']['text_processing']) {
+
+      // Field is not empty: apply it's matching format regardless of access.
+      $default_format = NULL;
+      if (!empty($items[$delta]['value'])) {
+        if (isset($items[$delta]['format'])) {
+          $default_format = $items[$delta]['format'];
+        }
+      }
+      else {
+        // Only set the default format when this account can access the format.
+        global $user;
+        $available_formats = filter_formats($user);
+        if (isset($items[$delta]['format']) && array_key_exists($items[$delta]['format'], $available_formats)) {
+          $default_format = $items[$delta]['format'];
+        }
+      }
+
       $element = $main_widget;
       $element['#type'] = 'text_format';
-      $element['#format'] = isset($items[$delta]['format']) ? $items[$delta]['format'] : NULL;
+      $element['#format'] = $default_format;
       $element['#allowed_formats'] = $instance['settings']['allowed_formats'];
       $element['#editor_uploads'] = TRUE;
       $element['#base_type'] = $main_widget['#type'];
