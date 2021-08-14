@@ -153,6 +153,9 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+.layout-editor-region-title {
+  padding: 0 0 10px 0;
+}
 .layout-editor-region-title .label {
   float: left; /* LTR */
   margin: 0;
@@ -167,13 +170,27 @@
   padding-right: 4px;
   padding-left: 12px;
 }
+.layout-flexible-region-top .label {
+  display: inline-block;
+  margin: 0;
+  padding: 4px 12px 4px 4px; /* LTR */
+  line-height: 1.2;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #908990;
+  position: relative;
+  top: -8px;
+}
+.flexible-row .layout-editor-region-title .label {
+  font-size: 16px;
+}
 .layout-editor-region-content {
   min-height: 40px;
 }
 .layout-editor-region-title .dropbutton-wrapper {
   float: left; /* LTR */
   width: 140px;
-  margin: 4px 0 10px
+  margin: 4px 00;
 }
 [dir="rtl"] .layout-editor-region-title .dropbutton-wrapper {
   float: right;
@@ -218,7 +235,12 @@
   border-radius: 4px 4px 0 0;
   padding: 0.4em 0.5em;
 }
-.layout-editor-block-title .handle {
+.layout--flexible .layout-editor-block-title {
+  padding: 0.4em 1em;
+  font-weight: bold;
+}
+.layout-editor-block-title .handle,
+.layout-flexible-region-top .handle {
   background: url(../../../misc/draggable.png) no-repeat 6px 9px;
   height: 13px;
   width: 13px;
@@ -229,8 +251,13 @@
   -webkit-box-sizing: content-box;
   -o-box-sizing: content-box;
 }
-[dir="rtl"] .layout-editor-block-title .handle {
+[dir="rtl"] .layout-editor-block-title .handle,
+[dir="rtl"] .layout-flexible-region-top .handle {
   margin: 0 0 0 0.5em;
+}
+.layout-flexible-region-top .handle {
+  position: relative;
+  top: -10px;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;
@@ -341,19 +368,22 @@
   }
 }
 
-.layout-flexible-region-buttons {
-  padding-bottom: 5px;
+.layout-flexible-region-top .buttons {
+  display: inline-block;
 }
 
 .layout-flexible-editor .flexible-row {
   padding: 15px 0 0;
+  border: 1px dashed #0074bd;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  -webkit-box-shadow: 3px 3px 0 0 #c6c6c6;
+  -moz-box-shadow: 3px 3px 0 0 #c6c6c6;
+  box-shadow: 3px 3px 0 0 #c6c6c6;
 }
 
 .layout-flexible-editor .flexible-row:hover {
   background-color: #ffffff;
-  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
-  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
-  box-shadow: 2px 2px 0 0 #d0d0d0;
   cursor: move;
 }
 

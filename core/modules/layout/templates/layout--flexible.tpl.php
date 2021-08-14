@@ -35,11 +35,15 @@
       ?>
       <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
-        <?php if ($region_buttons): ?>
-          <div class="layout-flexible-region-buttons clearfix">
-            <?php print $region_buttons[$name]; ?>
-          </div>
-        <?php endif; ?>
+        <div class="layout-flexible-region-top clearfix">
+          <span class="handle"></span>
+          <h2 class="label">Row</h2>
+          <?php if ($region_buttons): ?>
+            <span class="buttons">
+              <?php print $region_buttons[$name]; ?>
+            </span>
+          <?php endif; ?>
+        </div>
         <div class="l-flexible-row row">
         <?php foreach ($row['regions'] as $region): ?>
           <div class="l-col col-md-<?php print $region['region_md']; ?>">
@@ -47,6 +51,14 @@
               <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
                 <div class="layout-editor-region-title clearfix">
                   <h2 class="label"><?php print $region['region_name']; ?></h2>
+                </div>
+                <div class="layout-editor-block">
+                  <div class="layout-editor-block-title">
+                    <span class="text">Example Block</span>
+                  </div>
+                  <div class="layout-editor-block-content">
+                    <p>Example block content</p>
+                  </div>
                 </div>
               </div>
             <?php else: ?>
