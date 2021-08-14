@@ -7,25 +7,14 @@
 # https://github.com/backdrop-ops/backdropcms.org/tree/master/www/modules/custom/borg_qa
 ##
 
-#set site path
+# Set site path variable.
 SITEPATH="$HOME/www"
 
-# Go to domain directory.
-cd $SITEPATH
+# Remove the old site path.
+rm -rf $SITEPATH
 
-# Link Backdrop files
-ln -s $GITLC_DEPLOY_DIR/* ./
-
-# .htaccess needs to be an actual file for permissions.
-cp $GITLC_DEPLOY_DIR/.htaccess ./
-
-# Unlink settings.php and copy instead.
-rm -f settings.php
-cp $GITLC_DEPLOY_DIR/settings.php ./
-
-# Unlink files and copy instead.
-rm -f files
-cp -r $GITLC_DEPLOY_DIR/files ./
+# Link to the git checkout.
+ln -s $GITLC_DEPLOY_DIR $SITEPATH
 
 # Install Backdrop.
 php $SITEPATH/core/scripts/install.sh  --db-url=mysql://test:@localhost/test --root=/home/test/www
