@@ -167,16 +167,10 @@ abstract class FileTransfer {
    *
    */
   protected final function checkPath($path) {
-    $chroot_jail = $this->chroot . $this->jail;
-    $real_jail = backdrop_realpath($chroot_jail);
-    $chroot_path = $this->chroot . $path;
-    $existing_path = $chroot_path;
-    while ($existing_path && !file_exists($existing_path)) {
-      $existing_path = dirname($existing_path);
-    }
-    $real_path = backdrop_realpath($existing_path);
-    $fixed_path = $this->fixRemotePath($real_path, FALSE);
-    if (strpos($fixed_path, $real_jail) !== 0) {
+    $full_jail = $this->chroot . $this->jail;
+    $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
+    $full_path = $this->fixRemotePath($full_path, FALSE);
+    if ($full_jail !== $full_path) {
       throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
     }
   }
