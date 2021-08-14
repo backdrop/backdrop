@@ -17,7 +17,7 @@ cd $SITEPATH
 ln -s $GITLC_DEPLOY_DIR/* ./
 
 # .htaccess needs to be an actual file for permissions.
-cp $GITLC_DEPLOY_DIR/.htaccess ./
+#cp $GITLC_DEPLOY_DIR/.htaccess ./
 
 # Unlink settings.php and copy instead.
 rm -f settings.php
