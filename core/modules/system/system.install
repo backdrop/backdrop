@@ -3175,6 +3175,24 @@ function system_update_1074() {
 }
 
 /**
+ * Set a default value for the "Permissions-Policy: interest-cohort" header.
+ *
+ * This will make it so that the Google Federated Learning of Cohorts (FLoC)
+ * feature that gathers user data without cookies is blocked by default, unless
+ * overridden in settings.php.
+ * 
+ * For more information, see the change record at:
+ * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
+ */
+function system_update_1075() {
+  $config = config('system.core');
+  $config->set('block_interest_cohort', update_variable_get('block_interest_cohort', 1));
+  $config->save();
+
+  update_variable_del('block_interest_cohort');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

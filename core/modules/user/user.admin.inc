@@ -176,11 +176,7 @@ function user_admin_settings($form, &$form_state) {
   );
 
   module_load_include('password.inc', 'user', 'user');
-  $criteria = _user_password_policy_help();
-
-  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
-  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
-  $description .= $criteria;
+  $description = _user_password_policy_help();
 
   $form['password_policy']['user_password_reject_weak'] = array(
     '#type' => 'checkbox',
@@ -288,8 +284,11 @@ function user_admin_settings($form, &$form_state) {
  */
 function user_admin_settings_submit($form, &$form_state) {
   system_settings_form_submit($form, $form_state);
-  // Clear the token cache.
+  // Clear the token cache, which also resets token-related static variables.
   token_cache_clear();
+
+  // Clear all other caches, because menu items and permissions may have changed.
+  backdrop_flush_all_caches();
 }
 
 /**

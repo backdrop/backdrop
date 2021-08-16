@@ -1742,9 +1742,16 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-  if ($if_modified_since && $if_none_match
-      && $if_none_match == $etag // etag must match
-      && $if_modified_since == $cache->created) {  // if-modified-since must match
+  // Handle an exact match based on Etag. The If-None-Match header takes full
+  // precedence over If-Modified-Since header.
+  if ($if_none_match == $etag) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+    backdrop_send_headers($default_headers);
+    return;
+  }
+
+  // Handle a loose match based on date only, if no Etag was provided.
+  if (!$if_none_match && $if_modified_since && $if_modified_since >= $cache->created) {
     header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
     backdrop_send_headers($default_headers);
     return;

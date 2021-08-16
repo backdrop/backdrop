@@ -1217,6 +1217,14 @@ div.filter-options select {
   }
 }
 
+.block-dashboard-welcome h3 {
+  margin: 4px 0;
+  padding: 6px 0;
+  font-size: 1.154em;
+  text-transform: none;
+  background: none;
+}
+
 /* Add special icons for admin/config */
 .admin-panel-people h3 {
   background-image: url('../images/users--black--64.png');
