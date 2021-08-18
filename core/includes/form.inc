@@ -3629,19 +3629,19 @@ function form_process_container($element, &$form_state) {
  */
 function theme_container($variables) {
   $element = $variables['element'];
-  // Ensure #attributes is set.
-  $element += array('#attributes' => array());
+  // Ensure #attributes is set, but do not overwrite them if they have already
+  // been set.
+  $attributes = isset($element['#attributes']) ? $element['#attributes'] : array();
+  $element += array('#attributes' => $attributes);
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an html ID.
+    // Assign an HTML ID.
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
     // Add the form-wrapper class.
-    if (empty($element['#attributes']['class'])) {
-      $element['#attributes']['class'][] = 'form-wrapper';
-    }
+    $element['#attributes']['class'][] = 'form-wrapper';
   }
 
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
