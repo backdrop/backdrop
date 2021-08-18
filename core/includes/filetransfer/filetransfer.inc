@@ -168,8 +168,15 @@ abstract class FileTransfer {
    */
   protected final function checkPath($path) {
     $chroot_jail = $this->chroot . $this->jail;
-    $real_jail = backdrop_realpath($chroot_jail);
     $chroot_path = $this->chroot . $path;
+    $full_path = backdrop_realpath(substr($chroot_path, 0, strlen($chroot_jail)));
+    $full_path = $this->fixRemotePath($full_path, FALSE);
+    if ($chroot_jail === $full_path) {
+      // simple test case passes
+      return;
+    }
+    // try handling symbolic links
+    $real_jail = backdrop_realpath($chroot_jail);
     $existing_path = $chroot_path;
     while ($existing_path && !file_exists($existing_path)) {
       $existing_path = dirname($existing_path);
