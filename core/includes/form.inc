@@ -3640,8 +3640,14 @@ function theme_container($variables) {
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
-    // Add the form-wrapper class.
-    $element['#attributes']['class'][] = 'form-wrapper';
+    // Ensure that the classes within #attributes have been initialized.
+    if (!array_key_exists('class', $element['#attributes'])) {
+      $element['#attributes']['class'] = array();
+    }
+    // Add the form-wrapper class if not already added.
+    if (!in_array('form-wrapper', $element['#attributes']['class'])) {
+      $element['#attributes']['class'][] = 'form-wrapper';
+    }
   }
 
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
