@@ -167,7 +167,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
-    '#attributes' => array('class' => array('flexible-layout-add-row')),
+    '#attributes' => array('class' => array('flexible-layout-add-row', 'button-secondary')),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),
