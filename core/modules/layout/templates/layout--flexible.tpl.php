@@ -37,7 +37,7 @@
       <div class="<?php print $row['row_class']; ?>">
         <div class="layout-flexible-region-top clearfix">
           <span class="handle"></span>
-          <h2 class="label">Row</h2>
+          <h2 class="label"><?php print t('Row'); ?></h2>
           <?php if ($region_buttons): ?>
             <span class="buttons">
               <?php print $region_buttons[$name]; ?>
@@ -54,10 +54,10 @@
                 </div>
                 <div class="layout-editor-block">
                   <div class="layout-editor-block-title">
-                    <span class="text">Example Block</span>
+                    <span class="text"><?php print t('Example Block'); ?></span>
                   </div>
                   <div class="layout-editor-block-content">
-                    <p>Example block content</p>
+                    <p>&nbsp;</p>
                   </div>
                 </div>
               </div>
