@@ -3629,10 +3629,9 @@ function form_process_container($element, &$form_state) {
  */
 function theme_container($variables) {
   $element = $variables['element'];
-  // Ensure #attributes is set, but do not overwrite them if they have already
-  // been set.
-  $attributes = isset($element['#attributes']) ? $element['#attributes'] : array();
-  $element += array('#attributes' => $attributes);
+  // Ensure #attributes and classes within it are set; preserve existing ones.
+  $element += array('#attributes' => array());
+  $element['#attributes'] += array('class' => array());
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
@@ -3640,12 +3639,11 @@ function theme_container($variables) {
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
-    // Ensure that the classes within #attributes have been initialized.
-    if (!array_key_exists('class', $element['#attributes'])) {
-      $element['#attributes']['class'] = array();
-    }
-    // Add the form-wrapper class if not already added.
-    if (!in_array('form-wrapper', $element['#attributes']['class'])) {
+    // Add the form-wrapper class if not already added, but only for 'container'
+    // elements, otherwise #states does not work properly for 'checkboxes' and
+    // 'radios' elements.
+    // See: https://github.com/backdrop/backdrop-issues/issues/711#issuecomment-84353916
+    if ($element['#type'] == 'container' && !in_array('form-wrapper', $element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
     }
   }
