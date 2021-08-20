@@ -506,7 +506,7 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 }
 
 /**
- * Menu callback; provides module enable/disable interface.
+ * Menu callback; provides the module enable/disable interface.
  *
  * The list of modules gets populated by module.info files, which contain each
  * module's name, description, and information about which modules it requires.
