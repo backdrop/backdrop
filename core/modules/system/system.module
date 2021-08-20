@@ -4024,21 +4024,25 @@ function system_autoload_info() {
  * Implements hook_config_info().
  */
 function system_config_info() {
-  $prefixes['system.core'] = array(
-    'label' => t('System core settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.core'] = array(
+    'label' => t('Core settings'),
+    'group' => t('System configuration'),
   );
   $prefixes['system.date'] = array(
     'label' => t('System date'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.extensions'] = array(
+    'label' => t('Enabled extensions (themes/modules)'),
+    'group' => t('System configuration'),
   );
   $prefixes['system.mail'] = array(
     'label' => t('Mail systems'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
   );
 
   // Register config files for all active themes.
