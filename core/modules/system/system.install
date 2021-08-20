@@ -3193,7 +3193,7 @@ function system_update_1075() {
 }
 
 /**
- * Create system.core.extensions.json, and populate it with enabled extensions.
+ * Create system.extensions.json, and populate it with enabled modules/themes.
  * 
  * For more information, see the change record at:
  * ???
