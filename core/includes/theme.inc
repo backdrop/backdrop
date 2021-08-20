@@ -1633,7 +1633,7 @@ function theme_enable($theme_list) {
 
     // Add the newly-enabled theme to the system.extensions.json config file.
     $config = config('system.extensions');
-    $themes_in_config = $config->get('themes');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
     if (!in_array($theme, $themes_in_config)) {
       $themes_in_config[] = $theme;
       asort($themes_in_config);
@@ -1680,7 +1680,7 @@ function theme_disable($theme_list) {
 
     // Remove the theme from the system.extensions.json config file.
     $config = config('system.extensions');
-    $themes_in_config = $config->get('themes');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
     if (($key = array_search($theme, $themes_in_config)) !== FALSE) {
       unset($themes_in_config[$key]);
       asort($themes_in_config);

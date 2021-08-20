@@ -526,7 +526,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
 
       // Add the newly-enabled module to the system.extensions.json config file.
       $config = config('system.extensions');
-      $modules_in_config = $config->get('modules');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
       if (!in_array($module, $modules_in_config)) {
         $modules_in_config[] = $module;
         asort($modules_in_config);
@@ -624,7 +624,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
 
       // Remove the module from the system.extensions.json config file.
       $config = config('system.extensions');
-      $modules_in_config = $config->get('modules');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
       if (($key = array_search($module, $modules_in_config)) !== FALSE) {
         unset($modules_in_config[$key]);
         asort($modules_in_config);
