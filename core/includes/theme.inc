@@ -1631,7 +1631,7 @@ function theme_enable($theme_list) {
       ->condition('name', $theme)
       ->execute();
 
-    // Add the newly-enabled theme to the core.extensions.json config file.
+    // Add the newly-enabled theme to the system.extensions.json config file.
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes');
     if (!in_array($theme, $themes_in_config)) {
@@ -1678,7 +1678,7 @@ function theme_disable($theme_list) {
       ->condition('name', $theme)
       ->execute();
 
-    // Remove the theme from the core.extensions.json config file.
+    // Remove the theme from the system.extensions.json config file.
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes');
     if (($key = array_search($theme, $themes_in_config)) !== FALSE) {
