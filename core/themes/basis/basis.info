@@ -29,6 +29,7 @@ stylesheets[all][] = css/skin.css
 
 stylesheets[print][] = css/print.css
 
+; Used for custom styles in CKEditor
 ckeditor_stylesheets[] = css/ckeditor-iframe.css
 
 ; Include a style sheet in the rich-text editor.
