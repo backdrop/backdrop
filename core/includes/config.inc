@@ -296,8 +296,8 @@ function config_install_default_config($module, $config_name = NULL) {
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
           $config->setData($data);
-          $config->save();
           module_invoke_all('config_create', $config);
+          $config->save();
         }
       }
     }
