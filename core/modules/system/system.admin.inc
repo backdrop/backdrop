@@ -607,7 +607,7 @@ function system_modules($form, $form_state = array()) {
     // Some modules are always required by core and cannot be disabled, for
     // example: entity, node, system, and user.
     $extra['required_by_distribution'] = FALSE;
-    if (!empty($module->info['required'] )) {
+    if (!empty($module->info['required'])) {
       $extra['disabled'] = TRUE;
       $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : '');
       $extra['required_by_distribution'] = TRUE;

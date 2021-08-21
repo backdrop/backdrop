@@ -524,17 +524,13 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       // Record the fact that it was enabled.
       $modules_enabled[] = $module;
 
-      // Add the newly-enabled module to the system.extensions.json config file.
+      // Add the newly-enabled module to the system.extensions.json config file,
+      // or update its status if already in it.
       $config = config('system.extensions');
       $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
-      if (!in_array($module, $modules_in_config)) {
-        $modules_in_config[] = $module;
-        asort($modules_in_config);
-        $modules_in_config = array_values($modules_in_config);
-
-        $config->set('modules', $modules_in_config);
-        $config->save();
-      }
+      $modules_in_config[$module] = 1;
+      $config->set('modules', $modules_in_config);
+      $config->save();
 
       watchdog('system', '%module module enabled.', array('%module' => $module), WATCHDOG_INFO);
     }
@@ -622,17 +618,13 @@ function module_disable($module_list, $disable_dependents = TRUE) {
         ->execute();
       $invoke_modules[] = $module;
 
-      // Remove the module from the system.extensions.json config file.
+      // Update the status of the module in the system.extensions.json config
+      // file.
       $config = config('system.extensions');
       $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
-      if (($key = array_search($module, $modules_in_config)) !== FALSE) {
-        unset($modules_in_config[$key]);
-        asort($modules_in_config);
-        $modules_in_config = array_values($modules_in_config);
-
-        $config->set('modules', $modules_in_config);
-        $config->save();
-      }
+      $modules_in_config[$module] = 0;
+      $config->set('modules', $modules_in_config);
+      $config->save();
 
       watchdog('system', '%module module disabled.', array('%module' => $module), WATCHDOG_INFO);
     }

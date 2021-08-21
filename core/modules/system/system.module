@@ -4037,7 +4037,7 @@ function system_config_info() {
     'group' => t('System configuration'),
   );
   $prefixes['system.extensions'] = array(
-    'label' => t('Enabled extensions (themes/modules)'),
+    'label' => t('Enabled extensions (modules/themes)'),
     'group' => t('System configuration'),
   );
   $prefixes['system.mail'] = array(

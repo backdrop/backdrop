@@ -1631,17 +1631,13 @@ function theme_enable($theme_list) {
       ->condition('name', $theme)
       ->execute();
 
-    // Add the newly-enabled theme to the system.extensions.json config file.
+    // Add the newly-enabled theme to the system.extensions.json config file,
+    // or update its status if already in it.
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
-    if (!in_array($theme, $themes_in_config)) {
-      $themes_in_config[] = $theme;
-      asort($themes_in_config);
-      $themes_in_config = array_values($themes_in_config);
-
-      $config->set('themes', $themes_in_config);
-      $config->save();
-    }
+    $themes_in_config[$theme] = 1;
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
@@ -1678,17 +1674,13 @@ function theme_disable($theme_list) {
       ->condition('name', $theme)
       ->execute();
 
-    // Remove the theme from the system.extensions.json config file.
+    // Update the status of the theme in the system.extensions.json config
+    // file.
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
-    if (($key = array_search($theme, $themes_in_config)) !== FALSE) {
-      unset($themes_in_config[$key]);
-      asort($themes_in_config);
-      $themes_in_config = array_values($themes_in_config);
-
-      $config->set('themes', $themes_in_config);
-      $config->save();
-    }
+    $themes_in_config[$theme] = 0;
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
