@@ -26,6 +26,33 @@ function standard_install() {
         'scheme' => 'public',
         'directory' => 'inline-images',
       ),
+      'plugins' => array(
+        'style' => array( 
+          'style_list' => array(
+            array(
+              'name' => 'Blue text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'blue',
+              ),
+            ),
+            array(
+              'name' => 'Red text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'red',
+              ),
+            ),
+            array(
+              'name' => 'Green text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'green',
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
     'filters' => array(
       // URL filter.
@@ -37,6 +64,9 @@ function standard_install() {
       'filter_html' => array(
         'weight' => 1,
         'status' => 1,
+        'settings' => array(
+          'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <span> <img> <figure> <figcaption>',
+        )
       ),
       // Line break filter.
       'filter_autop' => array(
@@ -107,42 +137,6 @@ function standard_install() {
   config_set('system.core', 'theme_default', $default_theme);
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
-
-  // Enables the title_combo block and positions breadcrumbs
-  // immediately above title_combo block.
-
-  $title_combo_uuid = 'a549d0bc-51f7-46b0-9b41-653788410dd4';
-
-  $title_combo_block = array(
-    'content.' . $title_combo_uuid => array(
-      'plugin' => 'system:page_components:title_combo',
-      'data' => array(
-        'module' => 'system',
-        'delta' => 'page_components',
-        'settings' => array(
-          'title_display' => 'default',
-          'title' => '',
-          'style' => 'default',
-          'block_settings' => [],
-          'contexts' => [],
-          'title_tag' => 'h1',
-          'title_classes' => 'page-title',
-          'tab-type' => 'both',
-        ),
-        'uuid' => $title_combo_uuid,
-        'style' => array(
-          'plugin' => 'default',
-          'data' => array(
-            'settings' => array(
-              'classes' => '',
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-  config_set_multiple('layout.layout.default', $title_combo_block );
-  config_set('layout.layout.default','positions.top', array('09f11b4e-877e-45ab-9000-a4c6254faa04', 'a549d0bc-51f7-46b0-9b41-653788410dd4'));
 
   // Set home page to "home".
   config_set('system.core', 'site_frontpage', 'home');
