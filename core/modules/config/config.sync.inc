@@ -104,7 +104,6 @@ function _config_sync_finished($status, $results, $operations) {
       $config_storage->deleteAll();
     }
   }
-
   backdrop_flush_all_caches();
   state_del('config_sync');
 }
