@@ -264,11 +264,10 @@ function field_validate_field($field, $update = FALSE) {
     // Ensure the field name is unique.
     $prior_field = field_read_field($field['field_name'], array('include_inactive' => TRUE, 'include_deleted' => TRUE));
     if (!empty($prior_field)) {
-      dpm($field);
       $message = $prior_field['active']?
         t('The field "@name" already exists.', array('@name' => $field['field_name'])):
         t('The field "@name" already exists, but it is inactive. To create a field with the same name, the configuration and data from the old field must be manually deleted.', array('@name' => $field['field_name']));
-       throw new FieldException($message);
+      throw new FieldException($message);
     }
 
     // Field name cannot be longer than 32 characters. We use backdrop_strlen()
