@@ -1032,7 +1032,7 @@ button.button-primary:focus {
 }
 a.button-secondary,
 input.button-secondary,
-button.button-secondary {
+button.button-secondary{
   color: #828188;
   background-color: white;
   -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
@@ -1048,6 +1048,22 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
