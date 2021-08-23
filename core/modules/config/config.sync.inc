@@ -47,12 +47,12 @@ function _config_sync_validate(&$context) {
 
   $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
   foreach ($config_files as $config_file => $config_change_type) {
-      try {
-          config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
-      }
-      catch (ConfigValidateException $e) {
-          $context['results']['errors'][] = $e->getMessage();
-      }
+    try {
+      config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
+    }
+    catch (ConfigValidateException $e) {
+      $context['results']['errors'][] = $e->getMessage();
+    }
       $context['sandbox']['current_index']++;
   }
 
