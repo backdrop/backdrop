@@ -649,6 +649,16 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($contexts as $context) {
     $context_plugins[] = $context->plugin;
   }
+
+  // Add any plugin specified for an arbitrary wildcard path if required.
+  if (isset($form_state['input']['context']['required'])) {
+    $new_context_plugins = array();
+    foreach ($form_state['input']['context']['required'] as $required_context) {
+      $new_context_plugins[] = $required_context['plugin'];
+    }
+    $context_plugins = array_merge($context_plugins, $new_context_plugins);
+  }
+
   foreach ($layout->conditions as $key => $condition) {
     $required_contexts = $condition->getRequiredContexts();
     if (array_diff($required_contexts, $context_plugins)) {
@@ -1814,6 +1824,21 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
       'callback' => 'layout_condition_ajax_style',
     ),
   );
+
+  if ($is_new_condition && isset($form_state['input']['context']['required'])) {
+    foreach ($form_state['input']['context']['required'] as $required_context) {
+      $new_context_plugin = $required_context['plugin'];
+      switch ($new_context_plugin) {
+        case 'node':
+        case 'file':
+        case 'taxonomy_term':
+          $new_context = new EntityLayoutContext($new_context_plugin);
+          $layout->setContexts($new_context_plugin, $new_context);
+          break;
+      }
+    }
+  }
+
   foreach ($all_access_info as $access_info) {
     $required_contexts = !empty($access_info['required contexts']) ? $access_info['required contexts'] : array();
     $layout_has_context = $layout && $layout->hasContexts($required_contexts);
