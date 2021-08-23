@@ -36,6 +36,7 @@ function _config_sync_start($config_statuses, &$context) {
 
 /**
  * Batch API callback. Validate the changes before attempting to sync.
+ * Reports all discovered issues in a message.
  */
 function _config_sync_validate(&$context) {
   if (!isset($context['sandbox']['batch_size'])) {
