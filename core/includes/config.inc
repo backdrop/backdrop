@@ -301,6 +301,8 @@ function config_install_default_config($module, $config_name = NULL) {
         }
       }
     }
+
+    backdrop_flush_all_caches();
   }
 }
 
