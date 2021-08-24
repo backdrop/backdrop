@@ -53,7 +53,7 @@ function _config_sync_validate(&$context) {
     catch (ConfigValidateException $e) {
       $context['results']['errors'][] = $e->getMessage();
     }
-      $context['sandbox']['current_index']++;
+    $context['sandbox']['current_index']++;
   }
 
   $context['finished'] = $context['sandbox']['total_size'] ? $context['sandbox']['current_index'] / $context['sandbox']['total_size'] : 1;
