@@ -157,6 +157,27 @@ function standard_install() {
       ),
       'is_new' => TRUE,
     ),
+    array(
+      'type' => 'promo_box',
+      'name' => st('Promo Box'),
+      'description' => st('Add a piece of content to be used exclusively for blocks.'),
+      'settings' => array(
+        'status_default' => NODE_PUBLISHED,
+        'node_preview' => TRUE,
+        'promote_enabled' => FALSE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'show_submitted_info' => TRUE,
+        'comment_default' => COMMENT_NODE_CLOSED,
+        'node_submitted' => FALSE,
+        'node_user_picture' => TRUE,
+        'hidden_path' => TRUE,
+      ),
+      'is_new' => TRUE,
+    ),
   );
 
   foreach ($types as $type) {
@@ -191,7 +212,7 @@ function standard_install() {
       'uid' => 1,
       'status' => 1,
       'promote' => 0,
-      'type' => 'page',
+      'type' => 'promo_box',
     )
   );
   $page->save();
@@ -406,6 +427,11 @@ function standard_install() {
     'edit any post content',
     'delete own post content',
     'delete any post content',
+    'create promo_box content',
+    'edit own promo_box content',
+    'edit any promo_box content',
+    'delete own promo_box content',
+    'delete any promo_box content',
     'access dashboard',
     'view the administration theme',
     'access administration bar',
