@@ -127,7 +127,7 @@
                     "block_settings": [],
                     "contexts": [],
                     "admin_label": "Home Page Content",
-                    "admin_description": "A node with content for the home page.",
+                    "admin_description": "A piece of content used on the home page.",
                     "nid": 1,
                     "links": false,
                     "leave_node_title": false,
