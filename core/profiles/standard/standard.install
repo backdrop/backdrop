@@ -160,7 +160,7 @@ function standard_install() {
     array(
       'type' => 'promo_box',
       'name' => st('Promo Box'),
-      'description' => st('Add a piece of content to be used exclusively for blocks.'),
+      'description' => st('Add a piece of content to be used for blocks and views. A Promo Block does not have a public path (hide path display).'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'node_preview' => TRUE,
