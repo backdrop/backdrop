@@ -91,7 +91,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style'),
     'access arguments' => array('administer image styles'),
     'type' => MENU_CALLBACK,
@@ -125,7 +125,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),
@@ -142,7 +142,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect/delete'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect/delete'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),
@@ -159,7 +159,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/add/%image_effect_definition'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),

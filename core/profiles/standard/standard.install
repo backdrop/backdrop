@@ -108,7 +108,7 @@ function standard_install() {
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "home".
+  // Set home page to "home".
   config_set('system.core', 'site_frontpage', 'home');
   backdrop_flush_all_caches();
 

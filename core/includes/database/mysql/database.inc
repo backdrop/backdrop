@@ -81,10 +81,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // certain one has been set; otherwise, MySQL defaults to 'utf8_general_ci'
     // for UTF-8.
     if (!empty($connection_options['collation'])) {
-      $this->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
+      $this->pdo->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
     }
     else {
-      $this->exec('SET NAMES ' . $charset);
+      $this->pdo->exec('SET NAMES ' . $charset);
     }
 
     // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL
@@ -100,20 +100,39 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
-      $this->exec($sql);
+      $this->pdo->exec($sql);
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function prepareQuery($query) {
-    // DatabaseConnection::prepareQuery() is responsible for applying database
-    // table prefixes where curly brackets are around tables. Use this as an
-    // opportunity to apply backticks around table names.
-    $query = str_replace('{', '`{', $query);
-    $query = str_replace('}', '}`', $query);
-    return parent::prepareQuery($query);
+  protected function setPrefix($prefix) {
+    if (is_array($prefix)) {
+      $this->prefixes = $prefix + array('default' => '');
+    }
+    else {
+      $this->prefixes = array('default' => $prefix);
+    }
+
+    // This differs from the parent class implementation in that all tables
+    // are escaped with back-ticks. First, do table-specific replacements.
+    $this->prefixSearch = array();
+    $this->prefixReplace = array();
+    foreach ($this->prefixes as $key => $val) {
+      if ($key != 'default') {
+        $this->prefixSearch[] = '{' . $key . '}';
+        // Add backticks around the entire table name to avoid MySQL keywords,
+        // but also add backticks within the prefix value, in the event
+        // different database names are used as a prefix.
+        $this->prefixReplace[] = '`' . str_replace('.', '`.`', $val) . $key . '`';
+      }
+    }
+    // Then replace remaining tables with the default prefix.
+    $this->prefixSearch[] = '{';
+    $this->prefixReplace[] = '`' . $this->prefixes['default'];
+    $this->prefixSearch[] = '}';
+    $this->prefixReplace[] = '`';
   }
 
   /**
@@ -263,7 +282,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!PDO::commit()) {
+        if (!$this->pdo->commit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -286,7 +305,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
             $this->transactionLayers = array();
             // We also have to explain to PDO that the transaction stack has
             // been cleaned-up.
-            PDO::commit();
+            $this->pdo->commit();
           }
           else {
             throw $e;
@@ -307,7 +326,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
 
     // Ensure that the MySQL driver supports utf8mb4 encoding.
-    $version = $this->getAttribute(PDO::ATTR_CLIENT_VERSION);
+    $version = $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
 
     if (strpos($version, 'mysqlnd') !== FALSE) {
       // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.

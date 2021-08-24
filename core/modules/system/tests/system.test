@@ -1007,6 +1007,51 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
   }
 }
 
+class DeprecatedRedirectPageCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp(array('deprecated_redirect_test', 'dblog'));
+    // Enable deprecated watchdog messages (level 8).
+    config_set('system.core', 'watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6, 8));
+  }
+
+  /**
+   * Tests redirecting from a old menu paths to new menu paths.
+   */
+  function testRedirects() {
+    // Message used in watchdog entries.
+    $watchdog_message = 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.';
+
+    // Check simple path redirection with no wildcards.
+    $this->backdropGet('old/path/simple');
+    $this->assertText('Current path: new/path/simple');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/simple',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for simple redirect.');
+
+    // Check path redirection with an implied one-to-one argument map.
+    $this->backdropGet('old/path/foo/same/bar/positions/baz');
+    $this->assertText('Current path: new/path/foo/with/bar/wildcards/baz');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/foo/same/bar/positions/baz',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for an implied argument map redirect.');
+
+    // Check path redirection with a specified argument map.
+    $this->backdropGet('old/path/different/foo/wildcard/bar/baz/positions');
+    $this->assertText('Current path: new/path/foo/with/bar/wildcards/baz');
+    $this->assertWatchdogMessage($watchdog_message, array(
+      '%path' => 'old/path/different/foo/wildcard/bar/baz/positions',
+      '%referrer' => '',
+    ), 'Deprecated watchdog message found for an argument map redirect.');
+  }
+}
+
 class CustomLogoTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
@@ -1028,9 +1073,11 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    * Test the use of a custom logo.
    */
   function testCustomLogo() {
+    $file_public_path = config_get('system.core', 'file_public_path');
+    
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
-    $file_relative = strtr($file->uri, array('public://' => config_get('system.core', 'file_public_path') . '/'));
+    $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));
     $default_theme_path = 'core/themes/stark';
 
     $supported_paths = array(
@@ -1082,7 +1129,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       if (file_uri_scheme($input) == 'public') {
         $implicit_public_file = file_uri_target($input);
         $explicit_file = $input;
-        $local_file = strtr($input, array('public://' => config_get('system.core', 'file_public_path') . '/'));
+        $local_file = strtr($input, array('public://' => $file_public_path . '/'));
       }
       // Adjust for fully qualified stream wrapper URI elsewhere.
       elseif (file_uri_scheme($input) !== FALSE) {
@@ -1092,7 +1139,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       elseif ($input == file_uri_target($file->uri)) {
         $implicit_public_file = $input;
         $explicit_file = 'public://' . $input;
-        $local_file = config_get('system.core', 'file_public_path') . '/' . $input;
+        $local_file = $file_public_path . '/' . $input;
       }
       $this->assertEqual((string) $elements[0], $implicit_public_file);
       $this->assertEqual((string) $elements[1], $explicit_file);
@@ -1120,9 +1167,9 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       // Relative path within the public filesystem to non-existing file.
       'whatever.png',
       // Relative path to non-existing file in public filesystem.
-      config_get('system.core', 'file_public_path') . '/whatever.png',
+      $file_public_path . '/whatever.png',
       // Semi-absolute path to non-existing file in public filesystem.
-      '/' . config_get('system.core', 'file_public_path') . '/whatever.png',
+      '/' . $file_public_path . '/whatever.png',
       // Relative path to arbitrary non-existing file.
       'core/misc/whatever.png',
       // Semi-absolute path to arbitrary non-existing file.
@@ -1486,7 +1533,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
 }
 
 /**
- * Test front page functionality and administration.
+ * Test home page functionality and administration.
  */
 class FrontPageTestCase extends BackdropWebTestCase {
   function setUp() {
@@ -1497,21 +1544,21 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
     $this->node_path = "node/" . $this->backdropCreateNode(array('promote' => 1))->nid;
 
-    // Enable front page logging in system_test.module.
+    // Enable home page logging in system_test.module.
     config_set('system.core', 'front_page_output', 1);
   }
 
   /**
-   * Test front page functionality.
+   * Test home page functionality.
    */
   function testBackdropIsFrontPage() {
     $this->backdropGet('');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     config_set('system.core', 'site_frontpage', 'node');
     $this->backdropGet('node');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     $this->backdropGet($this->node_path);
-    $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+    $this->assertNoText(t('On home page.'), 'Path is not the home page.');
 
     // Test that the default_nodes_main setting is saved and works from
     // Site information form: /admin/config/system/site-information
@@ -1520,9 +1567,9 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $node3 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
     $this->backdropGet('');
     // Check that all three promoted nodes are on the frontpage.
-    $this->assertText($node1->title, 'node1 title found on front page.');
-    $this->assertText($node2->title, 'node2 title found on front page.');
-    $this->assertText($node3->title, 'node3 title found on front page.');
+    $this->assertText($node1->title, 'node1 title found on home page.');
+    $this->assertText($node2->title, 'node2 title found on home page.');
+    $this->assertText($node3->title, 'node3 title found on home page.');
     // Change the number of nodes allowed on frontpage.
     config_set('system.core', 'default_nodes_main', 2);
     backdrop_flush_all_caches();
@@ -1530,18 +1577,18 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
 
-    // Change the front page to an invalid path.
+    // Change the home page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->assertText(t("The path '@path' is either invalid or you do not have access to it.", array('@path' => $edit['site_frontpage'])));
 
-    // Change the front page to a valid path.
+    // Change the home page to a valid path.
     $edit['site_frontpage'] = $this->node_path;
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'), 'The front page path has been saved.');
+    $this->assertText(t('The configuration options have been saved.'), 'The home page path has been saved.');
 
     $this->backdropGet('');
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
     // Check that the path /node is redirected to the custom frontpage.
     $this->backdropGet('node');
     $node_alias = current_path();
@@ -1549,7 +1596,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     $this_alias = current_path();
     $this->assertEqual($node_alias, $this_alias, 'Path /node is redirected to custom frontpage.');
     $this->backdropGet($this->node_path);
-    $this->assertText(t('On front page.'), 'Path is the front page.');
+    $this->assertText(t('On home page.'), 'Path is the home page.');
   }
 }
 
@@ -2474,7 +2521,7 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
    */
   function testIndexPhpHandling() {
     $this->backdropGet('<front>');
-    $this->assertResponse(200, 'Make sure the front page returns a valid page.');
+    $this->assertResponse(200, 'Make sure the home page returns a valid page.');
 
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
@@ -2782,7 +2829,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $block_uuid = (string) $last_block[0]['data-block-id'];
     $block_edit_url = 'admin/structure/layouts/manage/default/configure-block/editor/' . $block_uuid;
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2804,7 +2851,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2822,7 +2869,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
 
@@ -2836,7 +2883,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Update block'));
 
-    // Save the layout and return to the front page.
+    // Save the layout and return to the home page.
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('user');
     $this->assertNoLink($item1['link_title']);
