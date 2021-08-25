@@ -158,9 +158,9 @@ function standard_install() {
       'is_new' => TRUE,
     ),
     array(
-      'type' => 'promo_box',
-      'name' => st('Promo Box'),
-      'description' => st('Add a piece of content to be used for blocks and views. A Promo Block does not have a public path (hide path display).'),
+      'type' => 'promobox',
+      'name' => st('Promobox'),
+      'description' => st('Add a piece of content to be used for blocks and views. A Promobox does not have a public path (hide path display). Example use-case: Place Promo Box content as "Existing content" block in a Layout.'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'node_preview' => TRUE,
@@ -195,15 +195,15 @@ function standard_install() {
     // Create an "About" page node.
   $page = new Node(
     array(
-      'title' => st('Home page'),
+      'title' => st('Home page content'),
       'body' => array(
         LANGUAGE_NONE => array(
           array(
             'value' => st('<h3>Welcome to your new site.</h3>
             <p>A great place to start configuring your new site is with your home page layout.</p>
             <ul>
-              <li>You can edit this message by looking for the "Home page" listed under the Content menu.</li>
-              <li>You can add or remove blocks on this page layout at admin/structure/layouts.</li>
+              <li>You can <a href="node/1/edit">edit this message</a> by looking for the "Home page" listed under the Content menu.</li>
+              <li>You can add or remove blocks on this page layout at <a href="admin/structure/layouts">admin/structure/layouts.</a></li>
             </ul>'),
             'format' => 'filtered_html'
           ),
@@ -432,6 +432,7 @@ function standard_install() {
     'edit any promo_box content',
     'delete own promo_box content',
     'delete any promo_box content',
+    'view hidden paths',
     'access dashboard',
     'view the administration theme',
     'access administration bar',
