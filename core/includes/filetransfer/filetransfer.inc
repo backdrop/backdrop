@@ -169,23 +169,30 @@ abstract class FileTransfer {
   protected final function checkPath($path) {
     $chroot_jail = $this->chroot . $this->jail;
     $chroot_path = $this->chroot . $path;
-    $full_path = backdrop_realpath(substr($chroot_path, 0, strlen($chroot_jail)));
-    $full_path = $this->fixRemotePath($full_path, FALSE);
-    if ($chroot_jail === $full_path) {
-      // simple test case passes
+    $fixed_path = $this->fixRemotePath($chroot_path, FALSE);
+    if (strpos($fixed_path, $chroot_jail) === 0) {
+      // simplest case - path begins with jail - pass
       return;
     }
-    // try handling symbolic links
-    $real_jail = backdrop_realpath($chroot_jail);
-    $existing_path = $chroot_path;
-    while ($existing_path && !file_exists($existing_path)) {
-      $existing_path = dirname($existing_path);
+    // look for a symlink
+    $parts = explode('/', $chroot_path);
+    // an empty string is the first entry
+    $front_path = array_shift($parts);
+    while ($parts) {
+      $front_path .= '/' . array_shift($parts);
+      if (is_link($front_path)) {
+        $real_path = backdrop_realpath($front_path);
+        $fixed_path = $this->fixRemotePath($real_path, FALSE);
+        if (strpos($fixed_path, $chroot_jail) === 0) {
+          // the path goes through a symlink that is inside the jail - pass
+          return;
+        }
+      }
+      if (!file_exists($front_path)) {
+        break;
+      }
     }
-    $real_path = backdrop_realpath($existing_path);
-    $fixed_path = $this->fixRemotePath($real_path, FALSE);
-    if (strpos($fixed_path, $real_jail) !== 0) {
-      throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
-    }
+    throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
   }
 
   /**
