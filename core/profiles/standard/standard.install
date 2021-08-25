@@ -160,7 +160,10 @@ function standard_install() {
     array(
       'type' => 'promobox',
       'name' => st('Promobox'),
-      'description' => st('Add a piece of content to be used for blocks and views. A Promobox does not have a public path (hide path display). Example use-case: Place Promo Box content as "Existing content" block in a Layout.'),
+      'description' => st('Add a piece of content to be used for blocks and 
+        views. A Promobox does not have a public path (hide path display). 
+        Example use-case: Place Promo Box content as "Existing content" block 
+        in a Layout.'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'node_preview' => TRUE,
@@ -199,20 +202,22 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('<h3>Welcome to your new site.</h3>
+            'value' => st('
             <p>A great place to start configuring your new site is with your home page layout.</p>
             <ul>
-              <li>You can <a href="node/1/edit">edit this message</a> by looking for the "Home page" listed under the Content menu.</li>
-              <li>You can add or remove blocks on this page layout at <a href="admin/structure/layouts">admin/structure/layouts.</a></li>
+              <li>You can <a href="node/1/edit">edit this message</a> by looking for the "Home page content" listed under the Content menu.
+              </li>
+              <li>You can add or remove blocks on this page layout at <a href="admin/structure/layouts">admin/structure/layouts</a>.
+              </li>
             </ul>'),
-            'format' => 'filtered_html'
+            'format' => 'filtered_html',
           ),
         ),
       ),
       'uid' => 1,
       'status' => 1,
       'promote' => 0,
-      'type' => 'promo_box',
+      'type' => 'promobox',
     )
   );
   $page->save();
@@ -224,7 +229,27 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first post! You may edit or delete it.'),
+            'value' => st('This is your first post! You may <a href="node/2/edit">edit or delete it</a>.'),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  $post = new Node(
+    array(
+      'title' => st('A view of promoted posts'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('By default your site is displaying <a href="admin/structure/views">a view of "promoted" posts</a> on the front page.'),
+            'format' => 'filtered_html',
           ),
         ),
       ),
@@ -243,7 +268,8 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'value' => st('This is a page with static content. You may <a href="node/4/edit">edit or delete it</a>.'),
+            'format' => 'filtered_html',
           ),
         ),
       ),
@@ -427,11 +453,11 @@ function standard_install() {
     'edit any post content',
     'delete own post content',
     'delete any post content',
-    'create promo_box content',
-    'edit own promo_box content',
-    'edit any promo_box content',
-    'delete own promo_box content',
-    'delete any promo_box content',
+    'create promobox content',
+    'edit own promobox content',
+    'edit any promobox content',
+    'delete own promobox content',
+    'delete any promobox content',
     'view hidden paths',
     'access dashboard',
     'view the administration theme',

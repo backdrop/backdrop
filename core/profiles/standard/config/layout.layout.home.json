@@ -23,7 +23,8 @@
             "094cbc03-d088-4b3c-8361-977733540ae8"
         ],
         "content": [
-            "209098f9-8e8f-4be6-8000-0033df223bdd"
+            "209098f9-8e8f-4be6-8000-0033df223bdd",
+            "578243cf-a4c8-46ad-9504-04aaf4ec9ccc"
         ],
         "bottom": [],
         "footer": [
@@ -121,12 +122,12 @@
                 "module": "node",
                 "delta": "content",
                 "settings": {
-                    "title_display": "none",
-                    "title": "",
+                    "title_display": "custom",
+                    "title": "Your home page block",
                     "style": "default",
                     "block_settings": [],
                     "contexts": [],
-                    "admin_label": "Home Page Content",
+                    "admin_label": "Home page content",
                     "admin_description": "A piece of content used on the home page.",
                     "nid": 1,
                     "links": false,
@@ -136,6 +137,29 @@
                     "view_mode": "full"
                 },
                 "uuid": "209098f9-8e8f-4be6-8000-0033df223bdd",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "578243cf-a4c8-46ad-9504-04aaf4ec9ccc": {
+            "plugin": "views:promoted-block",
+            "data": {
+                "module": "views",
+                "delta": "promoted-block",
+                "settings": {
+                    "title_display": "custom",
+                    "title": "Some promoted content",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": []
+                },
+                "uuid": "578243cf-a4c8-46ad-9504-04aaf4ec9ccc",
                 "style": {
                     "plugin": "default",
                     "data": {
