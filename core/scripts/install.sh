@@ -20,14 +20,14 @@ key=value...                              Any additional settings you wish to pa
 
 Options:
 --root                                    Set the working directory for the script to the specified path. Required if running this script from a directory other than the Backdrop root.
+--url                                     Set the URL of the site to install, as defined in sites.php. Required for multisite installations.
 --account-mail                            UID 1 email. Defaults to admin@example.com
 --account-name                            UID 1 name. Defaults to admin
 --account-pass                            UID 1 pass. Defaults to a randomly generated password.
 --clean-url                               Defaults to 1
 --db-prefix                               An optional table prefix to use for initial install.
---db-url=<mysql://root:pass@127.0.0.1/db  A database URL. Only required for initial install - not re-install.
-
---locale=<en-GB>                          A short language code. Sets the default site language. Language files must already be present.
+--db-url=mysql://root:pass@127.0.0.1/db   A database URL. Only required for initial install - not re-install.
+--langcode=en                             A short language code. Sets the default site language. Language files must already be present.
 --site-mail                               From: for system mailings. Defaults to admin@example.com
 --site-name                               Defaults to Backdrop
 
@@ -52,14 +52,14 @@ $options = array(
   'account-mail' => 'admin@example.com',
   'account-name' => 'admin',
   'account-pass' => md5(microtime() . mt_rand()),
-  'site-name' => 'Backdrop',
   'clean-url' => '1',
   'db-prefix' => '',
   'db-url' => '',
-  'locale' => 'en',
+  'langcode' => 'en',
   'site-mail' => 'admin@example.com',
   'site-name' => 'Backdrop',
   'root' => '',
+  'url' => '',
 );
 
 // Parse provided options.
@@ -98,6 +98,24 @@ if ($options['root'] && is_dir($options['root'])) {
 }
 unset($options['root']);
 
+// Set the site URL.
+if ($options['url']) {
+  $url_parts = parse_url($options['url']);
+  if (!empty($url_parts['host'])) {
+    // E.g.: 'http://example.com/'
+    $_SERVER['HTTP_HOST'] = $url_parts['host'];
+  }
+  elseif (!empty($url_parts['path'])) {
+    // E.g.: 'example.com'
+    $_SERVER['HTTP_HOST'] = $url_parts['path'];
+  }
+  else {
+    print "--url option is invalid. Specify the URL of your site as --url=http://example.com/ or --url=example.com.\n";
+    exit;
+  }
+}
+unset($options['url']);
+
 // Parse the database URL.
 if (empty($options['db-url'])) {
   print "--db-url option is required. Specify one as --db-url=mysql://user:pass@host_name/db_name.\n";
@@ -128,7 +146,7 @@ $db_spec = array(
 $settings = array(
   'parameters' => array(
     'profile' => $profile,
-    'locale' => $options['locale'],
+    'langcode' => $options['langcode'],
   ),
   'forms' => array(
     'install_settings_form' => array(
@@ -141,10 +159,7 @@ $settings = array(
       'account' => array(
         'name' => $options['account-name'],
         'mail' => $options['account-mail'],
-        'pass' => array(
-          'pass1' => $options['account-pass'],
-          'pass2' => $options['account-pass'],
-        ),
+        'pass' => $options['account-pass'],
       ),
       'update_status_module' => array(
         1 => TRUE,
@@ -170,7 +185,6 @@ define('MAINTENANCE_MODE', 'install');
 
 require_once './core/includes/install.core.inc';
 try {
-  print "Installing Backdrop. This may take a moment...\n";
   install_backdrop($settings);
   config_set('system.core', 'site_mail', $options['site-mail']);
   print "Backdrop installed successfully.\n";

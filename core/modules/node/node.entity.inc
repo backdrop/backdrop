@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for nodes.
@@ -23,6 +22,16 @@ class Node extends Entity {
    * @var integer
    */
   public $vid;
+
+  /**
+   * Indicates whether this is the active node revision.
+   *
+   * The active revision of a node is the one loaded when no specific revision
+   * has been specified. Only active revisions are saved to the node table.
+   *
+   * @var boolean
+   */
+  public $is_active_revision = TRUE;
 
   /**
    * The node content type (bundle).
@@ -77,6 +86,13 @@ class Node extends Entity {
   public $changed;
 
   /**
+   * The timestamp at which this content should be automatically published.
+   *
+   * @var integer
+   */
+  public $scheduled;
+
+  /**
    * The node comment status indicator.
    *
    * COMMENT_NODE_HIDDEN => no comments
@@ -90,7 +106,7 @@ class Node extends Entity {
   /**
    * The node promotion status.
    *
-   * Promoted nodes should be displayed on the front page of the site. The
+   * Promoted nodes should be displayed on the home page of the site. The
    * value is either NODE_PROMOTED or NODE_NOT_PROMOTED.
    *
    * @var integer
@@ -139,6 +155,16 @@ class Node extends Entity {
    * @var integer
    */
   public $revision_uid;
+
+  /**
+   * The node preview status.
+   *
+   * @var boolean
+   *
+   * @since 1.11.0
+   */
+  public $in_preview;
+
 
   /**
    * Create a new Node instance.
@@ -191,6 +217,172 @@ class Node extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    $rights = &backdrop_static('node_access', array());
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
+    }
+
+    if (user_access('bypass node access', $account)) {
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
+    }
+    if (!user_access('access content', $account)) {
+      $rights[$account->uid][$bundle] = FALSE;
+      return $rights[$account->uid][$bundle];
+    }
+
+    // We grant access to the node if both of the following conditions are met:
+    // - No modules say to deny access.
+    // - At least one module says to grant access.
+    // If no module specified either allow or deny, we fall back to the
+    // node_access table.
+    $access = module_invoke_all('node_access', $bundle, 'create', $account);
+    if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
+      $rights[$account->uid][$bundle] = FALSE;
+      return $rights[$account->uid][$bundle];
+    }
+    elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
+    }
+
+    $rights[$account->uid][$bundle] = FALSE;
+    return $rights[$account->uid][$bundle];
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the node. Possible values are:
+   *   - create
+   *   - view
+   *   - update
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool|NULL
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'Node' . "\0". So use static array instead.
+    $rights = &backdrop_static('node_access', array());
+
+    if ($op == 'create') {
+      return self::createAccess($this->bundle(), $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    $cid = $this->id();
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    if (user_access('bypass node access', $account)) {
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
+    }
+    if (!user_access('access content', $account)) {
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    // We grant access to the node if both of the following conditions are met:
+    // - No modules say to deny access.
+    // - At least one module says to grant access.
+    // If no module specified either allow or deny, we fall back to the
+    // node_access table.
+    $access = module_invoke_all('node_access', $this, $op, $account);
+    if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    // Check if user can view any unpublished nodes.
+    if ($op == 'view' && !$this->status && user_access('view any unpublished content', $account) && $account->uid != 0) {
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    // Check if authors can view their own unpublished nodes.
+    if ($op == 'view' && !$this->status && user_access('view own unpublished content', $account) && $account->uid == $this->uid && $account->uid != 0) {
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    // If the module did not override the access rights, use those set in the
+    // node_access table.
+    if ($this->id()) {
+      if (module_implements('node_grants')) {
+        $query = db_select('node_access');
+        $query->addExpression('1');
+        $query->condition('grant_' . $op, 1, '>=');
+        $nids = db_or()->condition('nid', $this->id());
+        if ($this->status) {
+          $nids->condition('nid', 0);
+        }
+        $query->condition($nids);
+        $query->range(0, 1);
+
+        $grants = db_or();
+        foreach (node_access_grants($op, $account) as $realm => $gids) {
+          foreach ($gids as $gid) {
+            $grants->condition(db_and()
+              ->condition('gid', $gid)
+              ->condition('realm', $realm)
+            );
+          }
+        }
+        if (count($grants) > 0) {
+          $query->condition($grants);
+        }
+        $result = (bool) $query
+          ->execute()
+          ->fetchField();
+        $rights[$account->uid][$cid][$op] = $result;
+        return $rights[$account->uid][$cid][$op];
+      }
+      elseif ($op == 'view' && $this->status) {
+        // If no modules implement hook_node_grants(), the default behavior is
+        // to allow all users to view published nodes, so reflect that here.
+        $rights[$account->uid][$cid][$op] = TRUE;
+        return $rights[$account->uid][$cid][$op];
+      }
+    }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
+  }
+
+  /**
    * Overrides Entity::createDuplicate().
    */
   public function createDuplicate() {
@@ -198,6 +390,13 @@ class Node extends Entity {
     $duplicate->nid = NULL;
     $duplicate->vid = NULL;
     return $duplicate;
+  }
+
+  /**
+   * Overrides Backdrop\entity\Entity::getRevisionId().
+   */
+  public function getRevisionId() {
+    return $this->vid;
   }
 }
 
@@ -279,7 +478,14 @@ class NodeStorageController extends EntityDatabaseStorageController {
       }
       else {
         $op = 'update';
-        $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        // Update the base node table, but only if this revision is marked as
+        // the active revision.
+        if ($entity->isActiveRevision()) {
+          $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        }
+        else {
+          $return = SAVED_UPDATED;
+        }
       }
 
       if ($this->revisionKey) {
@@ -318,10 +524,14 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     if (empty($entity->{$this->revisionKey}) || !empty($entity->revision)) {
       backdrop_write_record($this->revisionTable, $record);
-      db_update($this->entityInfo['base table'])
-        ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
-        ->condition($this->idKey, $entity->{$this->idKey})
-        ->execute();
+      // Only update the base node table if this revision is the active
+      // revision.
+      if ($entity->isActiveRevision()) {
+        db_update($this->entityInfo['base table'])
+          ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
+          ->condition($this->idKey, $entity->{$this->idKey})
+          ->execute();
+      }
     }
     else {
       backdrop_write_record($this->revisionTable, $record, $this->revisionKey);
@@ -453,7 +663,12 @@ class NodeStorageController extends EntityDatabaseStorageController {
    *   The node object that has just been saved.
    */
   function postSave(EntityInterface $node, $update) {
-    node_access_acquire_grants($node, $update);
+    // Update the node access table for this node, but only if it is the
+    // active revision. There's no need to delete existing records if the node
+    // is new.
+    if ($node->isActiveRevision()) {
+      node_access_acquire_grants($node, $update);
+    }
   }
 
   /**

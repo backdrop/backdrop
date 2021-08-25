@@ -47,6 +47,10 @@ function user_form_test_current_password($form, &$form_state, $account) {
     '#value' => array('user_form_test_field' => t('Test field')),
   );
 
+  $form['password_confirm'] = array(
+    '#type' => 'password_confirm',
+  );
+
   $form['#validate'][] = 'user_validate_current_pass';
   $form['submit'] = array(
     '#type' => 'submit',

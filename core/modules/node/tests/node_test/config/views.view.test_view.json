@@ -1,0 +1,56 @@
+{
+  "_config_name": "views.view.test_view",
+  "name": "test_view",
+  "description": "",
+  "tag": "",
+  "disabled": false,
+  "base_table": "node",
+  "human_name": "test_view",
+  "core": null,
+  "display": {
+    "default": {
+      "display_title": "Master",
+      "display_plugin": "default",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "access": {},
+        "pager": {
+          "type": "none"
+        },
+        "style_plugin": "default",
+        "row_plugin": "node",
+        "title": "Node Test Page",
+        "use_ajax": true
+      }
+    },
+    "page": {
+      "display_title": "Page",
+      "display_plugin": "page",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "path": "test-view-view"
+      }
+    },
+    "feed_1": {
+      "display_title": "Feed",
+      "display_plugin": "feed",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "displays": {
+          "page": "page",
+          "default": 0
+        },
+        "path": "test-view-feed"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Database Logging module.
+ * Admin page callbacks for the Database Logging module.
  */
 
 /**
@@ -30,8 +30,8 @@ function dblog_overview() {
     WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
-  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
   $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
   $header = array(
     '', // Icon column.
@@ -63,12 +63,13 @@ function dblog_overview() {
       $user_info = theme('username', array('account' => $dblog));
     }
 
+    $log_date_format = config_get('system.core', 'log_date_format');
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
         t($dblog->type),
-        format_date($dblog->timestamp, 'short'),
+        format_date($dblog->timestamp, 'custom', $log_date_format),
         dblog_format_message($dblog, TRUE),
         $user_info,
         filter_xss($dblog->link),
@@ -417,7 +418,7 @@ function dblog_clear_log_form($form) {
   $form['dblog_clear'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear log messages'),
-    '#description' => t('This will permanently remove the log messages from the database.'),
+    '#description' => t('This action will permanently delete the log messages from the database.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -425,6 +426,7 @@ function dblog_clear_log_form($form) {
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
     '#submit' => array('dblog_clear_log_submit'),
+    '#attributes' => array('class' => array('button-danger')),
   );
 
   return $form;

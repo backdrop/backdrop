@@ -191,8 +191,12 @@ if ($args['cache']) {
   simpletest_script_init(NULL);
 
   echo "\nPreparing database and configuration cache for profiles\n";
+  $skip_myisam = !$args['myisam-convert'];
+  if (!$skip_myisam) {
+    echo "Cache table conversion to MyISAM is enabled\n";
+  }
   foreach($profiles as $profile){
-    simpletest_script_prepare_profile_cache($profile);
+    simpletest_script_prepare_profile_cache($profile, $skip_myisam);
     echo " - " . $profile . " - " . "ready\n";
 
   }
@@ -281,7 +285,7 @@ All arguments are long options.
   --file      Run tests identified by specific file names, instead of class names.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
-              
+
   --directory <path>
 
               Run all tests found within the specified file directory.
@@ -295,6 +299,10 @@ All arguments are long options.
   --verbose   Output detailed assertion messages in addition to summary.
 
   --cache     Generate cache for instalation profiles to boost tests speed.
+
+  --myisam-convert
+              Convert cache tables to MyISAM. Improves test performance but is
+              not recommended with MySQL 5.7+ or MariaDB 10.2.2+.
 
   --summary [file]
 
@@ -333,6 +341,7 @@ function simpletest_script_parse_args() {
     'php' => '',
     'concurrency' => 1,
     'cache' => FALSE,
+    'myisam-convert' => FALSE,
     'split' => '',
     'force' => FALSE,
     'all' => FALSE,
@@ -479,7 +488,7 @@ function simpletest_script_init($server_software) {
    * avoids resolving of symlinks. This allows the code repository to be a symlink
    * and hosted outside of the web root. See issue #1297.
    *
-   * The realpath is important here to avoid FAILURE with filetransfer.tests. 
+   * The realpath is important here to avoid FAILURE with filetransfer.tests.
    * When realpath used, BACKDROP_ROOT contain full path to backdrop root folder.
    */
   define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
@@ -628,7 +637,7 @@ function simpletest_script_get_test_list() {
       else {
         $directory = BACKDROP_ROOT . "/" . $args['directory'];
       }
-      
+
       $all_classes = array();
       foreach ($groups as $group) {
         $all_classes = array_merge($all_classes, array_keys($group));
@@ -772,22 +781,22 @@ function simpletest_script_write_summary($summary_file) {
         $summary .= "\n$test_group: $test_name ($test_class)\n";
         $test_class = $result->test_class;
       }
-      
+
       if($count < 10 ){
         $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
       }
       $count++;
     }
   }
-  
+
   if($count > 10 ){
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
-  
+
   $total_count = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN ('fail', 'pass')", array(':test_id' => $test_id))->fetchField();
   if(!empty($summary)){
     $summary = format_plural($count, '1 of !total_count tests failed', '@count of !total_count tests failed.', array('!total_count' => $total_count)) . "\n" . $summary;
-  } 
+  }
   else{
     $summary = format_plural($total_count, '1 test passed', '@count tests passed.');
   }
@@ -1031,10 +1040,9 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
  */
 function simpletest_script_clean_profile_cache_tables(){
   $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
-  $count = 0;
+  $count = count($tables);
   foreach ($tables as $table) {
     db_drop_table($table);
-    $count++;
   }
 
   if ($count > 0) {
@@ -1067,7 +1075,7 @@ function simpletest_script_clean_profile_cache_folders(){
 /**
  * Removed profile cached tables from the database.
  */
-function simpletest_script_prepare_profile_cache($profile){
+function simpletest_script_prepare_profile_cache($profile, $skip_mysiam = FALSE){
   try {
     backdrop_page_is_cacheable(FALSE);
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
@@ -1078,7 +1086,7 @@ function simpletest_script_prepare_profile_cache($profile){
     $test = new BackdropWebTestCaseCache();
     $test->setProfile($profile);
     if (!$test->isCached()) {
-      $test->prepareCache();
+      $test->prepareCache($skip_mysiam);
     }
   }
   catch (Exception $e) {

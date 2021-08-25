@@ -9,7 +9,7 @@
  */
 function config_menu() {
   $items['admin/config/development/configuration'] = array(
-    'title' => 'Configuration management',
+    'title' => 'Configuration manager',
     'description' => 'Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('config_sync_form'),

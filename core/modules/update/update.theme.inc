@@ -25,7 +25,7 @@ function theme_update_manager_update_form($variables) {
  * Returns HTML for the last time we checked for update data.
  *
  * In addition to properly formatting the given timestamp, this function also
- * provides a "Check manually" link that refreshes the available update and
+ * provides a "Check manually" button, that refreshes the available update, and
  * redirects back to the same page.
  *
  * @param $variables
@@ -38,10 +38,22 @@ function theme_update_manager_update_form($variables) {
  */
 function theme_update_last_check($variables) {
   $last = $variables['last'];
+
   $output = '<div class="update checked">';
+
   $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
   $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
-  $output .= "</div>\n";
+
+  if (module_exists('installer') && user_access('access_site_reports')) {
+    // Link to the updates installation page from the available updates report
+    // (don't add this link to the "Available updates" Dashboard block).
+    if ($variables['theme_hook_original'] == 'update_last_check') {
+      $output .= l(t('Install system updates'), 'admin/config/system/updates');
+    }
+  }
+
+  $output .= '</div>';
+
   return $output;
 }
 
@@ -68,9 +80,10 @@ function theme_update_report($variables) {
   $header = array();
   $rows = array();
 
-  // Create an array of status values keyed by module, theme, or layout name, since
-  // we'll need this while generating the report if we have to cross reference
-  // anything (e.g. subthemes which have base themes missing an update).
+  // Create an array of status values keyed by module, theme, or layout name,
+  // since we'll need this while generating the report if we have to
+  // cross-reference anything (e.g. subthemes which have base themes missing an
+  // update).
   foreach ($data as $project) {
     foreach ($project['includes'] as $key => $name) {
       $status[$key] = $project['status'];
@@ -79,7 +92,7 @@ function theme_update_report($variables) {
 
   foreach ($data as $project) {
     // Don't show a link to the "Update modules" page for core.
-    $update_link = ($project['name'] != 'backdrop');
+    $update_link = ($project['name'] != 'backdrop' || config_get('installer.settings', 'core_update'));
     switch ($project['status']) {
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
@@ -112,20 +125,7 @@ function theme_update_report($variables) {
       $status_label = check_plain($project['reason']);
     }
     if ($update_link && module_exists('installer')) {
-      switch ($project['project_type']) {
-        case 'theme':
-          $updatepath = 'admin/appearance/update';
-          break;
-
-        case 'layout':
-          $updatepath = 'admin/layouts/update';
-          break;
-
-        case 'module':
-        default:
-          $updatepath = 'admin/modules/update';
-      }
-      $status_label = l($status_label, $updatepath, array('html' => TRUE));
+      $status_label = l($status_label, 'admin/config/system/updates', array('html' => TRUE));
     }
 
     $project_section = '';
@@ -204,7 +204,8 @@ function theme_update_report($variables) {
     }
 
     $info_section = '';
-    // Render the .info div only if there is something to be rendered in it.
+    // Render the .project-info div only if there is something to be rendered in
+    // it.
     if (!empty($project['extra']) || count($project['includes']) > 1 || !empty($project['base_themes']) || !empty($project['sub_themes'])) {
       $extra_section = $includes_section = $base_section = $sub_section ='';
 
@@ -271,7 +272,7 @@ function theme_update_report($variables) {
         $sub_section .= "</div>\n";  // .subthemes div
       }
 
-      $info_section = '<div class="info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
+      $info_section = '<div class="project-info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
     }
 
     $row = '';
@@ -286,6 +287,8 @@ function theme_update_report($variables) {
       $rows[$project['project_type']] = array();
     }
     $row_key = isset($project['title']) ? backdrop_strtolower($project['title']) : backdrop_strtolower($project['name']);
+    // Insert project status ID in front of key for sorting purposes.
+    $row_key = $project['status'] . $row_key;
     $rows[$project['project_type']][$row_key] = array(
       'class' => array($class),
       'data' => array(
@@ -300,9 +303,6 @@ function theme_update_report($variables) {
     'module' => t('Modules'),
     'theme' => t('Themes'),
     'layout' => t('Layouts'),
-    'module-disabled' => t('Disabled modules'),
-    'theme-disabled' => t('Disabled themes'),
-    'layout-disabled' => t('Disabled layouts'),
   );
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {

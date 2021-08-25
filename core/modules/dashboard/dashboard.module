@@ -1,0 +1,284 @@
+<?php
+/**
+ * @file
+ * Provides an administrative dashboard.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function dashboard_menu() {
+  $items = array();
+
+  // Check if any dashboard is present and is not disabled.
+  $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
+  $dashboard_layout = array_pop($dashboard_layouts);
+  if ($dashboard_layout->hasContexts(array('dashboard')) && !$dashboard_layout->disabled) {
+    $items['admin/dashboard/overview'] = array(
+      'title' => 'Overview',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -100,
+    );
+    $items['admin/dashboard/settings'] = array(
+      'title' => 'Settings',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('dashboard_admin_settings'),
+      'description' => 'Admin dashboard settings',
+      'access arguments' => array('administer dashboard'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -10,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function dashboard_menu_alter(&$items) {
+  if (isset($items['admin/dashboard'])) {
+    // Add a description for the admin and admin/index pages.
+    $items['admin/dashboard']['description'] = 'Get an overview of your site and manage administrative tasks.';
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function dashboard_permission() {
+  return array(
+    'access dashboard' => array(
+      'title' => t('Access Dashboard'),
+      'description' => t('Access the dashboard.'),
+    ),
+    'administer dashboard' => array(
+      'title' => t('Administer Dashboard'),
+      'description' => t('Change the dashboard settings, such as redirecting behavior on login.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function dashboard_config_info() {
+  $prefixes['dashboard.settings'] = array(
+    'label' => t('Dashboard settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function dashboard_block_info() {
+  $blocks = array();
+
+  // Dashboard blocks.
+  $blocks['welcome'] = array(
+    'info' => t('Dashboard - Welcome to Backdrop CMS!'),
+    'description' => t('Provides a welcome message, and links to get people started using Backdrop'),
+    'class' => 'DashboardWelcomeBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['create'] = array(
+    'info' => t('Dashboard - Create content'),
+    'description' => t('Provides links to create new content'),
+    'class' => 'DashboardCreateBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['menu'] = array(
+    'info' => t('Dashboard - Menus'),
+    'description' => t('Provides links to manage menus'),
+    'class' => 'DashboardMenuBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['node_types'] = array(
+    'info' => t('Dashboard - Content types'),
+    'description' => t('Provides links to manage content types'),
+    'class' => 'DashboardContentTypesBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['news'] = array(
+    'info' => t('Backdrop News'),
+    'description' => t('Displays a news feed from BackdropCMS.org.'),
+    'class' => 'DashboardNewsBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['overview_content'] = array(
+    'info' => t('Dashboard - Content'),
+    'description' => t('Displays a summary of content statistics'),
+    'class' => 'DashboardOverviewContentBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['overview_user'] = array(
+    'info' => t('Dashboard - User accounts'),
+    'description' => t('Displays a summary of user account statistics'),
+    'class' => 'DashboardOverviewUserBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['updates'] = array(
+    'info' => t('Dashboard - Available updates'),
+    'description' => t('Displays a list of available updates for modules, themes, layouts, and Backdrop core.'),
+    'class' => 'DashboardUpdateBlock',
+    'required contexts' => array('dashboard'),
+  );
+
+  if (module_exists('taxonomy')) {
+    $blocks['taxonomy'] = array(
+      'info' => t('Dashboard - Categories'),
+      'description' => t('Provides links to manage taxonomy'),
+      'class' => 'DashboardTaxonomyBlock',
+      'required contexts' => array('dashboard'),
+    );
+  }
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function dashboard_autoload_info() {
+  return array(
+    'DashboardWelcomeBlock' => 'includes/block.welcome.inc',
+    'DashboardCreateBlock' => 'includes/block.create.inc',
+    'DashboardMenuBlock' => 'includes/block.menus.inc',
+    'DashboardContentTypesBlock' => 'includes/block.node_types.inc',
+    'DashboardOverviewContentBlock' => 'includes/block.overview_content.inc',
+    'DashboardOverviewUserBlock' => 'includes/block.overview_user.inc',
+    'DashboardTaxonomyBlock' => 'includes/block.taxonomy.inc',
+    'DashboardUpdateBlock' => 'includes/block.update.inc',
+    'DashboardLayoutContext' => 'includes/dashboard_layout_context.inc',
+    'DashboardNewsBlock' => 'includes/block.news.inc',
+  );
+}
+
+/**
+ * Implements hook_layout_context_info().
+ */
+function dashboard_layout_context_info() {
+  $info['dashboard'] = array(
+    'title' => t('Dashboard'),
+    'class' => 'DashboardLayoutContext',
+    'menu paths' => array(
+      'admin/dashboard',
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function dashboard_user_login(&$edit, $account) {
+  // Don't redirect if a destination is already set.
+  if (!empty($_GET['destination'])) {
+    return;
+  }
+
+  // Don't redirect if during installation.
+  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE === 'install') {
+    return;
+  }
+
+  // Don't redirect for password reset forms.
+  if (isset($_POST['form_id']) && $_POST['form_id'] == 'user_pass_reset') {
+    return;
+  }
+
+  // Don't redirect if no permission to access dashboard.
+  if (!user_access('access dashboard', $account)) {
+    return;
+  }
+
+  // Don't redirect if redirect setting is not set.
+  if (config_get('dashboard.settings', 'dashboard_login_redirect') != 1) {
+    return;
+  }
+
+  // Check access to any dashboard layouts, and redirect.
+  $router_item = menu_get_item('admin/dashboard');
+  $dashboard_layouts = layout_load_multiple_by_router_item($router_item);
+  foreach ($dashboard_layouts as $dashboard_layout) {
+    if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
+      $_GET['destination'] = 'admin/dashboard';
+      break;
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_layout().
+ */
+function dashboard_preprocess_layout(&$variables) {
+  /* @var Layout $layout */
+  $layout = $variables['layout'];
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
+    // Include a dashboard-specific style sheet.
+    $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
+    backdrop_add_css($css_path);
+    $variables['classes'][] = 'dashboard';
+  }
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function dashboard_preprocess_block(&$variables) {
+  /* @var Layout $layout */
+  $layout = $variables['layout'];
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
+    $block = $variables['block'];
+    $region_name = $layout->getBlockPosition($block->uuid);
+    if (!in_array($region_name, array('header', 'footer'))) {
+      // Add the generic class for administration panels, same as on pages like
+      // admin/config and admin/structure. Helps place icons. Adds borders.
+      $variables['classes'][] = 'admin-panel';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dashboard_theme() {
+  return array(
+    'dashboard_panel' => array(
+      'render element' => 'panel',
+      'template' => 'templates/dashboard-panel',
+    ),
+  );
+}
+
+/**
+ * Implements hook_cron().
+ */
+function dashboard_cron() {
+  $last_news_fetch = state_get('dashboard_news_timestamp');
+  $fetch_interval = 21600; // 6 hours.
+  if (REQUEST_TIME - $last_news_fetch > $fetch_interval) {
+    DashboardNewsBlock::refreshNewsFeed();
+    state_set('dashboard_news_timestamp', REQUEST_TIME);
+  }
+}
+
+/**
+ * Menu callback; Dashboard settings form.
+ */
+function dashboard_admin_settings() {
+  $config = config('dashboard.settings');
+  // Redirect on log in.
+  $form['#config'] = 'dashboard.settings';
+  $form['dashboard_login_redirect'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Redirect administrators to Dashboard after log in'),
+    '#default_value' => $config->get('dashboard_login_redirect'),
+    '#description' => t('User accounts with the !permission permission will be automatically redirected to the Dashboard when they log in.', array(
+      '!permission' => l(t('Access dashboard'), 'admin/config/people/permissions', array('fragment' => 'module-dashboard')),
+    )),
+  );
+  return system_settings_form($form);
+}

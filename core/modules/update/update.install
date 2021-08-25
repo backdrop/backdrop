@@ -153,14 +153,15 @@ function _update_requirement_check($project, $type) {
         $version_available = t('version @version available', array('@version' => $project['recommended']));
       }
       else {
-        $version_available = t('Updates available');
+        $version_available = t('updates available');
       }
       if (update_manager_access() && module_exists('installer')) {
-        $requirement_label .= ' (' . l($version_available, 'admin/modules/update') . ')';
+        $updates_path = 'admin/config/system/updates';
       }
       else {
-        $requirement_label .= ' (' . l($version_available, 'admin/reports/updates') . ')';
+        $updates_path = 'admin/reports/updates';
       }
+      $requirement_label .= ' (' . l($version_available, $updates_path) . ')';
     }
     $requirement['value'] = $requirement_label;
   }
@@ -184,7 +185,7 @@ function update_update_1000() {
   $config->set('update_max_attempts', update_variable_get('update_max_fetch_attempts', 2));
   $config->set('update_timeout', update_variable_get('update_max_fetch_time', 5));
   $config->set('update_emails', update_variable_get('update_notify_emails', array()));
-  $config->set('update_threshold', update_variable_get('update_notification_threshold', 0));
+  $config->set('update_threshold', update_variable_get('update_notification_threshold', 'all'));
   $config->set('update_projects', update_variable_get('update_advanced_project_settings', array()));
   $config->save();
 
@@ -224,6 +225,17 @@ function update_update_1003() {
   $config = config('update.settings');
   $config->clear('update_xml_map');
   $config->clear('update_system_info');
+  $config->save();
+}
+
+/**
+ * Fix wrong default value for update_threshold setting.
+ */
+function update_update_1004() {
+  $config = config('update.settings');
+  if ($config->get('update_threshold') === 0) {
+    $config->set('update_threshold', 'all');
+  }
   $config->save();
 }
 

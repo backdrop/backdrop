@@ -34,10 +34,27 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $this->assertTrue($view->argument['null']->validate_arg(12));
   }
 
+  /**
+   * Make sure argument validation works properly.
+   */
+  function testArgumentValidatePhpFailure() {
+    $view = $this->view_test_argument_validate_php_failure();
+    $view->save();
+    $this->backdropGet('test-php-failure');
+
+    // This should return a 403, indicating that the arguments validation fails.
+    $this->assertResponse(403);
+
+    $this->backdropGet('test-php-failure-feed');
+
+    // This should return a 403, indicating that the arguments validation fails.
+    $this->assertResponse(403);
+  }
+
   function view_test_argument_validate_php($string) {
     $code = 'return $argument == \''. $string .'\';';
     $view = new view;
-    $view->name = 'view_argument_validate_numeric';
+    $view->name = 'view_argument_validate_php';
     $view->description = '';
     $view->tag = '';
     $view->view_php = '';
@@ -94,6 +111,64 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $handler->display->display_options['arguments']['null']['default_argument_type'] = 'fixed';
     $handler->display->display_options['arguments']['null']['validate_type'] = 'numeric';
     $handler->display->display_options['arguments']['null']['must_not_be'] = 0;
+
+    return $view;
+  }
+
+  function view_test_argument_validate_php_failure() {
+    $view = new view();
+    $view->name = 'view_argument_validate_php_failure';
+    $view->description = '';
+    $view->tag = '';
+    $view->base_table = 'node';
+    $view->human_name = '';
+    $view->core = 0;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'none';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'none';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
+    $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
+    /* Contextual filter: Global: Null */
+    $handler->display->display_options['arguments']['null']['id'] = 'null';
+    $handler->display->display_options['arguments']['null']['table'] = 'views';
+    $handler->display->display_options['arguments']['null']['field'] = 'null';
+    $handler->display->display_options['arguments']['null']['default_action'] = 'default';
+    $handler->display->display_options['arguments']['null']['default_argument_type'] = 'fixed';
+    $handler->display->display_options['arguments']['null']['default_argument_options']['argument'] = 'No filter';
+    $handler->display->display_options['arguments']['null']['summary']['number_of_records'] = '0';
+    $handler->display->display_options['arguments']['null']['summary']['format'] = 'default_summary';
+    $handler->display->display_options['arguments']['null']['summary_options']['items_per_page'] = '25';
+    $handler->display->display_options['arguments']['null']['specify_validation'] = TRUE;
+    $handler->display->display_options['arguments']['null']['validate']['type'] = 'php';
+    $handler->display->display_options['arguments']['null']['validate_options']['code'] = 'return FALSE;';
+    $handler->display->display_options['arguments']['null']['validate']['fail'] = 'access denied';
+
+    /* Display: Page */
+    $handler = $view->new_display('page', 'Page', 'page_1');
+    $handler->display->display_options['path'] = 'test-php-failure';
+
+    /* Display: Feed */
+    $handler = $view->new_display('feed', 'Feed', 'feed_1');
+    $handler->display->display_options['path'] = 'test-php-failure-feed';
+    $handler->display->display_options['pager']['type'] = 'none';
+    $handler->display->display_options['pager']['options']['offset'] = '0';
+    $handler->display->display_options['style_plugin'] = 'rss';
+    $handler->display->display_options['row_plugin'] = 'node_rss';
 
     return $view;
   }

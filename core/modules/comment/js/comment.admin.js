@@ -28,7 +28,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       vals.push($context.find(".form-item-comment-default input:checked").parent().find('label').text().replace(/^\s+|\s+$/g, ''));
 
       // Comments per page.
-      var number = parseInt($context.find(".form-item-comment-per-page select option:selected").val());
+      var number = parseInt($context.find(".form-item-comment-per-page input").val());
       vals.push(Backdrop.t('@number comments per page', {'@number': number}));
 
       // Threading.
@@ -37,6 +37,12 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       }
       else {
         vals.push(Backdrop.t('Flat list'));
+      }
+
+      // Automatic comment closer setting.
+      if ($context.find(".form-item-comment-close-enabled input:checked").length) {
+        var number = parseInt($context.find(".form-item-comment-close-days input").val());
+        vals.push(Backdrop.t('Automatically close comments after @number days', {'@number': number}));
       }
 
       return Backdrop.checkPlain(vals.join(', '));

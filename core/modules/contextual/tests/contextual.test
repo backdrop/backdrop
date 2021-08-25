@@ -31,7 +31,7 @@ class ContextualDynamicContextTestCase extends BackdropWebTestCase {
     $node2 = $this->backdropCreateNode(array('type' => 'page', 'promote' => 1));
     $node3 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
-    // Now, on the front page, all post nodes should have contextual edit
+    // Now, on the home page, all post nodes should have contextual edit
     // links. The page node in between should not.
     $this->backdropGet('node');
     $this->assertRaw('node/' . $node1->nid . '/edit', 'Edit link for oldest post node showing.');
