@@ -181,10 +181,10 @@ abstract class FileTransfer {
     while ($parts) {
       $front_path .= '/' . array_shift($parts);
       if (is_link($front_path)) {
-        $real_path = backdrop_realpath($front_path);
+        $real_path = realpath($front_path);
         $fixed_path = $this->fixRemotePath($real_path, FALSE);
         if (strpos($fixed_path, $chroot_jail) === 0) {
-          // the path goes through a symlink that is inside the jail - pass
+          // the path starts with a symlink that is equal to or inside the jail - pass
           return;
         }
       }
