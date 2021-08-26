@@ -958,5 +958,44 @@ function field_info_storage_settings($type) {
 }
 
 /**
+ * Returns whether a field's storage exists.
+ *
+ * @param string $field_name
+ *   The field name.
+ *
+ * @return
+ *   TRUE if the storage exists and is writable or if a validate key is not
+ *   defined in the field storage type's hook_field_storage_info().
+ */
+function field_storage_exists($field_name) {
+  $info = _field_info_collate_fields();
+
+  if (!isset($info['fields'][$field_name])) {
+    return FALSE;
+  }
+
+  $field_storage = $info['fields'][$field_name]['storage'];
+  $field_storage_type = $field_storage['type'];
+  $field_storage_details = $field_storage['details'];
+
+  $types = _field_info_collate_types();
+  $field_storage_validate = isset($types['storage types'][$field_storage_type]['validate']) ? $types['storage types'][$field_storage_type]['validate']: FALSE;
+
+  $exists = TRUE;
+  if ($field_storage_validate) {
+    foreach ($field_storage_details as $type => $storage_type) {
+      $stored_current = $field_storage_validate(key($storage_type[FIELD_LOAD_CURRENT]));
+      $stored_revision = $field_storage_validate(key($storage_type[FIELD_LOAD_REVISION]));
+      if (!$stored_current || !$stored_revision) {
+        $exists = FALSE;
+        break;
+      }
+    }
+  }
+
+  return $exists;
+}
+
+/**
  * @} End of "defgroup field_info".
  */

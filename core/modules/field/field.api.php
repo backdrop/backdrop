@@ -1680,6 +1680,8 @@ function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
  *   key/value pairs:
  *   - label: The human-readable name of the storage backend.
  *   - description: A short description for the storage backend.
+ *   - validate: The name of a function which returns true if the storage
+ *     for a given field exists and is writable.
  *   - settings: An array whose keys are the names of the settings available
  *     for the storage backend, and whose values are the default values for
  *     those settings.
@@ -1689,6 +1691,7 @@ function hook_field_storage_info() {
     'field_sql_storage' => array(
       'label' => t('Default SQL storage'),
       'description' => t('Stores fields in the local SQL database, using per-field tables.'),
+      'validate' => 'db_table_exists',
       'settings' => array(),
     ),
   );
