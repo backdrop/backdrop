@@ -167,6 +167,10 @@ abstract class FileTransfer {
    *
    */
   protected final function checkPath($path) {
+    // Resolve symbolic link in given path, if the root directory is a symlink.
+    if (is_link(BACKDROP_ROOT)) {
+      $path = realpath($path);
+    }
     $full_jail = $this->chroot . $this->jail;
     $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
     $full_path = $this->fixRemotePath($full_path, FALSE);
