@@ -73,25 +73,25 @@ function _vocabulary_get_operations($vocabulary) {
 
   $links['list'] = array(
     'title' => t('List terms'),
-    'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name,
+    'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
   );
   $links['add'] = array(
     'title' => t('Add terms'),
-    'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name . "/add",
+    'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add',
   );
   $links['configure'] = array(
     'title' => t('Configure'),
-    'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name . "/configure",
+    'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure',
   );
   if (module_exists('field_ui') && user_access('administer fields')) {
     $links['fields'] = array(
       'title' => t('Manage fields'),
-      'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name . "/fields",
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/fields',
       'weight' => 5,
     );
     $links['display'] = array(
       'title' => t('Manage displays'),
-      'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name . "/display",
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
       );
     }
@@ -107,7 +107,7 @@ function _vocabulary_get_operations($vocabulary) {
   }
   $links['delete'] = array(
     'title' => t('Delete'),
-    'href' => "admin/structure/taxonomy/" . $vocabulary->machine_name . "/delete",
+    'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/delete',
   );
 
   return $links;
