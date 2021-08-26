@@ -133,8 +133,7 @@ function _telemetry_destination_server_name() {
  * Get an anonymous, unique identifier for this site.
  */
 function _telemetry_site_key() {
-  // The $base_url is not used as the $data here intentionally, as different
-  // environments of the same site should all only count as a single
-  // installation.
+  // The private key is used here so that different environments of
+  // the same site should all only count as a single installation.
   return backdrop_hmac_base64('telemetry_site_key', backdrop_get_private_key());
 }
