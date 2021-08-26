@@ -137,3 +137,15 @@ function _telemetry_site_key() {
   // the same site should all only count as a single installation.
   return backdrop_hmac_base64('telemetry_site_key', backdrop_get_private_key());
 }
+
+/**
+ * Implements hook_config_info().
+ */
+function telemetry_config_info() {
+  $prefixes['telemetry.settings'] = array(
+    'label' => t('Telemetry settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
