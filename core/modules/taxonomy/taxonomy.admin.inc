@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the taxonomy module.
+ * Admin page callbacks for the Taxonomy module.
  */
 
 /**
@@ -738,30 +738,29 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
  * @see taxonomy_form_term_submit()
  */
 function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, TaxonomyVocabulary $vocabulary = NULL) {
+  // Load the vocabulary from the term, if not already provided.
+  if (!isset($vocabulary) && isset($term->vocabulary)) {
+    $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
+  }
+  
   // During initial form build, add the term entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
-      backdrop_set_title(t('Add term'));
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));
+      backdrop_set_title(t('@vocab_name: Add term', array('@vocab_name' => $vocabulary->name)), PASS_THROUGH);
     }
     else {
-      backdrop_set_title(t('Edit term %term_name', array('%term_name' => $term->name)), PASS_THROUGH);
-    }
-    if (!isset($vocabulary) && isset($term->vocabulary)) {
-      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
+      backdrop_set_title(t('@vocab_name: Edit term %term_name', array('@vocab_name' => $vocabulary->name, '%term_name' => $term->name)), PASS_THROUGH);
     }
     $form_state['term'] = $term;
   }
   else {
     $term = $form_state['term'];
-    if (!isset($vocabulary) && isset($term->vocabulary)) {
-      $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
-    }
   }
 
   $parent = array_keys(taxonomy_term_load_parents($term->tid));

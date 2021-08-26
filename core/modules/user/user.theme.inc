@@ -161,7 +161,7 @@ function theme_user_permission_description($variables) {
 }
 
 /**
- * Returns HTML for the role order and new role form.
+ * Returns HTML for the role order form.
  *
  * @param $variables
  *   An associative array containing:
@@ -189,11 +189,6 @@ function theme_user_admin_roles($variables) {
     $row[] = backdrop_render($form['roles'][$role_name]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
-  $row = array();
-  $row[] = array('data' => backdrop_render($form['label']) . backdrop_render($form['name']), 'class' => 'edit-name');
-  $row[] = '';
-  $row[] = backdrop_render($form['add']);
-  $rows[] = $row;
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
@@ -213,8 +208,9 @@ function theme_user_admin_roles($variables) {
  * @see user-picture.tpl.php
  */
 function template_preprocess_user_picture(&$variables) {
+  $site_config = config('system.core');
   $variables['user_picture'] = '';
-  if (config_get('system.core', 'user_pictures')) {
+  if ($site_config->get('user_pictures')) {
     $account = $variables['account'];
     if (!empty($account->picture)) {
       // @TODO: Ideally this function would only be passed file entities, but
@@ -231,14 +227,14 @@ function template_preprocess_user_picture(&$variables) {
         $filepath = $account->picture->uri;
       }
     }
-    elseif (config_get('system.core', 'user_picture_default')) {
-      $filepath = config_get('system.core', 'user_picture_default');
+    elseif ($site_config->get('user_picture_default')) {
+      $filepath = $site_config->get('user_picture_default');
     }
     if (isset($filepath)) {
       $alt = t("@user's picture", array('@user' => user_format_name($account)));
       // If the image does not have a valid Backdrop scheme (for eg. HTTP),
       // don't load image styles.
-      if (module_exists('image') && file_valid_uri($filepath) && $style = config_get('system.core', 'user_picture_style')) {
+      if (module_exists('image') && file_valid_uri($filepath) && $style = $site_config->get('user_picture_style')) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
       else {
@@ -324,4 +320,3 @@ function template_preprocess_user_profile(&$variables) {
   // Preprocess fields.
   field_attach_preprocess('user', $account, $variables['elements'], $variables);
 }
-

@@ -376,20 +376,13 @@ function backdrop_session_regenerate() {
 
   if (backdrop_session_started()) {
     $old_session_id = session_id();
-    // PHP 7.3 requires closing the session before setting a new session ID.
-    $original_session_saving = backdrop_save_session();
-    backdrop_save_session(FALSE);
-    session_write_close();
-    backdrop_session_started(FALSE);
+    _backdrop_session_regenerate_existing();
   }
-  session_id(backdrop_random_key());
+  else {
+    session_id(backdrop_random_key());
+  }
 
   if (isset($old_session_id)) {
-    // Preserve and restore user object, as starting session will reset it.
-    $original_user = $user;
-    backdrop_session_start();
-    $user = $original_user;
-    backdrop_save_session($original_session_saving);
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
@@ -426,6 +419,26 @@ function backdrop_session_regenerate() {
   }
   date_default_timezone_set(backdrop_get_user_timezone());
   return TRUE;
+}
+
+/**
+ * Regenerates an existing session.
+ */
+function _backdrop_session_regenerate_existing() {
+  global $user;
+  // Preserve existing settings for the saving of sessions.
+  $original_save_session_status = backdrop_save_session();
+  // Turn off saving of sessions.
+  backdrop_save_session(FALSE);
+  session_write_close();
+  backdrop_session_started(FALSE);
+  // Preserve the user object, as starting a new session will reset it.
+  $original_user = $user;
+  session_id(backdrop_random_key());
+  backdrop_session_start();
+  $user = $original_user;
+  // Restore the original settings for the saving of sessions.
+  backdrop_save_session($original_save_session_status);
 }
 
 /**

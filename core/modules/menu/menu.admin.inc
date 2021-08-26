@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for menu module.
+ * Admin page callbacks for the Menu module.
  */
 
 /**
@@ -343,7 +343,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#title' => t('Path'),
       '#maxlength' => 255,
       '#default_value' => (!empty($path)) ? $path_alias : $path,
-      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
+      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the home page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
       '#required' => TRUE,
       '#autocomplete_path' => 'path-autocomplete',
     );
@@ -371,7 +371,11 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
-      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.')
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
+      '#ajax' => array(
+        'callback' => 'menu_update_parent_options_ajax',
+        'wrapper' => 'menu-parent-select-wrapper',
+      ),
     );
   }
   else {
@@ -415,6 +419,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
+    '#prefix' => '<div id="menu-parent-select-wrapper">',
+    '#suffix' => '</div>',
   );
   $form['weight'] = array(
     '#type' => 'weight',
@@ -727,4 +733,62 @@ function menu_reset_item_confirm_submit($form, &$form_state) {
   $new_item = menu_reset_item($item);
   backdrop_set_message(t('The menu link was reset to its default settings.'));
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $new_item['menu_name'];
+}
+
+/**
+ * Menu callback; global settings form for menus.
+ */
+function menu_settings_form($form, &$form_state) {
+  $form['#config'] = 'menu.settings';
+  $config = config('menu.settings');
+
+  $form['menu_breakpoint'] = array(
+    '#type' => 'radios',
+    '#title' => t('Breakpoint'),
+    '#description' => t("The 'min-width' for the menu breakpoint. Screens smaller than this may display a menu toggle button, depending on the menu-specific settings."),
+    '#options' => array(
+      'default' => t('Default (48em)'),
+      'custom' => t('Custom'),
+    ),
+    '#default_value' => $config->get('menu_breakpoint'),
+  );
+  $form['menu_breakpoint_custom'] = array(
+    '#type' => 'textfield',
+    '#description' => t("A valid CSS width value (e.g.: '768px', '34em')."),
+    '#default_value' => $config->get('menu_breakpoint_custom'),
+    '#size' => 8,
+    '#field_prefix' => 'min-width:',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="menu_breakpoint"]' => array('value' => 'custom'),
+      ),
+    ),
+  );
+  $form['#submit'][] = 'menu_settings_form_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validate form values for the global settings form.
+ */
+function menu_settings_form_validate($form, &$form_state) {
+  // Do some basic validation of the menu breakpoint setting.
+  if ($form_state['values']['menu_breakpoint'] == 'custom') {
+    // This list of CSS units has been taken from:
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/length
+    if (!preg_match('/^[0-9.]+(px|em|ch|ex|rem|vh|vw|vmin|vmax|cm|mm|in|pc|pt)$/i', $form_state['values']['menu_breakpoint_custom'])) {
+      form_set_error('menu_breakpoint_custom', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
+        '@breakpoint' => $form_state['values']['menu_breakpoint_custom'],
+      )));
+    }
+  }
+}
+
+/**
+ * Custom submission handler for the global settings form.
+ */
+function menu_settings_form_submit($form, &$form_state) {
+  // Flush page cache to allow new breakpoint to take effect immediately.
+  cache_flush('page');
 }

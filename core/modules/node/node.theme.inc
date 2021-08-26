@@ -262,8 +262,14 @@ function template_preprocess_node(&$variables) {
   if ($variables['view_mode']) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
+  if (!$node->uid) {
+    $variables['classes'][] = 'node-by-anonymous';
+  }
+  elseif ($node->uid == $variables['user']->uid) {
+      $variables['classes'][] = 'node-by-viewer';
+  }
 
-  // Add an extra theme hook suggetion for node id.
+  // Add an extra theme hook suggestion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
 }
 

@@ -44,7 +44,6 @@ class Comment extends Entity {
    */
   public $subject;
 
-
   /**
    * The comment author ID.
    *
@@ -78,6 +77,16 @@ class Comment extends Entity {
    * @var string
    */
   public $homepage;
+
+  /**
+   * A list of comment IDs that make up the parents of this comment.
+   *
+   * For example a thread of 10/20/30 would indicate a comment that has 3 parent
+   * comments, with CID 30 being the immediate parent comment.
+   *
+   * @var string
+   */
+  public $thread;
 
   /**
    * Implements EntityInterface::id().

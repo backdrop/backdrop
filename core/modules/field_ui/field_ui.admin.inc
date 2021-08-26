@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative interface for custom field type creation.
+ * Admin page callbacks for the Field UI module.
  */
 
 /**
@@ -1518,7 +1518,9 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
           $options[$widget_field_type][$name] = $widget_type['label'];
         }
       }
-      asort($options[$widget_field_type]);
+      if (isset($options[$widget_field_type])) {
+        asort($options[$widget_field_type]);
+      }
     }
   }
 

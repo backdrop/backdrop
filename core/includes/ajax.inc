@@ -292,6 +292,7 @@ function ajax_render($commands = array()) {
 
   // Now add a command to merge changes and additions to Backdrop.settings.
   $scripts = backdrop_add_js();
+  backdrop_alter('js', $scripts);
   if (!empty($scripts['settings'])) {
     $settings = $scripts['settings'];
     array_unshift($commands, ajax_command_settings(backdrop_array_merge_deep_array($settings['data']), TRUE));
@@ -318,6 +319,11 @@ function ajax_render($commands = array()) {
  *   @endcode
  */
 function ajax_get_form() {
+  // Exit early if $_POST is empty.
+  if (empty($_POST) || !isset($_POST['form_build_id'])) {
+    backdrop_exit();
+  }
+
   $form_state = form_state_defaults();
 
   $form_build_id = $_POST['form_build_id'];
