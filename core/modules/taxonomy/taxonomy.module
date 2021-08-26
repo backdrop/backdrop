@@ -289,9 +289,6 @@ function taxonomy_theme() {
     'taxonomy_vocabulary_description' => array(
       'variables' => array('vocabulary' => NULL),
     ) + $base,
-    'taxonomy_vocabulary_term_count' => array(
-      'variables' => array('term_count' => NULL),
-    ) + $base,
     'taxonomy_overview_terms' => array(
       'render element' => 'form',
     ) + $base,

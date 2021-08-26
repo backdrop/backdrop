@@ -44,26 +44,6 @@ function theme_taxonomy_vocabulary_description($variables) {
   return $output;
 }
 
-
-/**
- * Returns HTML for the vocabulary term_count.
- *
- * @param $variables
- *   An associative array containing:
- *   - 'term_count': the number of terms within the vocabulary.
- *
- * @see taxonomy_overview_vocabularies()
- * @ingroup themeable
- */
-function theme_taxonomy_vocabulary_term_count($variables) {
-
-  $output  = '<div class="vocabulary-term-count">';
-  $output .= check_plain($variables['term_count']);
-  $output .= '</div>';
-
-  return $output;
-}
-
 /**
  * Returns HTML for a terms overview form as a sortable list of terms.
  *

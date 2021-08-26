@@ -34,7 +34,7 @@ function taxonomy_overview_vocabularies() {
       'data-label' => t('Description'),
     );
     $row[] = array(
-      'data' => theme('taxonomy_vocabulary_term_count', array('term_count' => $term_count)),
+      'data' => $term_count,
       'class' => array('vocabulary-term-count'),
       'data-label' => t('Number of terms'),
     );
