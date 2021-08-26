@@ -5,7 +5,7 @@
  */
 
 /**
- * Page callback at admin/structure/taxonomy to list all available menus.
+ * Page callback at admin/structure/taxonomy to list all available vocabularies.
  */
 function taxonomy_overview_vocabularies() {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);

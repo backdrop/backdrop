@@ -57,10 +57,10 @@ function theme_taxonomy_vocabulary_description($variables) {
 function theme_taxonomy_overview_terms($variables) {
   $form = $variables['form'];
 
-  $page_increment  = $form['#page_increment'];
-  $page_entries    = $form['#page_entries'];
-  $back_step       = $form['#back_step'];
-  $forward_step    = $form['#forward_step'];
+  $page_increment = $form['#page_increment'];
+  $page_entries = $form['#page_entries'];
+  $back_step = $form['#back_step'];
+  $forward_step = $form['#forward_step'];
 
   // Add drag and drop if parent fields are present in the form.
   if ($form['#parent_fields']) {
