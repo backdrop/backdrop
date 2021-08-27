@@ -19,6 +19,7 @@ jobs:
           # Disable apparmor for mysql.
           sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
           sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+          sudo tail /var/log/syslog
           # Move datadir and tmpdir to shared memory.
           sudo mkdir /dev/shm/mysql_tmp
           sudo chown mysql:mysql /dev/shm/mysql_tmp
@@ -27,6 +28,8 @@ jobs:
           sudo grep -r '/var/lib' /etc/mysql
           sudo sed -i -e 's?datadir\s*=.*?datadir = /dev/shm/mysql?' \
             -e 's?tmpdir\s*=.*?tmpdir = /dev/shm/mysql_tmp?' /etc/mysql/mysql.conf.d/mysqld.cnf
+          sudo grep -r 'shm' /etc/mysql
+          sudo grep -r 'var/lib' /etc/mysql
           sudo mv /var/lib/mysql /dev/shm
           echo 'Is it there'
           sudo ls -l /dev/shm/mysql
