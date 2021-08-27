@@ -172,7 +172,7 @@ function theme_user_permission_description($variables) {
 function theme_user_admin_roles($variables) {
   $form = $variables['form'];
 
-  $header = array(t('Name'), t('Status'), t('Weight'), t('Operations'));
+  $header = array(t('Name'), t('Required'), t('Weight'), t('Operations'));
   foreach (element_children($form['roles']) as $role_name) {
     $row = array();
     $row[] = theme('label_machine_name__role', array(
@@ -180,7 +180,7 @@ function theme_user_admin_roles($variables) {
       'machine_name' => $form['roles'][$role_name]['#role']->name,
     ));
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $row[] = '<em>' . t('Required') . '</em>';
+      $row[] = t('yes');
     }
     else {
       $row[] = '';
