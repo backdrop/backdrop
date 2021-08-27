@@ -1,6 +1,6 @@
 custom_service_name: "Functional tests (SimpleTest)"
 subprojects:
-  - id: simpletest
+  - id: functional-tests
     paths:
       - "**"
     checks:
