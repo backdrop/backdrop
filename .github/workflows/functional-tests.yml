@@ -17,8 +17,7 @@ jobs:
       - name: Setup MySQL and create database
         run: |
           # DEBUG
-          sudo dpkg -l|grep mysql
-          pgrep mysql
+          sudo systemctl status mysql.service
           sudo systemctl stop mysql.service
           # Disable apparmor for mysql.
           sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
