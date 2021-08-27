@@ -214,11 +214,11 @@ function _filter_image_library_ajax_deliver($page_callback_result) {
     '#markup' => $page_callback_result,
     '#attached' => array(
       'library' => array(
-        array('system', 'backdrop.dialog'),
+        array('system', 'backdrop.dialog.ajax'),
       ),
     ),
   );
-  print backdrop_render_page($library_page);
+  print backdrop_render($library_page);
 }
 
 /**
