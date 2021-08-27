@@ -1906,7 +1906,15 @@ div.add-or-remove-shortcuts {
  */
 .label {
   font-weight: bold;
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .label {
+  padding-right: 28px;
 }
 .machine-name {
   color: #666;
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .machine-name {
+  padding-right: 28px;
 }
