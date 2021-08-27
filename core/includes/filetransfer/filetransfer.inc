@@ -180,16 +180,14 @@ abstract class FileTransfer {
     $front_path = array_shift($parts);
     while ($parts) {
       $front_path .= '/' . array_shift($parts);
-      if (is_link($front_path)) {
-        $real_path = realpath($front_path);
-        $fixed_path = $this->fixRemotePath($real_path, FALSE);
-        if (strpos($fixed_path, $chroot_jail) === 0) {
-          // the path starts with a symlink that is equal to or inside the jail - pass
-          return;
-        }
-      }
       if (!file_exists($front_path)) {
         break;
+      }
+      $real_path = backdrop_realpath($front_path);
+      $fixed_path = $this->fixRemotePath($real_path, FALSE);
+      if (strpos($fixed_path, $chroot_jail) === 0) {
+        // the path starts with a symlink that is equal to or inside the jail - pass
+        return;
       }
     }
     throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
