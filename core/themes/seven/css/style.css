@@ -1902,12 +1902,12 @@ div.add-or-remove-shortcuts {
 }
 
 /**
- * Labels & machine names.
+ * Labels & machine names in admin listing tables.
  */
-.label {
+table .label {
   font-weight: bold;
 }
-.machine-name {
+table .machine-name {
   color: #666;
 }
 .tabledrag-handles-shown .label,
