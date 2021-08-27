@@ -25,7 +25,8 @@ jobs:
           # In ubuntu 20 these default settings are commented out, so we append
           # them to the server config file.
           echo 'cat before'
-          cat /etc/mysql/mysql.conf.d/mysqld.cnf
+          ls -l /etc/mysql/mysql.conf.d/mysqld.cnf
+          sudo chmod 666 /etc/mysql/mysql.conf.d/mysqld.cnf
           sudo echo 'datadir = /dev/shm/mysql' >> /etc/mysql/mysql.conf.d/mysqld.cnf
           sudo echo 'tmpdir = /dev/shm/mysql_tmp' >> /etc/mysql/mysql.conf.d/mysqld.cnf
           echo 'cat after'
