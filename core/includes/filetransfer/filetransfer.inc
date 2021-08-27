@@ -180,9 +180,6 @@ abstract class FileTransfer {
     $front_path = array_shift($parts);
     while ($parts) {
       $front_path .= '/' . array_shift($parts);
-      if (!file_exists($front_path)) {
-        break;
-      }
       $real_path = backdrop_realpath($front_path);
       $fixed_path = $this->fixRemotePath($real_path, FALSE);
       if (strpos($fixed_path, $chroot_jail) === 0) {
