@@ -119,7 +119,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     // @todo Remove in Backdrop 2.0.
     if ($theme_name === 'bartik') {
       module_load_include('inc', 'color', 'color.legacy');
-      bartik_form_system_theme_settings_alter($form, $form_state);
+      bartik_legacy_form_system_theme_settings_alter($form, $form_state);
     }
   }
 }
