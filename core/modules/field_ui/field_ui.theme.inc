@@ -112,16 +112,13 @@ function theme_field_ui_view_modes($variables) {
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
-  $label = t('Default');
-  $label_desc = t('Used for all display modes which are not customized');
-
   // Add the row for the default display mode.
   $row = array();
   $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
-    'label' => $label,
-    'machine_name' => t('default'),
+    'label' => t('Default'),
+    'machine_name' => 'default',
   ));
-  $row['description'] = $label_desc;
+  $row['description'] = t('Used for all display modes which are not customized');
   $row['operations'] = array(
     'data' => array(
       '#type' => 'dropbutton',
