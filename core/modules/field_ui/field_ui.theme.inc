@@ -100,17 +100,9 @@ function theme_field_ui_view_modes($variables) {
   $element = $variables['element'];
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
-  $entity_bundle = $element['#bundle'];
+  $entity_bundle = $element['#bundle_label'];
+  $bundle_machine_name = $element['#bundle'];
   $path = $element['#admin_path'] . '/display';
-
-  // Get the machine name of the entity bundle.
-  $entity_info = entity_get_info($entity_type);
-  $bundle_machine_name = '';
-  $bundles_by_label = array();
-  foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
-    $bundles_by_label[$bundle_info['label']] = $bundle;
-  }
-  $bundle_machine_name = $bundles_by_label[$entity_bundle];
 
   $rows = array();
 

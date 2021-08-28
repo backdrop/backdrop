@@ -920,7 +920,8 @@ function field_ui_display_overview($entity_type, $bundle) {
     '#tree' => TRUE,
     '#view_modes' => $custom + $default,
     '#entity_type' => $entity_type,
-    '#bundle' => $bundle_label,
+    '#bundle' => $bundle,
+    '#bundle_label' => $bundle_label,
     '#admin_path' => $admin_path,
   );
 
