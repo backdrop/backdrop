@@ -196,20 +196,16 @@ function standard_install() {
     ->save();
 
     // Create an "About" page node.
-  $page = new Node(
+  $promobox = new Node(
     array(
-      'title' => st('Home page content'),
+      'title' => st('Organize your content'),
       'body' => array(
         LANGUAGE_NONE => array(
           array(
             'value' => st('
-            <p>A great place to start configuring your new site is with your home page layout.</p>
-            <ul>
-              <li>You can <a href="node/1/edit">edit this message</a> by looking for the "Home page content" listed under the Content menu.
-              </li>
-              <li>You can add or remove blocks on this page layout at <a href="admin/structure/layouts">admin/structure/layouts</a>.
-              </li>
-            </ul>'),
+              <p>Your Backdrop site comes with three pre-defined types of content: Pages, Posts, and Promoboxs.</p>
+
+              <p>You also have the ability to create your own custom content types at admin/structure/types.</p>'),
             'format' => 'filtered_html',
           ),
         ),
@@ -220,17 +216,62 @@ function standard_install() {
       'type' => 'promobox',
     )
   );
-  $page->save();
+  $promobox->save();
 
-  // Create an initial post to welcome users on install.
+  $promobox = new Node(
+    array(
+      'title' => st('What is promobox?'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st("
+              <p>A Promobox is a block of content that does not have it's own visible page or path. It's primarily used to display content in views, slideshows, and layout blocks.</p>
+
+              <p>This Promobox is a block that has been placed on the home page layout. You can edit or delete this Promobox under the /admin/content menu.</p>"
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'promobox',
+    )
+  );
+  $promobox->save();
+
+    $promobox = new Node(
+    array(
+      'title' => st('The home page layout'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('
+              <p>To manage your home page, go to the Layouts page at admin/structure/layouts and edit the blocks on your Homepage layout.</p>
+
+              <p>This is an "existing content" block that allows you to use an existing piece of content (or a node) in a block. We are using promobox content for this particular "existing content" block.</p>'
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'promobox',
+    )
+  );
+  $promobox->save();
+
   $post = new Node(
     array(
       'title' => st('Your first post!'),
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first post! You may <a href="node/2/edit">edit or delete it</a>.'),
-            'format' => 'filtered_html',
+            'value' => st('This is your first post! You may edit or delete it.'),
+            'format' => 'filtered_html'
           ),
         ),
       ),
@@ -248,7 +289,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('By default your site is displaying <a href="admin/structure/views">a view of "promoted" posts</a> on the front page.'),
+            'value' => st('By default your site is displaying a view of "promoted" posts on the front page. See admin/structure/views.'),
             'format' => 'filtered_html',
           ),
         ),
@@ -268,7 +309,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is a page with static content. You may <a href="node/4/edit">edit or delete it</a>.'),
+            'value' => st('This is a page with static content. You may edit or delete it.'),
             'format' => 'filtered_html',
           ),
         ),

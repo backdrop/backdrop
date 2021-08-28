@@ -1218,3 +1218,34 @@ div.error:before {
   /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
+
+.l-eb82ab22-833c-4349-8600-bddb9c1003e1 {
+  background-color: #cecece;
+}
+
+.l-top.l-hero {
+  margin-top: -2rem;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Promobox view on default home page */
+
+.view-promobox-grid .views-grid-box {
+  border: none;
+}
+
+.block-views-promobox-grid-block {
+  margin-top: -2em;
+  background-color: #e8e8e8;
+}
+
+.block-views-promobox-grid-block .views-view-grid-cols-3 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 48em) {
+  .block-views-promobox-grid-block .views-view-grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

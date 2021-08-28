@@ -20,7 +20,8 @@
             "9aece1df-ac4f-44a6-8b0c-12a7f6a1fb21"
         ],
         "top": [
-            "094cbc03-d088-4b3c-8361-977733540ae8"
+            "094cbc03-d088-4b3c-8361-977733540ae8",
+            "fe8c7715-c7e9-46d0-8b09-09afb78b2891"
         ],
         "content": [
             "209098f9-8e8f-4be6-8000-0033df223bdd",
@@ -116,32 +117,42 @@
                 }
             }
         },
-        "209098f9-8e8f-4be6-8000-0033df223bdd": {
-            "plugin": "node:content",
+        "fe8c7715-c7e9-46d0-8b09-09afb78b2891": {
+            "plugin": "views:promobox_grid-block",
             "data": {
-                "module": "node",
-                "delta": "content",
+                "module": "views",
+                "delta": "promobox_grid-block",
                 "settings": {
-                    "title_display": "custom",
-                    "title": "Your home page block",
-                    "style": "default",
+                    "link_to_view": 0,
+                    "more_link": false,
+                    "use_pager": false,
+                    "pager_id": 0,
+                    "items_per_page": "3",
+                    "offset": 0,
+                    "path": "promobox-grid",
+                    "fields_override": null,
+                    "title_display": "none",
+                    "title": "",
+                    "style": "dynamic",
                     "block_settings": [],
                     "contexts": [],
-                    "admin_label": "Home page content",
-                    "admin_description": "A piece of content used on the home page.",
-                    "nid": 1,
-                    "links": false,
-                    "leave_node_title": false,
-                    "link_node_title": false,
-                    "display_submitted": false,
-                    "view_mode": "full"
+                    "allowed": [],
+                    "path_override": false,
+                    "exposed": [],
+                    "admin_label": "",
+                    "admin_description": ""
                 },
-                "uuid": "209098f9-8e8f-4be6-8000-0033df223bdd",
+                "uuid": "fe8c7715-c7e9-46d0-8b09-09afb78b2891",
                 "style": {
-                    "plugin": "default",
+                    "plugin": "dynamic",
                     "data": {
                         "settings": {
-                            "classes": ""
+                            "classes": "",
+                            "wrapper_tag": "div",
+                            "title_tag": "h2",
+                            "title_classes": "block-title",
+                            "content_tag": "div",
+                            "content_classes": "container"
                         }
                     }
                 }
@@ -153,7 +164,7 @@
                 "module": "views",
                 "delta": "promoted-block",
                 "settings": {
-                    "title_display": "custom",
+                    "title_display": "none",
                     "title": "Some promoted content",
                     "style": "default",
                     "block_settings": [],
