@@ -1008,11 +1008,11 @@ button.button-primary:focus {
 a.button-secondary,
 input.button-secondary,
 button.button-secondary {
-  color: #828188;
+  color: #76757b;
   background-color: white;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
-  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
-  box-shadow: inset 0px 0px 0px 2px #97979e;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #d0d0d0;
+  -moz-box-shadow: inset 0px 0px 0px 2px #d0d0d0;
+  box-shadow: inset 0px 0px 0px 2px #d0d0d0;
 }
 a.button-secondary:hover,
 a.button-secondary:focus,
