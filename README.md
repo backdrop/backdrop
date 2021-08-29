@@ -72,11 +72,11 @@ project:
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+Please see the the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
+Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
 
 Code of Conduct
 ---------------
@@ -102,7 +102,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2016 by the original authors.
+All Backdrop code is Copyright 2001 - 2021 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

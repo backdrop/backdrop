@@ -480,6 +480,25 @@ abstract class DatabaseConnection {
   }
 
   /**
+   * Provides a pass-through to the PDO prepare method.
+   *
+   * In adding support for PHP 8, the Backdrop DatabaseConnection no longer
+   * directly extends the PHP PDO object. A side-effect is that calls
+   * to PDO methods no longer worked. This provides a pass-through
+   * to this method specifically for compatibility with previous versions of
+   * Backdrop. See https://github.com/backdrop/backdrop-issues/issues/5094.
+   *
+   * @param $query
+   *
+   * @return bool|PDOStatement
+   *
+   * @since 1.19.2
+   */
+  public function prepare($query) {
+    return $this->pdo->prepare($query);
+  }
+
+  /**
    * Prepares a query string and returns the prepared statement.
    *
    * This method caches prepared statements, reusing them when
@@ -2926,11 +2945,11 @@ function db_drop_table($table) {
  *   will be set to the value of the key in all rows. This is most useful for
  *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
- *   Optional keys and indexes specification to be created on the table along
- *   with adding the field. The format is the same as a table specification, but
- *   without the 'fields' element. If you are adding a type 'serial' field, you
- *   MUST specify at least one key or index including it in this array. See
- *   db_change_field() for more explanation why.
+ *   Optional. An array containing the specification for keys and indexes to be 
+ *   created on the table along with the field. The format is the same as a
+ *   schema definition, but without the 'columns' element. If you are adding a
+ *   'serial' type field, you MUST specify at least one key or index in this
+ *   array. See db_change_field() for more explanation why.
  *
  * @see db_change_field()
  */

@@ -1187,7 +1187,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->setCommentSubject(TRUE);
 
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
-    $this->assertText(t('The name you used belongs to a registered user.'));
+    $this->assertText(t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
 
     // Require contact info.
     $this->backdropLogin($this->admin_user);
