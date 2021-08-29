@@ -25,7 +25,7 @@ function telemetry_telemetry_info() {
   );
   $info['installation_profile'] = array(
     'label' => t('Installation profile'),
-    'description' => t('The profile used to install this site.'),
+    'description' => t('The profile that was used to install this site.'),
     'project' => 'backdrop',
   );
   return $info;
