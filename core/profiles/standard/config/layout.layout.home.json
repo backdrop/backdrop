@@ -164,8 +164,8 @@
                 "module": "views",
                 "delta": "promoted-block",
                 "settings": {
-                    "title_display": "none",
-                    "title": "Some promoted content",
+                    "title_display": "default",
+                    "title": "",
                     "style": "default",
                     "block_settings": [],
                     "contexts": []
