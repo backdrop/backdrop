@@ -6,7 +6,7 @@
     "description": null,
     "module": "standard",
     "weight": 0,
-    "storage": 2,
+    "storage": 4,
     "layout_template": "boxton",
     "disabled": false,
     "settings": {

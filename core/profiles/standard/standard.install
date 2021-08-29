@@ -195,7 +195,7 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
-    // Create an "About" page node.
+  // Create an "About" page node.
   $promobox = new Node(
     array(
       'title' => st('Organize your content'),
