@@ -195,7 +195,7 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
-  // Create an "About" page node.
+  // Create three default Promobox nodes.
   $promobox = new Node(
     array(
       'title' => st('Organize your content'),
@@ -258,6 +258,7 @@ function standard_install() {
   );
   $promobox->save();
 
+  // Create two default posts to display on front page.
   $post = new Node(
     array(
       'title' => st('Your first post!'),
