@@ -412,10 +412,9 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       e.preventDefault();
     }
     $adminBar.find('.active-search-item').each(function () {
-      $(this).removeClass('active-search-item');
-      if ($(this).is('[class=""]')) {
-        $(this).removeAttr('class');
-      }
+      // Remove the 'active-search-item' class (if that was the only class,
+      // then make sure that no empty class attribute is left behind).
+      $(this).removeClass('active-search-item').filter('[class=""]').removeAttr('class');
     });
     if (show) {
       $this.addClass('active-search-item');
