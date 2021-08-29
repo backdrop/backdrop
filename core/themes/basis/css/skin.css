@@ -1219,16 +1219,6 @@ div.error:before {
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
 
-.l-eb82ab22-833c-4349-8600-bddb9c1003e1 {
-  background-color: #cecece;
-}
-
-.l-top.l-hero {
-  margin-top: -2rem;
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-
 /* Promobox view on default home page */
 
 .view-promobox-grid .views-grid-box {
