@@ -1443,6 +1443,20 @@ function system_library_info() {
     ),
   );
 
+  // details-polyfill.
+  $libraries['details-polyfill'] = array(
+    'title' => 'Polyfill for the HTML5 `<details>` element',
+    'website' => 'https://github.com/rstacruz/details-polyfill',
+    'version' => '1.2.0',
+    'js' => array(
+      'core/misc/html5-details.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -22,
+        'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
+      ),
+    ),
+  );
+
   // SmartMenus.
   $libraries['smartmenus'] = array(
     'title' => 'SmartMenus',

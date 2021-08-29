@@ -4040,19 +4040,24 @@ function form_process_fieldset(&$element, &$form_state) {
 }
 
 /**
- * Arranges fieldsets into groups.
+ * Processes HTML5 'details' elements.
  *
  * @param $element
- *   An associative array containing the properties and children of the
- *   fieldset. Note that $element must be taken by reference here, so processed
+ *   An associative array containing the properties and children of the details
+ *   element. Note that $element must be taken by reference here, so processed
  *   child elements are taken over into $form_state.
  * @param $form_state
- *   The $form_state array for the form this fieldset belongs to.
+ *   The $form_state array for the form this details element belongs to.
  *
  * @return
  *   The processed element.
  */
 function form_process_details(&$element, &$form_state) {
+  // DETAILS elements do not need 'collapsible'/'collapsed' classes, since they
+  // use their own "open" attribute by which they can be targetted in CSS. No
+  // need for collapse.js either - but we need to add a polyfill for IE.
+  backdrop_add_library('form', 'details-polyfill');
+
   $parents = implode('][', $element['#parents']);
 
   // Contains form element summary functionalities.
@@ -4063,17 +4068,6 @@ function form_process_details(&$element, &$form_state) {
   if (!isset($element['#attributes']['class'])) {
     $element['#attributes']['class'] = array();
   }
-
-  // DETAILS elements do not need 'collapsible'/'collapsed' classes, since they
-  // use their own "open" attribute by which they can be targetted in CSS. No
-  // need for collapse.js either - but we may need to add a polyfill here.
-  // if (!empty($element['#collapsible'])) {
-  //   $element['#attached']['library'][] = array('system', 'backdrop.collapse');
-  //   $element['#attributes']['class'][] = 'collapsible';
-  //   if (!empty($element['#collapsed'])) {
-  //     $element['#attributes']['class'][] = 'collapsed';
-  //   }
-  // }
 
   return $element;
 }
