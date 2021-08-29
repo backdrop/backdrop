@@ -9,18 +9,23 @@
  */
 function telemetry_telemetry_info() {
   $info['php_version'] = array(
-    'label' => t('PHP Version'),
+    'label' => t('PHP version'),
     'description' => t('The current version of PHP running on your server.'),
     'project' => 'backdrop',
   );
   $info['mysql_version'] = array(
-    'label' => t('MySQL Version'),
+    'label' => t('MySQL version'),
     'description' => t('The version number of your database (either MySQL or MariaDB).'),
     'project' => 'backdrop',
   );
   $info['server_os'] = array(
     'label' => t('Server OS'),
     'description' => t('The operating system of your server, such as RedHat Linux, Debian, Windows, etc.'),
+    'project' => 'backdrop',
+  );
+  $info['installation_profile'] = array(
+    'label' => t('Installation profile'),
+    'description' => t('The profile used to install this site.'),
     'project' => 'backdrop',
   );
   return $info;
@@ -37,5 +42,7 @@ function telemetry_telemetry_data($key) {
       return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
     case 'server_os':
       return PHP_OS;
+    case 'installation_profile':
+      return backdrop_get_profile();
   }
 }
