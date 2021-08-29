@@ -80,7 +80,7 @@
                         "id": "created",
                         "table": "node",
                         "field": "created",
-                        "order": "DESC"
+                        "order": "ASC"
                     }
                 },
                 "title": "Promobox grid",

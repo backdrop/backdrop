@@ -203,9 +203,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('
-              <p>Your Backdrop site comes with three pre-defined types of content: Pages, Posts, and Promoboxs.</p>
-
-              <p>You also have the ability to create your own custom content types at admin/structure/types.</p>'),
+              <p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Promoboxes. Any number of custom content types can also be added.</p>'),
             'format' => 'filtered_html',
           ),
         ),
@@ -225,9 +223,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st("
-              <p>A Promobox is a block of content that does not have it's own visible page or path. It's primarily used to display content in views, slideshows, and layout blocks.</p>
-
-              <p>This Promobox is a block that has been placed on the home page layout. You can edit or delete this Promobox under the /admin/content menu.</p>"
+              <p>Promobox content will not be visible on a stand-alone page. It will only appear as part of another page. A promobox can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
             ),
             'format' => 'filtered_html',
           ),
@@ -248,9 +244,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('
-              <p>To manage your home page, go to the Layouts page at admin/structure/layouts and edit the blocks on your Homepage layout.</p>
-
-              <p>This is an "existing content" block that allows you to use an existing piece of content (or a node) in a block. We are using promobox content for this particular "existing content" block.</p>'
+              <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This promobox was added to the Home Page layout through a view that was placed as a block.</p>'
             ),
             'format' => 'filtered_html',
           ),
