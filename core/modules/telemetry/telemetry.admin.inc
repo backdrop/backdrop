@@ -25,8 +25,8 @@ function telemetry_report() {
   );
 
   $header = array(
-    t('Module'),
-    t('Description'),
+    t('Metric'),
+    array('data' => t('Description'), 'class' => array('priority-low')),
     t('Value'),
   );
 
@@ -40,10 +40,20 @@ function telemetry_report() {
       else {
         $value = check_plain($telemetry_data[$project][$key]);
       }
+
+      // Convert module name to readable label.
       $module_info = system_get_info('module', $info['module']);
-      $project_name = $info['project'] === 'backdrop' ? 'core' : check_plain($info['project']);
-      $row[] = '<div class="telemetry-item-module">' . check_plain($module_info['name']) . '</div><div class="telemetry-item-project">' . $project_name . '</div>';
-      $row[] = '<div class="telemetry-item-label">' . check_plain($info['label']) . '</div><div class="telemetry-item-description">' . check_plain($info['description']) . '</div>';
+
+      // Data directly recorded by Telemetry module is reported as "System".
+      // This keeps Telemetry data collection all in one module for now.
+      // Perhaps remove this conversion once more modules start collecting data.
+      $module_info['name'] = $info['module'] === 'telemetry' ? t('System') : $info['label'];
+
+      $row[] = '<div class="telemetry-item-label">' . check_plain($info['label']) . '</div><div class="telemetry-item-project">' . check_plain($module_info['name']) . '</div>';
+      $row[] = array(
+        'data' => '<div class="telemetry-item-description">' . check_plain($info['description']) . '</div>',
+        'class' => array('priority-low'),
+      );
       $row[] = array(
         'data' => $value,
         'class' => array('telemetry-item-value'),

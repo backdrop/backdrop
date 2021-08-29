@@ -4,6 +4,9 @@
 .telemetry-report td {
   vertical-align: top;
 }
+.telemetry-report .telemetry-item-label {
+  font-weight: bold;
+}
 .telemetry-report .telemetry-item-project {
   font-size: 0.9em;
   color: #444;
@@ -15,6 +18,5 @@
   content: ')';
 }
 .telemetry-report .telemetry-item-description {
-  font-size: 0.9em;
   color: #444;
 }

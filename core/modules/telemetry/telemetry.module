@@ -11,7 +11,7 @@ function telemetry_menu() {
   $items['admin/reports/telemetry'] = array(
     'title' => 'Telemetry',
     'page callback' => 'telemetry_report',
-    'access arguments' => array('administer telemetry'),
+    'access arguments' => array('access site reports'),
     'file' => 'telemetry.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
@@ -102,7 +102,6 @@ function telemetry_get_data() {
 function telemetry_cron() {
   $last_run = state_get('telemetry_cron');
   $interval = 86400; // One day in seconds.
-  $interval = 1; // TODO: Testing, delete this line.
   if (REQUEST_TIME - $last_run > $interval) {
     $telemetry_data = telemetry_get_data();
     $destination_url = config_get('telemetry.settings', 'destination');
@@ -114,7 +113,6 @@ function telemetry_cron() {
         'X-Site-Key' => _telemetry_site_key(),
       ),
     ));
-    //dsm($response);
   }
 }
 
