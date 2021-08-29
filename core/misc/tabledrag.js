@@ -218,7 +218,7 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
   $('table.tabledrag-processed').addClass('tabledrag-handles-shown');
   // Show TableDrag handles.
-  $('.tabledrag-handle', 'table.tabledrag-processed').removeAttr('style');
+  $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
   // Reduce the colspan of any effected multi-span columns.
   $('.tabledrag-has-colspan', 'table.tabledrag-processed').each(function () {
     this.colSpan = this.colSpan - 1;
@@ -241,7 +241,7 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
  */
 Backdrop.tableDrag.prototype.showColumns = function () {
   // Show weight/parent cells and headers.
-  $('.tabledrag-hide', 'table.tabledrag-processed').removeAttr('style');
+  $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
   $('table.tabledrag-processed').removeClass('tabledrag-handles-shown');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
