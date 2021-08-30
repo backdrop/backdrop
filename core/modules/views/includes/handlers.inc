@@ -792,7 +792,7 @@ class views_many_to_one_helper {
             $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
             $group_type = $this->handler->query->where[$group]['type'];
             $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
-            if ($group === FALSE || $group_type == 'AND' && $plugin_id && $plugin_id != 'taxonomy_index_tid' ) {
+            if ($group === FALSE || $group_type == 'AND' && $plugin_id && $plugin_id != 'taxonomy_index_tid') {
               $join->type = 'INNER';
             }
           }
