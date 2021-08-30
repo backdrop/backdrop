@@ -128,7 +128,7 @@ function seven_tablesort_indicator($variables) {
     return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-down--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
   }
 }
 
