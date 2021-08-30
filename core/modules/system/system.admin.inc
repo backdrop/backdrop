@@ -423,6 +423,8 @@ function system_theme_settings($form, &$form_state, $key) {
     '#type' => 'value',
     '#value' => $key,
   );
+  // Store the form before processing theme settings so we can check for changes.
+  $form_original = $form;
 
   // Create a list which includes the current theme and all its base themes.
   if (isset($themes[$key]->base_themes)) {
@@ -449,11 +451,21 @@ function system_theme_settings($form, &$form_state, $key) {
     }
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save theme settings'),
-  );
+  if (isset($themes[$key]->info['settings']['color']) && !module_exists('color')) {
+    // Notify the user that the theme supports the color module.
+    backdrop_set_message(t('This theme supports custom color palettes. <a href="@url">Enable the Color module</a> to start customising it.', array(
+      '@url' =>   url('admin/modules', array('query' => array('search' => 'color')))
+    )), 'info');
+  }
+
+  if ($form_original !== $form) {
+    // If the form was modified, add the submit button.
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save theme settings'),
+    );
+  }
 
   return $form;
 }
