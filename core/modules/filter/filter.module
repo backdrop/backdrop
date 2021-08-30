@@ -1412,15 +1412,10 @@ function filter_get_attached($formats) {
   $attached = array();
   $attached['library'][] = array('filter', 'filter');
 
-  foreach ($formats as $format_name => $format_info) {
-    if (isset($added[$format_name])) {
-      unset($formats[$format_name]);
-    }
-    else {
-      // Add the library associated with a format's editor if needed.
-      if ($format_info->editor && ($editor = filter_editor_load($format_info->editor))) {
-        $attached['library'][] = $editor['library'];
-      }
+  foreach ($formats as $format) {
+    // Add the library associated with a format's editor if exists.
+    if ($format->editor && ($editor = filter_editor_load($format->editor)) && isset($editor['library'])) {
+      $attached['library'][] = $editor['library'];
     }
   }
 
@@ -2175,6 +2170,8 @@ function _filter_url_js_settings($filter, $format) {
 function _filter_url($text, $filter) {
   // Tags to skip and not recurse into.
   $ignore_tags = 'a|script|style|code|pre';
+  // An array of classes to ignore.
+  $ignore_classes = array('nolink');
 
   // Pass length to regexp callback.
   _filter_url_trim(NULL, $filter->settings['filter_url_length']);
@@ -2263,6 +2260,15 @@ function _filter_url($text, $filter) {
           // Check whether this tag is contained in $ignore_tags.
           if (preg_match("`<($ignore_tags)(?:\s|>)`i", $chunks[$i], $matches)) {
             $open_tag = $matches[1];
+          }
+          // Check whether this tag has a class contained in $ignore_classes.
+          elseif (preg_match('`<([a-z0-9-]+)\s+[\s\S]*?class=(["\'])([\s\S]*?)\2[\s\S]*?>`i', $chunks[$i], $matches)) {
+            if (!empty($matches[3])) {
+              $classes = array_map('trim', explode(' ', $matches[3]));
+              if (array_intersect($ignore_classes, $classes)) {
+                $open_tag = $matches[1];
+              }
+            }
           }
         }
         // Otherwise, check whether this is the closing tag for $open_tag.
@@ -2395,7 +2401,7 @@ function _filter_url_trim($text, $length = NULL) {
  * @see filter_filter_info()
  */
 function _filter_url_tips($filter, $format, $long = FALSE) {
-  return t('Web page addresses and e-mail addresses turn into links automatically.');
+  return t("Web page addresses and e-mail addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
 }
 
 /**

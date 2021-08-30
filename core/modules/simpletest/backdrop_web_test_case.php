@@ -1527,15 +1527,16 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function prepareEnvironment() {
     global $user, $language, $language_url, $settings, $config_directories;
+    $site_config = config('system.core');
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language;
     $this->originalLanguageUrl = $language_url;
     $this->originalConfigDirectories = $config_directories;
-    $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+    $this->originalFileDirectory = $site_config->get('file_public_path');
     $this->verboseDirectoryUrl = file_create_url($this->originalFileDirectory . '/simpletest/verbose');
     $this->originalProfile = backdrop_get_profile();
-    $this->originalCleanUrl = config_get('system.core', 'clean_url');
+    $this->originalCleanUrl = $site_config->get('clean_url');
     $this->originalUser = $user;
     $this->originalSettings = $settings;
 
@@ -1875,8 +1876,14 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->fail('Failed to drop all prefixed tables.');
     }
 
+    // In PHP 8 some tests encounter problems as some shutdown code tries to
+    // access the database connection after it's been explicitly closed (for
+    // example the destructor of BackdropCacheArray). We avoid this by not fully
+    // destroying the test database connection.
+    $close = \PHP_VERSION_ID < 80000;
+
     // Get back to the original connection.
-    Database::removeConnection('default');
+    Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
 
     // Delete the database table prefix record.
@@ -3278,7 +3285,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertTextHelper($text, $message = '', $group, $not_exists) {
+  protected function assertTextHelper($text, $message, $group, $not_exists) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3344,7 +3351,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertUniqueTextHelper($text, $message = '', $group, $be_unique) {
+  protected function assertUniqueTextHelper($text, $message, $group, $be_unique) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3466,7 +3473,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
+  protected function assertThemeOutput($callback, array $variables, $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
     $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
       . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
@@ -3965,6 +3972,32 @@ class BackdropWebTestCase extends BackdropTestCase {
       $mail = $mails[$i];
       $this->verbose(t('Email:') . '<pre>' . print_r($mail, TRUE) . '</pre>');
     }
+  }
+
+  /**
+   * Verifies that a watchdog message has been entered.
+   *
+   * @param $watchdog_message
+   *   The watchdog message.
+   * @param $variables
+   *   The array of variables passed to watchdog().
+   * @param $message
+   *   The assertion message.
+   *
+   * @since 1.19.0 Method added.
+   */
+  function assertWatchdogMessage($watchdog_message, $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+    return $this->assert($status, format_string('@message', array('@message' => $message)));
+  }
+
+  /**
+   * Clears the watchdog database table.
+   *
+   * @since 1.19.0 Method added.
+   */
+  function clearWatchdog() {
+    db_truncate('watchdog')->execute();
   }
 }
 

@@ -169,7 +169,7 @@ function theme_filter_admin_format_filter_order($variables) {
  *     filter in one or more text formats. Example:
  *     @code
  *       array(
- *         'Full HTML' => array(
+ *         'Raw HTML' => array(
  *           0 => array(
  *             'tip' => 'Web page addresses and e-mail addresses turn into links automatically.',
  *             'id' => 'filter/2',

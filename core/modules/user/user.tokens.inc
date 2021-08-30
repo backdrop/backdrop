@@ -96,6 +96,7 @@ function user_token_info() {
  * Implements hook_tokens().
  */
 function user_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $user_pictures = config_get('system.core', 'user_pictures');
   $url_options = array('absolute' => TRUE);
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
@@ -142,7 +143,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           break;
 
         case 'picture':
-          if (config_get('system.core', 'user_pictures')) {
+          if ($user_pictures) {
             $replacements[$original] = theme('user_picture', array('account' => $account));
           }
           break;
@@ -174,7 +175,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
       $replacements += token_generate('date', $registered_tokens, array('date' => $account->created), $options);
     }
 
-    if (!empty($account->picture) && config_get('system.core', 'user_pictures') && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
+    if (!empty($account->picture) && $user_pictures && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
       $replacements += token_generate('file', $picture_tokens, array('file' => $account->picture), $options);
     }
 
