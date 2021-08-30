@@ -4498,7 +4498,7 @@ function theme_file($variables) {
 }
 
  /**
- * Processes a file upload element, make use of #multiple if present.
+ * Processes a file upload element; make use of #multiple if present.
  */
 function form_process_file($element) {
   if ($element['#multiple']) {

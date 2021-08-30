@@ -78,7 +78,7 @@ function file_module_test_form_submit($form, &$form_state) {
     $fids[] = $fid;
   }
 
-  backdrop_set_message(t('The file ids are %fids.', array('%fids' => implode(',', $fids))));
+  backdrop_set_message(t('The file IDs are %fids.', array('%fids' => implode(',', $fids))));
 }
 
 /**

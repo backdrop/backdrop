@@ -796,7 +796,7 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
   // We depend on the managed file element to handle uploads.
   $return = file_managed_file_value($element, $input, $form_state);
 
-  // Ensure that all the required properties are returned even if empty.
+   // Ensure that all the required properties are returned, even if empty.
   $return += array(
     'fid' => array(),
     'display' => 1,
@@ -810,7 +810,7 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
  * Validation callback for upload element on file widget. Checks if user has
  * uploaded more files than allowed.
  *
- * This validator is used only when cardinality not set to 1 or unlimited.
+ * This validator is used only when cardinality is not set to 1 or unlimited.
  */
 function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
   $parents = $element['#parents'];
@@ -832,12 +832,12 @@ function file_field_widget_multiple_count_validate($element, &$form_state, $form
     }
     backdrop_set_message(
       t(
-        'Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.',
+        'Field %field can only hold @max values, but there were @count uploaded. The following files have been omitted as a result: %list.',
         array(
           '%field' => $field['field_name'],
           '@max' => $field['cardinality'],
           '@count' => $keep,
-          '%list' => implode(', ', $removed_names),
+          '%list' => count($removed_names) == 1 ? $removed_names[0] : theme('item_list', array('items' => $removed_names)),
         )
       ),
       'warning'
@@ -1022,7 +1022,7 @@ function file_field_widget_submit($form, &$form_state) {
   }
 
   // If there are more files uploaded via the same widget, we have to separate
-  // them, as we display each file in it's own widget.
+  // them, as we display each file in its own widget.
   $new_values = array();
   foreach ($submitted_values as $delta => $submitted_value) {
     if (is_array($submitted_value['fid'])) {

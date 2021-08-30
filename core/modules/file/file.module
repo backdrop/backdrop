@@ -1255,7 +1255,7 @@ function file_admin_paths() {
  * This function is assigned as a #process callback in file_element_info().
  */
 function file_managed_file_process($element, &$form_state, $form) {
-  // This is used sometimes so let's implode it just once.
+  // This is used sometimes, so let's implode it just once.
   $parents_prefix = implode('_', $element['#parents']);
 
   if (isset($element['#value']['fid'])) {
@@ -1426,7 +1426,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
 
   $force_default = FALSE;
 
-  // Process any input and save new uploads.
+   // Process any input, and save new uploads.
   if ($input !== FALSE) {
     $return = $input;
 
@@ -1450,7 +1450,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
         }
       }
       // If a FID was submitted, load the file (and check access if it's not a
-      // public file) to confirm it exists and that the current user has access
+       // public file) to confirm it exists, and that the current user has access
       // to it.
       if (!empty($input['fid'])) {
         $fids = array();
@@ -1581,7 +1581,7 @@ function file_managed_file_submit($form, &$form_state) {
     }
 
     foreach ($remove_fids as $fid) {
-      // If it's a temporary file we can safely remove it immediately, otherwise
+      // If it's a temporary file, we can safely remove it immediately; otherwise
       // it's up to the implementing module to remove usages of files to have them
       // removed.
       if ($element['#files'][$fid] && $element['#files'][$fid]->status == 0) {
