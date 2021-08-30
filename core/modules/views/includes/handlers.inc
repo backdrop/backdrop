@@ -788,7 +788,7 @@ class views_many_to_one_helper {
           $join = $this->get_join();
           if (isset($join)) {
             $join->type = 'LEFT';
-            // INNER joins are slightly faster, use them when we know its safe.
+            // INNER joins are slightly faster; use them when we know it's safe.
             $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
             $group_type = $this->handler->query->where[$group]['type'];
             $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
