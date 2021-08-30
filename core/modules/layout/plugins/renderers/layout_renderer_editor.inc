@@ -107,7 +107,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $output = '<div tabindex="0" aria-label="' . $aria_label . '" class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $attributes = array(
+      'tabindex' => '0',
+      'aria-label' => $aria_label,
+      'class' => array('layout-editor-block clearfix'),
+      'id' => 'layout-editor-block-' . $block->uuid,
+      'data-block-id' => $block->uuid,
+    );
+
+    $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
     $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
