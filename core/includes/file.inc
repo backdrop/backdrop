@@ -1526,16 +1526,16 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $delta = 0;
   }
 
-  // Return cached objects without processing since the file will have
-  // already been processed and the paths in $_FILES will be invalid.
+  // Return cached objects without processing, since the file will have
+  // already been processed, and the paths in $_FILES will be invalid.
   if (isset($upload_cache[$form_field_name])) {
     if (isset($delta)) {
       return $upload_cache[$form_field_name][$delta];
     }
   }
 
-  // Prepare uploaded files info so that single and multiple value uploads can
-  // be handled consistently despite differences in the $_FILES array structure.
+  // Prepare uploaded files info, so that single and multiple value uploads can
+  // be handled consistently, despite differences in the $_FILES array structure.
   $uploaded_files = $_FILES;
   if (!$multiple_file_upload) {
     foreach (array('name', 'type', 'tmp_name', 'error', 'size') as $value)
@@ -1544,30 +1544,30 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   $files = array();
   foreach ($uploaded_files['files']['name'][$form_field_name] as $i => $name) {
-    // Check for file upload errors and return FALSE for this file if a lower
+    // Check for file upload errors, and return FALSE for this file if a lower
     // level system error occurred. For a complete list of errors:
     // See http://php.net/manual/features.file-upload.errors.php.
     switch ($uploaded_files['files']['error'][$form_field_name][$i]) {
       case UPLOAD_ERR_INI_SIZE:
       case UPLOAD_ERR_FORM_SIZE:
-        backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
+        backdrop_set_message(t('The file %file could not be saved, because its size exceeds the maximum %maxsize for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
         $files[$i] = FALSE;
         continue;
 
       case UPLOAD_ERR_PARTIAL:
       case UPLOAD_ERR_NO_FILE:
-        backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
+        backdrop_set_message(t('The file %file could not be saved, because the upload did not complete.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
         continue;
  
       case UPLOAD_ERR_OK:
-        // Final check that this is a valid upload, if it isn't, use the
+        // Final check that this is a valid upload; if it isn't, use the
         // default error handler.
         if (is_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i])) {
           break;
         }
 
-        // Unknown error
+        // Unknown error.
       default:
         backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
@@ -1588,13 +1588,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $extensions = '';
     if (isset($validators['file_validate_extensions'])) {
       if (isset($validators['file_validate_extensions'][0])) {
-        // Build the list of non-munged extensions if the caller provided them.
+        // Build the list of non-munged extensions, if the caller provided them.
         $extensions = $validators['file_validate_extensions'][0];
       }
       else {
-        // If 'file_validate_extensions' is set and the list is empty then the
+        // If 'file_validate_extensions' is set and the list is empty, then the
         // caller wants to allow any extension. In this case we have to remove the
-        // validator or else it will reject all extensions.
+        // validator, or else it will reject all extensions.
         unset($validators['file_validate_extensions']);
       }
     }
@@ -1607,7 +1607,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     }
 
     if (!empty($extensions)) {
-      // Munge the filename to protect against possible malicious extension
+      // Munge the filename, to protect against possible malicious extension
       // hiding within an unknown file type (ie: filename.html.foo).
       $file->filename = file_munge_filename($file->filename, $extensions);
     }
@@ -1620,7 +1620,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       $file->uri .= '.txt';
       $file->filename .= '.txt';
       // The .txt extension may not be in the allowed list of extensions. We have
-      // to add it here or else the file upload will fail.
+      // to add it here, or else the file upload will fail.
       if (!empty($extensions)) {
         $validators['file_validate_extensions'][0] .= ' txt';
         backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
@@ -1635,25 +1635,25 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // Assert that the destination contains a valid stream.
     $destination_scheme = file_uri_scheme($destination);
     if (!file_stream_wrapper_valid_scheme($destination_scheme)) {
-      backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+      backdrop_set_message(t('The file could not be uploaded, because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
       $files[$i] = FALSE;
       continue;
     }
     $file->source = $form_field_name;
-    // A file URI may already have a trailing slash or look like "public://".
+    // A file URI may already have a trailing slash, or look like "public://".
     if (substr($destination, -1) != '/') {
       $destination .= '/';
     }
     $file->destination = file_destination($destination . $file->filename, $replace);
-    // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
-    // there's an existing file so we need to bail.
+    // If file_destination() returns FALSE, then $replace === FILE_EXISTS_ERROR and
+    // there's an existing file; so we need to bail.
     if ($file->destination === FALSE) {
-      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
+      backdrop_set_message(t('The file %source could not be uploaded, because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
       $files[$i] = FALSE;
       continue;
     }
 
-    // Add in our check of the the file name length.
+    // Add in the validation for the file name length.
     $validators['file_validate_name_length'] = array();
 
     // Call the validation functions specified by this function's caller.
@@ -1686,7 +1686,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // Set the permissions on the new file.
     backdrop_chmod($file->uri);
 
-    // If we are replacing an existing file re-use its database record.
+    // If we are replacing an existing file, re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
       $existing_files = entity_load_multiple('file', FALSE, array('uri' => $file->uri));
       if (count($existing_files)) {
@@ -1695,7 +1695,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       }
     }
 
-    // If we made it this far it's safe to record this file in the database.
+    // If we made it this far, it's safe to record this file in the database.
     $file->save();
     $files[$i] = $file;
   }
