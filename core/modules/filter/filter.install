@@ -492,10 +492,8 @@ function filter_update_1004() {
     return;
   }
   else {
-    $path = config_get_config_directory();
-    $contents = file_get_contents($path . '/views.view.image_library.json');
-    $data = json_decode($contents, true);
-    $data['display']['default']['display_options']['filters']['filename'] = array(
+    $view_config = $config->get();
+    $view_config['display']['default']['display_options']['filters']['filename'] = array(
       'id' => 'filename',
       'table' => 'file_managed',
       'field' => 'filename',
@@ -537,7 +535,7 @@ function filter_update_1004() {
           'group_items' => []
       ),
     );
-    $config->setData($data);
+    $config->setData($view_config);
     $config->save();
   }
 }
