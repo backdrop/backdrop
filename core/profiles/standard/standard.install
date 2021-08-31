@@ -162,7 +162,7 @@ function standard_install() {
       'name' => st('Promobox'),
       'description' => st('Add a piece of content to be used for blocks and 
         views. A Promobox does not have a public path (hide path display). 
-        Example use-case: Place Promo Box content as "Existing content" block 
+        Example use-case: Place Promobox content as "Existing content" block 
         in a Layout.'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
@@ -223,7 +223,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st("
-              <p>Promobox content will not be visible on a stand-alone page. It will only appear as part of another page. A promobox can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
+              <p>Promobox content will not be visible on a stand-alone page. It will only appear as part of another page. A Promobox can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
             ),
             'format' => 'filtered_html',
           ),
@@ -267,25 +267,6 @@ function standard_install() {
           array(
             'value' => st('This is your first post! You may edit or delete it.'),
             'format' => 'filtered_html'
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 1,
-      'type' => 'post',
-    )
-  );
-  $post->save();
-
-  $post = new Node(
-    array(
-      'title' => st('A view of promoted posts'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('By default your site is displaying a view of "promoted" posts on the front page. See admin/structure/views.'),
-            'format' => 'filtered_html',
           ),
         ),
       ),
