@@ -24,6 +24,7 @@ fieldset .fieldset-legend {
   top: 0;
   width: 100%;
   padding: 0.5em 0.78947em; /* LTR */
+  text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
