@@ -282,7 +282,8 @@ Backdrop.behaviors.editorImageLibrary = {
     $('[data-editor-library-view]')
       .once('editor-library-view')
       .on('click', '.image-library-choose-file', function() {
-        var $selectedImg = $(this).find('img');
+        var $libraryFile = $(this);
+        var $selectedImg = $libraryFile.find('img');
         var absoluteImgSrc = $selectedImg.data('file-url');
         var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
 
@@ -297,11 +298,12 @@ Backdrop.behaviors.editorImageLibrary = {
         // Remove style from previous selection.
         $('.image-library-image-selected').removeClass('image-library-image-selected');
         // Add style to this selection.
-        $(this).addClass('image-library-image-selected');
+        $libraryFile.addClass('image-library-image-selected');
       })
       .on('dblclick', '.image-library-choose-file', function() {
-        $(this).trigger('click');
-        var $form = $(this).closest('form');
+        var $libraryFile = $(this);
+        $libraryFile.trigger('click');
+        var $form = $libraryFile.closest('.ui-dialog-content').find('form');
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });

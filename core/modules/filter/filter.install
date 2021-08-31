@@ -488,11 +488,21 @@ function filter_update_1004() {
   $config = config('views.view.image_library');
 
   // Only update if view isn't overridden
-  if ($config->get('storage') == VIEWS_STORAGE_OVERRIDE) {
-    return;
-  }
-  else {
+  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
     $view_config = $config->get();
+    $view_config['display']['default']['display_options']['exposed_form'] = array(
+      'type' => 'basic',
+      'options' => array(
+        "reset_button" => 1,
+        "reset_button_label" => "Reset",
+        "exposed_sorts_label" => "Sort by",
+        "expose_sort_order" => 1,
+        "sort_asc_label" => "Asc",
+        "sort_desc_label" => "Desc",
+        "autosubmit" => 0,
+        "autosubmit_hide" => 1
+      ),
+    );
     $view_config['display']['default']['display_options']['filters']['filename'] = array(
       'id' => 'filename',
       'table' => 'file_managed',
@@ -503,38 +513,36 @@ function filter_update_1004() {
       'operator' => 'contains',
       'value' => '',
       'group' => '1',
-      'exposed' => true,
+      'exposed' => TRUE,
       'expose' => array(
-          'operator_id' => 'filename_op',
-          'label' => 'Filename',
-          'description' => '',
-          'use_operator' => 0,
-          'operator' => 'filename_op',
-          'identifier' => 'filename',
-          'required' => 0,
-          'remember' => 0,
-          'multiple' => false,
-          'remember_roles' => array(
-              'authenticated' => 'authenticated',
-              'anonymous' => 0,
-              'editor' => 0,
-              'administrator' => 0
-          ),
+        'operator_id' => 'filename_op',
+        'label' => 'Filename',
+        'description' => '',
+        'use_operator' => FALSE,
+        'operator' => 'filename_op',
+        'identifier' => 'filename',
+        'required' => FALSE,
+        'remember' => FALSE,
+        'multiple' => FALSE,
+        'remember_roles' => array(
+          'authenticated' => 'authenticated',
+        ),
       ),
-      'is_grouped' => false,
+      'is_grouped' => FALSE,
       'group_info' => array(
-          'label' => '',
-          'description' => '',
-          'identifier' => '',
-          'optional' => true,
-          'widget' => 'select',
-          'multiple' => false,
-          'remember' => 0,
-          'default_group' => 'All',
-          'default_group_multiple' => [],
-          'group_items' => []
+        'label' => '',
+        'description' => '',
+        'identifier' => '',
+        'optional' => TRUE,
+        'widget' => 'select',
+        'multiple' => FALSE,
+        'remember' => 0,
+        'default_group' => 'All',
+        'default_group_multiple' => [],
+        'group_items' => []
       ),
     );
+    $view_config['display']['default']['display_options']['hide_admin_links'] = TRUE;
     $config->setData($view_config);
     $config->save();
   }
