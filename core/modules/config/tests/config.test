@@ -497,6 +497,32 @@ class ConfigurationUITest extends BackdropWebTestCase {
   }
 
   /**
+   * Test skipping the clearing of the staging directory after import.
+   */
+  public function testClearStagingDirectory() {
+    $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
+
+    // Copy active to staging
+    $this->copyConfig('active', 'staging');
+
+    // Set staging system.core so it doesn't clear the staging directory.
+    $staging_config = config('system.core', 'staging');
+    $staging_config->set('config_sync_clear_staging', 0);
+    $staging_config->save();
+
+    // Verify that both appear as ready to import.
+    $this->backdropGet('admin/config/development/configuration');
+    $this->assertText('system.core');
+
+    // Sync changes
+    $this->backdropPost(NULL, array(), t('Import all'));
+
+    // Assert that staging directory is not empty.
+    $staging_files = $staging_storage->listAll();
+    $this->assert(!empty($staging_files), 'Staging directory is not empty.');
+  }
+
+  /**
    * Copies configuration objects from source storage to target storage.
    *
    * @param string $source

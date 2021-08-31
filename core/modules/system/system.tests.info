@@ -58,6 +58,12 @@ description = Tests page not found functionality, including custom 404 pages.
 group = System
 file = tests/system.test
 
+[DeprecatedRedirectPageCase]
+name = Deprecated Page Redirect
+description = Tests redirecting from a old menu paths to new menu paths.
+group = System
+file = tests/system.test
+
 [CustomLogoTestCase]
 name = Custom logo
 description = Tests theme based logo and uploaded custom logo functionality.
@@ -83,8 +89,8 @@ group = System
 file = tests/system.test
 
 [FrontPageTestCase]
-name = Front page
-description = Tests front page functionality and administration.
+name = Home page
+description = Tests home page functionality and administration.
 group = System
 file = tests/system.test
 

@@ -90,6 +90,125 @@ Backdrop.behaviors.layoutDisplayEditor = {
         forcePlaceholderSize: true
       });
 
+      // Allow keyboard navigation
+      // Get the list of droppables, that is regions where we can drop blocks.
+      var droppables = $.map($('.layout-editor-region'), function (item) {return $(item).attr('id')});
+
+      // Find the next region.
+      var findNextDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if (index >= 0 && index < arr.length - 1) {
+          return arr[index + 1]
+        }
+        return false;
+      }
+
+      // Find the previous region.
+      var findPreviousDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if (index > 0 && index <= arr.length - 1) {
+          return arr[index - 1]
+        }
+        return false;
+      }
+
+      // Check if an element is in the viewport.
+      $.fn.isInViewport = function () {
+        let elementTop = $(this).offset().top;
+        let elementBottom = elementTop + $(this).outerHeight();
+
+        let viewportTop = $(window).scrollTop();
+        let viewportBottom = viewportTop + $(window).height();
+
+        return elementBottom > viewportTop && elementTop < viewportBottom;
+      }
+
+      // Scroll to a droppable if it's not visible.
+      var scrollIfNotVisible = function (nextDroppableId) {
+        if ($('#' + nextDroppableId).isInViewport() === false) {
+          var $nextDroppable = $('#' + nextDroppableId);
+          var _offset = $nextDroppable.offset();
+          $('html, body').animate({
+            scrollTop: _offset.top,
+            scrollLeft: _offset.left
+          });
+        }
+      }
+
+      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
+        // Press right arrow to move block to next region.
+        if (event.which == 39) {
+          var currentDroppable = $(this).closest('.layout-editor-region');
+          var currentDroppableId = currentDroppable.attr('id');
+          var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppableId) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId);
+
+          var droppable = $('#' + nextDroppableId + ' .layout-editor-region-content');
+          droppable.append($(this));
+          $(this).focus();
+        }
+
+        // Press left arrow to move block to previous region.
+        if (event.which == 37) {
+          var currentDroppable = $(this).closest('.layout-editor-region');
+          var currentDroppableId = currentDroppable.attr('id');
+          var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppableId) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId);
+
+          var droppable = $('#' + nextDroppableId + ' .layout-editor-region-content');
+          droppable.append($(this));
+          $(this).focus();
+        }
+
+        // Press up to move block up by one position.
+        if (event.which == 38) {
+          $(this).insertBefore($(this).prev());
+          $(this).focus();
+        }
+        // Press down to move block down by one position.
+        if (event.which == 40) {
+          $(this).insertAfter($(this).next());
+          $(this).focus();
+        }
+        // Press t or "page up" to move block to top of region.
+        if (event.which == 84 || event.which == 33) {
+          $(this).parent().prepend($(this));
+          $(this).focus();
+        }
+        // Press b or "page down" to move block to bottom of region.
+        if (event.which == 66 || event.which == 34) {
+          $(this).parent().append($(this));
+          $(this).focus();
+        }
+
+        var region = $(this).closest('.layout-editor-region');
+        updateLayoutOnKeyInput(region);
+
+        if (currentDroppable) {
+          updateLayoutOnKeyInput(currentDroppable);
+        }
+      });
+
+      // Update block list on hidden input element.
+      var updateLayoutOnKeyInput = function (region) {
+        var regionName = region.data('regionName');
+        var blockList = [];
+        region.find('.layout-editor-block').each(function(index) {
+          blockList.push($(this).data('blockId'));
+        });
+        $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+      }
+
       // Open a dialog if editing a particular block.
       var blockUuid = window.location.hash.replace(/#configure-block:/, '');
       if (blockUuid) {

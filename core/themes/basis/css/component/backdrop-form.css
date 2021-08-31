@@ -113,6 +113,13 @@ td.checkbox .form-item input {
   padding: 0.5em 0.8em;
 }
 
+[dir=rtl] .form-item .description,
+[dir=rtl] .password-strength,
+[dir=rtl] .password-match {
+  border-left: none;
+  border-right: 0.25em solid #bbbbbb;
+}
+
 .form-item-radios .description,
 .form-item-checkboxes .description {
   margin-top: 0.375em;

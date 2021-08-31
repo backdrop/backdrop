@@ -2186,7 +2186,7 @@ function drupal_get_normal_path($path, $langcode = NULL) {
 }
 
 /**
- * Check if the current page is the front page.
+ * Check if the current page is the home page.
  *
  * @deprecated since 1.0.0
  * @see backdrop_is_front_page()

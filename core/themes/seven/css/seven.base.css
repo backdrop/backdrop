@@ -149,9 +149,17 @@ code {
 code,
 pre,
 kbd {
-  font-size: 1em;
+  font-size: 0.9em;
+  background: #e9e9e9;
+  padding: 0.2em 0.4em;
 }
 pre {
   margin: 0.5em 0;
   white-space: pre-wrap;
+}
+pre code {
+  font-size: 1em;
+  margin: 0;
+  padding: 0.2em;
+  display: block;
 }

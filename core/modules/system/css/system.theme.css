@@ -12,13 +12,6 @@ fieldset {
   margin-bottom: 1em;
   padding: 0.5em;
 }
-@-moz-document url-prefix() {
-  /* Firefox fix, see stackoverflow.com/questions/17408815 */
-  fieldset {
-    display: table-cell;
-    vertical-align: top;
-  }
-}
 form {
   margin: 0;
   padding: 0;

@@ -19,6 +19,15 @@ function entity_modules_disabled() {
 }
 
 /**
+ * Implements hook_modules_uninstalled().
+ */
+function entity_modules_uninstalled($modules) {
+  // It is important that the entity info cache gets flushed last to prevent
+  // fatal errors with outdated entity information.
+  backdrop_register_shutdown_function('entity_info_cache_clear');
+}
+
+/**
  * Implements hook_flush_caches().
  */
 function entity_flush_caches() {
