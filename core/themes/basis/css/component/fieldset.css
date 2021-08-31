@@ -100,17 +100,17 @@ fieldset .fieldset-wrapper {
 }
 
 .fieldset-legend span.summary {
-  position: relative;
-  z-index: 0;
-  float: right; /* LTR */
-  top: -1.9em;
   color: #999;
+  position: absolute;
+  right: 1.4em; /* LTR */
+  top: .8em;
+  z-index: 0;
   /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 [dir="rtl"] .fieldset-legend span.summary {
-  float: left;
-  left: 1em;
+  right: auto;
+  left: 1.4em;
 }
 .fieldset-legend span.summary:not(:empty):before {
   content: '(';
