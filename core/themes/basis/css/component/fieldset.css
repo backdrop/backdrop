@@ -24,7 +24,6 @@ fieldset .fieldset-legend {
   top: 0;
   width: 100%;
   padding: 0.5em 0.78947em; /* LTR */
-  text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
@@ -55,6 +54,10 @@ fieldset .fieldset-wrapper {
 }
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
+}
+
+.text-format-wrapper fieldset.collapsible .fieldset-legend {
+  text-transform: none;
 }
 
 .js fieldset.collapsible .fieldset-title {
