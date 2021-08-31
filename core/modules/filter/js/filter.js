@@ -108,7 +108,6 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
  * Provides toggles for uploading an image, whether by URL or upload.
  */
 Backdrop.behaviors.editorImageDialog = {
-
   attach: function (context, settings) {
     var $newToggles = $('[data-editor-image-toggle]', context).once('editor-image-toggle');
     $newToggles.each(function() {
@@ -194,7 +193,7 @@ Backdrop.behaviors.editorImageDialog = {
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
-        if ($('form').hasClass('filter-format-editor-image-form')){
+        if ($('form').hasClass('filter-format-editor-image-form')) {
           // Remove the dialog position, let the filter.css CSS for a
           // percentage-based width take precedence.
           DialogLeftPosition = $('.editor-dialog').position().left;
@@ -208,43 +207,17 @@ Backdrop.behaviors.editorImageDialog = {
 
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
-          //$('.form-item-image-directory').css({ 'display': 'block' });
-          //$('.editor-image-library').load(Backdrop.settings.basePath + '?q=filter_image_library_ajax');
           $('form.filter-format-editor-image-form').after('<div class="editor-image-library"></div>');
-          $('.editor-image-library').load(Backdrop.settings.basePath + '?q=filter_image_library_ajax');
-
-          // Now add click event to images
-          $('.editor-image-library').once('editor-image-library')
-            .on('click', '.image-library-choose-file', function() {
-              var $selectedImg = $(this).find('img');
-              var absoluteImgSrc = $selectedImg.data('file-url');
-              var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
-
-              var $form = $('.filter-format-editor-image-form');
-              $form.find('[name="attributes[src]"]').val(relativeImgSrc);
-              $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
-
-              // Reset width and height so image is not stretched to the any
-              // previous image's dimensions.
-              $form.find('[name="attributes[width]"]').val('');
-              $form.find('[name="attributes[height]"]').val('');
-              // Remove style from previous selection.
-              $('.image-library-image-selected').removeClass('image-library-image-selected');
-              // Add style to this selection.
-              $(this).addClass('image-library-image-selected');
-            })
-            .on('dblclick', '.image-library-choose-file', function() {
-              $(this).trigger('click');
-              var $form = $(this).closest('form');
-              var $submit = $form.find('.form-actions input[type=submit]:first');
-              $submit.trigger('mousedown').trigger('click').trigger('mouseup');
-            });
+          $('[name=library_open]').click();
         }
       }
       else {
         // Remove the library part of the dialog form.
-        $('.editor-image-library').remove();
-        //$('.form-item-image-directory').css({ 'display': 'none' });
+        $('.editor-image-library').each(function() {
+          Backdrop.detachBehaviors(this);
+          $(this).remove();
+        });
+
         // Restore the previous dialog position.
         if (DialogLeftPosition) {
           $(".editor-dialog").css('left', DialogLeftPosition + 'px');
@@ -296,6 +269,42 @@ Backdrop.behaviors.editorImageDialog = {
         $('[data-editor-image-toggle]').first().trigger('editor-image-show');
       }
     });
+  }
+};
+
+/**
+ * Provides behavior for clicking on images within the library browser.
+ */
+Backdrop.behaviors.editorImageLibrary = {
+  attach: function (context, settings) {
+    // The context may be the image library div itself, so include the context
+    // element in the selector.
+    $('[data-editor-library-view]')
+      .once('editor-library-view')
+      .on('click', '.image-library-choose-file', function() {
+        var $selectedImg = $(this).find('img');
+        var absoluteImgSrc = $selectedImg.data('file-url');
+        var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+
+        var $form = $('.filter-format-editor-image-form');
+        $form.find('[name="attributes[src]"]').val(relativeImgSrc);
+        $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
+
+        // Reset width and height so image is not stretched to the any
+        // previous image's dimensions.
+        $form.find('[name="attributes[width]"]').val('');
+        $form.find('[name="attributes[height]"]').val('');
+        // Remove style from previous selection.
+        $('.image-library-image-selected').removeClass('image-library-image-selected');
+        // Add style to this selection.
+        $(this).addClass('image-library-image-selected');
+      })
+      .on('dblclick', '.image-library-choose-file', function() {
+        $(this).trigger('click');
+        var $form = $(this).closest('form');
+        var $submit = $form.find('.form-actions input[type=submit]:first');
+        $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+      });
   }
 };
 

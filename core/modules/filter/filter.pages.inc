@@ -175,6 +175,24 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
+  // This button is hidden from display and clicked via JavaScript in
+  // Backdrop.behaviors.editorImageDialog in filter.js.
+  $form['library_open'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select from library'),
+    '#name' => 'library_open',
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#ajax' => array(
+      'callback' => '_filter_image_library_ajax',
+      'event' => 'click',
+    ),
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array(),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -200,25 +218,17 @@ function _filter_image_library_ajax() {
       $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
     }
   }
+
   $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  $error_messages = theme('status_messages');
 
-  return $rendered_library;
-}
+  $commands = array();
+  $commands[] = ajax_command_prepend('.editor-image-library', $error_messages . $rendered_library);
 
-/**
- * Menu delivery callback to print the image library page without any wrappers.
- */
-function _filter_image_library_ajax_deliver($page_callback_result) {
-  //dpm($page_callback_result);
-  $library_page = array(
-    '#markup' => $page_callback_result,
-    '#attached' => array(
-      'library' => array(
-        array('system', 'backdrop.dialog.ajax'),
-      ),
-    ),
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
   );
-  print backdrop_render($library_page);
 }
 
 /**
