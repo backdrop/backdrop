@@ -100,7 +100,7 @@ fieldset .fieldset-wrapper {
 }
 
 .fieldset-legend span.summary {
-  color: #999;
+  color: #757575; /* WCAG AA compliance */
   position: absolute;
   right: 1.4em; /* LTR */
   top: .8em;
