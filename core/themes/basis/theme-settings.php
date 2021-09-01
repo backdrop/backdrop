@@ -10,9 +10,9 @@
 
 if (module_exists('color')) {
   $form['header'] = array(
-    '#type' => 'details',
-    '#summary' => t('Header Settings'),
-    '#open' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Header Settings'),
+    '#collapsible' => TRUE,
   );
   $fields = array(
     'header',
@@ -27,9 +27,9 @@ if (module_exists('color')) {
   }
 
   $form['general'] = array(
-    '#type' => 'details',
-    '#summary' => t('General Settings'),
-    '#open' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('General Settings'),
+    '#collapsible' => TRUE,
   );
   $fields = array(
     'bg',
@@ -43,9 +43,9 @@ if (module_exists('color')) {
   }
 
   $form['primary_tabs'] = array(
-    '#type' => 'details',
-    '#summary' => t('Tabs and Breadcrumb'),
-    '#open' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Tabs and Breadcrumb'),
+    '#collapsible' => TRUE,
   );
   $fields = array(
     'primarytabs',
@@ -57,9 +57,9 @@ if (module_exists('color')) {
   }
 
   $form['footer'] = array(
-    '#type' => 'details',
-    '#summary' => t('Footer Settings'),
-    '#open' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Footer Settings'),
+    '#collapsible' => TRUE,
   );
   $fields = array(
     'footerborder',
