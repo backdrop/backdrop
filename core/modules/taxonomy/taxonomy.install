@@ -370,30 +370,33 @@ function taxonomy_update_1008() {
 }
 
 /**
- * Add new create terms permission to admin role.
+ * Add new "create terms" permission to editor and admin roles.
  */
 function taxonomy_update_1009() {
+  $config_vocab_names = config_get_names_with_prefix('taxonomy.vocabulary.');
+  $new_permissions = array();
+  foreach ($config_vocab_names as $config_vocab_name) {
+    $vocab = str_replace('taxonomy.vocabulary.', '', $config_vocab_name);
+    $new_permissions[] = "create terms in $vocab";
+  }
+
   $admin_role = config_get('system.core', 'user_admin_role');
-
-  $config = config('user.role.' . $admin_role);
-  $permissions = $config->get('permissions');
-  if ($permissions) {
-    // Permissions for each taxonomy.
-    $new_permissions = array();
-    $config_vocab_names = config_get_names_with_prefix('taxonomy.vocabulary.');
-    foreach ($config_vocab_names as $config_vocab_name) {
-      $vocab = str_replace('taxonomy.vocabulary.', '', $config_vocab_name);
-      $new_permissions[] = "create terms in $vocab";
-    }
-    foreach ($new_permissions as $new_permission) {
-      if (!in_array($new_permission, $permissions)) {
-        $permissions[] = $new_permission;
+  
+  foreach (array($admin_role, 'editor') as $role_name) { 
+    $config = config('user.role.' . $role_name);
+    $permissions = $config->get('permissions');
+    if ($permissions) {
+      // Permissions for each taxonomy.
+      foreach ($new_permissions as $new_permission) {
+        if (!in_array($new_permission, $permissions)) {
+          $permissions[] = $new_permission;
+        }
       }
-    }
 
-    // Save the role.
-    $config->set('permissions', $permissions);
-    $config->save();
+      // Save the role.
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
   }
 }
 
