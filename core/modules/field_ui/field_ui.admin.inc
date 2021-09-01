@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative interface for custom field type creation.
+ * Admin page callbacks for the Field UI module.
  */
 
 /**
@@ -482,7 +482,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
         // 32 characters minus the 'field_' prefix.
         '#maxlength' => 26,
-        '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
+        '#prefix' => '<div class="add-new-placeholder element-invisible">&nbsp;</div>',
         '#machine_name' => array(
           'source' => array('fields', $name, 'label'),
           'exists' => '_field_ui_field_name_exists',
@@ -1514,7 +1514,9 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
           $options[$widget_field_type][$name] = $widget_type['label'];
         }
       }
-      asort($options[$widget_field_type]);
+      if (isset($options[$widget_field_type])) {
+        asort($options[$widget_field_type]);
+      }
     }
   }
 

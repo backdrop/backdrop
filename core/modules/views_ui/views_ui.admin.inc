@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides the Views' administrative interface.
+ * Admin page callbacks for the Views UI module.
  */
 
 /**
@@ -468,14 +468,15 @@ function views_ui_add_form($form, &$form_state) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['continue'] = array(
     '#type' => 'submit',
-    '#value' => t('Continue & configure'),
+    '#value' => t('Continue and configure'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_store_edit_submit'),
     '#process' => array_merge(array('views_ui_default_button'), element_info_property('submit', '#process', array())),
+    '#weight' => -1,
   );
   $form['actions']['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Save & exit'),
+    '#value' => t('Save view'),
     '#validate' => array('views_ui_wizard_form_validate'),
     '#submit' => array('views_ui_add_form_save_submit'),
   );

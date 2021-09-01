@@ -615,7 +615,8 @@ function search_invoke_preprocess(&$text) {
  * @ingroup search
  */
 function search_index($sid, $module, $text) {
-  $minimum_word_size = config_get('search.settings', 'search_minimum_word_size');
+  $search_settings_config = config('search.settings');
+  $minimum_word_size = $search_settings_config->get('search_minimum_word_size');
 
   // Link matching
   global $base_url;
@@ -624,7 +625,7 @@ function search_index($sid, $module, $text) {
   // Multipliers for scores of words inside certain HTML tags. The weights are stored
   // in a variable so that modules can overwrite the default weights.
   // Note: 'a' must be included for link ranking to work.
-  $tags = config_get('search.settings', 'search_tag_weights');
+  $tags = $search_settings_config->get('search_tag_weights');
 
   // Strip off all ignored tags to speed up processing, but insert space before/after
   // them to keep word boundaries.

@@ -64,18 +64,37 @@ project:
 - [BrowserStack](https://www.browserstack.com) for interface testing across
   desktop and mobile browsers. *(Contact info@backdropcms.org for access
   information.)*
-- [JetBrains](https://www.jetbrains.com/phpstorm/) for use of the PHPStorm IDE
+- [JetBrains](https://www.jetbrains.com/phpstorm) for use of the PHPStorm IDE
   for development. *(Contact info@backdropcms.org for a license.)*
 - [GitHub](https://github.com) for collaboration and code management tools.
-- [ZenCI](https://zen.ci/) for continuous automated testing and sandbox testing.
+- [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
+- [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+Please see the the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
+Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
+
+Code of Conduct
+---------------
+
+A primary goal of the Backdrop CMS community is to be inclusive to the largest
+number of contributors, with the most varied and diverse backgrounds possible.
+As such, we are committed to providing a friendly, safe and welcoming
+environment for all, regardless of ability, ethnicity, gender, sexual
+orientation, sexual preferences, socioeconomic status, geographic location, or
+religion (or lack thereof).
+
+Our
+[code of conduct](https://github.com/backdrop-ops/conduct/blob/main/code_of_conduct.md)
+outlines our expectations for all those who participate in our community, as
+well as the consequences for unacceptable behavior.
+
+We invite all those who participate in the Backdrop CMS community to help us
+create safe and positive experiences for everyone.
 
 License
 -------
@@ -83,7 +102,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2016 by the original authors.
+All Backdrop code is Copyright 2001 - 2021 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

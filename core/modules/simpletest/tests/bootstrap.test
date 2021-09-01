@@ -91,10 +91,10 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
     );
 
     // Verifies that backdrop_valid_http_host() prevents invalid characters.
-    $this->assertFalse(backdrop_valid_http_host('security/.backdrop.org:80'), 'HTTP_HOST with / is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security\\.backdrop.org:80'), 'HTTP_HOST with \\ is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security<.backdrop.org:80'), 'HTTP_HOST with &lt; is invalid');
-    $this->assertFalse(backdrop_valid_http_host('security..backdrop.org:80'), 'HTTP_HOST with .. is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security/.backdropcms.org:80'), 'HTTP_HOST with / is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security\\.backdropcms.org:80'), 'HTTP_HOST with \\ is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security<.backdropcms.org:80'), 'HTTP_HOST with &lt; is invalid');
+    $this->assertFalse(backdrop_valid_http_host('security..backdropcms.org:80'), 'HTTP_HOST with .. is invalid');
     // Verifies that host names are shorter than 1000 characters.
     $this->assertFalse(backdrop_valid_http_host(str_repeat('x', 1001)), 'HTTP_HOST with more than 1000 characters is invalid.');
     $this->assertFalse(backdrop_valid_http_host(str_repeat('.', 101)), 'HTTP_HOST with more than 100 subdomains is invalid.');
@@ -129,21 +129,22 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $etag = $this->backdropGetHeader('ETag');
     $last_modified = $this->backdropGetHeader('Last-Modified');
 
+    // Match a cache based on Etag only.
+    $this->backdropGet($test_path, array(), array('If-None-Match: ' . $etag));
+    $this->assertResponse(304, 'Conditional request with Etag only returned 304 Not Modified.');
+
+    // Include both Etag and Date, even though the date is ignored.
+    // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
     $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . $last_modified, 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request returned 304 Not Modified.');
+    $this->assertResponse(304, 'Conditional request with Etag and unnecessary If-Modified-Since returned 304 Not Modified.');
 
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC822, strtotime($last_modified)), 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request with obsolete If-Modified-Since date returned 304 Not Modified.');
-
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC850, strtotime($last_modified)), 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request with obsolete If-Modified-Since date returned 304 Not Modified.');
-
+    // Match a cache based on date only.
     $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . $last_modified));
-    $this->assertResponse(200, 'Conditional request without If-None-Match returned 200 OK.');
-    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
+    $this->assertResponse(304, 'Conditional request without If-None-Match returned 304 Not Modified.');
 
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC1123, strtotime($last_modified) + 1), 'If-None-Match: ' . $etag));
-    $this->assertResponse(200, 'Conditional request with new a If-Modified-Since date newer than Last-Modified returned 200 OK.');
+    // Try a conditional request that is too stale to get a cached copy.
+    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC1123, strtotime($last_modified) - 1)));
+    $this->assertResponse(200, 'Conditional request with new a If-Modified-Since date older than Last-Modified returned 200 OK.');
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
 
     $user = $this->backdropCreateUser();
@@ -170,7 +171,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Page was not cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
@@ -180,7 +181,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'public, max-age=300', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->assertEqual($this->backdropGetHeader('Connection'), 'Keep-Alive', 'Connection header set to keep alive when getting a cached page.');
 
@@ -276,7 +277,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
     $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
-    $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->backdropLogout();
 
@@ -605,9 +606,14 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Test that settings.php variables can be overridden by the server.
    */
   function testBackdropSettingsOverride() {
-    // This test only works on Travis CI through the SetEnv call in
-    // core/misc/travis-ci/vhost.conf. See backdrop_settings_initialize().
+    // This test only runs when the "BACKDROP_SETTINGS" environment variable is
+    // set. This usually is done through a Apache VirtualHost setting.
+    // See backdrop_settings_initialize().
+    $raw_settings = array();
     if (isset($_SERVER['BACKDROP_SETTINGS'])) {
+      $raw_settings = json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
+    }
+    if (isset($raw_settings['test_setting'])) {
       $this->assertEqual(settings_get('test_setting'), 'foo', 'Custom setting set through the server environment variables in BACKDROP_SETTINGS.');
 
       $test_database_array = array(

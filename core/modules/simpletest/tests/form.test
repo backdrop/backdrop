@@ -2106,7 +2106,42 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
       $name = (string) $checkbox['name'];
       $this->assertIdentical($checked, $name == 'checkbox_off[0]' || $name == 'checkbox_zero_default[0]' || $name == 'checkbox_string_zero_default[0]', format_string('Checkbox %name correctly checked', array('%name' => $name)));
     }
+
+    // Make sure that a single checkbox gets the correct value when set via
+    // $_GET parameters. The content overview page is a view with an exposed
+    // form, where changing the sorting via tablesort sets values with $_GET.
+    $admin_user = $this->backdropCreateUser(array(
+      'access content overview',
+      'bypass node access',
+      'access administration pages',
+    ));
+    $this->backdropLogin($admin_user);
+    $options = array(
+      'query' => array(
+        'status' => 'All',
+        'type' => 'All',
+        'title' => '',
+        'order' => 'title',
+        'sort' => 'asc',
+      ),
+    );
+    $values = array(
+      '0' => FALSE,
+      'foobar' => FALSE,
+      '1' => TRUE,
+    );
+    foreach ($values as $key => $checked) {
+      $options['query']['timestamp'] = $key;
+      $this->backdropGet('admin/content/node', $options);
+      $checkbox = $this->xpath('//input[@id="edit-timestamp"]');
+      $attributes = $checkbox[0]->attributes();
+
+      $this->assertEqual(isset($attributes['checked']), $values[$key], format_string('Expected checked status is set via GET for value %key.', array(
+        '%key' => $key,
+      )));
+    }
   }
+
 }
 
 /**

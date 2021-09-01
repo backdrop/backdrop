@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Content administration and module settings UI.
+ * Admin page callbacks for the Node module.
  */
 
 /**

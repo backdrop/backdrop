@@ -17,6 +17,10 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Backdrop News');
   }
 
@@ -24,6 +28,10 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Displays a news feed from BackdropCMS.org.');
   }
 

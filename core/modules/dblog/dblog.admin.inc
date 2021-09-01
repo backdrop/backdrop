@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Database Logging module.
+ * Admin page callbacks for the Database Logging module.
  */
 
 /**
@@ -69,7 +69,7 @@ function dblog_overview() {
         // Cells
         array('class' => 'icon'),
         t($dblog->type),
-        format_date($dblog->timestamp, $log_date_format),
+        format_date($dblog->timestamp, 'custom', $log_date_format),
         dblog_format_message($dblog, TRUE),
         $user_info,
         filter_xss($dblog->link),

@@ -413,7 +413,7 @@ function installer_browser_get_destination_after_install() {
   $theme = in_array('theme', $types);
   $module = in_array('module', $types);
 
-  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage layout templates on the layouts !link page.', array('!link' => l(t('Settings'), 'admin/structure/layouts/settings')));
+  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage layout templates on the layouts !link page.', array('!link' => l(t('Templates'), 'admin/structure/layouts/settings')));
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no
