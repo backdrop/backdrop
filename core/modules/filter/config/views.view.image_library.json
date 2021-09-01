@@ -57,7 +57,7 @@
                             "items_per_page_options_all": 0,
                             "items_per_page_options_all_label": "- All -",
                             "offset": 0,
-                            "offset_label": "Offset",
+                            "offset_label": "Offset"
                         }
                     }
                 },
