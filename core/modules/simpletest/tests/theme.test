@@ -611,7 +611,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests system #type 'details'.
+   * Tests Form API #type 'details'.
    */
   public function testDetails() {
     $elements = array(
