@@ -14,7 +14,7 @@ class CoreUpdater extends Updater {
    * Return the Backdrop core directory.
    */
   public function getInstallDirectory() {
-    return BACKDROP_ROOT;
+    return realpath(BACKDROP_ROOT);
   }
 
   public function isInstalled() {
