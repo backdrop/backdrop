@@ -339,9 +339,10 @@ function dblog_filter_form($form) {
   $filters = dblog_filters();
 
   $form['filters'] = array(
-    '#type' => 'details',
-    '#summary' => t('Filter log messages'),
-    '#open' => !empty($_SESSION['dblog_overview_filter']),
+    '#type' => 'fieldset',
+    '#title' => t('Filter log messages'),
+    '#collapsible' => TRUE,
+    '#collapsed' => empty($_SESSION['dblog_overview_filter']),
   );
   foreach ($filters as $key => $filter) {
     $form['filters']['status'][$key] = array(
@@ -415,9 +416,11 @@ function dblog_filter_form_submit($form, &$form_state) {
  */
 function dblog_clear_log_form($form) {
   $form['dblog_clear'] = array(
-    '#type' => 'details',
-    '#summary' => t('Clear log messages'),
-    '#details' => t('This action will permanently delete the log messages from the database.'),
+    '#type' => 'fieldset',
+    '#title' => t('Clear log messages'),
+    '#description' => t('This action will permanently delete the log messages from the database.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
