@@ -175,18 +175,22 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
-  // Incorporate the Library View in the editor dialog form.
-  $view_name = 'image_library';
-  $view = views_embed_view($view_name);
-  if (empty($view)) {
-    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
-    if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
-    }
-  }
-
-  $form['library_view'] = array(
-    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
+  // This button is hidden from display and clicked via JavaScript in
+  // Backdrop.behaviors.editorImageDialog in filter.js.
+  $form['library_open'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select from library'),
+    '#name' => 'library_open',
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#ajax' => array(
+      'callback' => '_filter_image_library_ajax',
+      'event' => 'click',
+    ),
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array(),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -200,6 +204,31 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Render the image library.
+ */
+function _filter_image_library_ajax() {
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  $error_messages = theme('status_messages');
+
+  $commands = array();
+  $commands[] = ajax_command_prepend('.editor-image-library', $error_messages . $rendered_library);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
