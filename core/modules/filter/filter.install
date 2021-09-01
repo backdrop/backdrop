@@ -493,7 +493,7 @@ function filter_update_1004() {
     $view_config['display']['default']['display_options']['exposed_form'] = array(
       'type' => 'basic',
       'options' => array(
-        "reset_button" => 1,
+        "reset_button" => 0,
         "reset_button_label" => "Reset",
         "exposed_sorts_label" => "Sort by",
         "expose_sort_order" => 1,
