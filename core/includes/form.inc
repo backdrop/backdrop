@@ -3672,7 +3672,7 @@ function form_process_details($element, &$form_state) {
  *
  * Used for grouped form items. Can also be used as a theme wrapper for any
  * renderable element, to surround it with a <details> tag and add attributes
- * such as classes or a HTML id.
+ * such as classes or an HTML id.
  *
  * @param array $variables
  *   An associative array containing:
@@ -3680,7 +3680,7 @@ function form_process_details($element, &$form_state) {
  *     Properties used: #id, #attributes, #children, #summary, #details, #open.
  *
  * @return string
- *   The rendered html output.
+ *   The rendered HTML output.
  *
  * @ingroup themeable
  */
@@ -3691,7 +3691,7 @@ function theme_details($variables) {
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign a html ID.
+    // Assign an HTML ID.
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
