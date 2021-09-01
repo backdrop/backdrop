@@ -3642,7 +3642,6 @@ function theme_container($variables) {
     // Add the form-wrapper class if not already added, but only for 'container'
     // elements, otherwise #states does not work properly for 'checkboxes' and
     // 'radios' elements.
-    // See: https://github.com/backdrop/backdrop-issues/issues/711#issuecomment-84353916
     if ($element['#type'] == 'container' && !in_array('form-wrapper', $element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
     }
