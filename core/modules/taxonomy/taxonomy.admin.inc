@@ -597,7 +597,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $form['#forward_step'] = $forward_step;
   $form['#empty_text'] = t('No terms available.');
   if (taxonomy_vocabulary_access('create', $vocabulary)) {
-    $form['#empty_text'] = t('No terms available. <a href="@link">Add term</a>.', array('@link' => url('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add')));
+    $form['#empty_text'] .= ' ' . l(t('Add term'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add');
   }
 
   if ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE && count($tree) > 1 && taxonomy_vocabulary_access('edit', $vocabulary)) {
