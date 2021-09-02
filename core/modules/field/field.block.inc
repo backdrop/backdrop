@@ -39,7 +39,6 @@ class FieldBlock extends Block {
 
     // Do not render if the entity is not found on this layout.
     if (empty($entity)) {
-      watchdog('field', 'Attempted to display a field block from a missing entity.', array(), WATCHDOG_WARNING);
       $preview .= t('The %entity_type which provides this field is missing. Please re-configure the layout contexts or delete this block.', array('%entity_type' => $entity_type));
       $preview = '<p class="error">' . $preview . '</p>';
     }
@@ -69,8 +68,13 @@ class FieldBlock extends Block {
     if (empty($title) && $this->settings['title_display'] === LAYOUT_TITLE_DEFAULT) {
       list($entity_type, $field_name) = explode('-', $this->childDelta);
       $entity = $this->contexts[$entity_type]->data;
-      $instance = field_info_instance($entity->entityType(), $field_name, $entity->bundle());
-      $title = t($instance['label']);
+      if (!empty($entity)) {
+        $instance = field_info_instance($entity->entityType(), $field_name, $entity->bundle());
+        $title = t($instance['label']);
+      }
+      else {
+        $title = t('Empty block');
+      }
     }
 
     return $title;
@@ -88,8 +92,10 @@ class FieldBlock extends Block {
 
     // Do not render if the entity is not found on this layout.
     if (empty($entity)) {
-      watchdog('field', 'Attempted to display a field block from a missing entity.', array(), WATCHDOG_WARNING);
-      return NULL;
+      if (user_access('administer layouts')) {
+      $preview .= t('The %entity_type which provides this field is missing. Please re-configure the layout contexts or delete this block.', array('%entity_type' => $entity_type));
+        return '<div class="messages error">' . $preview . '</p>';
+      }
     }
 
     // Load the entity type's information for this field.
