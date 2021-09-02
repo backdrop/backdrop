@@ -2978,45 +2978,6 @@ function theme_fieldset($variables) {
 }
 
 /**
- * Returns HTML for a DETAILS form element and its children.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: An associative array containing the properties of the element.
- *     Properties used: #attributes, #children, #collapsed, #collapsible,
- *     #description, #id, #open_label, #close_label, #title, #value.
- *
- * @ingroup themeable
- */
-function theme_details($variables) {
-  $element = $variables['element'];
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-wrapper'));
-
-  $collapsed = isset($variables['element']['#collapsed']) && $variables['element']['#collapsed'];
-  $open = $collapsed ? '' : ' open';
-
-  $summary = !empty($element['#title']) ? $element['#title'] : '';
-
-  $open_label = isset($variables['element']['#open_label']) ? ' data-open="' . $variables['element']['#open_label'] . '"' : '';
-  $close_label = isset($variables['element']['#close_label']) ? ' data-close="' . $variables['element']['#close_label'] . '"' : '';
-
-  $output = '<details' . backdrop_attributes($element['#attributes']) . $open . '>';
-  $output .= '<summary' . $open_label . $close_label . '>' . $summary . '</summary>';
-  if (!empty($element['#description'])) {
-    $output .= '<div class="details-description">' . $element['#description'] . '</div>';
-  }
-  $output .= '<div class="details-content">';
-  $output .= $element['#children'];
-  if (isset($element['#value'])) {
-    $output .= $element['#value'];
-  }
-  $output .= '</div>';
-  $output .= "</details>\n";
-  return $output;
-}
-
-/**
  * Returns HTML for a radio button form element.
  *
  * Note: The input "name" attribute needs to be sanitized before output, which
@@ -4105,39 +4066,6 @@ function form_process_fieldset(&$element, &$form_state) {
     if (!empty($element['#collapsed'])) {
       $element['#attributes']['class'][] = 'collapsed';
     }
-  }
-
-  return $element;
-}
-
-/**
- * Processes HTML5 'details' elements.
- *
- * @param $element
- *   An associative array containing the properties and children of the details
- *   element. Note that $element must be taken by reference here, so processed
- *   child elements are taken over into $form_state.
- * @param $form_state
- *   The $form_state array for the form this details element belongs to.
- *
- * @return
- *   The processed element.
- */
-function form_process_details(&$element, &$form_state) {
-  // DETAILS elements do not need 'collapsible'/'collapsed' classes, since they
-  // use their own "open" attribute by which they can be targetted in CSS. No
-  // need for collapse.js either - but we need to add a polyfill for IE.
-  backdrop_add_library('form', 'details-polyfill');
-
-  $parents = implode('][', $element['#parents']);
-
-  // Contains form element summary functionalities.
-  $element['#attached']['library'][] = array('system', 'backdrop.form');
-
-  // The .form-wrapper class is required for #states to treat DETAILS elements
-  // like containers.
-  if (!isset($element['#attributes']['class'])) {
-    $element['#attributes']['class'] = array();
   }
 
   return $element;
