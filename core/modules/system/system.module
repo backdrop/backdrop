@@ -1323,6 +1323,15 @@ function system_library_info() {
     $libraries['backdrop.menu-toggle']['css'][$system_module_path . '/css/menu-toggle.theme.css'] = array('group' => CSS_DEFAULT);
   }
 
+  // Dismiss buttons.
+  $libraries['backdrop.dismiss'] = array(
+    'title' => 'Dismiss buttons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/dismiss.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',
