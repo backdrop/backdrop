@@ -944,15 +944,6 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => 20,
   );
-  $items['admin/config/system/messages'] = array(
-    'title' => 'Messages',
-    'description' => 'Configure the display of site messages.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_message_settings'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-    'weight' => 25,
-  );
 
   // URL handling.
   $items['admin/config/urls'] = array(

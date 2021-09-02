@@ -3198,7 +3198,7 @@ function system_update_1075() {
  */
 function system_update_1076() {
   $config = config('system.core');
-  $config->set('messages_dismissable', 0);
+  $config->set('messages_dismissible', 0);
   $config->save();
 }
 
