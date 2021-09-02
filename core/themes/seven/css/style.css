@@ -803,15 +803,6 @@ details .details-content-wrapper,
 details .details-child-wrapper {
   margin: 10px 0;
 }
-details.filter-wrapper summary {
-  font-size: .8333em;
-  padding: .5em;
-  text-transform: none;
-}
-details.filter-wrapper .details-child-wrapper,
-details.filter-wrapper .details-content-wrapper {
-   padding: .6em 2.3em;
-}
 
 /**
  * Views exposed form (matches fieldsets).

@@ -224,16 +224,24 @@ details {
   border: 2px solid #bbbbbb;
   background-color: #ffffff;
 }
+
 details summary {
   display: list-item;
+  cursor: pointer;
 }
+
 details summary span {
   color: #0073bd;
   font-size: 1.1875em;
 }
+
 details .details-content-wrapper,
 details .details-child-wrapper {
   margin: 0.78947em 0;
+}
+
+details summary:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /**
