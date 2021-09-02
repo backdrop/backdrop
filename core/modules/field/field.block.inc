@@ -39,7 +39,7 @@ class FieldBlock extends Block {
 
     // Do not render if the entity is not found on this layout.
     if (empty($entity)) {
-      $preview .= t('The %entity_type which provides this field is missing. Please re-configure the layout contexts or delete this block.', array('%entity_type' => $entity_type));
+      $preview = t('The %entity_type which provides this field is missing. Please re-configure the layout contexts or delete this block.', array('%entity_type' => $entity_type));
       $preview = '<p class="error">' . $preview . '</p>';
     }
     else {
