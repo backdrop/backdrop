@@ -1777,6 +1777,11 @@ function theme_status_messages($variables) {
     else {
       $output .= reset($messages) . "\n";
     }
+    if (config_get('system.core', 'messages_dismissible')) {
+      // Add the 'Dismiss' library and place a 'Dismiss' link on messages.
+      backdrop_add_library('system', 'backdrop.dismiss');
+      $output .= '<a href="#" class="dismiss" title="' . t('Dismiss') . '"><span class="element-invisible">' . t('Dismiss') . '</span></a>' . "\n";
+    }
     $output .= "</div>\n";
   }
 
@@ -2022,7 +2027,7 @@ function theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav role="navigation" class="breadcrumb">';
+    $output .= '<nav class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';

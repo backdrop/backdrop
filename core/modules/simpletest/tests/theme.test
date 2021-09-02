@@ -576,7 +576,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests system #type 'container'.
+   * Tests Form API #type 'container'.
    */
   function testContainer() {
     $elements = array(
@@ -604,6 +604,53 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           ),
         ),
         'expected' => '<div class="bar">foo</div>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
+   * Tests Form API #type 'details'.
+   */
+  public function testDetails() {
+    $elements = array(
+      // Basic 'details' element.
+      array(
+        'name' => "Basic 'details'",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#details' => t('Detailed content'),
+        ),
+        'expected' => '<details><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+      ),
+      // Basic 'details' with custom id and class attributes.
+      array(
+        'name' => "Basic 'details' with custom attributes",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#details' => t('Detailed content'),
+          '#attributes' => array(
+            'id' => 'foobar-id',
+            'class' => array('fooclass'),
+          ),
+        ),
+        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+      ),
+      // Expanded 'details' with child element.
+      array(
+        'name' => "Details with child",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#open' => TRUE,
+          'child' => array(
+            '#markup' => 'foobar',
+          ),
+        ),
+        'expected' => '<details open="open"><summary><span>The summary</span></summary><div class="details-child-wrapper">foobar</div></details>',
       ),
     );
 

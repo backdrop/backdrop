@@ -223,7 +223,7 @@ function redirect_set_current_redirect($redirect) {
  *   The redirect object (if any) for the current page. FALSE if not found.
  */
 function redirect_get_current_redirect() {
-  $redirect = backdrop_static('redirect_set_current_redirect', NULL);
+  $redirect = &backdrop_static('redirect_set_current_redirect', NULL);
 
   if (!isset($redirect)) {
     $redirect = redirect_load_by_source(current_path(), $GLOBALS['language']->langcode, backdrop_get_query_parameters());
