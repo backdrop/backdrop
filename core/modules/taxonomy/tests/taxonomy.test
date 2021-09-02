@@ -128,7 +128,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     ));
     $this->backdropLogin($admin_user);
 
-    // Create new role
+    // Create new role.
     $role_name = $this->backdropCreateRole(array('access content'));
     $web_user = $this->backdropCreateUser();
 
@@ -165,7 +165,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->backdropGet('admin/structure/taxonomy/tags/configure');
     $this->assertFieldByName($role_name . '[delete terms in tags]', 'delete terms in tags', "Role $role_name has delete terms in tags permission.");
 
-    // Test that the permissions actually exist
+    // Test that the permissions actually exist.
     $this->backdropLogin($web_user);
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
@@ -193,7 +193,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     );
     $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
 
-    // Test that the permissions actually exist
+    // Test that the permissions actually exist.
     $this->backdropLogin($web_user);
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');

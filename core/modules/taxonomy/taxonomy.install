@@ -370,7 +370,7 @@ function taxonomy_update_1008() {
 }
 
 /**
- * Add new "create terms" permission to editor and admin roles.
+ * Add the new "Create terms" permission to the Editor and Administrator roles.
  */
 function taxonomy_update_1009() {
   $config_vocab_names = config_get_names_with_prefix('taxonomy.vocabulary.');
@@ -386,7 +386,7 @@ function taxonomy_update_1009() {
     $config = config('user.role.' . $role_name);
     $permissions = $config->get('permissions');
     if ($permissions) {
-      // Permissions for each taxonomy.
+      // Permissions for each vocabulary.
       foreach ($new_permissions as $new_permission) {
         if (!in_array($new_permission, $permissions)) {
           $permissions[] = $new_permission;
