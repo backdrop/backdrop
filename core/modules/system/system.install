@@ -3194,11 +3194,11 @@ function system_update_1075() {
 }
 
 /*
- * Add default values for message settings.
+ * Add default values for dismissible message settings.
  */
 function system_update_1076() {
   $config = config('system.core');
-  $config->set('messages_dismissible', 0);
+  $config->set('messages_dismissible', 1);
   $config->save();
 }
 
