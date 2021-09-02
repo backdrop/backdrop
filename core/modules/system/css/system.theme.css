@@ -12,6 +12,13 @@ fieldset {
   margin-bottom: 1em;
   padding: 0.5em;
 }
+details summary {
+  display: list-item;
+  cursor: pointer;
+}
+details summary:focus:not(:focus-visible) {
+  outline: none;
+}
 form {
   margin: 0;
   padding: 0;
