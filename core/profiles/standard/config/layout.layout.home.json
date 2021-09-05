@@ -20,9 +20,11 @@
             "9aece1df-ac4f-44a6-8b0c-12a7f6a1fb21"
         ],
         "top": [
-            "094cbc03-d088-4b3c-8361-977733540ae8"
+            "094cbc03-d088-4b3c-8361-977733540ae8",
+            "fe8c7715-c7e9-46d0-8b09-09afb78b2891"
         ],
         "content": [
+            "209098f9-8e8f-4be6-8000-0033df223bdd",
             "578243cf-a4c8-46ad-9504-04aaf4ec9ccc"
         ],
         "bottom": [],
@@ -31,6 +33,7 @@
         ],
         "title": []
     },
+    "contexts": [],
     "content": {
         "9bd5a524-3670-4922-8b12-18b00a2858b9": {
             "plugin": "system:header",
@@ -109,6 +112,47 @@
                     "data": {
                         "settings": {
                             "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "fe8c7715-c7e9-46d0-8b09-09afb78b2891": {
+            "plugin": "views:card_grid-block",
+            "data": {
+                "module": "views",
+                "delta": "card_grid-block",
+                "settings": {
+                    "link_to_view": 0,
+                    "more_link": false,
+                    "use_pager": false,
+                    "pager_id": 0,
+                    "items_per_page": "3",
+                    "offset": 0,
+                    "path": "card-grid",
+                    "fields_override": null,
+                    "title_display": "none",
+                    "title": "",
+                    "style": "dynamic",
+                    "block_settings": [],
+                    "contexts": [],
+                    "allowed": [],
+                    "path_override": false,
+                    "exposed": [],
+                    "admin_label": "",
+                    "admin_description": ""
+                },
+                "uuid": "fe8c7715-c7e9-46d0-8b09-09afb78b2891",
+                "style": {
+                    "plugin": "dynamic",
+                    "data": {
+                        "settings": {
+                            "classes": "",
+                            "wrapper_tag": "div",
+                            "title_tag": "h2",
+                            "title_classes": "block-title",
+                            "content_tag": "div",
+                            "content_classes": "container"
                         }
                     }
                 }

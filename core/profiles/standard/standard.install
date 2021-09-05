@@ -157,6 +157,27 @@ function standard_install() {
       ),
       'is_new' => TRUE,
     ),
+    array(
+      'type' => 'card',
+      'name' => st('Card'),
+      'description' => st('Add a piece of content to be used for blocks and views. A Card does not have a public path (hide path display). Example use-case: Place card content as "Existing content" block in a Layout.'),
+      'settings' => array(
+        'status_default' => NODE_PUBLISHED,
+        'node_preview' => TRUE,
+        'promote_enabled' => FALSE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'show_submitted_info' => TRUE,
+        'comment_default' => COMMENT_NODE_CLOSED,
+        'node_submitted' => FALSE,
+        'node_user_picture' => TRUE,
+        'hidden_path' => TRUE,
+      ),
+      'is_new' => TRUE,
+    ),
   );
 
   foreach ($types as $type) {
@@ -171,7 +192,70 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
-  // Create an initial post to welcome users on install.
+  // Create three default Promobox nodes.
+  $card = new Node(
+    array(
+      'title' => st('Organize your content'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('
+              <p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
+  );
+  $card->save();
+
+  $card = new Node(
+    array(
+      'title' => st('What is a Card?'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st("
+              <p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
+  );
+  $card->save();
+
+  $card = new Node(
+    array(
+      'title' => st('The home page layout'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('
+              <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
+  );
+  $card->save();
+
+  // Create two default posts to display on front page.
   $post = new Node(
     array(
       'title' => st('Your first post!'),
@@ -179,6 +263,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('This is your first post! You may edit or delete it.'),
+            'format' => 'filtered_html'
           ),
         ),
       ),
@@ -198,6 +283,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('This is a page with static content. You may edit or delete it.'),
+            'format' => 'filtered_html',
           ),
         ),
       ),
@@ -381,6 +467,12 @@ function standard_install() {
     'edit any post content',
     'delete own post content',
     'delete any post content',
+    'create card content',
+    'edit own card content',
+    'edit any card content',
+    'delete own card content',
+    'delete any card content',
+    'view hidden paths',
     'access dashboard',
     'view the administration theme',
     'access administration bar',
@@ -388,7 +480,9 @@ function standard_install() {
     'access administration pages',
     'access site in maintenance mode',
     'flush caches',
-    'create terms in tags',
+    'edit terms in tags',
+    'delete terms in tags',
+    'administer taxonomy',
     'administer nodes',
     'search content',
     'use advanced search',
