@@ -68,25 +68,25 @@ class DashboardTaxonomyBlock extends Block {
     foreach ($vocabularies as $machine => $vocabulary) {
       if (in_array($machine, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
         $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
-        if (user_access('administer taxonomy') || 
-          user_access('create terms in ' . $vocabulary->machine_name) || 
-          user_access('edit terms in ' . $vocabulary->machine_name) || 
-          user_access('delete terms in ' . $vocabulary->machine_name)) {
+        $administer_taxonomy = user_access('administer taxonomy');
+        $create_terms = user_access('create terms in ' . $vocabulary->machine_name);
+        $edit_terms = user_access('edit terms in ' . $vocabulary->machine_name);
+        $delete_terms = user_access('delete terms in ' . $vocabulary->machine_name);
+        if ($administer_taxonomy || $create_terms || $edit_terms || $delete_terms) {
           $terms = format_plural($term_count, '1 term', '@count terms');
           $links['list'] = array(
             'title' => t('List terms'),
             'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
             'query' => $options,
           );
-          if (user_access('administer taxonomy') || 
-            user_access('create terms in ' . $vocabulary->machine_name)) {
+          if ($administer_taxonomy || $create_terms) {
             $links['add'] = array(
               'title' => t('Add new term'),
               'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add',
               'query' => $options,
             );
           }
-          if (user_access('administer taxonomy')) {
+          if ($administer_taxonomy) {
             $links['configure'] = array(
               'title' => t('Configure'),
               'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure',
