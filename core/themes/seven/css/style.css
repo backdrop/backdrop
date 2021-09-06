@@ -1921,3 +1921,21 @@ div.add-or-remove-shortcuts {
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
 }
+
+/**
+ * Token browser links in /admin/config/urls/path/patterns.
+ */
+span.token-browser-link {
+  position: relative;
+  bottom: 50px;
+  left: 46%;
+}
+span.token-browser-link span.token-browser-link-expanded {
+  display: none;
+}
+span.token-browser-link:hover span.token-browser-link-collapsed {
+  display: none;
+}
+span.token-browser-link:hover span.token-browser-link-expanded {
+  display: contents;
+}

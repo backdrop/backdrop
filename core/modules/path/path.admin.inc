@@ -373,7 +373,21 @@ function path_patterns_form($form, $form_state) {
       '#collapsed' => FALSE,
     );
 
+    // Display the user documentation of placeholders supported by this path
+    // type as a description on the last pattern.
+    $variables = array(
+      'token_types' => $token_types,
+      'text' => t('[token browser]', array('@type' => $path_info['label'])),
+      'title' => t('tokens'),
+    );
+
     // Prompt for the default URL alias pattern for this path type.
+    $variable = $path_type . '_pattern';
+    $token_browser_link =
+      '<span class="token-browser-link">' .
+        '<span class="token-browser-link-expanded">' . theme('token_tree_link', $variables) . '</span>' .
+        '<span class="token-browser-link-collapsed"><a href="" >[...]</a></span>' .
+      '</span>';
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
@@ -386,6 +400,7 @@ function path_patterns_form($form, $form_state) {
       '#token_types' => $token_types,
       '#min_tokens' => 1,
       '#parents' => array($variable),
+      '#suffix' => $token_browser_link,
     );
 
     // Set up specialized patterns for this path type (e.g. node types).
@@ -403,6 +418,7 @@ function path_patterns_form($form, $form_state) {
           '#token_types' => $token_types,
           '#min_tokens' => 1,
           '#parents' => array($variable),
+          '#suffix' => $token_browser_link,
         );
       }
     }
