@@ -639,7 +639,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#size' => 30,
     '#required' => TRUE,
     '#maxlength' => 64,
-    '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
+    '#description' => t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
   );
   $form['name'] = array(
     '#type' => 'machine_name',
@@ -661,13 +661,24 @@ function user_admin_role($form, &$form_state, $role = NULL) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save role'),
+    '#weight' => 2,
   );
+  // Only show the 'Save and configure permissions' button when creating a new
+  // role.
+  if (empty($role)) {
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and configure permissions'),
+      '#weight' => 1,
+    );
+  }
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#href' => 'admin/config/people/roles',
     '#title' => t('Cancel'),
+    '#options' => array('attributes' => array('class' => array('form-cancel'))),
+    '#weight' => 15,
   );
-  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
@@ -684,6 +695,7 @@ function user_admin_role_submit($form, &$form_state) {
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
+    $redirect = 'admin/config/people/permissions';
   }
   else {
     // Update existing role.
@@ -693,9 +705,10 @@ function user_admin_role_submit($form, &$form_state) {
     user_role_save($role);
     $new_role = $role->label;
     backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+    $redirect = 'admin/config/people/roles';
   }
 
-  $form_state['redirect'] = 'admin/config/people/roles';
+  $form_state['redirect'] = $redirect;
 }
 
 /**
