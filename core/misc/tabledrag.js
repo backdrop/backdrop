@@ -216,8 +216,9 @@ Backdrop.tableDrag.prototype.addColspanClass = function(columnIndex) {
 Backdrop.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
-  // Show TableDrag handles.
-  $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
+  // Show TableDrag handles (if 'display: none' was the only inline style,
+  // then make sure that no empty style attribute is left behind.
+  $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '').filter('[style=""]').removeAttr('style');
   // Reduce the colspan of any effected multi-span columns.
   $('.tabledrag-has-colspan', 'table.tabledrag-processed').each(function () {
     this.colSpan = this.colSpan - 1;
@@ -239,8 +240,9 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
  * Undo hideColumns().
  */
 Backdrop.tableDrag.prototype.showColumns = function () {
-  // Show weight/parent cells and headers.
-  $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
+  // Show weight/parent cells and headers (if 'display: none' was the only
+  // inline style, then make sure that no empty style attribute is left behind.
+  $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '').filter('[style=""]').removeAttr('style');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
   // Increase the colspan for any columns where it was previously reduced.
