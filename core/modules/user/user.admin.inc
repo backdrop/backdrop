@@ -663,12 +663,11 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#value' => t('Save role'),
     '#weight' => 2,
   );
-  // Only show the 'Save and configure permissions' button when creating a new
-  // role.
+  // Only show the 'Save and set permissions' button when creating a new role.
   if (empty($role)) {
     $form['actions']['continue'] = array(
       '#type' => 'submit',
-      '#value' => t('Save and configure permissions'),
+      '#value' => t('Save and set permissions'),
       '#weight' => 1,
     );
   }

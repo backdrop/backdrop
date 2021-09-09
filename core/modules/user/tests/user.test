@@ -2184,7 +2184,8 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_AUTHENTICATED_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
 
-    // Create a default role for site administrators, with all available permissions assigned.
+    // Create a default role for site administrators, with all available
+    // permissions assigned.
     $admin_role = new stdClass();
     $admin_role->name = 'administrator';
     $admin_role->label = st('Administrator');
