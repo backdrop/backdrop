@@ -2415,12 +2415,12 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
     $names = config_get_names_with_prefix('user.role.');
     foreach ($names as $config_name) {
       $config = config($config_name);
-      $role_name = str_replace('user.role.', '', $config_name);
       $role_data = $config->get();
       $role_data += array(
         'weight' => 0,
         'permissions' => array(),
       );
+      $role_name = $role_data['name'];
       $user_roles[$role_name] = $role_data;
     }
     backdrop_sort($user_roles, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
