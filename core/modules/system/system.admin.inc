@@ -518,7 +518,7 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 }
 
 /**
- * Menu callback; provides module enable/disable interface.
+ * Menu callback; provides the module enable/disable interface.
  *
  * The list of modules gets populated by module.info files, which contain each
  * module's name, description, and information about which modules it requires.
@@ -619,7 +619,7 @@ function system_modules($form, $form_state = array()) {
     // Some modules are always required by core and cannot be disabled, for
     // example: entity, node, system, and user.
     $extra['required_by_distribution'] = FALSE;
-    if (!empty($module->info['required'] )) {
+    if (!empty($module->info['required'])) {
       $extra['disabled'] = TRUE;
       $extra['required_by'][] = $distribution_name . (!empty($module->info['explanation']) ? ' ('. $module->info['explanation'] .')' : '');
       $extra['required_by_distribution'] = TRUE;

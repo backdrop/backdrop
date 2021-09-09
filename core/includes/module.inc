@@ -523,16 +523,25 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
 
       // Record the fact that it was enabled.
       $modules_enabled[] = $module;
+
+      // Add the newly-enabled module to the system.extensions.json config file,
+      // or update its status if already in it.
+      $config = config('system.extensions');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
+      $modules_in_config[$module] = 1;
+      $config->set('modules', $modules_in_config);
+      $config->save();
+
       watchdog('system', '%module module enabled.', array('%module' => $module), WATCHDOG_INFO);
     }
   }
 
-  // If any modules were newly installed, invoke hook_modules_installed().
+  // If any modules were newly-installed, invoke hook_modules_installed().
   if (!empty($modules_installed)) {
     module_invoke_all('modules_installed', $modules_installed);
   }
 
-  // If any modules were newly enabled, invoke hook_modules_enabled().
+  // If any modules were newly-enabled, invoke hook_modules_enabled().
   if (!empty($modules_enabled)) {
     module_invoke_all('modules_enabled', $modules_enabled);
   }
@@ -608,6 +617,15 @@ function module_disable($module_list, $disable_dependents = TRUE) {
         ->condition('name', $module)
         ->execute();
       $invoke_modules[] = $module;
+
+      // Update the status of the module in the system.extensions.json config
+      // file.
+      $config = config('system.extensions');
+      $modules_in_config = $config->get('modules') != NULL ? $config->get('modules') : array();
+      $modules_in_config[$module] = 0;
+      $config->set('modules', $modules_in_config);
+      $config->save();
+
       watchdog('system', '%module module disabled.', array('%module' => $module), WATCHDOG_INFO);
     }
   }

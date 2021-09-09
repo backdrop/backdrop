@@ -1624,12 +1624,20 @@ function _theme_render_template_debug($template_function, $template_file, $varia
 function theme_enable($theme_list) {
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 1))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
+
+    // Add the newly-enabled theme to the system.extensions.json config file,
+    // or update its status if already in it.
+    $config = config('system.extensions');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
+    $themes_in_config[$theme] = 1;
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
@@ -1638,6 +1646,8 @@ function theme_enable($theme_list) {
 
   // Invoke hook_themes_enabled() after the themes have been enabled.
   module_invoke_all('themes_enabled', $theme_list);
+
+  watchdog('system', '%theme theme enabled.', array('%theme' => $theme), WATCHDOG_INFO);
 }
 
 /**
@@ -1657,12 +1667,20 @@ function theme_disable($theme_list) {
 
   backdrop_clear_css_cache();
 
-  foreach ($theme_list as $key) {
+  foreach ($theme_list as $theme) {
     db_update('system')
       ->fields(array('status' => 0))
       ->condition('type', 'theme')
-      ->condition('name', $key)
+      ->condition('name', $theme)
       ->execute();
+
+    // Update the status of the theme in the system.extensions.json config
+    // file.
+    $config = config('system.extensions');
+    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
+    $themes_in_config[$theme] = 0;
+    $config->set('themes', $themes_in_config);
+    $config->save();
   }
 
   list_themes(TRUE);
@@ -1671,6 +1689,8 @@ function theme_disable($theme_list) {
 
   // Invoke hook_themes_disabled after the themes have been disabled.
   module_invoke_all('themes_disabled', $theme_list);
+
+  watchdog('system', '%theme theme disabled.', array('%theme' => $theme), WATCHDOG_INFO);
 }
 
 /**

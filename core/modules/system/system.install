@@ -3203,6 +3203,42 @@ function system_update_1076() {
 }
 
 /**
+ * Create system.extensions.json, and populate it with enabled modules/themes.
+ * 
+ * For more information, see the change record at:
+ * ???
+ */
+function system_update_1076() {
+  $modules = system_rebuild_module_data();
+  // system_rebuild_module_data() includes the current installation profile.
+  // Remove it.
+  $profile = backdrop_get_profile();
+  unset($modules[$profile]);
+  foreach ($modules as $module) {
+    // Remove hidden and required modules from the list.
+    if (!empty($module->info['hidden']) || !empty($module->info['required'])) {
+      unset($modules[$module->name]);
+    }
+    else {
+      $modules[$module->name] = (int) $module->status;
+    }
+  }
+
+  // Using system_list('theme') here, as list_themes() always returns enabled
+  // themes as disabled (their status set to 0).
+  // See https://github.com/backdrop/backdrop-issues/issues/5164
+  $themes = system_list('theme');
+  foreach ($themes as $theme) {
+    $themes[$theme->name] = (int) $theme->status;
+  }
+
+  $config = config('system.extensions');
+  $config->set('modules', $modules);
+  $config->set('themes', $themes);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
