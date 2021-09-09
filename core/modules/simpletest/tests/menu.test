@@ -706,6 +706,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['child-1']['mlid'])
       ->execute();
+    menu_rebuild();
 
     $expected_hierarchy = array(
       'parent' => FALSE,
@@ -722,6 +723,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['parent']['mlid'])
       ->execute();
+    menu_rebuild();
 
     $expected_hierarchy = array(
       'child-1-1' => 'child-1',
@@ -764,6 +766,8 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['parent']['mlid'])
       ->execute();
+    menu_rebuild();
+
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
@@ -779,6 +783,8 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['child-2']['mlid'])
       ->execute();
+    menu_rebuild();
+
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
