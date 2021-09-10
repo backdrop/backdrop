@@ -240,6 +240,20 @@ function update_update_1004() {
 }
 
 /**
+ * Set the usage reporting default value.
+ */
+function update_update_1005() {
+  // Prior to this update, usage information was always recorded. The ability
+  // to disable usage recording is new. The default value for all existing
+  // sites is to have it enabled, as it was before there was an option.
+  $config = config('update.settings');
+  if ($config->get('update_report_usage') === NULL) {
+    $config->set('update_report_usage', TRUE);
+  }
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
