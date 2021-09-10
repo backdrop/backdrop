@@ -724,10 +724,7 @@ class UpdateCoreUnitTestCase extends BackdropUnitTestCase {
    * Tests that _update_build_fetch_url() builds the URL correctly.
    */
   function testUpdateBuildFetchUrl() {
-    // Enable reporting usage for below checks.
-    config_set('update.settings', 'update_report_usage', TRUE);
-
-    // Check the trivial case of no site key being passed.
+    // First test that we didn't break the trivial case of no site key.
     $project['name'] = 'update_test';
     $project['project_type'] = '';
     $project['info']['version'] = '';
@@ -738,13 +735,6 @@ class UpdateCoreUnitTestCase extends BackdropUnitTestCase {
     $url = _update_build_fetch_url($project, $site_key);
     $this->assertEqual($url, $expected, "'$url' when no site_key provided should be '$expected'.");
 
-    // Test when usage tracking is disabled, site key is omitted.
-    config_set('update.settings', 'update_report_usage', FALSE);
-    $expected = 'http://www.example.com/' . $project['name'] . '/' . BACKDROP_CORE_COMPATIBILITY;
-    $url = _update_build_fetch_url($project, $site_key);
-    $this->assertEqual($url, $expected, "'$url' when reporting usage is disabled should be '$expected'.");
-    config_set('update.settings', 'update_report_usage', TRUE);
-
     // For disabled projects it shouldn't add the site key either.
     $site_key = 'site_key';
     $project['project_type'] = 'disabled';
@@ -752,7 +742,7 @@ class UpdateCoreUnitTestCase extends BackdropUnitTestCase {
     $url = _update_build_fetch_url($project, $site_key);
     $this->assertEqual($url, $expected, "'$url' should be '$expected' for disabled projects.");
 
-    // For enabled projects, check that the site_key is added.
+    // For enabled projects, the site key should be included.
     $project['project_type'] = '';
     $expected = 'http://www.example.com/' . $project['name'] . '/' . BACKDROP_CORE_COMPATIBILITY;
     $expected .= '?site_key=site_key';

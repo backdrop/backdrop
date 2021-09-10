@@ -152,7 +152,7 @@ function _update_process_fetch_task(array $project) {
   $response = NULL;
   $response_code = NULL;
   $available = array();
-  $site_key = backdrop_hmac_base64($base_url, backdrop_get_private_key());
+  $site_key = $config->get('update_report_usage') ? backdrop_hmac_base64($base_url, backdrop_get_private_key()) : '';
   $url = _update_build_fetch_url($project, $site_key);
   $fetch_url_base = _update_get_fetch_url_base($project);
   $project_name = $project['name'];
@@ -287,19 +287,20 @@ function _update_create_fetch_task($project) {
  * the global defaults. Appends optional query arguments when the site is
  * configured to report usage stats.
  *
- * @param $project
+ * @param array $project
  *   The array of project information from update_get_projects().
- * @param $site_key
- *   (optional) The anonymous site key hash. Defaults to an empty string.
+ * @param string $site_key
+ *   (optional) The anonymous site key hash. This value should only be passed if
+ *   the "update_report_usage" setting is enabled. Defaults to an empty string.
  *
- * @return
+ * @return string
  *   The URL for fetching information about updates to the specified project.
  *
  * @see update_fetch_data()
  * @see _update_process_fetch_task()
  * @see update_get_projects()
  */
-function _update_build_fetch_url($project, $site_key = '') {
+function _update_build_fetch_url(array $project, $site_key = '') {
   $name = $project['name'];
 
   if (empty($project['project status url'])) {
@@ -312,9 +313,7 @@ function _update_build_fetch_url($project, $site_key = '') {
 
   // Only append usage information if usage tracking is allowed and the project
   // is enabled. We do not record usage statistics for disabled projects.
-  if (!empty($site_key) &&
-      config_get('update.settings', 'update_report_usage') &&
-      (strpos($project['project_type'], 'disabled') === FALSE)) {
+  if (!empty($site_key) && (strpos($project['project_type'], 'disabled') === FALSE)) {
     // Append the site key.
     $url .= (strpos($url, '?') !== FALSE) ? '&' : '?';
     $url .= 'site_key=';
