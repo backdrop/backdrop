@@ -69,6 +69,9 @@ jobs:
       - name: System status
         if: ${{ always() }}
         run: |
+          pgrep mysql
+          sudo tail /var/log/syslog
+          sudo cat /tmp/actions-setup-mysql*/etc/my.cnf
           echo Get load
           uptime
           echo Get mem usage
