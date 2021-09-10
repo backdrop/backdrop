@@ -978,16 +978,6 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       $this->assertEntityAliasExists('user', $user);
     }
 
-    // Add a new node.
-    $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
-    $this->nodes[$new_node->nid] = $new_node;
-
-    // Run the update again.
-    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
-    // There should only be a single new alias generated (for the new node).
-    $this->assertText('Generated 1 URL alias.');
-    $this->assertEntityAliasExists('node', $new_node);
-
     // Test deletion of aliases by deleting all node aliases.
     $edit = array(
       'update[node][base]' => TRUE,
@@ -1007,7 +997,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'operations[operation]' => 'generate',
     );
     $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
-    // Check that aliases only now exists for post types.
+    // Check that aliases only now exist for post content types.
     foreach ($this->nodes as $node) {
       if ($node->type == 'page') {
         $this->assertNoEntityAliasExists('node', $node);
@@ -1039,7 +1029,8 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       }
     }
 
-    // Test deletion of individual types by deleting only post and tags aliases.
+    // Test the deletion of individual alias types, by deleting only the aliases
+    // for post nodes and the terms of the tags vocabulary.
     $edit = array(
       'update[node][post]' => TRUE,
       'update[taxonomy_term][tags]' => TRUE,
@@ -1047,24 +1038,37 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     );
     $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     $this->backdropPost(NULL, array(), t('Delete URL aliases'));
-    // Check only post aliases were deleted.
     foreach ($this->nodes as $node) {
       if ($node->type == 'post') {
+        // The aliases for post nodes SHOULD have been deleted.
         $this->assertNoEntityAliasExists('node', $node);
       }
       if ($node->type == 'page') {
+        // The aliases for page nodes should NOT have been deleted.
         $this->assertEntityAliasExists('node', $node);
       }
     }
-    // Check only tags aliases were deleted.
     foreach ($this->terms as $term) {
       if ($term->vocabulary == 'tags') {
+        // The aliases for terms in the tags vocabulary SHOULD have been
+        // deleted.
         $this->assertNoEntityAliasExists('taxonomy_term', $term);
       }
       if ($term->vocabulary == 'bulk_test') {
+        // The aliases for terms in the bulk_test vocabulary should NOT have
+        // been deleted.
         $this->assertEntityAliasExists('taxonomy_term', $term);
       }
     }
+
+    // Add a new node.
+    $new_node = $this->backdropCreateNode(array('path' => array('alias' => '', 'auto' => FALSE)));
+    $this->nodes[$new_node->nid] = $new_node;
+    // Run the update again.
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    // There should only be a single new alias generated (for the new node).
+    $this->assertText('Generated 1 URL alias.');
+    $this->assertEntityAliasExists('node', $new_node);
   }
 }
 
