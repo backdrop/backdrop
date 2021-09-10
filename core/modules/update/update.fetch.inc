@@ -310,12 +310,11 @@ function _update_build_fetch_url($project, $site_key = '') {
     $url = $project['project status url'];
   }
 
-  // Only append usage information if we have a site key and the project is
-  // enabled. We do not want to record usage statistics for disabled projects.
-  // Only append a site_key and the version information if we have a site_key
-  // in the first place, and if this is not a disabled module, theme, or layout. We do
-  // not want to record usage statistics for disabled code.
-  if (!empty($site_key) && (strpos($project['project_type'], 'disabled') === FALSE)) {
+  // Only append usage information if usage tracking is allowed and the project
+  // is enabled. We do not record usage statistics for disabled projects.
+  if (!empty($site_key) &&
+      config_get('update.settings', 'update_report_usage') &&
+      (strpos($project['project_type'], 'disabled') === FALSE)) {
     // Append the site key.
     $url .= (strpos($url, '?') !== FALSE) ? '&' : '?';
     $url .= 'site_key=';
