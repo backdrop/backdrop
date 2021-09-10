@@ -490,7 +490,8 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  * @see user_multiple_cancel_confirm()
  */
 function user_cancel_methods() {
-  $anonymous_name = config_get('system.core', 'anonymous');
+  $site_config = config('system.core');
+  $anonymous_name = $site_config->get('anonymous');
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content.'),
@@ -514,7 +515,7 @@ function user_cancel_methods() {
   backdrop_alter('user_cancel_methods', $methods);
 
   // Turn all methods into real form elements.
-  $default_method = config_get('system.core', 'user_cancel_method');
+  $default_method = $site_config->get('user_cancel_method');
   foreach ($methods as $name => $method) {
     $form[$name] = array(
       '#type' => 'radio',
@@ -548,7 +549,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
       );
       user_cancel($edit, $account->uid, $account->data['user_cancel_method']);
       // Since user_cancel() is not invoked via Form API, batch processing needs
-      // to be invoked manually and should redirect to the front page after
+      // to be invoked manually and should redirect to the home page after
       // completion.
       batch_process('');
     }

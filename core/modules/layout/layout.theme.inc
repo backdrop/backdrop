@@ -228,6 +228,22 @@ function theme_layout_settings_context_table($variables) {
 }
 
 /**
+ * Output a list of action links for layouts.
+ */
+function theme_layout_action_links($variables) {
+  $element = $variables['element'];
+  $attributes = array('class' => array('action-links', 'layout-action-links'));
+
+  $output = '<ul ' . backdrop_attributes($attributes) . '>';
+  foreach (element_children($element) as $key) {
+    $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
+
+/**
  * Output the list of visibility conditions for layouts.
  */
 function theme_layout_conditions($variables) {

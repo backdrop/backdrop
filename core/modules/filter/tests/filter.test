@@ -1623,6 +1623,26 @@ www.example.com with a newline in comments -->
         '<li><a href="http://listitem.com">http://listitem.com</a></li>' => TRUE,
         '<li class="odd"><a href="http://www.class.listitem.com">www.class.listitem.com</a></li>' => TRUE,
       ),
+      // 'nolink' class.
+      '
+<p class="nolink">www.no-example.com</p>
+<p class="no-link">www.example.com</p>
+<span class="link nolink button">www.button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">www.divitis.com</div>
+<p class="nolink">me@no-example.com</p>
+<p class="nolink2">me@example.com</p>
+<span class="link nolink button">you@button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">us@divitis.com</div>
+' => array(
+        '<p class="nolink"><a href="http://www.no-example.com">www.no-example.com</a></p>' => FALSE,
+        '<p class="no-link"><a href="http://www.example.com">www.example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="www.button-me.com">www.button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="http://www.divitis.com">www.divitis.com</a></div>' => FALSE,
+        '<p class="nolink"><a href="mailto:me@no-example.com">me@no-example.com</a></p>' => FALSE,
+        '<p class="nolink2"><a href="mailto:me@example.com">me@example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="mailto:you@button-me.com">you@button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="mailto:us@divitis.com">us@divitis.com</a></div>' => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 
@@ -1656,6 +1676,8 @@ www.example.com with a newline in comments -->
    *   ),
    * );
    * @endcode
+   * This means that after passing 'Input string' through the given filter, we
+   * should find '<p>Input string</p>' in the output, but not 'Input string<br'.
    */
   function assertFilteredString($filter, $tests) {
     foreach ($tests as $source => $tasks) {

@@ -57,13 +57,13 @@ function system_token_info() {
   );
   $site['url'] = array(
     'name' => t('URL'),
-    'description' => t("The URL of the site's front page."),
+    'description' => t("The URL of the site's home page."),
     'type' => 'url',
   );
   // @deprecated: Replaced by url:brief.
   $site['url-brief'] = array(
     'name' => t('URL (brief)'),
-    'description' => t("The URL of the site's front page without the protocol."),
+    'description' => t("The URL of the site's home page without the protocol."),
     'deprecated' => TRUE,
   );
   $site['login-url'] = array(

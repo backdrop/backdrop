@@ -447,7 +447,7 @@ function date_text_validate($element, &$form_state) {
       return;
     }
   }
-  $value = !empty($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
+  $value = date_is_date($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
   form_set_value($element, $value, $form_state);
 }
 
@@ -606,7 +606,7 @@ function date_parts_element($element, $date, $format) {
         $end_year = $range[1];
 
         $sub_element[$field]['#title'] = t('Year');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format('Y') : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format('Y') : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = backdrop_map_assoc(date_years($start_year, $end_year, $part_required));
         }
@@ -614,7 +614,7 @@ function date_parts_element($element, $date, $format) {
 
       case 'month':
         $sub_element[$field]['#title'] = t('Month');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format('n') : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format('n') : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = $month_function($part_required);
         }
@@ -622,7 +622,7 @@ function date_parts_element($element, $date, $format) {
 
       case 'day':
         $sub_element[$field]['#title'] = t('Day');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format('j') : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format('j') : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = backdrop_map_assoc(date_days($part_required));
         }
@@ -630,7 +630,7 @@ function date_parts_element($element, $date, $format) {
 
       case 'hour':
         $sub_element[$field]['#title'] = t('Hour');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format($hours_format) : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format($hours_format) : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = backdrop_map_assoc(date_hours($hours_format, $part_required));
         }
@@ -641,7 +641,7 @@ function date_parts_element($element, $date, $format) {
 
       case 'minute':
         $sub_element[$field]['#title'] = t('Minute');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format('i') : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format('i') : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = backdrop_map_assoc(date_minutes('i', $part_required, $element['#date_increment']));
         }
@@ -652,7 +652,7 @@ function date_parts_element($element, $date, $format) {
 
       case 'second':
         $sub_element[$field]['#title'] = t('Second');
-        $sub_element[$field]['#default_value'] = is_object($date) ? $date->format('s') : '';
+        $sub_element[$field]['#default_value'] = date_is_date($date) ? $date->format('s') : '';
         if ($part_type == 'select') {
           $sub_element[$field]['#options'] = backdrop_map_assoc(date_seconds('s', $part_required, $element['#date_increment']));
         }
@@ -773,7 +773,7 @@ function date_select_validate($element, &$form_state) {
       return;
     }
   }
-  $value = !empty($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
+  $value = date_is_date($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
   form_set_value($element, $value, $form_state);
 }
 
@@ -852,10 +852,20 @@ function date_default_value($field, $instance, $langcode) {
   $item = array();
   $db_format = date_type_format($field['type']);
   $date = date_default_value_part($item, $field, $instance, $langcode, 'value');
-  $item[0]['value'] = is_object($date) ? date_format($date, $db_format) : '';
+  if (is_object($date) && empty($date->errors)) {
+    $item[0]['value'] = date_format($date, $db_format);
+  }
+  else {
+    $item[0]['value'] = '';
+  }
   if (!empty($field['settings']['todate'])) {
-    $date = date_default_value_part($item, $field, $instance, $langcode, 'value2');
-    $item[0]['value2'] = is_object($date) ? date_format($date, $db_format) : '';
+    $date2 = date_default_value_part($item, $field, $instance, $langcode, 'value2');
+    if (is_object($date2) && empty($date2->errors)) {
+      $item[0]['value2'] = date_format($date2, $db_format);
+    }
+    else {
+      $item[0]['value2'] = '';
+    }
   }
 
   // Make sure the default value has the same construct as a loaded field value
@@ -908,7 +918,9 @@ function date_default_value_part($item, $field, $instance, $langcode, $part = 'v
     $date = date_now($timezone);
   }
   // The default value needs to be in the database timezone.
-  date_timezone_set($date, timezone_open($timezone_db));
+  if (empty($date->errors)) {
+    date_timezone_set($date, timezone_open($timezone_db));
+  }
   $date->limitGranularity($field['settings']['granularity']);
   return $date;
 }
@@ -917,7 +929,7 @@ function date_default_value_part($item, $field, $instance, $langcode, $part = 'v
 /**
  * Element value callback for date_popup element.
  */
-function date_popup_element_value_callback($element, $input = FALSE, &$form_state) {
+function date_popup_element_value_callback($element, $input, &$form_state) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   $date = NULL;
@@ -1237,7 +1249,7 @@ function date_popup_validate($element, &$form_state) {
   }
 
   // If the created date is valid, set it.
-  $value = !empty($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
+  $value = date_is_date($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
   form_set_value($element, $value, $form_state);
 }
 
