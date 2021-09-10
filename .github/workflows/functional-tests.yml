@@ -69,7 +69,7 @@ jobs:
       - name: System status
         if: ${{ always() }}
         run: |
-          pgrep mysql
+          #pgrep mysql
           sudo tail /var/log/syslog
           sudo cat /tmp/actions-setup-mysql*/etc/my.cnf
           echo Get load
