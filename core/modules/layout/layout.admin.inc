@@ -14,13 +14,36 @@ function layout_list_page() {
   $layout_template_info = layout_get_layout_template_info();
 
   // Group layouts by path.
+  $layout_paths = array();
   $path_groups = array();
+  $path_groups_end = array();
   foreach ($layouts as $layout) {
-    $path_groups[$layout->getPath()][$layout->name] = $layout;
+    $path = $layout->getPath();
+    // Move admin layouts to the bottom of the list.
+    if (path_is_admin($path)) {
+      $path_groups_end[$path][$layout->name] = $layout;
+    }
+    else {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+    // Build a list of all layout paths to check callbacks.
+    if ($path) {
+      $layout_paths[] = $path;
+    }
   }
 
+  // Put admin layouts at the bottom of the list.
+  foreach ($path_groups_end as $path => $name) {
+    foreach ($name as $layout) {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+  }
+
+  $page_callbacks = db_query('SELECT path, page_callback FROM {menu_router} WHERE path IN (:paths)', array(':paths' => $layout_paths))->fetchAllKeyed();
+
   // Assemble the rows of the table.
-  $rows = array();
+  $override_rows = array();
+  $stand_alone_rows = array();
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
@@ -38,20 +61,39 @@ function layout_list_page() {
       $row[] = '';
     }
     else {
-      $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link);
+      if (strpos($path, '%') === FALSE) {
+        $path_link = t('Path: ') . l($path, $path);
+      }
+      else {
+        $path_link = t('System path: ') . check_plain($path);
+      }
+
+      $class = array();
+      if (!$page_callbacks[$path]) {
+        $class[] = 'missing-path';
+        $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
+      }
+      $row[] = array('data' => $path_link, 'class' => $class);
       // Empty columns are intentional.
       $row[] = '';
       $row[] = '';
       $row[] = '';
     }
+
     if (count($operations['#links']) !== 0) {
       $row[] = backdrop_render($operations);
     }
     else {
       $row[] = '';
     }
-    $rows[] = array('data' => $row, 'class' => array('layout-group'));
+
+    if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+      $stand_alone_rows[] = array('data' => $row, 'class' => array('layout-group'));
+    }
+    else {
+      $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
+    }
+
 
     foreach ($group as $layout) {
       $operations = array(
@@ -82,12 +124,18 @@ function layout_list_page() {
       if ($layout->disabled) {
         $class[] = 'disabled';
       }
-      $rows[] = array('data' => $row, 'class' => $class);
+
+      if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+        $stand_alone_rows[] = array('data' => $row, 'class' => $class);
+      }
+      else {
+        $override_rows[] = array('data' => $row, 'class' => $class);
+      }
     }
   }
 
   $header = array(
-    array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Layout'), 'class' => array('layout-title')),
     array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
     array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
@@ -96,12 +144,31 @@ function layout_list_page() {
 
   $page = array();
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
-  $page['table'] = array(
+  $page['stand_alone'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Layout pages') . '</h2>' . t('These layouts will create new stand-alone pages on the site. Without the layouts, these pages would not exist.'),
+    '#weight' => 0,
+  );
+  $page['stand_alone_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
-    '#rows' => $rows,
+    '#rows' => $stand_alone_rows,
     '#attributes' => array('class' =>   array('layout-list')),
     '#empty' => t('No layouts have been created yet.'),
+    '#weight' => 1,
+  );
+  $page['override'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site. Without the layouts, these pages would use other layouts.'),
+    '#weight' => 2,
+  );
+  $page['override_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $override_rows,
+    '#attributes' => array('class' =>   array('layout-list')),
+    '#empty' => t('No layouts have been created yet.'),
+    '#weight' => 3,
   );
   return $page;
 }
