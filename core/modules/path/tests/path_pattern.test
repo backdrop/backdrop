@@ -963,7 +963,8 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'operations[operation]' => 'generate',
     );
     $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
-    // 12 nodes + 6 terms + 2 users.
+    // The 2 default nodes that come with the standard installation profile +
+    // 10 nodes + 6 terms + 2 users created earlier for this test.
     $this->assertText('Generated 20 URL aliases.');
 
     // Check that aliases have actually been created.
@@ -1028,8 +1029,10 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'operations[operation]' => 'update',
     );
     $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
-    // Only the 5 aliases for the post nodes should be updated.
-    $this->assertText('No new URL aliases generated; 5 aliases were updated.');
+    // Only the 6 aliases for the post nodes should be updated (the 1 post node
+    // that comes with the standard installation profile + 5 post nodes created
+    // earlier for this test).
+    $this->assertText('No new URL aliases generated; 6 aliases were updated.');
     foreach ($this->nodes as $node) {
       if ($node->type == 'post') {
         $this->assertEntityAlias('node', $node, 'changed-post/' . strtolower($node->title));
