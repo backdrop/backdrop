@@ -16,9 +16,8 @@ jobs:
     steps:
       - name: Prepare for database
         run: |
+          # The database runs as user "runner", no chown needed.
           sudo mkdir /dev/shm/mysql_tmp
-          sudo chmod 777 /dev/shm/mysql_tmp
-          #sudo chown mysql:mysql /dev/shm/mysql_tmp
 
       - name: Install database server
         uses: shogo82148/actions-setup-mysql@v1
@@ -70,11 +69,6 @@ jobs:
       - name: System status
         if: ${{ always() }}
         run: |
-          #pgrep mysql
-          sudo netstat -tapn
-          sudo tail /var/log/syslog
-          sudo cat /tmp/actions-setup-mysql*/etc/my.cnf
-          sudo ls -l /tmp/actions-setup-mysql*/tmp/
           echo Get load
           uptime
           echo Get mem usage
