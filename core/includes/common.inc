@@ -6003,6 +6003,9 @@ function _backdrop_bootstrap_full() {
     // specific file directory.
     ini_set('log_errors', 1);
     ini_set('error_log', 'public://error.log');
+
+    // Disable garbage collection inside of test runs.
+    gc_disable();
   }
 
   // Initialize $_GET['q'] prior to invoking hook_init().
