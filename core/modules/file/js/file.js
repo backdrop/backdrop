@@ -195,7 +195,13 @@ Backdrop.file = Backdrop.file || {
       var selectedFid = $(this).data('fid');
       // Set the FID in the modal submit form.
       $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
-    })
+    }).on('dblclick', '.image-library-choose-file', function() {
+      var $selectedElement = $(this);
+      $selectedElement.click();
+      var $form = $selectedElement.closest('.ui-dialog-content').find('form');
+      var $submit = $form.find('.form-actions input[type=submit]:first');
+      $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+    });
   },
 
   /**

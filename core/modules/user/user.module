@@ -46,6 +46,14 @@ define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approva
 define('USER_PASSWORD_STRENGTH_MODIFIER', 0.7);
 
 /**
+ * Password strength levels: weak, fair, good and strong.
+ */
+define('USER_PASSWORD_STRENGTH_WEAK', 0);
+define('USER_PASSWORD_STRENGTH_FAIR', 50);
+define('USER_PASSWORD_STRENGTH_GOOD', 70);
+define('USER_PASSWORD_STRENGTH_STRONG', 90);
+
+/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -759,6 +767,7 @@ function user_account_form(&$form, &$form_state) {
   $form['#validate'][] = 'user_account_form_validate';
   module_load_include('password.inc', 'user', 'user');
   $reject_weak = user_password_reject_weak($user->name);
+
   if ($reject_weak) {
     $form['#validate'][] = 'user_password_policy_validate';
   }
@@ -796,15 +805,9 @@ function user_account_form(&$form, &$form_state) {
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
   if (!$register) {
-    $description = t('Current password must be entered to set a new password.');
-    if ($reject_weak) {
-      $description .= ' ' . t('Weak passwords will be rejected.');
-      $description .= _user_password_policy_help();
-    }
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
-      '#description' => $description,
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
     );
@@ -846,18 +849,11 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
-    $description = '';
-    // Provide different help text if weak passwords are rejected.
-    if ($reject_weak) {
-      $description = ' ' . t('Weak passwords will be rejected.');
-      $description .= _user_password_policy_help();
-    }
     if (!$site_config->get('user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => TRUE,
@@ -874,7 +870,6 @@ function user_account_form(&$form, &$form_state) {
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => FALSE,
@@ -890,6 +885,15 @@ function user_account_form(&$form, &$form_state) {
       );
     }
   }
+
+  $description = !$register && $user->uid == $account->uid ? t('The current password must be entered to set a new password.') : '';
+  // If weak passwords are being rejected, append the list of password strength
+  // criteria to the help text of the password field.
+  if ($reject_weak) {
+    $description .= !empty($description) ? '<br /><br />' : '';
+    $description .= _user_password_policy_help();
+  }
+  $form['account']['pass']['#description'] = $description;
 
   $form['account_settings'] = array(
     '#type' => 'fieldset',
@@ -2890,10 +2894,10 @@ function user_form_process_password($element, $form_state = array()) {
     }
     $strength_settings = array(
       'scores' => array(
-        'weak' => 0,
-        'fair' => 50,
-        'good' => 70,
-        'strong' => 90,
+        'weak' => USER_PASSWORD_STRENGTH_WEAK,
+        'fair' => USER_PASSWORD_STRENGTH_FAIR,
+        'good' => USER_PASSWORD_STRENGTH_GOOD,
+        'strong' => USER_PASSWORD_STRENGTH_STRONG,
       ),
       'labels' => array(
         'strengthTitle' => t('Password strength: '),

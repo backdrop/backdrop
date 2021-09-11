@@ -3648,6 +3648,77 @@ function theme_container($variables) {
 }
 
 /**
+ * Processes a details element.
+ *
+ * @param array $element
+ *   An associative array containing the properties and children of the
+ *   details.
+ * @param array $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return array
+ *   The processed element.
+ */
+function form_process_details($element, &$form_state) {
+  // Generate the ID of the element if it's not explicitly given.
+  if (!array_key_exists('#id', $element)) {
+    $element['#id'] = backdrop_html_id(implode('-', $element['#parents']) . '-wrapper');
+  }
+  return $element;
+}
+
+/**
+ * Returns HTML to wrap children in a details element.
+ *
+ * Used for grouped form items. Can also be used as a theme wrapper for any
+ * renderable element, to surround it with a <details> tag and add attributes
+ * such as classes or an HTML id.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #id, #attributes, #children, #summary, #details, #open.
+ *
+ * @return string
+ *   The rendered HTML output.
+ *
+ * @ingroup themeable
+ */
+function theme_details($variables) {
+  $element = $variables['element'];
+  // Ensure #attributes is set.
+  $element += array('#attributes' => array());
+
+  // Special handling for form elements.
+  if (isset($element['#array_parents'])) {
+    // Assign an HTML ID.
+    if (!array_key_exists('id', $element['#attributes'])) {
+      $element['#attributes']['id'] = $element['#id'];
+    }
+    // Add the form-wrapper class.
+    if (empty($element['#attributes']['class'])) {
+      $element['#attributes']['class'][] = 'form-wrapper';
+    }
+  }
+  // Set initial collapsed/expanded display.
+  if (isset($element['#open']) && $element['#open']) {
+    $element['#attributes']['open'] = 'open';
+  }
+
+  $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
+  $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
+  if (isset($element['#details']) && !empty($element['#details'])) {
+    $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
+  }
+  if (isset($element['#children']) && !empty($element['#children'])) {
+    $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
+  }
+  $output .= '</details>';
+
+  return $output;
+}
+
+/**
  * Returns HTML for a table with radio buttons or checkboxes.
  *
  * @param $variables

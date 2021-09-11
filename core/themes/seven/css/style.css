@@ -784,6 +784,27 @@ fieldset .fieldset-wrapper::before {
 }
 
 /**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
+}
+
+/**
  * Views exposed form (matches fieldsets).
  */
 form.views-exposed-form {
@@ -1215,6 +1236,14 @@ div.filter-options select {
   .admin-panel h3 {
     margin: 15px;
   }
+}
+
+.block-dashboard-welcome h3 {
+  margin: 4px 0;
+  padding: 6px 0;
+  font-size: 1.154em;
+  text-transform: none;
+  background: none;
 }
 
 /* Add special icons for admin/config */

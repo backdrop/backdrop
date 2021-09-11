@@ -35,7 +35,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view1['name'] = strtolower($this->randomName(16));
     $view1['description'] = $this->randomName(16);
     $view1['page[create]'] = FALSE;
-    $this->backdropPost('admin/structure/views/add', $view1, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view1, t('Save view'));
     $this->assertText(t('Your view was saved. You may configure it from the list below.'));
     $this->assertText($view1['human_name']);
     $this->assertText($view1['description']);
@@ -62,7 +62,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view2['page[path]'] = $this->randomName(16);
     $view2['page[feed]'] = 1;
     $view2['page[feed_properties][path]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view2, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view2, t('Save view'));
 
     // Since the view has a page, we expect to be automatically redirected to
     // it.
@@ -107,7 +107,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     $view3['page[path]'] = $this->randomName(16);
     $view3['block[create]'] = 1;
     $view3['block[title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view3, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view3, t('Save view'));
 
     // Make sure the view only displays the node we expect.
     $this->assertUrl($view3['page[path]']);
@@ -333,7 +333,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view1['page[create]'] = 1;
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
-    $this->backdropPost(NULL, $view1, t('Save & exit'));
+    $this->backdropPost(NULL, $view1, t('Save view'));
     // Visit the page and check that the nodes we expect are present and the
     // ones we don't expect are absent.
     $this->backdropGet($view1['page[path]']);
@@ -353,7 +353,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
     $view2['page[create]'] = 1;
     $view2['page[title]'] = $this->randomName(16);
     $view2['page[path]'] = $this->randomName(16);
-    $this->backdropPost(NULL, $view2, t('Save & exit'));
+    $this->backdropPost(NULL, $view2, t('Save view'));
     $this->backdropGet($view2['page[path]']);
     $this->assertNoText($node_tag1_title);
     $this->assertText($node_tag1_tag2_title);
@@ -416,7 +416,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $view1['page[create]'] = 1;
     $view1['page[title]'] = $this->randomName(16);
     $view1['page[path]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view1, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view1, t('Save view'));
 
     // Make sure the view shows the nodes in the expected order.
     $this->assertUrl($view1['page[path]']);
@@ -439,7 +439,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $view2['page[create]'] = 1;
     $view2['page[title]'] = $this->randomName(16);
     $view2['page[path]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view2, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view2, t('Save view'));
 
     // Make sure the view shows the nodes in the expected order.
     $this->assertUrl($view2['page[path]']);
@@ -490,7 +490,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
     $view['block[items_per_page]'] = 3;
-    $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Save view'));
 
     // Make sure the page display shows the nodes we expect, and that they
     // appear in the expected order.
@@ -551,7 +551,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
     $view['page[link]'] = 1;
     $view['page[link_properties][menu_name]'] = 'main-menu';
     $view['page[link_properties][title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Save view'));
 
     // Make sure there is a link to the view from the home page (where we
     // expect the main menu to display).
@@ -624,7 +624,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
       $view['page[path]'] = $this->randomName(16);
       $view['page[style][style_plugin]'] = 'jump_menu';
       $view['page[style][row_plugin]'] = 'fields';
-      $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+      $this->backdropPost('admin/structure/views/add', $view, t('Save view'));
       $this->backdropGet($view['page[path]']);
 
       // Submit the jump menu form, and check that we are redirected to the
@@ -752,7 +752,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view_path = $view['page[path]'];
-    $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Save view'));
 
     // Configure its title. Since the page and block both started off with the
     // same (empty) title in the views wizard, we expect the wizard to have set
@@ -820,7 +820,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[feed_properties][path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Save view'));
 
     // Put the block into the first sidebar region, and make sure it will not
     // display on the view's page display (since we will be searching for the
@@ -902,7 +902,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view, t('Continue & configure'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue and configure'));
 
     // Revert the title of the block back to the default ones, but submit some
     // new values to be sure that the new value is not stored.
@@ -927,7 +927,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[path]'] = $this->randomName(16);
     $view['block[create]'] = 1;
     $view['block[title]'] = $this->randomName(16);
-    $this->backdropPost('admin/structure/views/add', $view, t('Continue & configure'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue and configure'));
 
     // Displays should list Page first and Block second.
     $display_links = $this->xpath('//*[@id="views-display-menu-tabs"]//a');

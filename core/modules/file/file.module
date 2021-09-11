@@ -1401,6 +1401,18 @@ function file_managed_file_process($element, &$form_state, $form) {
       '#markup' => theme('file_link', array('file' => $element['#file'])) . ' ',
       '#weight' => -10,
     );
+
+    // Anonymous users who have uploaded a temporary file need a
+    // non-session-based token added so file_managed_file_value() can check
+    // that they have permission to use this file on subsequent submissions of
+    // the same form (for example, after an Ajax upload or form validation
+    // error).
+    if (!$GLOBALS['user']->uid && $element['#file']->status != FILE_STATUS_PERMANENT) {
+      $element['fid_token'] = array(
+        '#type' => 'hidden',
+        '#value' => backdrop_hmac_base64('file-' . $fid, backdrop_get_private_key() . backdrop_get_hash_salt()),
+      );
+    }
   }
 
   // Enable auto-uploading unless requested otherwise.
@@ -1477,13 +1489,24 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           $force_default = TRUE;
         }
         // Temporary files that belong to other users should never be allowed.
-        // Since file ownership can't be determined for anonymous users, they
-        // are not allowed to reuse temporary files at all.
-        elseif ($file->status != FILE_STATUS_PERMANENT && (!$GLOBALS['user']->uid || $file->uid != $GLOBALS['user']->uid)) {
-          $force_default = TRUE;
+        elseif ($file->status != FILE_STATUS_PERMANENT) {
+          if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
+            $force_default = TRUE;
+          }
+          // Since file ownership can't be determined for anonymous users, they
+          // are not allowed to reuse temporary files at all. But they do need
+          // to be able to reuse their own files from earlier submissions of
+          // the same form, so to allow that, check for the token added by
+          // file_managed_file_process().
+          elseif (!$GLOBALS['user']->uid) {
+            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
+            if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
+              $force_default = TRUE;
+            }
+          }
         }
         // If all checks pass, allow the file to be changed.
-        else {
+        if (!$force_default) {
           $fid = $file->fid;
         }
       }
@@ -2083,7 +2106,7 @@ function file_get_download_token($file) {
  * @see file_file_predelete()
  */
 function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file', $check_access = TRUE) {
-  $references = backdrop_static(__FUNCTION__, array());
+  $references = &backdrop_static(__FUNCTION__, array());
   $fields = isset($field) ? array($field['field_name'] => $field) : field_info_fields();
 
   foreach ($fields as $field_name => $file_field) {
