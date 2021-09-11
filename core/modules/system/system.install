@@ -3193,7 +3193,7 @@ function system_update_1075() {
   update_variable_del('block_interest_cohort');
 }
 
-/*
+/**
  * Add default values for dismissible message settings.
  */
 function system_update_1076() {
