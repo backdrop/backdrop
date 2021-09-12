@@ -39,13 +39,15 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getContent() {
+    global $user;
+
     $news = $this->getNews();
-    $days_before_news_is_old = 14;
 
     $links = array();
     if ($news) {
+      $dashboard_news_last_seen = $user->dashboard_news_seen;
       foreach ($news as $key => $notifications) {
-        $is_new = (time() - $notifications['timestamp']) < $days_before_news_is_old * 24 * 60 * 60;
+        $is_new = $dashboard_news_last_seen < $notifications['timestamp'];
         $is_new_marker = $is_new ? '<span class="marker">' . t('new') . '</span> ' : '';
 
         $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
@@ -62,6 +64,13 @@ class DashboardNewsBlock extends Block {
 
         $links[] = $notification;
       }
+
+      // Log the time the current user has seen the 'Backdrop News' block.
+      $user->dashboard_news_seen = REQUEST_TIME;
+      db_update('users')
+        ->fields(array('dashboard_news_seen' => $user->dashboard_news_seen))
+        ->condition('uid', $user->uid)
+        ->execute();
     }
 
     $build = array();
