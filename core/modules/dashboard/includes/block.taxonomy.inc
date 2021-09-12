@@ -74,6 +74,7 @@ class DashboardTaxonomyBlock extends Block {
         $delete_terms = user_access('delete terms in ' . $vocabulary->machine_name);
         if ($administer_taxonomy || $create_terms || $edit_terms || $delete_terms) {
           $terms = format_plural($term_count, '1 term', '@count terms');
+          $links = array();
           $links['list'] = array(
             'title' => t('List terms'),
             'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
@@ -104,7 +105,6 @@ class DashboardTaxonomyBlock extends Block {
               backdrop_render($operations),
             ),
           );
-          unset($links);
         }
         else {
           $no_access = TRUE;
