@@ -60,17 +60,11 @@ class DashboardTaxonomyBlock extends Block {
     $vocabularies = taxonomy_vocabulary_load_multiple($allowed_vocabularies);
 
     $rows = array();
-    $show_opertations = FALSE;
+    // Flag that determines whether the block should be rendered or not.
+    $no_access = TRUE;
     foreach ($vocabularies as $vocabulary) {
       $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
       $terms = format_plural($term_count, '1 term', '@count terms');
-
-      $row = array(
-        'data' => array(
-          check_plain(t($vocabulary->name)),
-          $terms,
-        ),
-      );
 
       module_load_include('inc', 'taxonomy', 'taxonomy.admin');
       $operations = _vocabulary_get_operations($vocabulary);
@@ -86,29 +80,37 @@ class DashboardTaxonomyBlock extends Block {
         }
       }
 
-      // Add the "Operations" cell in the row only if there are operations to be
-      // performed.
+      // If even one operation is allowed to be performed on any vocabulary,
+      // render the block.
       if (!empty($operations)) {
-        $show_opertations = TRUE;
-        $operations = array(
-          '#type' => 'operations',
-          '#links' => $operations,
-        );
-        $row['data'][] = backdrop_render($operations);
+        $no_access = FALSE;
       }
 
-      $rows[] = $row;
+      $operations = array(
+        '#type' => 'operations',
+        '#links' => $operations,
+      );
+
+      $rows[] = array(
+        'data' => array(
+          check_plain(t($vocabulary->name)),
+          $terms,
+          backdrop_render($operations),
+        ),
+      );
+    }
+
+    // If there are existing vocabularies, but the user has no access to perform
+    // any operation to any of them, hide the block completely.
+    if ($no_access) {
+      return array();
     }
 
     $header = array(
       array('data' => t('Vocabulary')),
       array('data' => t('Terms')),
+      array('data' => t('Operations')),
     );
-    // Add the "Operations" column in the table only if there are operations to
-    // be performed.
-    If ($show_opertations) {
-      $header[] = array('data' => t('Operations'));
-    }
 
     $panel = array(
       '#theme' => 'dashboard_panel__taxonomy',
