@@ -54,69 +54,60 @@ class DashboardTaxonomyBlock extends Block {
       return;
     }
 
-    $vocabularies = taxonomy_get_vocabularies();
-    $current_path = current_path();
-    $options = array('destination' => $current_path);
+    $allowed_vocabularies = !empty($this->settings['vocabularies']) ? $this->settings['vocabularies'] : FALSE;
+    // Passing FALSE to taxonomy_vocabulary_load_multiple() loads all
+    // vocabulaies.
+    $vocabularies = taxonomy_vocabulary_load_multiple($allowed_vocabularies);
+
+    $rows = array();
+    $show_opertations = FALSE;
+    foreach ($vocabularies as $vocabulary) {
+      $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
+      $terms = format_plural($term_count, '1 term', '@count terms');
+
+      $row = array(
+        'data' => array(
+          check_plain(t($vocabulary->name)),
+          $terms,
+        ),
+      );
+
+      module_load_include('inc', 'taxonomy', 'taxonomy.admin');
+      $operations = _vocabulary_get_operations($vocabulary);
+      foreach ($operations as $operation => $link) {
+        // We only need a specific set of operations in the Taxonomy block.
+        if (!in_array($operation, array('list', 'add', 'configure'))) {
+          // Remove the rest.
+          unset($operations[$operation]);
+        }
+        // Add the current page as destination for the remaining operations.
+        else {
+          $operations[$operation]['query']['destination'] = current_path();
+        }
+      }
+
+      // Add the "Operations" cell in the row only if there are operations to be
+      // performed.
+      if (!empty($operations)) {
+        $show_opertations = TRUE;
+        $operations = array(
+          '#type' => 'operations',
+          '#links' => $operations,
+        );
+        $row['data'][] = backdrop_render($operations);
+      }
+
+      $rows[] = $row;
+    }
+
     $header = array(
       array('data' => t('Vocabulary')),
       array('data' => t('Terms')),
-      array('data' => t('Operations')),
     );
-    $rows = array();
-    $no_access = FALSE;
-
-    foreach ($vocabularies as $machine => $vocabulary) {
-      if (in_array($machine, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
-        $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
-        if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocabulary->machine_name)) {
-          $terms = format_plural($term_count, '1 term', '@count terms');
-          $links['list'] = array(
-            'title' => t('List terms'),
-            'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
-            'query' => $options,
-          );
-          $links['add'] = array(
-            'title' => t('Add new term'),
-            'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add',
-            'query' => $options,
-          );
-          if (user_access('administer taxonomy')) {
-            $links['configure'] = array(
-              'title' => t('Configure'),
-              'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit',
-              'query' => $options,
-            );
-          }
-          $operations = array(
-            '#type' => 'dropbutton',
-            '#links' => $links,
-          );
-          $rows[] = array(
-            'data' => array(
-              check_plain(t($vocabulary->name)),
-              $terms,
-              backdrop_render($operations),
-            ),
-          );
-        }
-        else {
-          $no_access = TRUE;
-        }
-      }
-    }
-
-    // If there are existing vocabularies, but user has no access to any
-    // of them, hide the block completely.
-    if (empty($rows)) {
-      if ($no_access) {
-        return array();
-      }
-      $rows[] = array(
-        array(
-          'data' => t('There are no vocabularies to display.'),
-          'colspan' => 4,
-        ),
-      );
+    // Add the "Operations" column in the table only if there are operations to
+    // be performed.
+    If ($show_opertations) {
+      $header[] = array('data' => t('Operations'));
     }
 
     $panel = array(
@@ -126,6 +117,7 @@ class DashboardTaxonomyBlock extends Block {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => t('There are no vocabularies to display.'),
     );
     if (user_access('administer taxonomy')) {
       $panel['link'] = array(
