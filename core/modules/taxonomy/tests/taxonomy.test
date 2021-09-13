@@ -159,7 +159,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit = array(
       $role_name . '[edit terms in tags]' => TRUE,
     );
-    $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save vocabulary'));
 
     // Check that the permission changes are saved on the permissions page.
     $this->backdropGet('admin/config/people/permissions');
@@ -1719,7 +1719,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Configure'));
     $edit = array();
     $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
 
     // Check vocabulary settings.
     $this->backdropGet('admin/structure/taxonomy');
@@ -1736,7 +1736,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Configure'));
     $edit = array();
     $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
 
     $terms = array(
       'term1' => $this->randomName(),
