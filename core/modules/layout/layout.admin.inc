@@ -44,6 +44,7 @@ function layout_list_page() {
   // Assemble the rows of the table.
   $override_rows = array();
   $stand_alone_rows = array();
+  $broken_rows = array();
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
@@ -62,17 +63,17 @@ function layout_list_page() {
     }
     else {
       if (strpos($path, '%') === FALSE) {
-        $path_link = t('Path: ') . l($path, $path);
+        if (!$page_callbacks[$path]) {
+          $path_link = t('Path: ') . check_plain($path);
+        }
+        else {
+          $path_link = t('Path: ') . l($path, $path);
+        }
       }
       else {
         $path_link = t('System path: ') . check_plain($path);
       }
 
-      $class = array();
-      if (!$page_callbacks[$path]) {
-        $class[] = 'missing-path';
-        $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
-      }
       $row[] = array('data' => $path_link, 'class' => $class);
       // Empty columns are intentional.
       $row[] = '';
@@ -87,7 +88,10 @@ function layout_list_page() {
       $row[] = '';
     }
 
-    if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+    if ($path !== '' && $page_callbacks[$path] == NULL) {
+      $broken_rows[] = array('data' => $row, 'class' => array('layout-group', 'disabled'));
+    }
+    elseif (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
       $stand_alone_rows[] = array('data' => $row, 'class' => array('layout-group'));
     }
     else {
@@ -114,6 +118,16 @@ function layout_list_page() {
       $info = $layout_template_info[$layout->layout_template];
       $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
 
+      // Remove disable and enable options for broken layouts.
+      if (!$page_callbacks[$path]) {
+        if (isset($operations['#links']['disable'])) {
+          unset($operations['#links']['disable']);
+        }
+        if (isset($operations['#links']['enable'])) {
+          unset($operations['#links']['enable']);
+        }
+      }
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
       $row[] = $template;
@@ -125,7 +139,12 @@ function layout_list_page() {
         $class[] = 'disabled';
       }
 
-      if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+      if ($path !== '' && $page_callbacks[$path] == NULL) {
+        // Add the disabled class to broken rows.
+        $class[] = 'disabled';
+        $broken_rows[] = array('data' => $row, 'class' => $class);
+      }
+      elseif (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
         $stand_alone_rows[] = array('data' => $row, 'class' => $class);
       }
       else {
@@ -167,9 +186,24 @@ function layout_list_page() {
     '#header' => $header,
     '#rows' => $override_rows,
     '#attributes' => array('class' =>   array('layout-list')),
-    '#empty' => t('No layouts have been created yet.'),
     '#weight' => 3,
   );
+
+  if (!empty($broken_rows)) {
+    $page['broken'] = array(
+      '#type' => 'help',
+      '#markup' => '<h2>' . t('Broken layouts') . '</h2>' . t('These layouts cannot be used unless the module that provides the path is enabled.'),
+      '#weight' => 4,
+    );
+    $page['broken_table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $broken_rows,
+      '#attributes' => array('class' =>   array('layout-list')),
+      '#weight' => 5,
+    );
+  }
+
   return $page;
 }
 
