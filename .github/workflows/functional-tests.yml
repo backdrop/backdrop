@@ -19,7 +19,7 @@ jobs:
         run: |
           # The database runs as user "runner".
           sudo mkdir /dev/shm/mysql_tmp
-          sudo chmod 777 /dev/shm/mysql_tmp
+          sudo chown runner:runner /dev/shm/mysql_tmp
 
       - name: Install database server
         uses: shogo82148/actions-setup-mysql@v1
