@@ -658,25 +658,22 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#value' => empty($role->weight) ? 0 : $role->weight,
   );
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save role'),
-    '#weight' => 2,
-  );
   // Only show the 'Save and set permissions' button when creating a new role.
   if (empty($role)) {
     $form['actions']['continue'] = array(
       '#type' => 'submit',
       '#value' => t('Save and set permissions'),
-      '#weight' => 1,
     );
   }
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save role'),
+  );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#href' => 'admin/config/people/roles',
     '#title' => t('Cancel'),
     '#options' => array('attributes' => array('class' => array('form-cancel'))),
-    '#weight' => 15,
   );
 
   return $form;
