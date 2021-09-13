@@ -12,6 +12,7 @@ jobs:
       matrix:
         php-versions: ['5.3', '7.4']
         fraction: ['1/3', '2/3', '3/3']
+        database-versions: ['mariadb-10.3']
 
     steps:
       - name: Prepare for database
@@ -23,7 +24,7 @@ jobs:
       - name: Install database server
         uses: shogo82148/actions-setup-mysql@v1
         with:
-          mysql-version: 'mariadb-10.3'
+          mysql-version: ${{ matrix.database-versions }}
           root-password: 'root'
           my-cnf: |
             datadir=/dev/shm/mysql
