@@ -45,15 +45,18 @@ class DashboardNewsBlock extends Block {
     $links = array();
     if ($news) {
       foreach ($news as $key => $notifications) {
-        $is_new = (time() - $notifications['timestamp']) < $days_before_news_is_old * 24 * 60 * 60;
-        $is_new_marker = $is_new ? '<span class="marker">' . t('new') . '</span> ' : '';
-
         $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
+        $date_classes = array('class' => array('notification-date'));
+        $is_new = (time() - $notifications['timestamp']) < $days_before_news_is_old * 24 * 60 * 60;
+        if ($is_new) {
+          $date_classes['class'][] = 'marker';
+        }
+        $notification_date = '<span ' . backdrop_attributes($date_classes) . '>' . $notification_date . '</span>';
         $notification_link = l($notifications['title'], $notifications['url'], array('attributes' => array('target'=>'_blank')));
         $notification_summary = filter_xss($notifications['summary']);
 
         $notification = array(
-          'data' => '<p>' . $is_new_marker . $notification_date . ': ' . $notification_link . ' - ' . $notification_summary . '</p>',
+          'data' => '<p>' . $notification_date . ': ' . $notification_link . ' - ' . $notification_summary . '</p>',
         );
 
         if ($is_new) {
