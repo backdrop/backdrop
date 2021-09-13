@@ -23,8 +23,7 @@ jobs:
       - name: Install database server
         uses: shogo82148/actions-setup-mysql@v1
         with:
-          distribution: mariadb
-          mysql-version: '10.3'
+          mysql-version: 'mariadb-10.3'
           root-password: 'root'
           my-cnf: |
             datadir=/dev/shm/mysql
