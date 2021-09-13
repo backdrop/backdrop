@@ -774,7 +774,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     // Set the translation file directory.
     $source = backdrop_get_path('module', 'locale_test');
     $destination = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
-    file_prepare_directory($destination);
+    file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
     foreach (file_scan_directory($source, '/.*\.po/') as $file) {
       file_unmanaged_copy($file->uri, $destination . '/' . $file->filename, FILE_EXISTS_REPLACE);
     }
