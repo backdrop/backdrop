@@ -21,11 +21,13 @@ function taxonomy_overview_vocabularies() {
 
   foreach ($vocabularies as $vocabulary) {
     $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", array(':vocab' => $vocabulary->machine_name))->fetchField();
-
     if (taxonomy_vocabulary_access(FALSE, $vocabulary)) {
       $row = array();
       $row[] = array(
-        'data' => theme('taxonomy_vocabulary_name', array('vocabulary' => $vocabulary)),
+        'data' => theme('label_machine_name__vocabulary', array(
+          'label' => $vocabulary->name,
+          'machine_name' => $vocabulary->machine_name,
+        )),
         'class' => array('vocabulary-name'),
         'data-label' => t('Vocabulary name'),
       );

@@ -1921,3 +1921,21 @@ div.add-or-remove-shortcuts {
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
 }
+
+/**
+ * Labels & machine names in admin listing tables.
+ */
+table .label {
+  font-weight: bold;
+}
+table .machine-name {
+  color: #666;
+}
+.tabledrag-handles-shown .label,
+.tabledrag-handles-shown .machine-name {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .tabledrag-handles-shown .label,
+[dir="rtl"] .tabledrag-handles-shown .machine-name {
+  padding-right: 28px;
+}

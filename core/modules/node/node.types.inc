@@ -13,7 +13,7 @@ function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Operations'));
   $rows = array();
 
   // Sort the list of content types by label instead of machine name.
@@ -22,7 +22,11 @@ function node_overview_types() {
   foreach ($names as $key => $name) {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
-    $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $row = array(theme('label_machine_name__node_type', array(
+      'label' => $name,
+      'machine_name' => $type->type,
+    )));
+    $row[] = filter_xss_admin($type->description);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
