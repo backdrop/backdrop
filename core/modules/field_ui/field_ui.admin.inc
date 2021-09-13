@@ -937,16 +937,23 @@ function field_ui_display_overview($entity_type, $bundle) {
  */
 function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
   $bundle_name = '';
-  if (is_object($bundle) && property_exists($bundle, 'name')) {
-    $bundle_name = check_plain($bundle->name);
+  if (is_string($bundle)) {
+    $bundles = field_info_bundles($entity_type);
+    if (isset($bundles[$bundle]['label'])) {
+      $bundle_name = check_plain($bundles[$bundle]['label']);
+    }
   }
-  elseif (is_object($bundle) && property_exists($bundle, 'label')) {
-    $bundle_name = check_plain($bundle->label);
+  elseif (is_object($bundle)) {
+    if (property_exists($bundle, 'name')) {
+      $bundle_name = check_plain($bundle->name);
+    }
+    elseif (property_exists($bundle, 'label')) {
+      $bundle_name = check_plain($bundle->label);
+    }
   }
+  
   $page_title = field_ui_manage_display_title($entity_type, $view_mode);
-  backdrop_set_title(t('!page: !teaser display', array(
-    '!page' => $bundle_name,
-    '!teaser' => $page_title)));
+  backdrop_set_title(t('!page: !teaser display', array('!page' => $bundle_name, '!teaser' => $page_title)));
 
   $bundle = field_extract_bundle($entity_type, $bundle);
 
