@@ -33,9 +33,9 @@ jobs:
 
       - name: Verify setup and create database
         run: |
-          echo -e '[client]\nuser = root\npassword = root' > ~/.my.cnf
-          mysql -h127.0.0.1 -e 'SELECT version()\G'
-          mysql -h127.0.0.1 -e 'CREATE DATABASE backdrop;'
+          echo -e '[client]\nuser = root\npassword = root\nhost = 127.0.0.1' > ~/.my.cnf
+          mysql -e 'SELECT version()\G'
+          mysql -e 'CREATE DATABASE backdrop;'
 
       - name: Checkout
         uses: actions/checkout@v2
