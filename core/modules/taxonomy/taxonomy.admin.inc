@@ -75,10 +75,15 @@ function taxonomy_overview_vocabularies() {
 function _vocabulary_get_operations($vocabulary) {
   $links = array();
 
-  $links['list'] = array(
-    'title' => t('List terms'),
-    'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
-  );
+  // Allow access to the terms listing for the vocabulary if the user has:
+  // - any of the create/update (edit)/delete permissions,
+  // - or the the 'administer taxonomy' permission.
+  if (taxonomy_vocabulary_access(FALSE, $vocabulary)) {
+    $links['list'] = array(
+      'title' => t('List terms'),
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
+    );
+  }
   if (taxonomy_vocabulary_access('create', $vocabulary)) {
     $links['add'] = array(
       'title' => t('Add terms'),

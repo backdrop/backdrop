@@ -938,12 +938,21 @@ function field_ui_display_overview($entity_type, $bundle) {
 function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
   $bundle_name = '';
   if (is_object($bundle) && property_exists($bundle, 'name')) {
-    $bundle_name = check_plain($bundle->name);
+    $bundle_name = $bundle->name;
   }
   elseif (is_object($bundle) && property_exists($bundle, 'label')) {
-    $bundle_name = check_plain($bundle->label);
+    $bundle_name = $bundle->label;
+  }
+  elseif (is_string($bundle)) {
+    $entity_info = entity_get_info($entity_type);
+    if (isset($entity_info['label'])) {
+      $bundle_name = $entity_info['label'];
+    }
   }
   $page_title = field_ui_manage_display_title($entity_type, $view_mode);
+
+  // Function backdrop_set_title() also sanitizes the raw title components with
+  // check_plain().
   backdrop_set_title(t('!page: !teaser display', array(
     '!page' => $bundle_name,
     '!teaser' => $page_title)));
