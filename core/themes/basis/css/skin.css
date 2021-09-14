@@ -29,6 +29,10 @@ a:active {
   background: #dddddd;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 blockquote,
 figcaption {
   border-left-color: #bbbbbb;
