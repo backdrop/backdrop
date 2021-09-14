@@ -386,8 +386,15 @@ function node_form($form, &$form_state, Node $node) {
   }
 
   $form['options']['additional'] = array(
+    // @todo candidate for conversion to '#type' => 'html_tag'.
+    // See: https://github.com/backdrop/backdrop-issues/issues/5223
     '#type' => 'markup',
-    '#markup' => $node->nid ? t('<label>Additional options</label>') : t('<label>Additional actions</label>'),
+    '#prefix' => '<label id="promote-stiky-label">',
+    '#markup' => $node->nid ? t('Additional options') : t('Additional actions'),
+    '#suffix' => '</label>',
+    '#attributes' => array(
+      'class' => array('promote-stiky-label'),
+    ),
     '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
   );
 
@@ -396,12 +403,18 @@ function node_form($form, &$form_state, Node $node) {
     '#title' => $node->nid ? t('Promoted') : t('Promote'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-stiky-label'),
+    ),
   );
   $form['options']['sticky'] = array(
     '#type' => 'checkbox',
     '#title' => $node->nid ? t('Sticky at top of lists') : t('Make sticky at top of lists'),
     '#default_value' => $node->sticky,
     '#access' => $node_type->settings['sticky_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-stiky-label'),
+    ),
   );
 
   // Prepare cancel link.
