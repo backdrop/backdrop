@@ -392,9 +392,6 @@ function node_form($form, &$form_state, Node $node) {
     '#prefix' => '<label id="promote-stiky-label">',
     '#markup' => $node->nid ? t('Additional options') : t('Additional actions'),
     '#suffix' => '</label>',
-    '#attributes' => array(
-      'class' => array('promote-stiky-label'),
-    ),
     '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
   );
 
