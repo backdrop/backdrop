@@ -40,14 +40,15 @@ class DashboardNewsBlock extends Block {
    */
   public function getContent() {
     $news = $this->getNews();
-    $days_before_news_is_old = 14;
 
     $links = array();
     if ($news) {
       foreach ($news as $key => $notifications) {
         $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
         $date_classes = array('class' => array('notification-date'));
-        $is_new = (time() - $notifications['timestamp']) < $days_before_news_is_old * 24 * 60 * 60;
+        // A notification is considered new, if no more than 14 days (1209600
+        // seconds) have lapsed.
+        $is_new = (time() - $notifications['timestamp']) < 1209600;
         if ($is_new) {
           $date_classes['class'][] = 'marker';
         }
