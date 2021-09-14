@@ -116,7 +116,7 @@ function system_token_info() {
   );
   $url['args'] = array(
     'name' => t('Arguments'),
-    'description' => t("The specific argument of the current page (e.g. 'arg:1' on the page 'node/1' returns '1')."),
+    'description' => t("The specific argument of the current page (e.g. 'args:value:1' on the page 'node/123' returns '123')."),
     'type' => 'array',
   );
 
