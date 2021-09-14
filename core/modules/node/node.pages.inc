@@ -386,18 +386,19 @@ function node_form($form, &$form_state, Node $node) {
   }
 
   $form['options']['additional'] = array(
-    '#type' => 'fieldset',
-    '#title' => $node->nid ? t('Additional options') : t('Additional actions'),
+    '#type' => 'markup',
+    '#markup' => $node->nid ? t('<label>Additional options</label>') : t('<label>Additional actions</label>'),
     '#collapsible' => FALSE,
     '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
   );
-  $form['options']['additional']['promote'] = array(
+
+  $form['options']['promote'] = array(
     '#type' => 'checkbox',
     '#title' => $node->nid ? t('Promoted') : t('Promote'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
   );
-  $form['options']['additional']['sticky'] = array(
+  $form['options']['sticky'] = array(
     '#type' => 'checkbox',
     '#title' => $node->nid ? t('Sticky at top of lists') : t('Make sticky at top of lists'),
     '#default_value' => $node->sticky,
