@@ -388,7 +388,6 @@ function node_form($form, &$form_state, Node $node) {
   $form['options']['additional'] = array(
     '#type' => 'markup',
     '#markup' => $node->nid ? t('<label>Additional options</label>') : t('<label>Additional actions</label>'),
-    '#collapsible' => FALSE,
     '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
   );
 
