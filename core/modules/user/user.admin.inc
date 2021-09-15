@@ -683,6 +683,9 @@ function user_admin_role($form, &$form_state, $role = NULL) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
+  //Set the default redirect.
+  $redirect = 'admin/config/people/roles';
+
   if (empty($form_state['role'])) {
     // Save a new role.
     $role = (object) array(
@@ -691,7 +694,11 @@ function user_admin_role_submit($form, &$form_state) {
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
-    $redirect = 'admin/config/people/permissions';
+    // Determine whether it was the 'Save and set permissions' or the 'Save
+    // role' button that was clicked, and set the form redirect accordingly.
+    if ($form_state['triggering_element']['#id'] == 'edit-continue') {
+      $redirect = 'admin/config/people/permissions';
+    }
   }
   else {
     // Update existing role.
@@ -701,7 +708,6 @@ function user_admin_role_submit($form, &$form_state) {
     user_role_save($role);
     $new_role = $role->label;
     backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
-    $redirect = 'admin/config/people/roles';
   }
 
   $form_state['redirect'] = $redirect;
