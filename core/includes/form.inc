@@ -3617,7 +3617,10 @@ function form_process_container($element, &$form_state) {
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
  *
- * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * theme_container() is also being used for 'checkboxes' and 'radios' elements.
+ * See: https://docs.backdropcms.org/change-records/functions-theme_radios-and-theme_checkboxes-have-been-removed
+ *
+ * See the @link https://docs.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
  * for more information on the #theme_wrappers render array property.
  *
  * @param $variables
@@ -3640,9 +3643,10 @@ function theme_container($variables) {
       $element['#attributes']['id'] = $element['#id'];
     }
     // Add the form-wrapper class if not already added, but only for 'container'
-    // elements, otherwise #states does not work properly for 'checkboxes' and
-    // 'radios' elements.
-    if ($element['#type'] == 'container' && !in_array('form-wrapper', $element['#attributes']['class'])) {
+    // elements. theme_container() is also being used for 'checkboxes' and
+    // 'radios' elements, but #states breaks for them if the form-wrapper class
+    // is added.
+    if (isset($element['#type']) && $element['#type'] == 'container' && !in_array('form-wrapper', $element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
     }
   }
