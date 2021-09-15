@@ -127,7 +127,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
-    '#description' => t('The alt attribute may be used by search engines, screen readers, and when the image cannot be loaded.'),
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
     '#required' => $upload_settings['alt_required'],
   );
