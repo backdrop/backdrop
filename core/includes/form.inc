@@ -3632,9 +3632,8 @@ function form_process_container($element, &$form_state) {
  */
 function theme_container($variables) {
   $element = $variables['element'];
-  // Ensure #attributes and classes within it are set; preserve existing ones.
+  // Ensure #attributes is set, while preserving any existing attributes.
   $element += array('#attributes' => array());
-  $element['#attributes'] += array('class' => array());
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
@@ -3646,8 +3645,13 @@ function theme_container($variables) {
     // elements. theme_container() is also being used for 'checkboxes' and
     // 'radios' elements, but #states breaks for them if the form-wrapper class
     // is added.
-    if (isset($element['#type']) && $element['#type'] == 'container' && !in_array('form-wrapper', $element['#attributes']['class'])) {
-      $element['#attributes']['class'][] = 'form-wrapper';
+    if (isset($element['#type']) && $element['#type'] == 'container') {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      if (!in_array('form-wrapper', $element['#attributes']['class'])) {
+        $element['#attributes']['class'][] = 'form-wrapper';
+      }
     }
   }
 
