@@ -2158,9 +2158,8 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Ensure both submit buttons exist in the "Add role" form.
     $this->clickLink(t('Add role'));
-    $this->assertResponse(200);
     $this->assertUrl('admin/config/people/roles/add', array(), 'Redirected to correct URL after clicking the "+ Add role" link.');
-    $this->assertTitle(t('Add role'), 'The title on the form is "Add role".');
+    $this->assertTitle(t('Add role'), 'The page title on the form page is "Add role".');
     $this->assertRaw(t('Save and set permissions'), '"Save and set permissions" button found on "Add role" form.');
     $this->assertRaw(t('Save role'), '"Save role" button found on "Add role" form.');
     $this->clickLink(t('Cancel'));
@@ -2178,9 +2177,8 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Ensure only one submit button exists in the "Edit role" form.
     $this->clickLink(t('Configure role'));
-    $this->assertResponse(200);
     $this->assertUrl('admin/config/people/roles/configure/' . $role1_name, array(), 'Redirected to correct URL after clicking the "Configure role" operation.');
-    $this->assertTitle(t('Configure role'), 'The title on the form is "Configure role".');
+    $this->assertTitle(t('Configure role'), 'The page title on the form is "Configure role".');
     $this->assertNoRaw(t('Save and set permissions'), '"Save and set permissions" button not found on "Configure role" form.');
     $this->assertRaw(t('Save role'), '"Save role" button found on "Configure role" form.');
     $this->clickLink(t('Cancel'));
