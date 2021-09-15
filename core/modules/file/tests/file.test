@@ -2868,11 +2868,15 @@ class FileTypeTestCase extends FileTestHelper {
     $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['name'])), 'New file type successfully created.');
     $this->assertText($edit['name'], 'New file type created: name found.');
     $this->assertText($edit['description'], 'New file type created: description found.');
-    $this->assertFieldByXPath("//table//td[2]", t('Custom'), 'Newly created file type is stored in config.');
+    $this->assertFieldByXPath("//table//td[1]//div[1]", $edit['name'], 'The label of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[1]//div[2]", '(' . t('Machine name: @machine_name', array('@machine_name' => $edit['type']])) . ')', 'The machine name of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[2]", $edit['description'], 'The description of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[3]", t('Custom'), 'The storage state of the newly-created file type is shown in the table.');
     $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type.');
     $this->assertLink(t('Delete'), 0, 'Able to delete newly created file type.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . str_replace('_', '-', $edit['type']) . '/disable', 0, 'Disable link disables.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . str_replace('_', '-', $edit['type']) . '/delete', 0, 'Delete link points to delete confirmation page.');
+    $this->assertEqual($edit['type'], config_get('file.type.' . $edit['type'], 'type'), 'The newly-created file type is stored in config.');
 
     // Edit file type.
     $this->backdropGet('admin/structure/file-types/manage/' . $edit['type'] . '/edit');
@@ -2888,13 +2892,16 @@ class FileTypeTestCase extends FileTestHelper {
     $this->backdropPost(NULL, array('name' => $edit['name']), t('Save'));
     $this->assertRaw(t('The file type %type has been updated.', array('%type' => $edit['name'])), 'File type was modified.');
     $this->assertText($edit['name'], 'Modified name found on file types list.');
+    $this->assertEqual($edit['name'], config_get('file.type.' . $edit['type'], 'name'), 'The file type name was updated in config.');
 
     // Disable and re-enable file type.
     $url_type = str_replace('_', '-', $edit['type']);
     $this->clickFileTypeOperationLink(t('Disable'), $url_type . '/disable');
+    $this->assertTrue(config_get('file.type.' . $edit['type'], 'disabled'), 'The file type was disabled in config.');
     $this->assertRaw(t('The file type %type has been disabled.', array('%type' => $edit['name'])), 'Disable confirmation message found.');
     $this->assertLink(t('Enable'), 0, 'Able to re-enable newly created file type.');
     $this->clickFileTypeOperationLink(t('Enable'), $url_type . '/enable');
+    $this->assertFalse(config_get('file.type.' . $edit['type'], 'disabled'), 'The file type was enabled in config.');
     $this->assertRaw(t('The file type %type has been enabled.', array('%type' => $edit['name'])), 'Enable confirmation message found.');
     $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type again.');
 
