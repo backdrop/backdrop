@@ -2159,7 +2159,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Ensure both submit buttons exist in the "Add role" form.
     $this->clickLink(t('Add role'));
     $this->assertUrl('admin/config/people/roles/add', array(), 'Redirected to correct URL after clicking the "+ Add role" link.');
-    $this->assertTitle(t('Add role'), 'The page title on the form page is "Add role".');
+    $this->assertTitle(t('Add role | Backdrop CMS'), 'The page title on the form page is "Add role".');
     $this->assertRaw(t('Save and set permissions'), '"Save and set permissions" button found on "Add role" form.');
     $this->assertRaw(t('Save role'), '"Save role" button found on "Add role" form.');
     $this->clickLink(t('Cancel'));
@@ -2176,9 +2176,9 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->assertTrue(is_object($role1), 'The role was successfully loaded from config.');
 
     // Ensure only one submit button exists in the "Edit role" form.
-    $this->clickLink(t('Configure role'));
+    $this->clickLink(t('Configure role'), 3);
     $this->assertUrl('admin/config/people/roles/configure/' . $role1_name, array(), 'Redirected to correct URL after clicking the "Configure role" operation.');
-    $this->assertTitle(t('Configure role'), 'The page title on the form is "Configure role".');
+    $this->assertTitle(t('Configure role | Backdrop CMS'), 'The page title on the form is "Configure role".');
     $this->assertNoRaw(t('Save and set permissions'), '"Save and set permissions" button not found on "Configure role" form.');
     $this->assertRaw(t('Save role'), '"Save role" button found on "Configure role" form.');
     $this->clickLink(t('Cancel'));
@@ -2209,7 +2209,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $this->assertText(t('The 123 role has been renamed to 789.'), 'The role has been renamed.');
     $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the renaming the role.');
     backdrop_static_reset('user_roles');
-    $role = user_role_load($role1_name);
+    $role1 = user_role_load($role1_name);
     $this->assertFalse($role1->label === $old_label, 'The role has had its label changed.');
     $this->assertTrue($role1->label === $new_label, 'The role has the new label.');
 

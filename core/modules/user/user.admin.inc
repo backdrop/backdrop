@@ -691,7 +691,12 @@ function user_admin_role_submit($form, &$form_state) {
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
-    $redirect = 'admin/config/people/permissions';
+    if ($form_state['clicked_button']['#parents'][0] == 'continue') {
+      $redirect = 'admin/config/people/permissions';
+    }
+    else {
+      $redirect = 'admin/config/people/roles';
+    }
   }
   else {
     // Update existing role.
