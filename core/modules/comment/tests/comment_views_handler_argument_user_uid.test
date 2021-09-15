@@ -23,8 +23,6 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     $comment += array(
       'uid' => $this->loggedInUser->uid,
       'nid' => $node->nid,
-      'cid' => '',
-      'pid' => '',
     );
     $comment = entity_create('comment', $comment);
     return comment_save($comment);

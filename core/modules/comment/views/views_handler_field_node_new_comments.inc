@@ -91,7 +91,7 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
 
   function render_link($data, $values) {
     if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
-      $node = new stdClass();
+      $node = new Node();
       $node->nid = $this->get_value($values, 'nid');
       $node->type = $this->get_value($values, 'type');
       $this->options['alter']['make_link'] = TRUE;

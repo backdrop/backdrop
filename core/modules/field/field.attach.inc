@@ -278,8 +278,8 @@ function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = 
         if (!isset($fields[$field_name])) {
           $fields[$field_name] = $field;
         }
-        // Extract the field values into a separate variable, easily accessed
-        // by hook implementations.
+        // Extract the field values into a separate variable that can be
+        // accessed by hook implementations.
         // Unless a language suggestion is provided we iterate on all the
         // available languages.
         $available_languages = field_available_languages($entity_type, $field);

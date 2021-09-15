@@ -514,10 +514,9 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
 
   // @see _book_admin_table_tree(). The weight may be larger than 15.
   $form['book']['weight'] = array(
-    '#type' => 'weight',
+    '#type' => 'number',
     '#title' => t('Weight'),
     '#default_value' => $node->book['weight'],
-    '#delta' => max(15, abs($node->book['weight'])),
     '#weight' => 5,
     '#description' => t('Pages at a given level are ordered first by weight and then by title.'),
   );
@@ -733,11 +732,13 @@ function book_prev($book_link) {
     return NULL;
   }
   $flat = book_get_flat_menu($book_link);
-  // Assigning the array to $flat resets the array pointer for use with each().
+  reset($flat);
   $curr = NULL;
   do {
     $prev = $curr;
-    list($key, $curr) = each($flat);
+    $curr = current($flat);
+    $key = key($flat);
+    next($flat);
   } while ($key && $key != $book_link['mlid']);
 
   if ($key == $book_link['mlid']) {
@@ -771,9 +772,10 @@ function book_prev($book_link) {
  */
 function book_next($book_link) {
   $flat = book_get_flat_menu($book_link);
-  // Assigning the array to $flat resets the array pointer for use with each().
+  reset($flat);
   do {
-    list($key, $curr) = each($flat);
+    $key = key($flat);
+    next($flat);
   }
   while ($key && $key != $book_link['mlid']);
 

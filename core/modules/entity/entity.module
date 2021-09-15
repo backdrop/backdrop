@@ -19,6 +19,31 @@ function entity_modules_disabled() {
 }
 
 /**
+ * Implements hook_modules_uninstalled().
+ */
+function entity_modules_uninstalled($modules) {
+  // It is important that the entity info cache gets flushed last to prevent
+  // fatal errors with outdated entity information.
+  backdrop_register_shutdown_function('entity_info_cache_clear');
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function entity_flush_caches() {
+  $bins = array();
+
+  $entities = entity_get_info();
+  foreach ($entities as $type => $info) {
+    if (isset($info['entity cache']) && $info['entity cache']) {
+      $bins[] = 'cache_entity_' . $type;
+    }
+  }
+
+  return $bins;
+}
+
+/**
  * Load a custom entity display mode by entity type and machine name.
  *
  * @param string $entity_type
@@ -141,6 +166,49 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
 }
 
 /**
+ * Determines whether the given user has access to an entity.
+ *
+ * @param string $op
+ *   The operation to be performed on the entity. Possible values are:
+ *   - create
+ *   - view
+ *   - update
+ *   - delete
+ * @param string $entity_type
+ *   The entity type of the entity to check for.
+ * @param EntityInterface $entity
+ *   Optionally an entity to check access for. If no entity is given, it will be
+ *   determined whether access is allowed for all entities of the given type.
+ * @param User $account
+ *   The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return bool
+ *   Whether access is allowed or not. If the entity type does not specify any
+ *   access information, NULL is returned.
+ *
+ * @see entity_type_supports()
+ */
+function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $account = NULL) {
+  if (!in_array($op, array('create', 'view', 'update', 'delete'), TRUE)) {
+    // If the $op was not one of the supported ones, we return access denied.
+    return FALSE;
+  }
+  if (!empty($entity)) {
+    return $entity->access($op, $account);
+  }
+  elseif ($op == 'create') {
+    $entity_info = entity_get_info($entity_type);
+
+    $class = $entity_info['entity class'];
+    $bundle = NULL;
+    if ($entity !== NULL) {
+      $bundle = $entity->bundle();
+    }
+    return $class::createAccess($bundle, $account);
+  }
+}
+
+/**
  * Gets the entity info array of an entity type.
  *
  * @param $entity_type
@@ -220,6 +288,17 @@ function entity_get_info($entity_type = NULL) {
               $entity_info[$type]['view modes'] = array();
             }
             $entity_info[$type]['view modes'] = $entity_info[$type]['view modes'] + $view_modes;
+          }
+        }
+
+        // Add a token view mode if it does not already exist. Only work with
+        // fieldable entities.
+        if (!empty($entity_info[$name]['fieldable'])) {
+          if (!isset($entity_info[$name]['view modes']['token'])) {
+            $entity_info[$name]['view modes']['token'] = array(
+              'label' => t('Tokens'),
+              'custom settings' => FALSE,
+            );
           }
         }
 
@@ -306,18 +385,22 @@ function entity_extract_ids($entity_type, $entity) {
  *
  * @return
  *   An entity object, initialized with the IDs provided.
+ *
+ * @deprecated since 1.15.0.
  */
 function entity_create_stub_entity($entity_type, $ids) {
-  $entity = new stdClass();
+  watchdog_deprecated_function('entity', __FUNCTION__);
+
+  $values = array();
   $info = entity_get_info($entity_type);
-  $entity->{$info['entity keys']['id']} = $ids[0];
+  $values[$info['entity keys']['id']] = $ids[0];
   if (!empty($info['entity keys']['revision']) && isset($ids[1])) {
-    $entity->{$info['entity keys']['revision']} = $ids[1];
+    $values[$info['entity keys']['revision']] = $ids[1];
   }
   if (!empty($info['entity keys']['bundle']) && isset($ids[2])) {
-    $entity->{$info['entity keys']['bundle']} = $ids[2];
+    $values[$info['entity keys']['bundle']] = $ids[2];
   }
-  return $entity;
+  return isset($info['entity class']) ? entity_create($entity_type, $values) : (object) $values;
 }
 
 /**

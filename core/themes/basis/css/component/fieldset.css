@@ -26,7 +26,6 @@ fieldset .fieldset-legend {
   padding: 0.5em 0.78947em; /* LTR */
   text-transform: uppercase;
 }
-
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
   padding-right: 0.9375em;
@@ -54,9 +53,12 @@ fieldset .fieldset-legend {
 fieldset .fieldset-wrapper {
   padding: 0 13px 13px 15px; /* LTR */
 }
-
 [dir="rtl"] fieldset .fieldset-wrapper {
   padding: 0 15px 13px 13px;
+}
+
+.text-format-wrapper fieldset.collapsible .fieldset-legend {
+  text-transform: none;
 }
 
 .js fieldset.collapsible .fieldset-title {
@@ -64,22 +66,25 @@ fieldset .fieldset-wrapper {
   z-index: 1;
   display: block;
   width: 100%;
-  padding: 0.3em 0.3em 0.3em 1.8em;
+  padding: 0.3em 0.3em 0.3em 1.8em; /* LTR */
   margin: 0 -0.5em;
   border-radius: 4px;
   background: transparent;
   text-decoration: none;
 }
+.js[dir="rtl"] fieldset.collapsible .fieldset-title {
+  padding: 0.3em 1.8em 0.3em 0.3em;
+}
 
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
-  left: 0.6em;
+  left: 0.6em; /* LTR */
   top: 0.8em;
   width: 0;
   height: 0;
   border: .32em solid transparent;
-  border-top-color: #000;
+  border-top-color: #000000;
   border-bottom: 0;
   -webkit-transform: translate(0, 0.125em);
   transform: translate(0, 0.125em);
@@ -91,19 +96,39 @@ fieldset .fieldset-wrapper {
     transform 0.25s ease-out,
     -webkit-transform 0.25s ease-out;
 }
-
-.fieldset-legend span.summary {
-  position: absolute;
-  top: .4em;
-  right: 2em;
-  display: none;
+.js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
+  right: 0.6em;
+  left: auto;
+  -webkit-transform: translate(0, 0.125em);
+  transform: translate(0, 0.125em);
 }
 
+.fieldset-legend span.summary {
+  color: #757575;
+  position: absolute;
+  right: 1.4em; /* LTR */
+  top: .8em;
+  z-index: 0;
+  /* Hide the summary by default; we show it on wider screens (see below). */
+  display: none;
+}
+[dir="rtl"] .fieldset-legend span.summary {
+  right: auto;
+  left: 1.4em;
+}
+.fieldset-legend span.summary:not(:empty):before {
+  content: '(';
+}
+.fieldset-legend span.summary:not(:empty):after {
+  content: ')';
+}
 @media (min-width: 34em) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed {
   padding: 3.774em 0 0!important;
@@ -116,4 +141,12 @@ fieldset .fieldset-wrapper {
   transform:
     translate(0, 0.125em)
     rotate(-90deg);
+}
+.js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
+  -webkit-transform:
+    translate(0, 0.125em)
+    rotate(90deg);
+  transform:
+    translate(0, 0.125em)
+    rotate(90deg);
 }

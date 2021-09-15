@@ -210,16 +210,18 @@ class LayoutRendererStandard {
       // Check access on each block.
       if (empty($this->admin)) {
         // Assign contexts to each block.
+        $layout_contexts = $this->layout->getContexts();
+
         $has_contexts = TRUE;
         $required_contexts = $block->getRequiredContexts();
         if ($required_contexts) {
           $has_contexts = $this->layout->hasContexts($required_contexts);
           if ($has_contexts) {
-            $block->setContexts($this->layout->getContexts());
+            $block->setContexts($layout_contexts);
           }
         }
         elseif ($block->conditions) {
-          $block->setContexts($this->layout->getContexts());
+          $block->setContexts($layout_contexts);
         }
 
         // Then check access on the block.
@@ -249,7 +251,7 @@ class LayoutRendererStandard {
       // If it wants to render first, add it to the $first array. This is used
       // by blocks that need to do some processing before other blocks are
       // rendered.
-      else if (!empty($block_info['render first'])) {
+      elseif (!empty($block_info['render first'])) {
         $first[$uuid] = $block;
       }
       // Otherwise, render it in the normal order.
@@ -595,7 +597,11 @@ class LayoutRendererStandard {
     $tag = isset($style_settings['element']) ? $style_settings['element'] : '';
     $classes = array();
     if (isset($style_settings['classes'])) {
-      $classes =  explode(' ', $style_settings['classes']);
+      $classes = explode(' ', $style_settings['classes']);
+      foreach ($classes as $n => $class) {
+        $classes[$n] = backdrop_clean_css_identifier($class, array());
+      }
+      $classes = array_filter($classes);
     }
 
     return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes));

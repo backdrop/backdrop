@@ -125,10 +125,10 @@ function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
   $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
-    return theme('image', array('path' => $theme_path . '/images/caret-down--gray--32.png', 'alt' => t('sort ascending'), 'width' => 13, 'height' => 13, 'title' => t('sort ascending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/caret-up--gray--32.png', 'alt' => t('sort descending'), 'width' => 13, 'height' => 13, 'title' => t('sort descending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
   }
 }
 
@@ -156,7 +156,7 @@ function seven_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav role="navigation" class="breadcrumb">';
+    $output .= '<nav class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';

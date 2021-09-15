@@ -17,6 +17,20 @@ class DatabaseTasks_mysql extends DatabaseTasks {
   protected $pdoDriver = 'mysql';
 
   /**
+   * Error code for "Unknown database" error.
+   *
+   * @var int
+   */
+  protected $databaseNotFoundErrorCode = 1049;
+
+  /**
+   * Error code for "Unknown database" error.
+   *
+   * @var int
+   */
+  protected $connectionRefusedErrorCode = 2002;
+
+  /**
    * Returns a human-readable name string for MySQL and equivalent databases.
    */
   public function name() {

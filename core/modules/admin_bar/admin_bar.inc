@@ -37,17 +37,14 @@ function admin_bar_output($complete = FALSE) {
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
-    // Add site name as CSS class for development/staging theming purposes. We
-    // leverage the cookie domain instead of HTTP_HOST to account for many (but
-    // not all) multi-domain setups (e.g. language-based sub-domains).
+    // Add site name as CSS class for development/staging purposes. We leverage
+    // the cookie domain instead of HTTP_HOST to account for many (but not all)
+    // multi-domain setups (e.g. language-based sub-domains).
     $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
     $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
-
-    // Load menu builder functions.
-    module_load_include('inc', 'admin_bar');
 
     // Add administration bar.
     if (in_array('admin_bar.menu', $components) || $complete) {
@@ -92,7 +89,7 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
-      $content['extra']['extra']['#title'] = t('More admin tasks');
+      $content['extra']['extra']['#title'] = t('More tasks');
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );
@@ -319,7 +316,7 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
         foreach ($load_functions as $index => $function) {
           if ($function) {
             if (is_array($function)) {
-              list($function,) = each($function);
+              $function = key($function);
             }
             // Add the loader function name minus "_load".
             $placeholder = '%' . substr($function, 0, -5);
@@ -647,13 +644,14 @@ function admin_bar_links_search() {
   $search['search']['search'] = array(
     '#type' => 'search',
     '#title' => t('Admin search'),
-    '#title_display' => 'attribute',
+    '#title_display' => 'invisible',
     '#attributes' => array(
       'placeholder' => t('Menu search'),
       'autocomplete' => 'off',
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
 }
@@ -781,7 +779,7 @@ function admin_bar_flush_cache($name = NULL) {
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
-  // destination parameter, the redirect ends on the front page.
+  // destination parameter, the redirect ends on the home page.
   backdrop_goto();
 }
 
@@ -792,38 +790,6 @@ function admin_bar_admin_bar_cache_info() {
   $caches['admin_bar'] = array(
     'title' => t('Administration bar'),
     'callback' => '_admin_bar_flush_cache',
-  );
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info().
- */
-function system_admin_bar_cache_info() {
-  $caches = array(
-    'assets' => t('CSS and JavaScript'),
-    'cache' => t('Page and else'),
-    'layout' => t('Layout'),
-    'menu' => t('Menu'),
-    'theme' => t('Theme registry'),
-    'token' => t('Token registry'),
-  );
-  foreach ($caches as $name => $cache) {
-    $caches[$name] = array(
-      'title' => $cache,
-      'callback' => '_admin_bar_flush_cache',
-    );
-  }
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info() on behalf of Update module.
- */
-function update_admin_bar_cache_info() {
-  $caches['update'] = array(
-    'title' => t('Update data'),
-    'callback' => '_update_cache_clear',
   );
   return $caches;
 }
@@ -858,6 +824,10 @@ function _admin_bar_flush_cache($name = NULL) {
       break;
 
     case 'assets':
+      // Rebuild all color palettes.
+      if (module_exists('color')) {
+        color_rebuild_settings();
+      }
       // Change query-strings on css/js files to enforce reload for all users.
       _backdrop_flush_css_js();
 

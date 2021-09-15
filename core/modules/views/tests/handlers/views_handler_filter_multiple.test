@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file
+ * Definition of ViewsHandlerFilterTest.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+/**
+ * Tests filter handler.
+ */
+class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    // The Views and Views UI modules will be enabled with this.
+    parent::setUp();
+
+    // Assign vocabulary 'tags' to user entity.
+    $field_definition = field_read_field('field_tags');
+    $instance_definition = array(
+      'field_name' => $field_definition['field_name'],
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'widget' => array(
+        'type' => 'taxonomy_autocomplete',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+      ),
+    );
+    field_create_instance($instance_definition);
+  }
+
+  /**
+   * Tests combining an exposed filter with a non-exposed one.
+   */
+  function testMultipleFilters() {
+    $term = $this->viewsCreateTerm('tags');
+
+    $node1 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME));
+    $node2 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME + 1));
+    $user1 = $this->backdropCreateUser(array('access content'));
+    $user2 = $this->backdropCreateUser(array('administer users', 'access administration pages', 'administer site configuration', 'administer nodes', 'bypass node access'));
+    $this->backdropLogin($user2);
+
+    $this->backdropGet('node/' . $node1->nid . '/edit');
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
+    $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
+
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
+    $this->backdropPost('user/' . $user1->uid . '/edit', $edit, t('Save'));
+
+    $result[] = array('nid' => $node1->nid);
+    $view = views_get_view('multiple_filters_test');
+    $this->executeView($view);
+    $this->assertIdenticalResultset($view, $result, array('nid' => 'nid'));
+  }
+}

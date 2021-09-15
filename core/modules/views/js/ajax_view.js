@@ -15,6 +15,20 @@ Backdrop.behaviors.ViewsAjaxView.attach = function() {
     });
   }
 };
+/**
+ * Removes configuration and state from the page when a view is removed.
+ */
+  Backdrop.behaviors.ViewsAjaxView.detach = function(context) {
+  if (Backdrop.settings && Backdrop.settings.views && Backdrop.settings.views.ajaxViews) {
+    $.each(Backdrop.settings.views.ajaxViews, function(i, settings) {
+      var $removedView = $('.view-dom-id-' + settings.view_dom_id, context);
+      if ($removedView.length) {
+        delete Backdrop.settings.views.ajaxViews[i];
+        delete Backdrop.views.instances[i];
+      }
+    });
+  }
+}
 
 Backdrop.views = {};
 Backdrop.views.instances = {};
@@ -67,10 +81,15 @@ Backdrop.views.ajaxView = function(settings) {
     .filter(jQuery.proxy(this.filterNestedViews, this))
     .once(jQuery.proxy(this.attachPagerAjax, this));
 
+  // In order to trigger a refresh, use the following code:
+  // @code
+  // jQuery('.view-name').trigger('RefreshView');
+  // @endcode
+  //
   // Add a trigger to update this view specifically.
   var self_settings = this.element_settings;
   self_settings.event = 'RefreshView';
-  this.refreshViewAjax = new Backdrop.ajax(this.selector, this.$view, self_settings);
+  this.refreshViewAjax = new Backdrop.ajax(this.selector, this.$view[0], self_settings);
 };
 
 Backdrop.views.ajaxView.prototype.attachExposedFormAjax = function() {
@@ -116,7 +135,7 @@ Backdrop.views.ajaxView.prototype.attachPagerLinkAjax = function(id, link) {
   $.extend(viewData, Backdrop.Views.parseViewArgs(href, this.settings.view_base_path));
 
   this.element_settings.submit = viewData;
-  this.pagerAjax = new Backdrop.ajax(false, $link, this.element_settings);
+  this.pagerAjax = new Backdrop.ajax(false, link, this.element_settings);
 };
 
 Backdrop.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
@@ -124,6 +143,7 @@ Backdrop.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
   // to browse newly loaded content after e.g. clicking a pager
   // link.
   var offset = $(response.selector).offset();
+
   // We can't guarantee that the scrollable object should be
   // the body, as the view could be embedded in something
   // more complex such as a modal popup. Recurse up the DOM

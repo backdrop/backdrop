@@ -144,6 +144,11 @@ abstract class Updater implements BackdropUpdaterInterface {
       return FALSE;
     }
     foreach ($info_files as $info_file) {
+      // Exclude info files for tests.
+      if (backdrop_substr($info_file->filename, -11) == '.tests.info') {
+        unset($info_files[$info_file->uri]);
+        continue;
+      }
       if (backdrop_substr($info_file->filename, 0, -5) == backdrop_basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;
@@ -170,27 +175,39 @@ abstract class Updater implements BackdropUpdaterInterface {
   }
 
   /**
-   * Return the project type from a Backdrop info file.
+   * Return the project type from a Backdrop info file or directory.
    *
    * @param string $directory
-   *   Directory to search for the info file.
+   *   Stream wrapper to directory to get the type from.
    *
    * @return string
-   *   The type of the project, either "module", "theme", or "layout".
+   *   The type of the project, either "core", "module", "theme", or "layout".
    *
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    $info_file = self::findInfoFile($directory);
-    $info = backdrop_parse_info_file($info_file);
-    if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+    if (basename($directory) == 'backdrop') {
+      $realpath = backdrop_realpath($directory);
+      if (is_dir($realpath . '/core')) {
+        return 'core';
+      }
+      else {
+        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', array('@directory' => $directory));
+        throw new UpdaterException($message);
+      }
     }
-    if (empty($info['type'])) {
-      throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
-    }
+    else {
+      $info_file = self::findInfoFile($directory);
+      $info = backdrop_parse_info_file($info_file);
+      if (empty($info)) {
+        throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+      }
+      if (empty($info['type'])) {
+        throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
+      }
 
-    return $info['type'];
+      return $info['type'];
+    }
   }
 
   /**
@@ -276,10 +293,19 @@ abstract class Updater implements BackdropUpdaterInterface {
       }
 
       // Copy the directory in place.
-      $filetransfer->copyDirectory($this->source, $args['install_dir']);
+      // Check for core udpate.
+      if ($this->name == 'backdrop') {
+        $source = $this->source . '/core';
+        $name = 'core';
+      }
+      else {
+        $source = $this->source;
+        $name = $this->name;
+      }
+      $filetransfer->copyDirectory($source, $args['install_dir']);
 
       // Make sure what we just installed is readable by the web server.
-      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $this->name);
+      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $name);
 
       // Run the updates.
       // @TODO: decide if we want to implement this.

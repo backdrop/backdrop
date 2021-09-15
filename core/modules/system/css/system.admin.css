@@ -70,11 +70,35 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .form-item-search {
+  display: inline-block;
+}
+#system-modules .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
+#system-modules .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 #system-modules div.incompatible {
   font-weight: bold;
 }
 #system-modules td.checkbox {
   width: 20px;
+}
+#system-modules .modules-error:before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 15px;
+  background: #EE3D23 url(../../../misc/icon-error.png) no-repeat center center;
+  background-size: 60%;
 }
 #system-modules td.module {
   width: 110px;
@@ -86,9 +110,31 @@ small .admin-link:after {
 }
 #system-modules td.version {
   width: 70px;
+  white-space: nowrap;
 }
 #system-modules td.operations {
   width: 120px;
+}
+.requirements-toggle {
+  white-space: nowrap;
+}
+.requirements-toggle .arrow {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 0.3333em 0.3333em 0;
+  display: inline-block;
+  height: 0;
+  line-height: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0.15em 0.3333em;
+}
+.requirements-toggle .arrow.close {
+  border-top-color: transparent;
+  border-bottom-color: #0074bd;
+  border-width: 0 0.3333em 0.3333em;
 }
 div.admin-requirements,
 div.admin-required {
@@ -96,10 +142,10 @@ div.admin-required {
   color: #444;
 }
 span.admin-disabled {
-  color: #800;
+  color: #C61214;
 }
 span.admin-enabled {
-  color: #080;
+  color: #00BE58;
 }
 span.admin-missing {
   color: #f00;
@@ -187,9 +233,6 @@ span.admin-missing {
   .system-status-report .status-title {
     white-space: nowrap;
   }
-}
-.system-status-report .report-error .status-summary {
-  color: #EC351C;
 }
 
 
@@ -280,6 +323,13 @@ table.screenshot {
 .system-themes-list-enabled .theme-selector h3 {
   margin-top: 0;
 }
+.has-flexbox .system-themes-list-disabled {
+  display: flex;
+  flex-wrap: wrap;
+}
+.has-flexbox .system-themes-list-disabled > h2 {
+  flex-basis: 100%;
+}
 .system-themes-list-disabled .theme-selector {
   width: 300px;
   float: left; /* LTR */
@@ -288,6 +338,28 @@ table.screenshot {
 [dir="rtl"] .system-themes-list-disabled .theme-selector {
   float: right;
   padding: 20px 0 20px 20px;
+}
+.has-flexbox .system-themes-list-disabled .theme-selector {
+  float: none;
+  flex: 1 0 auto;
+}
+@media all and (max-width: 710px) {
+  .system-themes-list-disabled .theme-selector {
+    width: 100%;
+    float: none;
+    padding: 20px 0;
+  }
+  .system-themes-list-disabled .theme-selector .screenshot,
+  .system-themes-list-disabled .theme-selector .no-screenshot {
+    float: left; /* LTR */
+    margin-right: 20px;
+  }
+  [dir="rtl"] .system-themes-list-disabled .theme-selector .screenshot,
+  [dir="rtl"] .system-themes-list-disabled .theme-selector .no-screenshot {
+    float: right;
+    margin-left: 20px;
+    margin-right: 0;
+  }
 }
 .system-themes-list-enabled .theme-info {
   max-width: 940px;

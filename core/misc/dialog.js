@@ -29,11 +29,16 @@ Backdrop.dialog = function (element, options) {
     settings = $.extend({}, Backdrop.settings.dialog, options, settings);
     settings.beforeClose = beforeClose;
 
+    // Add class to the page to modify overall page display.
+    $('html').addClass('dialog-open');
+
     // Trigger a global event to allow scripts to bind events to the dialog.
     $(window).trigger('dialog:beforecreate', [dialog, $element, settings]);
     $element.dialog(settings);
 
     if (settings.autoResize === true || settings.autoResize === 'true') {
+      // Add a class specifically to help to lock scrolling.
+      $('html').addClass('dialog-auto-resize');
 
       // Callback function for positioning the dialog on resize/scroll.
       var resetPosition = function() {
@@ -92,6 +97,7 @@ Backdrop.dialog = function (element, options) {
    * key or using the close button, which are triggered by jQuery UI directly.
    */
   function beforeClose (event, ui) {
+    $('html').removeClass('dialog-open dialog-auto-resize');
     Backdrop.optimizedResize.remove('dialogResize.' + dialogId);
   }
 

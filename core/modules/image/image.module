@@ -91,7 +91,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style'),
     'access arguments' => array('administer image styles'),
     'type' => MENU_CALLBACK,
@@ -125,7 +125,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),
@@ -142,7 +142,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect/delete'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect/delete'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),
@@ -159,7 +159,7 @@ function image_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/media/image-styles/configure/%image_style/add/%image_effect_definition'),
     'load arguments' => array(5),
     'access arguments' => array('administer image styles'),
@@ -939,6 +939,18 @@ function image_style_url($style_name, $uri) {
 }
 
 /**
+ * This function was never included in Backdrop. See:
+ * - https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop
+ * - https://github.com/backdrop/backdrop-issues/issues/34
+ * - https://github.com/backdrop/backdrop-issues/issues/3989
+ *
+ * @deprecated since 1.0.0
+ */
+function image_style_path_token($style_name, $uri) {
+  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Return the URI of an image when using a style.
  *
  * The path returned by this function may not exist. The default generation
@@ -1233,7 +1245,7 @@ function image_effect_save($style_name, $effect) {
   }
 
   $config->save();
-  $style = image_style_load(NULL, $style_name);
+  $style = image_style_load($style_name);
   image_style_flush($style);
   return $effect;
 }

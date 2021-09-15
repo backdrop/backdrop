@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for error handling.
@@ -50,11 +49,15 @@ function backdrop_error_levels() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler_real($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler_real($error_level, $message, $filename, $line) {
   if ($error_level & error_reporting()) {
     $types = backdrop_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
     $caller = _backdrop_get_last_caller(debug_backtrace());
+
+    if (empty($caller)) {
+      return FALSE;
+    }
 
     if (!function_exists('filter_xss_admin')) {
       require_once BACKDROP_ROOT . '/core/includes/common.inc';
@@ -216,7 +219,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (backdrop_is_cli()) {
     if ($fatal) {
-      // When called from CLI, simply output a plain text message.
+      // When called from CLI, output a plain text message.
       print html_entity_decode(strip_tags(t('%type: !message in %function (line %line of %file).', $error))). "\n";
       exit;
     }
@@ -224,7 +227,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $fatal) {
     if (error_displayable($error)) {
-      // When called from JavaScript, simply output the error message.
+      // When called from JavaScript, output the error message.
       print t('%type: !message in %function (line %line of %file).', $error);
     }
     exit;
@@ -248,8 +251,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     if ($fatal) {
       backdrop_set_title(t('Error'));
       // We fallback to a maintenance page at this point, because the page generation
-      // itself can generate errors.
-      print theme('maintenance_page', array('content' => t('The website encountered an unexpected error. Please try again later.')));
+      // itself can generate errors. Provide the error message to the end-user
+      // but exclude PHP error information.
+      print theme('maintenance_page', array('content' => $error['!message']));
       exit;
     }
   }

@@ -8,11 +8,10 @@
  * Implements hook_permission().
  */
 function block_permission() {
-  return array(
-    'administer blocks' => array(
-      'title' => t('Administer custom blocks'),
-    ),
+  $permissions['administer blocks'] = array(
+    'title' => t('Administer custom blocks'),
   );
+  return $permissions;
 }
 
 /**
@@ -30,7 +29,7 @@ function block_menu() {
     'title' => 'List custom blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-  $items['admin/structure/block/manage/%block_custom_block'] = array(
+  $items['admin/structure/block/manage/%'] = array(
     'title' => 'Configure block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_admin_configure', 4),
@@ -40,14 +39,34 @@ function block_menu() {
   $items['admin/structure/block/manage/%/configure'] = array(
     'title' => 'Configure block',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'context' => MENU_CONTEXT_INLINE,
+    'context' => MENU_CONTEXT_NONE,
   );
   $items['admin/structure/block/manage/%/delete'] = array(
     'title' => 'Delete block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_delete', 4),
     'access arguments' => array('administer blocks'),
+    'type' => MENU_CALLBACK,
+    'context' => MENU_CONTEXT_NONE,
+    'file' => 'block.admin.inc',
+  );
+  $items['admin/structure/block/manage/%/translation'] = array(
+    'title' => 'Translate',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('block_custom_block_translate_list', 4),
+    'access callback' => 'block_custom_block_translate_access',
+    'access arguments' => array(4),
     'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_NONE,
+    'file' => 'block.admin.inc',
+  );
+  $items['admin/structure/block/manage/%/translate/%'] = array(
+    'title' => 'Translate block',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('block_custom_block_translate', 4, 6),
+    'access callback' => 'block_custom_block_translate_access',
+    'access arguments' => array(4, 6),
+    'type' => MENU_NORMAL_ITEM,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );
@@ -78,6 +97,9 @@ function block_config_info() {
  * Implements hook_block_info().
  */
 function block_block_info() {
+  global $language;
+  $langcode = $language->langcode;
+
   // Statically cache to prevent multiple database lookups.
   $blocks = &backdrop_static(__FUNCTION__);
   if (isset($blocks)) {
@@ -88,9 +110,22 @@ function block_block_info() {
   $config_names = config_get_names_with_prefix('block.custom.');
   foreach ($config_names as $config_name) {
     $block = config_get($config_name);
-    $blocks[$block['delta']] = $block;
-    $blocks[$block['delta']]['description'] = t('A reusable custom block.');
+    $block_info = array();
+    $block_info['info'] = $block['info'];
+    $block_info['description'] = !empty($block['description']) ? $block['description'] : NULL;
+
+    // If this block has been translated, return the translated information.
+    if (isset($block['translations'][$langcode])) {
+      $block_info['info'] = $block['translations'][$langcode]['info'];
+      $block_info['description'] = $block['translations'][$langcode]['description'];
+    }
+    // If no description was entered, use a generic one.
+    if (empty($block_info['description'])) {
+      $block_info['description'] = t('A reusable custom block.');
+    }
+    $blocks[$block['delta']] = $block_info;
   }
+
   return $blocks;
 }
 
@@ -126,7 +161,8 @@ function block_block_save($delta, &$edit = array()) {
  * Generates the administrator-defined blocks for display.
  */
 function block_block_view($delta = '') {
-  $block = block_custom_block_load($delta);
+  global $language;
+  $block = block_custom_block_load($delta, $language->langcode);
   if (!$block) {
     return array();
   }
@@ -140,6 +176,8 @@ function block_block_view($delta = '') {
  *
  * @param $delta
  *   ID of the block to get information for.
+ * @param $langcode
+ *   The language code for loading the block.
  *
  * @return array
  *   Associative array of information stored in configuration for this block, or FALSE if it doesn't exist
@@ -149,12 +187,42 @@ function block_block_view($delta = '') {
  *   - body: Block contents.
  *   - format: Filter ID of the filter format for the body.
  */
-function block_custom_block_load($delta) {
-  $blocks = block_block_info();
-  if (isset($blocks[$delta])) {
-    return $blocks[$delta];
+function block_custom_block_load($delta, $langcode = LANGUAGE_NONE) {
+  // Statically cache each translation to prevent multiple database lookups.
+  $blocks = &backdrop_static(__FUNCTION__, array());
+  if (isset($blocks[$delta][$langcode])) {
+    return $blocks[$delta][$langcode];
   }
-  return FALSE;
+
+  $block = config_get('block.custom.' . $delta);
+  if (!$block) {
+    return FALSE;
+  }
+
+  // Ensure all expected keys are present.
+  $block += array(
+    'info' => '',
+    'title' => '',
+    'body' => '',
+    'description' => '',
+    'default_langcode' => LANGUAGE_NONE,
+  );
+
+  // If a translation is available, load it in to the main values.
+  if ($langcode !== LANGUAGE_NONE && $langcode !== $block['default_langcode'] && isset($block['translations'])) {
+    $block['langcode'] = $langcode;
+    foreach (array('info', 'description', 'title', 'body') as $key) {
+      if (isset($block['translations'][$langcode][$key])) {
+        $block[$key] = $block['translations'][$langcode][$key];
+      }
+    }
+    // Remove the translations from this copy to save on load bloat. Only the
+    // source or non-translated load included all translations.
+    unset($block['translations']);
+  }
+
+  $blocks[$delta][$langcode] = $block;
+  return $blocks[$delta][$langcode];
 }
 
 /**
@@ -173,27 +241,25 @@ function block_custom_block_load($delta) {
  */
 function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   $edit += array(
+    'delta' => NULL,
     'info' => '',
     'title' => '',
+    'description' => '',
     'body' => array('value' => '', 'format' => NULL),
-    'delta' => NULL,
+    'default_langcode' => LANGUAGE_NONE,
   );
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Display title'),
-    '#default_value' => $edit['title'],
-    '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
-    '#weight' => -18,
-  );
+  // If the description is the default from hook_block_info(), leave blank.
+  if ($edit['description'] === t('A reusable custom block.')) {
+    $edit['description'] = '';
+  }
+
   $form['info'] = array(
     '#type' => 'textfield',
     '#title' => t('Admin label'),
     '#default_value' => $edit['info'],
     '#maxlength' => 64,
-    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#required' => TRUE,
-    '#weight' => -20,
     '#id' => 'block-info',
   );
   $form['delta'] = array(
@@ -205,8 +271,22 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       'source' => array('info'),
     ),
     '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
-    '#weight' => -19,
     '#disabled' => isset($edit['delta']),
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Admin description'),
+    '#default_value' => $edit['description'],
+    '#maxlength' => 128,
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+    '#id' => 'block-description',
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Display title'),
+    '#default_value' => $edit['title'],
+    '#maxlength' => 255,
+    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
   );
   $form['body'] = array(
     '#type' => 'text_format',
@@ -216,19 +296,41 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
-    '#weight' => -17,
   );
+
+  // Add default language select dropdown on the stand-alone config form only.
+  // Not shown on the translation forms at all.
+  if ($stand_alone && module_exists('locale') && empty($edit['langcode'])) {
+    $language_options = array(LANGUAGE_NONE => t('- None -'));
+    $language_options += language_list(TRUE, TRUE);
+
+    $form['default_langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#description' => 'If assigned a language, options will be shown to translate this block into other languages.',
+      '#options' => $language_options,
+      '#default_value' => $edit['default_langcode'],
+    );
+  }
 
   // When displaying as part of the Layout UI.
   if (!$stand_alone) {
+    // The Layout UI may show the translated block admin title and description,
+    // but this form will only show the source translation contents. Notify
+    // the user that they may be about to edit something they weren't expecting.
+    if (!empty($edit['translations'])) {
+      $form['translation_help'] = array(
+        '#type' => 'help',
+        '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the <a href="!url">block\'s translation settings page</a>.', array('!url' => url('admin/structure/block/manage/' . $edit['delta'] . '/translation'))),
+        '#weight' => -99,
+      );
+    }
+
     $form['title']['#states'] = array(
       'visible' => array(
         '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
       ),
     );
-    $form['info']['#weight'] = 5;
-    $form['delta']['#weight'] = 6;
-    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
     $form['reusable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Make this block reusable'),
@@ -237,6 +339,10 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       '#default_value' => TRUE,
       '#disabled' => TRUE,
     );
+    $form['info']['#weight'] = 5;
+    $form['delta']['#weight'] = 6;
+    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
+    $form['description']['#weight'] = 7;
   }
 
   return $form;
@@ -248,17 +354,23 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  * @param array $edit
  *   Associative array of fields to save. Array keys:
  *   - delta: The machine name for the block
- *   - info: Block description.
+ *   - info: The administrative title for the block.
+ *   - description: The administrative description for the block.
  *   - title: The block title (optional, since layouts have their own title field)
  *   - body: Associative array of body value and format. Array keys:
  *     - value: Block contents.
  *     - format: Filter ID of the filter format for the body.
+ *   - default_langcode: The source translation language code string.
+ *   - langcode: If specified, the values for info, description, title, and
+ *     body will be saved as a translation of the source language.
  * @param string|NULL $delta
  *   Machine name of the block to save, comprised of lower-case letters,
  *   numbers, and underscores. Note: NULL values are still accepted when
  *   creating new nodes to maintain API contiguity.
+ * @param $langcode
+ *   The language code for the block. If set, only the translation is saved.
  */
-function block_custom_block_save(array $edit, $delta = NULL) {
+function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
   $delta = $delta ? $delta : preg_replace('/[^a-z0-9_]+/', '_', strtolower($edit['info']));
   $block = block_custom_block_load($delta);
   if (!$block) {
@@ -266,14 +378,34 @@ function block_custom_block_save(array $edit, $delta = NULL) {
       'delta' => $delta,
       'info' => '',
       'title' => '',
+      'description' => '',
       'body' => array('value' => '', 'format' => ''),
+      'default_langcode' => LANGUAGE_NONE,
     );
   }
-  foreach ($block as $key => $value) {
-    if (isset($edit[$key])) {
-      $block[$key] = $edit[$key];
+
+  // If langcode is NULL or the default (source) language code, save into the
+  // main configuration array.
+  if ($langcode === NULL || $langcode === $block['default_langcode']) {
+    // Clean up any copies of the translation, in the event the source had
+    // changed.
+    if ($langcode && isset($block['translations'][$langcode])) {
+      unset($block['translations'][$langcode]);
+    }
+    // Store the main block configuration.
+    foreach (array('info', 'description', 'title', 'body', 'default_langcode') as $key) {
+      if (isset($edit[$key])) {
+        $block[$key] = $edit[$key];
+      }
     }
   }
+  // Store the translation values.
+  elseif ($langcode) {
+    foreach (array('info', 'description', 'title', 'body') as $key) {
+      $block['translations'][$langcode][$key] = $edit[$key];
+    }
+  }
+
   $config = config('block.custom.' . $delta);
   $config->setData($block);
   $config->save();
@@ -284,10 +416,10 @@ function block_custom_block_save(array $edit, $delta = NULL) {
   // are immediately marked as permanent.
   // File usages are not currently removed for custom blocks.
   // See https://github.com/backdrop/backdrop-issues/issues/2137.
-  $fids = filter_parse_file_fids($block['body']['value']);
+  $fids = filter_parse_file_fids($edit['body']['value']);
   $files = file_load_multiple($fids);
   foreach ($files as $fid => $file) {
-    if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+    if ((int) ($file && $file->status) !== FILE_STATUS_PERMANENT) {
       // This makes the file "self-referencing", so it will never be deleted.
       file_usage_add($file, 'file', 'file', $file->fid);
     }

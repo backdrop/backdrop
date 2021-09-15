@@ -34,10 +34,10 @@ class LayoutStyle extends LayoutHandler {
   function form(&$form, &$form_state) {
     if (!$this->is_region) {
       $form['classes'] = array(
-        '#title' => t('Block classes'),
+        '#title' => t('Additional CSS classes'),
         '#type' => 'textfield',
         '#default_value' => $this->settings['classes'],
-        '#description' => t('Additional classes to be added to this block.'),
+        '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
       );
     }
   }

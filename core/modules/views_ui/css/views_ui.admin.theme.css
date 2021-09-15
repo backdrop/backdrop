@@ -251,6 +251,13 @@ input.form-radio {
   box-sizing: border-box;
 }
 
+#edit-page-style .views-ui-ajax-wrapper,
+#edit-page-style .views-ui-ajax-wrapper div,
+#edit-block-style .views-ui-ajax-wrapper,
+#edit-block-style .views-ui-ajax-wrapper div {
+  display: block;
+}
+
 @media (max-width: 600px) {
   .edit-page-style-wrapper div,
   .edit-page-style-wrapper label,
@@ -290,10 +297,6 @@ input.form-radio {
 .horizontal > * + * {
   margin-left: 9px; /* LTR */
   padding-left: 9px; /* LTR */
-}
-
-.views-ui-view-title {
-  font-weight: bold;
 }
 
 @media (max-width: 768px) {
@@ -376,15 +379,28 @@ th.views-ui-name {
 }
 
 th.views-ui-description {
-  width: 40%;
+  width: 30%;
 }
 
-th.views-ui-path {
-  width: auto;
+th.views-ui-displays {
+  width: 25%;
+}
+
+th.views-ui-storage {
+  width: 15%;
 }
 
 th.views-ui-operations {
   width: 15%;
+}
+
+td.views-ui-displays ul {
+  margin: 0.25em 0 0.25em 0;
+}
+
+.views-ui-view-tag,
+.views-ui-view-storage {
+  margin-top: 3px;
 }
 
 /* @end */

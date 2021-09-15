@@ -48,6 +48,11 @@ class InsertQuery_mysql extends InsertQuery {
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
 
+    // Escape each field.
+    foreach ($insert_fields as $field_key => $insert_field) {
+      $insert_fields[$field_key] = $this->connection->escapeField($insert_field);
+    }
+
     // If we're selecting from a SelectQuery, finish building the query and
     // pass it back, as any remaining options are irrelevant.
     if (!empty($this->fromQuery)) {

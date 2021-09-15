@@ -129,9 +129,9 @@ Backdrop.tableDrag = function (table, tableSettings) {
  * Initialize columns containing form elements to be hidden by default,
  * according to the settings for this tableDrag instance.
  *
- * Identify and mark each cell with a CSS class so we can easily toggle
- * show/hide it. Finally, hide columns if user does not have a
- * 'Backdrop.tableDrag.showWeight' cookie.
+ * Identify and mark each cell with a CSS class so we can toggle show/hide it.
+ * Finally, hide columns if user does not have a 'Backdrop.tableDrag.showWeight'
+ * cookie.
  */
 Backdrop.tableDrag.prototype.initColumns = function () {
   var $table = $(this.table), hidden, cell, columnIndex;
@@ -216,6 +216,7 @@ Backdrop.tableDrag.prototype.addColspanClass = function(columnIndex) {
 Backdrop.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
+  $('table.tabledrag-processed').addClass('tabledrag-handles-shown');
   // Show TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
   // Reduce the colspan of any effected multi-span columns.
@@ -241,6 +242,7 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
 Backdrop.tableDrag.prototype.showColumns = function () {
   // Show weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
+  $('table.tabledrag-processed').removeClass('tabledrag-handles-shown');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
   // Increase the colspan for any columns where it was previously reduced.
@@ -546,12 +548,12 @@ Backdrop.tableDrag.prototype.dragRow = function (event, self) {
     if (self.indentEnabled) {
       var xDiff = self.currentPointerCoords.x - self.dragObject.indentPointerPos.x;
       // Set the number of indentations the pointer has been moved left or right.
-      var indentDiff = Math.round(xDiff / self.indentAmount * self.rtl);
+      var indentDiff = Math.round(xDiff / self.indentAmount);
       // Indent the row with our estimated diff, which may be further
       // restricted according to the rows around this row.
       var indentChange = self.rowObject.indent(indentDiff);
       // Update table and pointer indentations.
-      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange * self.rtl;
+      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange;
       self.indentCount = Math.max(self.indentCount, self.rowObject.indents);
     }
 
