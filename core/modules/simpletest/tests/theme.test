@@ -580,7 +580,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
    */
   function testContainer() {
     $elements = array(
-      // Basic container with no attributes.
+      // Basic container with no additional attributes.
       array(
         'name' => "#type 'container' with no HTML attributes",
         'value' => array(
@@ -589,9 +589,10 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             '#markup' => 'foo',
           ),
         ),
-        'expected' => '<div>foo</div>',
+        // The 'form-wrapper' class is added by theme_container().
+        'expected' => '<div class="form-wrapper">foo</div>',
       ),
-      // Container with a class.
+      // Container with an additional class.
       array(
         'name' => "#type 'container' with a class HTML attribute",
         'value' => array(
@@ -603,7 +604,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             'class' => 'bar',
           ),
         ),
-        'expected' => '<div class="bar">foo</div>',
+        'expected' => '<div class="bar form-wrapper">foo</div>',
       ),
     );
 
