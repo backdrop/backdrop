@@ -69,7 +69,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
-    'alt_required' => 0,
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
