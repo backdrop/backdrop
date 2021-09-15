@@ -43,10 +43,6 @@
   margin-left: 0;
 }
 
-.layout-list .layout-title {
-  font-weight: bold;
-}
-
 /* Individual layout settings form. */
 .layout-settings-page .form-type-checkboxes,
 .layout-settings-form .form-type-radios {
@@ -97,11 +93,15 @@
 
 /* Buttons that are displayed as links. */
 .layout-access-remove,
-.layout-access-configure {
+.layout-access-configure,
+.layout-context-remove,
+.layout-context-configure {
   padding-left: 10px; /* LTR */
 }
 [dir="rtl"] .layout-access-remove,
-[dir="rtl"] .layout-access-configure {
+[dir="rtl"] .layout-access-configure,
+[dir="rtl"] .layout-context-remove,
+[dir="rtl"] .layout-context-configure {
   padding-left: 0;
   padding-right: 10px;
 }

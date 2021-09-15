@@ -1,0 +1,74 @@
+name: Functional tests
+on:
+  pull_request:
+    branches: [1.*]
+jobs:
+  simpletest:
+    name: Simpletest batches
+    runs-on: ubuntu-18.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['5.3', '7.4']
+        fraction: ['1/3', '2/3', '3/3']
+
+    steps:
+      - name: Setup MySQL and create database
+        run: |
+          # Disable apparmor for mysql.
+          sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+          sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+          # Move datadir and tmpdir to shared memory.
+          sudo mkdir /dev/shm/mysql_tmp
+          sudo chown mysql:mysql /dev/shm/mysql_tmp
+          sudo sed -i -e 's?datadir\s*=.*?datadir = /dev/shm/mysql?' \
+            -e 's?tmpdir\s*=.*?tmpdir = /dev/shm/mysql_tmp?' /etc/mysql/mysql.conf.d/mysqld.cnf
+          sudo mv /var/lib/mysql /dev/shm
+          sudo systemctl start mysql.service
+          # Use .my.cnf to avoid user / password on commandline.
+          echo -e '[client]\nuser = root\npassword = root' > ~/.my.cnf
+          mysql -V
+          mysql -e 'CREATE DATABASE backdrop;'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+          tools: none
+
+      - name: Setup webserver
+        run: |
+          # Set up apache with php-fpm.
+          sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
+          sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
+          # Setup php-fpm, this script is by intention not executable by default.
+          chmod 700 .github/misc/setup-php-fpm.sh
+          ./.github/misc/setup-php-fpm.sh ${{ matrix.php-versions }}
+          # This should be a redirect to the installer:
+          echo 'Verify webserver setup'
+          curl -sI 'http://localhost/'
+
+      - name: Install Backdrop
+        run: core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
+
+      - name: Run tests
+        run: |
+          echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 7
+
+      - name: System status
+        if: ${{ always() }}
+        run: |
+          echo Get load
+          uptime
+          echo Get mem usage
+          free -m
+          echo Get disk usage
+          df -h
+          echo Get running procs by user
+          pgrep -au runner

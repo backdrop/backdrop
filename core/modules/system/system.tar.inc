@@ -1784,7 +1784,7 @@ class Archive_Tar
 
         // ----- Extract the properties
         $v_header['filename'] = rtrim($v_data['filename'], "\0");
-        if ($this->_maliciousFilename($v_header['filename'])) {
+        if ($this->_isMaliciousFilename($v_header['filename'])) {
             $this->_error(
               'Malicious .tar detected, file "' . $v_header['filename'] .
               '" will not install in desired directory tree'
@@ -1854,9 +1854,9 @@ class Archive_Tar
      *
      * @return bool
      */
-    private function _maliciousFilename($file)
+    private function _isMaliciousFilename($file)
     {
-        if (strpos($file, 'phar://') === 0) {
+        if (strpos($file, '://') !== false) {
             return true;
         }
         if (strpos($file, '../') !== false || strpos($file, '..\\') !== false) {
@@ -1892,7 +1892,7 @@ class Archive_Tar
 
         $v_filename = rtrim(substr($v_filename, 0, $v_filesize), "\0");
         $v_header['filename'] = $v_filename;
-        if ($this->_maliciousFilename($v_filename)) {
+        if ($this->_isMaliciousFilename($v_filename)) {
             $this->_error(
               'Malicious .tar detected, file "' . $v_filename .
               '" will not install in desired directory tree'
@@ -2174,6 +2174,40 @@ class Archive_Tar
                             }
                         }
                     } elseif ($v_header['typeflag'] == "2") {
+                        $absolute_link = FALSE;
+                        $link_depth = 0;
+                        if (strpos($v_header['link'], "/") === 0 || strpos($v_header['link'], ':') !== FALSE) {
+                          $absolute_link = TRUE;
+                        }
+                        else {
+                            $s_filename = preg_replace('@^' . preg_quote($p_path) . '@', "", $v_header['filename']);
+                            $s_linkname = str_replace('\\', '/', $v_header['link']);
+                            foreach (explode("/", $s_filename) as $dir) {
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== "." ) {
+                                    $link_depth++;
+                                }
+                            }
+                            foreach (explode("/", $s_linkname) as $dir){
+                                if ($link_depth <= 0) {
+                                    break;
+                                }
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== ".") {
+                                    $link_depth++;
+                                }
+                            }
+                        }
+                        if ($absolute_link || $link_depth <= 0) {
+                            $this->_error(
+                                 'Out-of-path file extraction {'
+                                 . $v_header['filename'] . ' --> ' .
+                                 $v_header['link'] . '}'
+                            );
+                            return false;
+                        }
                         if (!$p_symlinks) {
                             $this->_warning('Symbolic links are not allowed. '
                                 . 'Unable to extract {'

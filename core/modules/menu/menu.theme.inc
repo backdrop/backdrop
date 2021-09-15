@@ -12,9 +12,14 @@
  *   - title: The menu's title.
  *   - description: The menu's description.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_menu_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $output = check_plain($variables['title']);
   $output .= '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 

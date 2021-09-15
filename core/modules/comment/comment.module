@@ -1195,8 +1195,9 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
     );
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow comment title'),
+      '#title' => t('Allow a custom title to be set for each comment'),
       '#default_value' => $node_type->settings['comment_subject_field'],
+      '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -2125,7 +2126,7 @@ function comment_form_validate($form, &$form_state) {
         ->execute()
         ->fetchField();
       if ($taken) {
-        form_set_error('name', t('The name you used belongs to a registered user.'));
+        form_set_error('name', t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
       }
     }
   }

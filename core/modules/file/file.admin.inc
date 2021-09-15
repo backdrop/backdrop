@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File type editing user interface.
+ * Admin page callbacks for the File module.
  */
 
 /**
@@ -12,7 +12,7 @@ function file_list_types_page() {
   $types = file_type_get_types();
   $names = file_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Storage state'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Storage state'), t('Operations'));
   $rows_enabled = array();
   $rows_disabled = array();
   $weight = 0;
@@ -26,13 +26,12 @@ function file_list_types_page() {
     $weight++;
     $row = array(
       array(
-        'data' => theme('file_type_overview',
-          array(
-            'name' => $type->name,
-            'description' => $type->description,
-          )
-        ),
+        'data' => theme('label_machine_name__file', array(
+          'label' => $type->name,
+          'machine_name' => $type->type,
+        )),
       ),
+      filter_xss_admin($type->description),
     );
 
 
@@ -519,10 +518,10 @@ function file_settings_form($form, &$form_state) {
     '#dialog' => TRUE,
   );
 
-  $form['default_allowed_extensions('] = array(
+  $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => $config->get('default_allowed_extensions('),
+    '#default_value' => $config->get('default_allowed_extensions'),
     '#description' => t('Separate extensions with a space and do not include the leading dot.'),
     '#maxlength' => NULL,
   );

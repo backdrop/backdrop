@@ -568,7 +568,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     $layout->addBlock('search', 'form', 'content');
     $layout->save();
 
-    // Test a normal search via the block form, from the front page.
+    // Test a normal search via the block form, from the home page.
     $terms = array('search_block_form' => 'test');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
@@ -587,7 +587,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
       'Redirected to correct url.'
     );
 
-    // Test an empty search via the block form, from the front page.
+    // Test an empty search via the block form, from the home page.
     $terms = array('search_block_form' => '');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Please enter some keywords');
@@ -697,7 +697,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     ));
     $full_html_format = (object) array(
       'format' => 'full_html',
-      'name' => 'Full HTML',
+      'name' => 'Raw HTML',
       'weight' => 1,
       'editor' => NULL,
       'filters' => array(),
@@ -717,8 +717,8 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-    // Create and log in an administrative user having access to the Full HTML
-    // text format.
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
     $permissions = array(
       'administer filters',
       filter_permission_name($full_html_format),
@@ -753,7 +753,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'post'));
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = 'Test comment subject';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
@@ -811,7 +811,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     // Create a node.
     $this->node = $this->backdropCreateNode(array('type' => 'post'));
 
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = $this->comment_subject;
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';

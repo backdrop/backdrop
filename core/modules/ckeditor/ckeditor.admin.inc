@@ -1,6 +1,7 @@
 <?php
 /**
- * Admin menu callbacks and theme functions for CKEditor module.
+ * @file
+ * Admin page callbacks for the CKEditor module.
  */
 
 /**
