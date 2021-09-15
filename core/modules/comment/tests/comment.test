@@ -519,6 +519,10 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertRaw('<a id="new"></a>', 'Found "new" marker.');
     $this->assertTrue($this->xpath('//a[@id=:new]/following-sibling::a[1][@id=:comment_id]', array(':new' => 'new', ':comment_id' => 'comment-1')), 'The "new" anchor is positioned at the right comment.');
 
+    // Updates to the history table are done in background processing from the
+    // previous request. Wait a short time to make sure the record is written. 
+    sleep(1);
+
     // Test if "new comment" link is correctly removed.
     $this->backdropGet('node');
     $this->assertLink(t('1 comment'));

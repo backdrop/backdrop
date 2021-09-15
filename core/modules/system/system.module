@@ -141,6 +141,12 @@ function system_theme() {
         'dialog' => TRUE,
       ),
     ) + $base,
+    'label_machine_name' => array(
+      'variables' => array(
+        'label' => NULL,
+        'machine_name' => NULL,
+      ),
+    ) + $base,
   ));
 }
 
