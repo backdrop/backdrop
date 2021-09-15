@@ -580,7 +580,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
    */
   function testContainer() {
     $elements = array(
-      // Basic container with no additional attributes.
+      // Basic container with no attributes.
       array(
         'name' => "#type 'container' with no HTML attributes",
         'value' => array(
@@ -590,9 +590,8 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           ),
         ),
         'expected' => '<div>foo</div>',
-        // <div class="form-wrapper" id="edit-container-test">foo</div>
       ),
-      // Container with an additional class.
+      // Container with a class.
       array(
         'name' => "#type 'container' with a class HTML attribute",
         'value' => array(
