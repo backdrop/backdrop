@@ -798,3 +798,24 @@ function system_preprocess_page_components(&$variables) {
     'page_components__' . $child_delta,
   );
 }
+
+/**
+ * Returns HTML for the display of a label and its machine name.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - label: The human-readable label.
+ *   - machine_name: (optional) The machine-safe name.
+ *
+ * @ingroup themeable
+ */
+function theme_label_machine_name($variables) {
+  $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
+
+  if (!empty($variables['machine_name'])) {
+    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
+}

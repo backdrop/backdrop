@@ -1777,6 +1777,11 @@ function theme_status_messages($variables) {
     else {
       $output .= reset($messages) . "\n";
     }
+    if (config_get('system.core', 'messages_dismissible')) {
+      // Add the 'Dismiss' library and place a 'Dismiss' link on messages.
+      backdrop_add_library('system', 'backdrop.dismiss');
+      $output .= '<a href="#" class="dismiss" title="' . t('Dismiss') . '"><span class="element-invisible">' . t('Dismiss') . '</span></a>' . "\n";
+    }
     $output .= "</div>\n";
   }
 

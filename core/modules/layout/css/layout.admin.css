@@ -43,10 +43,6 @@
   margin-left: 0;
 }
 
-.layout-list .layout-title {
-  font-weight: bold;
-}
-
 /* Individual layout settings form. */
 .layout-settings-page .form-type-checkboxes,
 .layout-settings-form .form-type-radios {

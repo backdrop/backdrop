@@ -141,6 +141,12 @@ function system_theme() {
         'dialog' => TRUE,
       ),
     ) + $base,
+    'label_machine_name' => array(
+      'variables' => array(
+        'label' => NULL,
+        'machine_name' => NULL,
+      ),
+    ) + $base,
   ));
 }
 
@@ -523,7 +529,12 @@ function system_element_info() {
     '#pre_render' => array('backdrop_pre_render_dropbutton'),
     '#theme' => 'links__dropbutton__operations',
   );
-
+  $types['details'] = array(
+    '#summary' => NULL,
+    '#details' => NULL,
+    '#open' => FALSE,
+    '#theme_wrappers' => array('details'),
+  );
   $types['container'] = array(
     '#theme_wrappers' => array('container'),
     '#process' => array('form_process_container'),
@@ -1322,6 +1333,15 @@ function system_library_info() {
     $libraries['backdrop.menus']['css'][$system_module_path . '/css/menu-dropdown.theme.css'] = array('group' => CSS_DEFAULT);
     $libraries['backdrop.menu-toggle']['css'][$system_module_path . '/css/menu-toggle.theme.css'] = array('group' => CSS_DEFAULT);
   }
+
+  // Dismiss buttons.
+  $libraries['backdrop.dismiss'] = array(
+    'title' => 'Dismiss buttons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/dismiss.js' => array('group' => JS_DEFAULT),
+    ),
+  );
 
   // jQuery.
   $libraries['jquery'] = array(

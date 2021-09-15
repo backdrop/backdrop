@@ -752,10 +752,12 @@ fieldset .fieldset-wrapper::before {
   left: auto;
   right: .6em;
 }
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
+  /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 .fieldset-legend span.summary:not(:empty):before {
@@ -766,9 +768,11 @@ fieldset .fieldset-wrapper::before {
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed .fieldset-legend a:before {
   left: .8em;
@@ -781,6 +785,27 @@ fieldset .fieldset-wrapper::before {
   right: .8em;
   border-left-color: transparent;
   border-right-color: black;
+}
+
+/**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
 }
 
 /**
@@ -1899,4 +1924,22 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+
+/**
+ * Labels & machine names in admin listing tables.
+ */
+table .label {
+  font-weight: bold;
+}
+table .machine-name {
+  color: #666;
+}
+.tabledrag-handles-shown .label,
+.tabledrag-handles-shown .machine-name {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .tabledrag-handles-shown .label,
+[dir="rtl"] .tabledrag-handles-shown .machine-name {
+  padding-right: 28px;
 }
