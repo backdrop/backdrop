@@ -271,7 +271,9 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         $field_elements['add_more'] = array(
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          // Intentional change, which will cause multime tests across various
+          // files to fail - for testing purposes.
+          '#value' => t('Add another'),
           '#attributes' => array('class' => array('field-add-more-submit')),
           '#limit_validation_errors' => array(array_merge($parents, array($field_name, $langcode))),
           '#submit' => array('field_add_more_submit'),
