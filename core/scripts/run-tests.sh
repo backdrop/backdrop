@@ -726,7 +726,7 @@ function simpletest_script_reporter_init() {
 
   echo "\n";
   echo "Backdrop test run\n";
-  echo "---------------\n";
+  echo "-----------------\n";
   echo "\n";
 
   // Tell the user about what tests are to be run.
@@ -928,16 +928,17 @@ function simpletest_script_reporter_display_results() {
 }
 
 /**
- * Format the result so that it fits within the default 80 character
- * terminal size.
+ * Format the result so that it fits within the default 80 character terminal
+ * size.
  *
  * @param $result The result object to format.
  */
 function simpletest_script_format_result($result) {
   global $results_map, $color;
 
-  $summary = sprintf("%-9.9s %-10.10s %-17.17s %4.4s %-35.35s\n",
-    $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $result->function);
+  $function_name = strpos($result->function, '->') !== FALSE ? substr($result->function, strpos($result->function, '->') + 2) : $result->function;
+  $format = "%-9.9s %-10.10s %-17.17s %4.4s %-35.35s\n";
+  $summary = sprintf($format, $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $function_name);
 
   simpletest_script_print($summary, $result->status);
 
