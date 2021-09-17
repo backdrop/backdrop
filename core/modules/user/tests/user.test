@@ -297,8 +297,8 @@ class UserRegistrationTestCase extends UserLoginTestBase {
         $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
       }
       else {
-        $this->backdropPost(NULL, $edit, t('Add another item'));
-        $this->backdropPost(NULL, $edit, t('Add another item'));
+        $this->backdropPost(NULL, $edit, t('Add another'));
+        $this->backdropPost(NULL, $edit, t('Add another'));
       }
       // Submit with three values.
       $edit['test_user_field[und][1][value]'] = $value + 1;
