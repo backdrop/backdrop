@@ -121,7 +121,7 @@ function layout_layout_access_info() {
       );
     }
 
-    // Create a entity id key such as "nid" or "cid".
+    // Create an entity id key such as "nid" or "cid".
     $id_key = $entity_type . '_' . $entity_info['entity keys']['id'];
     $key_label = strtoupper($entity_info['entity keys']['id']);
     $info[$id_key] = array(
