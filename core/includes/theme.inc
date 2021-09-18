@@ -838,21 +838,30 @@ function list_themes($refresh = FALSE) {
 /**
  * Find all the base themes for the specified theme.
  *
- * Themes can inherit templates and function implementations from earlier themes.
+ * Themes can inherit templates and function implementations from other themes
+ * that have been specified as their "base theme" (via the 'base_theme'
+ * property in their .info file). This function iterates through all "ancestor"
+ * base themes, untill it reaches the "top" parent.
  *
  * @param $themes
- *   An array of available themes.
+ *   An array of available themes. Defaults to all themes.
  * @param $key
  *   The name of the theme whose base we are looking for.
  * @param $used_keys
  *   A recursion parameter preventing endless loops.
  * @return
  *   Returns an array of all of the theme's ancestors; the first element's value
- *   will be NULL if an error occurred.
+ *   will be NULL if an error occurred, or if the theme provided as $key has no
+ *   base theme specified.
  */
-function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
-  $base_key = $themes[$key]->info['base theme'];
-  // Does the base theme exist?
+function backdrop_find_base_themes($themes = array(), $key, $used_keys = array()) {
+  // If no themes have been specified, default to a list of all themes.
+  if (empty($themes)) {
+    $themes = list_themes();
+  }
+  // Does the theme whose base we are looking for actually specify a base theme?
+  $base_key = isset($themes[$key]->base_theme) ? $themes[$key]->info['base theme'] : NULL;
+  // Does the specified base theme exist?
   if (!isset($themes[$base_key])) {
     return array($base_key => NULL);
   }
