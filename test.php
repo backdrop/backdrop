@@ -1,3 +1,12 @@
 <?php
+/**
+ * @file
+ * Some file to test.
+ */
 
-$foo = array('foo', 'bar', 'baz', 'foo');
+/**
+ * Implements foo.
+ */
+function foo() {
+  $foo = array('foo', 'bar', 'baz', 'foo');
+}

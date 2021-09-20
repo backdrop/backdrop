@@ -21,7 +21,7 @@ jobs:
           cp .github/misc/composer.json .
           composer install --ansi --prefer-dist --no-interaction --no-progress
           # test run...
-          vendor/bin/phpcs --standard=vendor/backdrop/coder/coder_sniffer/Backdrop --ignore="vendor/*" test.php
+          vendor/bin/phpcs -n --standard=vendor/backdrop/coder/coder_sniffer/Backdrop --ignore="vendor/*" test.php
 
       - uses: thenabeel/action-phpcs@v8
         with:
