@@ -8,5 +8,5 @@
  * Implements foo.
  */
 function foo() {
-  $foo = array('foo', 'bar', 'baz');
+  $foo = array('foo', 'bar', 'baz', 'bar');
 }
