@@ -1,10 +1,5 @@
 name: "Coding standards"
-on:
-  push:
-    paths:
-      - "*.php"
-      - "core/"
-      - ".github/**"
+on: [push]
 jobs:
   phpcs:
     name: Run phpcs
@@ -25,9 +20,13 @@ jobs:
         run: |
           cp .github/misc/composer.json .
           composer install --ansi --prefer-dist --no-interaction --no-progress
+          # test run...
+          vendor/bin/phpcs --standard=vendor/backdrop/coder/coder_sniffer/Backdrop --ignore="vendor/*" test.php
 
       - uses: thenabeel/action-phpcs@v8
         with:
-          files: "**.php"
+          files: |
+            "test.php"
+            "**.php"
           phpcs_path: vendor/bin/phpcs
           standard: vendor/backdrop/coder/coder_sniffer/Backdrop
