@@ -1,3 +1,3 @@
 <?php
 
-$foo = array('foo', 'bar');
+$foo = array('foo', 'bar', 'baz');
