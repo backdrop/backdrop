@@ -1,5 +1,5 @@
 name: "Coding standards"
-on: [push]
+on: [pull_request]
 jobs:
   phpcs:
     name: Run phpcs
@@ -25,7 +25,7 @@ jobs:
 
       - uses: thenabeel/action-phpcs@v8
         with:
-          scope: file
+          files: "**.php"
           phpcs_path: vendor/bin/phpcs
           standard: vendor/backdrop/coder/coder_sniffer/Backdrop
           fail_on_warnings: false
