@@ -4,7 +4,7 @@ on:
     paths:
       - "*.php"
       - "core/"
-      - ".github/"
+      - ".github/**"
 jobs:
   phpcs:
     name: Run phpcs
