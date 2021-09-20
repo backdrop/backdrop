@@ -26,7 +26,7 @@ jobs:
       - uses: thenabeel/action-phpcs@v8
         with:
           files: |
-            "test.php"
-            "**.php"
+            test.php
+            **.php
           phpcs_path: vendor/bin/phpcs
           standard: vendor/backdrop/coder/coder_sniffer/Backdrop
