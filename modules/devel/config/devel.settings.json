@@ -1,0 +1,17 @@
+{
+    "_config_name": "devel.settings",
+    "_config_static": true,
+    "query_display": null,
+    "query_sort": "source",
+    "query_slow_limit": 5,
+    "api_url": "api.backdropcms.org",
+    "timer_display": false,
+    "memory_display": false,
+    "redirect_page": false,
+    "permission_raw_names": false,
+    "error_handlers": [
+        "standard"
+    ],
+    "debug_mail_file_format": "%to-%subject-%datetime.mail.txt",
+    "debug_mail_directory": "temporary://devel-mails"
+}
