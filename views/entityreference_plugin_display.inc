@@ -6,6 +6,8 @@
  */
 class entityreference_plugin_display extends views_plugin_display {
 
+  public $id_field_alias;
+
   function option_definition() {
     $options = parent::option_definition();
 
