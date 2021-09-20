@@ -1,5 +1,10 @@
 name: "Coding standards"
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "*.php"
+      - "core/"
+      - ".github/"
 jobs:
   phpcs:
     name: Run phpcs
