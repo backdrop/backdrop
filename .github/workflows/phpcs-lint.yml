@@ -28,6 +28,10 @@ jobs:
 
       - uses: thenabeel/action-phpcs@v8
         with:
-          files: "**.php,**.inc,**.module,**.install" # you may customize glob as needed
+          files: |
+            "**.php"
+            "**.inc"
+            "**.module"
+            "**.install" # you may customize glob as needed
           phpcs_path: vendor/bin/phpcs
           standard: vendor/backdrop/coder/coder_sniffer/Backdrop
