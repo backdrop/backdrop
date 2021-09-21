@@ -175,18 +175,22 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
-  // Incorporate the Library View in the editor dialog form.
-  $view_name = 'image_library';
-  $view = views_embed_view($view_name);
-  if (empty($view)) {
-    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
-    if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
-    }
-  }
-
-  $form['library_view'] = array(
-    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
+  // This button is hidden from display and clicked via JavaScript in
+  // Backdrop.behaviors.editorImageDialog in filter.js.
+  $form['library_open'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select from library'),
+    '#name' => 'library_open',
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#ajax' => array(
+      'callback' => '_filter_image_library_ajax',
+      'event' => 'click',
+    ),
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array(),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -200,6 +204,31 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Render the image library.
+ */
+function _filter_image_library_ajax() {
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  $error_messages = theme('status_messages');
+
+  $commands = array();
+  $commands[] = ajax_command_prepend('.editor-image-library', $error_messages . $rendered_library);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
@@ -491,26 +520,134 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 
 /**
  * Element validation function.
+ *
+ * Clean up a URL and see if it will pass validation. Instead of stripping
+ * dangerous protocols we flag them as invalid to make the user aware.
+ *
+ * @see filter_format_editor_link_form()
+ * @see filter_format_editor_image_form()
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
 
-  // If Link module is available, automatically clean up URL, automatically
-  // adding http:// or a prefixing slash if needed.
-  if (module_exists('link') && $type = link_validate_url($value)) {
-    $value = link_cleanup_url($value);
-    $form_state['values']['type'] = $type;
-    if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
-      $value = '/' . $value;
-    }
+  // Allow empty values, since this will not result in a link tag anyway.
+  if ($value === '') {
+    form_set_value($element, $value, $form_state);
+    return;
   }
+
+  // Clean up the URL so it's more likely to pass validation.
+  $value = _filter_cleanup_url($value);
 
   form_set_value($element, $value, $form_state);
 
-  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
-  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
+  // Flag if it has any dangerous protocols.
+  $stripped_url = backdrop_strip_dangerous_protocols($value);
+  $dangerous_protocols = $stripped_url !== $value ? TRUE : FALSE;
+
+  // If it has dangerous protocols the URL is invalid. Or if it isn't either
+  // a valid relative nor a valid absolute path.
+  if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
+}
+
+/**
+ * Clean up the URL for validation.
+ *
+ * Attempts to create a URL that will pass validation: add a protocol if it
+ * looks like a domain but the protocol is missing; or create a valid, encoded
+ * internal alias.
+ *
+ * @param string $url
+ *
+ * @return string
+ *   A cleaned-up URL that is either a properly formatted external URL or an
+ *   internal path.
+ *
+ * @see _filter_format_editor_link_url_validate()
+ */
+function _filter_cleanup_url($url) {
+  // Will add a default protocol if missing on an external url.
+  $url = _filter_create_valid_external_url($url);
+
+  // If it's an external URL with a protocol we can skip the rest of the
+  // clean up.
+  if (_filter_url_has_protocol($url)) {
+    return $url;
+  }
+
+  // Return anchors as is.
+  if (substr($url, 0, 1) == '#') {
+    return $url;
+  }
+
+  // Return if it begins with a slash. Avoids issues such as:
+  // - extra language prefixes if it's a multilingual site;
+  // - adding extra prefixes if being re-edited;
+  // - a url getting double-encoded;
+  // - or domains with relative protocols.
+  // E.g. /fr/node/1, //domain.tld
+  if (substr($url, 0, 1) == '/') {
+    return $url;
+  }
+
+  // Break up the components so we can build up an aliased internal path.
+  $url_parts = backdrop_parse_url($url);
+
+  return url($url_parts['path'], $url_parts);
+}
+
+/**
+ * Forms a valid external URL if possible.
+ *
+ * Automatically adds an http:// to addresses that appear to be external URLs
+ * but have no specified protocol.
+ *
+ * @param string $url
+ *   The URL entered by the user.
+ *
+ * @return string
+ *   The URL with the protocol prepended if needed.
+ *
+ * @see link_cleanup_url().
+ */
+function _filter_create_valid_external_url($url) {
+  // Skip if it's already a valid external URL with a protocol.
+  if (_filter_url_has_protocol($url)) {
+    return $url;
+  }
+
+  // If it looks like a domain name but it's missing a protocol, add a protocol.
+  // The will catch domains like archive.org but will skip a valid external
+  // domains with a relative protocol like //archive.org.
+  $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+  if (!empty($domain_match)) {
+    // We add a relative protocol since we don't know if the address requires
+    // http or https.
+    $url = '//' . $url;
+  }
+
+  return $url;
+}
+
+/**
+ * Checks if a URL has a protocol.
+ *
+ * Checks for a protocol as a sign that the URL is external. We want to include
+ * all external URLs even if they have dangerous protocols.
+ *
+ * @param string $url
+ *
+ * @return bool
+ *   TRUE if URL has protocol.
+ */
+function _filter_url_has_protocol($url) {
+  // If it has a scheme then it has a protocol.
+  if (parse_url($url, PHP_URL_SCHEME)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**

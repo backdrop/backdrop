@@ -992,18 +992,25 @@ function backdrop_install_system() {
  *   all modules in this list have already been disabled before this function
  *   is called.
  * @param bool $uninstall_dependents
- *   (optional) If TRUE, the function will check that all modules which depend
- *   on the passed-in module list either are already uninstalled or contained in
- *   the list, and it will ensure that the modules are uninstalled in the
- *   correct order. This incurs a significant performance cost, so use FALSE if
- *   you know $module_list is already complete and in the correct order.
- *   Defaults to TRUE.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules
+ *     dependent on the passed-in module(s) are checked to see if they're
+ *     already uninstalled, or if they're included in $module_list. If all
+ *     dependents are in $module_list, they will all be uninstalled in the
+ *     correct order. If, however, dependent modules are still installed and not
+ *     included in $module_list, the passed-in module(s) will not be
+ *     uninstalled. Note that dependency-checking incurs a significant
+ *     performance cost.
+ *   - If FALSE, dependency-checking is bypassed. Dependent modules not included
+ *     in $module_list will not be uninstalled, and modules in the list may not
+ *     be uninstalled in the correct order. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @return bool
- *   Returns TRUE if the operation succeeds or FALSE if it aborts due to an
- *   unsafe condition, namely, $uninstall_dependents is TRUE and a module in
- *   $module_list has dependents which are not already uninstalled and not also
- *   included in $module_list).
+ *   Returns FALSE if $uninstall_dependents is TRUE, and one or more dependent
+ *   modules are still installed but not included in $module_list. Otherwise
+ *   returns TRUE.
  *
  * @see module_disable()
  * @see module_enable()

@@ -811,6 +811,83 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests that the correct layout is used for node previews.
+ */
+class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('node_layout_preview_test');
+
+    // Create a content type for checking node/edit page layouts.
+    $this->content_type = $this->backdropCreateContentType();
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that the correct layout is used for node add and node edit previews.
+   */
+  function testNodeLayoutPreview() {
+
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the node with a new random body content, then preview.
+    $this->backdropGet('node/1/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+     $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+  }
+}
+
+/**
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {

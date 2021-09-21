@@ -1032,9 +1032,16 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertEqual($unable_to_parse->code, -1001, 'Returned with "-1001" error code.');
     $this->assertEqual($unable_to_parse->error, 'unable to parse URL', 'Returned with "unable to parse URL" error message.');
 
-    // Fetch page.
-    $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
+    // Fetch page, and check that the data parameter works with both array and
+    // string.
+    $data_array = array($this->randomName() => $this->randomString() . ' "\'');
+    $data_string = backdrop_http_build_query($data_array);
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_array));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using an array.');
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_string));
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using a string.');
+
     $this->backdropSetContent($result->data);
     $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
@@ -2599,8 +2606,8 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
     $this->assertEqual(count($this->collectedErrors), 3, 'Three errors were collected');
 
     if (count($this->collectedErrors) == 3) {
-      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Undefined variable: bananas');
-      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', 'Division by zero');
+      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Object of class stdClass could not be converted to int');
+      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', \PHP_VERSION_ID < 80000 ? 'Invalid argument supplied for foreach()' : 'foreach() argument must be of type array|object, string given');
       $this->assertError($this->collectedErrors[2], 'User warning', 'error_test_generate_warnings()', 'error_test.module', 'Backdrop is awesome');
     }
     else {
@@ -2774,6 +2781,10 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
     $this->assertText(t('Date format updated.'));
+
+    // Reset the statically cached date formats so that these calls to
+    // format_date() will pick up the newly created date formats from config.
+    backdrop_static_reset('system_get_date_formats');
 
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');
@@ -3404,6 +3415,50 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
   }
 
+}
+
+/**
+ * Test for block_interest_cohort.
+ */
+class BlockInterestCohortTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('common_test');
+  }
+
+  /**
+   * Tests that FLoC is blocked by default.
+   */
+  function testDefaultBlocking() {
+    $this->backdropGet('node');
+    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=()', 'FLoC is blocked by default.');
+  }
+
+  /**
+   * Tests that an existing interest-cohort policy is not overwritten.
+   */
+  function testExistingInterestCohortPolicy() {
+    $this->backdropGet('common-test/existing_interest_cohort_policy');
+    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=*', 'Existing interest-cohort policy is not overwritten.');
+  }
+
+  /**
+   * Tests that an existing header is appended to correctly.
+   */
+  function testExistingPolicyHeader() {
+    $this->backdropGet('common-test/existing_permissions_policy_header');
+    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=(),interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
+  }
+
+  /**
+   * Tests that FLoC blocking can be disabled.
+   */
+  function testDisableBlocking() {
+    config_set('system.core', 'block_interest_cohort', FALSE);
+    $this->backdropGet('node');
+    $this->assertFalse($this->backdropGetHeader('Permissions-Policy'), 'FLoC blocking can be disabled.');
+  }
 }
 
 /**

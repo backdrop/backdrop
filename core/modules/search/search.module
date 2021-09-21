@@ -120,7 +120,7 @@ function search_block_configure($delta = '', $settings = array()) {
     $search_settings = !empty($settings['search'])? $settings['search'] : array();
     $search_settings += array(
       'label' => '',
-      'label_hide' => TRUE,
+      'label_hide' => FALSE,
       'placeholder' => '',
       'button_text' => 'Search',
     );
@@ -198,6 +198,7 @@ function search_block_view($delta = '', $settings = array(), $contexts = array()
 
     $block['subject'] = t('Search');
     $block['content'] = $form;
+
     return $block;
   }
 }
@@ -1101,6 +1102,19 @@ function search_box_form_submit($form, &$form_state) {
   }
   else {
     form_set_error(NULL, t('Search is currently disabled.'), 'error');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function search_form_layout_block_configure_form_alter(&$form, &$form_state) {
+  // Only alter the search block's configure form.
+  if ($form_state['block']->module == 'search' && $form_state['block']->delta == 'form') {
+    // Only hide the block title when the search block is first added.
+    if ($form_state['block']->is_new == TRUE) {
+      $form['title_display']['title_display']['#default_value'] = 'none';
+    }
   }
 }
 

@@ -1774,6 +1774,173 @@ class FilePrivateTestCase extends FileTestHelper {
 }
 
 /**
+ * Confirm that file field submissions work correctly for anonymous visitors.
+ */
+class FileFieldAnonymousSubmission extends FileTestHelper {
+
+  function setUp() {
+    parent::setUp();
+
+    // Allow node submissions by anonymous users.
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
+      'create page content',
+      'access content',
+      'create url aliases'
+    ));
+  }
+
+  /**
+   * Tests the basic node submission for an anonymous visitor.
+   */
+  function testAnonymousNode() {
+    $bundle_label = 'Page';
+    $node_title = 'Test page';
+
+    // Load the node form.
+    $this->backdropGet('node/add/page');
+    $this->assertResponse(200, 'Loaded the page node form.');
+    $this->assertText(strip_tags(t('Create @name', array('@name' => $bundle_label))));
+
+    $edit = array(
+      'title' => $node_title,
+      'body[und][0][value]' => 'Test page',
+      'body[und][0][format]' => 'filtered_html',
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $t_args = array('@type' => $bundle_label, '%title' => $node_title);
+    $this->assertText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
+    $matches = array();
+    if (preg_match('@node/(\d+)$@', $this->getUrl(), $matches)) {
+      $nid = end($matches);
+      $this->assertNotEqual($nid, 0, 'The node ID was extracted from the URL.');
+      $node = node_load($nid);
+      $this->assertNotEqual($node, NULL, 'The node was loaded successfully.');
+    }
+  }
+
+  /**
+   * Tests file submission for an anonymous visitor.
+   */
+  function testAnonymousNodeWithFile() {
+    $type_name = 'page';
+    $bundle_label = 'Page';
+    $node_title = 'Test page';
+
+    $field_name = strtolower($this->randomName());
+    $this->createFileField($field_name, $type_name);
+
+    // Load the node form.
+    $this->backdropGet('node/add/' . $type_name);
+    $this->assertResponse(200, 'Loaded the page node form.');
+    $this->assertText(strip_tags(t('Create @name', array('@name' => $bundle_label))));
+
+    // Generate a file.
+    $test_file = $this->getTestFile('text');
+
+    // Submit the form.
+    $edit = array(
+      'title' => $node_title,
+      'body[und][0][value]' => 'Test page',
+      'body[und][0][format]' => 'filtered_html',
+      'files[' . $field_name .'_und_0]' => backdrop_realpath($test_file->uri),
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $t_args = array('@type' => $bundle_label, '%title' => $node_title);
+    $this->assertText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
+    $matches = array();
+    if (preg_match('@node/(\d+)$@', $this->getUrl(), $matches)) {
+      $nid = end($matches);
+      $this->assertNotEqual($nid, 0, 'The node ID was extracted from the URL.');
+      $node = node_load($nid);
+      $this->assertNotEqual($node, NULL, 'The node was loaded successfully.');
+      $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['filename'], $test_file->filename, 'The file was uploaded successfully.');
+    }
+  }
+
+  /**
+   * Tests file submission for an anonymous visitor with a missing node title.
+   */
+  function testAnonymousNodeWithFileWithoutTitle() {
+    $this->backdropLogout();
+    $this->_testNodeWithFileWithoutTitle();
+  }
+
+  /**
+   * Tests file submission for an authenticated user with a missing node title.
+   */
+  function testAuthenticatedNodeWithFileWithoutTitle() {
+    $admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+      'access content overview',
+      'administer nodes',
+      'create url aliases',
+    ));
+    $this->backdropLogin($admin_user);
+    $this->_testNodeWithFileWithoutTitle();
+  }
+
+  /**
+   * Helper method to test file submissions with missing node titles.
+   */
+  protected function _testNodeWithFileWithoutTitle() {
+    $type_name = 'page';
+    $bundle_label = 'Page';
+    $node_title = 'Test page';
+
+    $field_name = strtolower($this->randomName());
+    $this->createFileField($field_name, $type_name);
+
+    // Load the node form.
+    $this->backdropGet('node/add/page');
+    $this->assertResponse(200, 'Loaded the page node form.');
+    $this->assertText(strip_tags(t('Create @name', array('@name' => $bundle_label))));
+
+    // Generate a file.
+    $test_file = $this->getTestFile('text');
+
+    // Submit the form but exclude the title field.
+    $edit = array(
+      'body[und][0][value]' => 'Test page',
+      'body[und][0][format]' => 'filtered_html',
+      'files[' . $field_name .'_und_0]' => backdrop_realpath($test_file->uri),
+      'path[auto]' => FALSE,
+      'path[alias]' => '',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    $t_args = array('@type' => $bundle_label, '%title' => $node_title);
+    $this->assertNoText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
+    $this->assertText(t('!name field is required.', array('!name' => t('Title'))));
+
+    // Submit the form again but this time with the missing title field. This
+    // should still work.
+    $edit = array(
+      'title' => $node_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Confirm the final submission actually worked.
+    $t_args = array('@type' => $bundle_label, '%title' => $node_title);
+    $this->assertText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
+    $matches = array();
+    if (preg_match('@node/(\d+)$@', $this->getUrl(), $matches)) {
+      $nid = end($matches);
+      $this->assertNotEqual($nid, 0, 'The node ID was extracted from the URL.');
+      $node = node_load($nid);
+      $this->assertNotEqual($node, NULL, 'The node was loaded successfully.');
+      $this->assertEqual($node->{$field_name}[LANGUAGE_NONE][0]['filename'], $test_file->filename, 'The file was uploaded successfully.');
+    }
+  }
+
+}
+
+/**
  * Tests file type classification functionality.
  */
 class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
@@ -2701,11 +2868,15 @@ class FileTypeTestCase extends FileTestHelper {
     $this->assertText(t('The file type @type has been updated.', array('@type' => $edit['name'])), 'New file type successfully created.');
     $this->assertText($edit['name'], 'New file type created: name found.');
     $this->assertText($edit['description'], 'New file type created: description found.');
-    $this->assertFieldByXPath("//table//td[2]", t('Custom'), 'Newly created file type is stored in config.');
+    $this->assertFieldByXPath("//table//td[1]//div[1]", $edit['name'], 'The label of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[1]//div[2]", '(' . t('Machine name: @machine_name', array('@machine_name' => $edit['type']])) . ')', 'The machine name of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[2]", $edit['description'], 'The description of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[3]", t('Custom'), 'The storage state of the newly-created file type is shown in the table.');
     $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type.');
     $this->assertLink(t('Delete'), 0, 'Able to delete newly created file type.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . str_replace('_', '-', $edit['type']) . '/disable', 0, 'Disable link disables.');
     $this->assertLinkByHref('admin/structure/file-types/manage/' . str_replace('_', '-', $edit['type']) . '/delete', 0, 'Delete link points to delete confirmation page.');
+    $this->assertEqual($edit['type'], config_get('file.type.' . $edit['type'], 'type'), 'The newly-created file type is stored in config.');
 
     // Edit file type.
     $this->backdropGet('admin/structure/file-types/manage/' . $edit['type'] . '/edit');
@@ -2721,13 +2892,16 @@ class FileTypeTestCase extends FileTestHelper {
     $this->backdropPost(NULL, array('name' => $edit['name']), t('Save'));
     $this->assertRaw(t('The file type %type has been updated.', array('%type' => $edit['name'])), 'File type was modified.');
     $this->assertText($edit['name'], 'Modified name found on file types list.');
+    $this->assertEqual($edit['name'], config_get('file.type.' . $edit['type'], 'name'), 'The file type name was updated in config.');
 
     // Disable and re-enable file type.
     $url_type = str_replace('_', '-', $edit['type']);
     $this->clickFileTypeOperationLink(t('Disable'), $url_type . '/disable');
+    $this->assertTrue(config_get('file.type.' . $edit['type'], 'disabled'), 'The file type was disabled in config.');
     $this->assertRaw(t('The file type %type has been disabled.', array('%type' => $edit['name'])), 'Disable confirmation message found.');
     $this->assertLink(t('Enable'), 0, 'Able to re-enable newly created file type.');
     $this->clickFileTypeOperationLink(t('Enable'), $url_type . '/enable');
+    $this->assertFalse(config_get('file.type.' . $edit['type'], 'disabled'), 'The file type was enabled in config.');
     $this->assertRaw(t('The file type %type has been enabled.', array('%type' => $edit['name'])), 'Enable confirmation message found.');
     $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type again.');
 

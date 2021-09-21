@@ -2126,7 +2126,7 @@ function comment_form_validate($form, &$form_state) {
         ->execute()
         ->fetchField();
       if ($taken) {
-        form_set_error('name', t('The name you used belongs to a registered user.'));
+        form_set_error('name', t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
       }
     }
   }

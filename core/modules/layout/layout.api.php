@@ -87,7 +87,8 @@ function hook_layout_info() {
  *     the menu paths array that contains this context's argument. This is only
  *     necessary if menu paths are also provided.
  *   - load callback: The name of a function that will load the argument from
- *     the URL and return the loaded data.
+ *     the URL and return the loaded data. The loaded data must be an object,
+ *     not a string, array, or other variable type.
  *   - hidden: Optional. Boolean if this context should be shown in the UI.
  *
  * @see hook_autoload_info()
@@ -332,6 +333,99 @@ function hook_layout_presave(Layout $layout) {
     $my_block_uuid = get_my_uuid();
     $my_block = $layout->content[$my_block_uuid];
     $my_block->data['settings']['title'] = 'New Title';
+  }
+}
+
+/**
+ * Perform alterations to the list of layouts that match the path of a router
+ * item.
+ *
+ * Modules can implement this hook to allow a given layout to be used for
+ * multiple or different paths than its defined path.
+ *
+ * This hook is called on every page load; your implementation should quickly
+ * and efficiently determine if it is applicable and return if not.
+ *
+ * If a layout's path includes positioned contexts (e.g., 'node/%') and you
+ * apply the layout to a different path, you may need to set the context
+ * data beyond the default setting done by the layout module. The default
+ * setting happens after invocations of this hook, taking care of any contexts
+ * that were not yet set.
+ *
+ * If you substitute a layout whose placeholder(s) are in a different position
+ * from the path in the router item and you will rely on the system to set the
+ * context, you should set the position of the context(s) in the layout to the
+ * position in the router. Example: the path in the router item is
+ * mymodule/node/% and you wish to use the layout with path node/%. Then you
+ * would find the context at position 2 in the router item and set its
+ *  Context::position variable to 2, so that the layout with path node/% looks
+ * at position 2 to set the context for that placeholder.
+ *
+ * @param Layout[] $layouts
+ *   The list of layouts that should be considered for the path
+ *   $router_item['path']. Note that the final selection of layout will be based
+ *   on contexts and visibility conditions.
+ * @param array $router_item
+ *   The router item for the path. In addition to obtaining the system path at
+ *   $router_item['path'], you can use other elements of $router_item. For
+ *   example, $router_item['original_map'] contains an exploded version of the
+ *   normal path.
+ *
+ * @since 1.20.0
+ *
+ * @see layout_get_layout_by_path()
+ * @see node_layout_load_by_router_item_alter()
+ */
+function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  // Example taken from node_layout_load_by_router_item_alter(). When creating
+  // node preview pages, the path will be of the form node/preview/<type>/<id>,
+  // where <type> is the node type and <id> is the tempstore ID of the node
+  // begin previewed. But we want to display it using a layout whose system path
+  // is node/%. So we choose those layouts and set the context from the
+  // tempstore node.
+
+  // Check path structure before checking node type because
+  // node_type_get_types() is expensive; don't call it if we don't need to.
+  $map = $router_item['map'];
+  if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
+    return;
+  }
+  $path_is_preview = FALSE;
+  foreach (node_type_get_types() as $type_obj) {
+    if ($type_obj->type == $map[2]) {
+      $path_is_preview = TRUE;
+      break;
+    }
+  }
+  if (!$path_is_preview) {
+    return;
+  }
+  // So now we know that this is a path that we want to handle. We want to use
+  // layouts whose path is node/%, and we'll use the node from the tempstore to
+  // set the context of those layouts. So start by getting the tempstore node,
+  // whose ID is in position 3 of the path.
+  $tempstore_id = $map[3];
+  $temp_node = node_get_node_tempstore($tempstore_id);
+  if ($temp_node) {
+    // Get all the layouts that we want to use whose paths are those normally
+    // used to display a node.
+    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+    if ($node_layouts) {
+      $layouts = $node_layouts;
+      foreach ($layouts as $layout) {
+        foreach ($layout->getContexts() as $context) {
+          if (isset($context->position)) {
+            // If we were relying on the system to set the context, we should
+            // change $context->position to be the place the data is found in
+            // the router item, as here. This isn't actually necessary here,
+            // because we're going to go ahead and set the data ourselves, since
+            // we need to use the tempstore node as the context data.
+            $context->position = 3;
+            $context->setData($temp_node);
+          }
+        }
+      }
+    }
   }
 }
 
