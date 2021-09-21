@@ -14,4 +14,6 @@ function foo() {
     // another ouch in a comment for several reasons
     $bar[] = $ouch;
   }
+  // Another failure.
+  $fooMyVariable = 'camelcase';
 }

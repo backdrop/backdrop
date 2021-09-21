@@ -1,5 +1,8 @@
-name: "Coding standards"
-on: [pull_request]
+name: Coding standards
+on:
+  pull_request:
+    branches: [1.x]
+
 jobs:
   phpcs:
     name: Run phpcs
@@ -12,18 +15,19 @@ jobs:
           php-version: '7.2'
           coverage: none
 
-      - uses: actions/checkout@v2
+      - name: Checkout code with full depth
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # important?
+          fetch-depth: 0
 
-      - name: Install PHP_CodeSniffer
+      - name: Install PHP_CodeSniffer with Backdrop standards
         run: |
           cp .github/misc/composer.json .
           composer install --ansi --prefer-dist --no-interaction --no-progress
 
       - uses: thenabeel/action-phpcs@v8
         with:
-          files: "**.php"
+          files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
           phpcs_path: vendor/bin/phpcs
           standard: vendor/backdrop/coder/coder_sniffer/Backdrop
           fail_on_warnings: false
