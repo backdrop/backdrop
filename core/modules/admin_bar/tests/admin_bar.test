@@ -125,7 +125,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
 
     // Anonymous users should not see the menu.
     $this->backdropGet('');
-    $this->assertNoElementByXPath('//div[@id="admin-bar"]', array(), t('Administration bar not found.'));
+    $this->assertNoElementByXPath('//div[@id="admin-bar"]', array(), 'Administration bar not found.');
 
     // Create a user who
     // - can access content overview
@@ -270,7 +270,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     $cid = 'admin_bar:' . $this->admin_user->uid . ':' . session_id() . ':en';
     $hash = admin_bar_cache_get($cid);
     $this->backdropGet('js/admin_bar/cache/' . $hash);
-    $this->assertElementByXPath('//div[@id="admin-bar"]', array(), t('Administration bar found.'));
+    $this->assertElementByXPath('//div[@id="admin-bar"]', array(), 'Administration bar found.');
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path)]', array(':path' => 'admin/structure/types'), "Structure » Content types link found.");
 
     // Verify link title output escaping.

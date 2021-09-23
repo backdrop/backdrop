@@ -187,7 +187,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
           break;
         }
       }
-      $this->assertTrue(isset($index), t('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
+      $this->assertTrue(isset($index), format_string('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
       if (isset($index)) {
         return $this->clickLink($label, $index);
       }
@@ -218,9 +218,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'name' => $name,
     );
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
-    $this->assertRaw(t('Text format names must be unique. A format named %name already exists.', array(
-      '%name' => $name,
-    )));
+    $this->assertRaw(t('Text format names must be unique. A format named %name already exists.', array('%name' => $name)));
 
     // Verify default weight of the text format.
     $this->backdropGet('admin/config/content/formats');

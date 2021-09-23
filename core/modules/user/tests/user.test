@@ -1041,7 +1041,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
       $this->assertRaw(image_style_url($style, $pic_path), "Image is displayed in user's edit page");
 
       // Check if file is located in proper directory.
-      $this->assertTrue(is_file($pic_path), "File is located in proper directory");
+      $this->assertTrue(is_file($pic_path), 'File is located in proper directory');
     }
   }
 
@@ -1444,7 +1444,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
-    $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
+    $this->assertMail('to', $user_c->mail, 'Activation mail sent to user C');
 
     // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail
     $user_d = $this->backdropCreateUser(array());
@@ -1455,7 +1455,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->backdropPost('user/' . $account1->uid . '/edit', array('status' => TRUE), t('Save'));
     $account1 = user_load($user_d->uid, TRUE);
     $this->assertEqual($account1->status, 1, 'User D unblocked');
-    $this->assertMail("to", $account1->mail, "Activation mail sent to user D");
+    $this->assertMail('to', $account1->mail, 'Activation mail sent to user D');
   }
 }
 
@@ -2525,12 +2525,12 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
    * Test label callback.
    */
   function testLabelCallback() {
-    $this->assertEqual(entity_label('user', $this->account), $this->account->name, t('The username should be used as label'));
+    $this->assertEqual(entity_label('user', $this->account), $this->account->name, 'The username should be used as label');
 
     // Setup a random anonymous name to be sure the name is used.
     $name = $this->randomName();
     config_set('system.core', 'anonymous', $name);
-    $this->assertEqual(entity_label('user', $this->anonymous), $name, t('The variable anonymous should be used for name of uid 0'));
+    $this->assertEqual(entity_label('user', $this->anonymous), $name, 'The variable anonymous should be used for name of uid 0');
   }
 
   /**
@@ -2538,6 +2538,6 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
    */
   function testUriCallback() {
     $uri = entity_uri('user', $this->account);
-    $this->assertEqual('user/' . $this->account->uid, $uri['path'], t('Correct user URI.'));
+    $this->assertEqual('user/' . $this->account->uid, $uri['path'], 'Correct user URI.');
   }
 }

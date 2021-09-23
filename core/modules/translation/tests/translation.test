@@ -120,14 +120,14 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Confirm that disabled languages are an option for translators when
     // creating nodes.
     $this->backdropGet('node/add/page');
-    $this->assertFieldByXPath('//select[@name="langcode"]//option', 'it', t('Italian (disabled) is available in language selection.'));
+    $this->assertFieldByXPath('//select[@name="langcode"]//option', 'it', 'Italian (disabled) is available in language selection.');
     $translation_it = $this->createTranslation($node, $this->randomName(), $this->randomName(), 'it');
     $this->assertRaw($translation_it->body[LANGUAGE_NONE][0]['value'], 'Content created in Italian (disabled).');
 
     // Confirm that language neutral is an option for translators when there are
     // disabled languages.
     $this->backdropGet('node/add/page');
-    $this->assertFieldByXPath('//select[@name="langcode"]//option', LANGUAGE_NONE, t('Language neutral is available in language selection with disabled languages.'));
+    $this->assertFieldByXPath('//select[@name="langcode"]//option', LANGUAGE_NONE, 'Language neutral is available in language selection with disabled languages.');
     $node2 = $this->createPage($this->randomName(), $this->randomName(), LANGUAGE_NONE);
     $this->assertRaw($node2->body[LANGUAGE_NONE][0]['value'], 'Language neutral content created with disabled languages available.');
 
@@ -299,11 +299,11 @@ class TranslationTestCase extends BackdropWebTestCase {
     }
     elseif ($this->xpath('//input[@type="checkbox" and @name=:name and @checked="checked"]', array(':name' => 'languages[' . $language_code . '][enabled]'))) {
       // It's installed and enabled. No need to do anything.
-      $this->assertTrue(true, 'Language [' . $language_code . '] already installed and enabled.');
+      $this->assertTrue(true, format_string('Language [@langcode] already installed and enabled.', array('@langcode' => $language_code)));
     }
     else {
       // It's installed but not enabled. Enable it.
-      $this->assertTrue(true, 'Language [' . $language_code . '] already installed.');
+      $this->assertTrue(true, format_string('Language [@langcode] already installed.', array('@langcode' => $language_code)));
       $this->backdropPost(NULL, array('languages[' . $language_code . '][enabled]' => TRUE), t('Save configuration'));
       $this->assertRaw(t('Configuration saved.'), 'Language successfully enabled.');
     }
@@ -335,7 +335,7 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     // Check to make sure the node was created.
     $node = $this->backdropGetNodeByTitle($title);
-    $this->assertTrue($node, t('Node found in database.'));
+    $this->assertTrue($node, 'Node found in database.');
 
     return $node;
   }
@@ -371,7 +371,7 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     // Check to make sure that translation was successful.
     $translation = $this->backdropGetNodeByTitle($title);
-    $this->assertTrue($translation, t('Node found in database.'));
+    $this->assertTrue($translation, 'Node found in database.');
     $this->assertTrue($translation->tnid == $node->nid, 'Translation set id correctly stored.');
 
     return $translation;

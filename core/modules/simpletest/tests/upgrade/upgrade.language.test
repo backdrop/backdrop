@@ -29,10 +29,10 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
     $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
     // Ensure Catalan was properly upgraded to be the new default language.
-    $this->assertTrue(language_default()->langcode == 'ca', t('Catalan is the default language'));
+    $this->assertTrue(language_default()->langcode == 'ca', 'Catalan is the default language');
     $languages = language_list();
     foreach ($languages as $language) {
-      $this->assertTrue($language->default == ($language->langcode == 'ca'), t('@language default property properly set', array('@language' => $language->name)));
+      $this->assertTrue($language->default == ($language->langcode == 'ca'), format_string('@language default property properly set', array('@language' => $language->name)));
     }
 
     // Ensure the default gets used for URL generation in this test.
@@ -40,9 +40,9 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
 
     // Check that both comments display on the node.
     $this->backdropGet('node/38');
-    $this->assertText('Node title 38', t('Node 38 displayed after update.'));
-    $this->assertText('First test comment', t('Comment 1 displayed after update.'));
-    $this->assertText('Reply to first test comment', t('Comment 2 displayed after update.'));
+    $this->assertText('Node title 38', 'Node 38 displayed after update.');
+    $this->assertText('First test comment', 'Comment 1 displayed after update.');
+    $this->assertText('Reply to first test comment', 'Comment 2 displayed after update.');
 
     // Check each language uses their locale-specific date formats.
     $this->assertText('2010/01/17 - 15:00', 'Localized Catalan medium date format displayed correctly after update.');
@@ -55,7 +55,7 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
 
     // Directly check the comment language property on the first comment.
     $comment = db_query('SELECT * FROM {comment} WHERE cid = :cid', array(':cid' => 1))->fetchObject();
-    $this->assertTrue($comment->langcode == 'und', t('Comment 1 language code found.'));
+    $this->assertTrue($comment->langcode == 'und', 'Comment 1 language code found.');
 
     // Ensure that the language switcher has been correctly upgraded. We need to
     // assert the expected HTML id because the block might appear even if the
@@ -63,7 +63,7 @@ class LanguageUpgradePathTestCase extends UpgradePathTestCase {
     $elements = $this->xpath('//*[contains(@class, :block)]', array(
       ':block' => 'block-locale-language',
     ));
-    $this->assertTrue($elements, t('The language switcher block is being correctly showed.'));
+    $this->assertTrue($elements, 'The language switcher block is being correctly showed.');
 
     // Test that the 'language' property was properly renamed to 'langcode'.
     $language_none_nid = 38;

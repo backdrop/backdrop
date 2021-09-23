@@ -39,7 +39,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
       '%function' => 'views_handler_argument->options_validate()',
     );
     $message = t('%type: !message in %function', $error);
-    $this->assertNoRaw($message, t('Did not find error message: !message.', array('!message' => $message)));
+    $this->assertNoRaw($message, 'Did not find error message: !message.', array('!message' => $message));
   }
 
   /**

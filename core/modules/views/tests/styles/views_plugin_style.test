@@ -67,7 +67,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     $expected['Job: Drummer'][2]->views_test_job = 'Drummer';
     $expected['Job: Drummer'][2]->views_test_id = '3';
 
-    $this->assertEqual($sets, $expected, t('The style plugin should proper group the results with grouping by the rendered output.'));
+    $this->assertEqual($sets, $expected, 'The style plugin should proper group the results with grouping by the rendered output.');
 
     $expected = array();
     $expected['Job: Singer'] = array();
@@ -91,7 +91,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     $sets_new_rendered = $view->style_plugin->render_grouping($view->result, $view->style_plugin->options['grouping'], TRUE);
     $sets_new_value = $view->style_plugin->render_grouping($view->result, $view->style_plugin->options['grouping'], FALSE);
 
-    $this->assertEqual($sets_new_rendered, $expected, t('The style plugins should proper group the results with grouping by the rendered output.'));
+    $this->assertEqual($sets_new_rendered, $expected, 'The style plugins should proper group the results with grouping by the rendered output.');
 
     // Reorder the group structure to group by value.
     $expected['Singer'] = $expected['Job: Singer'];
@@ -99,7 +99,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     unset($expected['Job: Singer']);
     unset($expected['Job: Drummer']);
 
-    $this->assertEqual($sets_new_value, $expected, t('The style plugins should proper group the results with grouping by the value.'));
+    $this->assertEqual($sets_new_value, $expected, 'The style plugins should proper group the results with grouping by the value.');
   }
 
   function testGrouping() {
@@ -204,7 +204,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     // The newer api passes the value of the grouping as well.
     $sets_new_rendered = $view->style_plugin->render_grouping($view->result, $view->style_plugin->options['grouping'], TRUE);
 
-    $this->assertEqual($sets_new_rendered, $expected, t('The style plugins should proper group the results with grouping by the rendered output.'));
+    $this->assertEqual($sets_new_rendered, $expected, 'The style plugins should proper group the results with grouping by the rendered output.');
 
     // Don't test stripped case, because the actual value is not stripped.
     if (!$stripped) {
@@ -222,7 +222,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
       unset($expected['Job: Drummer']);
       unset($expected['Drummer']['rows']['Age: 28']);
 
-      $this->assertEqual($sets_new_value, $expected, t('The style plugins should proper group the results with grouping by the value.'));
+      $this->assertEqual($sets_new_value, $expected, 'The style plugins should proper group the results with grouping by the value.');
     }
   }
 

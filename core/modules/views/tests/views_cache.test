@@ -79,7 +79,7 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
 
     // Add another man to the beatles.
     $record = array(
@@ -100,7 +100,7 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
   }
 
   /**
@@ -118,7 +118,7 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(5, count($view->result), t('The number of returned rows match.'));
+    $this->assertEqual(5, count($view->result), 'The number of returned rows match.');
 
     // Add another man to the beatles.
     $record = array(
@@ -138,7 +138,7 @@ class ViewsCacheTest extends ViewsSqlTest {
 
     $this->executeView($view);
     // Verify the result.
-    $this->assertEqual(6, count($view->result), t('The number of returned rows match.'));
+    $this->assertEqual(6, count($view->result), 'The number of returned rows match.');
   }
 
   /**
@@ -214,12 +214,12 @@ class ViewsCacheTest extends ViewsSqlTest {
     $first_content = $this->backdropGetContent();
     $first_content_type = $this->backdropGetHeader('content-type');
     $expected_type = 'application/rss+xml';
-    $this->assertIdentical(0, strpos(trim($first_content_type), $expected_type), t('Expected content type returned.'));
+    $this->assertIdentical(0, strpos(trim($first_content_type), $expected_type), 'Expected content type returned.');
 
     // Check that we have 7 items in RSS feed returned by the first request.
     $xml = simplexml_load_string($first_content);
     $items = $xml->xpath('/rss/channel/item');
-    $this->assertEqual(7, count($items), t('The number of RSS feed items matched.'));
+    $this->assertEqual(7, count($items), 'The number of RSS feed items matched.');
 
     // Create another node to be sure we get cached results on the second
     // request.
@@ -228,9 +228,9 @@ class ViewsCacheTest extends ViewsSqlTest {
     // Make the second request, check content type and content matching.
     $this->backdropGet('test_feed_http_headers_caching');
     $second_content = $this->backdropGetContent();
-    $this->assertEqual($first_content, $second_content, t('The second result fetched from cache.'));
+    $this->assertEqual($first_content, $second_content, 'The second result fetched from cache.');
     $second_content_type = $this->backdropGetHeader('content-type');
-    $this->assertEqual($first_content_type, $second_content_type, t('Content types of responses are equal.'));
+    $this->assertEqual($first_content_type, $second_content_type, 'Content types of responses are equal.');
   }
 
 }

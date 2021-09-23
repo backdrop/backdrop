@@ -71,7 +71,7 @@ class ListFieldTestCase extends FieldTestCase {
     field_update_field($this->field);
     $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
-    $this->assertTrue(empty($form[$this->field_name][$langcode][1]), t('Option 1 does not exist'));
+    $this->assertTrue(empty($form[$this->field_name][$langcode][1]), 'Option 1 does not exist');
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
     $this->assertTrue(empty($form[$this->field_name][$langcode][3]), 'Option 3 does not exist');
 

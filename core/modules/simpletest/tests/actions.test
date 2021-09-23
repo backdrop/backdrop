@@ -47,8 +47,8 @@ class ActionLoopTestCase extends BackdropWebTestCase {
     $result = db_query("SELECT message FROM {watchdog} WHERE type = 'actions_loop_test' OR type = 'actions' ORDER BY wid");
     foreach ($result as $row) {
       $expected_message = array_shift($expected);
-      $this->assertEqual($row->message, $expected_message, t('Expected message %expected, got %message.', array('%expected' => $expected_message, '%message' => $row->message)));
+      $this->assertEqual($row->message, $expected_message, format_string('Expected message %expected, got %message.', array('%expected' => $expected_message, '%message' => $row->message)));
     }
-    $this->assertTrue(empty($expected), t('All expected messages found.'));
+    $this->assertTrue(empty($expected), 'All expected messages found.');
   }
 }

@@ -250,8 +250,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view = $this->viewsGroupByCountViewOnlyFilters();
     $output = $view->execute_display();
 
-    $this->assertTrue(strpos($view->build_info['query'], 'GROUP BY'), t('Make sure that GROUP BY is in the query'));
-    $this->assertTrue(strpos($view->build_info['query'], 'HAVING'), t('Make sure that HAVING is in the query'));
+    $this->assertTrue(strpos($view->build_info['query'], 'GROUP BY'), 'Make sure that GROUP BY is in the query');
+    $this->assertTrue(strpos($view->build_info['query'], 'HAVING'), 'Make sure that HAVING is in the query');
   }
 
   function viewsGroupByCountViewOnlyFilters() {

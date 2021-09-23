@@ -197,7 +197,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
     // and make sure that backdrop_uninstall_modules() uninstalled them in the
     // correct sequence.
     $result = backdrop_uninstall_modules(array('dependency_test2', 'dependency_test1', 'dependency_test3'));
-    $this->assertTrue($result, t('backdrop_uninstall_modules() returns the correct value.'));
+    $this->assertTrue($result, 'backdrop_uninstall_modules() returns the correct value.');
     foreach (array('dependency_test3', 'dependency_test2', 'dependency_test1') as $module) {
       $this->assertEqual(backdrop_get_installed_schema_version($module), SCHEMA_UNINSTALLED, format_string('The @module module was uninstalled.', array('@module' => $module)));
     }

@@ -430,7 +430,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->use_ajax = TRUE; // force the value again here
     $view->query->pager = NULL;
     $output = $view->render();
-    $this->assertEqual(preg_match('/<ul class="pager">/', $output), 0, t('The pager is not rendered.'));
+    $this->assertEqual(preg_match('/<ul class="pager">/', $output), 0, 'The pager is not rendered.');
   }
 
   /**

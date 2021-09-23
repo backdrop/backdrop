@@ -427,8 +427,8 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     sleep(3);
 
     $calls = 1;
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, 'hook_boot called with disabled cache.');
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, 'hook_exit called with disabled cache.');
 
     // Test with normal cache. Boot and exit should be called.
     config_set('system.core', 'cache', 1);
@@ -441,19 +441,19 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     sleep(3);
 
     $calls++;
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with normal cache.'));
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, 'hook_boot called with normal cache.');
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, 'hook_exit called with normal cache.');
 
     // Test with page cache cleared, boot and exit should be called.
-    $this->assertTrue(db_delete('cache_page')->execute(), t('Page cache cleared.'));
+    $this->assertTrue(db_delete('cache_page')->execute(), 'Page cache cleared.');
     $this->backdropGet('');
 
     // Sleep to allow time for hook_exit() after the page has been delivered.
     sleep(3);
 
     $calls++;
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with aggressive cache and no cached page.'));
-    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with aggressive cache and no cached page.'));
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, 'hook_boot called with aggressive cache and no cached page.');
+    $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, 'hook_exit called with aggressive cache and no cached page.');
   }
 }
 
@@ -470,20 +470,20 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
     backdrop_static_reset('backdrop_get_filename');
 
     // Retrieving the location of a module.
-    $this->assertIdentical(backdrop_get_filename('module', 'block'), 'core/modules/block/block.module', t('Retrieve module location.'));
+    $this->assertIdentical(backdrop_get_filename('module', 'block'), 'core/modules/block/block.module', 'Retrieve module location.');
 
     // Retrieving the location of a theme.
-    $this->assertIdentical(backdrop_get_filename('theme', 'stark'), 'core/themes/stark/stark.info', t('Retrieve theme location.'));
+    $this->assertIdentical(backdrop_get_filename('theme', 'stark'), 'core/themes/stark/stark.info', 'Retrieve theme location.');
 
     // Retrieving the location of a theme engine.
-    $this->assertIdentical(backdrop_get_filename('theme_engine', 'phptemplate'), 'core/themes/engines/phptemplate/phptemplate.engine', t('Retrieve theme engine location.'));
+    $this->assertIdentical(backdrop_get_filename('theme_engine', 'phptemplate'), 'core/themes/engines/phptemplate/phptemplate.engine', 'Retrieve theme engine location.');
 
     // Retrieving the location of a layout.
-    $this->assertIdentical(backdrop_get_filename('layout', 'boxton'), 'core/layouts/boxton/boxton.info', t('Retrieve layout location.'));
+    $this->assertIdentical(backdrop_get_filename('layout', 'boxton'), 'core/layouts/boxton/boxton.info', 'Retrieve layout location.');
 
     // Retrieving the location of a profile. Profiles are a special case with
     // a fixed location and naming.
-    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'core/profiles/standard/standard.profile', t('Retrieve install profile location.'));
+    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'core/profiles/standard/standard.profile', 'Retrieve install profile location.');
 
     // When a file is not found in the database cache, backdrop_get_filename()
     // searches several locations on the filesystem, including the core/
@@ -492,7 +492,7 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
     // Since there is already a core/scripts directory, backdrop_get_filename()
     // will automatically check there for 'script' files, just as it does
     // for (e.g.) 'module' files in core/modules.
-    $this->assertIdentical(backdrop_get_filename('script', 'test'), 'core/scripts/test.script', t('Retrieve test script location.'));
+    $this->assertIdentical(backdrop_get_filename('script', 'test'), 'core/scripts/test.script', 'Retrieve test script location.');
   }
 }
 

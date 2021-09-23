@@ -618,7 +618,7 @@ class TokenMenuTestCase extends TokenTestHelper {
 
     // Regression test for http://drupal.org/node/1317926 to ensure the
     // original node object is not changed when calling menu_node_prepare().
-    $this->assertTrue(!isset($loaded_node->menu), t('The $node->menu property was not modified during token replacement.'), 'Regression');
+    $this->assertTrue(!isset($loaded_node->menu), 'The $node->menu property was not modified during token replacement.', 'Regression');
   }
 }
 
