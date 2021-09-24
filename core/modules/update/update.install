@@ -239,6 +239,15 @@ function update_update_1004() {
   $config->save();
 }
 
+/*
+ * Add a default setting (off) for automatic self-updates.
+ */
+function update_update_1005() {
+  $config = config('update.settings');
+  // Default to Automatic updates off.
+  $config->set('update_automatic', 0);
+}
+
 /**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.

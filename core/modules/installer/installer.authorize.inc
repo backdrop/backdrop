@@ -149,7 +149,12 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
   }
 
   /* @var Updater $updater */
-  $updater = new $updater_name($project_realpath);
+  if ($project['project'] == 'backdrop') {
+    $updater = new CoreUpdater($project_realpath);
+  }
+  else {
+    $updater = new $updater_name($project_realpath);
+  }
 
   try {
     if ($updater->isInstalled()) {
