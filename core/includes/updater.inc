@@ -298,19 +298,9 @@ abstract class Updater implements BackdropUpdaterInterface {
       // Make sure the installation parent directory exists and is writable.
       $this->prepareInstallDirectory($filetransfer, $args['install_dir']);
 
-      // Note: If the project is installed in top-level, it will not be
-      // deleted. It will be installed in the root as that will override
-      // the top-level reference and not break other sites which are using it.
-      if (is_dir($args['install_dir'] . '/' . $this->name)) {
-        // Remove the existing installed file.
-        $filetransfer->removeDirectory($args['install_dir'] . '/' . $this->name);
-      }
-
       // Copy the directory in place.
       // Check for core update.
       if ($this->name == 'backdrop') {
-        // Remove the existing core directory.
-        $filetransfer->removeDirectory($args['install_dir'] . '/core');
         $source = $this->source . '/core';
         $name = 'core';
       }
@@ -318,6 +308,15 @@ abstract class Updater implements BackdropUpdaterInterface {
         $source = $this->source;
         $name = $this->name;
       }
+
+      // Note: If the project is installed in top-level, it will not be
+      // deleted. It will be installed in the root as that will override
+      // the top-level reference and not break other sites which are using it.
+      if (is_dir($args['install_dir'] . '/' . $name)) {
+        // Remove the existing installed file.
+        $filetransfer->removeDirectory($args['install_dir'] . '/' . $name);
+      }
+
       $filetransfer->copyDirectory($source, $args['install_dir']);
 
       // Make sure what we just installed is readable by the web server.
