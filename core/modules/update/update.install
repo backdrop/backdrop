@@ -244,8 +244,9 @@ function update_update_1004() {
  */
 function update_update_1005() {
   $config = config('update.settings');
-  // Default to Automatic updates off.
-  $config->set('update_automatic', 0);
+  if (!($config->get('update_automatic') > 0)) {
+    $config->set('update_automatic', 0);
+  }
 }
 
 /**
