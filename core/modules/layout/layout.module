@@ -539,20 +539,22 @@ function layout_page_access() {
 /**
  * Suppress the layout.
  *
- * This function can be called when an empty layout (content only) should be displayed, such as
- * in hook_init. This can be useful for modules that implement popup pages or other special pages,
- * where the default layout would be distracting.
+ * This function should be called from within another module's page callback
+ * when the layout should not be displayed, that is, content only. This can be
+ * useful for modules that implement popup pages or other special pages where
+ * the default layout would be distracting.
  *
  * @param bool $suppress
  *   If set to TRUE, the layout will be supressed.
  * @return bool
  *   TRUE if the layout can be suppressed, FALSE otherwise.
  */
-function layout_suppress($suppress = FALSE) {
-  $supression_static = &backdrop_static(__FUNCTION__, FALSE);
+function layout_suppress($suppress = NULL) {
+  $suppression_static = &backdrop_static(__FUNCTION__, FALSE);
   if (isset($suppress)) {
     $suppression_static = $suppress;
   }
+
   return $suppression_static;
 }
 
