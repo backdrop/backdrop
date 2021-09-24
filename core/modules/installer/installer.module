@@ -370,7 +370,7 @@ function installer_cron() {
 
   // Automatically update Backdrop if the site site is configured to do so.
   $update_automatic = config_get('update.settings', 'update_automatic');
-  if ($update_automatic > 0) {
+  if ($update_automatic) {
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
     $directory = _installer_manager_extract_directory();
     $project_location = $directory . '/backdrop';
@@ -380,19 +380,21 @@ function installer_cron() {
       'updater_name' => 'CoreUpdater',
       'local_url' => $project_realpath,
     );
-
     // Get the backdrop.zip.
     module_load_include('inc', 'installer', 'installer.manager');
     $state['values']['projects']['backdrop'] = 'backdrop';
     $state['values']['project_downloads']['backdrop'] =
-      'https://github.com/backdrop/backdrop/releases/download/1.11.0/backdrop.zip';
-    $fake_context = array();
+      'https://github.com/backdrop/backdrop/releases/latest/download/backdrop.zip';
+    $fake_context = array(
+      'sandbox' => array(
+        'started' => TRUE,
+      ),
+    );
     installer_manager_batch_project_get(
       $projects,
       $state['values']['project_downloads']['backdrop'],
       $fake_context
     );
-
     // Update Backdrop core.
     module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
