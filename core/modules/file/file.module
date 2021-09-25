@@ -1268,7 +1268,7 @@ function file_managed_file_process($element, &$form_state, $form) {
   $parents_prefix = implode('_', $element['#parents']);
 
   if (isset($element['#value']['fid'])) {
-    $fids = $element['#multiple'] ? $element['#value']['fid'] : array($element['#value']['fid']);
+    $fids = $element['#multiple'] ? $element['#value']['fid'] : !empty($element['#value']['fid']) ? array($element['#value']['fid']) : array();
   }
   else {
     $fids = array();
