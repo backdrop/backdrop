@@ -1612,118 +1612,110 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       $validators['file_validate_extensions'] = array();
       $validators['file_validate_extensions'][0] = $extensions;
     }
-  }
-  else {
-    // No validator was provided, so add one using the default list.
-    // Build a default non-munged safe list for file_munge_filename().
-    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
-    $validators['file_validate_extensions'] = array();
-    $validators['file_validate_extensions'][0] = $extensions;
-  }
 
+    if (!settings_get('allow_insecure_uploads', 0)) {
+      if (!empty($extensions)) {
+        // Munge the filename to protect against possible malicious extension hiding
+        // within an unknown file type (ie: filename.html.foo).
+        $file->filename = file_munge_filename($file->filename, $extensions);
+      }
 
-  if (!settings_get('allow_insecure_uploads', 0)) {
-    if (!empty($extensions)) {
-      // Munge the filename to protect against possible malicious extension hiding
-      // within an unknown file type (ie: filename.html.foo).
-      $file->filename = file_munge_filename($file->filename, $extensions);
-    }
-
-    // Rename potentially executable files, to help prevent exploits (i.e. will
-    // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
-    // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
-    // evaluates to TRUE.
-    if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
-      // If the file will be rejected anyway due to a disallowed extension, it
-      // should not be renamed; rather, we'll let file_validate_extensions()
-      // reject it below.
-      if (!isset($validators['file_validate_extensions']) || !file_validate_extensions($file, $extensions)) {
-        $file->filemime = 'text/plain';
-        if (substr($file->filename, -4) != '.txt') {
-          // The destination filename will also later be used to create the URI.
-          $file->filename .= '.txt';
-        }
-        $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
-        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
-        // The .txt extension may not be in the allowed list of extensions. We have
-        // to add it here or else the file upload will fail.
-        if (!empty($validators['file_validate_extensions'][0])) {
-          $validators['file_validate_extensions'][0] .= ' txt';
+      // Rename potentially executable files, to help prevent exploits (i.e. will
+      // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
+      // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
+      // evaluates to TRUE.
+      if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
+        // If the file will be rejected anyway due to a disallowed extension, it
+        // should not be renamed; rather, we'll let file_validate_extensions()
+        // reject it below.
+        if (!isset($validators['file_validate_extensions']) || !file_validate_extensions($file, $extensions)) {
+          $file->filemime = 'text/plain';
+          if (substr($file->filename, -4) != '.txt') {
+            // The destination filename will also later be used to create the URI.
+            $file->filename .= '.txt';
+          }
+          $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
+          backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+          // The .txt extension may not be in the allowed list of extensions. We have
+          // to add it here or else the file upload will fail.
+          if (!empty($validators['file_validate_extensions'][0])) {
+            $validators['file_validate_extensions'][0] .= ' txt';
+          }
         }
       }
-    }
 
-    // If the destination is not provided, use the temporary directory.
-    if (empty($destination)) {
-      $destination = 'temporary://';
-    }
-
-    // Assert that the destination contains a valid stream.
-    $destination_scheme = file_uri_scheme($destination);
-    if (!file_stream_wrapper_valid_scheme($destination_scheme)) {
-      backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
-      $files[$i] = FALSE;
-      continue;
-    }
-    $file->source = $form_field_name;
-    // A file URI may already have a trailing slash or look like "public://".
-    if (substr($destination, -1) != '/') {
-      $destination .= '/';
-    }
-    $file->destination = file_destination($destination . $file->filename, $replace);
-    // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
-    // there's an existing file so we need to bail.
-    if ($file->destination === FALSE) {
-      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
-      $files[$i] = FALSE;
-      continue;
-    }
-
-    // Add in our check of the the file name length.
-    $validators['file_validate_name_length'] = array();
-
-    // Call the validation functions specified by this function's caller.
-    $errors = file_validate($file, $validators);
-
-    // Check for errors.
-    if (!empty($errors)) {
-      $message = t('The specified file %name could not be uploaded.', array('%name' => $file->filename));
-      if (count($errors) > 1) {
-        $message .= theme('item_list', array('items' => $errors));
+      // If the destination is not provided, use the temporary directory.
+      if (empty($destination)) {
+        $destination = 'temporary://';
       }
-      else {
-        $message .= ' ' . array_pop($errors);
+
+      // Assert that the destination contains a valid stream.
+      $destination_scheme = file_uri_scheme($destination);
+      if (!file_stream_wrapper_valid_scheme($destination_scheme)) {
+        backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+        $files[$i] = FALSE;
+        continue;
       }
-      form_set_error($form_field_name, $message);
-      $files[$i] = FALSE;
-      continue;
-    }
-
-    // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
-    // directory. This overcomes open_basedir restrictions for future file
-    // operations.
-    $file->uri = $file->destination;
-    if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
-      form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
-      watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
-      $files[$i] = FALSE;
-      continue;
-    }
-    // Set the permissions on the new file.
-    backdrop_chmod($file->uri);
-
-    // If we are replacing an existing file re-use its database record.
-    if ($replace == FILE_EXISTS_REPLACE) {
-      $existing_files = entity_load_multiple('file', FALSE, array('uri' => $file->uri));
-      if (count($existing_files)) {
-        $existing = reset($existing_files);
-        $file->fid = $existing->fid;
+      $file->source = $form_field_name;
+      // A file URI may already have a trailing slash or look like "public://".
+      if (substr($destination, -1) != '/') {
+        $destination .= '/';
       }
-    }
+      $file->destination = file_destination($destination . $file->filename, $replace);
+      // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
+      // there's an existing file so we need to bail.
+      if ($file->destination === FALSE) {
+        backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
+        $files[$i] = FALSE;
+        continue;
+      }
 
-    // If we made it this far it's safe to record this file in the database.
-    $file->save();
-    $files[$i] = $file;
+      // Add in our check of the the file name length.
+      $validators['file_validate_name_length'] = array();
+
+      // Call the validation functions specified by this function's caller.
+      $errors = file_validate($file, $validators);
+
+      // Check for errors.
+      if (!empty($errors)) {
+        $message = t('The specified file %name could not be uploaded.', array('%name' => $file->filename));
+        if (count($errors) > 1) {
+          $message .= theme('item_list', array('items' => $errors));
+        }
+        else {
+          $message .= ' ' . array_pop($errors);
+        }
+        form_set_error($form_field_name, $message);
+        $files[$i] = FALSE;
+        continue;
+      }
+
+      // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
+      // directory. This overcomes open_basedir restrictions for future file
+      // operations.
+      $file->uri = $file->destination;
+      if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
+        form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
+        watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
+        $files[$i] = FALSE;
+        continue;
+      }
+      // Set the permissions on the new file.
+      backdrop_chmod($file->uri);
+
+      // If we are replacing an existing file re-use its database record.
+      if ($replace == FILE_EXISTS_REPLACE) {
+        $existing_files = entity_load_multiple('file', FALSE, array('uri' => $file->uri));
+        if (count($existing_files)) {
+          $existing = reset($existing_files);
+          $file->fid = $existing->fid;
+        }
+      }
+
+      // If we made it this far it's safe to record this file in the database.
+      $file->save();
+      $files[$i] = $file;
+    }
   }
 
   // Add files to the cache.
