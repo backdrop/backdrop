@@ -4746,6 +4746,17 @@ function theme_file($variables) {
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
 
+ /**
+ * Processes a file upload element, make use of #multiple if present.
+ */
+function form_process_file($element) {
+  if ($element['#multiple']) {
+    $element['#attributes'] = array('multiple' => 'multiple');
+    $element['#name'] .= '[]';
+  }
+  return $element;
+}
+
 /**
  * Returns HTML for a form element.
  *

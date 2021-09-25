@@ -137,8 +137,8 @@ function theme_file_widget($variables) {
   $output .= '<div class="file-widget form-managed-file clearfix">';
   if ($element['fid']['#value'] != 0) {
     // Add the file size after the file name.
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
+    $file = reset($element['#files']);
+    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';  }
   $output .= backdrop_render_children($element);
   $output .= '</div>';
 
@@ -184,7 +184,7 @@ function theme_file_widget_multiple($variables) {
   $rows = array();
   foreach ($widgets as $key => &$widget) {
     // Save the uploading row for last.
-    if ($widget['#file'] == FALSE) {
+    if (empty($widget['#files'])) {
       $widget['#title'] = $element['#file_upload_title'];
       $widget['#description'] = $element['#file_upload_description'];
       continue;
@@ -266,6 +266,7 @@ function theme_file_widget_multiple($variables) {
 function theme_file_upload_help($variables) {
   $description = $variables['description'];
   $upload_validators = $variables['upload_validators'];
+  $cardinality = $variables['cardinality'];
 
   $descriptions = array();
 
@@ -277,6 +278,14 @@ function theme_file_upload_help($variables) {
   }
   if (isset($upload_validators['file_validate_extensions'])) {
     $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>'));
+  }
+  if (isset($cardinality)) {
+    if ($cardinality == -1) {
+      $descriptions[] = t('Unlimited number of files can be uploaded to this field.');
+    }
+    else {
+      $descriptions[] = format_plural($cardinality, 'This field can store only one file.', 'This field can store at most @count files.');
+    }
   }
   if (isset($upload_validators['file_validate_image_resolution'])) {
     $max = $upload_validators['file_validate_image_resolution'][0];
