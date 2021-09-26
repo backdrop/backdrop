@@ -1486,7 +1486,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
         $fids = array_merge($fids, array_keys($file_data));
       }
       else {
-        $fids = array($file_data->fid);
+        $fids = array_keys($file_data);
       }
     }
     else {
@@ -1705,7 +1705,12 @@ function file_managed_file_save_upload($element) {
     }
 
     // Value callback expects FIDs to be keys.
-    $files = array_filter($files);
+    if (is_array($files)) {
+      $files = array_filter($files);
+    }
+    else {
+      $files = array($files);
+    }
     $fids = array_map(function($file) { return $file->fid; }, $files);
 
     return empty($files) ? array() : array_combine($fids, $files);
