@@ -382,6 +382,38 @@ function layout_preprocess_layout(&$variables) {
     }
 
   }
+
+  // Wrap the output in contextual links via the renderer if applicable.
+  if (user_access('access contextual links')) {
+    $links = array();
+    if (user_access('administer layouts')) {
+      $name = variables['layout']->name;
+      $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name);
+      $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure');
+    }
+    if (!empty($links)) {
+      // If we have an admin bar, shift the trigger down so that it's not
+      // covered by the admin bar.
+      // TODO: this CSS tweak seems to be necessary with Basis theme but should
+      // not be used with Seven theme. How to accommodate?
+      if (user_access('access administration bar')) {
+        $css = '
+          .contextual-links-region-layout > .contextual-links-wrapper > .contextual-links-trigger {
+            position: relative;
+            top: 35px;
+          }';
+        backdrop_add_css($css, 'inline');
+      }
+      $variables['renderer']->prefix = '
+        <div class="contextual-links-region contextual-links-region-layout">
+          <div class="contextual-links-wrapper">
+            <ul class="contextual-links">
+              <li>' . implode('</li><li>', $links) . '</li>
+            </ul>
+          </div>';
+      $variables['renderer']->suffix = '</div>';
+    }
+  }
 }
 
 /**
