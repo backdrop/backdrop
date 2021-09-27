@@ -592,40 +592,92 @@ function layout_route_handler($router_item) {
   // If a different delivery callback is specified, we're probably not returning
   // HTML and it definitely should not be wrapped in a layout. Call the default
   // route handler and return its response directly.
-  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback') {
+  if (!backdrop_is_html() || !empty($router_item['delivery_callback'])) {
     return menu_default_route_handler($router_item);
   }
-
-  $selected_layout = layout_get_layout_by_path(NULL, $router_item);
-
-  // Safety check that we don't show an admin layout to a user who cannot view
-  // the admin theme. This may happen because the cached layout list does not
-  // include a permissions check on the admin theme.
-  if ($selected_layout->name === 'admin_default' && !user_access('view the administration theme')) {
-    $selected_layout = layout_load('default');
+  // If this is a layout-created page, then we can use the default route handler
+  // (which will pick the appropriate layout to generate the output). But we
+  // also need to know the layout itself if we are going to provide contextual
+  // links to edit it.
+  elseif ($router_item['page_callback'] === 'layout_page_callback') {
+    $output = menu_default_route_handler($router_item);
+    $selected_layout = layout_get_layout_by_path(NULL, $router_item, TRUE);
   }
+  else {
+    $selected_layout = layout_get_layout_by_path(NULL, $router_item);
 
-  // Special handling for 404 and 403 pages to render in admin theme. The
-  // current path will be the 404/403 system path, and we need to check the
-  // original path, which is stored in "destination" by
-  // backdrop_deliver_html_page().
-  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('view the administration theme')) {
-    if (isset($_GET['destination']) && path_is_admin($_GET['destination'])) {
-      $selected_layout = layout_load('admin_default');
+    // Safety check that we don't show an admin layout to a user who cannot view
+    // the admin theme. This may happen because the cached layout list does not
+    // include a permissions check on the admin theme.
+    if ($selected_layout->name === 'admin_default' && !user_access('view the administration theme')) {
+      $selected_layout = layout_load('default');
+    }
+
+    // Special handling for 404 and 403 pages to render in admin theme. The
+    // current path will be the 404/403 system path, and we need to check the
+    // original path, which is stored in "destination" by
+    // backdrop_deliver_html_page().
+    if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('view the administration theme')) {
+      if (isset($_GET['destination']) && path_is_admin($_GET['destination'])) {
+        $selected_layout = layout_load('admin_default');
+      }
+    }
+
+    if ($selected_layout) {
+      // Render the layout.
+      $renderer = layout_create_renderer($selected_layout->renderer_name, $selected_layout);
+      if ($selected_layout->isDefault()) {
+        $renderer->ensurePageContentBlock();
+      }
+      $output = $renderer->render();
+    }
+    else {
+    // Fallback code if even the expected default layout cannot be found.
+    $output = menu_default_route_handler($router_item);
     }
   }
 
-  if ($selected_layout) {
-    // Render the layout.
-    $renderer = layout_create_renderer($selected_layout->renderer_name, $selected_layout);
-    if ($selected_layout->isDefault()) {
-      $renderer->ensurePageContentBlock();
+  // If appropriate, wrap the output in contextual links.
+  if (user_access('access contextual links')) {
+    $links = array();
+    if ($selected_layout && user_access('administer layouts')) {
+      $name = $selected_layout->name;
+      $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name);
+      $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure');
     }
-    return $renderer->render();
+    if (!empty($links)) {
+      // If we have an admin bar, shift the trigger down so that it's not
+      // covered by the admin bar.
+      // TODO: this CSS tweak seems to be necessary with Basis theme but should
+      // not be used with Seven theme. How to accommodate?
+      if (user_access('access administration bar')) {
+        $css = '
+          .contextual-links-region-layout > .contextual-links-wrapper > .contextual-links-trigger {
+            position: relative;
+            top: 35px;
+          }
+        ';
+        backdrop_add_css($css, 'inline');
+      }
+      $build['wrapped_layout'] = array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array('contextual-links-region', 'contextual-links-region-layout'),
+        ),
+        array(
+          '#markup' => implode('</li><li>', $links),
+          '#prefix' => '<div class="contextual-links-wrapper"><ul class="contextual-links"><li>',
+          '#suffix' => '</li></ul></div>'
+        ),
+        array(
+          '#markup' => $output,
+        ),
+      );
+      $output = backdrop_render($build);
+    }
   }
 
-  // Fallback code if even the expected default layout cannot be found.
-  return menu_default_route_handler($router_item);
+  return $output;
 }
 
 /**
