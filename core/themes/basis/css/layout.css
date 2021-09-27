@@ -23,10 +23,6 @@
   -ms-flex-direction: column;
   flex-direction: column;
 }
-.admin-bar body .layout {
-  padding-top: 33px;
-  margin-top: -33px;
-}
 .l-wrapper {
   -webkit-flex: 1 0 auto;
   -ms-flex: 1 0 auto;
