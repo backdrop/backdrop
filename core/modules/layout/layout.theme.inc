@@ -387,7 +387,7 @@ function layout_preprocess_layout(&$variables) {
   if (user_access('access contextual links')) {
     $links = array();
     if (user_access('administer layouts')) {
-      $name = variables['layout']->name;
+      $name = $variables['layout']->name;
       $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name);
       $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure');
     }
