@@ -4751,7 +4751,7 @@ function theme_file($variables) {
  */
 function form_process_file($element) {
   if ($element['#multiple']) {
-    $element['#attributes'] = array('multiple' => 'multiple');
+    $element['#attributes']['multiple'] = 'multiple';
     $element['#name'] .= '[]';
   }
   return $element;
