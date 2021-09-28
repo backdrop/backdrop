@@ -101,14 +101,16 @@
 .contextual-links-wrapper a {
   text-decoration: none;
 }
-.contextual-links li a {
+.contextual-links li a,
+.contextual-links li .info {
   color: #333 !important;
   display: block;
   margin: 0.25em 0;
   padding: 0.25em 1em 0.25em 0.5em; /* LTR */
   text-indent: 0;
 }
-[dir="rtl"] .contextual-links li a {
+[dir="rtl"] .contextual-links li a,
+[dir="rtl"] .contextual-links li .info {
   padding: 0.25em 0.5em 0.25em 1em;
 }
 .contextual-links li a:hover {

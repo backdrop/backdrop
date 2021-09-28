@@ -385,11 +385,14 @@ function layout_preprocess_layout(&$variables) {
 
   // Wrap the output in contextual links via the renderer if applicable.
   if (user_access('access contextual links')) {
+    $layout = $variables['layout'];
     $links = array();
     if (user_access('administer layouts')) {
-      $name = $variables['layout']->name;
-      $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name);
-      $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure');
+      $name = $layout->name;
+      $query = array('destination' => current_path());
+      $links[] = '<div class="info">' . t('Layout: %title', array('%title' => $layout->title)) . '</div>';
+      $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name, array('query' => $query));
+      $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure', array('query' => $query));
     }
     if (!empty($links)) {
       $variables['renderer']->prefix = '

@@ -23,6 +23,10 @@
   -ms-flex-direction: column;
   flex-direction: column;
 }
+.admin-bar body .layout {
+  padding-top: 33px;
+  margin-top: -33px;
+}
 .l-wrapper {
   -webkit-flex: 1 0 auto;
   -ms-flex: 1 0 auto;
@@ -33,4 +37,13 @@
   -webkit-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
+}
+
+/* If we have both admin bar and contextual links, instead of a negative top
+margin (which mispositions the contextual links) add some padding to the
+footer to keep it from being pushed below the window bottom). */
+.admin-bar body .contextual-links-region-layout .layout {
+  padding-top: 0;
+  margin-top: 0;
+  padding-bottom: 33px;
 }
