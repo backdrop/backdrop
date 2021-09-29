@@ -37,8 +37,12 @@ Backdrop.behaviors.contextualLinks = {
       // Prepend the trigger.
       $wrapper.prepend($trigger);
 
-      // Prevent child contextual links overlapping their parent ones.
-      $wrapper.siblings().find('.contextual-links-wrapper').eq(0).css('margin-top', '20px');
+      // Prevent child contextual links overlapping their parent ones by
+      // shifting them down, but don't shift them beyond their enclosing region.
+      var $child = $wrapper.siblings().find('.contextual-links-wrapper').eq(0);
+      var height = $child.parent().height();
+      var shift = Math.max(0, Math.min(20, height - 19));
+      $child.css('margin-top', toString(shift) + 'px');
     });
   }
 };
