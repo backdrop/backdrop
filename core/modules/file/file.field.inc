@@ -1028,7 +1028,7 @@ function file_field_widget_submit($form, &$form_state) {
     if (is_array($submitted_value['fid'])) {
       foreach ($submitted_value['fid'] as $fid) {
         $new_value = $submitted_value;
-        $new_value['fid'] = array($fid);
+        $new_value['fid'] = $fid;
         $new_values[] = $new_value;
       }
     }
