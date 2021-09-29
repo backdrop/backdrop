@@ -276,7 +276,16 @@ function backdrop_is_front_page() {
   if (!isset($is_front_page)) {
     // As backdrop_path_initialize updates $_GET['q'] with the 'site_frontpage' path,
     // we can check it against the 'site_frontpage' variable.
-    $is_front_page = ($_GET['q'] == config_get('system.core', 'site_frontpage'));
+    $site_frontpage = config_get('system.core', 'site_frontpage');
+    if ($_GET['q'] == $site_frontpage) {
+      $is_front_page = TRUE;
+    }
+    else {
+      global $language;
+      // Get the front-page source.
+      $frontpage_alias = backdrop_lookup_path('alias', $site_frontpage, $language->langcode);
+      $is_front_page = ($_GET['q'] == $frontpage_alias);
+    }
   }
 
   return $is_front_page;
