@@ -3,6 +3,13 @@
  * Generic theme-independent base styles.
  */
 
+ /**
+ * Prevent background from jumping underneath modal.
+ */
+html.dialog-open {
+  position: inherit;
+}
+
 /**
  * Autocomplete.
  *
