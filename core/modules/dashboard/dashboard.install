@@ -20,6 +20,7 @@ function dashboard_enable() {
   if ($link) {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 0;
+    unset($link['customized']);
     menu_link_save($link);
     menu_cache_clear($link['menu_name']);
   }
@@ -38,6 +39,8 @@ function dashboard_disable() {
   if ($link) {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 1;
+    // This is required, otherwise hiding the menu item won't work.
+    $link['customized'] = 1;
     menu_link_save($link);
     menu_cache_clear($link['menu_name']);
   }
