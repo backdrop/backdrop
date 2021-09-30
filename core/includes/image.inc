@@ -161,6 +161,8 @@ function image_get_info($filepath, $toolkit = FALSE) {
  * @return
  *   TRUE on success, FALSE on failure.
  *
+ * @since 1.21.0 $anchor parameter added.
+ *
  * @see image_load()
  * @see image_resize()
  * @see image_crop()
