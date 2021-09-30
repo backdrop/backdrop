@@ -1271,7 +1271,7 @@ function file_managed_file_process($element, &$form_state, $form) {
     $fids = $element['#value']['fid'];
   }
   else {
-    $fids = array();
+    $fids = $element['#multiple'] ? array() : 0;
   }
 
   // Set some default element properties.
