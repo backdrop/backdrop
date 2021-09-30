@@ -449,7 +449,6 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
     // Add all extra functionality provided by the image widget.
     $elements[$delta]['#process'][] = 'image_field_widget_process';
-    $elements[$delta]['#multiple'] = ($field['cardinality'] > 1) || ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
   }
 
   if ($field['cardinality'] == 1) {

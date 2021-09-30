@@ -1276,7 +1276,8 @@ function file_managed_file_process($element, &$form_state, $form) {
 
   // Set some default element properties.
   $element['#progress_indicator'] = empty($element['#progress_indicator']) ? 'none' : $element['#progress_indicator'];
-  $element['#files'] = !empty($fids) ? file_load_multiple($fids) : FALSE;
+  $load_fids = $element['#multiple'] ? $fids : array($fids);
+  $element['#files'] = !empty($load_fids) ? file_load_multiple($load_fids) : FALSE;
   $element['#tree'] = TRUE;
 
   // Token here is not generated with backdrop_token() as it does not need to
@@ -1355,7 +1356,7 @@ function file_managed_file_process($element, &$form_state, $form) {
 
   $element['fid'] = array(
     '#type' => 'hidden',
-    '#value' => implode(' ', $fids),
+    '#value' => $element['#multiple'] ? implode(' ', $fids) : $fids,
   );
 
   // Legacy server-side progress bar support. If not available, client-side
