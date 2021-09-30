@@ -15,13 +15,13 @@ function dashboard_install() {
  * Implements hook_enable().
  */
 function dashboard_enable() {
-  // Enable the Dashboard menu item.
-  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system'")->fetchAssoc();
+  // Enable the Dashboard menu item (if it exists and is disabled).
+  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 1")->fetchAssoc();
   if ($link) {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 0;
     menu_link_save($link);
-    // menu_rebuild();
+    menu_rebuild();
   }
 
   // Enable the Dashboard layout.
@@ -33,13 +33,13 @@ function dashboard_enable() {
  * Implements hook_disable().
  */
 function dashboard_disable() {
-  // Disable the Dashboard menu item.
-  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system'")->fetchAssoc();
+  // Disable the Dashboard menu item (if it exists and is enabled).
+  $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system' AND hidden = 0")->fetchAssoc();
   if ($link) {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 1;
     menu_link_save($link);
-    // menu_rebuild();
+    menu_rebuild();
   }
 
   // Disable the Dashboard layout.
