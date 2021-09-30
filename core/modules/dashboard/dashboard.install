@@ -21,7 +21,7 @@ function dashboard_enable() {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 0;
     menu_link_save($link);
-    menu_rebuild();
+    menu_cache_clear($link['menu_name']);
   }
 
   // Enable the Dashboard layout.
@@ -39,7 +39,7 @@ function dashboard_disable() {
     $link = menu_link_load($link['mlid']);
     $link['hidden'] = 1;
     menu_link_save($link);
-    menu_rebuild();
+    menu_cache_clear($link['menu_name']);
   }
 
   // Disable the Dashboard layout.
