@@ -17,10 +17,12 @@ function dashboard_install() {
 function dashboard_enable() {
   // Enable the Dashboard menu item.
   $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system'")->fetchAssoc();
-  $link = menu_link_load($link['mlid']);
-  $link['hidden'] = 0;
-  menu_link_save($link);
-  menu_rebuild();
+  if ($link) {
+    $link = menu_link_load($link['mlid']);
+    $link['hidden'] = 0;
+    menu_link_save($link);
+    // menu_rebuild();
+  }
 
   // Enable the Dashboard layout.
   config_set('layout.layout.dashboard', 'disabled', FALSE);
@@ -33,10 +35,12 @@ function dashboard_enable() {
 function dashboard_disable() {
   // Disable the Dashboard menu item.
   $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'admin/dashboard' AND module = 'system'")->fetchAssoc();
-  $link = menu_link_load($link['mlid']);
-  $link['hidden'] = 1;
-  menu_link_save($link);
-  menu_rebuild();
+  if ($link) {
+    $link = menu_link_load($link['mlid']);
+    $link['hidden'] = 1;
+    menu_link_save($link);
+    // menu_rebuild();
+  }
 
   // Disable the Dashboard layout.
   config_set('layout.layout.dashboard', 'disabled', TRUE);
