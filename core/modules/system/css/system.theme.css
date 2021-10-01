@@ -566,3 +566,7 @@ img.align-right {
   outline-style: solid;
   outline-width: 4px;
 }
+
+a {
+  color: red !important;
+}
