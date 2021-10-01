@@ -380,10 +380,10 @@ function system_requirements($phase) {
     }
     else {
       if (file_default_scheme() == 'public') {
-        $requirements['file system']['value'] = $t('Writable (<em>public</em> download method)');
+        $requirements['file system']['value'] = $t('Is not writable (<em>public</em> download method)');
       }
       else {
-        $requirements['file system']['value'] = $t('Writable (<em>private</em> download method)');
+        $requirements['file system']['value'] = $t('Is not writable (<em>private</em> download method)');
       }
     }
   }
