@@ -1234,7 +1234,3 @@ div.error:before {
   outline-style: solid;
   outline-width: 4px;
 }
-
-p {
-  color: green !important;
-}
