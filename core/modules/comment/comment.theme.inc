@@ -77,8 +77,8 @@ function theme_comment_post_forbidden($variables) {
  * @see comment.tpl.php
  */
 function template_preprocess_comment(&$variables) {
-  $view_mode = $variables['elements']['#view_mode'];
-  $bundle = $variables['elements']['#bundle'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['bundle'] = $variables['elements']['#bundle'];
   $comment = $variables['elements']['#comment'];
   $node = $variables['elements']['#node'];
   $node_type = node_type_get_type($node->type);
