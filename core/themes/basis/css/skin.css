@@ -1235,6 +1235,6 @@ div.error:before {
   outline-width: 4px;
 }
 
-a {
-  color: red !important;
+p {
+  color: green !important;
 }
