@@ -131,7 +131,8 @@ if ($args['clean']) {
   echo "\nEnvironment cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(backdrop_get_messages('status'));
+  $message_array = backdrop_get_messages('status');
+  $messages = array_pop($message_array);
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
@@ -141,7 +142,8 @@ if ($args['clean']) {
   echo "\nProfile cache tables cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(backdrop_get_messages('status'));
+  $message_array = backdrop_get_messages('status');
+  $messages = array_pop($message_array);
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
@@ -151,7 +153,8 @@ if ($args['clean']) {
   echo "\nProfile cache folders cleaned.\n";
 
   // Get the status messages and print them.
-  $messages = array_pop(backdrop_get_messages('status'));
+  $message_array = backdrop_get_messages('status');
+  $messages = array_pop($message_array);
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
@@ -919,7 +922,7 @@ function simpletest_script_reporter_display_results() {
           $test_class = $result->test_class;
 
           // Print table header.
-          echo "Status    Group      Filename          Line Function                            \n";
+          echo "Status    Group      Filename          Line    Function                            \n";
           echo "------------------------------------------------------------------------------------------------------------------------\n";
         }
 
@@ -936,10 +939,17 @@ function simpletest_script_reporter_display_results() {
  *   The result object to format.
  */
 function simpletest_script_format_result($result) {
-  global $results_map, $color;
+  global $results_map;
+
+  // @todo Remove this unless we want it.
+  // Only print the function name, the class is redundant with the heading.
+  // list($class, $function) = explode('->', $result->function);
+  // if (!isset($function)) {
+  //   $function = $class;
+  // }
 
   $summary = sprintf(
-    "%-9.9s %-10.10s %-17.17s %4.4s %-75.75s\n",
+    "%-9.9s %-10.10s %-17.17s %-7.7s %-72.72s\n",
     $results_map[$result->status],
     $result->message_group,
     basename($result->file),
