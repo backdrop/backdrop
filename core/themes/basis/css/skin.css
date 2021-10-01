@@ -1226,3 +1226,15 @@ div.error:before {
   /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
+
+/**
+ *  Changing with of focus for accessiblity
+ */
+*:focus-visible {
+  outline-style: solid;
+  outline-width: 4px;
+}
+
+a {
+  color: red !important;
+}
