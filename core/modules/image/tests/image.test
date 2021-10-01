@@ -982,7 +982,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/post/fields/' . $private_field_name, $edit, t('Save settings'));
     $private_field = field_info_field($private_field_name);
-    $uri = $private_field['settings']['default_image'][0];
+    $uri = $private_field['settings']['default_image'];
     $this->assertEqual('private', file_uri_scheme($uri), 'Default image uses private:// scheme.');
     // Create a new node with no image attached and ensure that default private
     // image is displayed.
