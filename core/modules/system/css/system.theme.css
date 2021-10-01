@@ -562,8 +562,7 @@ img.align-right {
 /**
  *  Changing with of focus for accessiblity
  */
-
-:focus-visible {
+*:focus-visible {
   outline-style: solid;
   outline-width: 4px;
 }
