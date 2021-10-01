@@ -123,7 +123,7 @@ function standard_install() {
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'promote_enabled' => FALSE,
-        'node_preview' => TRUE,
+        'node_preview' => FALSE,
         'promote_default' => FALSE,
         'sticky_enabled' => FALSE,
         'sticky_default' => FALSE,
