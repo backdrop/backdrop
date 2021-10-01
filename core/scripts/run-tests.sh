@@ -328,7 +328,8 @@ EOF;
 /**
  * Parse execution argument and ensure that all are valid.
  *
- * @return The list of arguments.
+ * @return array
+ *   The list of arguments.
  */
 function simpletest_script_parse_args() {
   // Set default values.
@@ -603,7 +604,8 @@ function simpletest_script_command($test_id, $test_class) {
  *
  * Will print error and exit if no valid tests were found.
  *
- * @return List of tests.
+ * @return array
+ *   List of tests.
  */
 function simpletest_script_get_test_list() {
   global $args, $all_tests, $groups;
@@ -782,14 +784,14 @@ function simpletest_script_write_summary($summary_file) {
         $test_class = $result->test_class;
       }
 
-      if($count < 10 ){
+      if ($count < 10 ) {
         $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
       }
       $count++;
     }
   }
 
-  if($count > 10 ){
+  if ($count > 10){
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
 
@@ -918,7 +920,7 @@ function simpletest_script_reporter_display_results() {
 
           // Print table header.
           echo "Status    Group      Filename          Line Function                            \n";
-          echo "--------------------------------------------------------------------------------\n";
+          echo "------------------------------------------------------------------------------------------------------------------------\n";
         }
 
         simpletest_script_format_result($result);
@@ -928,20 +930,26 @@ function simpletest_script_reporter_display_results() {
 }
 
 /**
- * Format the result so that it fits within the default 80 character
- * terminal size.
+ * Format the result so that it fits within a 120 character terminal size.
  *
- * @param $result The result object to format.
+ * @param $result
+ *   The result object to format.
  */
 function simpletest_script_format_result($result) {
   global $results_map, $color;
 
-  $summary = sprintf("%-9.9s %-10.10s %-17.17s %4.4s %-35.35s\n",
-    $results_map[$result->status], $result->message_group, basename($result->file), $result->line, $result->function);
+  $summary = sprintf(
+    "%-9.9s %-10.10s %-17.17s %4.4s %-75.75s\n",
+    $results_map[$result->status],
+    $result->message_group,
+    basename($result->file),
+    $result->line,
+    $result->function
+  );
 
   simpletest_script_print($summary, $result->status);
 
-  $lines = explode("\n", wordwrap(trim(strip_tags(decode_entities($result->message))), 76));
+  $lines = explode("\n", wordwrap(trim(strip_tags(decode_entities($result->message))), 116));
   foreach ($lines as $line) {
     echo "    $line\n";
   }
@@ -951,7 +959,8 @@ function simpletest_script_format_result($result) {
  * Print error message prefixed with "ERROR: " and displayed in fail color
  * if color output is enabled.
  *
- * @param $message The message to print.
+ * @param $message
+ *   The message to print.
  */
 function simpletest_script_print_error($message) {
   simpletest_script_print("ERROR: $message\n", 'fail');
@@ -961,8 +970,10 @@ function simpletest_script_print_error($message) {
  * Print a message to the console, if color is enabled then the specified
  * color code will be used.
  *
- * @param $message The message to print.
- * @param $status One of the following:
+ * @param $message
+ *   The message to print.
+ * @param $status
+ *   One of the following:
  *   - pass
  *   - debug
  *   - exception
@@ -986,8 +997,10 @@ function simpletest_script_print($message, $status) {
 /**
  * Get the color code associated with the specified status.
  *
- * @param $status The status string to get code for.
- * @return Color code.
+ * @param $status
+ *   The status string to get code for.
+ * @return int
+ *   Color code.
  */
 function simpletest_script_color_code($status) {
   switch ($status) {
