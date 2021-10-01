@@ -635,7 +635,6 @@ function simpletest_script_get_test_list() {
     }
     elseif ($args['directory']) {
       // Extract test case class names from specified directory.
-      $files = array();
       if ($args['directory'][0] === '/') {
         $directory = $args['directory'];
       }
@@ -721,7 +720,7 @@ function simpletest_script_get_test_list() {
  * Initialize the reporter.
  */
 function simpletest_script_reporter_init() {
-  global $args, $all_tests, $test_list, $results_map;
+  global $args, $test_list, $results_map;
 
   $results_map = array(
     'pass' => 'Pass',
@@ -769,7 +768,7 @@ function simpletest_script_reporter_init() {
  *   The path to a file to which the summary will be written.
  */
 function simpletest_script_write_summary($summary_file) {
-  global $test_list, $args, $test_id, $results_map;
+  global $test_id, $results_map;
 
   $summary = '';
   $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail') ORDER BY test_class, message_id", array(':test_id' => $test_id));
