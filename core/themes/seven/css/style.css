@@ -517,7 +517,7 @@ tbody {
 tr.even,
 tr.odd {
   border: 0;
-  background: #f7f7f7;
+  background: #f2f2f2;
   -webkit-box-shadow:
     inset -1px 0 0 #eee,
     inset 0 -1px 0 0 #eee,
