@@ -558,3 +558,12 @@ img.align-right {
 .machine-name {
   font-size: smaller;
 }
+
+/**
+ *  Changing with of focus for accessiblity
+ */
+
+:focus-visible {
+  outline-style: solid;
+  outline-width: 4px;
+}
