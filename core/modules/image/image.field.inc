@@ -254,10 +254,10 @@ function _image_field_default_image_validate($element, &$form_state) {
     // IDs, we only track the URI.
     $directory = $element['#default_scheme'] . '://default_images/';
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    $uri = file_unmanaged_move($file[0]->uri, $directory);
+    $uri = file_unmanaged_move($file->uri, $directory);
 
     // Delete the file entity record.
-    file_delete($file[0]->fid);
+    file_delete($file->fid);
   }
   if (isset($element['remove']) && $element['remove']['#value']) {
     $uri = '';
