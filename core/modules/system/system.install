@@ -345,6 +345,7 @@ function system_requirements($phase) {
     if (!$directory) {
       continue;
     }
+    $requirements['file system']['value'] = $t('Writable');
     $prepared = file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $is_writable = is_writable($directory);
     $is_directory = is_dir($directory);
@@ -380,10 +381,10 @@ function system_requirements($phase) {
     }
     else {
       if (file_default_scheme() == 'public') {
-        $requirements['file system']['value'] = $t('Is not writable (<em>public</em> download method)');
+        $requirements['file system']['value'] .= $t('(<em>public</em> download method)');
       }
       else {
-        $requirements['file system']['value'] = $t('Is not writable (<em>private</em> download method)');
+        $requirements['file system']['value'] .= $t('(<em>private</em> download method)');
       }
     }
   }
