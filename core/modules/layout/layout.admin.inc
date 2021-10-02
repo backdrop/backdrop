@@ -187,7 +187,7 @@ function _layout_get_group_operations($path, array $group) {
   }
   if (count($group) > 1) {
     $links['reorder'] = array(
-      'title' => t('Reorder'),
+      'title' => t('Reorder layouts'),
       'href' => 'admin/structure/layouts/reorder',
       'query' => array('layouts' => array_keys($group)),
     );
@@ -2168,38 +2168,49 @@ function layout_reorder_form($form, &$form_state) {
   $layouts = $form_state['layouts'];
   $form['#tree'] = TRUE;
 
-  // Sanity check.
-  if (empty($layouts)) {
-    backdrop_set_message(t('No layouts specified to reorder.'));
-    return $form;
-  }
-
-  $form['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('Layouts at the same path are selected based on the first layout that matches its conditions. Reorder the layouts on this page to affect the layout that will be used first.'),
-  );
-
-  $form['layouts'] = array(
-    '#theme' => 'layout_reorder_layouts',
-  );
-
-  $layout_count = count($layouts);
-  foreach ($layouts as $layout) {
-    $form['layouts'][$layout->name]['title'] = array(
-      '#markup' => check_plain($layout->title),
-    );
-    $form['layouts'][$layout->name]['weight'] = array(
-      '#type' => 'weight',
-      '#delta' => $layout_count,
-      '#default_value' => $layout->weight,
-    );
-  }
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save order'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/structure/layouts',
+  );
+
+  // Sanity check.
+  if (empty($layouts)) {
+    backdrop_set_message(t('No layouts specified to reorder.'));
+    unset($form['actions']['submit']);
+    $form['actions']['cancel']['#title'] = t('Back to the layouts listing');
+  }
+  else {
+    $layout_path = array_values($layouts)[0]->getPath();
+    backdrop_set_title(t('Reorder layouts at path %path', array('%path' => $layout_path)), PASS_THROUGH);
+
+    $form['help'] = array(
+      '#type' => 'help',
+      '#markup' => t('Layouts at the same path are selected based on the first layout that matches its conditions. Reorder the layouts on this page to affect the layout that will be used first.'),
+    );
+
+    $form['layouts'] = array(
+      '#theme' => 'layout_reorder_layouts',
+      '#layouts' => $layouts,
+    );
+
+    $layout_count = count($layouts);
+    foreach ($layouts as $layout) {
+      $form['layouts'][$layout->name]['title'] = array(
+        '#markup' => check_plain($layout->title),
+      );
+      $form['layouts'][$layout->name]['weight'] = array(
+        '#type' => 'weight',
+        '#delta' => $layout_count,
+        '#default_value' => $layout->weight,
+      );
+    }
+  }
 
   return $form;
 }
@@ -2217,7 +2228,7 @@ function layout_reorder_form_submit(&$form, &$form_state) {
 }
 
 /**
- * Menu callback; Break a lock on a layout or menu item.
+ * Menu callback; Break a lock on a layout or a layout menu item.
  *
  * @param $item
  *   Either a Layout or LayoutMenuItem object, which is currently being edited.

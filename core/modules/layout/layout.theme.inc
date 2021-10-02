@@ -9,19 +9,24 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
+  $layouts = $element['#layouts'];
   $rows = array();
 
   // Assemble the data for a table from everything in $form['handlers']
   foreach (element_children($element) as $layout_name) {
     if (isset($element[$layout_name]['title'])) {
       $row = array();
-      $row[] = array(
-        'data' => render($element[$layout_name]['title']),
-        'class' => array('layout-name'),
-      );
+      $row[] = theme('label_machine_name__reorder_layouts', array(
+        'label' => render($element[$layout_name]['title']),
+        'machine_name' => $layout_name,
+      ));
       $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
       $row[] = render($element[$layout_name]['weight']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+      $row_classes = array('draggable');
+      if ($layouts[$layout_name]->disabled) {
+        $row_classes[] = 'disabled';
+      }
+      $rows[] = array('data' => $row, 'class' => $row_classes);
     }
   }
 
