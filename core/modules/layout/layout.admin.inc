@@ -2186,7 +2186,8 @@ function layout_reorder_form($form, &$form_state) {
     $form['actions']['cancel']['#title'] = t('Back to the layouts listing');
   }
   else {
-    $layout_path = array_values($layouts)[0]->getPath();
+    $first_layout = current($layouts);
+    $layout_path = $first_layout->getPath();
     backdrop_set_title(t('Reorder layouts at path %path', array('%path' => $layout_path)), PASS_THROUGH);
 
     $form['help'] = array(
