@@ -22,8 +22,8 @@ description = Tests the field validation.
 group = Link
 file = link.validate.test
 
-[LinkValidateUnitTest]
-name = Link validation unit tests
-description = Tests the link_validate_url() function by itself, without invoking the full Backdrop bootstrap.
+[LinkValidateApiTest]
+name = Link validation API tests
+description = Tests the link_validate_url() function.
 group = Link
 file = link.validate.test

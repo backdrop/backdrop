@@ -32,21 +32,22 @@ class LinkValidateTest extends LinkBaseTestClass {
    *   The URL to validate.
    */
   protected function validateUrl($url) {
-    $this->backdropGet('node/add/page');
 
     $label = $this->randomName();
-    $edit = array(
+    $settings = array(
       'title' => $label,
-      $this->field_name . '[und][0][title]' => $label,
-      $this->field_name . '[und][0][url]' => $url,
+      $this->field_name => array(
+        LANGUAGE_NONE=> array(
+          array(
+            'title' => $label,
+            'url' => $url,
+          )
+        ),
+      ),
     );
-    $this->backdropPost(NULL, $edit, t('Save'));
-    $this->assertRaw(' has been created.', 'Node created');
+    $node = $this->backdropCreateNode($settings);
 
-    $nid = db_query("SELECT MAX(nid) FROM {node}")->fetchField();
-    $node = node_load($nid);
-
-    $this->assertEqual($url, $node->{$this->field_name}['und'][0]['url']);
+    $this->assertEqual($url, $node->{$this->field_name}[LANGUAGE_NONE][0]['url']);
   }
 
   /**
@@ -129,6 +130,17 @@ class LinkValidateTest extends LinkBaseTestClass {
     $this->assertNoRaw($url, 'Make sure Javascript does not display.');
   }
 
+  // Validate that an internal url would be accepted.
+  function testLinkInternalUrl() {
+    // Create the content first.
+    $node = $this->backdropCreateNode();
+
+    $link = 'node/' . $node->nid;
+    $this->validateUrl($link);
+    $type = link_url_type($link);
+    $this->assertEqual(LINK_INTERNAL, $type, 'Test ' . $link . ' is an internal link.');
+  }
+
 }
 
 /**
@@ -136,16 +148,15 @@ class LinkValidateTest extends LinkBaseTestClass {
  *
  * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738!
  */
-class LinkValidateUnitTest extends BackdropUnitTestCase {
+class LinkValidateApiTest extends LinkBaseTestClass {
   function setUp() {
     parent::setUp();
-    backdrop_load('module', 'link');
   }
 
   // Make sure that a link labelled <front> works.
   function testValidateFrontLink() {
     $valid = link_validate_url('<front>');
-    $this->assertEqual(LINK_FRONT, $valid, 'Make sure that front link is verfied and identified');
+    $this->assertEqual(LINK_FRONT, $valid, 'Make sure that front link is verified and identified');
   }
 
   function testValidateEmailLink() {
@@ -165,7 +176,7 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
 
   function testValidateNewsArticleLink() {
     $valid = link_validate_url('news:hj0db8$vrm$1@news.eternal-september.org');
-    $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to specific article valiates as news.');
+    $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to specific article validates as news.');
   }
 
   function testValidateBadNewsgroupLink() {
@@ -174,16 +185,17 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
   }
 
   function testValidateInternalLinks() {
+    $tempfile = backdrop_tempnam('public://files', 'test');
     $links = array(
-      'node/5',
-      'feeds/rss.xml',
-      'files/test.jpg',
-      '/var/www/test',
+      file_uri_target($tempfile),
+      backdrop_realpath($tempfile),
     );
 
     foreach ($links as $link) {
+      $type = link_url_type($link);
+      $this->assertEqual(LINK_INTERNAL, $type, 'Test ' . $link . ' is an internal link.');
       $valid = link_validate_url($link);
-      $this->assertEqual(LINK_INTERNAL, $valid, 'Test ' . $link . ' internal link.');
+      $this->assertTrue($valid, 'Test ' . $link . ' is valid internal link.');
     }
   }
 
@@ -201,7 +213,6 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
       'http://255.255.255.255:4823/',
       'www.test-site.com',
       'http://example.com/index.php?q=node/123',
-      'http://example.com/index.php?page=this\that',
       'http://example.com/?first_name=Joe Bob&last_name=Smith',
       // Anchors
       'http://www.example.com/index.php#test',
@@ -226,8 +237,10 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
       }
     }
     foreach ($links as $link) {
+      $type = link_url_type($link);
+      $this->assertEqual(LINK_EXTERNAL, $type, 'Testing that ' . $link . ' is an external link.');
       $valid = link_validate_url($link);
-      $this->assertEqual(LINK_EXTERNAL, $valid, 'Testing that ' . $link . ' is a valid external link.');
+      $this->assertTrue($valid, 'Test ' . $link . ' is valid external link.');
     }
   }
 
@@ -238,8 +251,9 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
       'http://username:@www.example.com/',
       'http://25.0.0/', // Bad ip!
       'http://4827.0.0.2/',
-      '//www.example.com/',
       'http://www.-fudge.com/', // Domains can't have sections starting with a dash.
+      'http://example.com/index.php?page=this\that',
+      'example@example.com',
     );
     foreach ($links as $link) {
       $valid = link_validate_url($link);
