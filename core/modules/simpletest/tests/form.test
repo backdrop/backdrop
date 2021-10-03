@@ -364,11 +364,12 @@ class FormsTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/number');
 
     // Array with all the error messages to be checked.
+    // @see form_validate_number() for the messages.
     $error_messages = array(
-      'no_number' => '%name must be a number.',
-      'too_low' => '%name must be higher or equal to %min.',
-      'too_high' => '%name must be below or equal to %max.',
-      'step_mismatch' => '%name is not a valid number.',
+      'no_number' => 'In %name, %value must be a number.',
+      'too_low' => 'In %name, %value must be greater than or equal to %min.',
+      'too_high' => 'In %name, %value must be less that or equal to %max.',
+      'step_mismatch' => 'In %name, %value is not an integral number of steps %step from %offset.',
     );
 
     // The expected errors.
@@ -403,8 +404,11 @@ class FormsTestCase extends BackdropWebTestCase {
         // Create placeholder array.
         $placeholders = array(
           '%name' => $form[$element]['#title'],
+          '%value' => $form[$element]['#default_value'],
           '%min' => isset($form[$element]['#min']) ? $form[$element]['#min'] : '0',
           '%max' => isset($form[$element]['#max']) ? $form[$element]['#max'] : '0',
+          '%step' => isset($form[$element]['#step']) ? $form[$element]['#step'] : '1',
+          '%offset' => isset($form[$element]['#min']) ? $form[$element]['#min'] : 0.0,
         );
 
         foreach ($error_messages as $id => $message) {

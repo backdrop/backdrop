@@ -563,7 +563,7 @@ function form_get_cache($form_build_id, &$form_state) {
  */
 function form_set_cache($form_build_id, $form, $form_state) {
   $site_config = config('system.core');
-  
+
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
@@ -4572,20 +4572,22 @@ function form_validate_number(&$element, &$form_state) {
 
   $name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
 
-  // Ensure the input is numeric.
+  // Ensure the input is numeric. Browser validation of <input type="number">
+  // should prevent this but themers could override element implementation. Same
+  // goes for min/max/step validation below.
   if (!is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $name)));
+    form_error($element, t('In %name, %value must be a number.', array('%name' => $name, '%value' => $value)));
     return;
   }
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('%name must be higher or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('In %name, %value must be greater than or equal to %min.', array('%name' => $name, '%value' => $value, '%min' => $element['#min'])));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('%name must be below or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('In %name, %value must be less that or equal to %max.', array('%name' => $name, '%value' => $value, '%max' => $element['#max'])));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4594,7 +4596,7 @@ function form_validate_number(&$element, &$form_state) {
     $offset = isset($element['#min']) ? $element['#min'] : 0.0;
 
     if (!valid_number_step($value, $element['#step'], $offset)) {
-      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+      form_error($element, t('In %name, %value is not an integral number of steps %step from %offset.', array('%name' => $name, '%value' => $value, '%step' => $element['#step'], '%offset' => $offset)));
     }
   }
 }
