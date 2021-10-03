@@ -1635,6 +1635,7 @@ function file_managed_file_submit($form, &$form_state) {
     }
     else {
       $remove_fids = $fids;
+      $fids = NULL;
     }
 
     foreach ($remove_fids as $fid) {
