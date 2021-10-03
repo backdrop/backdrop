@@ -820,7 +820,7 @@ function file_field_widget_multiple_count_validate($element, &$form_state, $form
   $current = count(element_children(backdrop_array_get_nested_value($form, $parents))) - 1;
 
   $field = field_info_field($element['#field_name']);
-  $uploaded = count($values['fid']);
+  $uploaded = is_array($values['fid']) ? count($values['fid']) : 1;
   $count = $uploaded + $current;
   if ($count > $field['cardinality']) {
     $keep = $uploaded - $count + $field['cardinality'];

@@ -863,11 +863,11 @@ class FileFieldWidgetTestCase extends FileTestHelper {
       $this->backdropGet('node/' . $node->nid . '/edit');
       switch ($type) {
         case 'nojs':
-          $this->backdropPost(NULL, array("{$field_name}[$langcode][0][fids]" => (string) $victim_tmp_file->fid), 'Remove');
+          $this->backdropPost(NULL, array("{$field_name}[$langcode][0][fid]" => (string) $victim_tmp_file->fid), 'Remove');
           break;
         case 'js':
           $button = $this->xpath('//input[@type="submit" and @value="Remove"]');
-          $this->backdropPostAJAX(NULL, array("{$field_name}[$langcode][0][fids]" => (string) $victim_tmp_file->fid), array((string) $button[0]['name'] => (string) $button[0]['value']));
+          $this->backdropPostAJAX(NULL, array("{$field_name}[$langcode][0][fid]" => (string) $victim_tmp_file->fid), array((string) $button[0]['name'] => (string) $button[0]['value']));
           break;
       }
 
