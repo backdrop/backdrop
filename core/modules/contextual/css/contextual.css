@@ -70,7 +70,7 @@
   border: 1px solid #ccc;
   display: none;
   margin: 0;
-  padding: 0.25em 0;
+  padding: 0;
   position: absolute;
   right: 0;
   text-align: left; /* LTR */
@@ -105,14 +105,17 @@
 .contextual-links li .info {
   color: #333 !important;
   display: block;
-  margin: 0.25em 0;
-  padding: 0.25em 1em 0.25em 0.5em; /* LTR */
+  margin: 0;
+  padding: 0.5em 1em 0.5em 0.5em; /* LTR */
   text-indent: 0;
 }
 [dir="rtl"] .contextual-links li a,
 [dir="rtl"] .contextual-links li .info {
-  padding: 0.25em 0.5em 0.25em 1em;
+  padding: 0.5em 0.5em 0.5em 1em;
 }
 .contextual-links li a:hover {
   background-color: #bfdcee;
+}
+.contextual-links li .info {
+  background-color: #eee;
 }
