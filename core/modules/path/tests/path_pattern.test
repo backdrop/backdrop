@@ -709,22 +709,51 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['max_length'] = 'abc';
     $edit['max_component_length'] = 'abc';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be a number.');
-    $this->assertText('Maximum component length must be a number.');
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+      '%value' => $edit['max_length'],
+    );
+    $this->assertRaw(format_string('In %name, %value must be a number.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+      '%value' => $edit['max_component_length'],
+    );
+    $this->assertRaw(format_string('In %name, %value must be a number.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
     $edit['max_component_length'] = '0';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be higher or equal to 1.');
-    $this->assertText('Maximum component length must be higher or equal to 1.');
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+      '%value' => $edit['max_length'],
+      '%min' => 1,
+    );
+    $this->assertRaw(format_string('In %name, %value must be greater than or equal to %min.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+      '%value' => $edit['max_component_length'],
+      '%min' => 1,
+    );
+    $this->assertRaw(format_string('In %name, %value must be greater than or equal to %min.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
     $edit['max_component_length'] = '999';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be below or equal to 255.');
-    $this->assertText('Maximum component length must be below or equal to 255.');
+
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+      '%value' => $edit['max_length'],
+      '%max' => 255,
+    );
+    $this->assertRaw(format_string('In %name, %value must be less that or equal to %max.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+      '%value' => $edit['max_component_length'],
+      '%max' => 255,
+    );
+    $this->assertRaw(format_string('In %name, %value must be less that or equal to %max.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';
