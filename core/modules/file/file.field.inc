@@ -1033,7 +1033,7 @@ function file_field_widget_submit($form, &$form_state) {
       }
     }
     else {
-      $new_values = array($submitted_value);
+      $new_values[] = $submitted_value;
     }
   }
 
