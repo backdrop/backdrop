@@ -60,24 +60,30 @@ function admin_bar_output($complete = FALSE) {
       $content['menu']['menu']['#title'] = t('Admin bar');
     }
 
-    // Check for status report errors.
+    // Add alert badge if there are status report errors.
     if (user_access('administer site configuration')) {
       $content['alert'] = admin_bar_links_alert();
     }
 
-    // Add menu additions.
-    $content['extra']['extra'] = array();
-    if (in_array('admin_bar.icon', $components) || $complete) {
-      $content['icon'] = admin_bar_links_icon();
+    // Add enabled components to the admin bar menu.
+    if (!empty($components)) {
+      $content['extra']['extra'] = array();
+      if (in_array('admin_bar.icon', $components) || $complete) {
+        $content['icon'] = admin_bar_links_icon();
+      }
+      if (in_array('admin_bar.search', $components) || $complete) {
+        $content['extra']['extra'] += admin_bar_links_search();
+      }
+      if (in_array('admin_bar.account', $components) || $complete) {
+        $content['extra']['extra'] += admin_bar_links_account();
+      }
+      if (in_array('admin_bar.users', $components) || $complete) {
+        $content['extra']['extra'] += admin_bar_links_users();
+      }
     }
-    if (in_array('admin_bar.search', $components) || $complete) {
-      $content['extra']['extra'] += admin_bar_links_search();
-    }
-    if (in_array('admin_bar.account', $components) || $complete) {
-      $content['extra']['extra'] += admin_bar_links_account();
-    }
-    if (in_array('admin_bar.users', $components) || $complete) {
-      $content['extra']['extra'] += admin_bar_links_users();
+    else {
+      // Show help text when all components are disabled.
+      $content['empty'] = admin_bar_empty_message();
     }
 
     // Allow modules to enhance the menu.
@@ -654,6 +660,31 @@ function admin_bar_links_search() {
     '#id' => 'admin-bar-search-items',
   );
   return $search;
+}
+
+/**
+ * Build empty admin bar message.
+ */
+function admin_bar_empty_message() {
+  $empty_message = array(
+    '#theme' => 'admin_bar_links',
+    '#wrapper_attributes' => array(
+      'id' => 'admin-bar-empty-message',
+    ),
+  );
+
+  $message = t('All Administration bar components have been disabled. You can re-enable them <a href="@admin_bar_config">here</a>.', array('@admin_bar_config' => url('admin/config/administration/admin-bar')));
+
+  $empty_message['message'] = array(
+    '#title' => $message,
+    '#attributes' => array(
+      'class' => 'admin-bar-empty-message',
+    ),
+    '#access' => user_access('administer site configuration'),
+    '#options' => array('html' => TRUE),
+  );
+
+  return $empty_message;
 }
 
 /**
