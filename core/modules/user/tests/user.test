@@ -2197,13 +2197,13 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role_name = 'administrator';
     $role = user_role_load($role_name);
 
-    // Test canceling the various actions that can be performed on user roles.
+    // Test cancelling the various actions that can be performed on user roles.
     $actions = array('configure', 'delete');
     foreach ($actions as $action) {
       $this->backdropGet("admin/config/people/roles/$action/$role_name");
       $this->clickLink(t('Cancel'));
       $this->assertResponse(200);
-      $this->assertUrl('admin/config/people/roles', array(), "Redirected to correct URL after canceling $action role.");
+      $this->assertUrl('admin/config/people/roles', array(), "Redirected to correct URL after cancelling $action role.");
     }
 
     // Test deleting the default administrator role.

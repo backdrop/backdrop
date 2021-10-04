@@ -199,6 +199,79 @@ function user_field_info_alter(&$info) {
 }
 
 /**
+ * Implements hook_form_alter().
+ */
+function user_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_cancel_confirm_form') {
+    $can_select_method = $form['can_select_method']['#value'];
+    $danger = isset($form['default_method']['#value']['#danger']) && $form['default_method']['#value']['#danger'] == TRUE;
+    $warning = t('This action cannot be undone!');
+
+    if ($can_select_method) {
+      $methods = $form['user_cancel_method'];
+      $dangerous_methods = array();
+      $safe_methods = array();
+      // Compile the #states conditions for safe/dangerous account cancellation
+      // methods.
+      foreach (element_children($form['user_cancel_method']) as $method) {
+        if (isset($methods[$method]['#danger']) && $methods[$method]['#danger'] == TRUE) {
+          $dangerous_methods[] = array('input[name=user_cancel_method]' => array('value' => $method));
+        }
+        else {
+          $safe_methods[] = array('input[name=user_cancel_method]' => array('value' => $method));
+        }
+      }
+
+      // Add a second 'Cancel account' button, identical to the existing one.
+      $form['actions']['submit_safe'] = $form['actions']['submit'];
+      $form['actions']['submit_safe']['#attributes']['class'][] = 'button-primary';
+      // Move the additional 'Cancel account' button beofre the existing one.
+      $form['actions']['submit_safe']['#weight'] = -1;
+      $form['actions']['submit']['#weight'] = 0;
+
+      // Remove the 'danger' class from the additional submit button.
+      if (($key = array_search('button-danger', $form['actions']['submit_safe']['#attributes']['class'])) !== false) {
+        unset($form['actions']['submit_safe']['#attributes']['class'][$key]);
+      }
+
+      // Only show one of the two submit buttons, depending on whether the
+      // selected account cancellation method is dangerous/irreversible or not.
+      $form['actions']['submit']['#states'] = array(
+        'visible' => $dangerous_methods,
+      );
+      $form['actions']['submit_safe']['#states'] = array(
+        'visible' => $safe_methods,
+      );
+
+      $form['user_cancel_danger'] = array(
+        '#type' => 'container',
+        // The 'form-wrapper' class is required here, otherwise #states won't
+        // work. See: https://github.com/backdrop/backdrop-issues/issues/5157
+        '#attributes' => array('class' => array('form-wrapper', 'messages', 'warning')),
+        '#states' => array(
+          'visible' => $dangerous_methods,
+        ),
+      );
+      $form['user_cancel_danger']['warning'] = array(
+        '#markup' => $warning,
+      );
+    }
+    // If the user cannot select account cancelation method.
+    else {
+      if ($danger) {
+        backdrop_set_message($warning, 'warning');
+      }
+      else {
+        // Remove the 'danger' class from the submit button.
+        if (($key = array_search('button-danger', $form['actions']['submit']['#attributes']['class'])) !== false) {
+          unset($form['actions']['submit']['#attributes']['class'][$key]);
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_field_extra_fields().
  */
 function user_field_extra_fields() {
@@ -589,7 +662,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get_translated('system.core', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user, depending on the <a href="@user-settings-url">default account cancelation method</a>.', array('%anonymous-name' => config_get_translated('system.core', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),

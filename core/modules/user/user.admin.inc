@@ -50,13 +50,10 @@ function user_multiple_cancel_confirm($form, &$form_state) {
   }
 
   module_load_include('inc', 'user', 'user.pages');
-  $form['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling these accounts'),
-  );
-  $form['user_cancel_method'] += user_cancel_methods();
+  $form += user_cancel_methods();
 
-  // Remove method descriptions.
+  // Remove individual method descriptions (these are only displayed on the
+  // confirmation form for own account cancellation).
   foreach (element_children($form['user_cancel_method']) as $element) {
     unset($form['user_cancel_method'][$element]['#description']);
   }
@@ -150,23 +147,24 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
-  $form['registration_cancellation']['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling a user account'),
-    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer user accounts'), '@permissions-url' => url('admin/config/people/permissions'))),
-  );
-  $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
+  $form['registration_cancellation'] += user_cancel_methods();
+  $form['registration_cancellation']['user_cancel_method']['#title'] = t('Default account cancellation method');
   foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
-    // Remove all account cancellation methods that have #access defined, as
+    // Remove the individual options descriptions provided by
+    // user_cancel_methods() (these are only displayed on the confirmation form
+    // for own account cancellation).
+    unset($form['registration_cancellation']['user_cancel_method'][$element]['#description']);
+    // Disable all account cancellation methods that have #access defined, as
     // those cannot be configured as default method.
     if (isset($form['registration_cancellation']['user_cancel_method'][$element]['#access'])) {
-      $form['registration_cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
-    }
-    // Remove the description (only displayed on the confirmation form).
-    else {
-      unset($form['registration_cancellation']['user_cancel_method'][$element]['#description']);
+      // $form['registration_cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
+      $form['registration_cancellation']['user_cancel_method'][$element]['#disabled'] = TRUE;
+      $form['registration_cancellation']['user_cancel_method'][$element]['#description'] = t('This cancellation method cannot be selected as the default, as it specifies #access.');
     }
   }
+  // Add a single description for all radio options.
+  $user_module_permissions = module_invoke('user', 'permission');
+  $form['registration_cancellation']['user_cancel_method']['#description'] = t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => $user_module_permissions['change own username']['title'], '%administer-users' => $user_module_permissions['administer users']['title'], '@permissions-url' => url('admin/config/people/permissions')));
 
   // Password settings.
   $form['password_policy'] = array(

@@ -371,7 +371,7 @@ function user_edit_cancel_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; confirm form for canceling user account.
+ * Form builder; confirm form for cancelling a user account.
  *
  * @ingroup forms
  * @see user_edit_cancel_submit()
@@ -379,18 +379,15 @@ function user_edit_cancel_submit($form, &$form_state) {
  */
 function user_cancel_confirm_form($form, &$form_state, $account) {
   global $user;
+  $config = config('system.core');
 
   $form['_account'] = array('#type' => 'value', '#value' => $account);
 
-  // Display account cancellation method selection, if allowed.
+  // Get a list of the core-provided plus any custom/contrib account
+  // cancellation methods.
+  $form += user_cancel_methods();
+
   $admin_access = user_access('administer users');
-  $can_select_method = $admin_access || user_access('select account cancellation method');
-  $form['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => ($account->uid == $user->uid ? t('When cancelling your account') : t('When cancelling the account')),
-    '#access' => $can_select_method,
-  );
-  $form['user_cancel_method'] += user_cancel_methods();
 
   // Allow user administrators to skip the account cancellation confirmation
   // mail (by default), as long as they do not attempt to cancel their own
@@ -404,7 +401,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
   );
   // Also allow to send account canceled notification mail, if enabled.
-  $default_notify = config_get('system.core', 'user_mail_status_canceled_notify');
+  $default_notify = $config->get('user_mail_status_canceled_notify');
   $form['user_cancel_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
@@ -421,30 +418,35 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     $question = t('Are you sure you want to cancel the account %name?', array('%name' => $account->name));
   }
   $description = '';
+  // If the user can select a cancellation method, remove the individual
+  // descriptions from the cancellation methods radios.
+  $can_select_method = $admin_access || user_access('select account cancellation method');
+  $form['can_select_method'] = array('#type' => 'hidden', '#value' => $can_select_method);
   if ($can_select_method) {
-    $description = t('Select the method to cancel the account above.');
     foreach (element_children($form['user_cancel_method']) as $element) {
       unset($form['user_cancel_method'][$element]['#description']);
     }
   }
+  // Otherwise, remove all cancellation methods radios, and use the #description
+  // from the default cancellation method as the description of the confirmation
+  // form.
   else {
-    // The radio button #description is used as description for the confirmation
-    // form.
-    foreach (element_children($form['user_cancel_method']) as $element) {
-      if ($form['user_cancel_method'][$element]['#default_value'] == $form['user_cancel_method'][$element]['#return_value']) {
-        $description = $form['user_cancel_method'][$element]['#description'];
-      }
-      unset($form['user_cancel_method'][$element]['#description']);
-    }
+    $form['user_cancel_method']['#access'] = FALSE;
+    $default_method = $config->get('user_cancel_method');
+    $description = $form['user_cancel_method'][$default_method]['#description'];
+    $form['default_method'] = array('#type' => 'hidden', '#value' => $form['user_cancel_method'][$default_method]);
   }
 
   // Always provide entity id in the same form key as in the entity edit form.
   $form['uid'] = array('#type' => 'value', '#value' => $account->uid);
-  return confirm_form($form,
+  return confirm_form(
+    $form,
     $question,
     'user/' . $account->uid,
-    $description . ' ' . t('This action cannot be undone.'),
-    t('Cancel account'), t('Cancel'));
+    $description,
+    t('Cancel account'),
+    t('Cancel')
+  );
 }
 
 /**
@@ -485,6 +487,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  *   An array containing all account cancellation methods as form elements.
  *
  * @see hook_user_cancel_methods_alter()
+ * @see theme_user_cancel_confirm_form()
  * @see user_admin_settings()
  * @see user_cancel_confirm_form()
  * @see user_multiple_cancel_confirm()
@@ -492,22 +495,45 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
 function user_cancel_methods() {
   $site_config = config('system.core');
   $anonymous_name = $site_config->get('anonymous');
+
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content.'),
-      'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
+      'description' => theme('item_list', array('items' => array(
+          t('Your account will be blocked, and you will no longer be able to log in.'),
+          t('All of your content will remain attributed to your user name.'),
+        )
+      )),
     ),
     'user_cancel_block_unpublish' => array(
       'title' => t('Disable the account and unpublish its content.'),
-      'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
+      'description' => theme('item_list', array('items' => array(
+          t('Your account will be blocked, and you will no longer be able to log in.'),
+          t('All of your content will be hidden from everyone but administrators.'),
+        )
+      )),
     ),
     'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
-      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'title' => t('Permanently delete the account, and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'description' => theme('item_list', array('items' => array(
+          t('Your account will be <u><em>permanently</em></u> removed, and all account information deleted.'),
+          t('All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+        )
+      )),
+      'danger' => TRUE,
     ),
     'user_cancel_delete' => array(
-      'title' => t('Delete the account and its content.'),
-      'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
+      'title' => t('Permanently delete the account and its content.'),
+      'description' => theme('item_list', array('items' => array(
+          t('Your account will be <u><em>permanently</em></u> removed, and all account information deleted.'),
+          t('All of your content will also be deleted.'),
+        )
+      )),
+      'danger' => TRUE,
+      // This was meant to be used in user_admin_settings() in order to remove
+      // cancellation methods that have #access defined, as those cannot be
+      // configured as the default method. However this property was never being
+      // returned by this function here before. ¯\_(ツ)_/¯
       'access' => user_access('administer users'),
     ),
   );
@@ -516,16 +542,30 @@ function user_cancel_methods() {
 
   // Turn all methods into real form elements.
   $default_method = $site_config->get('user_cancel_method');
+  $options = array();
   foreach ($methods as $name => $method) {
-    $form[$name] = array(
-      '#type' => 'radio',
-      '#title' => $method['title'],
-      '#description' => (isset($method['description']) ? $method['description'] : NULL),
-      '#return_value' => $name,
-      '#default_value' => $default_method,
-      '#parents' => array('user_cancel_method'),
-    );
+    $options[$name] = $method['title'];
+    // Flag used to denote account cancellation methods as being
+    // dangerous/irreversible.
+    if (isset($method['danger']) && $method['danger']) {
+      $additional_properties[$name]['#danger'] = $method['danger'];
+    }
+    $additional_properties[$name]['#description'] = $method['description'];
+    // Flag used to exclude cancellation methods from being set as the
+    // default.
+    if (isset($method['access']) && $method['access']) {
+      $additional_properties[$name]['#access'] = $method['access'];
+    }
   }
+
+  $form['user_cancel_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Cancellation method'),
+    '#options' => $options,
+    '#default_value' => $default_method,
+  );
+  $form['user_cancel_method'] += $additional_properties;
+
   return $form;
 }
 
