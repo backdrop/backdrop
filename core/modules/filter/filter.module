@@ -1332,10 +1332,10 @@ function filter_process_format($element) {
     $element['description'] = array(
       '#type' => 'container',
       // The 'form-wrapper' class is required here, otherwise #states won't
-      // work.
+      // work. See https://github.com/backdrop/backdrop-issues/issues/5157
       '#attributes' => array('class' => array('form-wrapper', 'description')),
     );
-    $element['description']['abc'] = array(
+    $element['description']['text'] = array(
       '#markup' => $element['#description'],
     );
   }
