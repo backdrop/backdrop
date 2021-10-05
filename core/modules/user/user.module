@@ -202,8 +202,8 @@ function user_field_info_alter(&$info) {
  * Implements hook_form_alter().
  */
 function user_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'user_cancel_confirm_form') {
-    $can_select_method = $form['can_select_method']['#value'];
+  if ($form_id == 'user_cancel_confirm_form' || $form_id == 'user_multiple_cancel_confirm') {
+    $can_select_method = (isset($form['can_select_method']['#value']) && $form['can_select_method']['#value'] == TRUE) || user_access('administer users');
     $danger = isset($form['default_method']['#value']['#danger']) && $form['default_method']['#value']['#danger'] == TRUE;
     $warning = t('This action cannot be undone!');
 
