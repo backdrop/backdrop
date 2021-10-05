@@ -23,10 +23,10 @@ function user_multiple_cancel_confirm($form, &$form_state) {
   // Output a notice that user 1 cannot be canceled.
   if (isset($accounts[1])) {
     $redirect = (count($accounts) == 1);
-    $message = t('The user account %name cannot be cancelled.', array('%name' => $accounts[1]->name));
+    $message = t('The user account %name cannot be cancelled. It has been removed from the list.', array('%name' => $accounts[1]->name));
     backdrop_set_message($message, $redirect ? 'error' : 'warning');
     unset($accounts[1]);
-    // If only user 1 was selected, redirect to the overview.
+    // If only user 1 was selected, redirect to the accounts listing page.
     if ($redirect) {
       backdrop_goto('admin/people');
     }
@@ -38,16 +38,22 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     backdrop_set_message(t('No user accounts have been selected for cancellation.'), 'error');
     return $form;
   }
+  // If multiple accounts, then show them as a bullet list.
+  elseif (count($accounts) > 1) {
+    $form['user_list'] = array(
+      '#theme' => 'item_list',
+      '#items' => array(),
+    );
+    foreach ($accounts as $account) {
+      $form['user_list']['#items'][] = check_plain($account->name);
+    }
+  }
+  else {
+    $user = reset($accounts);
+    $user_name = $user->name;
+  }
 
   $form_state['accounts'] = $accounts;
-
-  $form['user_list'] = array(
-    '#theme' => 'item_list',
-    '#items' => array(),
-  );
-  foreach ($accounts as $account) {
-    $form['user_list']['#items'][] = check_plain($account->name);
-  }
 
   module_load_include('inc', 'user', 'user.pages');
   $form += user_cancel_methods();
@@ -74,8 +80,8 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     '#description' => t('When enabled, the user will receive an email notification after the account has been cancelled.'),
   );
 
-  $confirm_question = format_plural(count($accounts), 'Are you sure you want to cancel this user account?', 'Are you sure you want to cancel these user accounts?');
-  return confirm_form($form, $confirm_question, 'admin/people', NULL, t('Cancel accounts'), t('Cancel'));
+  $confirm_question = format_plural(count($accounts), 'Are you sure you want to cancel the account %name?', 'Are you sure you want to cancel these user accounts?', array('%name' => $user_name));
+  return confirm_form($form, $confirm_question, 'admin/people', '', t('Cancel accounts'), t('Cancel'));
 }
 
 /**
