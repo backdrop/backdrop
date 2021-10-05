@@ -807,8 +807,8 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
-    $this->assertRaw(t('Your account will be permanently removed, and all account information deleted.'), 'Informs that the account will be permanently deleted.');
-    $this->assertRaw(t('All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('system.core', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
+    $this->assertText(t('Your account will be permanently removed, and all account information deleted.'), 'Informs that the account will be permanently deleted.');
+    $this->assertText(t('All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => config_get('system.core', 'anonymous'))), 'Informs that all content will be attributed to anonymous account.');
 
     // Confirm account cancellation.
     $timestamp = time();
@@ -877,7 +877,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertText(t('Are you sure you want to cancel your account?'), 'Confirmation form to cancel account displayed.');
-    $this->assertRaw(t('Your account will be permanently removed, and all account information deleted.'), 'Informs that the account will be permanently deleted.');
+    $this->assertText(t('Your account will be permanently removed, and all account information deleted.'), 'Informs that the account will be permanently deleted.');
     $this->assertText(t('All of your content will also be deleted.'), 'Informs that all content will be deleted.');
 
     // Confirm account cancellation.

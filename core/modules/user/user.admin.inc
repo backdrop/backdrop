@@ -38,8 +38,9 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     backdrop_set_message(t('No user accounts have been selected for cancellation.'), 'error');
     return $form;
   }
+
   // If multiple accounts, then show them as a bullet list.
-  elseif (count($accounts) > 1) {
+  if (count($accounts) > 1) {
     $form['user_list'] = array(
       '#theme' => 'item_list',
       '#items' => array(),
@@ -48,10 +49,11 @@ function user_multiple_cancel_confirm($form, &$form_state) {
       $form['user_list']['#items'][] = check_plain($account->name);
     }
   }
-  else {
-    $user = reset($accounts);
-    $user_name = $user->name;
-  }
+
+  // Get the name of the current user account in the array. If only one account
+  // was selected, then this will happen to be the only account name.
+  $user = current($accounts);
+  $user_name = $user->name;
 
   $form_state['accounts'] = $accounts;
 
