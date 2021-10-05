@@ -157,7 +157,6 @@ function user_admin_settings($form, &$form_state) {
     // Disable all account cancellation methods that have #access defined, as
     // those cannot be configured as default method.
     if (isset($form['registration_cancellation']['user_cancel_method'][$element]['#access'])) {
-      // $form['registration_cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
       $form['registration_cancellation']['user_cancel_method'][$element]['#disabled'] = TRUE;
       $form['registration_cancellation']['user_cancel_method'][$element]['#description'] = t('This cancellation method cannot be selected as the default, as it specifies #access.');
     }

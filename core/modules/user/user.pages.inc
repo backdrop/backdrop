@@ -487,7 +487,6 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  *   An array containing all account cancellation methods as form elements.
  *
  * @see hook_user_cancel_methods_alter()
- * @see theme_user_cancel_confirm_form()
  * @see user_admin_settings()
  * @see user_cancel_confirm_form()
  * @see user_multiple_cancel_confirm()
@@ -530,10 +529,6 @@ function user_cancel_methods() {
         )
       )),
       'danger' => TRUE,
-      // This was meant to be used in user_admin_settings() in order to remove
-      // cancellation methods that have #access defined, as those cannot be
-      // configured as the default method. However this property was never being
-      // returned by this function here before. ¯\_(ツ)_/¯
       'access' => user_access('administer users'),
     ),
   );
