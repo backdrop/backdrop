@@ -50,11 +50,6 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     }
   }
 
-  // Get the name of the current user account in the array. If only one account
-  // was selected, then this will happen to be the only account name.
-  $user = current($accounts);
-  $user_name = $user->name;
-
   $form_state['accounts'] = $accounts;
 
   module_load_include('inc', 'user', 'user.pages');
@@ -82,6 +77,10 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     '#description' => t('When enabled, the user will receive an email notification after the account has been cancelled.'),
   );
 
+  // Get the name of the current user account in the array. If only one account
+  // was selected, then this will happen to be the only account name.
+  $user = current($accounts);
+  $user_name = $user->name;
   $confirm_question = format_plural(count($accounts), 'Are you sure you want to cancel the account %name?', 'Are you sure you want to cancel these user accounts?', array('%name' => $user_name));
   return confirm_form($form, $confirm_question, 'admin/people', '', t('Cancel accounts'), t('Cancel'));
 }
