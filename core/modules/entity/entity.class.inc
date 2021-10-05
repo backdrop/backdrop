@@ -177,12 +177,47 @@ interface EntityInterface {
    * @since 1.13.0 Method added.
    */
   public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL);
+
+  /**
+   * Returns the revision identifier of the entity.
+   *
+   * @return
+   *   The revision identifier of the entity, or NULL if the entity does not
+   *   have a revision identifier.
+   *
+   * @since 1.16.0 Method added.
+   */
+  public function getRevisionId();
+
+  /**
+   * Checks if this entity is the active revision.
+   *
+   * @return bool
+   *   TRUE if the entity is the active revision, FALSE otherwise.
+   *
+   * @since 1.16.0 Method added.
+   */
+  public function isActiveRevision();
+
+  /**
+   * Sets this revision as the active revision.
+   *
+   * @since 1.16.0 Method added.
+   */
+  public function setIsActiveRevision();
 }
 
 /**
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
+  /**
+   * Indicates whether this is the active revision.
+   *
+   * @var bool
+   */
+  public $is_active_revision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -277,6 +312,27 @@ abstract class Entity extends stdClass implements EntityInterface {
       }
     }
     return $values;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::getRevisionId().
+   */
+  public function getRevisionId() {
+    return NULL;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::isActiveRevision().
+   */
+  public function isActiveRevision() {
+    return $this->is_active_revision;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::setActiveRevision().
+   */
+  public function setIsActiveRevision() {
+    $this->is_active_revision = TRUE;
   }
 }
 

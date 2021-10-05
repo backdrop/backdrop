@@ -55,10 +55,10 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
     $this->backdropLogin($user2);
 
     $this->backdropGet('node/' . $node1->nid . '/edit');
-    $edit['field_tags' . '[' . LANGUAGE_NONE . ']'] = $term->name;
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
-    $edit['field_tags' . '[' . LANGUAGE_NONE . ']'] = $term->name;
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
     $this->backdropPost('user/' . $user1->uid . '/edit', $edit, t('Save'));
 
     $result[] = array('nid' => $node1->nid);

@@ -264,7 +264,7 @@ class views_plugin_display_page extends views_plugin_display {
     $options['path'] = array(
       'category' => 'page',
       'title' => t('Path'),
-      'value' => views_ui_truncate($path, 24),
+      'value' => $path,
     );
 
     $menu = $this->get_option('menu');
@@ -288,7 +288,7 @@ class views_plugin_display_page extends views_plugin_display {
     $options['menu'] = array(
       'category' => 'page',
       'title' => t('Menu'),
-      'value' => views_ui_truncate($menu_str, 24),
+      'value' => $menu_str,
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.

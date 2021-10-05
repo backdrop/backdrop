@@ -44,7 +44,6 @@ class Comment extends Entity {
    */
   public $subject;
 
-
   /**
    * The comment author ID.
    *
@@ -78,6 +77,16 @@ class Comment extends Entity {
    * @var string
    */
   public $homepage;
+
+  /**
+   * A list of comment IDs that make up the parents of this comment.
+   *
+   * For example a thread of 10/20/30 would indicate a comment that has 3 parent
+   * comments, with CID 30 being the immediate parent comment.
+   *
+   * @var string
+   */
+  public $thread;
 
   /**
    * Implements EntityInterface::id().
@@ -202,6 +211,18 @@ class Comment extends Entity {
 class CommentStorageController extends EntityDatabaseStorageController {
 
   /**
+   * Overrides DefaultEntityController::load().
+   */
+  public function load($ids = array(), $conditions = array()) {
+    $comments = parent::load($ids, $conditions);
+
+    foreach ($comments as $key => $comment) {
+      $comment->new = node_mark($comment->nid, $comment->changed);
+    }
+    return $comments;
+  }
+
+  /**
    * Overrides EntityDatabaseStorageController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
@@ -222,7 +243,6 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // Set up standard comment properties.
     foreach ($comments as $key => $comment) {
       $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-      $comment->new = node_mark($comment->nid, $comment->changed);
       $comment->node_type = 'comment_node_' . $comment->node_type;
       $comments[$key] = $comment;
     }
@@ -320,6 +340,12 @@ class CommentStorageController extends EntityDatabaseStorageController {
     if ($comment->status == COMMENT_PUBLISHED) {
       module_invoke_all('comment_publish', $comment);
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the node.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      cache('entity_node')->delete($comment->nid);
+    }
   }
 
   /**
@@ -335,7 +361,18 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     foreach ($comments as $comment) {
       $this->updateNodeStatistics($comment->nid);
+      $nodes[] = $comment->nid;
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the nodes that
+    // the deleted comments were on.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      foreach (array_unique($nodes) as $nid) {
+        cache('entity_node')->delete($nid);
+      }
+    }
+
   }
 
   /**
