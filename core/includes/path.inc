@@ -260,10 +260,10 @@ function backdrop_get_normal_path($path, $langcode = NULL) {
 }
 
 /**
- * Check if the current page is the front page.
+ * Check if the current page is the home page.
  *
  * @return
- *   Boolean value: TRUE if the current page is the front page; FALSE if otherwise.
+ *   Boolean value: TRUE if the current page is the home page; FALSE if otherwise.
  */
 function backdrop_is_front_page() {
   // Use the advanced backdrop_static() pattern, since this is called very often.
@@ -337,7 +337,9 @@ function backdrop_match_path($path, $patterns) {
  * @see request_path()
  */
 function current_path() {
-  return $_GET['q'];
+  if (isset($_GET['q'])) {
+    return $_GET['q'];
+  }
 }
 
 /**

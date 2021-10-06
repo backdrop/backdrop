@@ -116,9 +116,9 @@ function file_field_instance_settings_form($field, $instance) {
 
   $form['description_field'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable <em>Description</em> field'),
+    '#title' => t('Show <em>File display title</em> field'),
+    '#description' => t('This text will be used in links to the uploaded file. When not available, the filename will be used.'),
     '#default_value' => isset($settings['description_field']) ? $settings['description_field'] : '',
-    '#description' => t('The description field allows users to enter a description about the uploaded file.'),
     '#parents' => array('instance', 'settings', 'description_field'),
     '#weight' => 11,
   );
@@ -774,7 +774,7 @@ function file_field_widget_uri($field, $instance, $data = array()) {
  *
  * This function is assigned as a #value callback in file_field_widget_form().
  */
-function file_field_widget_value($element, $input = FALSE, $form_state) {
+function file_field_widget_value($element, $input, $form_state) {
   if ($input) {
     // Checkboxes lose their value when empty.
     // If the display field is present make sure its unchecked value is saved.
@@ -834,10 +834,10 @@ function file_field_widget_process($element, &$form_state, $form) {
   if (!empty($instance['settings']['description_field']) && $item['fid']) {
     $element['description'] = array(
       '#type' => 'textfield',
-      '#title' => t('Description'),
+      '#title' => t('File display title'),
+      '#description' => t('This text will be used in links to the uploaded file.'),
       '#value' => isset($item['description']) ? $item['description'] : '',
       '#maxlength' => 500,
-      '#description' => t('The description may be used as the label of the link to the file.'),
     );
   }
 
@@ -853,7 +853,7 @@ function file_field_widget_process($element, &$form_state, $form) {
     $field_element = backdrop_array_get_nested_value($form, $parents);
     $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
     foreach (element_children($element) as $key) {
-      if (isset($element[$key]['#ajax'])) {
+      if (isset($element[$key]['#ajax']['path'])) {
         $element[$key]['#ajax']['path'] = $new_path;
         $element[$key]['#ajax']['wrapper'] = $new_wrapper;
       }
