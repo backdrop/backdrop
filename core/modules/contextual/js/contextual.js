@@ -47,7 +47,7 @@ Backdrop.behaviors.contextualLinks = {
         var dir = $('html').attr('dir');
         if (childOffset.top < parentOffset.top + 20) {
           if (dir == 'ltr') {
-            if (childOffset.left > parentOffset.left  - 25) {
+            if (childOffset.left > parentOffset.left - 25) {
               // There's a collision at right, so we need to shift the child.
               if (parentHeight >= 40) {
                   // If there's enought vertical room in the child contextual links
