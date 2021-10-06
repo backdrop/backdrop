@@ -940,12 +940,8 @@ function simpletest_script_reporter_display_results() {
 function simpletest_script_format_result($result) {
   global $results_map;
 
-  // @todo Remove this unless we want it.
   // Only print the function name, the class is redundant with the heading.
-  // list($class, $function) = explode('->', $result->function);
-  // if (!isset($function)) {
-  //   $function = $class;
-  // }
+  list($class, $function) = explode('->', $result->function, 2);
 
   $summary = sprintf(
     "%-9.9s %-10.10s %-17.17s %-7.7s %-72.72s\n",
@@ -953,7 +949,7 @@ function simpletest_script_format_result($result) {
     $result->message_group,
     basename($result->file),
     $result->line,
-    $result->function
+    $function
   );
 
   simpletest_script_print($summary, $result->status);
