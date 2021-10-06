@@ -2247,7 +2247,7 @@ function system_update_1025() {
   $admin_config->setData($admin_layout);
   $admin_config->save();
 
-  $layout_name = state_get('upgrade_layout_name', 'simmons');
+  $layout_name = settings_get('upgrade_layout_name', 'simmons');
 
   $default_layout = array(
     'path' => NULL,
@@ -2314,7 +2314,7 @@ function system_update_1025() {
   );
 
   $current_theme = update_variable_get('theme_default', 'bartik');
-  $layout_regions = state_get('upgrade_layout_regions', array(
+  $layout_regions = settings_get('upgrade_layout_regions', array(
     'header' => 'header',
     'top' => 'top',
     'content' => 'content',
