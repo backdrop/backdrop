@@ -61,7 +61,7 @@ Backdrop.behaviors.contextualLinks = {
             }
           }
           else {
-            // Handle RTL
+            // Handle RTL.
             if (childOffset.left < parentOffset.left  + 25) {
               // There's a collision at left, so we need to shift the child.
               if (parentHeight >= 40) {
