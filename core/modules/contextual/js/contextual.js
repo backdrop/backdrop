@@ -41,19 +41,39 @@ Backdrop.behaviors.contextualLinks = {
       // ones by shifting their position.
       var $child = $wrapper.siblings().find('.contextual-links-wrapper').eq(0);
       if ($child.length > 0) {
-        var height = $child.parent().height();
+        var parentHeight = $child.parent().height();
         var parentOffset = $wrapper.offset();
         var childOffset = $child.offset();
-        if (childOffset.top < parentOffset.top + 20 && childOffset.left > parentOffset.left  - 25) {
-          // There's a collision, so we need to shift the child.
-          if (height >= 40) {
-              // If there's enought vertical room in the child contextual links
-              // region, shift the child links down.
-            $child.css('margin-top', '20px');
+        var dir = $('html').attr('dir');
+        if (childOffset.top < parentOffset.top + 20) {
+          if (dir == 'ltr') {
+            if (childOffset.left > parentOffset.left  - 25) {
+              // There's a collision at right, so we need to shift the child.
+              if (parentHeight >= 40) {
+                  // If there's enought vertical room in the child contextual links
+                  // region, shift the child links down.
+                $child.css('margin-top', '20px');
+              }
+              else {
+                // Otherwise shift the child links to the left.
+                $child.css('margin-right', '25px');
+              }
+            }
           }
           else {
-            // Otherwise shift the child links to the left.
-            $child.css('margin-right', '25px');
+            // Handle RTL
+            if (childOffset.left < parentOffset.left  + 25) {
+              // There's a collision at left, so we need to shift the child.
+              if (parentHeight >= 40) {
+                  // If there's enought vertical room in the child contextual links
+                  // region, shift the child links down.
+                $child.css('margin-top', '20px');
+              }
+              else {
+                // Otherwise shift the child links to the left.
+                $child.css('margin-left', '25px');
+              }
+            }
           }
         }
       }
