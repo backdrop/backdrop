@@ -2151,9 +2151,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
    * Test adding, renaming and deleting roles.
    */
   function testRoleAdministration() {
-    // Cause intentional failures.
-    // @todo Remove.
-    //$this->backdropLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Test adding a role.
     $role_name = '123';
