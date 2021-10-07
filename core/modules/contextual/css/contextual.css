@@ -118,4 +118,6 @@
 }
 .contextual-links li .info {
   background-color: #eee;
+  cursor: default;
+  font-weight: bold;
 }
