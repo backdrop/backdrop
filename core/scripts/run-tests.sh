@@ -786,14 +786,14 @@ function simpletest_script_write_summary($summary_file) {
         $test_class = $result->test_class;
       }
 
-      if ($count < 10 ) {
+      if ($count < 10) {
         $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
       }
       $count++;
     }
   }
 
-  if ($count > 10){
+  if ($count > 10) {
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
 
