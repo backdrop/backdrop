@@ -922,9 +922,9 @@ function backdrop_access_denied() {
  *   (optional) An array that can have one or more of the following elements:
  *   - headers: An array containing request headers to send as name/value pairs.
  *   - method: A string containing the request method. Defaults to 'GET'.
- *   - data: A string containing the request body, formatted as
- *     'param=value&param=value&...'; to generate this, use http_build_query().
- *     Defaults to NULL.
+ *   - data: An array containing the values for the request body or a string
+ *     containing the request body, formatted as 'param=value&param=value&...'.
+ *     To generate this, use backdrop_http_build_query(). Defaults to NULL.
  *   - max_redirects: An integer representing how many times a redirect
  *     may be followed. Defaults to 3.
  *   - timeout: A float representing the maximum number of seconds the function
@@ -949,6 +949,10 @@ function backdrop_access_denied() {
  *     HTTP header names are case-insensitive (RFC 2616, section 4.2), so for
  *     easy access the array keys are returned in lower case.
  *   - data: A string containing the response body that was received.
+ *
+ * @see backdrop_http_build_query()
+ *
+ * @since 1.18.4 The $options['data'] key may now be passed as an array.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -1087,6 +1091,11 @@ function backdrop_http_request($url, array $options = array()) {
   $path = isset($uri['path']) ? $uri['path'] : '/';
   if (isset($uri['query'])) {
     $path .= '?' . $uri['query'];
+  }
+
+  // Convert array $options['data'] to a query string.
+  if (is_array($options['data'])) {
+    $options['data'] = backdrop_http_build_query($options['data']);
   }
 
   // Only add Content-Length if we actually have any content or if it is a POST
@@ -1953,7 +1962,13 @@ function _filter_xss_attributes($attr) {
         // Attribute name, href for instance.
         if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
           $attrname = strtolower($match[1]);
-          $skip = ($attrname == 'style' || substr($attrname, 0, 2) == 'on');
+          $skip = (
+            $attrname == 'style' ||
+            substr($attrname, 0, 2) == 'on' ||
+            substr($attrname, 0, 1) == '-' ||
+            // Ignore long attributes to avoid unnecessary processing overhead.
+            strlen($attrname) > 96
+          );
           $working = $mode = 1;
           $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
         }
@@ -2285,7 +2300,7 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
  */
 function parse_size($size) {
   $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
-  $size = preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+  $size = (float) preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
   if ($unit) {
     // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
     return round($size * pow(BACKDROP_KILOBYTE, stripos('bkmgtpezy', $unit[0])));
@@ -3011,7 +3026,7 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
  */
 function backdrop_deliver_html_page($page_callback_result) {
   $site_config = config('system.core');
-  
+
   // Emit the correct charset HTTP header, but not if the page callback
   // result is NULL, since that likely indicates that it printed something
   // in which case, no further headers may be sent, and not if code running
@@ -3031,6 +3046,19 @@ function backdrop_deliver_html_page($page_callback_result) {
   $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
+  }
+
+  if ($site_config->get('block_interest_cohort')) {
+    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
+    if (is_null($permissions_policy)) {
+      backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
+    }
+    else {
+      // Only add interest-cohort if the header does not contain it already.
+      if (strpos($permissions_policy, 'interest-cohort') === FALSE) {
+        backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()', TRUE);
+      }
+    }
   }
 
   // Menu status constants are integers; page content is a string or array.
@@ -3445,10 +3473,10 @@ function backdrop_css_defaults($data = NULL) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
- *   - attributes: An associative array of attributes for the <link> tag.
- *     This may be used to add 'integrity' or custom attributes. Note that
- *     setting any attributes will disable preprocessing as though the
- *     'preprocess' option was set to FALSE.
+ *   - attributes: An associative array of attributes for the <link> tag. This
+ *     may be used to add 'integrity' or custom attributes. Note that setting
+ *     any attributes will disable preprocessing as though the 'preprocess'
+ *     option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
  *     styles will be aggregated and compressed. Defaults to TRUE.
  *   - 'browsers': An array containing information specifying which browsers
@@ -3917,7 +3945,9 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
-            $element['#attributes'] += $item['attributes'];
+            if (isset($item['attributes'])) {
+              $element['#attributes'] += $item['attributes'];
+            }
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3940,7 +3970,9 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
-            $element['#attributes'] += $item['attributes'];
+            if (isset($item['attributes'])) {
+              $element['#attributes'] += $item['attributes'];
+            }
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3952,7 +3984,9 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
-          $element['#attributes'] += $item['attributes'];
+          if (isset($item['attributes'])) {
+            $element['#attributes'] += $item['attributes'];
+          }
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
@@ -7771,7 +7805,7 @@ function backdrop_common_theme() {
       'variables' => array('markup' => NULL),
     ),
     'table' => array(
-      'variables' => array('header' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
+      'variables' => array('header' => NULL, 'footer' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
     ),
     'tablesort_indicator' => array(
       'variables' => array('style' => NULL),
@@ -7950,6 +7984,9 @@ function backdrop_common_theme() {
       'render element' => 'element',
     ),
     'container' => array(
+      'render element' => 'element',
+    ),
+    'details' => array(
       'render element' => 'element',
     ),
   );

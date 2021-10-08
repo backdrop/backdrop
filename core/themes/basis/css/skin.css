@@ -29,6 +29,10 @@ a:active {
   background: #dddddd;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 blockquote,
 figcaption {
   border-left-color: #bbbbbb;
@@ -534,7 +538,10 @@ input.form-submit:active {
 }
 
 .button,
-input.form-submit,
+input.form-submit {
+  color: #444b53;
+  background: #e5e5e6;
+}
 input.button-primary,
 button.button-primary,
 .ui-state-default,
@@ -560,6 +567,7 @@ button.button-primary:active {
   color: white;
 }
 
+a.button-secondary,
 input.button-secondary,
 button.button-secondary {
   color: #828188;

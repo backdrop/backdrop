@@ -114,25 +114,29 @@
 .password-strength.weak .indicator {
   background-color: #ff0000;
 }
-.password-strength.weak .password-strength-text {
+.password-strength.weak .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.weak em {
   color: #ff0000;
 }
 .password-strength.fair .indicator {
   background-color: #FFA500;
 }
-.password-strength.fair .password-strength-text {
+.password-strength.fair .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.fair em {
   color: #FFA500;
 }
 .password-strength.good .indicator {
   background-color: #4CA64C;
 }
-.password-strength.good .password-strength-text {
+.password-strength.good .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.good em {
   color: #4CA64C;
 }
 .password-strength.strong .indicator {
   background-color: #008000;
 }
-.password-strength.strong .password-strength-text {
+.password-strength.strong .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.strong em {
   color: #008000;
 }
 

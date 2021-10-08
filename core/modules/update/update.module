@@ -73,10 +73,10 @@ function update_init() {
   if (arg(0) == 'admin' && user_access('administer site configuration')) {
     switch ($_GET['q']) {
       // These pages don't need additional nagging.
-      case 'admin/appearance/update':
+      case 'admin/config/system/updates':
       case 'admin/appearance/install':
-      case 'admin/modules/update':
       case 'admin/modules/install':
+      case 'admin/structure/layouts/install':
       case 'admin/reports/updates':
       case 'admin/reports/updates/update':
       case 'admin/reports/updates/install':
@@ -85,8 +85,8 @@ function update_init() {
       case 'admin/update/ready':
         return;
 
-      // If we are on the appearance or modules list, display a detailed report
-      // of the update status.
+      // If we are on the modules, themes, or layout templates list, display a
+      // detailed report of the update status.
       case 'admin/appearance':
       case 'admin/modules':
       case 'admin/structure/layouts':
@@ -452,7 +452,7 @@ function update_mail($key, &$message, $params) {
   }
   $message['body'][] = t('See the available updates page for more information:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates', array('absolute' => TRUE, 'language' => $language));
   if (update_manager_access()) {
-    $message['body'][] = t('You can automatically install your missing updates using the Update manager:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates/update', array('absolute' => TRUE, 'language' => $language));
+    $message['body'][] = t('You can automatically install your missing updates using the Update Manager:', array(), array('langcode' => $langcode)) . "\n" . url('admin/reports/updates/update', array('absolute' => TRUE, 'language' => $language));
   }
   $settings_url = url('admin/reports/updates/settings', array('absolute' => TRUE));
   if (config_get('update.settings', 'update_threshold') == 'all') {
@@ -555,7 +555,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
       break;
   }
 
-  if ($report_link) {
+  if ($report_link && current_path() != 'admin/config/system/updates') {
     $text .= ' ' . t('See the <a href="@available_updates">available updates</a> page for more information.', array('@available_updates' => url('admin/reports/updates', array('language' => $language))), array('langcode' => $langcode));
   }
 

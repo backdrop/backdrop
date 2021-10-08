@@ -81,10 +81,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // certain one has been set; otherwise, MySQL defaults to 'utf8_general_ci'
     // for UTF-8.
     if (!empty($connection_options['collation'])) {
-      $this->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
+      $this->pdo->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
     }
     else {
-      $this->exec('SET NAMES ' . $charset);
+      $this->pdo->exec('SET NAMES ' . $charset);
     }
 
     // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL
@@ -100,7 +100,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
-      $this->exec($sql);
+      $this->pdo->exec($sql);
     }
   }
 
@@ -282,7 +282,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!PDO::commit()) {
+        if (!$this->pdo->commit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -305,7 +305,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
             $this->transactionLayers = array();
             // We also have to explain to PDO that the transaction stack has
             // been cleaned-up.
-            PDO::commit();
+            $this->pdo->commit();
           }
           else {
             throw $e;
@@ -326,7 +326,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
 
     // Ensure that the MySQL driver supports utf8mb4 encoding.
-    $version = $this->getAttribute(PDO::ATTR_CLIENT_VERSION);
+    $version = $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
 
     if (strpos($version, 'mysqlnd') !== FALSE) {
       // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.

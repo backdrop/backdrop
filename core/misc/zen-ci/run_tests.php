@@ -24,7 +24,7 @@ zenci_put_request($data);
 
 chdir($sitepath);
 
-$cmd = 'php core/scripts/run-tests.sh --url http://localhost --verbose --cache --force --all --concurrency 10 --color --verbose --summary /tmp/summary';
+$cmd = 'php core/scripts/run-tests.sh --url http://localhost --verbose --cache --myisam-convert --force --all --concurrency 10 --color --verbose --summary /tmp/summary';
 $proc = popen($cmd, 'r');
 
 while (!feof($proc)) {

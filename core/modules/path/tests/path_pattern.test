@@ -754,7 +754,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $vocabulary = $this->addVocabulary();
     $pattern = $vocabulary->machine_name . '/[term:name]/foo';
     $edit = array('path_pattern' =>  $pattern);
-    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure', $edit, 'Save');
+    $this->backdropPost('admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure', $edit, 'Save vocabulary');
     // Check that the page URL alias pattern is on the pathauto form.
     $this->backdropGet('admin/config/urls/path/patterns');
     $this->assertFieldByName('taxonomy_term_' . $vocabulary->machine_name . '_pattern', $pattern, 'URL alias pattern set with vocabulary settings appears on path config page.');

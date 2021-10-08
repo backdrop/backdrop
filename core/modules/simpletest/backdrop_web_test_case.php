@@ -1876,8 +1876,14 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->fail('Failed to drop all prefixed tables.');
     }
 
+    // In PHP 8 some tests encounter problems as some shutdown code tries to
+    // access the database connection after it's been explicitly closed (for
+    // example the destructor of BackdropCacheArray). We avoid this by not fully
+    // destroying the test database connection.
+    $close = \PHP_VERSION_ID < 80000;
+
     // Get back to the original connection.
-    Database::removeConnection('default');
+    Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
 
     // Delete the database table prefix record.
@@ -3279,7 +3285,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertTextHelper($text, $message = '', $group, $not_exists) {
+  protected function assertTextHelper($text, $message, $group, $not_exists) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3345,7 +3351,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertUniqueTextHelper($text, $message = '', $group, $be_unique) {
+  protected function assertUniqueTextHelper($text, $message, $group, $be_unique) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3467,7 +3473,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
+  protected function assertThemeOutput($callback, array $variables, $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
     $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
       . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
