@@ -81,9 +81,8 @@ class NumberFieldTestCase extends BackdropWebTestCase {
       $this->backdropPost(NULL, $edit, t('Save'));
       $placeholders = array(
         '%name' => $this->field['field_name'],
-        '%value' => $wrong_entry,
       );
-      $this->assertRaw(t('In %name, %value must be a number.', $placeholders), 'Correctly failed to save decimal value with more than one decimal point.');
+      $this->assertRaw(t('%name: the value must be numeric.', $placeholders), 'Correctly failed to save decimal value with more than one decimal point.');
     }
 
     // Try to create entries with minus sign not in the first position.
@@ -103,9 +102,8 @@ class NumberFieldTestCase extends BackdropWebTestCase {
       $this->backdropPost(NULL, $edit, t('Save'));
       $placeholders = array(
         '%name' => $this->field['field_name'],
-        '%value' => $wrong_entry,
       );
-      $this->assertRaw(t('In %name, %value must be a number.', $placeholders), 'Correctly failed to save decimal value with minus sign in the wrong position.');
+      $this->assertRaw(t('%name: the value must be numeric.', $placeholders), 'Correctly failed to save decimal value with minus sign in the wrong position.');
     }
   }
 
@@ -158,9 +156,8 @@ class NumberFieldTestCase extends BackdropWebTestCase {
       $this->backdropPost(NULL, $edit, t('Save'));
       $placeholders = array(
         '%name' => $this->field['field_name'],
-        '%value' => $decimal,
       );
-      $this->assertNoRaw(format_string('In %name, %value must be a number.', $placeholders));
+      $this->assertNoRaw(format_string('%name: the value must be numeric.', $placeholders));
     }
   }
 

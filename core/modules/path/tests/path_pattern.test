@@ -711,14 +711,12 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $placeholders = array(
       '%name' => 'Maximum URL alias length',
-      '%value' => $edit['max_length'],
     );
-    $this->assertRaw(format_string('In %name, %value must be a number.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be numeric.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
-      '%value' => $edit['max_component_length'],
     );
-    $this->assertRaw(format_string('In %name, %value must be a number.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be numeric.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
@@ -726,16 +724,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $placeholders = array(
       '%name' => 'Maximum URL alias length',
-      '%value' => $edit['max_length'],
       '%min' => 1,
     );
-    $this->assertRaw(format_string('In %name, %value must be greater than or equal to %min.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be greater than or equal to %min.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
-      '%value' => $edit['max_component_length'],
       '%min' => 1,
     );
-    $this->assertRaw(format_string('In %name, %value must be greater than or equal to %min.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be greater than or equal to %min.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
@@ -744,16 +740,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     $placeholders = array(
       '%name' => 'Maximum URL alias length',
-      '%value' => $edit['max_length'],
       '%max' => 255,
     );
-    $this->assertRaw(format_string('In %name, %value must be less that or equal to %max.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be less than or equal to %max.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
-      '%value' => $edit['max_component_length'],
       '%max' => 255,
     );
-    $this->assertRaw(format_string('In %name, %value must be less that or equal to %max.', $placeholders));
+    $this->assertRaw(format_string('%name: the value must be less than or equal to %max.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';

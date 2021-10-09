@@ -366,19 +366,20 @@ class FormsTestCase extends BackdropWebTestCase {
     // Array with all the error messages to be checked.
     // @see form_validate_number() for the messages.
     $error_messages = array(
-      'no_number' => 'In %name, %value must be a number.',
-      'too_low' => 'In %name, %value must be greater than or equal to %min.',
-      'too_high' => 'In %name, %value must be less that or equal to %max.',
-      'step_mismatch' => 'In %name, %value is not an integral number of steps %step from %offset.',
+      'no_number' => '%name: the value must be numeric.',
+      'too_low' => '%name: the value must be greater than or equal to %min.',
+      'too_high' => '%name: the value must be less than or equal to %max.',
+      'step_mismatch_integer' => '%name: the value must be an integer.',
+      'step_mismatch_general' => '%name: the value must be an integral number of steps %step from %offset.',
     );
 
     // The expected errors.
     $expected = array(
       'integer_no_number' => 'no_number',
       'integer_no_step' => 0,
-      'integer_no_step_step_error' => 'step_mismatch',
+      'integer_no_step_step_error' => 'step_mismatch_integer',
       'integer_step' => 0,
-      'integer_step_error' => 'step_mismatch',
+      'integer_step_error' => 'step_mismatch_general',
       'integer_step_min' => 0,
       'integer_step_min_error' => 'too_low',
       'integer_step_max' => 0,
@@ -386,12 +387,12 @@ class FormsTestCase extends BackdropWebTestCase {
       'integer_step_min_border' => 0,
       'integer_step_max_border' => 0,
       'integer_step_based_on_min' => 0,
-      'integer_step_based_on_min_error' => 'step_mismatch',
+      'integer_step_based_on_min_error' => 'step_mismatch_general',
       'float_small_step' => 0,
       'float_step_no_error' => 0,
-      'float_step_error' => 'step_mismatch',
+      'float_step_error' => 'step_mismatch_general',
       'float_step_hard_no_error' => 0,
-      'float_step_hard_error' => 'step_mismatch',
+      'float_step_hard_error' => 'step_mismatch_general',
       'float_step_any_no_error' => 0,
     );
 
