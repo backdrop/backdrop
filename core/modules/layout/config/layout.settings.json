@@ -5,5 +5,9 @@
         "two_column",
         "two_column_flipped",
         "three_three_four_column"
-    ]
+    ],
+    "use_layout_contextual_links": 0,
+    "include_theme_contextual_links": 0,
+    "default_theme_shift": 0,
+    "admin_theme_shift": 0
 }
