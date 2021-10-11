@@ -590,7 +590,7 @@ function layout_page_access() {
  * @return bool
  *   TRUE if the layout can be suppressed, FALSE otherwise.
  *
- * @since 1.20.1 Function added.
+ * @since 1.21.0 Function added.
  */
 function layout_suppress($suppress = NULL) {
   $suppression_static = &backdrop_static(__FUNCTION__, FALSE);
