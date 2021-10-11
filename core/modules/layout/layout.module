@@ -578,30 +578,6 @@ function layout_page_access() {
 }
 
 /**
- * Suppress the layout.
- *
- * This function should be called from within another module's page callback
- * when the layout should not be displayed, that is, content only. This can be
- * useful for modules that implement popup pages or other special pages where
- * the default layout would be distracting.
- *
- * @param bool $suppress
- *   If set to TRUE, the layout will be supressed.
- * @return bool
- *   TRUE if the layout can be suppressed, FALSE otherwise.
- *
- * @since 1.20.1 Function added.
- */
-function layout_suppress($suppress = NULL) {
-  $suppression_static = &backdrop_static(__FUNCTION__, FALSE);
-  if (isset($suppress)) {
-    $suppression_static = $suppress;
-  }
-
-  return $suppression_static;
-}
-
-/**
  * Route handler callback; Execute the current route item or wrap in a layout.
  *
  * @param $router_item
@@ -615,9 +591,8 @@ function layout_suppress($suppress = NULL) {
 function layout_route_handler($router_item) {
   // If a different delivery callback is specified, we're probably not returning
   // HTML and it definitely should not be wrapped in a layout. Call the default
-  // route handler, and return its response directly. Do the same if requested
-  // by layout_suppress().
-  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback' || layout_suppress()) {
+  // route handler and return its response directly.
+  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback') {
     return menu_default_route_handler($router_item);
   }
 
