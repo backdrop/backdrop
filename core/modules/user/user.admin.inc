@@ -683,7 +683,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
-  //Set the default redirect.
+  // Set the default redirect.
   $redirect = 'admin/config/people/roles';
 
   if (empty($form_state['role'])) {
