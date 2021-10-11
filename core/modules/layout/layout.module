@@ -2269,25 +2269,28 @@ function layout_form_contextual_settings_form_alter(&$form, &$form_state, $form_
       ),
     ),
   );
-  $form['layout']['shifts'] = array(
+  $form['layout']['contextual_links_position'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Shifts'),
+    '#title' => t('Contextual links position'),
     '#description' => t('Some themes (e.g., Basis) will cover up the default contextual links with the admin bar. Check either of the below to shift the layout contextual links downward for the specified theme.'),
     '#states' => array(
       'visible' => array(
         ':input[name="use_layout_contextual_links"]' => array('checked' => TRUE),
       ),
     ),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
-  $theme_default = config_get('system.core', 'theme_default');
-  $form['layout']['shifts']['default_theme_shift'] = array(
+  $themes = list_themes();
+  $theme_default = $themes[config_get('system.core', 'theme_default')]->info['name'];
+  $form['layout']['contextual_links_position']['default_theme_shift'] = array(
     '#type' => 'checkbox',
     '#title' => t('Shift for default theme'),
     '#description' => t('Shift contextual links downward for all pages that display the admin bar in the default theme (%theme_default).', array('%theme_default' => $theme_default)),
     '#default_value' => $config->get('default_theme_shift'),
   );
-  $admin_theme = config_get('system.core', 'admin_theme');
-  $form['layout']['shifts']['admin_theme_shift'] = array(
+  $admin_theme = $themes[config_get('system.core', 'admin_theme')]->info['name'];
+  $form['layout']['contextual_links_position']['admin_theme_shift'] = array(
     '#type' => 'checkbox',
     '#title' => t('Shift for admin theme'),
     '#description' => t('Shift contextual links downward for all pages that display the admin bar in the admin theme (%admin_theme).', array('%admin_theme' => $admin_theme)),
