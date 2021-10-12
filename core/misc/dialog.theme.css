@@ -12,6 +12,14 @@ html.dialog-auto-resize {
   width: 100%;
 }
 
+/**
+ * Prevent the background underneath modal dialogs from being auto-scrolled to
+ * the top of the page.
+ */
+html.dialog-open {
+  position: inherit;
+}
+
 .ui-dialog {
   position: absolute;
   z-index: 1260;
