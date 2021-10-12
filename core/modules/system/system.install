@@ -3229,12 +3229,13 @@ function system_update_1078() {
   config_set('layout.settings', 'use_layout_contextual_links', TRUE);
   config_set('layout.settings', 'include_theme_contextual_links', TRUE);
 
-  if (module_exists('layout_contextual_links')) {
+  $contrib_config = config('layout_contextual_links.settings');
+  if ($contrib_config) {
     config_set('layout.settings', 'default_theme_shift', config_get('layout_contextual_links.settings', 'default_theme_shift'));
     config_set('layout.settings', 'admin_theme_shift', config_get('layout_contextual_links.settings', 'admin_theme_shift'));
     module_disable(array('layout_contextual_links'));
     backdrop_uninstall_modules(array('layout_contextual_links'));
-    return t('The Layout Contextual Links module has been disabled and uninstalled.');
+    return t('The Layout Contextual Links settings have been copied into Backdrop and the module disabled and uninstalled.');
   }
   else {
     $themes = list_themes();

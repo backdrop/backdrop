@@ -57,3 +57,9 @@ name = Layout Flexible Template Test
 description = Tests that flexible layout templates perform correctly.
 group = Layout
 file = layout.test
+
+[LayoutContextualAdminTestCase]
+name = Layout Contextual Links Admin Page
+description = Tests the layout contributions on the contextual links admin page.
+group = Layout
+file = layout.test

@@ -3356,3 +3356,31 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   }
 
 }
+
+/**
+ * Tests the layout links on the contextual links administration page.
+ */
+class LayoutContextualAdminTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('contextual'));
+    config_set('system.core', 'theme_default', 'basis');
+    config_set('system.core', 'admin_theme', 'seven');
+    $admin_user = $this->backdropCreateUser(array('access content', 'access contextual links', 'administer site configuration'));
+    $this->backdropLogin($admin_user);
+  }
+
+  /**
+   * Tests the contextual links admin page.
+   */
+   function testAdminPage() {
+    $this->backdropGet('admin/config/administration/contextual-links');
+
+    // Make sure the contributions from Layout module are showing.
+    $this->assertRaw('Use contextual links for layout', '"Use contextual links for layout" showing.');
+    $this->assertRaw('Include theme contextual links', '"Include theme contextual links" showing.');
+    $this->assertRaw('Shift for default theme', '"Shift for default theme" showing.');
+    $this->assertRaw('Shift for admin theme', '"Shift for admin theme" showing.');
+   }
+}
