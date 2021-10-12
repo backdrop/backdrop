@@ -11,6 +11,14 @@ html.dialog-open {
 }
 
 /**
+ * Prevent the background underneath modal dialogs from being auto-scrolled to
+ * the top of the page.
+ */
+html.dialog-open {
+  position: inherit;
+}
+
+/**
  * Autocomplete.
  *
  * @see autocomplete.js
