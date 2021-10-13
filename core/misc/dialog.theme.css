@@ -6,18 +6,8 @@
 html.dialog-auto-resize {
   overflow: hidden;
   height: 100%;
-  left: 0;
-  position: fixed;
-  top: 0;
   width: 100%;
-}
-
-/**
- * Prevent the background underneath modal dialogs from being auto-scrolled to
- * the top of the page.
- */
-html.dialog-open {
-  position: inherit;
+  position: static;
 }
 
 .ui-dialog {
