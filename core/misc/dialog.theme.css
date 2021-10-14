@@ -4,10 +4,8 @@
 
 /* Lock scrolling when an auto-resize dialog is open. */
 html.dialog-auto-resize {
-  overflow: hidden;
   height: 100%;
   width: 100%;
-  position: static;
 }
 
 .ui-dialog {
