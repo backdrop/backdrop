@@ -2,12 +2,6 @@
  * Presentational styles for Backdrop dialogs.
  */
 
-/* Lock scrolling when an auto-resize dialog is open. */
-html.dialog-auto-resize {
-  height: 100%;
-  width: 100%;
-}
-
 .ui-dialog {
   position: absolute;
   z-index: 1260;
