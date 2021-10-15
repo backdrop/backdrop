@@ -883,6 +883,8 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
             array(
               ':input[name="options[alter][alter_text]"]' => array('checked' => TRUE),
             ),
+            // For Global: Custom text always display patterns. Accomplished by displaying
+            // regardless of text filled in or not.
             array(
               ':input[name="options[alter][text]"]' => array('filled' => TRUE),
             ),
