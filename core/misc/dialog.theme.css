@@ -6,11 +6,6 @@
 html.dialog-auto-resize {
   overflow: hidden;
 }
-html.dialog-auto-resize body {
-  position: fixed;
-  height: 100%;
-  width: 100%;
-}
 
 .ui-dialog {
   position: absolute;
