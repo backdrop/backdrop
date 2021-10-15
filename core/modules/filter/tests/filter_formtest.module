@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Helper module for FilterEditorLinkValidateTestCase.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function filter_formtest_form_filter_format_editor_link_form_alter(&$form, &$form_state, $form_id) {
+  $form['href']['#element_validate'][] = '_filter_formtest_href_element_validate';
+}
+
+/**
+ * Helper function to output potentially altered form values as message.
+ */
+function _filter_formtest_href_element_validate(&$element, &$form_state) {
+  if (isset($form_state['values'])) {
+    $new_value = $form_state['values']['attributes']['href'];
+    $message = format_string('Output href is: @href', array(
+      '@href' => $new_value,
+    ));
+    backdrop_set_message($message, 'info');
+  }
+}

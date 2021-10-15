@@ -833,6 +833,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
+    '#autocomplete_path' => 'path-autocomplete',
   );
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.
@@ -1093,7 +1094,7 @@ function link_validate_url($text) {
   $news_pattern = '/^news:(' . $newsgroup_name . '|' . $message_id . ')$/i';
 
   $email_user = '([^ @\-][^ @]*)';
-  $email_pattern = '/^mailto:' . $email_user . '@' . '(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
+  $email_pattern = '/^mailto:' . $email_user . '@(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
 
   if (strcmp($text, '<front>') === 0) {
     return LINK_FRONT;

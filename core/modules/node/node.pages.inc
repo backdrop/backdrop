@@ -35,7 +35,7 @@ function node_add_page() {
       $content[$node_type->type] = array(
         'title' => t($node_type->name),
         'href'=>'node/add/' . $href_url_friendly,
-        'localized_options' => array('html' => TRUE),
+        'localized_options' => array('html' => FALSE),
         'description' => t($node_type->description),
       );
     }
@@ -186,7 +186,14 @@ function node_form($form, &$form_state, Node $node) {
   $form['#node'] = $node;
 
   if ($node_type->settings['language'] && module_exists('language')) {
-    $language_options = language_list(TRUE, TRUE);
+    $language_options = array();
+    foreach (language_list(TRUE) as $langcode => $language) {
+      $option_label = $language->name;
+      if (isset($language->native)) {
+        $option_label .= ' (' . $language->native . ')';
+      }
+      $language_options[$langcode] = $option_label;
+    }
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -283,11 +290,26 @@ function node_form($form, &$form_state, Node $node) {
     '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
   );
   $form['author']['date'] = array(
-    '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+    '#type' => 'html_datetime',
     '#title' => t('Authored on'),
-    // Note #date_format only applies if date module is enabled.
-    '#date_format' => 'Y-m-d g:i a',
-    '#default_value' => !empty($node->date) ? $node->date : NULL,
+    '#default_value' => array(
+      'date' => format_date($node->created, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($node->created, 'custom', DATE_FORMAT_TIME),
+    ),
+    '#attributes' => array(
+      'date' => array(
+        'min' => '1970-01-01',
+        'max' => '2037-12-31',
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+        )),
+      ),
+      'time' => array(
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+        )),
+      ),
+    ),
     '#description' => t('Leave blank to use the current time.'),
   );
 
@@ -329,12 +351,26 @@ function node_form($form, &$form_state, Node $node) {
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
-      '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+      '#type' => 'html_datetime',
       '#title' => t('Publish on'),
-      // Note #date_ properties only apply if date module is enabled.
-      '#date_format' => 'Y-m-d g:i a',
-      '#date_increment' => 10,
-      '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
+      '#default_value' => array(
+        'date' => format_date($scheduled_date, 'custom', DATE_FORMAT_DATE),
+        'time' => format_date($scheduled_date, 'custom', DATE_FORMAT_TIME),
+      ),
+      '#attributes' => array(
+        'date' => array(
+          'min' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE),
+          'max' => '2037-12-31',
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+          )),
+        ),
+        'time' => array(
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+          )),
+        ),
+      ),
       '#states' => array(
         'visible' => array(
          ':input[name="status"]' => array('value' => NODE_SCHEDULED),
@@ -531,7 +567,7 @@ function node_form_submit($form, &$form_state) {
  * @return
  *   An HTML-formatted string of a node preview.
  *
- * @see node_form_build_preview()
+ * @see node_form_preview()
  *
  * @since 1.11.0
  */
@@ -634,12 +670,6 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
-
-  // We render this message here instead of in node_form_preview() in order to
-  // make it persistent across page refreshes while still in preview mode, and
-  // also while switching to different display modes.
-  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
 
   $form['node'] = array(
     '#type' => 'value',
@@ -924,6 +954,9 @@ function node_revision_revert_confirm($form, $form_state, $node_revision) {
 function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision = $form['#node_revision'];
   $node_revision->revision = 1;
+  // Make this the new active revision for the node.
+  $node_revision->setIsActiveRevision();
+
   // The revision timestamp will be updated when the revision is saved. Keep the
   // original one for the confirmation message.
   $original_revision_timestamp = $node_revision->revision_timestamp;

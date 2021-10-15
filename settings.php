@@ -38,6 +38,14 @@ $config_directories['active'] = 'files/config_' . md5($database) . '/active';
 $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
+ * Skip the configuration staging directory cleanup
+ *
+ * When the configuration files are in version control, it may be preferable to
+ * not empty the staging directory after each sync.
+ */
+// $config['system.core']['config_sync_clear_staging'] = 0;
+
+/**
  * Access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
@@ -398,6 +406,36 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+
+/**
+ * Configuration overrides.
+ *
+ * These settings allow you to specify values for anything stored in config
+ * within the files stored in the $config_directories variable above.
+ * This can be useful to store per-environment values or sensitive data that
+ * is undesirable to store in the config storage.
+ *
+ * There are particular configuration values that are risky to override. For
+ * example overriding field storage will create errors because associated
+ * database changes are necessary. Modifying values within complicated objects
+ * such as views, content types, vocabularies, etc. may not work as expected.
+ * Use any available API functions for complex systems instead.
+ */
+//$config['system.core']['site_name'] = 'My Backdrop site';
+//$config['system.core']['file_temporary_path'] = '/tmp';
+
+/**
+ * Add Permissions-Policy header to disable Google FLoC.
+ *
+ * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
+ * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
+ * which was introduced in Chrome v89. For more information about FLoC, see:
+ * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ *
+ * If you don't wish to disable FLoC in Chrome, you can uncomment the following
+ * setting, and make sure its value is set to "FALSE".
+ */
+//$config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
  * Include a local settings file, if available.

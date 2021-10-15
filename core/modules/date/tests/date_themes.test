@@ -77,6 +77,21 @@ class DateThemeTestCase extends BackdropWebTestCase {
           'granularity' => array('year', 'month', 'day', 'hour', 'minute'),
         ),
       ),
+      'display' => array(
+          'label' => 'above',
+          'type' => 'date_default',
+          'settings' => array(
+            'format_type' => 'long',
+            'show_repeat_rule' => 'show',
+            'multiple_number' => '',
+            'multiple_from' => '',
+            'multiple_to' => '',
+            'fromto' => 'both',
+          ),
+          'module' => 'date',
+          'weight' => 0 ,
+      ),
+
       'show_remaining_days' => '',
     );
     $expected = '<span class="date-display-single">2019-03-20 <span class="date-display-range">';
@@ -99,34 +114,28 @@ class DateThemeTestCase extends BackdropWebTestCase {
     $expected = '<span class="date-display-range"><span class="date-display-start">2019-03-12T12:00+0100</span> to ';
     $expected .= '<span class="date-display-end">2019-04-12T12:00+0200</span></span>';
     $output = theme('date_display_combination', $variables);
-    $success = $this->assertEqual($expected, $output, 'Start and end date on different days with offset renders correctly.');
+    $success = $this->assertEqual($expected, $output, 'Start and end date on different days, with offset is rendered correctly.');
     if (!$success) {
       $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
     }
 
     // Start and end date on same day, 7 days in future,
     // with timezone identifier, with remaining days.
-    $tz = 'Europe/Moscow';
-    $dateTimeStart = new DateTime('now', new DateTimeZone($tz));
-    $currentHour = $dateTimeStart->format('H');
+    $timezone = date_default_timezone();
+    $dateTimeStart = new DateTime('now', new DateTimeZone($timezone));
+    $currentHour = $dateTimeStart->format('G');
     if ($currentHour > 22) {
       // Make sure start and end are the same day.
       $dateTimeStart->modify('- 1 hour');
     }
-    elseif ($currentHour < 1) {
-      // Make sure it's really 7 days.
-      $dateTimeStart->modify('- 2 hours');
-    }
-    // We need 168 hours (7 days) remaining.
-    $offsetHours = 7 * 24;
-    $dateTimeStart->modify("+ $offsetHours hours");
+    $dateTimeStart->modify('+ 1 week');
     $dateTimeEnd = clone $dateTimeStart;
     $dateTimeEnd->modify('+ 1 hour');
 
     $variables['dates']['value']['formatted'] = $dateTimeStart->format('d.m.Y - H:i e');
     $variables['dates']['value']['formatted_date'] = $dateTimeStart->format('d.m.Y');
     $variables['dates']['value']['formatted_time'] = $dateTimeStart->format('H:i');
-    $variables['dates']['value']['formatted_timezone'] = $tz;
+    $variables['dates']['value']['formatted_timezone'] = $timezone;
     $variables['dates']['value']['formatted_iso'] = $dateTimeStart->format('Y-m-d\TH:i:sO');
     $variables['dates']['value2']['formatted'] = $dateTimeEnd->format('d.m.Y - H:i e');
     $variables['dates']['value2']['formatted_date'] = $dateTimeEnd->format('d.m.Y');
@@ -136,9 +145,9 @@ class DateThemeTestCase extends BackdropWebTestCase {
     $expected = '<span class="date-display-single">' . $dateTimeStart->format('d.m.Y') . ' - <span class="date-display-range">';
     $expected .= '<span class="date-display-start">' . $dateTimeStart->format('H:i') . '</span> to ';
     $expected .= '<span class="date-display-end">' . $dateTimeEnd->format('H:i e') . '</span></span> </span>';
-    $expected .= '<div class="date-display-remaining"><span class="date-display-remaining">To event remaining 7 days</span></div>';
+    $expected .= '<div class="date-display-remaining"><span class="date-display-remaining">7 days remaining to event.</span></div>';
     $output = theme('date_display_combination', $variables);
-    $success = $this->assertEqual($expected, $output, 'Start and end date on same day with timezone, with remaining days renders correctly.');
+    $success = $this->assertEqual($expected, $output, 'Start and end date on same day with timezone, with remaining days is rendered correctly.');
     if (!$success) {
       $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
     }
