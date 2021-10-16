@@ -883,10 +883,11 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * request and routes it to the appropriate @link themeable theme function or
  * template @endlink, by checking the theme registry.
  *
- * You can call this function directly or make calls to backdrop_render() by
- * passing a render array with a #theme key, which in turn calls theme(). Either
- * is acceptable. In some situations a render array will be preferable when the
- * ability for other modules to alter the render array is provided.
+ * You can call this function directly, or you can make a call to
+ * backdrop_render() by passing a render array with a #theme key, which in turn
+ * calls theme(). Either is acceptable. In some situations a render array will
+ * be preferable when the ability for other modules to alter the render array is
+ * provided.
  *
  * @section sec_theme_hooks Theme Hooks
  * Most commonly, the first argument to this function is the name of the theme
