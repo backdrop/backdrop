@@ -225,7 +225,7 @@ function user_form_alter(&$form, &$form_state, $form_id) {
       // Add a second 'Cancel account' button, identical to the existing one.
       $form['actions']['submit_safe'] = $form['actions']['submit'];
       $form['actions']['submit_safe']['#attributes']['class'][] = 'button-primary';
-      // Move the additional 'Cancel account' button beofre the existing one.
+      // Move the additional 'Cancel account' button before the existing one.
       $form['actions']['submit_safe']['#weight'] = -1;
       $form['actions']['submit']['#weight'] = 0;
 
