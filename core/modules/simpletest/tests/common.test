@@ -2151,6 +2151,15 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
       ':title' => $element['#title'],
     ));
 
+    $element = array(
+      '#type' => 'fieldset',
+      '#title' => $this->randomName(),
+      '#collapsible' => TRUE,
+    );
+    $this->assertRenderedElement($element, '//fieldset[contains(@class, :class)]', array(
+      ':class' => 'collapsible',
+    ));
+
     $element['item'] = array(
       '#type' => 'item',
       '#title' => $this->randomName(),
