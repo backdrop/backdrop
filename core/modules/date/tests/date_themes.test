@@ -127,6 +127,10 @@ class DateThemeTestCase extends BackdropWebTestCase {
     if ($currentHour > 22) {
       // Make sure start and end are the same day.
       $dateTimeStart->modify('- 1 hour');
+      $days_remaining = 6; // Because it's one week less one hour.
+    }
+    else {
+      $days_remaining = 7;
     }
     $dateTimeStart->modify('+ 1 week');
     $dateTimeEnd = clone $dateTimeStart;
@@ -145,7 +149,7 @@ class DateThemeTestCase extends BackdropWebTestCase {
     $expected = '<span class="date-display-single">' . $dateTimeStart->format('d.m.Y') . ' - <span class="date-display-range">';
     $expected .= '<span class="date-display-start">' . $dateTimeStart->format('H:i') . '</span> to ';
     $expected .= '<span class="date-display-end">' . $dateTimeEnd->format('H:i e') . '</span></span> </span>';
-    $expected .= '<div class="date-display-remaining"><span class="date-display-remaining">7 days remaining to event.</span></div>';
+    $expected .= '<div class="date-display-remaining"><span class="date-display-remaining">' . $days_remaining . ' days remaining to event.</span></div>';
     $output = theme('date_display_combination', $variables);
     $success = $this->assertEqual($expected, $output, 'Start and end date on same day with timezone, with remaining days is rendered correctly.');
     if (!$success) {
