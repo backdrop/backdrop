@@ -138,7 +138,8 @@ function locale_translate_export_screen() {
  *   An associate array with localized language names
  */
 function locale_translate_export_po_form($form, &$form_state, $names) {
-  $form['export_title'] = array('#type' => 'item',
+  $form['export_title'] = array(
+    '#type' => 'item',
     '#title' => t('Export translation'),
   );
   $form['langcode'] = array('#type' => 'select',
@@ -156,7 +157,8 @@ function locale_translate_export_po_form($form, &$form_state, $names) {
  */
 function locale_translate_export_pot_form() {
   // Complete template export of the strings
-  $form['export_title'] = array('#type' => 'item',
+  $form['export_title'] = array(
+    '#type' => 'item',
     '#title' => t('Export template'),
     '#description' => t('Generate a Gettext Portable Object Template (<em>.pot</em>) file with all strings from the Backdrop locale database.'),
   );
