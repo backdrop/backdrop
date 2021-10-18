@@ -4157,6 +4157,8 @@ function form_process_vertical_tabs($element, &$form_state) {
       $element['#title_display'] = 'invisible';
     }
 
+    $element['#attached']['library'][] = array('system', 'backdrop.vertical-tabs');
+
     // The JavaScript stores the currently selected tab in this hidden
     // field so that the active tab can be restored the next time the
     // form is rendered, e.g. when form validation fails.
