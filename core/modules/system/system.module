@@ -517,7 +517,7 @@ function system_element_info() {
     '#theme_wrappers' => array('fieldset'),
   );
   $types['vertical_tabs'] = array(
-    '#theme_wrappers' => array('vertical_tabs', 'form_element'),
+    '#theme_wrappers' => array('form_element', 'vertical_tabs'),
     '#default_tab' => '',
     '#process' => array('form_process_vertical_tabs'),
   );
