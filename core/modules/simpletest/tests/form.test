@@ -241,11 +241,11 @@ class FormsTestCase extends BackdropWebTestCase {
     $values = backdrop_json_decode($this->backdropPost(NULL, array('required_checkbox' => 1), t('Submit')));
     $expected_values = array(
       'disabled_checkbox_on' => 'disabled_checkbox_on',
-      'disabled_checkbox_off' => '',
+      'disabled_checkbox_off' => 0,
       'checkbox_on' => 'checkbox_on',
-      'checkbox_off' => '',
+      'checkbox_off' => 0,
       'zero_checkbox_on' => '0',
-      'zero_checkbox_off' => '',
+      'zero_checkbox_off' => 0,
     );
     foreach ($expected_values as $widget => $expected_value) {
       $this->assertEqual($values[$widget], $expected_value, format_string('Checkbox %widget returns expected value (expected: %expected, got: %value)', array(
