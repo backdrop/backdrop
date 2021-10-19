@@ -498,7 +498,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
       '#title' => t('Region name'),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['name']) ? $row_data['region_names']['region_' . $i]['name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_name']) ? $row_data['region_names']['region_' . $i]['region_name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
     $form['region_names']['region_' . $i]['class_name'] = array(
       '#type' => 'machine_name',
