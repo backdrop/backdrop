@@ -1445,23 +1445,20 @@ class FormsFormStoragePageCacheTestCase extends BackdropWebTestCase {
 /**
  * Test cache_form.
  */
-class FormsFormCacheTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form caching',
-      'description' => 'Tests storage and retrieval of forms from cache.',
-      'group' => 'Form API',
-    );
-  }
+class FormsFormCacheTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * Overrides BackdropWebTestCase::setUp() for upgrade for form cache test.
+   */
+  public function setUp() {
     parent::setUp('form_test');
   }
 
   /**
    * Tests storing and retrieving the form from cache.
    */
-  function testCacheForm() {
+  public function testCacheForm() {
     $form = backdrop_get_form('form_test_cache_form');
     $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
     form_set_cache($form['#build_id'], $form, $form_state);
@@ -1476,16 +1473,18 @@ class FormsFormCacheTestCase extends DrupalWebTestCase {
   /**
    * Tests changing form_cache_expiration.
    */
-  function testCacheFormCustomExpiration() {
+  public function testCacheFormCustomExpiration() {
     config_set('system.core', 'form_cache_expiration', -1 * (24 * 60 * 60));
 
     $form = backdrop_get_form('form_test_cache_form');
     $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
     form_set_cache($form['#build_id'], $form, $form_state);
 
-    // Clear expired entries from cache_form, which should include the entry we
-    // just stored. Without this, the form will still be retrieved from cache.
-    cache_clear_all(NULL, 'cache_form');
+    // Cleanup expired tempstore entries the same way cron would do, but
+    // without actually running cron.
+    db_delete('tempstore')
+      ->condition('expire', REQUEST_TIME, '<')
+      ->execute();
 
     $cached_form_state = array();
     $cached_form = form_get_cache($form['#build_id'], $cached_form_state);
