@@ -109,7 +109,7 @@ function hook_field_group_formatter_info() {
  * Implements hook_field_group_format_settings().
  *
  * Defines configuration widget for the settings on a field group
- * formatter. Eache formatter can have different elements and storage.
+ * formatter. Each formatter can have different elements and storage.
  *
  * @params Object $group The group object.
  * @return Array $form The form element for the format settings.
@@ -206,7 +206,7 @@ function hook_field_group_format_settings($group) {
 /**
  * Implements hook_field_group_pre_render().
  *
- * This function gives you the oppertunity to create the given
+ * This function gives you the opportunity to create the given
  * wrapper element that can contain the fields.
  * In the example beneath, some variables are prepared and used when building the
  * actual wrapper element. All elements in backdrop fapi can be used.
@@ -220,7 +220,7 @@ function hook_field_group_format_settings($group) {
  * @param Array $elements by address.
  * @param Object $group The Field group info.
  */
-function hook_field_group_pre_render(& $element, $group, & $form) {
+function hook_field_group_pre_render(&$element, $group, &$form) {
 
   // You can prepare some variables to use in the logic.
   $view_mode = isset($form['#view_mode']) ? $form['#view_mode'] : 'form';
@@ -268,7 +268,7 @@ function hook_field_group_pre_render(& $element, $group, & $form) {
  *
  * Function that fungates as last resort to alter the pre_render build.
  */
-function hook_field_group_pre_render_alter(&$element, $group, & $form) {
+function hook_field_group_pre_render_alter(&$element, $group, &$form) {
 
   if ($group->format_type == 'htab') {
     $element['#theme_wrappers'] = array('my_horizontal_tab');
@@ -285,7 +285,7 @@ function hook_field_group_pre_render_alter(&$element, $group, & $form) {
  *
  * @param Array $elements by address.
  */
-function hook_field_group_build_pre_render_alter(& $element) {
+function hook_field_group_build_pre_render_alter(&$element) {
 
   // Prepare variables.
   $display = isset($element['#view_mode']);
