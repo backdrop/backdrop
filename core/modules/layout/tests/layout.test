@@ -3134,7 +3134,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
 
     // Edit the header row and check that the changes are reflected on the
     // template editor page and the layout path.
-    $this->clickLink(t('Configure row'), 0);
+    $this->clickLink(t('Configure'), 0);
     $edit = array(
       'region_names[region_name_0]' => 'New header',
       'row_classes' => 'new-class another-class',
