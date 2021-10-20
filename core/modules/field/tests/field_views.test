@@ -412,7 +412,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
 
     // Test delta first last.
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['group_rows'] = TRUE;
-    $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_limit'] = 0;
+    $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_limit'] = 'all';
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_first_last'] = TRUE;
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_reversed'] = FALSE;
     $this->executeView($view);
