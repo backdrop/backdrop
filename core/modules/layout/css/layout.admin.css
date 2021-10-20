@@ -1,3 +1,7 @@
+/**
+ * Layout admin css.
+ */
+
 /* Layout listing form. */
 .layout-list .layout-group td {
   background: #dddddd;
@@ -149,6 +153,9 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+.layout-editor-region-title {
+  padding: 0 0 10px 0;
+}
 .layout-editor-region-title .label {
   float: left; /* LTR */
   margin: 0;
@@ -156,7 +163,7 @@
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
-  color: #908990;
+  color: #5b575b;
 }
 [dir="rtl"] .layout-editor-region-title .label {
   float: right;
@@ -169,7 +176,7 @@
 .layout-editor-region-title .dropbutton-wrapper {
   float: left; /* LTR */
   width: 140px;
-  margin: 4px 0 10px
+  margin: 4px 0 10px;
 }
 [dir="rtl"] .layout-editor-region-title .dropbutton-wrapper {
   float: right;
@@ -337,39 +344,6 @@
   }
 }
 
-.layout-flexible-region-buttons {
-  padding-bottom: 5px;
-}
-
-.layout-flexible-editor .flexible-row {
-  padding: 15px 0 0;
-}
-
-.layout-flexible-editor .flexible-row:hover {
-  background-color: #ffffff;
-  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
-  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
-  box-shadow: 2px 2px 0 0 #d0d0d0;
-  cursor: move;
-}
-
-.flexible-layout-add-row {
-  margin: 20px 40px 0;
-}
-
-.flexible-icon {
-  border: 2px solid #999;
-  border-radius: 3px;
-  padding: 1px;
-}
-
-.flexible-icon-region {
-  background-color: #ccc;
-  color: #fff;
-  background-clip: content-box;
-  text-align: center;
-}
-
 .form-item .form-item.form-item-region-count {
   margin-right: 2em;
   display: inline;
@@ -379,7 +353,9 @@
   padding: 0.5em 0.5em;
   background: #e9e8e8;
   border-radius: 4px 4px 0 0;
-  margin: 1em 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin: 1em 0 0;
 }
 .edit-layout-top .dropbutton-wrapper {
   float: right; /* LTR */
