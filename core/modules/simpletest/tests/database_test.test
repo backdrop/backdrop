@@ -3531,7 +3531,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
     if (strpos($message, 'Rollback attempted when there is no active transaction.') !== FALSE ) {
       throw new Exception('Rollback attempted when there is no active transaction.');
     }
-    _drupal_error_handler($error_level, $message, $filename, $line);
+    _backdrop_error_handler($error_level, $message, $filename, $line);
   }
 
   /**

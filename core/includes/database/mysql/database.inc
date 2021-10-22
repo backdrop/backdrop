@@ -335,7 +335,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * {@inheritdoc}
    */
-  public function rollback($savepoint_name = 'drupal_transaction') {
+  public function rollback($savepoint_name = 'backdrop_transaction') {
     // MySQL will automatically commit transactions when tables are altered or
     // created (DDL transactions are not supported). Prevent triggering an
     // exception to ensure that the error that has caused the rollback is
