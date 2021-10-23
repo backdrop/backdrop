@@ -147,6 +147,7 @@ function admin_bar_field_delete_instance($instance) {
  */
 function admin_bar_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
   cache('admin_bar')->flush();
+  return FALSE;
 }
 
 /**
