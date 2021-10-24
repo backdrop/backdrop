@@ -460,7 +460,7 @@ function theme_date_display_remaining($variables) {
     $show_remaining_text = format_plural($remaining_days, '1 day remaining to event.', '@count days remaining to event.');
   }
   else {
-    $show_remaining_text = t('Less then 1 day remaining to event.');
+    $show_remaining_text = t('Less than 1 day remaining to event.');
   }
 
   return '<div class="date-display-remaining"><span class="date-display-remaining">' . $show_remaining_text . '</span></div>';
@@ -653,14 +653,15 @@ function template_preprocess_date_views_pager(&$variables) {
  * Theme the calendar title.
  */
 function theme_date_nav_title($params) {
+  $date_views_config = config('date_views.settings');
   $title  = '';
   $granularity = $params['granularity'];
   $view = $params['view'];
   $date_info = $view->date_info;
   $link = !empty($params['link']) ? $params['link'] : FALSE;
   $format = !empty($params['format']) ? $params['format'] : NULL;
-  $format_with_year = config_get('date_views.settings', "date_views_{$granularity}_format_with_year");
-  $format_without_year = config_get('date_views.settings', "date_views_{$granularity}_format_without_year");
+  $format_with_year = $date_views_config->get("date_views_{$granularity}_format_with_year");
+  $format_without_year = $date_views_config->get("date_views_{$granularity}_format_without_year");
   switch ($granularity) {
     case 'year':
       $title = $date_info->year;

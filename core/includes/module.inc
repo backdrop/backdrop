@@ -379,15 +379,24 @@ function module_load_all_includes($type, $name = NULL) {
  * - Invoke hook_modules_installed().
  * - Invoke hook_modules_enabled().
  *
- * @param string[] $module_list
+ * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   If TRUE, dependencies will automatically be added and enabled in the
- *   correct order. This incurs a significant performance cost, so use FALSE
- *   if you know $module_list is already complete and in the correct order.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules the
+ *     passed-in module(s) depend on will be automatically added and enabled in
+ *     the correct order. If any dependencies are unavailable, the passed-in
+ *     module(s) will not be enabled. Note that dependency-checking incurs a
+ *     significant performance cost.
+ *   - If FALSE, dependency-checking is bypassed and the passed-in module(s)
+ *     will be enabled regardless of whether or not their dependencies are
+ *     available or listed in the correct order. This could lead to problems,
+ *     and so should only be used if you know $module_list is already complete
+ *     and in the correct order.
  *
  * @return bool
- *   FALSE if one or more dependencies are missing, TRUE otherwise.
+ *   Returns FALSE if $enable_dependencies is TRUE and one or more dependencies
+ *   are missing. Otherwise returns TRUE.
  *
  * @see hook_install()
  * @see hook_enable()
@@ -537,9 +546,15 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   If TRUE, dependent modules will automatically be added and disabled in the
- *   correct order. This incurs a significant performance cost, so use FALSE
- *   if you know $module_list is already complete and in the correct order.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules
+ *     dependent on the passed-in module(s) will be automatically added and
+ *     disabled in the correct order. Note that dependency-checking incurs a
+ *     significant performance cost.
+ *   - If FALSE, dependency-checking is bypassed and dependent modules will not
+ *     be automatically added or disabled. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @see backdrop_uninstall_modules()
  * @see module_enable()
@@ -1184,4 +1199,23 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
   foreach ($functions[$cid] as $function) {
     $function($data, $context1, $context2, $context3);
   }
+}
+
+/**
+ * Set the weight of a module in the 'system' table, thereby determining the
+ * order in which its hooks will be executed in relation to other modules.
+ *
+ * @param string $module
+ *   The name of the module (without the .module extension).
+ * @param integer $weight
+ *   The weight to set, as an integer.
+ *
+ * @since 1.17.2 Function added.
+ */
+function module_set_weight($module, $weight) {
+  db_update('system')
+    ->fields(array('weight' => $weight))
+    ->condition('type', 'module')
+    ->condition('name', $module)
+    ->execute();
 }

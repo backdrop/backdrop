@@ -1583,14 +1583,14 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertNoField("{$this->field_name}[$langcode][1][value]", 'No extraneous widget is displayed');
 
     // Press 'add more' button -> 2 widgets.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertFieldByName("{$this->field_name}[$langcode][1][value]", '', 'New widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
     // TODO : check that non-field inpurs are preserved ('title')...
 
     // Yet another time so that we can play with more values -> 3 widgets.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Prepare values and weights.
     $count = 3;
@@ -1614,7 +1614,7 @@ class FieldFormTestCase extends FieldTestCase {
     }
 
     // Press 'add more' button -> 4 widgets
-    $this->backdropPost(NULL, $edit, t('Add another item'));
+    $this->backdropPost(NULL, $edit, t('Add another'));
     for ($delta = 0; $delta <= $delta_range; $delta++) {
       $this->assertFieldByName("$this->field_name[$langcode][$delta][value]", $values[$delta], "Widget $delta is displayed and has the right value");
       $this->assertFieldByName("$this->field_name[$langcode][$delta][_weight]", $weights[$delta], "Widget $delta has the right weight");
@@ -1679,7 +1679,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->backdropGet('test-entity/add/test-bundle');
 
     // Press the 'Add more' button.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Verify that no error is thrown by the radio element.
     $this->assertNoFieldByXpath('//div[contains(@class, "error")]', FALSE, 'No error message is displayed.');
@@ -1704,8 +1704,8 @@ class FieldFormTestCase extends FieldTestCase {
     // Press 'add more' button a couple times -> 3 widgets.
     // backdropPostAJAX() will not work iteratively, so we add those through
     // non-JS submission.
-    $this->backdropPost(NULL, array(), t('Add another item'));
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Prepare values and weights.
     $count = 3;
@@ -2831,6 +2831,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
       $language = (object) array(
         'langcode' => 'l' . $i,
         'name' => $this->randomString(),
+        'native' => $this->randomString(),
       );
       language_save($language);
     }
