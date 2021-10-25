@@ -13,10 +13,10 @@
 /**
  * Attach behaviors to managed file element upload fields.
  */
-Backdrop.behaviors.fileChangeValidate = {
+Backdrop.behaviors.fileUploadChange = {
   attach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').on('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').on('change', Backdrop.file.autoUpload).each(function() {
+    $(context).find('input[data-file-extensions]').once('validate-extension').on('change', Backdrop.file.validateExtension);
+    $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
   },
@@ -31,8 +31,8 @@ Backdrop.behaviors.fileChangeValidate = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).bind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
   },
   detach: function (context) {
     $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
@@ -45,10 +45,26 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).bind('click',Backdrop.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
     $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
+  }
+};
+
+/**
+ * Attach behaviors to Vertical tabs on file administration pages.
+ */
+Backdrop.behaviors.fileFieldsetSummaries = {
+  attach: function (context) {
+    $('fieldset.file-form-destination', context).backdropSetSummary(function (context) {
+      var scheme = $('.form-item-scheme input:checked', context).parent().text();
+      return Backdrop.t('Destination: @scheme', { '@scheme': scheme });
+    });
+    $('fieldset.file-form-user', context).backdropSetSummary(function (context) {
+      var name = $('.form-item-name input', context).val() || Backdrop.settings.anonymous;
+      return Backdrop.t('By @name', { '@name': name });
+    });
   }
 };
 
@@ -112,7 +128,7 @@ Backdrop.file = Backdrop.file || {
 
     // Check if we're working with an "Upload" button.
     var $enabledFields = [];
-    if ($(this).closest('div.form-managed-file').length > 0) {
+    if ($(this).is('.file-upload-button')) {
       $enabledFields = $(this).closest('div.form-managed-file').find('input.form-file');
     }
 
@@ -159,7 +175,71 @@ Backdrop.file = Backdrop.file || {
     $(this).attr('target', '_blank');
     window.open(this.href, 'filePreview', 'toolbar=0,scrollbars=1,location=1,statusbar=1,menubar=0,resizable=1,width=500,height=550');
     return false;
+  },
+
+  /**
+   * Provide events for files in the file browser dialog.
+   */
+  dialogOpenEvent: function(e, dialoog, $element, settings) {
+    var $browserContainer = $element.find(".file-browser");
+    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+      var $selectedElement = $(this);
+      if ($selectedElement.is('img')) {
+        $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+        $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+      }
+      else {
+        $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
+        $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+      }
+      var selectedFid = $(this).data('fid');
+      // Set the FID in the modal submit form.
+      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
+    }).on('dblclick', '.image-library-choose-file', function() {
+      var $selectedElement = $(this);
+      $selectedElement.click();
+      var $form = $selectedElement.closest('.ui-dialog-content').find('form');
+      var $submit = $form.find('.form-actions input[type=submit]:first');
+      $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+    });
+  },
+
+  /**
+   * After closing a dialog, check if the file ID needs to be updated..
+   */
+  dialogCloseEvent: function(e, dialog, $element) {
+    var $browserContainer = $element.find(".file-browser");
+    if ($browserContainer.length > 0) {
+      // These two variables are set server-side when submitting the dialog, in
+      // file_managed_file_browser_submit().
+      var selectedFid = Backdrop.settings.file.browser.selectedFid;
+      var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
+
+      var $parentElement = $fidElement.closest('.form-type-managed-file');
+      var $fileInputField = $parentElement.find('input[type="file"]');
+      var $uploadButton = $parentElement.find('.file-upload-button');
+
+      if ($fidElement.length && selectedFid) {
+        // Clear any selected file (in the event it was selected before opening).
+        $fileInputField.val('');
+
+        // Set this hidden FID value to the selected file.
+        $fidElement.val(selectedFid);
+
+        // Then click the "Upload" button, which will utilize the given file.
+        $uploadButton
+          .trigger('mousedown')
+          .trigger('click')
+          .trigger('mouseup');
+      }
+    }
   }
 };
+
+/**
+ * Attach dialog behaviors for the file browser.
+ */
+$(window).on('dialog:aftercreate.fileBrowser', Backdrop.file.dialogOpenEvent);
+$(window).on('dialog:afterclose.fileBrowser', Backdrop.file.dialogCloseEvent);
 
 })(jQuery);

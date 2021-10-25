@@ -40,7 +40,7 @@ function views_ajax() {
 
     // Load the view.
     $view = views_get_view($name);
-    if ($view && $view->access($display_id)) {
+    if ($view && $view->access($display_id) && $view->set_display($display_id) && $view->display_handler->use_ajax()) {
       // Fix 'q' for paging.
       if (!empty($path)) {
         $_GET['q'] = $path;
@@ -53,7 +53,7 @@ function views_ajax() {
       // Overwrite the destination.
       // @see backdrop_get_destination()
       $origin_destination = $path;
-      $query = backdrop_http_build_query($_REQUEST);
+      $query = backdrop_http_build_query(backdrop_get_query_parameters());
       if ($query != '') {
         $origin_destination .= '?' . $query;
       }
@@ -164,7 +164,7 @@ function views_ajax_command_replace_title($title) {
   $command = array(
     'command' => 'viewsReplaceTitle',
     'title' => $title,
-    'siteName' => config_get('system.core', 'site_name'),
+    'siteName' => config_get_translated('system.core', 'site_name'),
   );
   return $command;
 }

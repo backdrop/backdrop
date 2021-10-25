@@ -12,6 +12,7 @@
  *   The taxonomy term entity.
  */
 function taxonomy_term_page(TaxonomyTerm $term) {
+  $site_config = config('system.core');
   // If there is a menu link to this term, the link becomes the last part of
   // the active trail, and the link name becomes the page title. Thus, we must
   // explicitly set the page title to be the term title.
@@ -35,10 +36,10 @@ function taxonomy_term_page(TaxonomyTerm $term) {
 
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
-  $canonical_secure = config_get('system.core', 'canonical_secure') == 1 ? TRUE : FALSE;
+  $canonical_secure = $site_config->get('canonical_secure') == 1 ? TRUE : FALSE;
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
-  
+
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
   // data structures and HTML markup than what Drupal 7 released with). Calling
@@ -50,7 +51,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
     'term' => taxonomy_term_view($term, 'full'),
   );
 
-  if ($nids = taxonomy_select_nodes($term->tid, TRUE, config_get('system.core', 'default_nodes_main'))) {
+  if ($nids = taxonomy_select_nodes($term->tid, TRUE, $site_config->get('default_nodes_main'))) {
     $nodes = node_load_multiple($nids);
     $build += node_view_multiple($nodes);
     $build['pager'] = array(
@@ -65,6 +66,9 @@ function taxonomy_term_page(TaxonomyTerm $term) {
       '#suffix' => '</p>',
     );
   }
+
+  backdrop_alter('taxonomy_term_page', $build);
+
   return $build;
 }
 
@@ -76,11 +80,11 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = config_get('system.core', 'site_name') . ' - ' . $term->name;
+  $channel['title'] = config_get_translated('system.core', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
-  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.rss', 'rss_limit'));
+  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.core', 'rss_limit'));
 
   node_feed($nids, $channel);
 }

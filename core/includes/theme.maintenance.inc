@@ -1,12 +1,11 @@
 <?php
-
 /**
  * @file
- * Theming for maintenance pages.
+ * Theme the maintenance pages.
  */
 
 /**
- * Sets up the theming system for maintenance page.
+ * Sets up the theme system for the maintenance page.
  *
  * Used for site installs, updates and when the site is in maintenance mode.
  * It also applies when the database is unavailable or bootstrap was not
@@ -30,7 +29,7 @@ function _backdrop_maintenance_theme() {
   require_once BACKDROP_ROOT . '/core/includes/module.inc';
   unicode_check();
 
-  // Install and update pages are treated differently to prevent theming overrides.
+  // Install and update pages are treated differently to prevent theme overrides.
   if (defined('MAINTENANCE_MODE') && (MAINTENANCE_MODE == 'install' || MAINTENANCE_MODE == 'update')) {
     $custom_theme = settings_get('maintenance_theme', 'seven');
   }
@@ -45,12 +44,13 @@ function _backdrop_maintenance_theme() {
     // We use the default theme as the maintenance theme. If a maintenance theme
     // isn't specified in the database or in settings.php, we use the default.
     try {
+      $site_config = config('system.core');
       $custom_theme = settings_get('maintenance_theme');
       if (empty($custom_theme)) {
-        $custom_theme = config_get('system.core', 'maintenance_theme');
+        $custom_theme = $site_config->get('maintenance_theme');
       }
       if (empty($custom_theme)) {
-        $custom_theme = config_get('system.core', 'theme_default');
+        $custom_theme = $site_config->get('theme_default');
       }
     }
     catch (ConfigException $e) {}
@@ -93,6 +93,7 @@ function _backdrop_maintenance_theme() {
   backdrop_add_css($path . '/css/system.css');
   backdrop_add_css($path . '/css/system.admin.css');
   backdrop_add_css($path . '/css/system.theme.css');
+  backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
@@ -137,8 +138,9 @@ function theme_task_list($variables) {
     }
     $list .= '<li';
     $list .= ($class ? ' class="' . $class . '"' : '') . '>';
-    $list .= $item;
+    $list .= '<span class="task-item">' . $item;
     $list .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
+    $list .= '</span>';
     $list .= '</li>';
   }
 

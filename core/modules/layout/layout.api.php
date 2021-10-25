@@ -87,7 +87,8 @@ function hook_layout_info() {
  *     the menu paths array that contains this context's argument. This is only
  *     necessary if menu paths are also provided.
  *   - load callback: The name of a function that will load the argument from
- *     the URL and return the loaded data.
+ *     the URL and return the loaded data. The loaded data must be an object,
+ *     not a string, array, or other variable type.
  *   - hidden: Optional. Boolean if this context should be shown in the UI.
  *
  * @see hook_autoload_info()
@@ -203,11 +204,11 @@ function hook_layout_renderer_info() {
  *
  * Layouts can be reverted only if the configuration is provided
  * by a module. Layouts created in the Layout Builder User Interface
- * cannot be reverted. 
+ * cannot be reverted.
  * A layout revert operation results in deletion of the existing
  * layout configuration and replacement with the default configuration
- * from the providing module. 
- * This hook is invoked from Layout::revert() after a layout has been 
+ * from the providing module.
+ * This hook is invoked from Layout::revert() after a layout has been
  * reverted and the new configuration has been inserted into the live
  * config directory and the layout cache has been cleared.
  *
@@ -227,7 +228,7 @@ function hook_layout_revert(Layout $old_layout) {
 /**
  * Respond to a layout being deleted.
  *
- * This hook is invoked from Layout::delete() after a layout has been 
+ * This hook is invoked from Layout::delete() after a layout has been
  * deleted.
  *
  * @param Layout $layout
@@ -244,7 +245,7 @@ function hook_layout_delete(Layout $layout) {
 /**
  * Respond to a layout being enabled.
  *
- * This hook is invoked from Layout::enable() after a layout has been 
+ * This hook is invoked from Layout::enable() after a layout has been
  * enabled.
  *
  * @param Layout $layout
@@ -263,10 +264,10 @@ function hook_layout_enable(Layout $layout) {
 /**
  * Respond to a layout being disabled.
  *
- * This hook is invoked from Layout::disable() after a layout has been 
+ * This hook is invoked from Layout::disable() after a layout has been
  * disabled.
- * A layout configuration may be disabled by a user from the administrative 
- * list of layouts. A disabled layout will not affect pages at its configured 
+ * A layout configuration may be disabled by a user from the administrative
+ * list of layouts. A disabled layout will not affect pages at its configured
  * path, but will retain its configuration so that it may be enabled later.
  *
  * @param Layout $layout
@@ -336,6 +337,99 @@ function hook_layout_presave(Layout $layout) {
 }
 
 /**
+ * Perform alterations to the list of layouts that match the path of a router
+ * item.
+ *
+ * Modules can implement this hook to allow a given layout to be used for
+ * multiple or different paths than its defined path.
+ *
+ * This hook is called on every page load; your implementation should quickly
+ * and efficiently determine if it is applicable and return if not.
+ *
+ * If a layout's path includes positioned contexts (e.g., 'node/%') and you
+ * apply the layout to a different path, you may need to set the context
+ * data beyond the default setting done by the layout module. The default
+ * setting happens after invocations of this hook, taking care of any contexts
+ * that were not yet set.
+ *
+ * If you substitute a layout whose placeholder(s) are in a different position
+ * from the path in the router item and you will rely on the system to set the
+ * context, you should set the position of the context(s) in the layout to the
+ * position in the router. Example: the path in the router item is
+ * mymodule/node/% and you wish to use the layout with path node/%. Then you
+ * would find the context at position 2 in the router item and set its
+ *  Context::position variable to 2, so that the layout with path node/% looks
+ * at position 2 to set the context for that placeholder.
+ *
+ * @param Layout[] $layouts
+ *   The list of layouts that should be considered for the path
+ *   $router_item['path']. Note that the final selection of layout will be based
+ *   on contexts and visibility conditions.
+ * @param array $router_item
+ *   The router item for the path. In addition to obtaining the system path at
+ *   $router_item['path'], you can use other elements of $router_item. For
+ *   example, $router_item['original_map'] contains an exploded version of the
+ *   normal path.
+ *
+ * @since 1.20.0
+ *
+ * @see layout_get_layout_by_path()
+ * @see node_layout_load_by_router_item_alter()
+ */
+function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  // Example taken from node_layout_load_by_router_item_alter(). When creating
+  // node preview pages, the path will be of the form node/preview/<type>/<id>,
+  // where <type> is the node type and <id> is the tempstore ID of the node
+  // begin previewed. But we want to display it using a layout whose system path
+  // is node/%. So we choose those layouts and set the context from the
+  // tempstore node.
+
+  // Check path structure before checking node type because
+  // node_type_get_types() is expensive; don't call it if we don't need to.
+  $map = $router_item['map'];
+  if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
+    return;
+  }
+  $path_is_preview = FALSE;
+  foreach (node_type_get_types() as $type_obj) {
+    if ($type_obj->type == $map[2]) {
+      $path_is_preview = TRUE;
+      break;
+    }
+  }
+  if (!$path_is_preview) {
+    return;
+  }
+  // So now we know that this is a path that we want to handle. We want to use
+  // layouts whose path is node/%, and we'll use the node from the tempstore to
+  // set the context of those layouts. So start by getting the tempstore node,
+  // whose ID is in position 3 of the path.
+  $tempstore_id = $map[3];
+  $temp_node = node_get_node_tempstore($tempstore_id);
+  if ($temp_node) {
+    // Get all the layouts that we want to use whose paths are those normally
+    // used to display a node.
+    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+    if ($node_layouts) {
+      $layouts = $node_layouts;
+      foreach ($layouts as $layout) {
+        foreach ($layout->getContexts() as $context) {
+          if (isset($context->position)) {
+            // If we were relying on the system to set the context, we should
+            // change $context->position to be the place the data is found in
+            // the router item, as here. This isn't actually necessary here,
+            // because we're going to go ahead and set the data ourselves, since
+            // we need to use the tempstore node as the context data.
+            $context->position = 3;
+            $context->setData($temp_node);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * Defines to Backdrop what blocks are provided by your module.
  *
  * In hook_block_info(), each block your module provides is given a unique
@@ -347,8 +441,8 @@ function hook_layout_presave(Layout $layout) {
  * - Used to construct the default HTML ID of "block-MODULE-DELTA" applied to
  *   each block when it is rendered. This ID may then be used for CSS styling or
  *   JavaScript programming.
- * - Used to define a theming template suggestion of block__MODULE__DELTA, for
- *   advanced theming possibilities.
+ * - Used to define a theme template suggestion of block__MODULE__DELTA, for
+ *   advanced theme possibilities.
  * - Used by other modules to identify your block in hook_block_info_alter() and
  *   other alter hooks.
  * The values of delta can be strings or numbers, but because of the uses above
@@ -569,35 +663,32 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
 /**
  * Perform alterations to the content of a block.
  *
- * This hook allows you to modify any data returned by hook_block_view().
+ * This hook allows you to modify blocks before they are rendered.
  *
  * Note that instead of hook_block_view_alter(), which is called for all
  * blocks, you can also use hook_block_view_MODULE_DELTA_alter() to alter a
  * specific block.
  *
  * @param $data
- *   The data as returned from the hook_block_view() implementation of the
- *   module that defined the block. This could be an empty array or NULL value
- *   (if the block is empty) or an array containing:
- *   - subject: The default localized title of the block.
+ *   The block title and content as returned by the module that defined the
+ *   block. This could be an empty array or NULL value (if the block is empty)
+ *   or an array containing the following:
+ *   - title: The (localized) title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
  * @param $block
- *   The block object, as loaded from the database, having the main properties:
+ *   The Block object. It will have have at least the following properties:
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
- * @param array $contexts
- *   An array of contexts required by this block. Each context will be keyed
- *   by the string specified in this module's hook_block_info().
+ *   - settings: All block settings as defined for this instance of the block.
+ *   - contexts: All layout contexts available for the layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
  */
-function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = array()) {
+function hook_block_view_alter(&$data, $block) {
   // Remove the contextual links on all blocks that provide them.
   if (is_array($data['content']) && isset($data['content']['#contextual_links'])) {
     unset($data['content']['#contextual_links']);
@@ -619,7 +710,7 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  *   The data as returned from the hook_block_view() implementation of the
  *   module that defined the block. This could be an empty array or NULL value
  *   (if the block is empty) or an array containing:
- *   - subject: The localized title of the block.
+ *   - title: The localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
@@ -634,14 +725,14 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  * @see hook_block_view_alter()
  * @see hook_block_view()
  */
-function hook_block_view_MODULE_DELTA_alter(&$data, $block, $settings = array()) {
+function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
   // in the function definition above is set to "mymodule_somedelta", the code
   // will only run on the "somedelta" block provided by the "mymodule" module.
 
   // Change the title of the "somedelta" block provided by the "mymodule"
   // module.
-  $data['subject'] = t('New title of the block');
+  $data['title'] = t('New title of the block');
 }
 
 /**

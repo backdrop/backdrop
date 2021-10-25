@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the Comment module.
@@ -12,7 +11,11 @@ class CommentHelperCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   function setUp($modules = array()) {
-    $modules = array_merge($modules, array('comment', 'node', 'search'));
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'comment';
     parent::setUp($modules);
 
     // Create a post content type with comments enabled.
@@ -66,6 +69,10 @@ class CommentHelperCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
+
+    // Disable safety cron run that can affect the updating of comment "new"
+    // status during shutdown functions when cron takes a long time.
+    config_get('system.core', 'cron_safe_threshold', 0);
   }
 
   /**
@@ -289,7 +296,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $edit = array();
     $edit['operation'] = $operation;
     $edit['comments[' . $comment->id . ']'] = TRUE;
-    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Update'));
+    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Execute'));
 
     if ($operation == 'delete') {
       $this->backdropPost(NULL, array(), t('Delete comments'));
@@ -391,6 +398,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
     $this->assertText($subject_text, 'Individual comment-reply subject found.');
     $this->assertText($comment_text, 'Individual comment-reply body found.');
+    $this->assertUniqueText($comment_text, 'Comment-reply body found only once.');
     $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
     $reply_loaded = comment_load($reply->id);
     $this->assertTrue($this->commentExists($reply, TRUE), 'Reply found.');
@@ -511,6 +519,10 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertRaw('<a id="new"></a>', 'Found "new" marker.');
     $this->assertTrue($this->xpath('//a[@id=:new]/following-sibling::a[1][@id=:comment_id]', array(':new' => 'new', ':comment_id' => 'comment-1')), 'The "new" anchor is positioned at the right comment.');
 
+    // Updates to the history table are done in background processing from the
+    // previous request. Wait a short time to make sure the record is written. 
+    sleep(1);
+
     // Test if "new comment" link is correctly removed.
     $this->backdropGet('node');
     $this->assertLink(t('1 comment'));
@@ -566,6 +578,11 @@ class CommentInterfaceTest extends CommentHelperCase {
           $case['user_uid'] = $this->admin_user->uid;
           break;
       }
+
+      // Wait a few seconds to ensure that the "comment-new" flag is allowed to
+      // trigger (more than 1 second from the time the comment was created).
+      sleep(3);
+
       // Request the node with the comment.
       $this->backdropGet('node/' . $node->nid);
 
@@ -613,6 +630,10 @@ class CommentInterfaceTest extends CommentHelperCase {
         $comments = $this->xpath('//*[contains(@class, "comment-new")]');
         if ($case['user'] != 'anonymous') {
           $this->assertTrue(count($comments) == 1, 'comment-new class found.');
+
+          // node_tag_new() writes to the database after delivering the page,
+          // wait to ensure the record is written before reloading the page.
+          sleep(2);
 
           // Request the node again. The comment-new class should disappear.
           $this->backdropGet('node/' . $node->nid);
@@ -1035,7 +1056,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropPost('node/' . $this->node->nid, $edit, t('Preview'));
 
     // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
+    $this->assertTitle(t('Preview comment | Backdrop CMS'), 'Page title is "Preview comment".');
     $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
 
@@ -1074,7 +1095,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Preview'));
 
     // Check that the preview is displaying the subject, comment, author and date correctly.
-    $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
+    $this->assertTitle(t('Preview comment | Backdrop CMS'), 'Page title is "Preview comment".');
     $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
     $this->assertText($edit['name'], 'Author displayed.');
@@ -1119,7 +1140,7 @@ class CommentPreviewTest extends CommentHelperCase {
  * Tests anonymous commenting.
  */
 class CommentAnonymous extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp();
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -1170,7 +1191,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->setCommentSubject(TRUE);
 
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
-    $this->assertText(t('The name you used belongs to a registered user.'));
+    $this->assertText(t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
 
     // Require contact info.
     $this->backdropLogin($this->admin_user);
@@ -1524,8 +1545,8 @@ class CommentPagerTest extends CommentHelperCase {
  * Tests comments with node access.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
-  function setUp() {
-    parent::setUp(array('node_access_test'));
+  function setUp($modules = array()) {
+    parent::setUp('search', 'node_access_test');
 
     $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
     user_role_grant_permissions($web_user_role, array('node test view'));
@@ -1628,10 +1649,11 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropGet('admin/content/comment/approval');
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
+      'operation' => 'publish',
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
     // Delete multiple comments in one operation.
@@ -1641,7 +1663,7 @@ class CommentApprovalTest extends CommentHelperCase {
       "comments[{$comments[1]->id}]" => 1,
       "comments[{$anonymous_comment4->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Are you sure you want to delete these comments and all their children?'), 'Confirmation required.');
     $this->backdropPost(NULL, $edit, t('Delete comments'));
     $this->assertText(t('No comments available.'), 'All comments were deleted.');
@@ -1695,7 +1717,7 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('block'));
 
     $admin_user_role = $this->admin_user->roles[count($this->admin_user->roles) - 1];
@@ -1892,9 +1914,9 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
     $tests['[comment:node:title]'] = check_plain($node->title);
-    $tests['[comment:author]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author]'] = check_plain(user_format_name($this->admin_user));
     $tests['[comment:author:uid]'] = $comment->uid;
-    $tests['[comment:author:name]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author:name]'] = check_plain(user_format_name($this->admin_user));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
@@ -1913,8 +1935,8 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = $comment->comment_body[LANGUAGE_NONE][0]['value'];
     $tests['[comment:parent:title]'] = $parent_comment->subject;
     $tests['[comment:node:title]'] = $node->title;
-    $tests['[comment:author]'] = format_username($this->admin_user);
-    $tests['[comment:author:name]'] = format_username($this->admin_user);
+    $tests['[comment:author]'] = user_format_name($this->admin_user);
+    $tests['[comment:author:name]'] = user_format_name($this->admin_user);
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('comment' => $comment), array('language' => $language, 'sanitize' => FALSE));
@@ -1956,36 +1978,56 @@ class CommentActionsTestCase extends CommentHelperCase {
     comment_publish_action($comment);
     $this->assertEqual(comment_load($comment->cid)->status, COMMENT_PUBLISHED, 'Comment was published');
   }
-
-  /**
-   * Verifies that a watchdog message has been entered.
-   *
-   * @param $watchdog_message
-   *   The watchdog message.
-   * @param $variables
-   *   The array of variables passed to watchdog().
-   * @param $message
-   *   The assertion message.
-   */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
-    return $this->assert($status, format_string('@message', array('@message' => $message)));
-  }
-
-  /**
-   * Clears watchdog.
-   */
-  function clearWatchdog() {
-    db_truncate('watchdog')->execute();
-  }
 }
 
 /**
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('field_ui'));
+  }
+
+  /**
+   * Tests trying to save a comment with an empty, NON-required body.
+   *
+   * Trying to save should succeed and not generate a warning.
+   */
+  public function testCommentEmptyNonRequiredBody() {
+    // Set the requirement-indicator of the comment_body field.
+    $this->backdropLogin($this->admin_user);
+    $edit = array('instance[required]' => FALSE);
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body', $edit, t('Save settings'));
+
+    // Preview an empty comment, and check if an error is shown.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Preview'));
+    $this->assertNoText('Comment field is required.', 'Can preview comment with empty required body.');
+
+    // Post an empty comment, and check if an error is shown.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Save'));
+    $this->assertNoText('Comment field is required.', 'Can save comment with empty required body.');
+    $this->assertText('Your comment has been posted.', 'Can save comment with empty required body.');
+  }
+
+  /**
+   * Tests that the comment_body field is not required.
+   *
+   * It should be possible to preview and save a comment without the
+   * default "comment_body" field and without generating warnings.
+   */
+  public function testCommentDeletedBody() {
+    // Delete the comment_body field.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body/delete', array(), t('Delete'));
+
+    // Preview an empty comment.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Preview'));
+
+    // Post an empty comment.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Save'));
+
+    // View the comment administration overview page.
+    $this->backdropGet('admin/content/comment');
   }
 
   /**
@@ -2221,4 +2263,107 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
     $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when comments are hidden.');
 
   }
+}
+
+/**
+ * Tests that comments behave correctly when the auto closer is enabled.
+ */
+class CommentNodeAutoCloserTestCase extends CommentHelperCase {
+  /**
+   * Tests the auto closer node type setting and the override setting on individual nodes.
+   */
+  function testNodeCommentAutoCloserSettings() {
+    $this->backdropLogin($this->admin_user);
+
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertNoField('edit-comment-close-override', 'Comment auto closer override hidden when auto closer not enabled.');
+
+    $this->setCommentSettings('comment_close_enabled', TRUE, 'Comment auto closer enabled.');
+
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertField('edit-comment-close-enabled', 'Comment auto closer override visible when auto closer enabled.');
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form visible on node page when created date is younger than comment auto closer default time span.');
+
+    // Set node created date to older than default 14 days
+    $comment_close_days = config_get('node.type.post','settings.comment_close_days');
+    $this->node->created = time() - strtotime($comment_close_days + 1 . ' days');
+    $this->node->save();
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when created date is older than the comment auto closer default time span.');
+
+    // Override the auto comment closer so the node can be kept open.
+    $edit = array(
+      'comment' => COMMENT_NODE_OPEN,
+      'comment_close_enabled' => FALSE,
+    );
+    $this->backdropPost('node/' . $this->node->nid . '/edit', $edit, t('Save'));
+
+    // Ensure the checkbox stays unchecked after saving.
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertNoFieldChecked('edit-comment-close-enabled', 'Comment close option still unchecked after saving.');
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form visible on node page when comments auto closer is overridden for individual node.');
+  }
+}
+
+/**
+ * Tests the behavior of comments when the comment author is deleted.
+ */
+class CommentAuthorDeletionTestCase extends CommentHelperCase {
+
+  /**
+   * Tests that comments are correctly deleted when their author is deleted.
+   */
+  public function testAuthorDeletion() {
+    // Create a comment as the admin user.
+    $this->backdropLogin($this->admin_user);
+    $comment = $this->postComment($this->node, $this->randomName());
+    $this->assertTrue($this->commentExists($comment), t('Comment is displayed initially.'));
+    $this->backdropLogout();
+
+    // Delete the admin user, and check that the node which displays the
+    // comment can still be viewed, but the comment itself does not appear
+    // there.
+    user_delete($this->admin_user->uid);
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertResponse(200, t('Node page is accessible after the comment author is deleted.'));
+    $this->assertFalse($this->commentExists($comment), t('Comment is not displayed after the comment author is deleted.'));
+  }
+
+  /**
+   * Test comment author deletion while the comment module is disabled.
+   */
+  public function testAuthorDeletionCommentModuleDisabled() {
+    // Create a comment as the admin user.
+    $this->backdropLogin($this->admin_user);
+    $comment = $this->postComment($this->node, $this->randomName());
+    $this->assertTrue($this->commentExists($comment), t('Comment is displayed initially.'));
+    $this->backdropLogout();
+
+    // Delete the admin user while the comment module is disabled, and ensure
+    // that the missing comment author is still handled correctly (the node
+    // itself should be displayed, but the comment should not be displayed on
+    // it).
+    module_disable(array('comment'));
+    user_delete($this->admin_user->uid);
+    cache('entity_comment')->flush();
+    module_enable(array('comment'));
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertResponse(200, t('Node page is accessible after the comment author is deleted.'));
+    $this->assertFalse($this->commentExists($comment), t('Comment is not displayed after the comment author is deleted.'));
+  }
+
 }

@@ -1,6 +1,7 @@
 
 #permissions td.module {
   font-weight: bold;
+  background: #dddddd;
 }
 #permissions td.permission {
   padding-left: 1.5em; /* LTR */
@@ -17,28 +18,36 @@
   font-size: 0.85em;
   padding-bottom: .5em;
 }
+#user-admin-settings .form-item-user-password-policy {
+  margin-bottom: 0;
+}
+#user-admin-settings .min-length-wrapper {
+  font-size: 0.923em;
+}
 
 /**
- * Override default textfield float to put the "Add role" button next to
- * the input textfield.
+ * Password toggle.
  */
-#user-admin-roles td.edit-name {
-  clear: both;
+.password-toggle-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
 }
-#user-admin-roles .form-item-name {
-  float: left; /* LTR */
-  margin-right: 1em; /* LTR */
+.password-toggle {
+  position: absolute;
+  top: -2em;
+  right: 0; /* LTR */
+  font-size: 80%;
 }
-[dir="rtl"] #user-admin-roles .form-item-name {
-  float: right;
-  margin-left: 1em;
-  margin-right: 0;
+[dir="rtl"] .password-toggle {
+  right: auto;
+  left: 0;
 }
 
 /**
  * Password strength indicator.
  */
-.password-confirm-wrapper {
+.password-strength-wrapper {
   position: relative;
   display: inline-block;
   max-width: 100%;
@@ -51,6 +60,19 @@
 .password-strength.empty {
   visibility: hidden;
   display: none;
+}
+.password-strength-title {
+  float: left; /* LTR */
+}
+.password-strength-text {
+  padding-left: 5px; /* LTR */
+}
+[dir="rtl"] .password-strength-title {
+  float: right;
+}
+[dir="rtl"] .password-strength-text {
+  padding-left: 0;
+  padding-right: 5px;
 }
 .password-indicator {
   background-color: #EEE;
@@ -75,27 +97,35 @@
 .password-strength.weak .indicator {
   background-color: #ff0000;
 }
-.password-strength.weak .password-strength-text {
+.password-strength.weak .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.weak em {
   color: #ff0000;
 }
 .password-strength.fair .indicator {
   background-color: #FFA500;
 }
-.password-strength.fair .password-strength-text {
+.password-strength.fair .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.fair em {
   color: #FFA500;
 }
 .password-strength.good .indicator {
   background-color: #4CA64C;
 }
-.password-strength.good .password-strength-text {
+.password-strength.good .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.good em {
   color: #4CA64C;
 }
 .password-strength.strong .indicator {
   background-color: #008000;
 }
-.password-strength.strong .password-strength-text {
+.password-strength.strong .password-strength-text,
+form:not(.user-admin-settings) .password-strength-help-text.strong em {
   color: #008000;
 }
+
+/**
+ * Password confirmation field.
+ */
 .password-match {
   display: block;
 }

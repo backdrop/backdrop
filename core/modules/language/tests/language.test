@@ -18,7 +18,7 @@ class LanguageListTest extends BackdropWebTestCase {
   }
 
   /**
-   * Functional tests for adding, editing and deleting languages.
+   * Functional tests for adding, configuring, and deleting languages.
    */
   function testLanguageList() {
     global $base_url;
@@ -42,6 +42,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -81,12 +82,13 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->assertFieldChecked('edit-languages-en-enabled', t('Default language re-enabled.'));
 
     // Ensure 'edit' link works.
-    $this->clickLink(t('Edit'));
-    $this->assertTitle(t('Edit language | Backdrop'), t('Page title is "Edit language".'));
-    // Edit a language.
+    $this->clickLink(t('Configure'));
+    $this->assertTitle(t('Configure language | Backdrop CMS'), t('Page title is "Configure language".'));
+    // Configre a language.
     $name = $this->randomName(16);
     $edit = array(
       'name' => $name,
+      'native' => $name,
     );
     $this->backdropPost('admin/config/regional/language/edit/' . $langcode, $edit, t('Save language'));
     $this->assertRaw($name, t('The language has been updated.'));
@@ -147,6 +149,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));

@@ -1,0 +1,49 @@
+.menu-dropdown {
+  position: relative;
+}
+
+/* Undo system.theme.css menu styles for dropdowns. */
+.menu-dropdown li,
+.menu-dropdown li.expanded,
+.menu-dropdown li.collapsed,
+.menu-dropdown li.leaf {
+  margin: 0;
+  padding: 0;
+}
+.js .menu-dropdown a,
+.js .menu-dropdown a:hover,
+.js .menu-dropdown a:focus,
+.js .menu-dropdown a:active {
+  /* Make room for the toggle button (sub indicator) */
+  padding-right: 58px;
+  font-weight: normal;
+  line-height: 17px;
+  text-decoration: none;
+}
+.menu-dropdown a.current {
+  color: #d23600;
+}
+.menu-dropdown a.disabled {
+  color: #bbbbbb;
+}
+.menu-dropdown a span.sub-arrow {
+  position: absolute;
+  top: 50%;
+  margin-top: -17px;
+  left: auto;
+  right: 4px;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  font: bold 16px/34px monospace !important;
+  text-align: center;
+  text-shadow: none;
+}
+.menu-dropdown span.sub-arrow:before {
+  display: block;
+  content: '+';
+}
+.menu-dropdown a.highlighted span.sub-arrow:before {
+  display: block;
+  content: '-';
+}

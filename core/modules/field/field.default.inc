@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default 'implementations' of hook_field_*(): common field housekeeping.
@@ -86,6 +85,12 @@ function field_default_validate($entity_type, $entity, $field, $instance, $langc
   }
 }
 
+/**
+ * Default field 'submit' operation.
+ *
+ * Filter out empty values and sort the remainder in preparation for insert,
+ * below.
+ */
 function field_default_submit($entity_type, $entity, $field, $instance, $langcode, &$items, $form, &$form_state) {
   // Filter out empty values.
   $items = _field_filter_items($field, $items);
@@ -131,7 +136,7 @@ function field_default_insert($entity_type, $entity, $field, $instance, $langcod
  *   Array of field values already loaded for the entities, keyed by entity id.
  * @param $display
  *   Can be either:
- *   - the name of a view mode
+ *   - the name of a display mode
  *   - or an array of display settings to use for display, as found in the
  *     'display' entry of $instance definitions.
  */
@@ -184,7 +189,7 @@ function field_default_prepare_view($entity_type, $entities, $field, $instances,
  *   Array of field values already loaded for the entities, keyed by entity id.
  * @param $display
  *   Can be either:
- *   - the name of a view mode;
+ *   - the name of a display mode;
  *   - or an array of custom display settings, as found in the 'display' entry
  *     of $instance definitions.
  */

@@ -91,7 +91,13 @@ CKEDITOR.plugins.add('backdropimagecaption', {
           element.removeClass(classes[i]);
         }
 
-        return img;
+        // If img is wrapped with a link, we want to return that link.
+        if (img.parent.name === 'a') {
+          return img.parent;
+        }
+        else {
+          return img;
+        }
       };
 
       // We want to upcast <img> elements to a DOM structure required by the
@@ -116,6 +122,10 @@ CKEDITOR.plugins.add('backdropimagecaption', {
         }
 
         var attrs = element.attributes;
+        if (element.parent.name === 'a') {
+          element = element.parent;
+        }
+
         var retElement = element;
         var caption;
 
@@ -157,6 +167,9 @@ CKEDITOR.plugins.add('backdropimagecaption', {
           if (caption) {
             var figure = new CKEDITOR.htmlParser.element('figure');
             caption = new CKEDITOR.htmlParser.fragment.fromHtml(caption, 'figcaption');
+
+            var captionFilter = new CKEDITOR.filter(widgetDefinition.editables.caption.allowedContent);
+            captionFilter.applyTo(caption);
 
             // Use Backdrop's data-placeholder attribute to insert a CSS-based,
             // translation-ready placeholder for empty captions. Note that it

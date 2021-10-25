@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * @todo.
@@ -435,7 +434,7 @@ class views_handler_argument extends views_handler {
     // Let the plugins do validation.
     $default_id = $form_state['values']['options']['default_argument_type'];
     $plugin = $this->get_plugin('argument default', $default_id);
-    if ($plugin) {
+    if ($plugin && isset($form['argument_default'][$default_id]) && isset($form_state['values']['options']['argument_default'][$default_id])) {
       $plugin->options_validate($form['argument_default'][$default_id], $form_state, $form_state['values']['options']['argument_default'][$default_id]);
     }
 
@@ -737,8 +736,7 @@ class views_handler_argument extends views_handler {
   /**
    * Default action: ignore.
    *
-   * If an argument was expected and was not given, in this case, simply
-   * ignore the argument entirely.
+   * If an argument was expected and not given, ignore the argument entirely.
    */
   function default_ignore() {
     return TRUE;

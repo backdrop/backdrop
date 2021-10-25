@@ -2,9 +2,56 @@
 
 /**
  * @file
- * Subclasses of the Updater class to update Backdrop core knows how to update.
- * At this time, only modules, themes and layouts are supported.
+ * Subclasses of the Updater class to update Backdrop core, modules, themes, and layouts.
  */
+
+/**
+ * Class for updating Backdrop core using FileTransfer classes via authorize.php.
+ */
+class CoreUpdater extends Updater {
+
+  /**
+   * Return the Backdrop core directory.
+   */
+  public function getInstallDirectory() {
+    return realpath(BACKDROP_ROOT);
+  }
+
+  public function isInstalled() {
+    return (bool) file_exists($this->getInstallDirectory());
+  }
+
+  public static function canUpdateDirectory($directory) {
+    return (self::getProjectType($directory) == 'core');
+  }
+
+  static function canUpdate($project_name) {
+    return (bool) $this->isInstalled();
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstall() {
+    $project = array();
+    $project['name'] = $this->name;
+    $project['type'] = 'core';
+    $_SESSION['project_browser_installed_projects'][$this->name] = $project;
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstallTasks() {
+    return array();
+  }
+
+  public function postUpdateTasks() {
+    // We don't want to check for DB updates here, we do that once for all
+    // updated modules on the landing page.
+  }
+
+}
 
 /**
  * Class for updating modules using FileTransfer classes via authorize.php.
@@ -27,10 +74,13 @@ class ModuleUpdater extends Updater {
     if ($relative_path = backdrop_get_path('module', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/modules/contrib')) {
+      $relative_path = 'modules/contrib';
+    }
     else {
       $relative_path = 'modules';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {
@@ -93,10 +143,13 @@ class ThemeUpdater extends Updater {
     if ($relative_path = backdrop_get_path('theme', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/themes/contrib')) {
+      $relative_path = 'themes/contrib';
+    }
     else {
       $relative_path = 'themes';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {
@@ -146,10 +199,13 @@ class LayoutUpdater extends Updater {
     if ($relative_path = backdrop_get_path('layout', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/layouts/contrib')) {
+      $relative_path = 'layouts/contrib';
+    }
     else {
       $relative_path = 'layouts';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {

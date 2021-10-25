@@ -38,6 +38,14 @@ $config_directories['active'] = 'files/config_' . md5($database) . '/active';
 $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
+ * Skip the configuration staging directory cleanup
+ *
+ * When the configuration files are in version control, it may be preferable to
+ * not empty the staging directory after each sync.
+ */
+// $config['system.core']['config_sync_clear_staging'] = 0;
+
+/**
  * Access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
@@ -64,10 +72,60 @@ $settings['update_free_access'] = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @code
+ * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @endcode
  *
  */
 $settings['hash_salt'] = '';
+
+/**
+ * Trusted host configuration (optional but highly recommended).
+ *
+ * Since the HTTP Host header can be set by the user making the request, it
+ * is possible for malicious users to override it and create an attack vector.
+ * To protect against these sort of attacks, Backdrop supports checking a list
+ * of trusted hosts.
+ *
+ * To enable the trusted host protection, specify the allowable hosts below.
+ * This should be an array of regular expression patterns representing the hosts
+ * you would like to allow.
+ *
+ * For example, this will allow the site to only run from www.example.com:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^www\.example\.com$',
+ * );
+ * @endcode
+ *
+ * If you are running a site on multiple domain names, you should specify all of
+ * the host patterns that are allowed by your site. For example, this will allow
+ * the site to run off of all variants of example.com and example.org, with all
+ * subdomains included:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^example\.com$',
+ *   '^.+\.example\.com$',
+ *   '^example\.org',
+ *   '^.+\.example\.org',
+ * );
+ * @endcode
+ *
+ * If you do not need this functionality (such as in development environments or
+ * if protection is at another layer), you can suppress the status report
+ * warning by setting this value to FALSE:
+ * @code
+ * $settings['trusted_host_patterns'] = FALSE;
+ * @endcode
+ *
+ * For more information about trusted host patterns, see the documentation at
+ * https://api.backdropcms.org/documentation/trusted-host-settings
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
+ */
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
 
 /**
  * Base URL (optional).
@@ -152,7 +210,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
  * 'maintenance_theme' key. The template file should also be copied into the
- * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
+ * theme. It is located inside
+ * 'core/modules/system/templates/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
 // $settings['maintenance_theme'] = 'bartik';
@@ -221,6 +280,23 @@ ini_set('session.cookie_lifetime', 2000000);
 // $settings['omit_vary_cookie'] = TRUE;
 
 /**
+ * Expiration of cache_form entries:
+ *
+ * Backdrop's Form API stores details of forms in cache_form and these entries
+ * are kept for at least 6 hours by default. Expired entries are cleared by
+ * cron. Busy sites can encounter problems with the cache_form table becoming
+ * very large. It's possible to mitigate this by setting a shorter expiration
+ * for cached forms. In some cases it may be desirable to set a longer cache
+ * expiration. For example to prolong cache_form entries for Ajax forms in
+ * cached HTML.
+ *
+ * @see form_set_cache()
+ * @see system_cron()
+ * @see ajax_get_form()
+ */
+// $settings['form_cache_expiration'] = 21600;
+
+/**
  * String overrides:
  *
  * To override specific strings on your site with or without enabling locale
@@ -284,12 +360,12 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $settings['proxy_server'] = '';
-# $settings['proxy_port'] = 8080;
-# $settings['proxy_username'] = '';
-# $settings['proxy_password'] = '';
-# $settings['proxy_user_agent'] = '';
-# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+// $settings['proxy_server'] = '';
+// $settings['proxy_port'] = 8080;
+// $settings['proxy_username'] = '';
+// $settings['proxy_password'] = '';
+// $settings['proxy_user_agent'] = '';
+// $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
@@ -332,12 +408,52 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
- * Include a local settings file.
+ * Configuration overrides.
  *
- * To make local development easier, you can add a file that contains your local
- * database connection information. This local settings file can be ignored in
- * your Git repository so that any updates to settings.php can be pulled in 
- * without overwriting your local changes.
+ * These settings allow you to specify values for anything stored in config
+ * within the files stored in the $config_directories variable above.
+ * This can be useful to store per-environment values or sensitive data that
+ * is undesirable to store in the config storage.
+ *
+ * There are particular configuration values that are risky to override. For
+ * example overriding field storage will create errors because associated
+ * database changes are necessary. Modifying values within complicated objects
+ * such as views, content types, vocabularies, etc. may not work as expected.
+ * Use any available API functions for complex systems instead.
+ */
+//$config['system.core']['site_name'] = 'My Backdrop site';
+//$config['system.core']['file_temporary_path'] = '/tmp';
+
+/**
+ * Add Permissions-Policy header to disable Google FLoC.
+ *
+ * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
+ * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
+ * which was introduced in Chrome v89. For more information about FLoC, see:
+ * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ *
+ * If you don't wish to disable FLoC in Chrome, you can uncomment the following
+ * setting, and make sure its value is set to "FALSE".
+ */
+//$config['system.core']['block_interest_cohort'] = FALSE;
+
+/**
+ * Include a local settings file, if available.
+ *
+ * To make local development easier, you can add a settings.local.php file that
+ * contains settings specific to your local installation, or to any secondary
+ * environment (staging, development, etc).
+ *
+ * Typically used to specify a different database connection information, to
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * Google Analytics, and other things that should not happen on development and
+ * testing sites.
+ *
+ * This local settings file can be ignored in your Git repository, so that any
+ * updates to settings.php can be pulled in without overwriting your local
+ * changes.
+ *
+ * Keep this code block at the end of this file to take full effect.
  */
 if (file_exists(__DIR__ . '/settings.local.php')) {
   include __DIR__ . '/settings.local.php';

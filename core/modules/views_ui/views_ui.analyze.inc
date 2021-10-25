@@ -4,11 +4,10 @@
  * Contains the view analyze tool code.
  *
  * This tool is a small plugin manager to perform analysis on a view and
- * report results to the user. This tool is meant to let modules that
- * provide data to Views also help users properly use that data by
- * detecting invalid configurations. Views itself comes with only a
- * small amount of analysis tools, but more could easily be added either
- * by modules or as patches to Views itself.
+ * report results. It is meant to let modules that provide data to Views also
+ * help users properly use that data by detecting invalid configurations.
+ * Views itself comes with only a small number of analysis tools, but more
+ * could be added with additional modules.
  */
 
 /**

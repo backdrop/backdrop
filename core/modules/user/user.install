@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the user module.
@@ -155,6 +154,10 @@ function user_schema() {
       ),
     ),
   );
+
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_user'] = $cache_schema;
+  $schema['cache_entity_user']['description'] = "Cache table used to store Users entity records.";
 
   return $schema;
 }
@@ -492,7 +495,7 @@ function user_update_1009() {
     'tag' => 'default',
     'disabled' => FALSE,
     'base_table' => 'users',
-    'human_name' => 'Administer users',
+    'human_name' => 'Administer user accounts',
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
@@ -1124,7 +1127,7 @@ function user_update_1011() {
 }
 
 /**
- * Update 'Find user accounts'  to 'Manage user accounts'
+ * Update 'Find user accounts' to 'Manage user accounts'
  */
 function user_update_1012() {
   $config = config('views.view.user_admin');
@@ -1135,6 +1138,144 @@ function user_update_1012() {
     $config->set('display.page.display_options.menu.title', 'Manage user accounts');
   }
   $config->save();
+}
+
+/**
+ * Grant accounts with 'administer permissions' the new 'assign roles' permission.
+ */
+function user_update_1013() {
+  $names = config_get_names_with_prefix('user.role.');
+  foreach ($names as $config_name) {
+    $config = config($config_name);
+    $permissions = $config->get('permissions');
+    if (in_array('administer permissions', $permissions)) {
+      $permissions[] = 'assign roles';
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Fixes system email linebreaks.
+ */
+function user_update_1014() {
+  $emails = array(
+    'register_admin_created_body',
+    'register_pending_approval_body',
+    'register_no_approval_required_body',
+    'register_no_approval_required_body',
+    'password_reset_body',
+    'status_activated_body',
+    'status_blocked_body',
+    'cancel_confirm_body',
+    'status_canceled_body',
+  );
+  $config = config('user.mail');
+  foreach ($emails as $name) {
+    $mail = $config->get($name);
+    if (strstr($mail, '\n')) {
+      $fixed_mail = str_replace('\n', "\n", $mail);
+      $config->set($name, $fixed_mail);
+    }
+  }
+  $config->save();
+}
+
+/**
+ * Change label 'Name' to 'Username' for clarity on user admin view.
+ */
+function user_update_1015() {
+  $config = config('views.view.user_admin');
+  if ($config->get('display.default.display_options.filters.name.expose.label') == 'Name') {
+    $config->set('display.default.display_options.filters.name.expose.label', 'Username');
+  }
+  if ($config->get('display.default.display_options.filters.name.expose.identifier') == 'name') {
+    $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
+  }
+  $config->save();
+}
+
+/**
+ * Creates the table to enable caching of User entities.
+ */
+function user_update_1016() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store User entity records.";
+  db_create_table('cache_entity_user', $table);
+}
+
+/**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
+  $config->save();
+}
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1018() {
+  $config = config('system.core');
+  $config->set('user_password_reject_weak', FALSE);
+  $config->set('user_password_strength_threshold', 50);
+  $config->save();
+}
+
+/**
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  if ($config->get('user_admin_role') == NULL) {
+    $config->set('user_admin_role', 0);
+    $config->save();
+  }
+}
+
+/**
+ * Make sure that all config translatables are set for user mails.
+ */
+function user_update_1020() {
+  $mail_config = config('user.mail');
+  $available = $mail_config->get('_config_translatables');
+  if ($available === NULL || count($available) < 18 ) {
+    // @see core/modules/user/config/user.mail.json
+    $mail_translatables = array(
+      'cancel_confirm_body',
+      'cancel_confirm_subject',
+      'password_reset_body',
+      'password_reset_subject',
+      'register_admin_created_body',
+      'register_admin_created_subject',
+      'register_no_approval_required_body',
+      'register_no_approval_required_subject',
+      'register_pending_approval_body',
+      'register_pending_approval_subject',
+      'register_pending_approval_admin_body',
+      'register_pending_approval_admin_subject',
+      'status_activated_body',
+      'status_activated_subject',
+      'status_blocked_body',
+      'status_blocked_subject',
+      'status_canceled_body',
+      'status_canceled_subject',
+    );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $mail_translatables = array_merge($available, $mail_translatables);
+      $mail_translatables = array_values(array_unique($mail_translatables));
+    }
+    $mail_config->set('_config_translatables', $mail_translatables);
+    $mail_config->save();
+  }
 }
 
 /**

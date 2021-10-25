@@ -13,18 +13,23 @@ class ConfigurationTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that a setting can be written and read from a non-existent config.
+   * Tests that a config setting can be written, read and deleted.
    */
-  public function testReadWriteConfig() {
-    // Long-hand setting and getting.
+  public function testReadWriteClearConfig() {
+    // Long-hand setting, getting and deleting.
     $config = config('foo.bar');
     $config->set('foo', 'bar');
     $config->save();
     $this->assertEqual('bar', config('foo.bar')->get('foo'), 'Content retrieved from written config data using Config classes.');
+    $config->clear('foo');
+    $config->save();
+    $this->assertNull(config('foo.bar')->get('foo'), 'Deleted config data cannot be retrieved using Config classes.');
 
-    // Short-hand setting and getting.
+    // Short-hand setting, getting and deleting.
     config_set('foo.bar', 'foo', 'baz');
     $this->assertEqual('baz', config_get('foo.bar', 'foo'), 'Content retrieved from written config data using short cut functions.');
+    config_clear('foo.bar', 'foo');
+    $this->assertNull(config_get('foo.bar', 'foo'), 'Deleted config data cannot be retrieved using shortcut functions.');
   }
 
   /**
@@ -83,6 +88,102 @@ class ConfigurationTest extends BackdropWebTestCase {
       'favorite_color' => 'blue',
     );
     $this->assertEqual($config->get(), $expected_config, 'The configuration file contained the expected configuration.');
+  }
+
+  /**
+   * Tests that a config setting can be overidden.
+   */
+  public function testOverrideConfig() {
+    $original_data = array(
+      'foo' => array(
+        'key1' => 'value1',
+        'key2' => 'value2',
+        'key3' => 'value3',
+      ),
+      'bar' => array(
+        'keyA' => 'valueA',
+        'keyB' => 'valueB',
+      ),
+    );
+
+    // Set variable the regular method.
+    $config_data = config('config.test');
+    $config_data->setData($original_data);
+    $config_data->save();
+
+    $this->assertEqual('value1', config('config.test')->get('foo.key1'), 'Sample config retrieved from written config data using Config classes.');
+    $this->assertEqual('valueB', config('config.test')->get('bar.keyB'), 'Sample config retrieved from written config data using Config classes.');
+
+    // Simulate overriding in settings file.
+    $GLOBALS['config']['config.test']['foo.key1'] = 'chocolate';
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', $config_data->get('foo.key1'), 'Config variable overridden in global configuration override.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo.key1'), 'Nested config variable is overridden.');
+    $this->assertFalse(config_is_overridden('config.test', 'foo'), 'Root config variable not considered overridden.');
+    $this->assertEqual($original_data['foo']['key2'], $config_data->get('foo.key2'), 'Sibling key not affected by override.');
+    $this->assertEqual($original_data['bar'], $config_data->get('bar'), 'Uncle key not affected by override.');
+
+    // Simulate overriding a collection of values.
+    $override_data = array(
+      'key1' => 'chocolate',
+      'key2' => 'vanilla',
+    );
+    unset($GLOBALS['config']['config.test']['foo.key1']);
+    $GLOBALS['config']['config.test']['foo'] = $override_data;
+
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', $config_data->get('foo.key1'), 'Config variable overridden in global configuration override.');
+    $this->assertEqual('vanilla', $config_data->get('foo.key2'), 'Config variable overridden in global configuration override.');
+    $this->assertEqual($override_data, $config_data->get('foo'), 'Entire set of nested data overridden. Discarding 3rd undefined key.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo.key1'), 'Nested config variable is overridden when overriding parent.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo'), 'Root config variable is considered overridden when overriding parent.');
+
+    // Try overwriting the overridden config, which won't actually write.
+    $config_data->set('foo.key1', 'chocolate');
+    $config_data->save();
+
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', config('config.test')->get('foo.key1'), 'Config variable still overridden and cannot be set regular way.');
+    $this->assertEqual($config_data->getOriginal('foo.key1'), 'value1', 'Config original value still in place.');
+    $this->assertEqual($config_data->getOverride('foo.key1'), 'chocolate', 'Overridden value retrieved correctly.');
+
+    // Actually overwrite the config with the overridden value.
+    $config_data->set('foo.key1', 'chocolate', TRUE);
+    $config_data->save();
+
+    // Reload the config to read from disk again, the overridden value should
+    // now be on disk.
+    unset($GLOBALS['config']['config.test']['foo']);
+    $config_data = config('config.test');
+    $this->assertEqual(FALSE, $config_data->isOverridden('foo.key1'), 'Original value no longer overridden.');
+    $this->assertEqual($config_data->get('foo.key1'), 'chocolate', 'Original value has been updated to include overridden value.');
+  }
+
+  /**
+   * Tests that config directories are protected by .htaccess files.
+   */
+  public function testConfigHtaccess() {
+    // Check that the .htaccess file is present in config location.
+    $active_dir = config_get_config_directory();
+    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");
+
+    // Visit the status report to confirm the file is re-created automatically.
+    $admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'access site reports',
+    ));
+    $this->backdropLogin($admin_user);
+
+    // Remove .htaccess file so we can test that it gets re-created.
+    @backdrop_unlink($active_dir . '/.htaccess');
+    $this->assertFalse(is_file($active_dir . '/.htaccess'), "Removed the .htaccess file in the 'active' config directory.");
+
+    $this->backdropGet('admin/reports/status');
+    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Re-created the .htaccess file in the 'active' config directory.");
+
+    // Verify contents of .htaccess file.
+    $file = file_get_contents($active_dir . '/.htaccess');
+    $this->assertEqual($file, file_htaccess_lines(), 'The .htaccess file contains the proper content.');
   }
 }
 
@@ -396,6 +497,32 @@ class ConfigurationUITest extends BackdropWebTestCase {
   }
 
   /**
+   * Test skipping the clearing of the staging directory after import.
+   */
+  public function testClearStagingDirectory() {
+    $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
+
+    // Copy active to staging
+    $this->copyConfig('active', 'staging');
+
+    // Set staging system.core so it doesn't clear the staging directory.
+    $staging_config = config('system.core', 'staging');
+    $staging_config->set('config_sync_clear_staging', 0);
+    $staging_config->save();
+
+    // Verify that both appear as ready to import.
+    $this->backdropGet('admin/config/development/configuration');
+    $this->assertText('system.core');
+
+    // Sync changes
+    $this->backdropPost(NULL, array(), t('Import all'));
+
+    // Assert that staging directory is not empty.
+    $staging_files = $staging_storage->listAll();
+    $this->assert(!empty($staging_files), 'Staging directory is not empty.');
+  }
+
+  /**
    * Copies configuration objects from source storage to target storage.
    *
    * @param string $source
@@ -412,3 +539,57 @@ class ConfigurationUITest extends BackdropWebTestCase {
     }
   }
 }
+
+/**
+ * Tests that hook_config_create() is run during config sync.
+ */
+class ConfigurationSyncTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  protected function setUp() {
+    parent::setUp(array('config_test_hooks'));
+
+    // Create a blank content type into which our new config-based field will be
+    // added.
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'bypass node access',
+      'administer nodes',
+      'create post content',
+      'edit any post content',
+    ));
+  }
+
+  /**
+   * Tests that hook_config_create() is run during config sync.
+   */
+  public function testSync() {
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('brie', $config_data['favorite_cheese'], 'Config variable is set to brie.');
+    $this->assertFalse(field_info_field('field_config_test'), 'The test field does not exist.');
+
+    module_enable(array('config_test'));
+    // Test that config value is altered when default config is synced from
+    // another module.
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('cheddar', $config_data['favorite_cheese'], 'Config variable is set to cheddar.');
+    $this->assertTrue(field_info_field('field_config_test'), 'The test field has been installed.');
+
+    // Test that content can actually be saved into the new field that was
+    // created.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/post', array(
+      'title' => 'Test post',
+      'field_config_test[und][0][value]' => 'Test value in the new field',
+    ), t('Save'));
+
+    $this->assertText('Post Test post has been created.');
+    $this->assertText('Test value in the new field');
+  }
+}
+

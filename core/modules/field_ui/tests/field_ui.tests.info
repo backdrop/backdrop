@@ -5,8 +5,8 @@ group = Field UI
 file = field_ui.test
 
 [FieldUIManageDisplayTestCase]
-name = Manage display
-description = Test the Field UI "Manage display" screens.
+name = Manage displays
+description = Test the Field UI "Manage displays" screens.
 group = Field UI
 file = field_ui.test
 
@@ -17,7 +17,7 @@ group = Field UI
 file = field_ui.test
 
 [FieldUIViewModeFunctionalTest]
-name = View modes
+name = Display modes
 description = Tests view mode functionality.
 group = Field UI
 file = field_ui.test

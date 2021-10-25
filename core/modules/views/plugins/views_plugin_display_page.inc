@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the page display plugin.
@@ -216,11 +215,13 @@ class views_plugin_display_page extends views_plugin_display {
     // display, and arguments should be set on the view.
     $this->view->build();
     if (!empty($this->view->build_info['fail'])) {
-      return backdrop_not_found();
+      backdrop_not_found();
+      exit();
     }
 
     if (!empty($this->view->build_info['denied'])) {
-      return backdrop_access_denied();
+      backdrop_access_denied();
+      exit();
     }
 
     $this->view->get_breadcrumb(TRUE);
@@ -263,7 +264,7 @@ class views_plugin_display_page extends views_plugin_display {
     $options['path'] = array(
       'category' => 'page',
       'title' => t('Path'),
-      'value' => views_ui_truncate($path, 24),
+      'value' => $path,
     );
 
     $menu = $this->get_option('menu');
@@ -287,7 +288,7 @@ class views_plugin_display_page extends views_plugin_display {
     $options['menu'] = array(
       'category' => 'page',
       'title' => t('Menu'),
-      'value' => views_ui_truncate($menu_str, 24),
+      'value' => $menu_str,
     );
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
@@ -414,9 +415,9 @@ class views_plugin_display_page extends views_plugin_display {
         }
         $form['menu']['weight'] = array(
           '#title' => t('Weight'),
-          '#type' => 'textfield',
+          '#type' => 'number',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
-          '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
+          '#description' => t('This number sets the order of the menu item or tab, with lower weights coming first. Negative values are allowed.'),
           '#states' => array(
             'visible' => array(
               array(

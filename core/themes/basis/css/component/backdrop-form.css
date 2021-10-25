@@ -8,13 +8,25 @@
   margin: 0 0 1.5em;
 }
 
-.form-type-textarea label,
-.form-type-textfield label,
-.form-type-select label,
+.form-type-email label,
 .form-type-file label,
-.form-type-password label {
+.form-type-password label,
+.form-type-select label,
+.form-type-tel label,
+.form-type-textarea label,
+.form-type-textfield label {
   display: block;
   margin: 0 0 0.25em;
+}
+
+abbr.form-required,
+abbr.tabledrag-changed,
+abbr.ajax-changed {
+  text-decoration: none;
+}
+
+.form-required {
+  color: #ff0000;
 }
 
 .form-item-radios label,
@@ -96,9 +108,16 @@ td.checkbox .form-item input {
 .form-item .description,
 .password-strength,
 .password-match {
-  border-left: 0.25em solid #c6cad2;
+  border-left: 0.25em solid #bbbbbb;
   margin: 0.6875em 0 2.5em;
   padding: 0.5em 0.8em;
+}
+
+[dir=rtl] .form-item .description,
+[dir=rtl] .password-strength,
+[dir=rtl] .password-match {
+  border-left: none;
+  border-right: 0.25em solid #bbbbbb;
 }
 
 .form-item-radios .description,
@@ -174,6 +193,8 @@ button.form-submit,
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -192,6 +213,8 @@ textarea.form-textarea {
 }
 
 input.form-text,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-search,
@@ -220,6 +243,8 @@ select.filter-list {
 
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -228,6 +253,23 @@ input.form-search:focus,
 input.form-file:focus,
 textarea.form-textarea:focus {
   outline: 0;
+}
+
+#autocomplete {
+  border: 0.125rem solid #d0d0d0;
+  border-top: 0;
+  box-sizing: content-box;
+}
+#autocomplete ul {
+  margin: 0;
+}
+#autocomplete li {
+  padding: 0.2em 0.625em;
+  margin: 0;
+}
+#autocomplete li.selected {
+  background: #008be2;
+  color: #ffffff;
 }
 
 ul.action-links {

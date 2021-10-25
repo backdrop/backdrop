@@ -325,6 +325,7 @@ class MemoryQueue implements BackdropQueueInterface {
     $item->created = time();
     $item->expire = 0;
     $this->queue[$item->item_id] = $item;
+    return TRUE;
   }
 
   public function numberOfItems() {

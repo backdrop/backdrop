@@ -4,6 +4,12 @@ description = Tests pluggable access for views.
 group = Views Plugins
 file = views_access.test
 
+[ViewsAjaxTest]
+name = Ajax
+description = Test views with and without ajax enabled.
+group = Views Handlers
+file = views_ajax.test
+
 [ViewsAnalyzeTest]
 name = Views Analyze
 description = Test the views analyze system.
@@ -18,7 +24,7 @@ file = views_argument_default.test
 
 [ViewsArgumentValidatorTest]
 name = Argument validator
-description => Test argument validator tests.
+description = Test argument validator tests.
 group = Views Plugins
 file = views_argument_validator.test
 
@@ -142,6 +148,12 @@ description = Test the core views_handler_field handler.
 group = Views Handlers
 file = handlers/views_handler_field.test
 
+[ViewsHandlerFilterMultipleTest]
+name = Filter: Multiple conditions
+description = Tests multiple filters on a single display.
+group = Views Handlers
+file = handlers/views_handler_filter_multiple.test
+
 [ViewsHandlerFilterCombineTest]
 name = Filter: Combine
 description = Tests the combine filter handler.
@@ -184,6 +196,12 @@ description = Test the core views_handler_sort_date handler.
 group = Views Handlers
 file = handlers/views_handler_sort_date.test
 
+[ViewsHandlerManyToOneTest]
+name = Many To One
+description = Tests the many_to_one_helper handler.
+group = Views Handlers
+file = handlers/views_handler_manytoone.test
+
 [ViewsHandlerSortRandomTest]
 name = Sort: random
 description = Test the core views_handler_sort_random handler.
@@ -219,6 +237,12 @@ name = Display plugin
 description = Tests the basic display plugin.
 group = Views Plugins
 file = plugins/views_plugin_display.test
+
+[ViewsPluginDisplayBlockTestCase]
+name = Block display tests
+description = Tests overriding options for block displays.
+group = Views Plugins
+file = plugins/views_plugin_display_block.test
 
 [ViewsPluginStyleJumpMenuTest]
 name = Jump menu
@@ -303,3 +327,9 @@ name = Test the view class
 description = Tests some  functionality of the view class.
 group = Views
 file = views_view.test
+
+[ViewsTranslatableTest]
+name = 'Views Translatable Test'
+description = 'Tests the pluggable translations'
+group = Views
+file = views_translatable.test

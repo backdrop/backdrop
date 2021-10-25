@@ -1,5 +1,5 @@
 {
-    "_config_name": "image.style.thumbnail.json",
+    "_config_name": "image.style.thumbnail",
     "overridden": false,
     "module": "image",
     "label": "Thumbnail (100x100)",

@@ -196,8 +196,8 @@ class DiffEngine {
     $edits = array();
     $xi = $yi = 0;
     while ($xi < $n_from || $yi < $n_to) {
-      assert('$yi < $n_to || $this->xchanged[$xi]');
-      assert('$xi < $n_from || $this->ychanged[$yi]');
+      assert($yi < $n_to || $this->xchanged[$xi]);
+      assert($xi < $n_from || $this->ychanged[$yi]);
 
       // Skip matching "snake".
       $copy = array();
@@ -380,18 +380,20 @@ class DiffEngine {
         $k = 0;
         $matches = $ymatches[$line];
         reset($matches);
-        while (list(, $y) = each($matches)) {
+        while ($y = current($matches)) {
+          next($matches);
           if (empty($this->in_seq[$y])) {
             $k = $this->lcsPos($y);
-            assert('$k > 0');
+            assert($k > 0);
             $ymids[$k] = $ymids[$k - 1];
             break;
           }
         }
 
-        while (list(, $y) = each($matches)) {
+        while ($y = current($matches)) {
+          next($matches);
           if ($y > $this->seq[$k - 1]) {
-            assert('$y < $this->seq[$k]');
+            assert($y < $this->seq[$k]);
             // Optimization: this is a common case:
             //	next match is just replacing previous match.
             $this->in_seq[$this->seq[$k]] = FALSE;
@@ -400,7 +402,7 @@ class DiffEngine {
           }
           elseif (empty($this->in_seq[$y])) {
             $k = $this->lcsPos($y);
-            assert('$k > 0');
+            assert($k > 0);
             $ymids[$k] = $ymids[$k - 1];
           }
         }
@@ -444,7 +446,7 @@ class DiffEngine {
       }
     }
 
-    assert('$ypos != $this->seq[$end]');
+    assert($ypos != $this->seq[$end]);
 
     $this->in_seq[$this->seq[$end]] = FALSE;
     $this->seq[$end] = $ypos;
@@ -532,7 +534,7 @@ class DiffEngine {
     $i = 0;
     $j = 0;
 
-    assert('count($lines) == count($changed)');
+    assert(count($lines) == count($changed));
     $len = count($lines);
     $other_len = count($other_changed);
 
@@ -553,7 +555,7 @@ class DiffEngine {
       }
 
       while ($i < $len && !$changed[$i]) {
-        assert('$j < $other_len && ! $other_changed[$j]');
+        assert($j < $other_len && !$other_changed[$j]);
         $i++;
         $j++;
         while ($j < $other_len && $other_changed[$j]) {
@@ -590,11 +592,11 @@ class DiffEngine {
           while ($start > 0 && $changed[$start - 1]) {
             $start--;
           }
-          assert('$j > 0');
+          assert($j > 0);
           while ($other_changed[--$j]) {
             continue;
           }
-          assert('$j >= 0 && !$other_changed[$j]');
+          assert($j >= 0 && !$other_changed[$j]);
         }
 
         /*
@@ -618,7 +620,7 @@ class DiffEngine {
             $i++;
           }
 
-          assert('$j < $other_len && ! $other_changed[$j]');
+          assert($j < $other_len && !$other_changed[$j]);
           $j++;
           if ($j < $other_len && $other_changed[$j]) {
             $corresponding = $i;
@@ -636,11 +638,11 @@ class DiffEngine {
       while ($corresponding < $i) {
         $changed[--$start] = 1;
         $changed[--$i] = 0;
-        assert('$j > 0');
+        assert($j > 0);
         while ($other_changed[--$j]) {
           continue;
         }
-        assert('$j >= 0 && !$other_changed[$j]');
+        assert($j >= 0 && !$other_changed[$j]);
       }
     }
   }
@@ -791,8 +793,8 @@ class MappedDiff extends Diff {
    *   have the same number of elements as $to_lines.
    */
   function __construct($from_lines, $to_lines, $mapped_from_lines, $mapped_to_lines) {
-    assert('count( $from_lines ) == count( $mapped_from_lines )');
-    assert('count( $to_lines ) == count( $mapped_to_lines )');
+    assert(count($from_lines) == count($mapped_from_lines));
+    assert(count($to_lines) == count($mapped_to_lines));
 
     parent::__construct($mapped_from_lines, $mapped_to_lines);
 
@@ -880,7 +882,7 @@ class HWLDFWordAccumulator {
         $this->flushLine($tag);
         $word = substr($word, 1);
       }
-      assert('!strstr( $word, "\n" )');
+      assert(!strstr($word, "\n"));
       $this->group .= $word;
     }
   }

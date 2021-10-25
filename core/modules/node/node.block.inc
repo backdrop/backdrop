@@ -8,6 +8,10 @@ class NodeBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Existing content');
   }
 
@@ -15,6 +19,10 @@ class NodeBlock extends Block {
    * Returns a preview for this block.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
   }
 
@@ -23,7 +31,14 @@ class NodeBlock extends Block {
    */
   function getTitle() {
     $title = NULL;
-    $node = node_load($this->settings['nid']);
+
+    // Look for and load translated node if translations are available.
+    if (module_exists('translation') && !empty($this->settings['translate'])) {
+      $node = $this->loadTranslatedNode();
+    } else {
+      $node = node_load($this->settings['nid']);
+    }
+
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
       $title = check_plain($this->settings['title']);
     }
@@ -45,7 +60,12 @@ class NodeBlock extends Block {
    *  Sets block content on block view.
    */
   function getContent() {
-    $node = node_load($this->settings['nid']);
+    // Look for and load translated node if translations are available.
+    if (module_exists('translation') && !empty($this->settings['translate'])) {
+      $node = $this->loadTranslatedNode();
+    } else {
+      $node = node_load($this->settings['nid']);
+    }
 
     // Prevent display of no access to the node.
     if (!node_access('view', $node)) {
@@ -67,15 +87,31 @@ class NodeBlock extends Block {
       $content['links']['#access'] = FALSE;
     }
 
-    // Add 'submitted by' settings.
-    if (!empty($this->settings['display_submitted'])) {
-      $content['#display_submitted'] = TRUE;
-    }
+    // Add author and date information settings.
+    $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
     // Add theme hook suggestion.
-    $content['#theme'] = 'node__block-' . $this->settings['nid'];
+    $content['#theme'] = 'node__block_' . $this->settings['nid'];
 
     return $content;
+  }
+
+  function loadTranslatedNode() {
+    global $language;
+
+    $node = node_load($this->settings['nid']);
+
+    if (!empty($node->tnid) && !empty($node->langcode)) {
+      $translations = translation_node_get_translations($node->tnid);
+
+      foreach ($translations as $code => $translation) {
+        if ($code == $language->langcode) {
+          return node_load($translation->nid);
+        }
+      }
+    }
+
+    return $node;
   }
 
   /**
@@ -134,7 +170,7 @@ class NodeBlock extends Block {
     unset($view_mode_options['search_result']);
 
     $form['view_mode'] = array(
-      '#title' => t('View mode'),
+      '#title' => t('Display mode'),
       '#type' => 'select',
       '#options' => $view_mode_options,
       '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',
@@ -151,6 +187,14 @@ class NodeBlock extends Block {
       '#default_value' => !empty($settings['links']),
       '#title' => t('Include the links "add comment", "read more" etc.'),
     );
+
+    if (module_exists('translation')) {
+      $form['translate'] = array(
+        '#type' => 'checkbox',
+        '#default_value' => !empty($settings['translate']),
+        '#title' => t('Load translated version of the content if available'),
+      );
+    }
   }
 
   /**
@@ -188,5 +232,8 @@ class NodeBlock extends Block {
     $this->settings['link_node_title'] = (bool) $form_state['values']['link_node_title'];
     $this->settings['display_submitted'] = (bool) $form_state['values']['display_submitted'];
     $this->settings['view_mode'] = (string) $form_state['values']['view_mode'];
+    if (module_exists('translation')) {
+      $this->settings['translate'] = (bool) $form_state['values']['translate'];
+    }
   }
 }

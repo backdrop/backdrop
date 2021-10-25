@@ -31,9 +31,10 @@ class views_plugin_row_user_view extends views_plugin_row {
     $form['view_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
-      '#title' => t('View mode'),
+      '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
      );
+    $form['help']['#type'] = 'help';
     $form['help']['#markup'] = t("Display the user account using the standard user account view. It might be necessary to add a user-profile.tpl.php file in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a> template doesn't show the username.", array('@user-profile-api-link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21user%21templates%21user-profile.tpl.php/1')));
   }
 

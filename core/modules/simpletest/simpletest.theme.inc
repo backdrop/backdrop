@@ -30,8 +30,8 @@ function theme_simpletest_test_table($variables) {
   // Define the images used to expand/collapse the test groups.
   $js = array(
     'images' => array(
-      theme('image', array('uri' => 'core/misc/menu-collapsed.png', 'width' => 7, 'height' => 7, 'alt' => t('Expand'), 'title' => t('Expand'))) . ' <a href="#" class="simpletest-collapse">(' . t('Expand') . ')</a>',
-      theme('image', array('uri' => 'core/misc/menu-expanded.png', 'width' => 7, 'height' => 7, 'alt' => t('Collapse'), 'title' => t('Collapse'))) . ' <a href="#" class="simpletest-collapse">(' . t('Collapse') . ')</a>',
+      theme('image', array('path' => 'core/misc/menu-collapsed.png', 'width' => 7, 'height' => 7, 'alt' => t('Expand'), 'title' => t('Expand'))) . ' <a href="#" class="simpletest-collapse">(' . t('Expand') . ')</a>',
+      theme('image', array('path' => 'core/misc/menu-expanded.png', 'width' => 7, 'height' => 7, 'alt' => t('Collapse'), 'title' => t('Collapse'))) . ' <a href="#" class="simpletest-collapse">(' . t('Collapse') . ')</a>',
     ),
   );
   backdrop_add_js(array('simpleTest' => $js), 'setting');

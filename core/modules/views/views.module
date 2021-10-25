@@ -69,7 +69,7 @@ function views_api_minimum_version() {
 }
 
 /**
- * Implement hook_theme(). Register views theming functions.
+ * Implement hook_theme(). Register views theme functions.
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = backdrop_get_path('module', 'views');
@@ -104,6 +104,7 @@ function views_theme($existing, $type, $theme, $path) {
   $hooks['views_view_field'] = $base + array(
     'pattern' => 'views_view_field__',
     'variables' => array('view' => NULL, 'field' => NULL, 'row' => NULL),
+    'file' => 'views.theme.inc',
   );
   $hooks['views_view_grouping'] = $base + array(
     'pattern' => 'views_view_grouping__',
@@ -195,7 +196,7 @@ function views_theme($existing, $type, $theme, $path) {
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
-  $regex = '/' . '\.tpl\.php' . '$' . '/';
+  $regex = '/\.tpl\.php$/';
 
   // Because backdrop_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
@@ -214,7 +215,7 @@ function _views_find_module_templates($cache, $path) {
       $templates[$hook] = array(
         'template' => $template,
         'path' => dirname($file->filename),
-        'includes' => isset($cache[$hook]['includes']) ? $cache[$hook]['includes'] : NULL,
+        'includes' => !empty($cache[$hook]['includes']) ? $cache[$hook]['includes'] : array(),
       );
     }
     // Ensure that the pattern is maintained from base themes to its sub-themes.
@@ -244,7 +245,7 @@ function _views_find_module_templates($cache, $path) {
             'variables' => isset($info['variables']) ? $info['variables'] : NULL,
             'render element' => isset($info['render element']) ? $info['render element'] : NULL,
             'base hook' => $hook,
-            'includes' => isset($info['includes']) ? $info['includes'] : NULL,
+            'includes' => !empty($info['includes']) ? $info['includes'] : array(),
           );
         }
       }
@@ -562,11 +563,6 @@ function views_preprocess_layout(&$variables) {
     if (is_subclass_of($view, 'views_plugin_display')) {
       $view = $view->view;
     }
-
-    // Since views exposed filters do not have a current display, test first.
-    if (property_exists($view, 'current_display') && isset($view->current_display)) {
-      views_add_contextual_links($variables['content'], 'page', $view, $view->current_display);
-    }
   }
 }
 
@@ -616,83 +612,6 @@ function views_block_info() {
   views_cache_set('views_block_items', $items, TRUE);
 
   return $items;
-}
-
-/**
- * Implement hook_block_view().
- */
-function views_block_view($delta) {
-  // This indicates it's a special one.
-  if (substr($delta, 0, 1) == '-') {
-    list($nothing, $type, $name, $display_id) = explode('-', $delta);
-    // Put the - back on.
-    $type = '-' . $type;
-    if ($view = views_get_view($name)) {
-      if ($view->access($display_id)) {
-        $view->set_display($display_id);
-        if (isset($view->display_handler)) {
-          $output = $view->display_handler->view_special_blocks($type);
-          // Before returning the block output, convert it to a renderable
-          // array with contextual links.
-          views_add_block_contextual_links($output, $view, $display_id, 'special_block_' . $type);
-          $view->destroy();
-          return $output;
-        }
-      }
-      $view->destroy();
-    }
-  }
-
-  // If the delta doesn't contain valid data return nothing.
-  $explode = explode('-', $delta);
-  if (count($explode) != 2) {
-    return;
-  }
-  list($name, $display_id) = $explode;
-  // Load the view
-  if ($view = views_get_view($name)) {
-    if ($view->access($display_id)) {
-      $output = $view->execute_display($display_id);
-      // Before returning the block output, convert it to a renderable array
-      // with contextual links.
-      views_add_block_contextual_links($output, $view, $display_id);
-      $view->destroy();
-      return $output;
-    }
-    $view->destroy();
-  }
-}
-
-/**
- * Converts Views block content to a renderable array with contextual links.
- *
- * @param $block
- *   An array representing the block, with the same structure as the return
- *   value of hook_block_view(). This will be modified so as to force
- *   $block['content'] to be a renderable array, containing the optional
- *   '#contextual_links' property (if there are any contextual links associated
- *   with the block).
- * @param $view
- *   The view that was used to generate the block content.
- * @param $display_id
- *   The ID of the display within the view that was used to generate the block
- *   content.
- * @param $block_type
- *   The type of the block. If it's block it's a regular views display,
- *   but 'special_block_-exp' exist as well.
- */
-function views_add_block_contextual_links(&$block, $view, $display_id, $block_type = 'block') {
-  // Do not add contextual links to an empty block.
-  if (!empty($block['content'])) {
-    // Contextual links only work on blocks whose content is a renderable
-    // array, so if the block contains a string of already-rendered markup,
-    // convert it to an array.
-    if (is_string($block['content'])) {
-      $block['content'] = array('#markup' => $block['content']);
-    }
-    // Add the contextual links.
-    views_add_contextual_links($block['content'], $block_type, $view, $display_id);
-  }
 }
 
 /**
@@ -826,7 +745,7 @@ function views_language_list($field = 'name', $all = FALSE) {
     $languages = language_list();
   }
   else {
-    $languages = language_list('enabled');
+    $languages = language_list(TRUE);
   }
   $list = array();
   foreach ($languages as $language) {
@@ -940,8 +859,21 @@ function views_access() {
  * permissions. If the $account argument is omitted, the current user
  * is used.
  */
-function views_check_perm($perm, $account = NULL) {
-  return user_access($perm, $account) || user_access('access all views', $account);
+function views_check_perm($perms, $account = NULL) {
+  // Backward compatibility to ensure also a single permission string is
+  // properly processed.
+  $perms = is_array($perms) ? $perms : array($perms);
+  if (user_access('access all views', $account)) {
+    return TRUE;
+  }
+  // Perms are handled as OR; as soon one permission allows access, TRUE is
+  // returned.
+  foreach ($perms as $perm) {
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -1081,10 +1013,6 @@ function views_add_css($file) {
  * Include views .js files.
  */
 function views_add_js($file) {
-  // If javascript has been disabled by the user, never add js files.
-  if (config_get('views.settings', 'no_javascript')) {
-    return;
-  }
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
@@ -1231,7 +1159,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
  *   Either 'display', 'style' or 'row'
  * @param $key
  *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
+ *   'summary', 'feed' or others based on the needs of the display.
  * @param $base
  *   An array of possible base tables.
  *
@@ -1274,6 +1202,26 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
   }
+}
+
+/**
+ * Load the current enabled localization plugin.
+ *
+ * @return string
+ *   The name of the localization plugin.
+ */
+function views_get_localization_plugin() {
+  $plugin = config_get('views.settings', 'views_localization_plugin');
+  // Provide sane default values for the localization plugin.
+  if (empty($plugin)) {
+    if (module_exists('locale')) {
+      $plugin = 'core';
+    }
+    else {
+      $plugin = 'none';
+    }
+  }
+  return $plugin;
 }
 
 // -----------------------------------------------------------------------
@@ -1497,13 +1445,13 @@ function views_get_view($name, $reset = FALSE) {
       $cache[$name] = FALSE;
     }
   }
-  else {
-    if ($cache[$name]) {
-      $cache[$name] = $cache[$name]->clone_view();
-    }
+
+  $return = FALSE;
+  if ($cache[$name]) {
+    $return = $cache[$name]->clone_view();
   }
 
-  return $cache[$name];
+  return $return;
 }
 
 /**
@@ -1937,10 +1885,40 @@ function _views_query_tag_alter_condition(QueryAlterableInterface $query, &$cond
         views_query_views_alter($condition['value']);
       }
       elseif (isset($condition['value'])) {
-        $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        // Arrays need to be handled differently to strings as they could be
+        // nested.
+        if (is_array($condition['value'])) {
+          // Use the callback to walk through the value, performing the search-
+          // replace operation recursively.
+          array_walk_recursive($condition['value'], '_views_str_replace_recursive', array(
+            array_keys($substitutions),
+            array_values($substitutions),
+          ));
+        }
+        // Simple strings can simply use str_replace().
+        else {
+          $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        }
       }
     }
   }
+}
+
+/**
+ * Callback for performing a string replacement via array_walk_recursive().
+ *
+ * @param string $item
+ *   A leaf from the original array.
+ * @param int $key
+ *   The key for the current array item.
+ * @param array $args
+ *   Element 0 is the items to search for, element 1 is the replacements.
+ *
+ * @see _views_query_tag_alter_condition()
+ */
+function _views_str_replace_recursive(&$item, $key, $args) {
+  list($search, $replace) = $args;
+  $item = str_replace($search, $replace, $item);
 }
 
 /**
@@ -2238,6 +2216,9 @@ function views_autoload_info() {
     'views_plugin_exposed_form_basic' => 'plugins/views_plugin_exposed_form_basic.inc',
     'views_plugin_exposed_form' => 'plugins/views_plugin_exposed_form.inc',
     'views_plugin_exposed_form_input_required' => 'plugins/views_plugin_exposed_form_input_required.inc',
+    'views_plugin_localization_core' => 'plugins/views_plugin_localization_core.inc',
+    'views_plugin_localization' => 'plugins/views_plugin_localization.inc',
+    'views_plugin_localization_none' => 'plugins/views_plugin_localization_none.inc',
     'views_plugin_pager' => 'plugins/views_plugin_pager.inc',
     'views_plugin_pager_full' => 'plugins/views_plugin_pager_full.inc',
     'views_plugin_pager_mini' => 'plugins/views_plugin_pager_mini.inc',
@@ -2259,9 +2240,42 @@ function views_autoload_info() {
     'views_plugin_style_summary_jump_menu' => 'plugins/views_plugin_style_summary_jump_menu.inc',
     'views_plugin_style_summary_unformatted' => 'plugins/views_plugin_style_summary_unformatted.inc',
     'views_plugin_style_table' => 'plugins/views_plugin_style_table.inc',
-    // Tests. These are used as base classes so frequently its easiest to
-    // include them in the registry rather than include them manually.
-    'ViewsTestCase' => 'tests/views_query.inc',
-    'ViewsSqlTest' => 'tests/views_query.inc',
+    // Blocks.
+    'ViewsBlock' => 'includes/views.block.inc',
+    'ViewsSpecialBlock' => 'includes/views.special_block.inc',
   );
+}
+
+/**
+ * Cleans a CSS identifier, taking into account views tokenization.
+ *
+ * @param sring $class
+ *   A single CSS class, as entered into the Views user interface.
+ * @param object $plugin
+ *   The complete view plugin object for tokenization.
+ * @param string $row_index
+ *   The index indicating the row of the view.
+ *
+ * @return string $class
+ *   A sanitized clean css identifier with tokens replaced.
+ */
+function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
+  if (!empty($class)) {
+    // To support a class that is part hand-typed and part token, split out tokens.
+    $subclasses = preg_split('/(\[[^\]]*])/i', $class, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    foreach ($subclasses as &$subclass) {
+      $tokenized = $plugin->tokenize_value($subclass, $row_index);
+      if ($tokenized == $subclass) {
+        // No token replacement, all valid CSS characters allowed.
+        $subclass = backdrop_clean_css_identifier($tokenized, array());
+      }
+      else {
+        // Tokens that are replaced should be additionally sanitized, such
+        // as replacing underscores with hyphens.
+        $subclass = backdrop_clean_css_identifier($tokenized);
+      }
+      $class = implode('', $subclasses);
+    }
+    return $class;
+  }
 }

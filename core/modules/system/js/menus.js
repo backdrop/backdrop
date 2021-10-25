@@ -13,6 +13,12 @@ Backdrop.behaviors.menuStyles = {
       var $menu = $(element);
       var style = $menu.data('menuStyle');
       var menuSettings = $menu.data('menuSettings');
+      var clickdown = $(context).find('[data-clickdown]').data('clickdown');
+      if (clickdown) {
+        menuSettings = $.extend(menuSettings, {
+          noMouseOver: true
+        });
+      }
       if (Backdrop.menuStyles[style]) {
         Backdrop.menuStyles[style].attach(element, menuSettings);
       }

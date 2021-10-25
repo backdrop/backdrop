@@ -56,11 +56,8 @@
 }
 
 .block-hero-no-image {
-  background-color: #0074bd;
-  background-image: url(../../images/texture.png);
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-blend-mode: luminosity; /* Colorizes bg image */
+  background: #0074bd url(../../images/texture.png) repeat center center;
+  background-blend-mode: luminosity;
 }
 
 .no-background-blend-mode .block-hero-no-image * {

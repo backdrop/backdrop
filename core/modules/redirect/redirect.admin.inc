@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Redirect module.
+ * Admin page callbacks for the Redirect module.
  */
 
 /**
@@ -37,10 +37,10 @@ function redirect_list_form($form, &$form_state) {
   $keys = implode('/', $keys);
   $form['redirect_list_filter_form'] = redirect_list_filter_form($keys);
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
+    '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -53,12 +53,14 @@ function redirect_list_form($form, &$form_state) {
   }
   $form['operations']['operation'] = array(
     '#type' => 'select',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => $operations,
-    '#default_value' => 'delete',
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
   $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Execute'),
     '#validate' => array('redirect_list_form_operations_validate'),
     '#submit' => array('redirect_list_form_operations_submit'),
   );
@@ -108,14 +110,14 @@ function redirect_list_form($form, &$form_state) {
     if (redirect_access('update', $redirect)) {
       $operations['edit'] = array(
         'title' => t('Edit'),
-        'href' => 'admin/config/search/redirect/edit/' . $rid,
+        'href' => 'admin/config/urls/redirect/edit/' . $rid,
         'query' => $destination,
       );
     }
     if (redirect_access('delete', $redirect)) {
       $operations['delete'] = array(
         'title' => t('Delete'),
-        'href' => 'admin/config/search/redirect/delete/' . $rid,
+        'href' => 'admin/config/urls/redirect/delete/' . $rid,
         'query' => $destination,
       );
     }
@@ -137,14 +139,9 @@ function redirect_list_form($form, &$form_state) {
     '#attributes' => array(
       'class' => array('redirect-list-tableselect'),
     ),
-    '#attached' => array(
-      'js' => array(
-        backdrop_get_path('module', 'redirect') . '/js/redirect.admin.js',
-      ),
-    ),
   );
   if (redirect_access('create', 'redirect')) {
-    $form['rids']['#empty'] .= ' ' . l(t('Add URL redirect.'), 'admin/config/search/redirect/add');
+    $form['rids']['#empty'] .= ' ' . l(t('Add URL redirect.'), 'admin/config/urls/redirect/add');
   }
   $form['pager'] = array('#theme' => 'pager');
   return $form;
@@ -197,14 +194,14 @@ function redirect_list_filter_form($filter_value = '') {
  * Process filter form submission when the Filter button is pressed.
  */
 function redirect_list_filter_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/redirect/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/redirect/list/' . trim($form_state['values']['filter']);
 }
 
 /**
  * Process filter form submission when the Reset button is pressed.
  */
 function redirect_list_filter_form_reset($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/redirect';
+  $form_state['redirect'] = 'admin/config/urls/redirect';
 }
 
 /**
@@ -310,7 +307,7 @@ function redirect_list_form_operations_confirm_form($form, &$form_state, $operat
   $confirm_question = format_plural(count($rids), 'Are you sure you want to @action this redirect?', 'Are you sure you want to @action these redirects?', array('@action' => backdrop_strtolower($operation['action'])));
 
   // Cancel link returns to the current search if possible.
-  $cancel_path = strpos($_GET['q'], 'admin/config/search/redirect') === 0 ? $_GET['q'] : 'admin/config/search/redirect';
+  $cancel_path = strpos($_GET['q'], 'admin/config/urls/redirect') === 0 ? $_GET['q'] : 'admin/config/urls/redirect';
 
   return confirm_form(
     $form,
@@ -326,7 +323,7 @@ function redirect_list_form_operations_confirm_form($form, &$form_state, $operat
  * Page callback; Redirect to the form for creating a redirect.
  */
 function redirect_add_redirect_page() {
-  backdrop_goto('admin/config/search/redirect/add');
+  backdrop_goto('admin/config/urls/redirect/add');
 }
 
 /**
@@ -344,6 +341,11 @@ function redirect_add_redirect_page() {
  */
 function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   if (!isset($redirect)) {
+    // backdrop_set_title() used to "manually" change the page title. See:
+    // https://github.com/backdrop/backdrop-issues/issues/3315
+    // @todo Check if this is needed after/if this gets fixed in core
+    // menu.module. See: https://www.drupal.org/project/drupal/issues/891892
+    backdrop_set_title(t('Add redirect'));
     $redirect = new Redirect(array(
       'source' => isset($_GET['source']) ? urldecode($_GET['source']) : '',
       'source_options' => isset($_GET['source_options']) ? backdrop_get_query_array($_GET['source_options']) : array(),
@@ -379,6 +381,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#required' => TRUE,
     '#field_prefix' => $GLOBALS['base_url'] . '/' . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#element_validate' => array('redirect_element_validate_source'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['source_options'] = array(
     '#type' => 'value',
@@ -391,8 +394,9 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->redirect ? redirect_url($redirect->redirect, $redirect->redirect_options, TRUE) : '',
     '#required' => TRUE,
-    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the front page.', array('%front' => '<front>')),
+    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['redirect_options'] = array(
     '#type' => 'value',
@@ -463,7 +467,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/search/redirect',
+    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/urls/redirect',
   );
 
   return $form;
@@ -482,9 +486,9 @@ function redirect_element_validate_source($element, &$form_state) {
 
   $parsed_value = _redirect_extract_url_options($element, $form_state);
 
-  // Disallow redirects from the front page.
+  // Disallow redirects from the home page.
   if ($parsed_value['path'] === '<front>') {
-    form_error($element, t('The source path cannot be the front page.'));
+    form_error($element, t('The source path cannot be the home page.'));
   }
 
   // Cannot create redirects for valid paths.
@@ -492,14 +496,14 @@ function redirect_element_validate_source($element, &$form_state) {
     // Check if this is an alias.
     $alias = path_load(array('alias' => $parsed_value['path']));
     if ($alias) {
-      $form_state['storage']['override_messages']['existing-alias'] = t('The source path !path is an existing URL alias. You may prefer to <a href="@url-alias">edit this URL alias</a> rather than using a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/edit/' . $alias['pid'])));
+      $form_state['storage']['override_messages']['existing-alias'] = t('The source path !path is an existing URL alias. You may prefer to <a href="@url-alias">edit this URL alias</a> rather than using a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/urls/path/edit/' . $alias['pid'])));
       $form_state['rebuild'] = TRUE;
       return $element;
     }
     $path = backdrop_get_normal_path($parsed_value['path'], $form_state['values']['langcode']);
     $menu_item = menu_get_item($path);
     if ($menu_item && $menu_item['page_callback'] != 'redirect_redirect') {
-      $form_state['storage']['override_messages']['valid-path'] = t('The source path !path is an existing path. Creating a redirect may make it inaccessible. You may prefer to <a href="@url-alias">create a URL alias</a> for this path rather than a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/add')));
+      $form_state['storage']['override_messages']['valid-path'] = t('The source path !path is an existing path. Creating a redirect may make it inaccessible. You may prefer to <a href="@url-alias">create a URL alias</a> for this path rather than a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/urls/path/add')));
       $form_state['rebuild'] = TRUE;
       return $element;
     }
@@ -577,7 +581,7 @@ function redirect_edit_form_validate($form, &$form_state) {
     if ($existing = redirect_load_by_source($redirect->source, $redirect->langcode)) {
       if ($redirect->rid != $existing->rid && $redirect->langcode == $existing->langcode) {
         // The "from" path should not conflict with another redirect
-        $form_state['storage']['override_messages']['redirect-conflict'] = t('The base source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', array('%source' => $redirect->source, '@edit-page' => url('admin/config/search/redirect/edit/'. $existing->rid)));
+        $form_state['storage']['override_messages']['redirect-conflict'] = t('The base source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', array('%source' => $redirect->source, '@edit-page' => url('admin/config/urls/redirect/edit/'. $existing->rid)));
         $form_state['rebuild'] = TRUE;
       }
     }
@@ -596,7 +600,7 @@ function redirect_edit_form_delete_submit($form, &$form_state) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
-  $form_state['redirect'] = array('admin/config/search/redirect/delete/' . $form_state['redirect']->rid, array('query' => $destination));
+  $form_state['redirect'] = array('admin/config/urls/redirect/delete/' . $form_state['redirect']->rid, array('query' => $destination));
 }
 
 /**
@@ -608,7 +612,7 @@ function redirect_edit_form_submit($form, &$form_state) {
   $redirect = $form_state['redirect'];
   redirect_save($redirect);
   backdrop_set_message(t('The redirect has been saved.'));
-  $form_state['redirect'] = 'admin/config/search/redirect';
+  $form_state['redirect'] = 'admin/config/urls/redirect';
 }
 
 /**
@@ -631,7 +635,7 @@ function redirect_delete_form($form, &$form_state, Redirect $redirect) {
   return confirm_form(
     $form,
     t('Are you sure you want to delete the URL redirect from %source to %redirect?', array('%source' => $redirect->source, '%redirect' => $redirect->redirect)),
-    'admin/config/search/redirect'
+    'admin/config/urls/redirect'
   );
 }
 
@@ -643,7 +647,7 @@ function redirect_delete_form($form, &$form_state, Redirect $redirect) {
 function redirect_delete_form_submit($form, &$form_state) {
   redirect_delete($form_state['values']['rid']);
   backdrop_set_message(t('The redirect has been deleted.'));
-  $form_state['redirect'] = 'admin/config/search/redirect';
+  $form_state['redirect'] = 'admin/config/urls/redirect';
 }
 
 /**
@@ -660,7 +664,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
-    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/search/path/patterns/settings'))),
+    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
   $form['passthrough_querystring'] = array(
@@ -744,7 +748,7 @@ function redirect_404_list($form = NULL) {
     if (redirect_access('create', 'redirect')) {
       $operations['add'] = array(
         'title' => t('Add URL redirect'),
-        'href' => 'admin/config/search/redirect/add/',
+        'href' => 'admin/config/urls/redirect/add/',
         'query' => array('source' => $result->message) + $destination,
       );
     }
@@ -781,9 +785,8 @@ function redirect_404_list($form = NULL) {
 function redirect_list_404_filter_form($form, &$form_state, $filter_value = '') {
   $form['#attributes'] = array('class' => array('search-form'));
   $form['help'] = array(
-    '#markup' => '<p>' .
-      t('This page lists all paths that have resulted in 404 errors and do not yet have any redirects assigned to them.') .
-    '</p>'
+    '#type' => 'help',
+    '#markup' => t('This page lists all paths that have resulted in 404 errors and do not yet have any redirects assigned to them.'),
   );
   $form['basic'] = array(
     '#type' => 'fieldset',
@@ -816,14 +819,14 @@ function redirect_list_404_filter_form($form, &$form_state, $filter_value = '') 
  * Process filter form submission when the Filter button is pressed.
  */
 function redirect_list_404_filter_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/redirect/404/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/redirect/404/' . trim($form_state['values']['filter']);
 }
 
 /**
  * Process filter form submission when the Reset button is pressed.
  */
 function redirect_list_404_filter_form_reset($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/redirect/404';
+  $form_state['redirect'] = 'admin/config/urls/redirect/404';
 }
 
 /**
@@ -890,14 +893,14 @@ function redirect_list_table($redirects, $header) {
     if (redirect_access('update', $redirect)) {
       $operations['edit'] = array(
         'title' => t('Edit'),
-        'href' => 'admin/config/search/redirect/edit/' . $rid,
+        'href' => 'admin/config/urls/redirect/edit/' . $rid,
         'query' => $destination,
       );
     }
     if (redirect_access('delete', $redirect)) {
       $operations['delete'] = array(
         'title' => t('Delete'),
-        'href' => 'admin/config/search/redirect/delete/' . $rid,
+        'href' => 'admin/config/urls/redirect/delete/' . $rid,
         'query' => $destination,
       );
     }

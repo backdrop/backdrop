@@ -3,19 +3,74 @@
  * Test class for the test_entity entity type.
  */
 class TestFieldEntity extends Entity {
+
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
+    return $this->id;
+  }
+
+  /**
+   * Implements EntityInterface::entityType().
+   */
+  public function entityType() {
+    return 'entity_test';
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return 'label';
+  }
+
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'test/' . $this->id,
+    );
+  }
+
+  /**
+   * Implements EntityInterface::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
+   * Implements EntityInterface::access().
+   */
+  public function access($op, $account = NULL) {
+    return TRUE;
+  }
+
+}
+
+/**
+ * Test class for the test_entity entity type.
+ */
+class TestEntity extends Entity {
+  public $id;
+
   function id() {
     return $this->id;
   }
 
   public function entityType() {
-    return 'test_field_entity';
+    return 'test_entity';
   }
 
   function label() {
-    return $this->label;
+    return 'label';
   }
 
   function uri() {
-    return 'test/' . $this->id;
+    return array(
+      'path' => 'test/' . $this->id,
+    );
   }
 }

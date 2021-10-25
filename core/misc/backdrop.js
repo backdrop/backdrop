@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -17,7 +17,16 @@ if (Backdrop.settings.drupalCompatibility) {
   window.Drupal = Backdrop;
 }
 
-/**
+// Pre-filter Ajax requests to guard against XSS attacks.
+// This is similar to the fix that is built in to jQuery 3.0 and higher.
+// See https://github.com/jquery/jquery/issues/2432
+$.ajaxPrefilter(function (s) {
+  if (s.crossDomain) {
+    s.contents.script = false;
+  }
+});
+
+  /**
  * Attach all registered behaviors to a page element.
  *
  * Behaviors are event-triggered actions that attach to page elements, enhancing
@@ -93,10 +102,10 @@ Backdrop.attachBehaviors = function (context, settings) {
  *     during a tabledrag row swap). After the move is completed,
  *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
- *     do anything simply in response to the element being moved, but because
- *     IFRAME elements reload their "src" when being moved within the DOM,
- *     behaviors bound to IFRAME elements (like WYSIWYG editors) may need to
- *     take some action.
+ *     do anything in response to the element being moved, but because IFRAME
+ *     elements reload their "src" when being moved within the DOM, behaviors
+ *     bound to IFRAME elements (like WYSIWYG editors) may need to take some
+ *     action.
  *   - serialize: When an Ajax form is submitted, this is called with the
  *     form as the context. This provides every behavior within the form an
  *     opportunity to ensure that the field elements have correct content
@@ -130,6 +139,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
 Backdrop.checkPlain = function (str) {
   str = str.toString()
     .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#39;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
@@ -157,24 +167,117 @@ Backdrop.formatString = function(str, args) {
   // Transform arguments before inserting them.
   for (var key in args) {
     if (args.hasOwnProperty(key)) {
-       switch (key.charAt(0)) {
-         // Escaped only.
-         case '@':
-           args[key] = Backdrop.checkPlain(args[key]);
-        break;
+      switch (key.charAt(0)) {
+        // Escaped only.
+        case '@':
+          args[key] = Backdrop.checkPlain(args[key]);
+          break;
         // Pass-through.
-         case '!':
-           break;
-         // Escaped and placeholder.
-         case '%':
-         default:
-           args[key] = Backdrop.theme('placeholder', args[key]);
-           break;
-       }
-       str = str.replace(key, args[key]);
+        case '!':
+          break;
+        // Escaped and placeholder.
+        case '%':
+          default:
+          args[key] = Backdrop.theme('placeholder', args[key]);
+          break;
+      }
     }
   }
-  return str;
+  return Backdrop.stringReplace(str, args, null);
+};
+
+/**
+ * Generates a string representation for the given byte count.
+ *
+ * @param size
+ *   A size in bytes.
+ * @param langcode
+ *   Optional language code to translate to a language other than what is used
+ *   to display the page.
+ *
+ * @return
+ *   A translated string representation of the size.
+ *
+ * @since Backdrop 1.11.0
+ */
+Backdrop.formatSize = function(size, langcode) {
+  var kilobyte = 1024;
+  if (size < kilobyte) {
+    return Backdrop.formatPlural(size, '1 byte', '@count bytes', {}, {'langcode': langcode });
+  }
+  else {
+    // Convert bytes to kilobytes and round.
+    size = Number.parseFloat(size / kilobyte).toFixed(2);
+    var units = [
+      Backdrop.t('@size KB', {}, {'langcode': langcode}),
+      Backdrop.t('@size MB', {}, {'langcode': langcode}),
+      Backdrop.t('@size GB', {}, {'langcode': langcode}),
+      Backdrop.t('@size TB', {}, {'langcode': langcode})
+    ];
+    var unit;
+    for (var n = 0; n < units.length; n++) {
+      unit = units[n];
+      if (size >= kilobyte) {
+        size = Number.parseFloat(size / kilobyte).toFixed(2);
+      }
+      else {
+        break;
+      }
+    }
+    return unit.replace('@size', size);
+  }
+};
+
+/**
+ * Replace substring.
+ *
+ * The longest keys will be tried first. Once a substring has been replaced,
+ * its new value will not be searched again.
+ *
+ * @param {String} str
+ *   A string with placeholders.
+ * @param {Object} args
+ *   Key-value pairs.
+ * @param {Array|null} keys
+ *   Array of keys from the "args".  Internal use only.
+ *
+ * @return {String}
+ *   Returns the replaced string.
+ */
+Backdrop.stringReplace = function (str, args, keys) {
+  if (str.length === 0) {
+    return str;
+  }
+
+  // If the array of keys is not passed then collect the keys from the args.
+  if (!$.isArray(keys)) {
+    keys = [];
+    for (var k in args) {
+      if (args.hasOwnProperty(k)) {
+        keys.push(k);
+      }
+    }
+
+    // Order the keys by the character length. The shortest one is the first.
+    keys.sort(function (a, b) { return a.length - b.length; });
+  }
+
+  if (keys.length === 0) {
+    return str;
+  }
+
+  // Take next longest one from the end.
+  var key = keys.pop();
+  var fragments = str.split(key);
+
+  if (keys.length) {
+    for (var i = 0; i < fragments.length; i++) {
+      // Process each fragment with a copy of remaining keys.
+      fragments[i] = Backdrop.stringReplace(fragments[i], args, keys.slice(0));
+    }
+  }
+
+  return fragments.join(args[key]);
 };
 
 /**
@@ -289,6 +392,45 @@ Backdrop.absoluteUrl = function (url) {
 };
 
 /**
+ * Returns the passed in URL as a relative URL to the current site.
+ *
+ * Relative URLs are returned only for local URLs. This will return the full
+ * URL for remote URLs.
+ *
+ * @param url
+ *   The URL string to be normalized to a relative URL.
+ *
+ * @return
+ *   The normalized, relative URL with a leading slash.
+ *
+ * @since 1.11.0
+ */
+Backdrop.relativeUrl = function (url) {
+  // Normalize to absolute first.
+  relativeUrl = Backdrop.absoluteUrl(url);
+  // Port is only present on non-HTTP(S) URLs.
+  var port = window.location.port ? (':' + window.location.port) : '';
+  return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
+};
+
+/**
+ * Sanitizes a URL for use with jQuery.ajax().
+ *
+ * @param url
+ *   The URL string to be sanitized.
+ *
+ * @return
+ *   The sanitized URL.
+ */
+Backdrop.sanitizeAjaxUrl = function (url) {
+  var regex = /\=\?(&|$)/;
+  while (url.match(regex)) {
+    url = url.replace(regex, '');
+  }
+  return url;
+}
+
+/**
  * Returns true if the URL is within Backdrop's base path.
  *
  * @param url
@@ -401,6 +543,29 @@ Backdrop.getSelection = function (element) {
     return { 'start': start, 'end': end };
   }
   return { 'start': element.selectionStart, 'end': element.selectionEnd };
+};
+
+/**
+ * Add a global variable which determines if the window is being unloaded.
+ *
+ * This is primarily used by Backdrop.displayAjaxError().
+ */
+Backdrop.beforeUnloadCalled = false;
+$(window).bind('beforeunload pagehide', function () {
+    Backdrop.beforeUnloadCalled = true;
+});
+
+/**
+ * Displays a JavaScript error from an Ajax response when appropriate to do so.
+ */
+Backdrop.displayAjaxError = function (message) {
+  // Skip displaying the message if the user deliberately aborted (for example,
+  // by reloading the page or navigating to a different page) while the Ajax
+  // request was still ongoing. See, for example, the discussion at
+  // http://stackoverflow.com/questions/699941/handle-ajax-error-when-a-user-clicks-refresh.
+  if (!Backdrop.beforeUnloadCalled) {
+    alert(message);
+  }
 };
 
 /**
@@ -600,15 +765,16 @@ Backdrop.featureDetect.flexbox = function() {
  * @endcode
  */
 Backdrop.optimizedResize = (function() {
-  // Set defaults
-  var callbacks = [],
-    running = false;
+  // Set defaults.
+  var callbacks = {};
+  var running = false;
+  var counter = 0;
 
-  // Fired on resize event
+  // Fired on resize event.
   function resize() {
     if (!running) {
       running = true;
-      // Provide setTimeout fallback to old browsers
+      // Provide setTimeout fallback to old browsers.
       if (window.requestAnimationFrame) {
         window.requestAnimationFrame(runCallbacks);
       } else {
@@ -617,30 +783,102 @@ Backdrop.optimizedResize = (function() {
     }
   }
 
-  // Run the actual callbacks
+  // Run the actual callbacks.
   function runCallbacks() {
-    callbacks.forEach(function(callback) {
-      callback();
-    });
+    for (var callbackName in callbacks) {
+      if (callbacks.hasOwnProperty(callbackName)) {
+        callbacks[callbackName]();
+      }
+    }
     running = false;
   }
 
-  // Adds callback to loop
-  function addCallback(callback) {
+  // Adds callback to loop.
+  function addCallback(callback, callbackName) {
+    // Populate a unique callback name if one is not provided.
+    callbackName = callbackName || ('callback-' + (counter++));
     if (callback) {
-      callbacks.push(callback);
+      callbacks[callbackName] = callback;
+    }
+  }
+
+  // Removes a callback from the list of resize handlers.
+  function removeCallback(callbackName) {
+    if (callbacks[callbackName]) {
+      delete callbacks[callbackName];
     }
   }
 
   return {
-    // Public method to add additional callback
-    add: function(callback) {
+    // Public methods to add/remove callbacks.
+    add: function(callback, callbackName) {
       if (!callbacks.length) {
         window.addEventListener('resize', resize);
+        window.addEventListener('scroll', resize);
       }
-      addCallback(callback);
+      addCallback(callback, callbackName);
+    },
+    remove: function(callbackName) {
+      removeCallback(callbackName);
+    },
+    trigger: function() {
+      runCallbacks();
     }
   }
 }());
+
+/**
+ * Limits the invocations of a function in a given time frame.
+ *
+ * This can be useful to respond to an event that fires very frequently,
+ * such as a "keyup" event while a user is typing in a field.
+ *
+ * A common use of debouncing in other systems is window resizing,
+ * however Backdrop provides the Backdrop.optimizedResize() method,
+ * which should be used for that purpose.
+ *
+ * @param function func
+ *   The function to be invoked.
+ * @param number wait
+ *   The time period within which the callback function should only be
+ *   invoked once. For example if the wait period is 250ms, then the callback
+ *   will only be called at most 4 times per second.
+ * @param bool immediate
+ *   Whether we wait at the beginning or end to execute the function.
+ *
+ * @return function
+ *   The debounced function.
+ *
+ * @since 1.18.2 Method added.
+ */
+Backdrop.debounce = function (func, wait, immediate) {
+  var timeout;
+  var result;
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var context = this;
+
+    var later = function later() {
+      timeout = null;
+
+      if (!immediate) {
+        result = func.apply(context, args);
+      }
+    };
+
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+
+    if (callNow) {
+      result = func.apply(context, args);
+    }
+
+    return result;
+  };
+};
 
 })(jQuery);

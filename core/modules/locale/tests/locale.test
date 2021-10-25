@@ -4,7 +4,6 @@
  * Tests for locale.module.
  */
 
-
 /**
  * Functional tests for language configuration's effect on negotiation setup.
  */
@@ -189,6 +188,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -202,6 +203,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -271,6 +273,16 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     // The indicator should not be here.
     $this->assertNoRaw($language_indicator, 'String is translated.');
 
+    // Verify that a translation set which has an empty target string can be
+    // updated without any database error.
+    db_update('locales_target')
+      ->fields(array('translation' => ''))
+      ->condition('language', $langcode, '=')
+      ->condition('lid', $lid, '=')
+      ->execute();
+    $this->backdropPost('admin/config/regional/translate/edit/' . $lid, $edit, t('Save translations'));
+    $this->assertText(t('The string has been saved.'), 'The string has been saved.');
+
     // Try to edit a non-existent string and ensure we're redirected correctly.
     // Assuming we don't have 999,999 strings already.
     $random_lid = 999999;
@@ -330,12 +342,15 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
 
     // Add custom language.
     $edit = array(
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -381,6 +396,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -399,6 +416,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -442,6 +460,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $langcode = 'xx';
     // The English name for the language. This will be translated.
     $name = $this->randomName(16);
+    // The native name for the language.
+    $native = $this->randomName(16);
     // This is the language indicator on the translation search screen for
     // untranslated strings. Copied straight from locale.inc.
     $language_indicator = "<em class=\"locale-untranslated\">$langcode</em> ";
@@ -454,6 +474,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $native,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -647,7 +668,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $options['mode'] = LOCALE_IMPORT_OVERWRITE;
@@ -752,8 +773,8 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
 
     // Set the translation file directory.
     $source = backdrop_get_path('module', 'locale_test');
-    $destination = settings_get('locale_translate_file_directory', 'files/translations');
-    file_prepare_directory($destination);
+    $destination = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
+    file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
     foreach (file_scan_directory($source, '/.*\.po/') as $file) {
       file_unmanaged_copy($file->uri, $destination . '/' . $file->filename, FILE_EXISTS_REPLACE);
     }
@@ -864,6 +885,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -940,7 +962,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $this->backdropPost('admin/config/regional/translate/import', $options, t('Import'));
@@ -1122,7 +1144,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
   function testExportTranslation() {
     // First import some known translations.
     // This will also automatically enable the 'fr' language.
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $this->getPoFile());
     $this->backdropPost('admin/config/regional/translate/import', array(
       'langcode' => 'fr',
@@ -1269,7 +1291,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
     module_disable($locale_module);
     backdrop_uninstall_modules($locale_module);
 
-    // Visit the front page.
+    // Visit the home page.
     $this->backdropGet('');
 
     // Check the init language logic.
@@ -1427,7 +1449,7 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
       'pt' => (object) array(
         'langcode' => 'pt',
       ),
-      // Language codes with more then one dash are actually valid.
+      // Language codes with more than one dash are actually valid.
       // eh-oh-laa-laa is the official language code of the Teletubbies.
       'eh-oh-laa-laa' => (object) array(
         'langcode' => 'eh-oh-laa-laa',
@@ -1533,6 +1555,7 @@ class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -1546,6 +1569,7 @@ class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode_disabled,
       'name' => $name_disabled,
+      'native' => $name_disabled,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -1624,11 +1648,11 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Create a user with the admin/people/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
+    $password = $this->randomName(10);
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass[pass1]' => $username,
-      'pass[pass2]' => $username,
+      'pass' => $password,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
@@ -1664,8 +1688,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Set pass_raw so we can login the new user.
     $user->pass_raw = $this->randomName(10);
     $edit = array(
-      'pass[pass1]' => $user->pass_raw,
-      'pass[pass2]' => $user->pass_raw,
+      'pass' => $user->pass_raw,
     );
 
     $this->backdropPost($user_edit, $edit, t('Save'));
@@ -1705,6 +1728,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -1713,16 +1737,16 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     $edit = array( "prefix[$langcode]" => $prefix );
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
 
-    // Check that the "xx" front page is readily available because path prefix
+    // Check that the "xx" home page is readily available because path prefix
     // negotiation is pre-configured.
     $this->backdropGet($prefix);
-    $this->assertText(t('Welcome to Backdrop'), 'The "xx" front page is readibly available.');
+    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readibly available.');
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
 
     // Create a path alias in default language (English).
-    $path = 'admin/config/search/path/add';
+    $path = 'admin/config/urls/path/add';
     $english_path = $this->randomName(8);
     $edit = array(
       'source'   => 'node/' . $node->nid,
@@ -1861,6 +1885,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -1874,6 +1899,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode_disabled,
       'name' => $name_disabled,
+      'native' => $name_disabled,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -1922,7 +1948,8 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
     // Edit the content and ensure correct language is selected.
     $path = 'node/' . $node->nid . '/edit';
     $this->backdropGet($path);
-    $this->assertRaw('<option value="' . $langcode . '" selected="selected">' .  $name . '</option>', 'Correct language selected.');
+    $label = $name . ' (' . $name . ')';
+    $this->assertRaw('<option value="' . $langcode . '" selected="selected">' .  $label . '</option>', 'Correct language selected.');
     // Ensure we can change the node language.
     $edit = array(
       'langcode' => 'en',
@@ -2184,7 +2211,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       // Default domain, browser preference should have no influence.
       array(
         'language_negotiation' => array(LANGUAGE_NEGOTIATION_URL, LANGUAGE_NEGOTIATION_DEFAULT),
-        'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+        'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
         'path' => 'admin/config',
         'expect' => $default_string,
         'expected_provider' => LANGUAGE_NEGOTIATION_DEFAULT,
@@ -2195,7 +2222,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       // locale_test.module hook_boot() to simulate this.
       array(
         'language_negotiation' => array(LANGUAGE_NEGOTIATION_URL, LANGUAGE_NEGOTIATION_DEFAULT),
-        'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+        'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
         'locale_test_domain' => $language_domain . ':88',
         'path' => 'admin/config',
         'expect' => $language_string,
@@ -2214,8 +2241,8 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     if (!empty($test['language_negotiation'])) {
       language_negotiation_set(LANGUAGE_TYPE_INTERFACE, $test['language_negotiation']);
     }
-    if (!empty($test['locale_language_negotiation_url_part'])) {
-      config_set('locale.settings', 'language_negotiation_url_part', $test['locale_language_negotiation_url_part']);
+    if (!empty($test['language_negotiation_url_part'])) {
+      config_set('locale.settings', 'language_negotiation_url_part', $test['language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
       state_set('locale_test_domain', $test['locale_test_domain']);
@@ -2261,7 +2288,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
 
-    // Access the front page without specifying any valid URL language prefix
+    // Access the home page without specifying any valid URL language prefix
     // and having as browser language preference a non-default language.
     $http_header = array("Accept-Language: $langcode_browser_fallback;q=1");
     $language = (object) array('langcode' => '');
@@ -2271,11 +2298,11 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     // language.
     $args = array(':url' => base_path() . (config_get('system.core', 'clean_url') ? $langcode_browser_fallback : "?q=$langcode_browser_fallback"));
     $fields = $this->xpath('//*[contains(@class,"block-locale-language")]//a[@class="language-link active" and @href=:url]', $args);
-    $this->assertTrue($fields[0] == $languages[$langcode_browser_fallback]->name, 'The browser language is the URL active language');
+    $this->assertTrue($fields[0] == $languages[$langcode_browser_fallback]->native, 'The browser language is the URL active language');
 
     // Check that URLs are rewritten using the given browser language.
     $fields = $this->xpath('//*[contains(@class,"site-name")]//a[@rel="home" and @href=:url]//span', $args);
-    $this->assertTrue($fields[0] == 'Backdrop', 'URLs are rewritten using the browser language.');
+    $this->assertTrue($fields[0] == 'Backdrop CMS', 'URLs are rewritten using the browser language.');
   }
 
   /**
@@ -2299,7 +2326,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Change the domain for the Italian language.
     $edit = array(
-      'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+      'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
       'domain[it]' => 'it.example.com',
     );
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
@@ -2385,9 +2412,9 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting for the given language.
    *
-   * The test is performed with a fixed URL (the default front page) to simply
-   * check that language prefixes are not added to it and that the prefixed URL
-   * is actually not working.
+   * The test is performed with a fixed URL (the default home page) to check
+   * that language prefixes are not added to it, and that the prefixed URL is
+   * actually not working.
    *
    * @param string $language
    *   The language prefix, e.g. 'es'.
@@ -2414,6 +2441,62 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
 
     $this->backdropGet("$prefix/$path");
     $this->assertResponse(404, $message2);
+  }
+
+  /**
+   * Check URL rewriting when using a domain name and a non-standard port.
+   */
+  function testDomainNameNegotiationPort() {
+    $edit = array(
+      // Enable domain configuration.
+      'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+      'prefix[fr]' => '',
+      'domain[fr]' => 'example.fr',
+    );
+    $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
+
+    // Reset static caching.
+    backdrop_static_reset('language_list');
+    backdrop_static_reset('language_url_outbound_alter');
+    backdrop_static_reset('language_url_rewrite_url');
+
+    // In case index.php is part of the URLs, we need to adapt the asserted
+    // URLs as well.
+    $index_php = strpos(url('', array('absolute' => TRUE)), 'index.php') !== FALSE;
+
+    // Remember current HTTP_HOST.
+    $http_host = $_SERVER['HTTP_HOST'];
+
+    // Fake a different port.
+    $_SERVER['HTTP_HOST'] .= ':88';
+
+    // Create an absolute French link.
+    $languages = language_list();
+    $language = $languages['fr'];
+    $url = url('', array(
+      'absolute' => TRUE,
+      'language' => $language
+    ));
+
+    $expected = 'http://example.fr:88/';
+    $expected .= $index_php ? 'index.php/' : '';
+
+    $this->assertEqual($url, $expected, 'The right port is used.');
+
+    // If we set the port explicitly in url(), it should not be overriden.
+    $url = url('', array(
+      'absolute' => TRUE,
+      'language' => $language,
+      'base_url' => $GLOBALS['base_url'] . ':90',
+    ));
+
+    $expected = 'http://example.fr:90/';
+    $expected .= $index_php ? 'index.php/' : '';
+
+    $this->assertEqual($url, $expected, 'A given port is not overriden.');
+
+    // Restore HTTP_HOST.
+    $_SERVER['HTTP_HOST'] = $http_host;
   }
 }
 
@@ -2484,7 +2567,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'it',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
+    $node = $this->backdropGetNodeByTitle($edit[$title_key], TRUE);
     $this->assertTrue($node, 'Node found in database.');
 
     $assert = isset($node->body['it']) && !isset($node->body['en']) && $node->body['it'][0]['value'] == $body_value;

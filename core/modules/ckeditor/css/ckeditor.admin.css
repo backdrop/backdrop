@@ -5,21 +5,16 @@
  * Many of these styles are adapted directly from the default CKEditor theme
  * "moono".
  */
-.ckeditor-active-toolbar-configuration {
+.ckeditor-active-toolbar-configuration,
+[dir="rtl"] .ckeditor-active-toolbar-configuration {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 .ckeditor-toolbar-active {
-  border: 1px solid #b6b6b6;
+  border: 1px solid #d1d1d1;
   padding: 6px 4px 2px;
-  background: #cfd1cf;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(whiteSmoke), to(#cfd1cf));
-  background-image: -moz-linear-gradient(top, whiteSmoke, #cfd1cf);
-  background-image: -o-linear-gradient(top, whiteSmoke, #cfd1cf);
-  background-image: -ms-linear-gradient(top, whiteSmoke, #cfd1cf);
-  background-image: linear-gradient(top, whiteSmoke, #cfd1cf);
-  filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#fff5f5f5', endColorstr='#ffcfd1cf');
+  background: #f8f8f8;
   margin: 5px 0;
   line-height: 1;
   font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
@@ -36,14 +31,15 @@
   min-height: 26px;
   min-width: 28px;
   list-style: none;
-
   display: inline-block;
   padding: 0;
   margin: 0;
-  border: 1px solid #a6a6a6;
-  border-bottom-color: #979797;
-  border-radius: 3px;
+  border: 1px solid #d1d1d1;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 0 2px rgba(255, 255, 255, .15) inset, 0 1px 0 rgba(255, 255, 255, .15) inset;
+}
+[dir="rtl"] .ckeditor-buttons {
+  padding: 0;
+  margin: 0;
 }
 .ckeditor-button,
 .ckeditor-button-placeholder,
@@ -56,15 +52,7 @@
   border: 0;
   vertical-align: middle;
   line-height: 1.6;
-
-  background: #e4e4e4;
-  background-image: -webkit-gradient(linear,left top,left bottom,from(white),to(#e4e4e4));
-  background-image: -moz-linear-gradient(top,white,#e4e4e4);
-  background-image: -webkit-linear-gradient(top,white,#e4e4e4);
-  background-image: -o-linear-gradient(top,white,#e4e4e4);
-  background-image: -ms-linear-gradient(top,white,#e4e4e4);
-  background-image: linear-gradient(top,white,#e4e4e4);
-  filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0,startColorstr='#ffffffff',endColorstr='#ffe4e4e4');
+  background: #f8f8f8;
 }
 .ckeditor-buttons .ckeditor-button:first-child {
   border-top-left-radius: 2px;
@@ -113,12 +101,13 @@
 }
 .ckeditor-row-controls {
   float: right; /* LTR */
+  text-align: right; /* LTR */
   font-size: 18px;
   width: 40px;
-  text-align: right;
 }
 [dir="rtl"] .ckeditor-row-controls {
   float: left;
+  text-align: left;
 }
 .ckeditor-row-controls a {
   display: inline-block;
@@ -143,14 +132,7 @@
   height: 26px;
   text-align: center;
 
-  background: #e4e4e4;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(#e4e4e4));
-  background-image: -moz-linear-gradient(top, white, #e4e4e4);
-  background-image: -webkit-linear-gradient(top, white, #e4e4e4);
-  background-image: -o-linear-gradient(top, white, #e4e4e4);
-  background-image: -ms-linear-gradient(top, white, #e4e4e4);
-  background-image: linear-gradient(top, white, #e4e4e4);
-  filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#ffffffff', endColorstr='#ffe4e4e4');
+  background: #f8f8f8;
 }
 .ckeditor-multiple-buttons .ckeditor-button-separator {
   width: 10px;
@@ -199,6 +181,8 @@
   float: left; /* LTR */
 }
 [dir="rtl"] .ckeditor-toolbar-groups {
+  margin: 0;
+  padding: 0;
   float: right;
 }
 .ckeditor-toolbar-group {
@@ -233,6 +217,8 @@
   float: left; /* LTR */
 }
 [dir="rtl"] .ckeditor-toolbar-group-buttons {
+  padding: 0;
+  margin: 0;
   float: right;
 }
 .ckeditor-groupnames-toggle {
@@ -242,4 +228,3 @@
 [dir="rtl"] .ckeditor-groupnames-toggle {
   float: left;
 }
-

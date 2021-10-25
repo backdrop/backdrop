@@ -27,11 +27,11 @@ function image_image_effect_info() {
     ),
     'image_scale_and_crop' => array(
       'label' => t('Scale and crop'),
-      'help' => t('Scale and crop will maintain the aspect-ratio of the original image, then crop the larger dimension. This is most useful for creating perfectly square thumbnails without stretching the image.'),
+      'help' => t('Scale and crop will maintain the aspect-ratio of the original image, then crop the larger dimension based on the type of anchor selected.'),
       'effect callback' => 'image_scale_and_crop_effect',
       'dimensions callback' => 'image_resize_dimensions',
-      'form callback' => 'image_resize_form',
-      'summary theme' => 'image_resize_summary',
+      'form callback' => 'image_crop_form',
+      'summary theme' => 'image_crop_summary',
     ),
     'image_crop' => array(
       'label' => t('Crop'),
@@ -166,11 +166,13 @@ function image_scale_dimensions(array &$dimensions, array $data) {
  *   - "width": An integer representing the desired width in pixels.
  *   - "height": An integer representing the desired height in pixels.
  *   - "anchor": A string describing where the crop should originate in the form
- *     of "XOFFSET-YOFFSET". XOFFSET is either a number of pixels or
- *     "left", "center", "right" and YOFFSET is either a number of pixels or
- *     "top", "center", "bottom".
+ *     of "XOFFSET-YOFFSET":
+ *     - XOFFSET is either a number of pixels or "left", "center", "right".
+ *     - YOFFSET is either a number of pixels or "top", "center", "bottom".
+ *
  * @return
  *   TRUE on success. FALSE on failure to crop image.
+ *
  * @see image_crop()
  */
 function image_crop_effect(&$image, $data) {
@@ -199,12 +201,19 @@ function image_crop_effect(&$image, $data) {
  *   with the following items:
  *   - "width": An integer representing the desired width in pixels.
  *   - "height": An integer representing the desired height in pixels.
+ *
  * @return
  *   TRUE on success. FALSE on failure to scale and crop image.
+ *
  * @see image_scale_and_crop()
  */
 function image_scale_and_crop_effect(&$image, $data) {
-  if (!image_scale_and_crop($image, $data['width'], $data['height'])) {
+  // Set sane default values.
+  $data += array(
+    'anchor' => 'center-center',
+  );
+
+  if (!image_scale_and_crop($image, $data['width'], $data['height'], $data['anchor'])) {
     watchdog('image', 'Image scale and crop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
     return FALSE;
   }

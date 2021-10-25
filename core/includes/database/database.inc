@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Core systems for the database layer.
@@ -14,13 +13,11 @@
  * @{
  * Allow the use of different database servers using the same code base.
  *
- * Backdrop provides a database abstraction layer to provide developers with
- * the ability to support multiple database servers easily. The intent of
- * this layer is to preserve the syntax and power of SQL as much as possible,
- * but also allow developers a way to leverage more complex functionality in
- * a unified way. It also provides a structured interface for dynamically
- * constructing queries when appropriate, and enforcing security checks and
- * similar good practices.
+ * Backdrop includes a database abstraction layer to provide a structured
+ * interface for dynamically constructing queries when appropriate, and to
+ * enforce security checks and similar good practices. The intent of this layer
+ * is to preserve the syntax and power of SQL as much as possible, but also
+ * allow developers to leverage more complex functionality in a unified way.
  *
  * The system is built atop PHP's PDO (PHP Data Objects) database API and
  * inherits much of its syntax and semantics.
@@ -79,7 +76,7 @@
  * array where keys are a placeholder label (e.g., :uid) and the value is the
  * corresponding value to use. The array may be in any order.
  *
- * Unnamed placeholders are simply a question mark. Example:
+ * Unnamed placeholders are represented by a question mark. For example:
  * @code
  * SELECT nid, title FROM {node} WHERE uid=?;
  * @endcode
@@ -122,8 +119,8 @@
  *
  * Backdrop also supports transactions, including a transparent fallback for
  * databases that do not support transactions. To start a new transaction,
- * simply call $txn = db_transaction(); in your own code. The transaction will
- * remain open for as long as the variable $txn remains in scope.  When $txn is
+ * call $txn = db_transaction(); in your own code. The transaction will remain
+ * open for as long as the variable $txn remains in scope.  When $txn is
  * destroyed, the transaction will be committed.  If your transaction is nested
  * inside of another then Backdrop will track each transaction and only commit
  * the outer-most transaction when the last transaction object goes out out of
@@ -184,7 +181,7 @@
  *
  * @see http://php.net/manual/book.pdo.php
  */
-abstract class DatabaseConnection extends PDO {
+abstract class DatabaseConnection {
 
   /**
    * The database target this connection is for.
@@ -212,6 +209,13 @@ abstract class DatabaseConnection extends PDO {
    * @var DatabaseLog
    */
   protected $logger = NULL;
+
+  /**
+   * The PDO object that is used for running database queries.
+   *
+   * @var PDO
+   */
+  protected $pdo = NULL;
 
   /**
    * Tracks the number of "layers" of transactions currently active.
@@ -296,6 +300,20 @@ abstract class DatabaseConnection extends PDO {
    */
   protected $prefixReplace = array();
 
+  /**
+   * List of escaped database, table, and field names, keyed by unescaped names.
+   *
+   * @var array
+   */
+  protected $escapedNames = array();
+
+  /**
+   * List of escaped aliases names, keyed by unescaped aliases.
+   *
+   * @var array
+   */
+  protected $escapedAliases = array();
+
   function __construct($dsn, $username, $password, $driver_options = array()) {
     // Initialize and prepare the connection prefix.
     $this->setPrefix(isset($this->connectionOptions['prefix']) ? $this->connectionOptions['prefix'] : '');
@@ -304,11 +322,11 @@ abstract class DatabaseConnection extends PDO {
     $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
 
     // Call PDO::__construct and PDO::setAttribute.
-    parent::__construct($dsn, $username, $password, $driver_options);
+    $this->pdo = new PDO($dsn, $username, $password, $driver_options);
 
     // Set a Statement class, unless the driver opted out.
     if (!empty($this->statementClass)) {
-      $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
     }
   }
 
@@ -324,7 +342,7 @@ abstract class DatabaseConnection extends PDO {
     // Destroy all references to this connection by setting them to NULL.
     // The Statement class attribute only accepts a new value that presents a
     // proper callable, so we reset it to PDOStatement.
-    $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
     $this->schema = NULL;
   }
 
@@ -367,8 +385,7 @@ abstract class DatabaseConnection extends PDO {
    * - throw_exception: By default, the database system will catch any errors
    *   on a query as an Exception, log it, and then rethrow it so that code
    *   further up the call chain can take an appropriate action. To suppress
-   *   that behavior and simply return NULL on failure, set this option to
-   *   FALSE.
+   *   that behavior and return NULL on failure, set this option to FALSE.
    *
    * @return
    *   An array of default query options.
@@ -463,6 +480,25 @@ abstract class DatabaseConnection extends PDO {
   }
 
   /**
+   * Provides a pass-through to the PDO prepare method.
+   *
+   * In adding support for PHP 8, the Backdrop DatabaseConnection no longer
+   * directly extends the PHP PDO object. A side-effect is that calls
+   * to PDO methods no longer worked. This provides a pass-through
+   * to this method specifically for compatibility with previous versions of
+   * Backdrop. See https://github.com/backdrop/backdrop-issues/issues/5094.
+   *
+   * @param $query
+   *
+   * @return bool|PDOStatement
+   *
+   * @since 1.19.2
+   */
+  public function prepare($query) {
+    return $this->pdo->prepare($query);
+  }
+
+  /**
    * Prepares a query string and returns the prepared statement.
    *
    * This method caches prepared statements, reusing them when
@@ -479,7 +515,7 @@ abstract class DatabaseConnection extends PDO {
     $query = $this->prefixTables($query);
 
     // Call PDO::prepare.
-    return parent::prepare($query);
+    return $this->pdo->prepare($query);
   }
 
   /**
@@ -664,7 +700,6 @@ abstract class DatabaseConnection extends PDO {
    * @throws PDOException
    */
   public function query($query, array $args = array(), $options = array()) {
-
     // Use default values if not already set.
     $options += $this->defaultOptions();
 
@@ -691,7 +726,7 @@ abstract class DatabaseConnection extends PDO {
         case Database::RETURN_AFFECTED:
           return $stmt->rowCount();
         case Database::RETURN_INSERT_ID:
-          return $this->lastInsertId();
+          return $this->pdo->lastInsertId();
         case Database::RETURN_NULL:
           return NULL;
         default:
@@ -918,11 +953,14 @@ abstract class DatabaseConnection extends PDO {
    * For some database drivers, it may also wrap the table name in
    * database-specific escape characters.
    *
-   * @return
+   * @return string
    *   The sanitized table name string.
    */
   public function escapeTable($table) {
-    return preg_replace('/[^A-Za-z0-9_.]+/', '', $table);
+    if (!isset($this->escapedNames[$table])) {
+      $this->escapedNames[$table] = preg_replace('/[^A-Za-z0-9_.]+/', '', $table);
+    }
+    return $this->escapedNames[$table];
   }
 
   /**
@@ -932,11 +970,14 @@ abstract class DatabaseConnection extends PDO {
    * For some database drivers, it may also wrap the field name in
    * database-specific escape characters.
    *
-   * @return
+   * @return string
    *   The sanitized field name string.
    */
   public function escapeField($field) {
-    return preg_replace('/[^A-Za-z0-9_.]+/', '', $field);
+    if (!isset($this->escapedNames[$field])) {
+      $this->escapedNames[$field] = preg_replace('/[^A-Za-z0-9_.]+/', '', $field);
+    }
+    return $this->escapedNames[$field];
   }
 
   /**
@@ -947,11 +988,14 @@ abstract class DatabaseConnection extends PDO {
    * DatabaseConnection::escapeTable(), this doesn't allow the period (".")
    * because that is not allowed in aliases.
    *
-   * @return
+   * @return string
    *   The sanitized field name string.
    */
   public function escapeAlias($field) {
-    return preg_replace('/[^A-Za-z0-9_]+/', '', $field);
+    if (!isset($this->escapedAliases[$field])) {
+      $this->escapedAliases[$field] = preg_replace('/[^A-Za-z0-9_]+/', '', $field);
+    }
+    return $this->escapedAliases[$field];
   }
 
   /**
@@ -981,6 +1025,19 @@ abstract class DatabaseConnection extends PDO {
    */
   public function escapeLike($string) {
     return addcslashes($string, '\%_');
+  }
+
+  /**
+   * Provides a wrapper for the quote() function from the PDO object.
+   *
+   * @param string $string
+   *   The string to be quoted.
+   *
+   * @return
+   *   The quoted string.
+   */
+  public function quote($string) {
+    return $this->pdo->quote($string);
   }
 
   /**
@@ -1068,7 +1125,7 @@ abstract class DatabaseConnection extends PDO {
         $rolled_back_other_active_savepoints = TRUE;
       }
     }
-    parent::rollBack();
+    $this->pdo->rollBack();
     if ($rolled_back_other_active_savepoints) {
       throw new DatabaseTransactionOutOfOrderException();
     }
@@ -1096,7 +1153,7 @@ abstract class DatabaseConnection extends PDO {
       $this->query('SAVEPOINT ' . $name);
     }
     else {
-      parent::beginTransaction();
+      $this->pdo->beginTransaction();
     }
     $this->transactionLayers[$name] = $name;
   }
@@ -1147,7 +1204,7 @@ abstract class DatabaseConnection extends PDO {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!parent::commit()) {
+        if (!$this->pdo->commit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -1231,7 +1288,7 @@ abstract class DatabaseConnection extends PDO {
    * Returns the version of the database server.
    */
   public function version() {
-    return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
+    return $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
   }
 
   /**
@@ -1262,6 +1319,16 @@ abstract class DatabaseConnection extends PDO {
    */
   abstract public function databaseType();
 
+  /**
+   * Creates a database.
+   *
+   * In order to use this method, you must be connected without a database
+   * specified.
+   *
+   * @param string $database
+   *   The name of the database to create.
+   */
+  abstract public function createDatabase($database);
 
   /**
    * Gets any special processing requirements for the condition operator.
@@ -1348,7 +1415,7 @@ abstract class DatabaseConnection extends PDO {
 abstract class Database {
 
   /**
-   * Flag to indicate a query call should simply return NULL.
+   * Flag to indicate a query call should return NULL.
    *
    * This is used for queries that have no reasonable return value anyway, such
    * as INSERT statements to a table without a serial primary key.
@@ -1386,7 +1453,7 @@ abstract class Database {
   static protected $databaseInfo = NULL;
 
   /**
-   * A list of key/target credentials to simply ignore.
+   * A list of key/target credentials to ignore.
    *
    * @var array
    */
@@ -1675,12 +1742,16 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
+   * @param $close
+   *   Whether to close the connection.
    * @return
    *   TRUE in case of success, FALSE otherwise.
    */
-  final public static function removeConnection($key) {
+  final public static function removeConnection($key, $close = TRUE) {
     if (isset(self::$databaseInfo[$key])) {
-      self::closeConnection(NULL, $key);
+      if ($close) {
+        self::closeConnection(NULL, $key);
+      }
       unset(self::$databaseInfo[$key]);
       return TRUE;
     }
@@ -1847,6 +1918,11 @@ class DatabaseTransactionExplicitCommitNotAllowedException extends Exception { }
 class DatabaseTransactionOutOfOrderException extends Exception { }
 
 /**
+ * Exception thrown when the specified database cannot be found.
+ */
+class DatabaseNotFoundException extends Exception { }
+
+/**
  * Exception thrown for merge queries that do not make semantic sense.
  *
  * There are many ways that a merge query could be malformed.  They should all
@@ -1881,17 +1957,17 @@ class DatabaseDriverNotSpecifiedException extends Exception {}
 /**
  * A wrapper class for creating and managing database transactions.
  *
- * Not all databases or database configurations support transactions. For
- * example, MySQL MyISAM tables do not. It is also easy to begin a transaction
- * and then forget to commit it, which can lead to connection errors when
- * another transaction is started.
+ * Not all database configurations support transactions. For example, MySQL
+ * MyISAM tables do not. It is also easy to begin a transaction and then forget
+ * to commit it, which can lead to connection errors when another transaction is
+ * started.
  *
  * This class acts as a wrapper for transactions. To begin a transaction,
- * simply instantiate it. When the object goes out of scope and is destroyed
- * it will automatically commit. It also will check to see if the specified
- * connection supports transactions. If not, it will simply skip any transaction
- * commands, allowing user-space code to proceed normally. The only difference
- * is that rollbacks won't actually do anything.
+ * instantiate it. When the object goes out of scope and is destroyed it will
+ * automatically commit. It also will check to see if the specified connection
+ * supports transactions. If not, it will skip any transaction commands,
+ * allowing user-space code to proceed normally. The only difference is that
+ * rollbacks won't actually do anything.
  *
  * In the vast majority of cases, you should not instantiate this class
  * directly. Instead, call ->startTransaction(), from the appropriate connection
@@ -2347,9 +2423,8 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
 }
 
 /**
- * The following utility functions are simply convenience wrappers.
- *
- * They should never, ever have any database-specific code in them.
+ * The following utility functions are wrappers, for convenience. They should
+ * never have any database-specific code in them.
  */
 
 /**
@@ -2835,10 +2910,6 @@ function db_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
 }
 
-function _db_create_keys_sql($spec) {
-  return Database::getConnection()->schema()->createKeysSql($spec);
-}
-
 /**
  * Renames a table.
  *
@@ -2874,11 +2945,11 @@ function db_drop_table($table) {
  *   will be set to the value of the key in all rows. This is most useful for
  *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
- *   Optional keys and indexes specification to be created on the table along
- *   with adding the field. The format is the same as a table specification, but
- *   without the 'fields' element. If you are adding a type 'serial' field, you
- *   MUST specify at least one key or index including it in this array. See
- *   db_change_field() for more explanation why.
+ *   Optional. An array containing the specification for keys and indexes to be 
+ *   created on the table along with the field. The format is the same as a
+ *   schema definition, but without the 'columns' element. If you are adding a
+ *   'serial' type field, you MUST specify at least one key or index in this
+ *   array. See db_change_field() for more explanation why.
  *
  * @see db_change_field()
  */

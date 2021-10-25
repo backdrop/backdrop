@@ -16,7 +16,7 @@ class BackdropMatchPathTestCase extends BackdropWebTestCase {
     // Set up the database and testing environment.
     parent::setUp();
 
-    // Set up a random site front page to test the '<front>' placeholder.
+    // Set up a random site home page to test the '<front>' placeholder.
     $this->front = $this->randomName();
     config_set('system.core', 'site_frontpage', $this->front);
     // Refresh our static variables from the database.
@@ -151,7 +151,7 @@ class UrlAlterFunctionalTest extends BackdropWebTestCase {
 
     // Test that alias source paths are normalized in the interface.
     $edit = array('source' => "user/$name/edit", 'alias' => 'alias/test2');
-    $this->backdropPost('admin/config/search/path/add', $edit, 'Save URL alias');
+    $this->backdropPost('admin/config/urls/path/add', $edit, 'Save URL alias');
     $this->assertText(t('The alias has been saved.'));
 
     // Test that a path always uses its alias.

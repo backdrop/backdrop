@@ -46,14 +46,14 @@ class redirect_handler_field_redirect_operations extends views_handler_field {
     if (redirect_access('update', $redirect)) {
       $operations['edit'] = array(
         'title' => !empty($this->options['edit_text']) ? $this->options['edit_text'] : t('Edit'),
-        'href' => 'admin/config/search/redirect/edit/' . $rid,
+        'href' => 'admin/config/urls/redirect/edit/' . $rid,
         'query' => $destination,
       );
     }
     if (redirect_access('delete', $redirect)) {
       $operations['delete'] = array(
         'title' => !empty($this->options['delete_text']) ? $this->options['delete_text'] : t('Delete'),
-        'href' => 'admin/config/search/redirect/delete/' . $rid,
+        'href' => 'admin/config/urls/redirect/delete/' . $rid,
         'query' => $destination,
       );
     }

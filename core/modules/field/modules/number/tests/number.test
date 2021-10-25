@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for number.module.
@@ -63,7 +62,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
-    $this->assertRaw(round($value, 2), 'Value is displayed.');
+    $this->assertRaw($value, 'Value is displayed.');
 
     // Try to create entries with more than one decimal separator; assert fail.
     $wrong_entries = array(
@@ -103,6 +102,57 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test number_decimal field step validation.
+   */
+  public function testNumberDecimalFieldStepValidation() {
+    // Create a field with settings to validate, this time with higher
+    // precision and scale.
+    $this->field = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'number_decimal',
+      'settings' => array(
+        'precision' => 14,
+        'scale' => 10,
+        'decimal_separator' => '.',
+      ),
+    );
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_decimal',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    // Valid values but problematic because of php floating point precision.
+    // All these values are divisible by 0.0000000001 (1.0E-10), so the step
+    // validation must pass.
+    $valid_values = array(
+      20.123456789,
+      9999.1933172003,
+      219.200005,
+      199.200001,
+    );
+    foreach ($valid_values as $index => $decimal) {
+      $langcode = LANGUAGE_NONE;
+      $this->backdropGet('test-entity/add/test-bundle');
+      $edit = array(
+        "{$this->field['field_name']}[$langcode][0][value]" => $decimal,
+      );
+      $this->backdropPost(NULL, $edit, t('Save'));
+      $this->assertNoRaw(format_string('%name is not a valid number.', array('%name' => $this->field['field_name'])));
+    }
+  }
+
+  /**
    * Test number_integer field.
    */
   function testNumberIntegerField() {
@@ -138,4 +188,92 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
   }
+
+  /**
+   * Test number_float field.
+   */
+  function testNumberFloatField() {
+    $this->field = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'number_float',
+      'settings' => array(
+        'precision' => 8, 'scale' => 4, 'decimal_separator' => '.',
+      )
+    );
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_float',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    $langcode = LANGUAGE_NONE;
+    $value = array(
+      '9.' => '9',
+      '.' => '0',
+      '123.55' => '123.55',
+      '.55' => '0.55',
+      '-0.55' => '-0.55',
+    );
+    foreach($value as $key => $value) {
+      $edit = array(
+        "{$this->field['field_name']}[$langcode][0][value]" => $key,
+      );
+      $this->backdropPost('test-entity/add/test-bundle', $edit, t('Save'));
+      $this->assertNoText("PDOException");
+      $this->assertRaw($value, 'Correct value is displayed.');
+    }
+  }
+
+  /**
+   * Test empty value submission.
+   */
+  function testNumberFieldEmpty() {
+    // Add a content type.
+    $this->backdropGet('admin/structure/types/add');
+    $name = $this->randomName();
+    $bundle = backdrop_strtolower($name);
+    $edit = array('name' => $name, 'type' => $bundle);
+    $this->backdropPost(NULL, $edit, t('Save and add fields'));
+
+    // Add a decimal field to the newly created type.
+    $label = $this->randomName();
+    $field_name = backdrop_strtolower($label);
+    $edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $field_name,
+      'fields[_add_new_field][type]' => 'number_decimal',
+      'fields[_add_new_field][widget_type]' => 'number',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Set an empty default value for that type via UI.
+    $path = "admin/structure/types/manage/$bundle/fields/field_{$field_name}";
+    $this->backdropGet($path);
+    $langcode = LANGUAGE_NONE;
+    $edit = array(
+      "field_{$field_name}[$langcode][0][value]" => '',
+    );
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    // Default value should still be NULL.
+    $config = config("field.instance.node.{$bundle}.field_{$field_name}");
+    $this->assertEqual($config->get('default_value'), NULL, 'Default value of number field is NULL');
+    $node_user = $this->backdropCreateUser(array('bypass node access'));
+    $this->backdropLogin($node_user);
+    // Save the same empty value in a node entity (node needs a title).
+    $edit['title'] = $this->randomName();
+    $this->backdropGet("node/add/{$bundle}");
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200, 'Post to create new node with empty number value returned 200 OK');
+  }
+
 }

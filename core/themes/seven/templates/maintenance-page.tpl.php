@@ -27,9 +27,11 @@
     </main>
   </div>
 
-  <footer role="contentinfo">
-    <?php print $footer; ?>
-  </footer>
+  <?php if (!empty($footer)): ?>
+    <footer role="contentinfo">
+      <?php print $footer; ?>
+    </footer>
+  <?php endif; ?>
 
   </body>
 </html>

@@ -112,7 +112,7 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {
@@ -171,19 +171,18 @@ function theme_system_modules_fieldset($variables) {
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
 
-    if ($requires || $required_by) {
-      $requirements .= ' <div class="requirements">';
-      if ($requires) {
-        $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
-      }
-      if ($required_by) {
-        $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
-      }
-      $requirements .= '</div>';
-
-      // Build a requirements toggle.
-      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+    $requirements .= '<div class="requirements">';
+    if ($requires) {
+      $requirements .= '<div class="admin-requirements">' . t('Requires:') . ' ' . implode(', ', $module['#requires']) . '</div>';
     }
+    if ($required_by) {
+      $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
+    $requirements .= '</div>';
+
+    // Build a requirements toggle.
+    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
 
     // Add the description, along with any modules it requires.
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
@@ -228,7 +227,7 @@ function theme_system_modules_incompatible($variables) {
 function theme_system_modules_uninstall($variables) {
   $form = $variables['form'];
 
-  // No theming for the confirm form.
+  // No special theme override for the confirm form.
   if (isset($form['confirm'])) {
     return backdrop_render($form);
   }
@@ -268,52 +267,121 @@ function theme_system_modules_uninstall($variables) {
 /**
  * Returns HTML for the status report.
  *
+ * This theme function is dependent on install.inc being loaded, because
+ * that's where the constants are defined.
+ *
  * @param $variables
  *   An associative array containing:
- *   - requirements: An array of requirements.
+ *   - requirements: An array of requirements/status items. Each requirement
+ *     is an associative array containing the following elements:
+ *     - title: The name of the requirement.
+ *     - value: (optional) The current value (version, time, level, etc).
+ *     - description: (optional) The description of the requirement.
+ *     - severity: (optional) The requirement's result/severity level, one of:
+ *       - REQUIREMENT_INFO: Status information.
+ *       - REQUIREMENT_OK: The requirement is satisfied.
+ *       - REQUIREMENT_WARNING: The requirement failed with a warning.
+ *       - REQUIREMENT_ERROR: The requirement failed with an error.
  *
  * @ingroup themeable
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  backdrop_sort($requirements, array('title' => SORT_STRING));
+
+  // Separate requirements by severity.
+  $errors = array();
+  $warnings = array();
+  $infos = array();
+  $okays = array();
+  foreach ($requirements as $requirement) {
+    if (!isset($requirement['severity'])) {
+      $requirement['severity'] = REQUIREMENT_OK;
+    }
+    switch ($requirement['severity']) {
+      case REQUIREMENT_ERROR:
+        $errors[] = $requirement;
+        break;
+      case REQUIREMENT_WARNING:
+        $warnings[] = $requirement;
+        break;
+      case REQUIREMENT_INFO:
+        $infos[] = $requirement;
+        break;
+      case REQUIREMENT_OK:
+        $okays[] = $requirement;
+        break;
+    }
+  }
+  // Put them back together in the desired order.
+  $requirements = array_merge($errors, $warnings, $infos, $okays);
+
   $severities = array(
     REQUIREMENT_INFO => array(
       'title' => t('Info'),
-      'class' => 'info',
+      'class' => array('report-info'),
     ),
     REQUIREMENT_OK => array(
       'title' => t('OK'),
-      'class' => 'status',
+      'class' => array('report-status'),
     ),
     REQUIREMENT_WARNING => array(
       'title' => t('Warning'),
-      'class' => 'warning',
+      'class' => array('report-warning'),
     ),
     REQUIREMENT_ERROR => array(
       'title' => t('Error'),
-      'class' => 'error',
+      'class' => array('report-error'),
     ),
   );
-  $output = '<table class="system-status-report">';
 
+  $system_status_report_table = array(
+    'header' => array(),
+    'rows' => array(),
+    'attributes' => array('class' => 'system-status-report'),
+    'caption' => '',
+    'colgroups' => array(),
+    'sticky' => FALSE,
+    'empty' => 'No status report. Something is definitely wrong.',
+  );
+
+  $rows = array();
   foreach ($requirements as $requirement) {
-    if (empty($requirement['#type'])) {
-      $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
-      $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
+    $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
+    $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
 
-      // Output table row(s)
-      if (!empty($requirement['description'])) {
-        $output .= '<tr class="' . $severity['class'] . ' merge-down"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
-        $output .= '<tr class="' . $severity['class'] . ' merge-up"><td colspan="3" class="status-description">' . $requirement['description'] . '</td></tr>';
-      }
-      else {
-        $output .= '<tr class="' . $severity['class'] . '"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
-      }
+    // The requirement's 'value' key is optional, provide a default value.
+    $requirement['value'] = isset($requirement['value']) ? $requirement['value'] : '';
+
+    $title = $requirement['title'] . '<br/>';
+    $title .= '<span class="status-summary-mobile">' . $requirement['value'] . '</span>';
+
+    $more = ' ';
+    $details = '';
+    if (!empty($requirement['description'])) {
+      $more .= '<a class="description-toggle" href="#">more</a>';
+      $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
+
+    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+
+    $row = array(
+      'data' => array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title, 'class' => 'status-title'),
+        array('data' => $description, 'class' => array('status-value', 'priority-low')),
+      ),
+      'class' => $severity['class'],
+    );
+
+    $rows[] = $row;
   }
 
-  $output .= '</table>';
-  return $output;
+  $system_status_report_table['rows'] = $rows;
+  $path = backdrop_get_path('module', 'system');
+  backdrop_add_js($path . '/js/status.js');
+
+  return theme_table($system_status_report_table);
 }
 
 /**
@@ -347,14 +415,18 @@ function theme_admin_page($variables) {
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
+  if (!empty($container)) {
+    $output = '<div class="admin clearfix">';
+      foreach ($container as $id => $data) {
+        $output .= '<div class="' . $id . ' clearfix">';
+        $output .= $data;
+        $output .= '</div>';
+      }
     $output .= '</div>';
   }
-  $output .= '</div>';
+  else {
+    $output = t('You do not have any administrative items.');
+  }
   return $output;
 }
 
@@ -374,14 +446,21 @@ function theme_admin_page($variables) {
  */
 function theme_admin_block($variables) {
   $block = $variables['block'];
-  $output = '';
+  $classes = array('admin-panel');
+  // Construct a more specific class.
+  if (isset($variables['block']['path'])) {
+    $path_parts = explode('/', $variables['block']['path']);
+    $class_suffix = end($path_parts);
+    $classes[] = ' ' . backdrop_clean_css_identifier('admin-panel-' . $class_suffix);
+  }
 
+  $output = '';
   // Don't display the block if it has no content to display.
   if (empty($block['show'])) {
     return $output;
   }
 
-  $output .= '<div class="admin-panel">';
+  $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
     $output .= '<h3>' . $block['title'] . '</h3>';
   }
@@ -626,8 +705,8 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
     'id' => '',
     'class' => array(),
     'data' => array(
-      'name' => '',
-      'token' => '',
+      'name' => array(),
+      'token' => array(),
       'value' => '',
     ),
   );
@@ -656,4 +735,87 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
   }
 
   return $row;
+}
+
+/**
+ * Prepares variables for Page Component block templates.
+ */
+function system_preprocess_page_components(&$variables) {
+  $settings = $variables['settings'];
+  $child_delta = $variables['child_delta'];
+  $variables += array(
+    'action_links' => NULL,
+    'tabs' => NULL,
+    'messages' => NULL,
+    'title' => NULL,
+  );
+
+  if ($child_delta == 'title' || $child_delta == 'title_combo') {
+    $variables['title'] = $settings['title'];
+    $variables['title_tag'] = $settings['title_tag'];
+    $variables['title_classes'] = $settings['title_classes'];
+    $variables['title_attributes'] = array(
+      'class' => array_filter(explode(' ', $settings['title_classes'])),
+    );
+  }
+  if ($child_delta == 'tabs' || $child_delta == 'title_combo') {
+    $menus =  array();
+    switch ($settings['tab_type']) {
+      case 'primary':
+        $menus =  array(
+          'primary' => menu_primary_local_tasks(),
+        );
+        break;
+      case 'secondary':
+        $menus =  array(
+          'secondary' => menu_secondary_local_tasks(),
+        );
+        break;
+      case 'both':
+        $menus =  array(
+          'primary' => menu_primary_local_tasks(),
+          'secondary' => menu_secondary_local_tasks(),
+        );
+        break;
+    }
+    if ($settings['tab_type'] == 'hidden') {
+      $variables['tabs'] = '';
+    }
+    else {
+      $variables['tabs'] = theme('menu_local_tasks', $menus);
+    }
+  }
+  if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
+    $variables['action_links'] = menu_local_actions();
+  }
+
+  if ($child_delta == 'messages' || $child_delta == 'title_combo') {
+    $variables['messages'] = theme('status_messages');
+  }
+
+  // Add specific suggestions that can override the default implementation.
+  $variables['theme_hook_suggestions'] = array(
+    'page_components__' . $child_delta,
+  );
+}
+
+/**
+ * Returns HTML for the display of a label and its machine name.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - label: The human-readable label.
+ *   - machine_name: (optional) The machine-safe name.
+ *
+ * @ingroup themeable
+ */
+function theme_label_machine_name($variables) {
+  $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
+
+  if (!empty($variables['machine_name'])) {
+    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
 }

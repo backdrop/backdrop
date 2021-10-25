@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administration pages for image settings.
+ * Admin page callbacks for the Image module.
  */
 
 /**
@@ -24,7 +23,7 @@ function image_style_list() {
 }
 
 /**
- * Form builder; Edit an image style name and effects order.
+ * Form builder; Configure an image style name and effects order.
  *
  * @param $form_state
  *   An associative array containing the current state of the form.
@@ -34,7 +33,7 @@ function image_style_list() {
  * @see image_style_form_submit()
  */
 function image_style_form($form, &$form_state, $style) {
-  $title = t('Edit %name style', array('%name' => $style['label']));
+  $title = t('Configure image style %name', array('%name' => $style['label']));
   backdrop_set_title($title, PASS_THROUGH);
 
   $form_state['image_style'] = $style;
@@ -93,14 +92,14 @@ function image_style_form($form, &$form_state, $style) {
     );
     $links = array();
     if (isset($effect['form callback'])) {
-      $links['edit'] = array(
-        'title' => t('Edit'),
-        'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key,
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => 'admin/config/media/image-styles/configure/' . $style['name'] . '/effects/' . $key,
       );
     }
     $links['delete'] = array(
       'title' => t('Delete'),
-      'href' => 'admin/config/media/image-styles/edit/' . $style['name'] . '/effects/' . $key . '/delete',
+      'href' => 'admin/config/media/image-styles/configure/' . $style['name'] . '/effects/' . $key . '/delete',
     );
     $form['effects'][$key]['operations'] = array(
       '#type' => 'operations',
@@ -165,7 +164,7 @@ function image_style_form_add_submit($form, &$form_state) {
 
   // Load the configuration form for this option.
   if (isset($effect['form callback'])) {
-    $path = 'admin/config/media/image-styles/edit/' . $form_state['image_style']['name'] . '/add/' . $form_state['values']['new'];
+    $path = 'admin/config/media/image-styles/configure/' . $form_state['image_style']['name'] . '/add/' . $form_state['values']['new'];
     $form_state['redirect'] = array($path, array('query' => array('weight' => $form_state['values']['weight'])));
   }
   // If there's no form, immediately add the image effect.
@@ -211,7 +210,7 @@ function image_style_form_submit($form, &$form_state) {
   if ($form_state['values']['op'] == t('Update style')) {
     backdrop_set_message(t('Changes to the style have been saved.'));
   }
-  $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
+  $form_state['redirect'] = 'admin/config/media/image-styles/configure/' . $style['name'];
 }
 
 /**
@@ -221,6 +220,7 @@ function image_style_form_submit($form, &$form_state) {
  * @see image_style_add_form_submit()
  */
 function image_style_add_form($form, &$form_state) {
+  backdrop_set_title(t('Add image style'));
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Style name'),
@@ -240,9 +240,10 @@ function image_style_add_form($form, &$form_state) {
     ),
   );
 
-  $form['submit'] = array(
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Create new style'),
+    '#value' => t('Save and add effects'),
   );
 
   return $form;
@@ -258,7 +259,7 @@ function image_style_add_form_submit($form, &$form_state) {
   );
   $style = image_style_save($style);
   backdrop_set_message(t('Style %name was created.', array('%name' => $style['label'])));
-  $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
+  $form_state['redirect'] = 'admin/config/media/image-styles/configure/' . $style['name'];
 }
 
 /**
@@ -361,7 +362,7 @@ function image_effect_form($form, &$form_state, $style, $effect) {
 
   // If no configuration for this image effect, return to the image style page.
   if (!isset($effect['form callback'])) {
-    backdrop_goto('admin/config/media/image-styles/edit/' . $style['name']);
+    backdrop_goto('admin/config/media/image-styles/configure/' . $style['name']);
   }
 
   $form['#tree'] = TRUE;
@@ -383,7 +384,7 @@ function image_effect_form($form, &$form_state, $style, $effect) {
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => 'admin/config/media/image-styles/edit/' . $style['name'],
+    '#href' => 'admin/config/media/image-styles/configure/' . $style['name'],
   );
 
   return $form;
@@ -396,7 +397,7 @@ function image_effect_form_submit($form, &$form_state) {
   $effect = array_merge($form_state['image_effect'], $form_state['values']);
   image_effect_save($form_state['image_style']['name'], $effect);
   backdrop_set_message(t('The image effect was successfully applied.'));
-  $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $form_state['image_style']['name'];
+  $form_state['redirect'] = 'admin/config/media/image-styles/configure/' . $form_state['image_style']['name'];
 }
 
 /**
@@ -414,7 +415,7 @@ function image_effect_delete_form($form, &$form_state, $style, $effect) {
   $form_state['image_effect'] = $effect;
 
   $question = t('Are you sure you want to delete the @effect effect from the %style style?', array('%style' => $style['label'], '@effect' => $effect['label']));
-  return confirm_form($form, $question, 'admin/config/media/image-styles/edit/' . $style['name'], '', t('Delete'));
+  return confirm_form($form, $question, 'admin/config/media/image-styles/configure/' . $style['name'], '', t('Delete'));
 }
 
 /**
@@ -426,7 +427,7 @@ function image_effect_delete_form_submit($form, &$form_state) {
 
   image_effect_delete($style['name'], $effect);
   backdrop_set_message(t('The image effect %name has been deleted.', array('%name' => $effect['label'])));
-  $form_state['redirect'] = 'admin/config/media/image-styles/edit/' . $style['name'];
+  $form_state['redirect'] = 'admin/config/media/image-styles/configure/' . $style['name'];
 }
 
 /**
@@ -480,6 +481,7 @@ function image_resize_form($data) {
     '#min' => 1,
     '#max' => 1000000000,
   );
+
   return $form;
 }
 
@@ -501,9 +503,10 @@ function image_scale_form($data) {
   $form['upscale'] = array(
     '#type' => 'checkbox',
     '#default_value' => (isset($data['upscale'])) ? $data['upscale'] : 0,
-    '#title' => t('Allow Upscaling'),
-    '#description' => t('Let scale make images larger than their original size'),
+    '#title' => t('Enable upscaling'),
+    '#description' => t('Allows images to be made larger than their original size.'),
   );
+
   return $form;
 }
 

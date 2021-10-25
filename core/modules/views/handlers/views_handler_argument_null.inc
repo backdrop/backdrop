@@ -40,7 +40,7 @@ class views_handler_argument_null extends views_handler_argument {
    */
   function default_actions($which = NULL) {
     if ($which) {
-      if (in_array($which, array('ignore', 'not found', 'empty', 'default'))) {
+      if (in_array($which, array('ignore', 'not found', 'empty', 'default', 'access denied'))) {
         return parent::default_actions($which);
       }
       return;

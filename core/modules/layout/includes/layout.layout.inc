@@ -6,6 +6,10 @@
 
 /**
  * Implements hook_layout_context_info().
+ *
+ * @see node_layout_context_info().
+ * @see user_layout_context_info().
+ * @see taxonomy_layout_context_info().
  */
 function layout_layout_context_info() {
   $info['node'] = array(
@@ -45,6 +49,16 @@ function layout_layout_context_info() {
     'path placeholder' => '%term',
     'load callback' => 'taxonomy_term_load',
   );
+  $info['file'] = array(
+    'title' => t('File'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'file/%file',
+      'file/%file/view',
+    ),
+    'path placeholder' => '%file',
+    'load callback' => 'file_load',
+  );
   $info['overrides_path'] = array(
     'title' => t('Overrides path'),
     'description' => t('Layout overrides existing path provided by another module.'),
@@ -59,6 +73,21 @@ function layout_layout_context_info() {
     'path placeholder' => NULL,
     'menu paths' => array(),
   );
+  return $info;
+}
+
+/**
+ * Implements hook_layout_relationship_info().
+ */
+function layout_layout_relationship_info() {
+  $info['author_from_node'] = array(
+    'title' => t('Author of content'),
+    'class' => 'LayoutRelationshipAuthorFromNode',
+    'context' => 'node',
+    'context_label' => t('Content'),
+    'description' => t('Creates a user context from the author of a piece of content.'),
+  );
+
   return $info;
 }
 
@@ -102,8 +131,8 @@ function layout_layout_access_info() {
   }
 
   $info['front'] = array(
-    'title' => t('Front page'),
-    'description' => t('Is this the front page.'),
+    'title' => t('Home page'),
+    'description' => t('Is this the home page.'),
     'class' => 'FrontLayoutAccess',
   );
   $info['language'] = array(
@@ -154,6 +183,9 @@ function layout_layout_renderer_info() {
   );
   $info['standard'] = array(
     'class' => 'LayoutRendererStandard',
+  );
+  $info['flexible'] = array(
+    'class' => 'LayoutRendererFlexible',
   );
   return $info;
 }

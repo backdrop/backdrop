@@ -3,7 +3,7 @@
  * Stylesheet for the Field UI module.
  */
 
-/* 'Manage fields' and 'Manage display' overviews */
+/* 'Manage fields' and 'Manage displays' overviews */
 .field-ui-overview tr.add-new .label-input {
   float: left; /* LTR */
 }
@@ -37,11 +37,14 @@
   display: none;
 }
 .field-ui-overview tr.add-new td {
-  vertical-align: top;
+  vertical-align: bottom;
   white-space: nowrap;
 }
+.field-ui-overview tr.add-new td:nth-of-type(4) {
+  vertical-align: middle;
+}
 
-/* 'Manage display' overview */
+/* 'Manage displays' overview */
 .field-ui-overview .field-formatter-summary-cell {
   line-height: 1em;
 }
@@ -70,7 +73,7 @@
   font-weight: bold;
 }
 
-/* 'View modes' overview */
+/* 'Display modes' overview */
 .field-ui-view-modes tr.header td {
   background-color: #e9e8e8;
   font-weight: bold;
@@ -81,7 +84,8 @@
 .field-ui-view-modes tr.default-view-mode td {
   font-weight: bold;
 }
-.field-ui-view-modes tr.default-view-mode td div.description {
+.field-ui-view-modes tr.default-view-mode td div.description,
+.field-ui-view-modes tr.default-view-mode td div.machine-name {
   font-weight: normal;
 }
 .field-ui-view-modes th.operations {

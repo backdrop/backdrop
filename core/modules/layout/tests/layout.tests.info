@@ -16,6 +16,12 @@ description = Tests the custom text block (BlockText) saving and converting to r
 group = Layout
 file = layout.test
 
+[LayoutCloneTest]
+name = Layout Clone Test
+description = Tests cloning a layout through the UI.
+group = Layout
+file = layout.test
+
 [LayoutSelectionTest]
 name = Layout Selection Test
 description = Tests that the correct layout is used in various situations.
@@ -37,5 +43,17 @@ file = layout.test
 [LayoutBlockUsageTestCase]
 name = Layout Block Usage Test
 description = Tests the layout_get_block_usage() function.
+group = Layout
+file = layout.test
+
+[LayoutRendererTest]
+name = Layout Renderer Test
+description = Tests that the correct renderer is used.
+group = Layout
+file = layout.test
+
+[LayoutFlexibleTemplateTest]
+name = Layout Flexible Template Test
+description = Tests that flexible layout templates perform correctly.
 group = Layout
 file = layout.test
