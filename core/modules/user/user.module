@@ -1321,11 +1321,11 @@ function user_cancel_access($account) {
 function user_menu() {
   $items['user/autocomplete'] = array(
     'title' => 'User autocomplete',
+    'type' => MENU_CALLBACK,
     'page callback' => 'user_autocomplete',
     'delivery callback' => 'backdrop_json_deliver',
     'access callback' => 'user_access',
     'access arguments' => array('access user profiles'),
-    'type' => MENU_CALLBACK,
     'file' => 'user.pages.inc',
   );
 
@@ -1335,41 +1335,41 @@ function user_menu() {
     'title callback' => 'user_menu_title',
     'page callback' => 'user_page',
     'access callback' => TRUE,
+    'menu_name' => 'user-menu',
     'file' => 'user.pages.inc',
     'weight' => -10,
-    'menu_name' => 'user-menu',
   );
 
   $items['user/login'] = array(
     'title' => 'Log in',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login'),
     'access callback' => 'user_is_anonymous',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
   $items['user/register'] = array(
     'title' => 'Create new account',
+    'type' => MENU_LOCAL_TASK,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_register_form'),
     'access callback' => 'user_register_access',
-    'type' => MENU_LOCAL_TASK,
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
+    'type' => MENU_LOCAL_TASK,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_pass'),
     'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
     'file' => 'user.pages.inc',
   );
   $items['user/reset/%/%/%'] = array(
     'title' => 'Reset password',
+    'type' => MENU_CALLBACK,
     'page callback' => 'user_pass_reset',
     'page arguments' => array(2, 3, 4),
     'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
     'file' => 'user.pages.inc',
   );
 
@@ -1382,77 +1382,87 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
 
-  $items['admin/people/create'] = array(
-    'title' => 'Add user account',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_register_form'),
-    'access arguments' => array('administer users'),
-    'type' => MENU_LOCAL_ACTION,
-  );
-  $items['admin/people/cancel'] = array(
-    'title' => 'Cancel user accounts',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_multiple_cancel_confirm'),
-    'access arguments' => array('administer users'),
-    'file' => 'user.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-
-  // Administration pages.
-  $items['admin/config/people'] = array(
+  $items['admin/people'] = array(
     'title' => 'User accounts',
-    'description' => 'Configure user accounts.',
+    'description' => 'Manage user accounts.',
     'position' => 'left',
-    'weight' => -20,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('field_ui_field_overview_form', 'user', 'user'),
     'access arguments' => array('access administration pages'),
     'file' => 'field_ui.admin.inc',
     'file path' => backdrop_get_path('module', 'field_ui'),
   );
+  $items['admin/people/create'] = array(
+    'title' => 'Add user account',
+    'type' => MENU_LOCAL_ACTION,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_register_form'),
+    'access arguments' => array('administer users'),
+  );
+  $items['admin/people/cancel'] = array(
+    'title' => 'Cancel user accounts',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_multiple_cancel_confirm'),
+    'access arguments' => array('administer users'),
+    'file' => 'user.admin.inc',
+  );
+
+  // Administration pages.
+  $items['admin/config/people'] = array(
+    'title' => 'User accounts',
+    'description' => 'Configure user account settings.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer account settings'),
+    'file' => 'system.admin.inc',
+    'file path' => backdrop_get_path('module', 'system'),
+  );
   $items['admin/config/people/settings'] = array(
     'title' => 'Account settings',
+    // 'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'description' => 'Configure settings for user accounts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 40,
+    'weight' => -50,
   );
 
   // Login settings.
   $items['admin/config/people/login'] = array(
     'title' => 'Login settings',
+    'type' => MENU_LOCAL_TASK,
     'description' => 'Configure the way visitors may log in and limit login attempts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
+    'weight' => -40,
   );
 
   // Permissions forms.
   $items['admin/config/people/permissions'] = array(
     'title' => 'Permissions',
+    'type' => MENU_LOCAL_TASK,
     'description' => 'Determine access to features by selecting permissions for roles.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_permissions'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 60,
+    'weight' => -10,
   );
 
   // Role forms.
   $items['admin/config/people/roles'] = array(
     'title' => 'Roles',
+    'type' => MENU_LOCAL_TASK,
     'description' => 'List, edit, or add levels of access, or <em>user roles</em>.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_roles'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 70,
+    'weight' => -20,
   );
   $items['admin/config/people/roles/add'] = array(
     'title' => 'Add role',
@@ -1486,13 +1496,13 @@ function user_menu() {
   // Emails.
   $items['admin/config/people/emails'] = array(
     'title' => 'Account emails',
+    'type' => MENU_LOCAL_TASK,
     'description' => 'Configure email templates used for account registration and management.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_settings_email'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 50,
+    'weight' => -30,
   );
 
   $items['user/%user'] = array(
@@ -1537,11 +1547,11 @@ function user_menu() {
 
   $items['user/%user/edit'] = array(
     'title' => 'Edit',
+    'type' => MENU_LOCAL_TASK,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_profile_form', 1),
     'access callback' => 'user_edit_access',
     'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
     'file' => 'user.pages.inc',
   );
   return $items;
