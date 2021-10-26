@@ -337,9 +337,9 @@ class BookTestCase extends BackdropWebTestCase {
      $edit = array();
 
      // Test access to delete top-level and child book nodes.
-     $this->backdropGet('node/' . $this->book->nid . '/outline/remove');
+     $this->backdropGet('node/' . $this->book->nid . '/outline-remove');
      $this->assertResponse('403', 'Deleting top-level book node properly forbidden.');
-     $this->backdropPost('node/' . $nodes[4]->nid . '/outline/remove', $edit, t('Remove'));
+     $this->backdropPost('node/' . $nodes[4]->nid . '/outline-remove', $edit, t('Remove'));
      $node4 = node_load($nodes[4]->nid, NULL, TRUE);
      $this->assertTrue(empty($node4->book), 'Deleting child book node properly allowed.');
 
@@ -348,7 +348,7 @@ class BookTestCase extends BackdropWebTestCase {
        $nids[] = $node->nid;
      }
      node_delete_multiple($nids);
-     $this->backdropPost('node/' . $this->book->nid . '/outline/remove', $edit, t('Remove'));
+     $this->backdropPost('node/' . $this->book->nid . '/outline-remove', $edit, t('Remove'));
      $node = node_load($this->book->nid, NULL, TRUE);
      $this->assertTrue(empty($node->book), 'Deleting childless top-level book node properly allowed.');
    }

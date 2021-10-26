@@ -122,7 +122,7 @@ function book_node_view_link(Node $node, $view_mode) {
  */
 function book_menu() {
   $items['admin/content/book'] = array(
-    'title' => 'Books',
+    'title' => 'Manage Books',
     'description' => "Manage your site's book outlines.",
     'page callback' => 'book_admin_overview',
     'access arguments' => array('administer book outlines'),
@@ -148,7 +148,6 @@ function book_menu() {
     'page arguments' => array('book_admin_edit', 3),
     'access callback' => '_book_outline_access',
     'access arguments' => array(3),
-    'type' => MENU_CALLBACK,
     'file' => 'book.admin.inc',
   );
   $items['book'] = array(
@@ -158,18 +157,8 @@ function book_menu() {
     'type' => MENU_SUGGESTED_ITEM,
     'file' => 'book.pages.inc',
   );
-  $items['node/%node/outline'] = array(
-    'title' => 'Outline',
-    'page callback' => 'book_outline',
-    'page arguments' => array(1),
-    'access callback' => '_book_outline_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-    'file' => 'book.pages.inc',
-  );
-  $items['node/%node/outline/remove'] = array(
-    'title' => 'Remove from outline',
+  $items['node/%node/outline-remove'] = array(
+    'title' => 'Remove from book outline',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_remove_form', 1),
     'access callback' => '_book_outline_remove_access',
@@ -227,8 +216,7 @@ function _book_node_is_removable($node) {
 function book_admin_paths() {
   if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
-      'node/*/outline' => TRUE,
-      'node/*/outline/remove' => TRUE,
+      'node/*/outline-remove' => TRUE,
     );
     return $paths;
   }
@@ -413,6 +401,20 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
         'css' => array(backdrop_get_path('module', 'book') . '/css/book.admin.css'),
       ),
     );
+    if (!empty($node->nid)) {
+      $form['book']['actions'] = array(
+        '#theme' => 'links',
+        '#links' => array(),
+        '#attributes' => array('class' => array('action-links')),
+        '#weight' => 40,
+      );
+      if (_book_node_is_removable($node)) {
+        $form['book']['actions']['#links']['remove'] = array(
+          'title' => t('Remove from book outline'),
+          'href' => 'node/' . $node->nid . '/outline-remove',
+        );
+      }
+    }
   }
 }
 

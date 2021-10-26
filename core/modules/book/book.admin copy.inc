@@ -65,37 +65,14 @@ function book_admin_settings($form, &$form_state) {
     '#options' => $types,
     '#required' => TRUE,
   );
-  $form['book_options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Options'),
-  );
-  $form['book_options']['book_navigation'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Display default book navigation on book pages'),
-    '#default_value' => $config->get('book_navigation'),
-  );
-  $form['book_options']['book_navigation_options'] = array(
+  $form['book_create_new'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Select book navigation options'),
-    '#default_value' => $config->get('book_navigation_options'),
-    '#options' => array(
-      'tree' => t('Table of contents'),
-      'pager' => t('Previous, Next, and Up links'),
-    ),
-    '#states' => array(
-      'invisible' => array(
-        ':input[name="book_navigation"]' => array('checked' => FALSE),
-      ),
-    ),
+    '#title' => t('Always create new books'),
+    '#default_value' => $config->get('book_create_new'),
+    '#options' => $form['book_allowed_types']['#options'],
+    '#description' => t('Select content types which will automatically create new books when the main book page is initially created'),
   );
-  $form['book_options']['book_links'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Select book links options'),
-    '#default_value' => $config->get('book_links'),
-    '#options' => array(
-      'book_add_child' => t('Add child page'),
-    ),
-  );
+
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
 
@@ -117,6 +94,11 @@ function book_admin_settings_validate($form, &$form_state) {
   if (empty($form_state['values']['book_allowed_types'][$child_type])) {
     form_set_error('book_child_type', t('The content type for the %add-child link must be one of those selected as an allowed book outline type.', array('%add-child' => t('Add child page'))));
   }
+  $create_new = $form_state['values']['book_create_new'];
+  debug($create_new);
+  if (empty($form_state['values']['book_allowed_types'][$create_new])) {
+    form_set_error('book_create_new', t('The content type for Always create new books must be one of those selected as an allowed book outline type.'));
+  }
 }
 
  /**
@@ -128,9 +110,7 @@ function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
-    ->set('book_navigation', $form_state['values']['book_navigation'])
-    ->set('book_navigation_options', $form_state['values']['book_navigation_options'])
-    ->set('book_links', $form_state['values']['book_links'])
+    ->set('book_create_new', $form_state['values']['book_create_new'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }
