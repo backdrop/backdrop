@@ -1395,7 +1395,7 @@ function views_ui_edit_form_submit_clone_display_as_type($form, &$form_state) {
   $display_clone = clone $view->display[$display_id];
   unset($display_clone->display_title);
   unset($display_clone->display_plugin);
-  $new_display_array = drupal_array_merge_deep((array) $view->display[$new_display_id], (array) $display_clone);
+  $new_display_array = backdrop_array_merge_deep((array) $view->display[$new_display_id], (array) $display_clone);
   foreach ($new_display_array as $key => $value) {
     $view->display[$new_display_id]->{$key} = $value;
   }
