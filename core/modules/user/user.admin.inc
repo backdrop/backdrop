@@ -23,7 +23,7 @@ function user_multiple_cancel_confirm($form, &$form_state) {
   // Output a notice that user 1 cannot be canceled.
   if (isset($accounts[1])) {
     $redirect = (count($accounts) == 1);
-    $message = t('The user account %name cannot be cancelled.', array('%name' => $accounts[1]->name));
+    $message = t('The user account %name cannot be cancelled.', array('%name' => user_format_name($accounts[1])));
     backdrop_set_message($message, $redirect ? 'error' : 'warning');
     unset($accounts[1]);
     // If only user 1 was selected, redirect to the overview.
