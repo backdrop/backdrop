@@ -87,11 +87,13 @@ function book_autoload_info() {
  */
 function book_node_view_link(Node $node, $view_mode) {
   $links = array();
+  $config = config('book.settings');
+  $link_options = $config->get('book_links');
 
   if (isset($node->book['depth'])) {
     if ($view_mode == 'full' && node_is_page($node)) {
-      $child_type = config_get('book.settings', 'book_child_type');
-      if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH) {
+      $child_type = $config->get('book_child_type');
+      if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH && in_array('book_add_child', $link_options, TRUE)) {
         $links['book_add_child'] = array(
           'title' => t('Add child page'),
           'href' => 'node/add/' . str_replace('_', '-', $child_type),
@@ -850,7 +852,7 @@ function book_node_load($nodes, $types) {
  */
 function book_node_view(Node $node, $view_mode) {
   if ($view_mode == 'full') {
-    if (!empty($node->book['bid']) && empty($node->in_preview)) {
+    if (!empty($node->book['bid']) && empty($node->in_preview) && config_get('book.settings', 'book_navigation')) {
       $node->content['book_navigation'] = array(
         '#markup' => theme('book_navigation', array('book_link' => $node->book)),
         '#weight' => 100,
