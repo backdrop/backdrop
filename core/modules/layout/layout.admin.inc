@@ -11,6 +11,7 @@
  */
 function layout_list_page() {
   $layouts = layout_load_all();
+  $layout_template_info = layout_get_layout_template_info();
 
   // Group layouts by path.
   $path_groups = array();
@@ -34,11 +35,13 @@ function layout_list_page() {
       // priority-low class on the $header array.
       $row[] = '';
       $row[] = '';
+      $row[] = '';
     }
     else {
       $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
       $row[] = array('data' => $path_link);
       // Empty columns are intentional.
+      $row[] = '';
       $row[] = '';
       $row[] = '';
     }
@@ -65,8 +68,13 @@ function layout_list_page() {
         $storage = t('Custom');
       }
 
+      // Create a link to the settings page.
+      $info = $layout_template_info[$layout->layout_template];
+      $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+
       $row = array();
       $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = $template;
       $row[] = theme('layout_condition_info', array('layout' => $layout));
       $row[] = $storage;
       $row[] = backdrop_render($operations);
@@ -80,6 +88,7 @@ function layout_list_page() {
 
   $header = array(
     array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
     array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
@@ -952,6 +961,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   $form['#attached'] = array(
     'library' => array(
       array('system', 'backdrop.ajax'),
+      array('system', 'backdrop.announce'),
     ),
   );
 
@@ -3121,14 +3131,17 @@ function layout_block_list() {
           }
         }
         $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
-        $block_name = check_plain($block['info']) . ' (' . $delta . ')';
+        $block_name = theme('label_machine_name__layout_block', array(
+          'label' => $block['info'],
+          'machine_name' => $delta,
+        ));
         $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
       }
     }
   }
 
   $header = array(
-    array('data' => 'Name (delta)', 'field' => 'name', 'sort' => 'ASC'),
+    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
     array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
     array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     array('data' => 'Required contexts', 'field' => 'contexts', 'class' => array(RESPONSIVE_PRIORITY_LOW)),

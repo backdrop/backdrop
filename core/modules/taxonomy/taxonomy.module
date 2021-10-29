@@ -65,6 +65,9 @@ function taxonomy_permission() {
  */
 function taxonomy_vocabulary_list_permissions($vocabulary) {
   $permissions = array(
+    'create terms in ' . $vocabulary->machine_name => array(
+      'title' => t('%vocabulary: Create terms', array('%vocabulary' => $vocabulary->name)),
+    ),
     'edit terms in ' . $vocabulary->machine_name => array(
       'title' => t('%vocabulary: Edit terms', array('%vocabulary' => $vocabulary->name)),
     ),
@@ -283,8 +286,11 @@ function taxonomy_theme() {
   );
 
   return array(
-    'taxonomy_overview_vocabularies' => array(
-      'render element' => 'form',
+    'taxonomy_vocabulary_name' => array(
+      'variables' => array('vocabulary' => NULL),
+    ) + $base,
+    'taxonomy_vocabulary_description' => array(
+      'variables' => array('vocabulary' => NULL),
     ) + $base,
     'taxonomy_overview_terms' => array(
       'render element' => 'form',
@@ -307,9 +313,8 @@ function taxonomy_menu() {
   $items['admin/structure/taxonomy'] = array(
     'title' => 'Taxonomy',
     'description' => 'Manage tagging, categorization, and classification of your content.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('taxonomy_overview_vocabularies'),
-    'access arguments' => array('administer taxonomy'),
+    'page callback' => 'taxonomy_overview_vocabularies',
+    'access callback' => 'taxonomy_vocabulary_overview_access',
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/list'] = array(
@@ -389,7 +394,8 @@ function taxonomy_menu() {
     'title arguments' => array(3),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_overview_terms', 3),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_access',
+    'access arguments' => array(FALSE, 3),
     'file' => 'taxonomy.admin.inc',
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
@@ -411,7 +417,8 @@ function taxonomy_menu() {
     'title' => 'Add term',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_form_term', NULL, 3),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_access',
+    'access arguments' => array('create', 3),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'taxonomy.admin.inc',
   );
@@ -420,7 +427,8 @@ function taxonomy_menu() {
     'title' => 'Delete',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('taxonomy_vocabulary_confirm_delete', 3),
-    'access arguments' => array('administer taxonomy'),
+    'access callback' => 'taxonomy_vocabulary_access',
+    'access arguments' => array(FALSE, 3),
     'type' => MENU_CALLBACK,
     'file' => 'taxonomy.admin.inc',
   );
@@ -440,6 +448,95 @@ function taxonomy_admin_paths() {
 }
 
 /**
+ * Access callback: Checks if a user has permission to view the vocabulary
+ * overview page. This is anyone who can create/update/delete terms in any
+ * existing vocabulary.
+ *
+ * @return
+ *   TRUE if the user has access, FALSE otherwise.
+ *
+ * @see taxonomy_menu()
+ */
+function taxonomy_vocabulary_overview_access() {
+  // Users with the 'administer taxonomy' permission always have access.
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+
+  // Check access for each create/update (edit)/delete operation for terms
+  // in all vocabularies and return TRUE if any of them are allowed.
+  $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
+  $operations = array('create', 'edit', 'delete');
+  foreach ($vocabularies as $vocabulary) {
+    foreach ($operations as $operation) {
+      if (user_access("$operation terms in $vocabulary->machine_name")) {
+        return TRUE;
+      }
+    }
+  }
+
+  // Deny access if the user doesn't have any permissions for any vocabularies.
+  return FALSE;
+}
+
+/**
+ * Access callback: Checks a user's permission for performing operations on
+ * taxonomy terms in a vocabulary.
+ *
+ * @param $op
+ *   The operation to be performed on taxonomy terms in the vocabulary, or FALSE
+ *   to check access for any operation.
+ * @param TaxonomyVocabulary $vocabulary
+ *   The $vocabulary object that contains the terms on which the operation is to
+ *   be performed.
+ *
+ * @return
+ *   TRUE if the user has access, FALSE otherwise.
+ *
+ * @see taxonomy_menu()
+ *
+ * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
+ */
+function taxonomy_vocabulary_access($op, $vocabulary) {
+  // Deny access if there is no vocabulary to check against.
+  if (!$vocabulary) {
+    return FALSE;
+  }
+
+  // Users with the 'administer taxonomy' permission always have access.
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+
+  // Even though "edit" is deprecated it's still in the permissions
+  // so log it as deprecated but still use it.
+  if ($op == 'edit') {
+    $message = 'The function taxonomy_vocabulary_access() was called with the operation <em>edit</em>. This operation is now named <em>update</em>. The <em>edit</em> operation will be removed in the next major release of Backdrop.';
+    $variables = array();
+    watchdog('taxonomy', $message, $variables, WATCHDOG_DEPRECATED);
+  } elseif ($op == 'update') {
+    return user_access("edit terms in $vocabulary->machine_name");
+  }
+
+  if ($op !== FALSE) {
+    return user_access("$op terms in $vocabulary->machine_name");
+  }
+  else {
+    // Check access for each create/update (edit)/delete operation for terms
+    // in the vocabulary and return TRUE if any of them are allowed.
+    $operations = array('create', 'edit', 'delete');
+    foreach ($operations as $operation) {
+      if (user_access("$operation terms in $vocabulary->machine_name")) {
+        return TRUE;
+      }
+    }
+
+    // Deny access if the user doesn't have any permissions for the vocabulary.
+    return FALSE;
+  }
+}
+
+/**
  * Access callback: Checks a user's permission for performing a taxonomy term operation.
  *
  * @param string $op
@@ -448,7 +545,7 @@ function taxonomy_admin_paths() {
  *   - view
  *   - update
  *   - delete
- * @param TaxonomyTerm string $term
+ * @param TaxonomyTerm|string $term
  *   The $term object on which the operation is to be performed, or the
  *   vocabulary for the 'create' operation.
  *
@@ -1407,7 +1504,7 @@ function taxonomy_field_widget_info_alter(&$info) {
  * Implements hook_menu_local_tasks_alter().
  */
 function taxonomy_menu_local_tasks_alter(&$data, $router_item, $root_path) {
-  // Add language code to the "Add link" action link under
+  // Add language code to the "Add term" action link under
   // admin/structure/taxonomy/[taxonomy-name].
   if (module_exists('language')) {
     if ($root_path == 'admin/structure/taxonomy/%') {

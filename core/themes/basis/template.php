@@ -124,7 +124,7 @@ function basis_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav role="navigation" class="breadcrumb">';
+    $output .= '<nav class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';

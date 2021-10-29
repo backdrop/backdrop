@@ -403,9 +403,10 @@ function system_requirements($phase) {
         $current_schema = backdrop_get_installed_schema_version($module);
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
+          $update_link = base_path() . 'core/update.php';
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), 'core/update.php'). ')';
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
+          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run database updates</a>)', array('@update' => $update_link));
+          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => $update_link));
           break;
         }
       }
@@ -3180,7 +3181,7 @@ function system_update_1074() {
  * This will make it so that the Google Federated Learning of Cohorts (FLoC)
  * feature that gathers user data without cookies is blocked by default, unless
  * overridden in settings.php.
- * 
+ *
  * For more information, see the change record at:
  * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
  */
@@ -3190,6 +3191,34 @@ function system_update_1075() {
   $config->save();
 
   update_variable_del('block_interest_cohort');
+}
+
+/**
+ * Add default values for dismissible message settings.
+ */
+function system_update_1076() {
+  $config = config('system.core');
+  $config->set('messages_dismissible', 1);
+  $config->save();
+}
+
+/**
+ * Explicitly set the admin theme to an actual theme, instead of the special
+ * 'Default theme' option.
+ */
+function system_update_1077() {
+  $config = config('system.core');
+  $admin_theme = $config->get('admin_theme');
+  $default_theme = $config->get('theme_default');
+
+  // Check whether the admin theme is currently set to the special 'Default
+  // theme' option, or if empty.
+  if ($admin_theme == '0' || $admin_theme == '') {
+    // Explicitly set the admin theme to whichever actual theme is selected as
+    // the default.
+    $config->set('admin_theme', $default_theme);
+    $config->save();
+  }
 }
 
 /**
