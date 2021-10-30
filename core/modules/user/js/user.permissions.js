@@ -1,11 +1,15 @@
 (function ($) {
 
 /**
- * Shows checked and disabled checkboxes for inherited permissions.
+ * Ticks and disables checkboxes for permissions inherited from the
+ * authenticated role.
  */
 Backdrop.behaviors.permissions = {
-  attach: function (context) {
+  attach: function (context, settings) {
     var self = this;
+    var authPermissions = Backdrop.settings.userPermissions.authenticatedPermissions;
+    var userRole = Backdrop.settings.userPermissions.userRole;
+
     $('table#permissions').once('permissions', function () {
       // On a site with many roles and permissions, this behavior initially has
       // to perform thousands of DOM manipulations to inject checkboxes and hide
@@ -24,24 +28,41 @@ Backdrop.behaviors.permissions = {
       }
       $table.detach();
 
-      // Create dummy checkboxes. We use dummy checkboxes instead of reusing
-      // the existing checkboxes here because new checkboxes don't alter the
-      // submitted form. If we'd automatically check existing checkboxes, the
-      // permission table would be polluted with redundant entries. This
-      // is deliberate, but desirable when we automatically check them.
+      // Create dummy checkboxes for display purposes. We use dummy checkboxes
+      // instead of reusing the actual permission checkboxes here because we
+      // don't want to alter the submitted form. If we'd automatically tick
+      // existing checkboxes, the user.role.* config files would be polluted
+      // with redundant permissions.
       var $dummy = $('<input type="checkbox" class="form-checkbox dummy-checkbox" disabled="disabled" checked="checked" />')
-        .attr('title', Backdrop.t("This permission is inherited from the authenticated user role."))
-        .hide();
+        .attr('title', Backdrop.t("This permission is inherited from the authenticated user role."));
 
-      $('input[type=checkbox]', this).not('.role-authenticated, .role-anonymous').addClass('real-checkbox').each(function () {
-        $dummy.clone().insertAfter(this);
-      });
+      // If editing permissions for an individual role (i.e. via the form at the
+      // admin/config/people/permissions/%role_name path).
+      if (authPermissions && userRole) {
+        // Find all checkboxes for permissions that are already granted to the
+        // authenticated role.
+        authPermissions.forEach(function(permission) {
+          var checkboxID = '#edit-' + userRole + '-' + permission.replace(/[\s_]+/g, '-');
+          // Hide the actual checkbox, and show a dummy in its place.
+          $table.find('input[type=checkbox]' + checkboxID).addClass('real-checkbox').hide().after($dummy.clone());
+        });
+      }
+      // If editing permissions for all roles (i.e. via the form at the
+      // admin/config/people/permissions path).
+      else {
+        var $hidden_dummy = $dummy.hide();
+        // Append hidden dummy checkboxes to all permission checkboxes for all
+        // roles excluding the anonymous and authenticated roles.
+        $('input[type=checkbox]', this).not('.role-authenticated, .role-anonymous').addClass('real-checkbox').each(function () {
+          $hidden_dummy.clone().insertAfter(this);
+        });
 
-      // Initialize the authenticated user checkbox.
-      $table.on('click.permissions', 'input[type=checkbox].role-authenticated', function(e) {
-        self.toggle.apply(e.target);
-      });
-      $table.find('input[type=checkbox].role-authenticated').each(self.toggle);
+        // Initialize the authenticated user checkbox.
+        $table.on('click.permissions', 'input[type=checkbox].role-authenticated', function(e) {
+          self.toggle.apply(e.target);
+        });
+        $table.find('input[type=checkbox].role-authenticated').each(self.toggle);
+      }
 
       // Re-insert the table into the DOM.
       $ancestor[method]($table);
@@ -49,10 +70,12 @@ Backdrop.behaviors.permissions = {
   },
 
   /**
-   * Toggles all dummy checkboxes based on the checkboxes' state.
+   * Toggles display of dummy/actual checkboxes for a specific permission.
    *
-   * If the "authenticated user" checkbox is checked, the checked and disabled
-   * checkboxes are shown, the real checkboxes otherwise.
+   * If the checkbox for the authenticated role is ticked for a specific
+   * permission, the respective dummy (ticked and disabled) checkboxes for the
+   * other roles are shown, and the actual permission checkboxes are hidden.
+   * Otherwise, the actual checkboxes are shown and dummy checkboxes hidden.
    */
   toggle: function () {
     var authCheckbox = this, $row = $(this).closest('tr');

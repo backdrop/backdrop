@@ -403,12 +403,17 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
-
   // Retrieve role names for columns.
-  $roles = user_roles(FALSE, NULL, TRUE);
-  if (isset($roles[$role_name])) {
-    $roles = array($role_name => $roles[$role_name]);
+  $all_roles = user_roles(FALSE, NULL, TRUE);
+
+  // If permissions for an individual role are being edited.
+  if (isset($all_roles[$role_name])) {
+    $roles = array($role_name => $all_roles[$role_name]);
   }
+  else {
+    $roles = $all_roles;
+  }
+
   $form['roles'] = array(
     '#type' => 'value',
     '#value' => $roles,
@@ -418,7 +423,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   $options = array();
   $module_info = system_get_info('module');
 
-  // Get a list of all the modules implementing a hook_permission() and sort by
+  // Get a list of all the modules implementing hook_permission(), and sort by
   // display name.
   $modules = array();
   foreach (module_implements('permission') as $module) {
@@ -446,7 +451,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
         foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
+          // Builds arrays for ticked checkboxes for each role.
           if (in_array($perm, $role->permissions)) {
             $status[$role_name][] = $perm;
           }
@@ -455,7 +460,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Build checkboxes here after checkbox arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -473,12 +478,30 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+  // Permissions granted to the authenticated role are being inherited by all
+  // other user roles, except the anonymous role. When editing permissions for
+  // all roles (i.e. via the form at the admin/config/people/permissions path),
+  // if a permission checkbox is ticked in the authenticated role column, the
+  // respective permission checkboxes are ticked (and also locked) for all other
+  // roles (with the exception of the anonymous role).
+  // When editing an individual role though (i.e. via the form at the
+  // admin/config/people/permissions/%role_name path), the authenticated role
+  // column is missing from the form; yet we need a way to tick (and lock) the
+  // checkboxes for the respective permissions that are inherited from the
+  // authenticated role. For that purpose, we make the permissions assigned to
+  // the authenticated role available as settings for user.permissions.js.
+  $individual_role_edit = count($roles) == 1 && !in_array($role_name, array(BACKDROP_AUTHENTICATED_ROLE, BACKDROP_ANONYMOUS_ROLE));
+  $js_settings = array(
+    'authenticatedPermissions' => $individual_role_edit ? $all_roles[BACKDROP_AUTHENTICATED_ROLE]->permissions : NULL,
+    'userRole' => $individual_role_edit ? $role_name : NULL,
+  );
+  backdrop_add_js(array('userPermissions' => $js_settings), 'setting');
 
   return $form;
 }
 
 /**
- * Save permissions selected on the administer permissions page.
+ * Save permissions selected on the "Permissions" page.
  *
  * @see user_admin_permissions()
  */
