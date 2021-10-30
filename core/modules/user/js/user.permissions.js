@@ -7,8 +7,10 @@
 Backdrop.behaviors.permissions = {
   attach: function (context, settings) {
     var self = this;
-    var authPermissions = Backdrop.settings.userPermissions.authenticatedPermissions;
-    var userRole = Backdrop.settings.userPermissions.userRole;
+    if (Backdrop.settings.userPermissions) {
+      var authPermissions = Backdrop.settings.userPermissions.authenticatedPermissions;
+      var userRole = Backdrop.settings.userPermissions.userRole;
+    }
 
     $('table#permissions').once('permissions', function () {
       // On a site with many roles and permissions, this behavior initially has

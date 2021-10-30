@@ -313,7 +313,6 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   }
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
-  backdrop_add_js(array('userPermissions' => array()), 'setting');
 
   return $form;
 }
