@@ -164,6 +164,7 @@ function contact_form_permissions() {
   }
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+  backdrop_add_js(array('userPermissions' => array()), 'setting');
 
   return $form;
 }
