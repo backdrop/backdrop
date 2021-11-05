@@ -35,17 +35,17 @@
       ?>
       <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
+        <?php if ($region_buttons): ?>
         <div class="layout-flexible-region-top clearfix">
           <div class="layout-editor-block-title clearfix">
             <span class="handle"></span>
             <span class="text"><?php print t('Row'); ?></span>
-            <?php if ($region_buttons): ?>
-              <span class="buttons">
-                <?php print $region_buttons[$name]; ?>
-              </span>
-            <?php endif; ?>
+            <span class="buttons">
+              <?php print $region_buttons[$name]; ?>
+            </span>
           </div>
         </div>
+        <?php endif; ?>
         <div class="l-flexible-row row">
         <?php foreach ($row['regions'] as $region): ?>
           <div class="l-col col-md-<?php print $region['region_md']; ?>">
