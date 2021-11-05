@@ -607,7 +607,9 @@ function translation_language_switch_links_alter(array &$links, $type, $path) {
       $translations = translation_node_get_translations($node->tnid);
     }
 
+    $query = backdrop_get_query_parameters();
     foreach ($links as $langcode => $link) {
+      $links[$langcode]['query'] = $query;
       if (isset($translations[$langcode]) && $translations[$langcode]->status) {
         // Translation in a different node.
         $links[$langcode]['href'] = 'node/' . $translations[$langcode]->nid . $matches[2];
