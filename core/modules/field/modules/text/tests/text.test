@@ -453,7 +453,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $edit = array('field[cardinality]' => -1);
     $this->backdropPost('admin/structure/types/manage/post/fields/body', $edit, t('Save settings'));
     $this->backdropGet('node/add/post');
-    $this->assertFieldByXPath("//input[@name='body_add_more']", t('Add another item'), 'Body field cardinality set to multiple.');
+    $this->assertFieldByXPath("//input[@name='body_add_more']", t('Add another'), 'Body field cardinality set to multiple.');
 
     $body = array(
       $this->randomName(),

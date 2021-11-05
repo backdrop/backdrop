@@ -66,9 +66,13 @@ project:
   information.)*
 - [JetBrains](https://www.jetbrains.com/phpstorm) for use of the PHPStorm IDE
   for development. *(Contact info@backdropcms.org for a license.)*
+- [Fastly](https://fastly.com) for CDN services for all backdropcms.org properties.
 - [GitHub](https://github.com) for collaboration and code management tools.
 - [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
 - [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
+- [Linode](https://linode.com) for web hosting.
+- [1Password](https://1password.com) for keeping our passwords safe.
+- [SendGrid](https://sendgrid.com) for getting our emails into your inboxes.
 
 User Guide
 ----------
