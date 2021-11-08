@@ -664,15 +664,19 @@ function entityreference_settings_ajax_submit($form, &$form_state) {
  * Property callback for the Entity Metadata framework.
  */
 function entityreference_field_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  // Set the property type based on the targe type.
-  $field_type['property_type'] = $field['settings']['target_type'];
+  // Only Entity Plus would parse the property_callbacks, but check just to
+  // be safe.
+  if (module_exists('entity_plus')) {
+    // Set the property type based on the targe type.
+    $field_type['property_type'] = $field['settings']['target_type'];
 
-  // Then apply the default.
-  entity_plus_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
+    // Then apply the default.
+    entity_plus_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
 
-  // Invoke the behaviors to allow them to change the properties.
-  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
-    $handler->property_info_alter($info, $entity_type, $field, $instance, $field_type);
+    // Invoke the behaviors to allow them to change the properties.
+    foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+      $handler->property_info_alter($info, $entity_type, $field, $instance, $field_type);
+    }
   }
 }
 
