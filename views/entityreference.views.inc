@@ -122,6 +122,8 @@ function entityreference_views_plugins() {
         'help' => 'Returns results as a PHP array of labels and rendered rows.',
         'handler' => 'entityreference_plugin_style',
         'theme' => 'views_view_unformatted',
+        'theme path' => drupal_get_path('module', 'views') . '/theme',
+        'theme file' => 'theme.inc',
         'uses row plugin' => TRUE,
         'uses fields' => TRUE,
         'uses options' => TRUE,
