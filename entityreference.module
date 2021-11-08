@@ -1,12 +1,19 @@
 <?php
 
+define('ENTITYREFERENCE_DENIED', '- Restricted access -');
+
+/**
+ * @file
+ * Entityreference primary module file.
+ */
+
 /**
  * Implements hook_field_info().
  */
 function entityreference_field_info() {
   $field_info['entityreference'] = array(
     'label' => t('Entity Reference'),
-    'description' => t('This field reference another entity.'),
+    'description' => t('This field references another entity.'),
     'settings' => array(
       // Default to the core target entity type node.
       'target_type' => 'node',
@@ -40,6 +47,20 @@ function entityreference_flush_caches() {
   // We are using a setting because cache is going to be cleared right after
   // hook_flush_caches() is finished.
   config_set('entityreference.settings', 'base-tables', $base_tables);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function entityreference_theme($existing, $type, $theme, $path) {
+  return array(
+    'entityreference_label' => array(
+      'variables' => array('label' => NULL, 'item' => NULL, 'settings' => NULL, 'uri' => NULL),
+    ),
+    'entityreference_entity_id' => array(
+      'variables' => array('item' => NULL, 'settings' => NULL),
+    ),
+  );
 }
 
 /**
@@ -118,7 +139,7 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
 /**
  * Get the behavior handler for a given entityreference field and instance.
  *
- * @param $handler
+ * @param $behavior
  *   The behavior handler name.
  */
 function _entityreference_get_behavior_handler($behavior) {
@@ -353,6 +374,9 @@ function entityreference_field_settings_form($field, $instance, $has_data) {
   return $form;
 }
 
+/**
+ * Callback for custom element processing.
+ */
 function _entityreference_field_settings_process($form, $form_state) {
   $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
   $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
@@ -433,11 +457,17 @@ function _entityreference_field_settings_process($form, $form_state) {
   return $form;
 }
 
+/**
+ * Custom callback for ajax processing.
+ */
 function _entityreference_field_settings_ajax_process($form, $form_state) {
   _entityreference_field_settings_ajax_process_element($form, $form);
   return $form;
 }
 
+/**
+ * Helper function for custom ajax processing.
+ */
 function _entityreference_field_settings_ajax_process_element(&$element, $main_form) {
   if (isset($element['#ajax']) && $element['#ajax'] === TRUE) {
     $element['#ajax'] = array(
@@ -452,6 +482,9 @@ function _entityreference_field_settings_ajax_process_element(&$element, $main_f
   }
 }
 
+/**
+ * Custom callback for element processing.
+ */
 function _entityreference_form_process_merge_parent($element) {
   $parents = $element['#parents'];
   array_pop($parents);
@@ -459,11 +492,17 @@ function _entityreference_form_process_merge_parent($element) {
   return $element;
 }
 
+/**
+ * Helper function to remove blank elements.
+ */
 function _entityreference_element_validate_filter(&$element, &$form_state) {
   $element['#value'] = array_filter($element['#value']);
   form_set_value($element, $element['#value'], $form_state);
 }
 
+/**
+ * Implements hook_validate().
+ */
 function _entityreference_field_settings_validate($form, &$form_state) {
   // Store the new values in the form state.
   $field = $form['#field'];
@@ -499,6 +538,9 @@ function entityreference_field_instance_settings_form($field, $instance) {
   return $form;
 }
 
+/**
+ * Implements hook_field_settings_form().
+ */
 function _entityreference_field_instance_settings_form($form, $form_state) {
   $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
   $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
@@ -516,6 +558,9 @@ function _entityreference_field_instance_settings_form($form, $form_state) {
   return $form;
 }
 
+/**
+ * Implements hook_validate().
+ */
 function _entityreference_field_instance_settings_validate($form, &$form_state) {
   // Store the new values in the form state.
   $instance = $form['#instance'];
@@ -746,7 +791,7 @@ function entityreference_query_entityreference_alter(QueryAlterableInterface $qu
 function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   // Ensure that the entity target type exists before displaying the widget.
   $entity_info = entity_get_info($field['settings']['target_type']);
-  if (empty($entity_info)){
+  if (empty($entity_info)) {
     return;
   }
   $entity_type = $instance['entity_type'];
@@ -771,7 +816,9 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
 
     // Build an array of entities ID.
     foreach ($items as $item) {
-      $entity_ids[] = $item['target_id'];
+      if (isset($item['target_id'])) {
+        $entity_ids[] = $item['target_id'];
+      }
     }
 
     // Load those entities and loop through them to extract their labels.
@@ -832,6 +879,9 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
   }
 }
 
+/**
+ * Implements hook_validate().
+ */
 function _entityreference_autocomplete_validate($element, &$form_state, $form) {
   // If a value was entered into the autocomplete...
   $value = '';
@@ -856,6 +906,9 @@ function _entityreference_autocomplete_validate($element, &$form_state, $form) {
   form_set_value($element, $value, $form_state);
 }
 
+/**
+ * Implements hook_validate().
+ */
 function _entityreference_autocomplete_tags_validate($element, &$form_state, $form) {
   $value = array();
   // If a value was entered into the autocomplete...
@@ -902,7 +955,8 @@ function entityreference_field_widget_error($element, $error) {
  *   The entity type.
  * @param $bundle_name
  *   The bundle name.
- * @return
+ *
+ * @return bool
  *   True if user can access this menu item.
  */
 function entityreference_autocomplete_access_callback($type, $field_name, $entity_type, $bundle_name) {
@@ -934,10 +988,11 @@ function entityreference_autocomplete_access_callback($type, $field_name, $entit
  */
 function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
   // If the request has a '/' in the search text, then the menu system will have
-  // split it into multiple arguments and $string will only be a partial. We want
-  //  to make sure we recover the intended $string.
+  // split it into multiple arguments and $string will only be a partial.
+  // We want to make sure we recover the intended $string.
   $args = func_get_args();
-  // Shift off the $type, $field_name, $entity_type, $bundle_name, and $entity_id args.
+  // Shift off the $type, $field_name, $entity_type,
+  // $bundle_name, and $entity_id args.
   array_shift($args);
   array_shift($args);
   array_shift($args);
@@ -973,6 +1028,7 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
  */
 function entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id = '', $string = '') {
   $matches = array();
+  $prefix = '';
 
   $entity = NULL;
   if ($entity_id !== 'NULL') {
@@ -987,7 +1043,8 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
   if ($type == 'tags') {
-    // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+    // The user enters a comma-separated list of tags.
+    // We only autocomplete the last tag.
     $tags_typed = backdrop_explode_tags($string);
     $tag_last = backdrop_strtolower(array_pop($tags_typed));
     if (!empty($tag_last)) {
@@ -996,19 +1053,22 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   }
   else {
     // The user enters a single tag.
-    $prefix = '';
     $tag_last = $string;
   }
 
   if (isset($tag_last)) {
     // Get an array of matching entities.
     $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
-
+    $denied_label = t(ENTITYREFERENCE_DENIED);
     // Loop through the products and convert them into autocomplete output.
     foreach ($entity_labels as $values) {
       foreach ($values as $entity_id => $label) {
+        // Never autocomplete entities that aren't accessible.
+        if ($label == $denied_label) {
+          continue;
+        }
         $key = "$label ($entity_id)";
-        // Strip things like starting/trailing white spaces, line breaks and tags.
+        // Strip starting/trailing white spaces, line breaks and tags.
         $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
         // Names containing commas or quotes must be wrapped in quotes.
         if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
@@ -1022,6 +1082,32 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   backdrop_json_output($matches);
 }
 
+ /**
+ * Introspects field and instance settings, and determines the correct settings
+ * for the functioning of the formatter.
+ *
+ * Settings:
+ *   - entity_type - The entity_type being loaded.
+ *   - column - The name of the ref. field column that stores the entity id.
+ */
+function entityreference_field_type_settings($field) {
+  $settings = array(
+    'entity_type' => NULL,
+    'column' => NULL,
+  );
+
+  if ($field['type'] == 'entityreference') {
+    $settings['entity_type'] = $field['settings']['target_type'];
+    $settings['column'] = 'target_id';
+  }
+  elseif ($field['type'] == 'taxonomy_term_reference') {
+    $settings['entity_type'] = 'taxonomy_term';
+    $settings['column'] = 'tid';
+  }
+
+  return $settings;
+}
+
 /**
  * Implements hook_field_formatter_info().
  */
@@ -1033,6 +1119,7 @@ function entityreference_field_formatter_info() {
       'field types' => array('entityreference'),
       'settings' => array(
         'link' => FALSE,
+        'bypass_access' => FALSE,
       ),
     ),
     'entityreference_entity_id' => array(
@@ -1042,12 +1129,13 @@ function entityreference_field_formatter_info() {
     ),
     'entityreference_entity_view' => array(
       'label' => t('Rendered entity'),
-      'description' => t('Display the referenced entities rendered by entity_view().'),
-      'field types' => array('entityreference'),
+      'description' => t('Display the referenced entities as they are rendered.'),
+      'field types' => array('entityreference', 'taxonomy_term_reference'),
       'settings' => array(
         'view_mode' => 'default',
         'links' => TRUE,
         'use_content_language' => TRUE,
+        'hide_title' => FALSE,
       ),
     ),
   );
@@ -1059,9 +1147,17 @@ function entityreference_field_formatter_info() {
 function entityreference_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
   $element = array();
 
   if ($display['type'] == 'entityreference_label') {
+    $element['bypass_access'] = array(
+      '#title' => t('Show entity labels regardless of user access'),
+      '#description' => t("All entities in the field will be shown, without checking them for access. If the 'Link' setting is also enabled, an entity which the user does not have access to view will show without a link."),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['bypass_access'],
+    );
+
     $element['link'] = array(
       '#title' => t('Link label to the referenced entity'),
       '#type' => 'checkbox',
@@ -1070,7 +1166,7 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
   }
 
   if ($display['type'] == 'entityreference_entity_view') {
-    $entity_info = entity_get_info($field['settings']['target_type']);
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
     $options = array('default' => t('Default'));
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $view_mode => $view_mode_settings) {
@@ -1097,6 +1193,11 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
       '#title' => t('Use current content language'),
       '#default_value' => $settings['use_content_language'],
     );
+    $element['hide_title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide title'),
+      '#default_value' => $settings['hide_title'],
+    );
   }
 
   return $element;
@@ -1108,15 +1209,17 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
 function entityreference_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
 
   $summary = array();
 
   if ($display['type'] == 'entityreference_label') {
     $summary[] = $settings['link'] ? t('Link to the referenced entity') : t('No link');
+    $summary[] = $settings['bypass_access'] ? t('Show labels regardless of access') : t('Respect entity access for label visibility');
   }
 
   if ($display['type'] == 'entityreference_entity_view') {
-    $entity_info = entity_get_info($field['settings']['target_type']);
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
     $view_mode_label = $settings['view_mode'] == 'default' ? t('Default') : $settings['view_mode'];
     if (isset($entity_info['view modes'][$settings['view_mode']]['label'])) {
       $view_mode_label = $entity_info['view modes'][$settings['view_mode']]['label'];
@@ -1124,6 +1227,7 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
     $summary[] = t('Rendered as @mode', array('@mode' => $view_mode_label));
     $summary[] = !empty($settings['links']) ? t('Display links') : t('Do not display links');
     $summary[] = !empty($settings['use_content_language']) ? t('Use current content language') : t('Use field language');
+    $summary[] = !empty($settings['hide_title']) ? t('Hide Title') : t('Show Title');
   }
 
   return implode('<br />', $summary);
@@ -1133,19 +1237,22 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
  * Implements hook_field_formatter_prepare_view().
  */
 function entityreference_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
   $target_ids = array();
 
   // Collect every possible entity attached to any of the entities.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
-      if (isset($item['target_id'])) {
-        $target_ids[] = $item['target_id'];
+      if (isset($item[$column])) {
+        $target_ids[] = $item[$column];
       }
     }
   }
 
   if ($target_ids) {
-    $target_entities = entity_load_multiple($field['settings']['target_type'], $target_ids);
+    $target_entities = entity_load_multiple($target_type, $target_ids);
   }
   else {
     $target_entities = array();
@@ -1157,12 +1264,12 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 
     foreach ($items[$id] as $delta => $item) {
       // Check whether the referenced entity could be loaded.
-      if (isset($item['target_id']) && isset($target_entities[$item['target_id']])) {
+      if (isset($target_entities[$item[$column]]) && isset($target_entities[$item[$column]])) {
         // Replace the instance value with the term data.
-        $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
+        $items[$id][$delta]['entity'] = $target_entities[$item[$column]];
         // Check whether the user has access to the referenced entity.
-        $has_view_access = (entityreference_entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
-        $has_update_access = (entityreference_entity_access('update', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $has_view_access = (entity_access('view', $target_type, $target_entities[$item[$column]]) !== FALSE);
+        $has_update_access = (entity_access('update', $target_type, $target_entities[$item[$column]]) !== FALSE);
         $items[$id][$delta]['access'] = ($has_view_access || $has_update_access);
       }
       // Otherwise, unset the instance value, since the entity does not exist.
@@ -1185,34 +1292,63 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 function entityreference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
   $settings = $display['settings'];
-
-  // Rebuild the items list to contain only those with access.
-  foreach ($items as $key => $item) {
-    if (empty($item['access'])) {
-      unset($items[$key]);
-    }
-  }
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
 
   switch ($display['type']) {
     case 'entityreference_label':
       $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
       foreach ($items as $delta => $item) {
-        $label = $handler->getLabel($item['entity']);
-        // If the link is to be displayed and the entity has a uri, display a link.
-        // Note the assignment ($url = ) here is intended to be an assignment.
-        if ($display['settings']['link'] && ($uri = entity_uri($field['settings']['target_type'], $item['entity']))) {
-          $result[$delta] = array('#markup' => l($label, $uri['path'], $uri['options']));
+        // Skip an item that is not accessible, unless we're allowing output of
+        // entity labels without considering access.
+        if (empty($item['access']) && !$display['settings']['bypass_access']) {
+          continue;
         }
-        else {
-          $result[$delta] = array('#markup' => check_plain($label));
+
+        // Calling EntityReferenceHandler::getLabel() would make a repeated,
+        // wasteful call to entity_access().
+        $label = entity_label($field['settings']['target_type'], $item['entity']);
+
+        // Check if the settings and access allow a link to be displayed.
+        $display_link = $display['settings']['link'] && $item['access'];
+
+        $uri = NULL;
+
+        // If the link is allowed and the entity has a uri, display a link.
+        if ($display_link) {
+          $uri = entity_uri($target_type, $item['entity']);
         }
+
+        $result[$delta] = array(
+          '#theme' => 'entityreference_label',
+          '#label' => $label,
+          '#item' => $item,
+          '#uri' => $uri,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
       }
       break;
 
     case 'entityreference_entity_id':
       foreach ($items as $delta => $item) {
-        $result[$delta] = array('#markup' => check_plain($item['target_id']));
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
+        $result[$delta] = array(
+          '#theme' => 'entityreference_entity_id',
+          '#item' => $item,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
       }
       break;
 
@@ -1223,19 +1359,24 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
       }
 
       foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
         // Protect ourselves from recursive rendering.
         static $depth = 0;
         $depth++;
         if ($depth > 20) {
-          throw new EntityReferenceRecursiveRenderingException(t('Recursive rendering detected when rendering entity @entity_type(@entity_id). Aborting rendering.', array('@entity_type' => $entity_type, '@entity_id' => $item['target_id'])));
+          throw new EntityReferenceRecursiveRenderingException(t('Recursive rendering detected when rendering entity @entity_type(@entity_id). Aborting rendering.', array('@entity_type' => $target_type, '@entity_id' => $item[$column])));
         }
 
         $target_entity = clone $item['entity'];
         unset($target_entity->content);
-        $result[$delta] = entity_plus_view($field['settings']['target_type'], array($item['target_id'] => $target_entity), $settings['view_mode'], $target_langcode, FALSE);
+        $result[$delta] = entity_plus_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $target_langcode, !empty($settings['hide_title']));
 
-        if (empty($settings['links']) && isset($result[$delta][$field['settings']['target_type']][$item['target_id']]['links'])) {
-          $result[$delta][$field['settings']['target_type']][$item['target_id']]['links']['#access'] = FALSE;
+        if (empty($settings['links']) && isset($result[$delta][$target_type][$item[$column]]['links'])) {
+          $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
         }
         $depth = 0;
       }
@@ -1419,4 +1560,45 @@ function entityreference_config_info() {
     'group' => t('Configuration'),
   );
   return $prefixes;
+}
+
+/**
+ * Theme label.
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_label($vars) {
+  $label = $vars['label'];
+  $settings = $vars['settings'];
+  $item = $vars['item'];
+  $uri = $vars['uri'];
+
+  $output = '';
+
+  // If the link is to be displayed and the entity has a uri, display a link.
+  // Note the assignment ($url = ) here is intended to be an assignment.
+  if ($settings['display']['link'] && isset($uri['path'])) {
+    $output .= l($label, $uri['path'], $uri['options']);
+  }
+  else {
+    $output .= check_plain($label);
+  }
+
+  return $output;
+}
+
+/**
+ * Theme entity_id
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_entity_id($vars) {
+  $settings = $vars['settings'];
+  $item = $vars['item'];
+
+  $output = '';
+
+  $output = check_plain($item['target_id']);
+
+  return $output;
 }
