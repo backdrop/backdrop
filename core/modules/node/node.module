@@ -3498,10 +3498,11 @@ function node_content_form(Node $node, $form_state) {
       '#default_value' => $node->title,
       '#maxlength' => 255,
       '#weight' => -5,
-      '#attributes' => array(
-        'autofocus' => TRUE,
-      ),
     );
+    // Set the autofocus attribute for new nodes.
+    if (!isset($node->nid)) {
+      $form['title']['#attributes']['autofocus'] = TRUE;
+    }
   }
 
   return $form;
