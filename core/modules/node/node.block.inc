@@ -91,7 +91,7 @@ class NodeBlock extends Block {
     $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
     // Add theme hook suggestion.
-    $content['#theme'] = 'node__block_' . $this->settings['nid'];
+    $content['#theme'] .= '__block_' . $this->settings['nid'];
 
     return $content;
   }
