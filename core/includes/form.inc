@@ -3695,12 +3695,17 @@ function theme_details($variables) {
   // Ensure #attributes is set.
   $element += array('#attributes' => array());
 
+  // Assign an HTML ID.
+  if (!array_key_exists('id', $element['#attributes'])) {
+    $element['#attributes']['id'] = $element['#id'];
+  }
+  if (isset($element['#details']) && !empty($element['#details'])) {
+    $description_id = $element['#attributes']['id'] . '--description';
+    $element['#attributes']['aria-describedby'] = $description_id;
+  }
+
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an HTML ID.
-    if (!array_key_exists('id', $element['#attributes'])) {
-      $element['#attributes']['id'] = $element['#id'];
-    }
     // Add the form-wrapper class.
     if (empty($element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
@@ -3714,7 +3719,8 @@ function theme_details($variables) {
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
-    $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
+    $attributes = array('class' => 'details-content-wrapper', 'id' => $description_id);
+    $output .= '<div ' . backdrop_attributes($attributes) . '">' . $element['#details'] . '</div>';
   }
   if (isset($element['#children']) && !empty($element['#children'])) {
     $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
