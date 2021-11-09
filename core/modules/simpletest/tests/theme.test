@@ -623,7 +623,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           '#summary' => t('The summary'),
           '#details' => t('Detailed content'),
         ),
-        'expected' => '<details><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+        'expected' => '<details aria-describedby="the-summary--description"><summary><span>The summary</span></summary><div class="details-content-wrapper" id="the-summary--description">Detailed content</div></details>',
       ),
       // Basic 'details' with custom id and class attributes.
       array(
@@ -637,7 +637,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             'class' => array('fooclass'),
           ),
         ),
-        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+        'expected' => '<details id="foobar-id" class="fooclass" aria-describedby="foobar-id--description"><summary><span>The summary</span></summary><div class="details-content-wrapper" id="foobar-id--description">Detailed content</div></details>',
       ),
       // Expanded 'details' with child element.
       array(

@@ -2972,7 +2972,7 @@ function theme_fieldset($variables) {
   $output .= '<div class="fieldset-wrapper">';
   if (!empty($element['#description'])) {
     $attributes = array('class' => 'fieldset-description', 'id' => $description_id);
-    $output .= '<div ' . backdrop_attributes($attributes) . '>' . $element['#description'] . '</div>';
+    $output .= '<div' . backdrop_attributes($attributes) . '>' . $element['#description'] . '</div>';
   }
   $output .= $element['#children'];
   if (isset($element['#value'])) {
@@ -3695,32 +3695,32 @@ function theme_details($variables) {
   // Ensure #attributes is set.
   $element += array('#attributes' => array());
 
-  // Assign an HTML ID.
-  if (!array_key_exists('id', $element['#attributes'])) {
-    $element['#attributes']['id'] = $element['#id'];
-  }
-  if (isset($element['#details']) && !empty($element['#details'])) {
-    $description_id = $element['#attributes']['id'] . '--description';
-    $element['#attributes']['aria-describedby'] = $description_id;
-  }
-
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
+    // Assign an HTML ID.
+    element_set_attributes($element, array('id'));
     // Add the form-wrapper class.
-    if (empty($element['#attributes']['class'])) {
-      $element['#attributes']['class'][] = 'form-wrapper';
-    }
+    _form_set_class($element, array('form-wrapper'));
   }
   // Set initial collapsed/expanded display.
   if (isset($element['#open']) && $element['#open']) {
     $element['#attributes']['open'] = 'open';
   }
 
+  if (isset($element['#details']) && !empty($element['#details'])) {
+    // We need an HTML ID for the details-content-wrapper element, for the
+    // aria-describedby attribute to point to. If no id attribute has been set
+    // in the details element, we generate one from its summary.
+    $description_id = isset($element['#attributes']['id']) ? $element['#attributes']['id'] : backdrop_html_id($element['#summary']);
+    $description_id .= '--description';
+    $element['#attributes']['aria-describedby'] = $description_id;
+  }
+
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $attributes = array('class' => 'details-content-wrapper', 'id' => $description_id);
-    $output .= '<div ' . backdrop_attributes($attributes) . '">' . $element['#details'] . '</div>';
+    $output .= '<div' . backdrop_attributes($attributes) . '>' . $element['#details'] . '</div>';
   }
   if (isset($element['#children']) && !empty($element['#children'])) {
     $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
