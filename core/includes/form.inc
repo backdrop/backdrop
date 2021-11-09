@@ -2959,6 +2959,11 @@ function theme_fieldset($variables) {
   element_set_attributes($element, array('id'));
   _form_set_class($element, array('form-wrapper'));
 
+  if (!empty($element['#description'])) {
+    $description_id = $element['#attributes']['id'] . '--description';
+    $element['#attributes']['aria-describedby'] = $description_id;
+  }
+
   $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
     // Always wrap fieldset legends in a SPAN for CSS positioning.
@@ -2966,7 +2971,8 @@ function theme_fieldset($variables) {
   }
   $output .= '<div class="fieldset-wrapper">';
   if (!empty($element['#description'])) {
-    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+    $attributes = array('class' => 'fieldset-description', 'id' => $description_id);
+    $output .= '<div ' . backdrop_attributes($attributes) . '>' . $element['#description'] . '</div>';
   }
   $output .= $element['#children'];
   if (isset($element['#value'])) {
