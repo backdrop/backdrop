@@ -611,11 +611,58 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests Form API #type 'fieldset'.
+   */
+  public function testFieldset() {
+    $elements = array(
+      // Basic 'fieldset' element - no children.
+      array(
+        'name' => "Basic fieldset",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('Fieldset legend'),
+          '#description' => t('Fieldset description'),
+        ),
+        'expected' => '<fieldset aria-describedby="fieldset-legend--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="fieldset-legend--description">Fieldset content</div></div></fieldset>',
+      ),
+      // Basic fieldset with custom id and class attributes.
+      array(
+        'name' => "Basic fieldset with custom attributes",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('Fieldset legend'),
+          '#description' => t('Fieldset description'),
+          '#attributes' => array(
+            'id' => 'foobar-id',
+            'class' => array('fooclass'),
+          ),
+        ),
+        'expected' => '<fieldset id="foobar-id" class="fooclass" aria-describedby="foobar-id--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="foobar-id--description">Fieldset content</div></div></fieldset>',
+      ),
+      // Expanded fieldset with a child element and no description.
+      array(
+        'name' => "Fieldset with child",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('Fieldset legend'),
+          '#open' => TRUE,
+          'child' => array(
+            '#markup' => 'Fieldset content',
+          ),
+        ),
+        'expected' => '<fieldset><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
    * Tests Form API #type 'details'.
    */
   public function testDetails() {
     $elements = array(
-      // Basic 'details' element.
+      // Basic 'details' element - no children.
       array(
         'name' => "Basic 'details'",
         'value' => array(
@@ -625,7 +672,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
         ),
         'expected' => '<details aria-describedby="the-summary--description"><summary><span>The summary</span></summary><div class="details-content-wrapper" id="the-summary--description">Detailed content</div></details>',
       ),
-      // Basic 'details' with custom id and class attributes.
+      // Basic 'details' element with custom id and class attributes.
       array(
         'name' => "Basic 'details' with custom attributes",
         'value' => array(
@@ -639,7 +686,8 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
         ),
         'expected' => '<details id="foobar-id" class="fooclass" aria-describedby="foobar-id--description"><summary><span>The summary</span></summary><div class="details-content-wrapper" id="foobar-id--description">Detailed content</div></details>',
       ),
-      // Expanded 'details' with child element.
+      // Expanded 'details' element with a child element and no details
+      // (description).
       array(
         'name' => "Details with child",
         'value' => array(

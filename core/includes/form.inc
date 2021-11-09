@@ -2956,11 +2956,23 @@ function form_get_options($element, $key) {
  */
 function theme_fieldset($variables) {
   $element = $variables['element'];
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-wrapper'));
+  // Ensure #attributes is set.
+  $element += array('#attributes' => array());
 
-  if (!empty($element['#description'])) {
-    $description_id = $element['#attributes']['id'] . '--description';
+  // Special handling for form elements.
+  if (isset($element['#array_parents'])) {
+    // Assign an HTML ID.
+    element_set_attributes($element, array('id'));
+    // Add the form-wrapper class.
+    _form_set_class($element, array('form-wrapper'));
+  }
+
+  if (isset($element['#description']) && !empty($element['#description'])) {
+    // We need an HTML ID for the fieldset-description element, for the
+    // aria-describedby attribute to point to. If no id attribute has been set
+    // in the fieldset element, we generate one from its title.
+    $description_id = isset($element['#attributes']['id']) ? $element['#attributes']['id'] : backdrop_html_id($element['#title']);
+    $description_id .= '--description';
     $element['#attributes']['aria-describedby'] = $description_id;
   }
 
@@ -2970,7 +2982,7 @@ function theme_fieldset($variables) {
     $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
   }
   $output .= '<div class="fieldset-wrapper">';
-  if (!empty($element['#description'])) {
+  if (isset($element['#description']) && !empty($element['#description'])) {
     $attributes = array('class' => 'fieldset-description', 'id' => $description_id);
     $output .= '<div' . backdrop_attributes($attributes) . '>' . $element['#description'] . '</div>';
   }
