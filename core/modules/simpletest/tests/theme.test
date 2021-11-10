@@ -623,7 +623,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           '#title' => t('Fieldset legend'),
           '#description' => t('Fieldset description'),
         ),
-        'expected' => '<fieldset aria-describedby="fieldset-legend--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="fieldset-legend--description">Fieldset content</div></div></fieldset>',
+        'expected' => '<fieldset aria-describedby="fieldset-legend--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="fieldset-legend--description">Fieldset description</div></div></fieldset>',
       ),
       // Basic fieldset with custom id and class attributes.
       array(
@@ -637,7 +637,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             'class' => array('fooclass'),
           ),
         ),
-        'expected' => '<fieldset id="foobar-id" class="fooclass" aria-describedby="foobar-id--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="foobar-id--description">Fieldset content</div></div></fieldset>',
+        'expected' => '<fieldset id="foobar-id" class="fooclass" aria-describedby="foobar-id--description"><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper"><div class="fieldset-description" id="foobar-id--description">Fieldset description</div></div></fieldset>',
       ),
       // Expanded fieldset with a child element and no description.
       array(
@@ -650,7 +650,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             '#markup' => 'Fieldset content',
           ),
         ),
-        'expected' => '<fieldset><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+        'expected' => '<fieldset><legend><span class="fieldset-legend">Fieldset legend</span></legend><div class="fieldset-wrapper">Fieldset content</div></fieldset>',
       ),
     );
 
