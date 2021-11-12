@@ -16,7 +16,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    parent::setUp(array('field_ui', 'entity', 'ctools', 'entityreference'));
+    parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -68,7 +68,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
     $this->createEntityReferenceField('test');
 
     // Set formatter to "Rendered entity".
-    $this->backdropPost('admin/structure/types/manage/' . $this->contentType . '/display', array(
+    $this->backdropPost('admin/structure/types/manage/' . $this->contentType . '/display/default', array(
       'fields[field_test][type]' => 'entityreference_entity_view',
     ), t('Save'));
 
@@ -105,7 +105,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
     $this->assertText('Read more');
 
     // Now turn off the "Show links" setting.
-    $this->backdropGet('admin/structure/types/manage/' . $this->contentType . '/display');
+    $this->backdropGet('admin/structure/types/manage/' . $this->contentType . '/display/default');
     $this->backdropPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
     $edit = array(
       'fields[field_test][settings_edit_form][settings][links]' => FALSE,
