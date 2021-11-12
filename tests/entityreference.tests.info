@@ -15,3 +15,9 @@ name = Entity Reference Taxonomy
 description = Tests nodes with reference to terms as indexed.
 group = Entity Reference
 file = entityreference.taxonomy.test
+
+[EntityReferenceFieldTestCase]
+name = Entity Reference field
+description = Tests for the entity reference field formatters and widgets.
+group = Entity Reference
+file = entityreference.field.test

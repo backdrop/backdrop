@@ -149,7 +149,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
     $settings = array();
     $settings['type'] = 'article';
     $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = $tid;
-    $node = $this->drupalCreateNode($settings);
+    $node = $this->backdropCreateNode($settings);
 
     $this->assertEqual(taxonomy_select_nodes($tid), array($node->nid));
   }

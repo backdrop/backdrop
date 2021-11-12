@@ -3,7 +3,7 @@
 /**
  * Tests for the Entity Reference field.
  */
-class EntityReferenceFieldTestCase extends DrupalWebTestCase {
+class EntityReferenceFieldTestCase extends BackdropWebTestCase {
 
   /**
    * The content type that is created.
@@ -15,22 +15,11 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity Reference field',
-      'description' => 'Tests for the entity reference field formatters and widgets.',
-      'group' => 'Entity Reference',
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setUp() {
     parent::setUp(array('field_ui', 'entity', 'ctools', 'entityreference'));
 
     // Create test user.
-    $this->admin_user = $this->drupalCreateUser(array(
+    $this->admin_user = $this->backdropCreateUser(array(
       'access content',
       'administer content types',
       'administer nodes',
@@ -38,11 +27,11 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
       'administer filters',
       'administer fields',
     ));
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Create content type.
     $this->contentType = strtolower($this->randomName(8));
-    $this->drupalCreateContentType(array('name' => $this->contentType, 'type' => $this->contentType));
+    $this->backdropCreateContentType(array('name' => $this->contentType, 'type' => $this->contentType));
   }
 
   /**
@@ -57,7 +46,7 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
     $bundle_path = 'admin/structure/types/manage/' . $this->contentType;
 
     // First step: 'Add new field' on the 'Manage fields' page.
-    $this->drupalPost($bundle_path . '/fields', array(
+    $this->backdropPost($bundle_path . '/fields', array(
       'fields[_add_new_field][label]' => $label,
       'fields[_add_new_field][field_name]' => $field_name,
       'fields[_add_new_field][type]' => 'entityreference',
@@ -65,10 +54,10 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
     ), t('Save'));
 
     // Second step: 'Instance settings' form.
-    $this->drupalPost(NULL, array(), t('Save field settings'));
+    $this->backdropPost(NULL, array(), t('Save field settings'));
 
     // Third step: confirm.
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->backdropPost(NULL, array(), t('Save settings'));
   }
 
   /**
@@ -79,28 +68,28 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
     $this->createEntityReferenceField('test');
 
     // Set formatter to "Rendered entity".
-    $this->drupalPost('admin/structure/types/manage/' . $this->contentType . '/display', array(
+    $this->backdropPost('admin/structure/types/manage/' . $this->contentType . '/display', array(
       'fields[field_test][type]' => 'entityreference_entity_view',
     ), t('Save'));
 
     // Set view mode option to "teaser" and enable the "Show links" option.
-    $this->drupalPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
+    $this->backdropPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
     $edit = array(
       'fields[field_test][settings_edit_form][settings][view_mode]' => 'teaser',
       'fields[field_test][settings_edit_form][settings][links]' => 1,
     );
-    $this->drupalPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
-    $this->drupalPost(NULL, array(), t('Save'));
+    $this->backdropPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
+    $this->backdropPost(NULL, array(), t('Save'));
 
     // Assert that the formatter says that links will be shown.
     $this->assertText('Display links');
     $this->assertNoText('Do not display links');
 
     // Create two nodes. The second node will reference the first one.
-    $node1 = $this->drupalCreateNode(array(
+    $node1 = $this->backdropCreateNode(array(
       'type' => $this->contentType,
     ));
-    $node2 = $this->drupalCreateNode(array(
+    $node2 = $this->backdropCreateNode(array(
       'type' => $this->contentType,
       'field_test' => array(
         LANGUAGE_NONE => array(
@@ -112,23 +101,23 @@ class EntityReferenceFieldTestCase extends DrupalWebTestCase {
     ));
 
     // Assert that a read more link is shown on node 2.
-    $this->drupalGet('node/2');
+    $this->backdropGet('node/2');
     $this->assertText('Read more');
 
     // Now turn off the "Show links" setting.
-    $this->drupalGet('admin/structure/types/manage/' . $this->contentType . '/display');
-    $this->drupalPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
+    $this->backdropGet('admin/structure/types/manage/' . $this->contentType . '/display');
+    $this->backdropPostAJAX(NULL, array(), 'field_test_formatter_settings_edit');
     $edit = array(
       'fields[field_test][settings_edit_form][settings][links]' => FALSE,
     );
-    $this->drupalPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
-    $this->drupalPost(NULL, array(), t('Save'));
+    $this->backdropPostAJAX(NULL, $edit, 'field_test_formatter_settings_update');
+    $this->backdropPost(NULL, array(), t('Save'));
 
     // Assert that the formatter says that no links will be shown.
     $this->assertText('Do not display links');
 
     // And assert that the read more link is no longer displayed on node 2.
-    $this->drupalGet('node/2');
+    $this->backdropGet('node/2');
     $this->assertNoText('Read more');
   }
 

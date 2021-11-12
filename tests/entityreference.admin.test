@@ -102,6 +102,6 @@ class EntityReferenceAdminTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save settings'));
 
     // Check that the field appears in the overview form.
-    $this->assertFieldByXPath('//table[@id="field-overview"]//td[1]', 'Test label', t('Field was created and appears in the overview page.'));
+    $this->assertFieldByXPath('//input[@name="fields[field_test][parent_wrapper][hidden_name]"]', 'field_test', 'Field was created and appears in the overview page.');
   }
 }
