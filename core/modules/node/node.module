@@ -636,6 +636,13 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
+  // Remove permissions for this content type from all roles.
+  $node_type_permissions = array_keys(node_list_permissions($type));
+  $roles = array_keys(user_roles(FALSE, NULL));
+  foreach ($roles as $role_name) {
+    user_role_revoke_permissions($role_name, $node_type_permissions);
+  }
+
   $info = node_type_get_type($type);
   $config = config('node.type.' . $type);
   $config->delete();
