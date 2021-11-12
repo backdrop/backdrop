@@ -46,7 +46,7 @@ function entityreference_flush_caches() {
   }
   // We are using a setting because cache is going to be cleared right after
   // hook_flush_caches() is finished.
-  config_set('entityreference.settings', 'base-tables', $base_tables);
+  state_set('entityreference_base_tables', $base_tables);
 }
 
 /**
