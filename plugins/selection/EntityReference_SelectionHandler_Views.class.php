@@ -55,10 +55,6 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
       $default = !empty($view_settings['args']) ? implode(', ', $view_settings['args']) : '';
       $description = t('Provide a comma separated list of arguments to pass to the view.') . '<br />' . t('This field supports tokens.');
 
-      if (!module_exists('token')) {
-        $description .= '<br>' . t('Install the <a href="@url">token module</a> to get more tokens and display available ones.', array('@url' => 'http://drupal.org/project/token'));
-      }
-
       $form['view']['args'] = array(
         '#type' => 'textfield',
         '#title' => t('View arguments'),
@@ -67,18 +63,16 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
         '#description' => $description,
         '#maxlength' => '512',
       );
-      if (module_exists('token')) {
-        // Get the token type for the entity type our field is in (a type 'taxonomy_term' has a 'term' type token).
-        $info = entity_get_info($instance['entity_type']);
+      // Get the token type for the entity type our field is in (a type 'taxonomy_term' has a 'term' type token).
+      $info = entity_get_info($instance['entity_type']);
 
-        $form['view']['tokens'] = array(
-          '#theme' => 'token_tree',
-          '#token_types' => array($info['token type']),
-          '#global_types' => TRUE,
-          '#click_insert' => TRUE,
-          '#dialog' => TRUE,
-        );
-      }
+      $form['view']['tokens'] = array(
+        '#theme' => 'token_tree',
+        '#token_types' => array($info['token type']),
+        '#global_types' => TRUE,
+        '#click_insert' => TRUE,
+        '#dialog' => TRUE,
+      );
     }
     else {
       $form['view']['no_view_help'] = array(
@@ -199,10 +193,6 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
    *   The arguments to be send to the View.
    */
   protected function handleArgs($args) {
-    if (!module_exists('token')) {
-      return $args;
-    }
-
     // Parameters for token_replace().
     $data = array();
     $options = array('clear' => TRUE);
