@@ -1913,7 +1913,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     ));
     $this->backdropLogin($admin_user);
 
-    // Create new role
+    // Create new role.
     $role_name = $this->backdropCreateRole(array('access content'));
     $web_user = $this->backdropCreateUser();
 
@@ -1958,6 +1958,43 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit own page content', $account), "Web user has edit own page content permission.");
     $this->assertTrue(user_access('edit any page content', $account), "Web user has edit any page content permission.");
+  }
+
+  /**
+   * Tests that node type permissions are removed when the node type is deleted.
+   */
+  function testNodeTypeRemovePermissions() {
+    // Create a new content type of abc123 via the user interface.
+    $this->admin_user = $this->backdropCreateUser(array('administer content types'));
+    $this->backdropLogin($admin_user);
+    $edit = array(
+      'name' => 'abc123',
+      'title_label' => 'title for abc123',
+      'type' => 'abc123',
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+
+    $node_type_permissions = array_keys(node_list_permissions('abc123'));
+
+    // Check that user1 has all permissions for actions relevant to the new
+    // content type.
+    backdrop_static_reset('user_access');
+    $account = user_load(1, TRUE);
+    foreach ($node_type_permissions as $permission) {
+      $this->assertTrue(user_access($permission, $account), "Admin user has the $permission permission.");
+    }
+
+    // Delete the content type via the user interface.
+    $this->backdropPost('admin/structure/types/manage/abc123', array(), t('Delete content type'));
+    $this->backdropPost(NULL, array(), t('Delete'));
+
+    // Check that user1 no longer has any of the permissions related to the
+    // deleted content type.
+    backdrop_static_reset('user_access');
+    $account = user_load(1, TRUE);
+    foreach ($node_type_permissions as $permission) {
+      $this->assertFalse(user_access($permission, $account), "Admin user has the $permission permission.");
+    }
   }
 
   /**
