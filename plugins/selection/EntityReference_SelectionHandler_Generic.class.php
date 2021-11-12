@@ -290,18 +290,9 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
    * access control mechanisms to alter it again.
    */
   protected function reAlterQuery(SelectQueryInterface $query, $tag, $base_table) {
-    // Save the old tags and metadata.
-    // For some reason, those are public.
-    $old_tags = $query->alterTags;
-    $old_metadata = $query->alterMetaData;
-
-    $query->alterTags = array($tag => TRUE);
-    $query->alterMetaData['base_table'] = $base_table;
+    $query->addTag($tag);
+    $query->addMetaData('base_table', $base_table);
     backdrop_alter(array('query', 'query_' . $tag), $query);
-
-    // Restore the tags and metadata.
-    $query->alterTags = $old_tags;
-    $query->alterMetaData = $old_metadata;
   }
 
   /**
@@ -510,17 +501,17 @@ class EntityReference_SelectionHandler_Generic_file extends EntityReference_Sele
 class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // The Taxonomy module doesn't implement any proper taxonomy term access,
-    // and as a consequence doesn't make sure that taxonomy terms cannot be viewed
-    // when the user doesn't have access to the vocabulary.
+    // and as a consequence doesn't make sure that taxonomy terms cannot be
+    // viewed when the user doesn't have access to the vocabulary.
     $base_table = $this->ensureBaseTable($query);
     $vocabulary_alias = $query->innerJoin('taxonomy_vocabulary', 'n', '%alias.vid = ' . $base_table . '.vid');
     $query->addMetadata('base_table', $vocabulary_alias);
     // Pass the query to the taxonomy access control.
     $this->reAlterQuery($query, 'taxonomy_vocabulary_access', $vocabulary_alias);
 
-    // Also, the taxonomy term entity exposes a bundle, but doesn't have a bundle
-    // column in the database. We have to alter the query ourself to go fetch
-    // the bundle.
+    // Also, the taxonomy term entity exposes a bundle, but doesn't have a
+    // bundle column in the database. We have to alter the query ourselves to go
+    // fetch the bundle.
     $conditions = &$query->conditions();
     foreach ($conditions as $key => &$condition) {
       if ($key !== '#conjunction' && is_string($condition['field']) && $condition['field'] === 'vocabulary_machine_name') {
@@ -546,8 +537,8 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
     $bundles = !empty($this->field['settings']['handler_settings']['target_bundles']) ? $this->field['settings']['handler_settings']['target_bundles'] : array_keys($entity_info['bundles']);
 
     foreach ($bundles as $bundle) {
-      if ($vocabulary = taxonomy_vocabulary_machine_name_load($bundle)) {
-        if ($terms = taxonomy_get_tree($vocabulary->vid, 0, NULL, TRUE)) {
+      if ($vocabulary = taxonomy_vocabulary_load($bundle)) {
+        if ($terms = taxonomy_get_tree($vocabulary->machine_name, 0, NULL, TRUE)) {
           foreach ($terms as $term) {
             $options[$vocabulary->machine_name][$term->tid] = str_repeat('-', $term->depth) . check_plain(entity_label('taxonomy_term', $term));
           }
@@ -564,4 +555,3 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
  * Exception thrown when the entity view renderer goes into a potentially infinite loop.
  */
 class EntityReferenceRecursiveRenderingException extends Exception {}
-

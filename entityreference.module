@@ -1037,8 +1037,8 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   $entity = NULL;
   if ($entity_id !== 'NULL') {
     $entity = entity_load($entity_type, $entity_id);
-    $has_view_access = (entityreference_entity_access('view', $entity_type, $entity) !== FALSE);
-    $has_update_access = (entityreference_entity_access('update', $entity_type, $entity) !== FALSE);
+    $has_view_access = (entity_access('view', $entity_type, $entity) !== FALSE);
+    $has_update_access = (entity_access('update', $entity_type, $entity) !== FALSE);
     if (!$entity || !($has_view_access || $has_update_access)) {
       return MENU_ACCESS_DENIED;
     }
@@ -1531,28 +1531,6 @@ function entityreference_autoload_info() {
     'entityreference_plugin_row_fields' => 'views/entityreference_plugin_row_fields.inc',
     'entityreference_plugin_style' => 'views/entityreference_plugin_style.inc',
   );
-}
-
-/**
- * Check user access to the entity.
- *
- * Until entity_access is supported in core.
- */
-function entityreference_entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
-  if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
-    return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
-  }
-
-  // Fallback to entity specific access functions where possible.
-  switch ($info[$entity_type]) {
-    case 'node':
-      return node_access($op, $entity, $account);
-      break;
-    case 'comment':
-      return comment_access($op, $entity);
-      break;
-  }
-  return TRUE;
 }
 
 /**
