@@ -500,25 +500,12 @@ class EntityReference_SelectionHandler_Generic_file extends EntityReference_Sele
  */
 class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityReference_SelectionHandler_Generic {
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
-    // The Taxonomy module doesn't implement any proper taxonomy term access,
-    // and as a consequence doesn't make sure that taxonomy terms cannot be
+    // Want to ensure that taxonomy terms cannot be
     // viewed when the user doesn't have access to the vocabulary.
     $base_table = $this->ensureBaseTable($query);
-    $vocabulary_alias = $query->innerJoin('taxonomy_vocabulary', 'n', '%alias.vid = ' . $base_table . '.vid');
-    $query->addMetadata('base_table', $vocabulary_alias);
-    // Pass the query to the taxonomy access control.
-    $this->reAlterQuery($query, 'taxonomy_vocabulary_access', $vocabulary_alias);
-
-    // Also, the taxonomy term entity exposes a bundle, but doesn't have a
-    // bundle column in the database. We have to alter the query ourselves to go
-    // fetch the bundle.
-    $conditions = &$query->conditions();
-    foreach ($conditions as $key => &$condition) {
-      if ($key !== '#conjunction' && is_string($condition['field']) && $condition['field'] === 'vocabulary_machine_name') {
-        $condition['field'] = $vocabulary_alias . '.machine_name';
-        break;
-      }
-    }
+    $tag = 'taxonomy_vocabulary_access';
+    $query->addTag($tag);
+    backdrop_alter(array('query', 'query_' . $tag), $query);
   }
 
   /**
