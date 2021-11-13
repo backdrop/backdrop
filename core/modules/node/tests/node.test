@@ -1974,29 +1974,42 @@ class NodeTypeTestCase extends BackdropWebTestCase {
       'assign roles',
       'access user profiles',
     ));
+    // Get the name of the role assigned to the newly-created admin user, and
+    // make it the default admin role for the site (all new permissions are
+    // automatically assigned to it).
+    $admin_role = reset($admin_user->roles);
+    config_set('system.core', 'user_admin_role', $admin_role);
+
     $this->backdropLogin($admin_user);
 
-    // Create a new content type of abc123 via the user interface.
+    // Create a new content type via the user interface.
     $edit = array(
       'name' => 'abc123',
       'title_label' => 'title for abc123',
       'type' => 'abc123',
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // At this point, all permissions relevant to the newly-created content type
+    // should have been automatically assigned to the default site admin role.
 
     $node_type_permissions = array_keys(node_list_permissions('abc123'));
 
-    // Create new role, and grant permissions to it for all actions available
+    // Create a new role, and grant permissions to it for all actions available
     // for the newly-created content type.
-    $role_name = $this->backdropCreateRole($node_type_permissions);
-    // Load the config file for the role.
-    $role_config_file = 'user.role.' . $role_name;
+    $regular_role = $this->backdropCreateRole($node_type_permissions);
 
-    // Get the permissions array within the config file, and confirm that all
-    // permissions relevant to the new content type exist in the array.
-    $permissions = config_get($role_config_file, 'permissions');
-    foreach ($node_type_permissions as $permission) {
-      $this->assertTrue(in_array($permission, $permissions), "Admin user has the '$permission' permission.");
+    $roles = array(
+      'admin role' => $admin_role;
+      'regular role' => $regular_role;
+    );
+
+    // Get the permissions array within each role config file, and confirm that
+    // all permissions relevant to the new content type exist in the array.
+    foreach ($roles as $role_type => $role) {
+      $permissions = config_get('user.role.' . $role, 'permissions') != NULL ? config_get('user.role.' . $role, 'permissions') : array();
+      foreach ($node_type_permissions as $permission) {
+        $this->assertTrue(in_array($permission, $permissions), "Permission '$permission' exists in the config file of the $role_type.");
+      }
     }
 
     // Delete the content type via the user interface.
@@ -2006,9 +2019,11 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Get the permissions array again, and confirm that all permissions
     // relevant to the deleted content type have been removed from it.
-    $permissions = config_get($role_config_file, 'permissions');
-    foreach ($node_type_permissions as $permission) {
-      $this->assertFalse(in_array($permission, $permissions), "Permission '$permission' removed from admin user.");
+    foreach ($config_files as $role => $config_file) {
+      $permissions = config_get('user.role.' . $role, 'permissions') != NULL ? config_get('user.role.' . $role, 'permissions') : array();
+      foreach ($node_type_permissions as $permission) {
+        $this->assertFalse(in_array($permission, $permissions), "Permission '$permission' removed from the config file of the $role_type.");
+      }
     }
   }
 
