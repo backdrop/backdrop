@@ -1979,10 +1979,11 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropLogin($admin_user);
 
     // Create a new content type via the user interface.
+    $name = strtolower($this->randomName(8));
     $edit = array(
-      'name' => 'abc123',
-      'title_label' => 'title for abc123',
-      'type' => 'abc123',
+      'name' => $name,
+      'title_label' => "Title for $name",
+      'type' => $name,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     node_type_cache_reset();
@@ -1991,7 +1992,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Create a new role, and grant permissions to it for all actions available
     // for the newly-created content type.
-    $node_type_permissions = array_keys(node_list_permissions('abc123'));
+    $node_type_permissions = array_keys(node_list_permissions($name));
     $regular_role = $this->backdropCreateRole($node_type_permissions, NULL, TRUE);
 
     $roles = array(
@@ -2009,9 +2010,9 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     }
 
     // Delete the content type via the user interface.
-    $this->backdropPost('admin/structure/types/manage/abc123/delete', array(), t('Delete'));
+    $this->backdropPost('admin/structure/types/manage/'  . $name . '/delete', array(), t('Delete'));
     $this->backdropGet('admin/structure/types');
-    $this->assertNoText('abc123', 'Content type abc123 is no longer found on admin/structure/types.');
+    $this->assertNoText($name, "Content type $name is no longer found on admin/structure/types.");
 
     // Get the permissions array again, and confirm that all permissions
     // relevant to the deleted content type have been removed from it.
