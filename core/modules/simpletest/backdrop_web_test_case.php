@@ -1341,21 +1341,25 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Creates a role with specified permissions.
    *
-   * @param $permissions
+   * @param array $permissions
    *   Array of permission names to assign to role.
-   * @param $name
+   * @param string $name
    *   (optional) String for the name of the role.  Defaults to a random string.
+   * @param bool $reset
+   *   (optional) Flag to force a reset of cached available permissions.
+   *   Defaults to FALSE.
+   *
    * @return
    *   Role name of newly created role, or FALSE if role creation failed.
    */
-  protected function backdropCreateRole(array $permissions, $name = NULL) {
+  protected function backdropCreateRole(array $permissions, $name = NULL, $reset = FALSE) {
     // Generate random name if it was not passed.
     if (!$name) {
       $name = $this->randomName();
     }
 
-    // Check the all the permissions strings are valid.
-    if (!$this->checkPermissions($permissions)) {
+    // Check that all the permission strings are valid.
+    if (!$this->checkPermissions($permissions, $reset)) {
       return FALSE;
     }
 
@@ -1383,6 +1387,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   Permissions to check.
    * @param $reset
    *   Reset cached available permissions.
+   *
    * @return
    *   TRUE or FALSE depending on whether the permissions are valid.
    */
