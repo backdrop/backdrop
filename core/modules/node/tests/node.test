@@ -1994,8 +1994,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $regular_role = $this->backdropCreateRole($node_type_permissions);
 
     $roles = array(
-      'admin role' => $admin_role;
-      'regular role' => $regular_role;
+      'admin role' => $admin_role,
+      'regular role' => $regular_role,
     );
 
     // Get the permissions array within each role config file, and confirm that
@@ -2014,7 +2014,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Get the permissions array again, and confirm that all permissions
     // relevant to the deleted content type have been removed from it.
-    foreach ($config_files as $role => $config_file) {
+    foreach ($roles as $role_type => $role) {
       $permissions = config_get('user.role.' . $role, 'permissions') != NULL ? config_get('user.role.' . $role, 'permissions') : array();
       foreach ($node_type_permissions as $permission) {
         $this->assertFalse(in_array($permission, $permissions), "Permission '$permission' removed from the config file of the $role_type.");
