@@ -1354,7 +1354,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $name = $this->randomName();
     }
 
-    // Check the all the permissions strings are valid.
+    // Check that all the permission strings are valid.
     if (!$this->checkPermissions($permissions)) {
       return FALSE;
     }

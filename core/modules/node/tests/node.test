@@ -1985,6 +1985,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
       'type' => 'abc123',
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    node_type_cache_reset();
     // At this point, all permissions relevant to the newly-created content type
     // should have been automatically assigned to the default site admin role.
 
