@@ -1967,12 +1967,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   function testNodeTypeRemovePermissions() {
     // Create admin user.
     $admin_user = $this->backdropCreateUser(array(
-      'bypass node access',
       'administer content types',
       'administer permissions',
-      'administer users',
-      'assign roles',
-      'access user profiles',
     ));
     // Get the name of the role assigned to the newly-created admin user, and
     // make it the default admin role for the site (all new permissions are
@@ -1992,10 +1988,9 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // At this point, all permissions relevant to the newly-created content type
     // should have been automatically assigned to the default site admin role.
 
-    $node_type_permissions = array_keys(node_list_permissions('abc123'));
-
     // Create a new role, and grant permissions to it for all actions available
     // for the newly-created content type.
+    $node_type_permissions = array_keys(node_list_permissions('abc123'));
     $regular_role = $this->backdropCreateRole($node_type_permissions);
 
     $roles = array(
