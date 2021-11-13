@@ -1796,7 +1796,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
     $this->assertEqual($config->get('settings.hidden_path'), '0', 'The new content type has hidden_path disabled.');
 
-    // Add a node of type foo; make sure we can visit it with 200 response..
+    // Add a node of type foo; make sure we can visit it with 200 response.
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
 
@@ -1961,12 +1961,22 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that node type permissions are removed when the node type is deleted.
+   * Tests that node type permissions are removed from user role config files
+   * when the node type is deleted.
    */
   function testNodeTypeRemovePermissions() {
-    // Create a new content type of abc123 via the user interface.
-    $admin_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
+    // Create admin user.
+    $admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+      'administer content types',
+      'administer permissions',
+      'administer users',
+      'assign roles',
+      'access user profiles',
+    ));
     $this->backdropLogin($admin_user);
+
+    // Create a new content type of abc123 via the user interface.
     $edit = array(
       'name' => 'abc123',
       'title_label' => 'title for abc123',
@@ -1974,27 +1984,31 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
 
-    // Check that user1 has all permissions for actions relevant to the new
-    // content type.
-    backdrop_static_reset('user_access');
     $node_type_permissions = array_keys(node_list_permissions('abc123'));
-    $account = user_load(1, TRUE);
+
+    // Create new role, and grant permissions to it for all actions available
+    // for the newly-created content type.
+    $role_name = $this->backdropCreateRole($node_type_permissions);
+    // Load the config file for the role.
+    $role_config_file = 'user.role.' . $role_name;
+
+    // Get the permissions array within the config file, and confirm that all
+    // permissions relevant to the new content type exist in the array.
+    $permissions = config_get($role_config_file, 'permissions');
     foreach ($node_type_permissions as $permission) {
-      $this->assertTrue(user_access($permission, $account), "Admin user has the '$permission' permission.");
+      $this->assertTrue(in_array($permission, $permissions), "Admin user has the '$permission' permission.");
     }
 
     // Delete the content type via the user interface.
-    $this->backdropPost('admin/structure/types/manage/abc123', array(), t('Delete content type'));
-    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropPost('admin/structure/types/manage/abc123/delete', array(), t('Delete'));
     $this->backdropGet('admin/structure/types');
     $this->assertNoText('abc123', 'Content type abc123 is no longer found on admin/structure/types.');
 
-    // Check that user1 no longer has any of the permissions related to the
-    // deleted content type.
-    backdrop_static_reset('user_access');
-    $account = user_load(1, TRUE);
+    // Get the permissions array again, and confirm that all permissions
+    // relevant to the deleted content type have been removed from it.
+    $permissions = config_get($role_config_file, 'permissions');
     foreach ($node_type_permissions as $permission) {
-      $this->assertFalse(user_access($permission, $account), "Permission '$permission' removed from admin user.");
+      $this->assertFalse(in_array($permission, $permissions), "Permission '$permission' removed from admin user.");
     }
   }
 
