@@ -1986,6 +1986,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Delete the content type via the user interface.
     $this->backdropPost('admin/structure/types/manage/abc123', array(), t('Delete content type'));
     $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropGet('admin/structure/types');
+    $this->assertText('abc123', 'Content type abc123 is no longer found on admin/structure/types.');
 
     // Check that user1 no longer has any of the permissions related to the
     // deleted content type.
