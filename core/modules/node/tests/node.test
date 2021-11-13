@@ -1992,7 +1992,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     backdrop_static_reset('user_access');
     $account = user_load(1, TRUE);
     foreach ($node_type_permissions as $permission) {
-      $this->assertFalse(user_access($permission, $account), "Admin user has the $permission permission.");
+      $this->assertFalse(user_access($permission, $account), "Permission $permission removed from admin user.");
     }
   }
 
