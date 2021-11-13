@@ -1349,7 +1349,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   (optional) Flag to force a reset of cached available permissions.
    *   Defaults to FALSE.
    *
-   * @return
+   * @return string|FALSE
    *   Role name of newly created role, or FALSE if role creation failed.
    */
   protected function backdropCreateRole(array $permissions, $name = NULL, $reset = FALSE) {
@@ -1381,15 +1381,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Check to make sure that the array of permissions are valid.
+   * Checks to make sure that the array of permissions are valid.
    *
-   * @param $permissions
-   *   Permissions to check.
-   * @param $reset
-   *   Reset cached available permissions.
+   * @param array $permissions
+   *   Array of permission names to validate.
+   * @param bool $reset
+   *   (optional) Flag to force a reset of cached available permissions.
+   *   Defaults to FALSE.
    *
-   * @return
-   *   TRUE or FALSE depending on whether the permissions are valid.
+   * @return bool
+   *   TRUE or FALSE, depending on whether the permissions are valid ot not.
    */
   protected function checkPermissions(array $permissions, $reset = FALSE) {
     $available = &backdrop_static(__FUNCTION__);
