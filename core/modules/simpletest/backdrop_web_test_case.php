@@ -1390,7 +1390,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   Defaults to FALSE.
    *
    * @return bool
-   *   TRUE or FALSE, depending on whether the permissions are valid ot not.
+   *   TRUE or FALSE, depending on whether the permissions are valid or not.
    */
   protected function checkPermissions(array $permissions, $reset = FALSE) {
     $available = &backdrop_static(__FUNCTION__);
