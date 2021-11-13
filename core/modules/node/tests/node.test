@@ -1992,7 +1992,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Create a new role, and grant permissions to it for all actions available
     // for the newly-created content type.
     $node_type_permissions = array_keys(node_list_permissions('abc123'));
-    $regular_role = $this->backdropCreateRole($node_type_permissions);
+    $regular_role = $this->backdropCreateRole($node_type_permissions, NULL, TRUE);
 
     $roles = array(
       'admin role' => $admin_role,
