@@ -36,6 +36,8 @@ services:
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
+        # Set an expiration date/time for the preview.
+        - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
         # Post a comment in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./post-comment.sh
   mariadb:
