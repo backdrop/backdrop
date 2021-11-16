@@ -44,7 +44,7 @@ function entityreference_field_schema($field) {
 }
 
 /**
- * Move entityreference settings from config to settings.
+ * Move entityreference settings from config to state.
  */
 function entityreference_update_1000() {
   $config = config('entityreference.settings');
