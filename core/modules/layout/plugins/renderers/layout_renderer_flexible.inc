@@ -126,6 +126,7 @@ class LayoutRendererFlexible {
     backdrop_add_library('system', 'ui.sortable');
     backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
     backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
+    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.flexible.admin.css');
   }
 
   /**
@@ -145,7 +146,7 @@ class LayoutRendererFlexible {
   protected function getRowButtons($region_id) {
     $links = array();
     $links['configure'] = array(
-      'title' => t('Configure row'),
+      'title' => t('Configure'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/configure',
       'attributes' => array(
         'class' => array('use-ajax'),

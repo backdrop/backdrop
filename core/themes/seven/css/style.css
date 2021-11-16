@@ -1335,7 +1335,8 @@ div.filter-options select {
   margin: 0;
   background: none;
 }
-#layout-edit-main .l-header:before {
+#layout-edit-main .l-header:before,
+#layout-flexible-edit-main .l-header:before {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }

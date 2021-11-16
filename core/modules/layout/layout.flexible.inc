@@ -115,6 +115,11 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This page allows you to add or remove rows, and change the order of rows by dragging them up and down. You can also change the number of regions within each row, and adjust the width of each region.'),
+  );
+
   $messages = array();
   $form['messages'] = array(
     '#theme' => 'status_messages',
@@ -162,7 +167,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
-    '#attributes' => array('class' => array('flexible-layout-add-row')),
+    '#attributes' => array('class' => array('layout-flexible-add-row', 'button-secondary')),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),

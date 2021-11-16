@@ -2838,7 +2838,11 @@ function system_update_files_database(&$files, $type) {
   // If any module or theme was moved to a new location, we need to reset the
   // system_list() cache or we will continue to load the old copy, look for
   // schema updates in the wrong place, etc.
-  system_list_reset();
+  // We avoid system_list_reset() since this resets the static storage in
+  // system_rebuild_module_data(), which itself calls this function.
+  backdrop_static_reset('system_list');
+  backdrop_static_reset('list_themes');
+  cache('bootstrap')->deleteMultiple(array('bootstrap_modules', 'system_list'));
 }
 
 /**
@@ -3908,8 +3912,10 @@ function system_get_date_formats($date_format_name = NULL) {
   $date_formats = &backdrop_static(__FUNCTION__, array());
   if (empty($date_formats)) {
     $date_formats = config_get('system.date', 'formats');
-    foreach ($date_formats as $name => $format) {
-      $date_formats[$name]['name'] = $name;
+    if (is_array($date_formats)) {
+      foreach ($date_formats as $name => $format) {
+        $date_formats[$name]['name'] = $name;
+      }
     }
   }
 

@@ -1,0 +1,73 @@
+/**
+ * Flexible template admin css.
+ */
+
+.layout-flexible-region-top .label {
+  display: inline-block;
+  margin: 0;
+  padding: 4px 12px 4px 0; /* LTR */
+  line-height: 1.2;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #000;
+}
+[dir="rtl"] .layout-flexible-region-top .label {
+  padding: 4px 0 4px 12px;
+}
+
+.flexible-row .layout-editor-region-title .label {
+  font-size: 16px;
+}
+
+.layout--flexible .layout-editor-block {
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+.layout--flexible .layout-editor-block-title {
+  padding: 0.4em 1em;
+  margin-bottom: 10px;
+}
+.layout--flexible .layout-editor-block-title .text {
+  font-weight: normal;
+}
+.layout--flexible .layout-editor-block-content p {
+  color: #575357;
+}
+
+.layout-flexible-region-top .buttons {
+  display: inline-block;
+}
+
+.layout-flexible-editor .flexible-row {
+  padding: 0;
+  border: 1.25px dashed #0074bd;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  -webkit-box-shadow: 3px 3px 0 0 #c6c6c6;
+  -moz-box-shadow: 3px 3px 0 0 #c6c6c6;
+  box-shadow: 3px 3px 0 0 #c6c6c6;
+}
+.layout-flexible-editor .flexible-row:hover {
+  background-color: #ffffff;
+  cursor: move;
+}
+
+.layout-flexible-add-row {
+  margin: 20px;
+}
+[dir="rtl"] .layout-flexible-template-configure-form .layout-flexible-add-row {
+  margin-right: 20px;
+}
+
+.flexible-icon {
+  border: 2px solid #999;
+  border-radius: 3px;
+  padding: 1px;
+}
+.flexible-icon-region {
+  background-color: #ccc;
+  color: #fff;
+  background-clip: content-box;
+  text-align: center;
+}
