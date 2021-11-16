@@ -12,6 +12,10 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
 
   public function setUp() {
     parent::setUp('entityreference');
+
+    // Remove default content.
+    node_delete(1);
+    node_delete(2);
   }
 
   protected function assertReferencable($field, $tests, $handler_name) {
@@ -58,29 +62,29 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
 
     // Build a set of test data.
     // Titles contain HTML-special characters to test escaping.
-    $nodes = array(
-      'published1' => (object) array(
-        'type' => 'article',
+    $build_nodes = array(
+      'published1' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node published1 (<&>)',
         'uid' => 1,
       ),
-      'published2' => (object) array(
-        'type' => 'article',
+      'published2' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node published2 (<&>)',
         'uid' => 1,
       ),
-      'unpublished' => (object) array(
-        'type' => 'article',
+      'unpublished' => array(
+        'type' => 'post',
         'status' => 0,
         'title' => 'Node unpublished (<&>)',
         'uid' => 1,
       ),
       // Title purposefully starts with same characters as published1 and
       // published2 above but contains a slash.
-      'published_withslash' => (object) array(
-        'type' => 'article',
+      'published_withslash' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node pub/lished1',
         'uid' => 1,
@@ -88,8 +92,9 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     );
 
     $node_labels = array();
-    foreach ($nodes as $key => $node) {
-      node_save($node);
+    foreach ($build_nodes as $key => $settings) {
+      $node = $this->backdropCreateNode($settings);
+      $nodes[$key] = $node;
       $node_labels[$key] = check_plain($node->title);
     }
 
@@ -102,7 +107,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
             $nodes['published_withslash']->nid => $node_labels['published_withslash'],
@@ -115,7 +120,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array('Published1', 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['published1']->nid => $node_labels['published1'],
           ),
         ),
@@ -126,7 +131,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array('Published2', 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['published2']->nid => $node_labels['published2'],
           ),
         ),
@@ -150,7 +155,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array('Node pub/', 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['published_withslash']->nid => $node_labels['published_withslash'],
           ),
         ),
@@ -167,7 +172,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
             $nodes['published_withslash']->nid => $node_labels['published_withslash'],
@@ -180,7 +185,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array('Node unpublished', 'CONTAINS'),
         ),
         'result' => array(
-          'article' => array(
+          'post' => array(
             $nodes['unpublished']->nid => $node_labels['unpublished'],
           ),
         ),
@@ -228,20 +233,20 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     $users = array(
       'anonymous' => user_load(0),
       'admin' => user_load(1),
-      'non_admin' => (object) array(
+      'non_admin' => entity_create('user', array(
         'name' => 'non_admin <&>',
         'mail' => 'non_admin@example.com',
         'roles' => array(),
         'pass' => user_password(),
         'status' => 1,
-      ),
-      'blocked' => (object) array(
+      )),
+      'blocked' => entity_create('user', array(
         'name' => 'blocked <&>',
         'mail' => 'blocked@example.com',
         'roles' => array(),
         'pass' => user_password(),
         'status' => 0,
-      ),
+      )),
     );
 
     // The label of the anonymous user.
@@ -356,26 +361,26 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     );
 
     // Build a set of test data.
-    $nodes = array(
-      'published' => (object) array(
-        'type' => 'article',
+    $build_nodes = array(
+      'published' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node published',
         'uid' => 1,
       ),
-      'unpublished' => (object) array(
-        'type' => 'article',
+      'unpublished' => array(
+        'type' => 'post',
         'status' => 0,
         'title' => 'Node unpublished',
         'uid' => 1,
       ),
     );
-    foreach ($nodes as $node) {
-      node_save($node);
+    foreach ($build_nodes as $key => $settings) {
+      $nodes[$key] = $this->backdropCreateNode($settings);
     }
 
-    $comments = array(
-      'published_published' => (object) array(
+    $build_comments = array(
+      'published_published' => array(
         'nid' => $nodes['published']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -385,7 +390,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
-      'published_unpublished' => (object) array(
+      'published_unpublished' => array(
         'nid' => $nodes['published']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -395,7 +400,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         'hostname' => ip_address(),
         'language' => LANGUAGE_NONE,
       ),
-      'unpublished_published' => (object) array(
+      'unpublished_published' => array(
         'nid' => $nodes['unpublished']->nid,
         'uid' => 1,
         'cid' => NULL,
@@ -408,8 +413,10 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     );
 
     $comment_labels = array();
-    foreach ($comments as $key => $comment) {
+    foreach ($build_comments as $key => $settings) {
+      $comment = entity_create('comment', $settings);
       comment_save($comment);
+      $comments[$key] = $comment;
       $comment_labels[$key] = check_plain($comment->subject);
     }
 
@@ -422,7 +429,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          'comment_node_article' => array(
+          'comment_node_post' => array(
             $comments['published_published']->cid => $comment_labels['published_published'],
           ),
         ),
@@ -432,7 +439,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array('Published', 'CONTAINS'),
         ),
         'result' => array(
-          'comment_node_article' => array(
+          'comment_node_post' => array(
             $comments['published_published']->cid => $comment_labels['published_published'],
           ),
         ),
@@ -461,7 +468,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          'comment_node_article' => array(
+          'comment_node_post' => array(
             $comments['published_published']->cid => $comment_labels['published_published'],
             $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
           ),
@@ -479,7 +486,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           array(NULL, 'CONTAINS'),
         ),
         'result' => array(
-          'comment_node_article' => array(
+          'comment_node_post' => array(
             $comments['published_published']->cid => $comment_labels['published_published'],
             $comments['published_unpublished']->cid => $comment_labels['published_unpublished'],
             $comments['unpublished_published']->cid => $comment_labels['unpublished_published'],
@@ -509,7 +516,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
       'label' => 'Text Field',
       'field_name' => 'field_text',
       'entity_type' => 'node',
-      'bundle' => 'article',
+      'bundle' => 'post',
       'settings' => array(),
       'required' => FALSE,
     );
@@ -539,9 +546,9 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     );
 
     // Build a set of test data.
-    $nodes = array(
-      'published1' => (object) array(
-        'type' => 'article',
+    $build_nodes = array(
+      'published1' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node published1 (<&>)',
         'uid' => 1,
@@ -553,8 +560,8 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           ),
         ),
       ),
-      'published2' => (object) array(
-        'type' => 'article',
+      'published2' => array(
+        'type' => 'post',
         'status' => 1,
         'title' => 'Node published2 (<&>)',
         'uid' => 1,
@@ -566,8 +573,8 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           ),
         ),
       ),
-      'unpublished' => (object) array(
-        'type' => 'article',
+      'unpublished' => array(
+        'type' => 'post',
         'status' => 0,
         'title' => 'Node unpublished (<&>)',
         'uid' => 1,
@@ -582,8 +589,9 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     );
 
     $node_labels = array();
-    foreach ($nodes as $key => $node) {
-      node_save($node);
+    foreach ($build_nodes as $key => $settings) {
+      $node = $this->backdropCreateNode($settings);
+      $nodes[$key] = $node;
       $node_labels[$key] = check_plain($node->title);
     }
 
@@ -600,6 +608,6 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
       $nodes['published2']->nid => $node_labels['published2'],
       $nodes['published1']->nid => $node_labels['published1'],
     );
-    $this->assertIdentical($result['article'], $expected_result, 'Query sorted by field returned expected values for non-admin.');
+    $this->assertIdentical($result['post'], $expected_result, 'Query sorted by field returned expected values for non-admin.');
   }
 }

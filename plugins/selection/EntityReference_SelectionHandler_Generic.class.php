@@ -9,6 +9,14 @@
 class EntityReference_SelectionHandler_Generic implements EntityReference_SelectionHandler {
 
   /**
+   * Label key
+   *   The entity's label key is required for matching the autocomplete
+   *   string.
+   *   @see EntityReference_SelectionHandler_Generic::buildEntityFieldQuery
+   */
+  protected $label_key;
+
+  /**
    * Implements EntityReferenceHandler::getInstance().
    */
   public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
@@ -249,9 +257,8 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
       $query->entityCondition('bundle', $this->field['settings']['handler_settings']['target_bundles'], 'IN');
     }
     if (isset($match)) {
-      $entity_info = entity_get_info($this->field['settings']['target_type']);
-      if (isset($entity_info['entity keys']['label'])) {
-        $query->propertyCondition($entity_info['entity keys']['label'], $match, $match_operator);
+      if (!empty($this->label_key)) {
+        $query->propertyCondition($this->label_key, $match, $match_operator);
       }
     }
 
@@ -348,6 +355,9 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_node extends EntityReference_SelectionHandler_Generic {
+
+  protected $label_key = 'title';
+
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Adding the 'node_access' tag is sadly insufficient for nodes: core
     // requires us to also know about the concept of 'published' and
@@ -367,17 +377,14 @@ class EntityReference_SelectionHandler_Generic_node extends EntityReference_Sele
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_user extends EntityReference_SelectionHandler_Generic {
+
+  protected $label_key = 'name';
+
   public function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityFieldQuery($match, $match_operator);
 
-    // The user entity doesn't have a label column.
-    if (isset($match)) {
-      $query->propertyCondition('name', $match, $match_operator);
-    }
-
-    // Adding the 'user_access' tag is sadly insufficient for users: core
-    // requires us to also know about the concept of 'blocked' and
-    // 'active'.
+    // Adding the 'user_access' tag is insufficient for users: need to
+    // also know about the concept of 'blocked' and 'active'.
     if (!user_access('administer users')) {
       $query->propertyCondition('status', 1);
     }
@@ -425,27 +432,27 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_comment extends EntityReference_SelectionHandler_Generic {
+
+  protected $label_key = 'subject';
+
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
-    // Adding the 'comment_access' tag is sadly insufficient for comments: core
-    // requires us to also know about the concept of 'published' and
-    // 'unpublished'.
+    // Adding the 'comment_access' tag is insufficient for comments: need to
+    // also know about the concept of 'published' and 'unpublished'.
     if (!user_access('administer comments')) {
       $base_table = $this->ensureBaseTable($query);
       $query->condition("$base_table.status", COMMENT_PUBLISHED);
     }
 
-    // The Comment module doesn't implement any proper comment access,
-    // and as a consequence doesn't make sure that comments cannot be viewed
-    // when the user doesn't have access to the node.
+    // Need to make sure that comments cannot be viewed when the user doesn't
+    // have access to the node.
     $tables = $query->getTables();
     $base_table = key($tables);
     $node_alias = $query->innerJoin('node', 'n', '%alias.nid = ' . $base_table . '.nid');
     // Pass the query to the node access control.
     $this->reAlterQuery($query, 'node_access', $node_alias);
 
-    // Alas, the comment entity exposes a bundle, but doesn't have a bundle column
-    // in the database. We have to alter the query ourself to go fetch the
-    // bundle.
+    // The comment entity exposes a bundle, but doesn't have a bundle column
+    // in the database. Alter the query to fetch the bundle.
     $conditions = &$query->conditions();
     foreach ($conditions as $key => &$condition) {
       if ($key !== '#conjunction' && is_string($condition['field']) && $condition['field'] === 'node_type') {
@@ -459,8 +466,6 @@ class EntityReference_SelectionHandler_Generic_comment extends EntityReference_S
       }
     }
 
-    // Passing the query to node_query_node_access_alter() is sadly
-    // insufficient for nodes.
     // @see EntityReferenceHandler_node::entityFieldQueryAlter()
     if (!user_access('bypass node access') && !count(module_implements('node_grants'))) {
       $query->condition($node_alias . '.status', 1);
@@ -474,15 +479,18 @@ class EntityReference_SelectionHandler_Generic_comment extends EntityReference_S
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_file extends EntityReference_SelectionHandler_Generic {
+
+  protected $label_key = 'filename';
+
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
-    // Core forces us to know about 'permanent' vs. 'temporary' files.
+    // Need to know about 'permanent' vs. 'temporary' files.
     $tables = $query->getTables();
     $base_table = key($tables);
     $query->condition('status', FILE_STATUS_PERMANENT);
 
-    // Access control to files is a very difficult business. For now, we are not
-    // going to give it a shot.
-    // @todo: fix this when core access control is less insane.
+    // Access control to files is a very difficult business.
+    // @todo: Fix this when file access control is implemented.
+    // @see File::access().
     return $query;
   }
 
@@ -499,6 +507,9 @@ class EntityReference_SelectionHandler_Generic_file extends EntityReference_Sele
  * This only exists to workaround core bugs.
  */
 class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityReference_SelectionHandler_Generic {
+
+  protected $label_key = 'name';
+
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     // Want to ensure that taxonomy terms cannot be
     // viewed when the user doesn't have access to the vocabulary.
