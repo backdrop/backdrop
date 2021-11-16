@@ -152,9 +152,6 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     // Rebuild caches.
     $this->refreshVariables();
 
-    // Reset public files directory.
-    $GLOBALS['conf']['file_public_path'] = $this->originalFileDirectory;
-
     // Close the CURL handler.
     $this->curlClose();
   }
