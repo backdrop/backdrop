@@ -101,7 +101,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
     ));
 
     // Assert that a read more link is shown on node 2.
-    $this->backdropGet('node/2');
+    $this->backdropGet('node/' . $node2->nid);
     $this->assertText('Read more');
 
     // Now turn off the "Show links" setting.
@@ -117,7 +117,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
     $this->assertText('Do not display links');
 
     // And assert that the read more link is no longer displayed on node 2.
-    $this->backdropGet('node/2');
+    $this->backdropGet('node/' . $node2->nid);
     $this->assertNoText('Read more');
   }
 
