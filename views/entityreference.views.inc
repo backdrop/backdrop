@@ -147,3 +147,32 @@ function entityreference_views_plugins() {
   );
   return $plugins;
 }
+
+/**
+ * Element validation callback for EntityReferenceSelectionHandlerViews.
+ */
+function entityreference_view_settings_validate($element, &$form_state, $form) {
+  // Split view name and display name from the 'view_and_display' value.
+  if (!empty($element['view_and_display']['#value'])) {
+    list($view, $display) = explode(':', $element['view_and_display']['#value']);
+  }
+  else {
+    form_error($element, t('The views entity selection mode requires a view.'));
+    return;
+  }
+
+  // Explode the 'args' string into an actual array. Beware, explode() turns an
+  // empty string into an array with one empty string. We'll need an empty array
+  // instead.
+  $args_string = trim($element['args']['#value']);
+  if ($args_string === '') {
+    $args = array();
+  }
+  else {
+    // array_map is called to trim whitespaces from the arguments.
+    $args = array_map('trim', explode(',', $args_string));
+  }
+
+  $value = array('view_name' => $view, 'display_name' => $display, 'args' => $args);
+  form_set_value($element, $value, $form_state);
+}

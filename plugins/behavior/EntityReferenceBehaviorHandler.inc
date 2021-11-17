@@ -6,7 +6,7 @@
  * Implementations that wish to provide an implementation of this should
  * register it using hook_entityreference_behavior_plugins().
  */
-interface EntityReference_BehaviorHandler {
+interface EntityReferenceBehaviorHandlerInterface {
 
   /**
    * Constructor for the behavior.
@@ -140,9 +140,9 @@ interface EntityReference_BehaviorHandler {
 }
 
 /**
- * An abstract implementation of EntityReference_BehaviorHandler.
+ * An abstract implementation of EntityReferenceBehaviorHandlerInterface.
  */
-abstract class EntityReference_BehaviorHandler_Abstract implements EntityReference_BehaviorHandler {
+abstract class EntityReferenceBehaviorHandler implements EntityReferenceBehaviorHandlerInterface {
 
   /**
    * The name of the behavior plugin.
@@ -202,9 +202,9 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
 }
 
 /**
- * A broken implementation of EntityReference_BehaviorHandler.
+ * A broken implementation of EntityReferenceBehaviorHandler.
  */
-class EntityReference_BehaviorHandler_Broken extends EntityReference_BehaviorHandler_Abstract {
+class EntityReferenceBehaviorHandlerBroken extends EntityReferenceBehaviorHandler {
   public function settingsForm($field, $instance) {
     $form['behavior_handler'] = array(
       '#markup' => t('The selected behavior handler is broken.'),

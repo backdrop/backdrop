@@ -50,7 +50,7 @@ class entityreference_plugin_display extends views_plugin_display {
     $options = $this->get_option('entityreference_options');
 
     // Play nice with Views UI 'preview' : if the view is not executed through
-    // EntityReference_SelectionHandler_Views::getReferencableEntities(),
+    // EntityReferenceSelectionHandlerViews::getReferencableEntities(),
     // don't alter the query.
     if (empty($options)) {
       return;

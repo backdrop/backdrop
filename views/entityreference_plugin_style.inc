@@ -37,7 +37,7 @@ class entityreference_plugin_style extends views_plugin_style {
     $options = $this->display->handler->get_option('entityreference_options');
 
     // Play nice with Views UI 'preview' : if the view is not executed through
-    // EntityReference_SelectionHandler_Views::getReferencableEntities(), just
+    // EntityReferenceSelectionHandlerViews::getReferencableEntities(), just
     // display the HTML.
     if (empty($options)) {
       return parent::render();

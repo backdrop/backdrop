@@ -3,15 +3,18 @@
 /**
  * Entity handler for Views.
  */
-class EntityReference_SelectionHandler_Views implements EntityReference_SelectionHandler {
+class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHandlerInterface {
 
   /**
    * Implements EntityReferenceHandler::getInstance().
    */
   public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-    return new EntityReference_SelectionHandler_Views($field, $instance, $entity);
+    return new EntityReferenceSelectionHandlerViews($field, $instance, $entity);
   }
 
+  /**
+   * Constructor for EntityReferenceSelectionHandlerViews.
+   */
   protected function __construct($field, $instance, $entity) {
     $this->field = $field;
     $this->instance = $instance;
@@ -37,7 +40,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
 
     // The value of the 'view_and_display' select below will need to be split
     // into 'view_name' and 'view_display' in the final submitted values, so
-    // we massage the data at validate time on the wrapping element (not
+    // massage the data at validate time on the wrapping element (not
     // ideal).
     $form['view']['#element_validate'] = array('entityreference_view_settings_validate');
 
@@ -220,30 +223,4 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
     }
     return $args;
   }
-}
-
-function entityreference_view_settings_validate($element, &$form_state, $form) {
-  // Split view name and display name from the 'view_and_display' value.
-  if (!empty($element['view_and_display']['#value'])) {
-    list($view, $display) = explode(':', $element['view_and_display']['#value']);
-  }
-  else {
-    form_error($element, t('The views entity selection mode requires a view.'));
-    return;
-  }
-
-  // Explode the 'args' string into an actual array. Beware, explode() turns an
-  // empty string into an array with one empty string. We'll need an empty array
-  // instead.
-  $args_string = trim($element['args']['#value']);
-  if ($args_string === '') {
-    $args = array();
-  }
-  else {
-    // array_map is called to trim whitespaces from the arguments.
-    $args = array_map('trim', explode(',', $args_string));
-  }
-
-  $value = array('view_name' => $view, 'display_name' => $display, 'args' => $args);
-  form_set_value($element, $value, $form_state);
 }

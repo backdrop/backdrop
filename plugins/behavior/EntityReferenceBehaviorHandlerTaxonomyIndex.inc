@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Plugin class for the taxonomy-index behavior.
+ * Plugin class for the taxonomy behavior.
  */
 
 /**
@@ -13,10 +13,10 @@
  * is not needed as cleanup is performed by taxonomy module in
  * taxonomy_delete_node_index().
  */
-class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHandler_Abstract {
+class EntityReferenceBehaviorHandlerTaxonomyIndex extends EntityReferenceBehaviorHandler {
 
   /**
-   * Overrides EntityReference_BehaviorHandler_Abstract::access().
+   * Overrides EntityReferenceBehaviorHandler::access().
    *
    * Ensure that it is only enabled for ER instances on nodes targeting
    * terms, and the core setting to maintain index is enabled.
@@ -35,7 +35,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
   }
 
   /**
-   * Overrides EntityReference_BehaviorHandler_Abstract::entityPostInsert().
+   * Overrides EntityReferenceBehaviorHandler::entityPostInsert().
    *
    * Runs after hook_node_insert() used by taxonomy module.
    */
@@ -48,7 +48,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
   }
 
   /**
-   * Overrides EntityReference_BehaviorHandler_Abstract::entityPostUpdate().
+   * Overrides EntityReferenceBehaviorHandler::entityPostUpdate().
    *
    * Runs after hook_node_update() used by taxonomy module.
    */
@@ -72,7 +72,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
    * @see taxonomy_build_node_index()
    */
   protected function buildNodeIndex($node) {
-    // We maintain a denormalized table of term/node relationships, containing
+    // Maintain a denormalized table of term/node relationships, containing
     // only data for current, published nodes.
     $status = NULL;
     if (config_get('taxonomy.settings', 'maintain_index_table')) {
@@ -87,7 +87,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
         $sticky = (int)(!empty($node->sticky));
       }
     }
-    // We only maintain the taxonomy index for published nodes.
+    // Only maintain the taxonomy index for published nodes.
     if ($status) {
       // Collect a unique list of all the term IDs from all node fields.
       $tid_all = array();
@@ -116,7 +116,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
         }
 
         // Re-calculate the terms added in taxonomy_build_node_index() so
-        // we can optimize database queries.
+        // database queries can be optimized.
         $original_tid_all = array();
         if ($field['module'] == 'taxonomy' && $field['storage']['type'] == 'field_sql_storage') {
           // If a field value is not set in the node object when node_save() is
@@ -163,7 +163,7 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
   }
 
   /**
-   * Overrides EntityReference_BehaviorHandler_Abstract::settingsForm().
+   * Overrides EntityReferenceBehaviorHandler::settingsForm().
    */
   public function settingsForm($field, $instance) {
     $form = array();

@@ -1,18 +1,19 @@
 <?php
 
 /**
- * A generic Entity handler.
+ * @file
+ * Generic Entity handler.
  *
- * The generic base implementation has a variety of overrides to workaround
- * core's largely deficient entity handling.
+ * The generic base implementation with a variety of overrides for core
+ * entities.
  */
-class EntityReference_SelectionHandler_Generic implements EntityReference_SelectionHandler {
+class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelectionHandlerInterface {
 
   /**
-   * Label key
-   *   The entity's label key is required for matching the autocomplete
-   *   string.
-   *   @see EntityReference_SelectionHandler_Generic::buildEntityFieldQuery
+   * The entity's label key as required for matching the autocomplete string.
+   * @see EntityReferenceSelectionHandlerGeneric::buildEntityFieldQuery
+   *
+   * @var string
    */
   protected $label_key;
 
@@ -25,17 +26,20 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     // Check if the entity type does exist and has a base table.
     $entity_info = entity_get_info($target_entity_type);
     if (empty($entity_info['base table'])) {
-      return EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
+      return EntityReferenceSelectionHandlerBroken::getInstance($field, $instance);
     }
 
-    if (class_exists($class_name = 'EntityReference_SelectionHandler_Generic_' . $target_entity_type)) {
+    if (class_exists($class_name = 'EntityReferenceSelectionHandlerGeneric_' . $target_entity_type)) {
       return new $class_name($field, $instance, $entity_type, $entity);
     }
     else {
-      return new EntityReference_SelectionHandler_Generic($field, $instance, $entity_type, $entity);
+      return new EntityReferenceSelectionHandlerGeneric($field, $instance, $entity_type, $entity);
     }
   }
 
+  /**
+   * Constructor for EntityReferenceSelectionHandlerGeneric.
+   */
   protected function __construct($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
     $this->field = $field;
     $this->instance = $instance;
@@ -354,16 +358,14 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
  *
  * This only exists to workaround core bugs.
  */
-class EntityReference_SelectionHandler_Generic_node extends EntityReference_SelectionHandler_Generic {
+class EntityReferenceSelectionHandlerGeneric_node extends EntityReferenceSelectionHandlerGeneric {
 
   protected $label_key = 'title';
 
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
-    // Adding the 'node_access' tag is sadly insufficient for nodes: core
-    // requires us to also know about the concept of 'published' and
-    // 'unpublished'. We need to do that as long as there are no access control
-    // modules in use on the site. As long as one access control module is there,
-    // it is supposed to handle this check.
+    // Adding the 'node_access' tag is insufficient for nodes: need to also
+    // know about the concept of 'published' and 'unpublished' if there are
+    // no access control modules in use.
     if (!user_access('bypass node access') && !count(module_implements('node_grants'))) {
       $base_table = $this->ensureBaseTable($query);
       $query->condition("$base_table.status", NODE_PUBLISHED);
@@ -372,11 +374,9 @@ class EntityReference_SelectionHandler_Generic_node extends EntityReference_Sele
 }
 
 /**
- * Override for the User type.
- *
- * This only exists to workaround core bugs.
+ * Override for the User entity type.
  */
-class EntityReference_SelectionHandler_Generic_user extends EntityReference_SelectionHandler_Generic {
+class EntityReferenceSelectionHandlerGeneric_user extends EntityReferenceSelectionHandlerGeneric {
 
   protected $label_key = 'name';
 
@@ -393,8 +393,8 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
 
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
     if (user_access('administer users')) {
-      // In addition, if the user is administrator, we need to make sure to
-      // match the anonymous user, that doesn't actually have a name in the
+      // In addition, if the user is administrator, need to make sure to
+      // match the anonymous user, which doesn't actually have a name in the
       // database.
       $conditions = &$query->conditions();
       foreach ($conditions as $key => $condition) {
@@ -427,11 +427,9 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
 }
 
 /**
- * Override for the Comment type.
- *
- * This only exists to workaround core bugs.
+ * Override for the Comment entity type.
  */
-class EntityReference_SelectionHandler_Generic_comment extends EntityReference_SelectionHandler_Generic {
+class EntityReferenceSelectionHandlerGeneric_comment extends EntityReferenceSelectionHandlerGeneric {
 
   protected $label_key = 'subject';
 
@@ -474,11 +472,9 @@ class EntityReference_SelectionHandler_Generic_comment extends EntityReference_S
 }
 
 /**
- * Override for the File type.
- *
- * This only exists to workaround core bugs.
+ * Override for the File entity type.
  */
-class EntityReference_SelectionHandler_Generic_file extends EntityReference_SelectionHandler_Generic {
+class EntityReferenceSelectionHandlerGeneric_file extends EntityReferenceSelectionHandlerGeneric {
 
   protected $label_key = 'filename';
 
@@ -495,24 +491,22 @@ class EntityReference_SelectionHandler_Generic_file extends EntityReference_Sele
   }
 
   public function getLabel($entity) {
-    // The file entity doesn't have a label. More over, the filename is
+    // The file entity doesn't have a label. Moreover, the filename is
     // sometimes empty, so use the basename in that case.
     return $entity->filename !== '' ? $entity->filename : basename($entity->uri);
   }
 }
 
 /**
- * Override for the Taxonomy term type.
- *
- * This only exists to workaround core bugs.
+ * Override for the Taxonomy term entity type.
  */
-class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityReference_SelectionHandler_Generic {
+class EntityReferenceSelectionHandlerGeneric_taxonomy_term extends EntityReferenceSelectionHandlerGeneric {
 
   protected $label_key = 'name';
 
   public function entityFieldQueryAlter(SelectQueryInterface $query) {
-    // Want to ensure that taxonomy terms cannot be
-    // viewed when the user doesn't have access to the vocabulary.
+    // Ensure that taxonomy terms cannot be viewed when the user doesn't have
+    // access to the vocabulary.
     $base_table = $this->ensureBaseTable($query);
     $tag = 'taxonomy_vocabulary_access';
     $query->addTag($tag);
@@ -530,7 +524,6 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
     $options = array();
     $entity_type = $this->field['settings']['target_type'];
 
-    // We imitate core by calling taxonomy_get_tree().
     $entity_info = entity_get_info('taxonomy_term');
     $bundles = !empty($this->field['settings']['handler_settings']['target_bundles']) ? $this->field['settings']['handler_settings']['target_bundles'] : array_keys($entity_info['bundles']);
 
@@ -547,9 +540,3 @@ class EntityReference_SelectionHandler_Generic_taxonomy_term extends EntityRefer
     return $options;
   }
 }
-
-// This is here temporarily
-/**
- * Exception thrown when the entity view renderer goes into a potentially infinite loop.
- */
-class EntityReferenceRecursiveRenderingException extends Exception {}

@@ -7,7 +7,7 @@
  * Implementations that wish to provide an implementation of this should
  * register it with hook_entityreference_selection_plugins().
  */
-interface EntityReference_SelectionHandler {
+interface EntityReferenceSelectionHandlerInterface {
   /**
    * Factory function: create a new instance of this handler for a given field.
    *
@@ -71,11 +71,11 @@ interface EntityReference_SelectionHandler {
 }
 
 /**
- * A null implementation of EntityReference_SelectionHandler.
+ * A null implementation of EntityReferenceSelectionHandler.
  */
-class EntityReference_SelectionHandler_Broken implements EntityReference_SelectionHandler {
+class EntityReferenceSelectionHandlerBroken implements EntityReferenceSelectionHandlerInterface {
   public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
-    return new EntityReference_SelectionHandler_Broken($field, $instance, $entity_type, $entity);
+    return new EntityReferenceSelectionHandlerBroken($field, $instance, $entity_type, $entity);
   }
 
   protected function __construct($field, $instance) {

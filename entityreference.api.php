@@ -21,7 +21,7 @@ function hook_entityreference_behavior_plugins() {
   $plugins['views'] = array(
     'title' => t('Render Views filters as select list'),
     'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
-    'class' => 'EntityReferenceBehavior_ViewsFilterSelect',
+    'class' => 'EntityReferenceBehaviorHandlerViewsFilterSelect',
     'behavior type' => 'field',
     'access callback' => FALSE,
     'force enabled' => FALSE,
@@ -41,7 +41,7 @@ function hook_entityreference_behavior_plugins() {
 function hook_entityreference_selection_plugins() {
   $plugins['base'] = array(
     'title' => t('Simple (with optional filter by bundle)'),
-    'class' => 'EntityReference_SelectionHandler_Generic',
+    'class' => 'EntityReferenceSelectionHandlerGeneric',
     'weight' => -100,
   );
   return $plugins;
