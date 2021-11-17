@@ -11,23 +11,21 @@ define('ENTITYREFERENCE_DENIED', '- Restricted access -');
  * Implements hook_field_info().
  */
 function entityreference_field_info() {
-  $field_info['entityreference'] = array(
-    'label' => t('Entity Reference'),
-    'description' => t('This field references another entity.'),
-    'settings' => array(
-      // Default to the core target entity type node.
-      'target_type' => 'node',
-      // The handler for this field.
-      'handler' => 'base',
-      // The handler settings.
-      'handler_settings' => array(),
+  return array(
+    'entityreference' => array(
+      'label' => 'Entity Reference',
+      'description' => t('This field references another entity.'),
+      'settings' => array(
+        'target_type' => 'node',
+        'handler' => 'base',
+        'handler_settings' => array(),
+      ),
+      'instance_settings' => array(),
+      'default_widget' => 'entityreference_autocomplete',
+      'default_formatter' => 'entityreference_label',
+      'property_callbacks' => array('entityreference_field_property_callback'),
     ),
-    'instance_settings' => array(),
-    'default_widget' => 'entityreference_autocomplete',
-    'default_formatter' => 'entityreference_label',
-    'property_callbacks' => array('entityreference_field_property_callback'),
   );
-  return $field_info;
 }
 
 /**
