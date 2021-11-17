@@ -8,24 +8,24 @@ where authors could select which team they belong to.
 Installation
 ------------
 
-* Install this module using the official Backdrop CMS instructions at
-  <https://backdropcms.org/guide/modules>
+Install this module using the official Backdrop CMS instructions at <https://backdropcms.org/guide/modules>.
 
 Configuration
 -------------
 
-2. To add an entity reference field to a node, navigate to Administration >
-       Structure > Content types > [content type to edit] > Manage fields and
-       add a new field. Add a title and select the entity reference field type.
-       Select a widget: Select list, Autocomplete (Tags style), Autocomplete, or
-       Check boxes/radio buttons. Save.
-    3. From the Field Setting tab select the entity reference "Target type":
-       Node, Comment, File, User, Taxonomy term, or Taxonomy vocabulary.
-    4. From the Field Setting tab select select the Entity Selection Mode -
-       Simple (with optional filter by bundle) is the default. Select how to
-       Sort: Don't sort, A property of the base table of the entity, or A field
-       attached to this entity. Select the sort field or property and the sort
-       direction. Save.
+1. To add an entity reference field to a node, navigate to Administration >
+   Structure > Content types > [content type to edit] > Manage fields and
+   add a new field. Add a title and select the entity reference field type.
+   Select a widget: Select list, Autocomplete (Tags style), Autocomplete, or
+   Check boxes/radio buttons. Save.
+2. From the Field Setting tab select the entity reference "Target type":
+   Node, Comment, File, User, Taxonomy term, or Taxonomy vocabulary.
+3. From the Field Setting tab select select the Entity Selection Mode -
+   Simple (with optional filter by bundle) is the default. Select how to
+   Sort: Don't sort, A property of the base table of the entity, or A field
+   attached to this entity. Select the sort field or property and the sort
+   direction. Save.
+
 Now when authoring content there is an option to make reference to another
 entity.
 
