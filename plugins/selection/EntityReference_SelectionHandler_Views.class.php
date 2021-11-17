@@ -198,7 +198,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
     $options = array('clear' => TRUE);
 
     if ($entity = $this->entity) {
-      // D7 HACK: For new entities, entity and revision id are not set. This leads to
+      // For new entities, entity and revision id are not set. This leads to
       // * token replacement emitting PHP warnings
       // * views choking on empty arguments
       // We workaround this by filling in '0' for these IDs
