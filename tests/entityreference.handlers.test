@@ -231,7 +231,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
 
     // Build a set of test data.
     $users = array(
-      'anonymous' => user_load(0),
+      'anonymous' => NULL,
       'admin' => user_load(1),
       'non_admin' => entity_create('user', array(
         'name' => 'non_admin <&>',
@@ -249,15 +249,17 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
       )),
     );
 
-    // The label of the anonymous user.
-    $users['anonymous']->name = config_get('system.core', 'anonymous');
-
     $user_labels = array();
     foreach ($users as $key => $user) {
-      if (!isset($user->uid)) {
-        $users[$key] = $user = user_save(backdrop_anonymous_user(), (array) $user);
+      if ($key == 'anonymous') {
+        $users[$key] = backdrop_anonymous_user();
+        $name = ENTITYREFERENCE_DENIED;
+      } else {
+        user_save($user);
+        $users[$key] = $user;
+        $name = check_plain($user->name);
       }
-      $user_labels[$key] = check_plain($user->name);
+      $user_labels[$key] = $name;
     }
 
     // Test as a non-admin.

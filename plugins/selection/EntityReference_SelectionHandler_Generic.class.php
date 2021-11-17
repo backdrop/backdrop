@@ -407,16 +407,16 @@ class EntityReference_SelectionHandler_Generic_user extends EntityReference_Sele
           //    WHERE (name LIKE :name) OR (:anonymous_name LIKE :name AND uid = 0)
           $or = db_or();
           $or->condition($condition['field'], $condition['value'], $condition['operator']);
-          // Sadly, the Database layer doesn't allow us to build a condition
+          // The Database layer doesn't allow us to build a condition
           // in the form ':placeholder = :placeholder2', because the 'field'
           // part of a condition is always escaped.
-          // As a (cheap) workaround, we separately build a condition with no
-          // field, and concatenate the field and the condition separately.
+          // As a workaround, build a condition with no field, and concatenate
+          // the field and the condition separately.
           $value_part = db_and();
           $value_part->condition('anonymous_name', $condition['value'], $condition['operator']);
           $value_part->compile(Database::getConnection(), $query);
           $or->condition(db_and()
-            ->where(str_replace('anonymous_name', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => format_username(user_load(0))))
+            ->where(str_replace('`anonymous_name`', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => format_username(user_load(0))))
             ->condition('users.uid', 0)
           );
           $query->condition($or);
