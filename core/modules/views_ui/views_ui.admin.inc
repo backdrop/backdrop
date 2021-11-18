@@ -1673,7 +1673,7 @@ function views_ui_get_display_tab_details($view, $display) {
 
         $plugin_names = views_fetch_plugin_names('display', NULL, array($view->base_table));
         // Remove the plugin type of the current display from the list of
-        // plugiins.
+        // plugins.
         unset($plugin_names[$display->display_plugin]);
         // Add "Clone as" operations for the remaining plugin types.
         foreach ($plugin_names as $type => $label) {
