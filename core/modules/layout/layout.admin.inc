@@ -661,7 +661,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   foreach ($layout->conditions as $key => $condition) {
     $required_contexts = $condition->getRequiredContexts();
     if (array_diff($required_contexts, $context_plugins)) {
-      form_error($form['conditions']['active'][$key], t('The condition \'@condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('@condition' => $condition->summary())));
+      form_error($form['conditions']['active'][$key], t('The condition \'!condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('!condition' => $condition->summary())));
     }
   }
 }
@@ -874,6 +874,7 @@ function layout_settings_form_reset($form, &$form_state) {
   layout_clear_layout_tempstore($layout->name);
   backdrop_set_message(t('Layout changes discarded.'));
   $form_state['redirect'] = 'admin/structure/layouts';
+  $form_state['no_redirect'] = FALSE;
 }
 
 /**
