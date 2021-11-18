@@ -50,6 +50,40 @@ interface EntityControllerInterface {
    *   An array of entity objects indexed by their ids.
    */
   public function load($ids = array(), $conditions = array());
+
+  /**
+   * Builds a structured array representing the entity's content.
+   *
+   * The content built for the entity will vary depending on the $view_mode
+   * parameter.
+   *
+   * @param Entity $entity
+   *   An entity object.
+   * @param string $view_mode
+   *   View mode, e.g. 'full', 'teaser'...
+   * @param string|NULL $langcode
+   *   (optional) A language code to use for rendering. Defaults to the global
+   *   content language of the current request.
+   * @param array $context
+   *
+   * @return
+   *   The renderable array.
+   */
+  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array());
+
+  /**
+   * Creates a rendered entity.
+   *
+   * @param Entity $entity
+   *   An entity object.
+   * @param string $view_mode
+   * @param string|NULL $langcode
+   * @param array $context
+   *
+   * @return array
+   *   The renderable array.
+   */
+  public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array());
 }
 
 /**
@@ -529,6 +563,74 @@ class DefaultEntityController implements EntityControllerInterface {
    */
   protected function cacheSet($entities) {
     $this->entityCache += $entities;
+  }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array()) {
+    if (!isset($langcode)) {
+      $langcode = $GLOBALS['language_content']->langcode;
+    }
+
+    // Remove previously built content, if exists.
+    $entity->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare($entity->entityType(), array($entity->id() => $entity), $view_mode, $langcode));
+
+    // Make sure the used view-mode gets stored.
+    $entity->content += array('#view_mode' => $view_mode);
+
+    // Add in fields.
+    if (!empty($this->entityInfo['fieldable'])) {
+      // Perform the preparation tasks if they have not been performed yet.
+      // An internal flag prevents the operation from running twice.
+      $key = isset($entity->{$this->idKey}) ? $entity->{$this->idKey} : NULL;
+      field_attach_prepare_view($this->entityType, array($key => $entity), $view_mode);
+      $entity->content += field_attach_view($this->entityType, $entity, $view_mode, $langcode);
+    }
+    // Invoke hook_ENTITY_view() to allow modules to add their additions.
+    module_invoke_all($this->entityType . '_view', $entity, $view_mode, $langcode);
+
+    module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
+
+    $entity->content;
+  }
+
+  /**
+   * Implements EntityControllerInterface::view().
+   */
+  public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array()) {
+    if (!empty($this->entityInfo['fieldable'])) {
+      field_attach_prepare_view($this->entityType, array($entity->id() => $entity), $view_mode);
+    }
+    entity_prepare_view($this->entityType, array($entity->id() => $entity));
+    $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->langcode;
+
+    $view = array();
+
+    $this->buildContent($entity, $view_mode, $langcode, $context);
+
+    $build = $entity->content;
+    // We don't need duplicate rendering info in entity->content.
+    unset($entity->content);
+
+    $build += array(
+      // If the entity type provides an implementation, use this instead the
+      // generic one.
+      // @see template_preprocess_entity()
+      '#theme' => 'entity',
+      '#entity_type' => $this->entityType,
+      '#entity' => $entity,
+      '#view_mode' => $view_mode,
+      '#language' => $langcode,
+      '#page' => isset($context['page']) ? $context['page'] : NULL,
+    );
+    // Allow modules to modify the structured entity.
+    backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
+
+    return $view;
   }
 }
 

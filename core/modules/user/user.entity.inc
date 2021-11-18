@@ -495,4 +495,61 @@ class UserStorageController extends EntityDatabaseStorageController {
       }
     }
   }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $account, $view_mode = 'full', $langcode = NULL, $context = array()) {
+    if (!isset($langcode)) {
+      $langcode = $GLOBALS['language_content']->langcode;
+    }
+
+    // Remove previously built content, if exists.
+    $account->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare('user', array($account->uid => $account), $view_mode, $langcode));
+
+    // Build fields content.
+    field_attach_prepare_view('user', array($account->uid => $account), $view_mode, $langcode);
+    entity_prepare_view('user', array($account->uid => $account), $langcode);
+    $account->content += field_attach_view('user', $account, $view_mode, $langcode);
+
+    // Populate $account->content with a render() array.
+    module_invoke_all('user_view', $account, $view_mode, $langcode);
+    module_invoke_all('entity_view', $account, 'user', $view_mode, $langcode);
+
+    // Make sure the current display mode is stored if no module has already
+    // populated the related key.
+    $account->content += array('#view_mode' => $view_mode);
+  }
+
+  /**
+   * Overrides DefaultEntityController::view().
+   */
+  public function view(EntityInterface $account, $view_mode = 'full', $langcode = NULL, $context = array()) {
+    if (!isset($langcode)) {
+      $langcode = $GLOBALS['language_content']->langcode;
+    }
+
+    // Retrieve all profile fields and attach to $account->content.
+    $this->buildContent($account, $view_mode, $langcode, $context);
+
+    $build = $account->content;
+    // We don't need duplicate rendering info in account->content.
+    unset($account->content);
+
+    $build += array(
+      '#theme' => 'user_profile__' . $view_mode,
+      '#account' => $account,
+      '#view_mode' => $view_mode,
+      '#language' => $langcode,
+    );
+
+    // Allow modules to modify the structured user.
+    $type = 'user';
+    backdrop_alter(array('user_view', 'entity_view'), $build, $type);
+
+    return $build;
+  }
 }
