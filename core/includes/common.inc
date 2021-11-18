@@ -8690,7 +8690,7 @@ function backdrop_parse_dependency($dependency) {
           }
         }
 
-        if ($matches['patch'] === '0' || $matches['patch']) {
+        if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
           if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
             // See comments above about "x" in minor. 
             // Same principle applies to patch in relation to minor.
@@ -8704,7 +8704,7 @@ function backdrop_parse_dependency($dependency) {
           }
         }
         $version = $matches['major'] . '.' . $matches['minor'];
-        $version .= ($matches['patch'] === '0' || $matches['patch']) ? '.' . $matches['patch'] : '';
+        $version .= (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) ? '.' . $matches['patch'] : '';
         $value['versions'][] = array('op' => $op, 'version' => $version);
       }
     }
