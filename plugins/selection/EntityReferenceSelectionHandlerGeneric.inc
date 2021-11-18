@@ -453,8 +453,8 @@ class EntityReferenceSelectionHandlerGeneric_comment extends EntityReferenceSele
     // in the database. Alter the query to fetch the bundle.
     $conditions = &$query->conditions();
     foreach ($conditions as $key => &$condition) {
-      if ($key !== '#conjunction' && is_string($condition['field']) && $condition['field'] === 'node_type') {
-        $condition['field'] = $node_alias . '.type';
+      if ($key !== '#conjunction' && is_string($condition['field']) && $condition['field'] === $base_table . '.node_type') {
+        $condition['field'] = '`' . $node_alias . '`.`type`';
         foreach ($condition['value'] as &$value) {
           if (substr($value, 0, 13) == 'comment_node_') {
             $value = substr($value, 13);
