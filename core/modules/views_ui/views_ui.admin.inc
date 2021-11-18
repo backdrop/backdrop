@@ -2771,6 +2771,16 @@ function views_ui_build_form_path($form_state) {
 }
 
 /**
+ * Backwards compatible wrapper function for views_ui_build_form_path().
+ *
+ * @deprecated since 1.0.0.
+ */
+function views_ui_build_form_url($form_state) {
+  watchdog_deprecated_function('views_ui', __FUNCTION__);
+  return views_ui_build_form_path($form_state);
+}
+
+/**
  * Add another form to the stack; clicking 'apply' will go to this form
  * rather than closing the ajax popup.
  */
