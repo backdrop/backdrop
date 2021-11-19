@@ -13,8 +13,8 @@ define('ENTITYREFERENCE_DENIED', '- Restricted access -');
 function entityreference_field_info() {
   return array(
     'entityreference' => array(
-      'label' => 'Entity Reference',
-      'description' => t('This field references another entity.'),
+      'label' => 'Reference',
+      'description' => t('Defines a field type for referencing other entities.'),
       'settings' => array(
         'target_type' => 'node',
         'handler' => 'base',
@@ -68,7 +68,7 @@ function entityreference_menu() {
   $items = array();
 
   $items['entityreference/autocomplete/single/%/%/%'] = array(
-    'title' => 'Entity Reference Autocomplete',
+    'title' => 'Reference Autocomplete',
     'page callback' => 'entityreference_autocomplete_callback',
     'page arguments' => array(2, 3, 4, 5),
     'access callback' => 'entityreference_autocomplete_access_callback',
@@ -76,7 +76,7 @@ function entityreference_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['entityreference/autocomplete/tags/%/%/%'] = array(
-    'title' => 'Entity Reference Autocomplete',
+    'title' => 'Reference Autocomplete',
     'page callback' => 'entityreference_autocomplete_callback',
     'page arguments' => array(2, 3, 4, 5),
     'access callback' => 'entityreference_autocomplete_access_callback',
@@ -1433,7 +1433,7 @@ function entityreference_entityreference_selection_plugins() {
   );
   if (module_exists('views')) {
     $plugins['views'] = array(
-        'title' => t('Views: Filter by an entity reference view'),
+        'title' => t('Views: Filter by a reference view'),
         'class' => 'EntityReferenceSelectionHandlerViews',
         'weight' => 0,
     );

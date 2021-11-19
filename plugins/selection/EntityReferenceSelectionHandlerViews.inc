@@ -52,7 +52,7 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
         '#required' => TRUE,
         '#options' => $options,
         '#default_value' => $default,
-        '#description' => '<p>' . t('Choose the view and display that select the entities that can be referenced.<br />Only views with a display of type "Entity Reference" are eligible.') . '</p>',
+        '#description' => '<p>' . t('Choose the view and display that select the entities that can be referenced.<br />Only views with a display of type "Reference" are eligible.') . '</p>',
       );
 
       $default = !empty($view_settings['args']) ? implode(', ', $view_settings['args']) : '';
@@ -79,7 +79,7 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     }
     else {
       $form['view']['no_view_help'] = array(
-        '#markup' => '<p>' . t('No eligible views were found. <a href="@create">Create a view</a> with an <em>Entity Reference</em> display, or add such a display to an <a href="@existing">existing view</a>.', array(
+        '#markup' => '<p>' . t('No eligible views were found. <a href="@create">Create a view</a> with an <em>Reference</em> display, or add such a display to an <a href="@existing">existing view</a>.', array(
           '@create' => url('admin/structure/views/add'),
           '@existing' => url('admin/structure/views'),
         )) . '</p>',
