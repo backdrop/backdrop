@@ -175,13 +175,15 @@ function theme_user_admin_roles($variables) {
   $header = array(t('Name'), t('Weight'), t('Operations'));
   foreach (element_children($form['roles']) as $role_name) {
     $label = $form['roles'][$role_name]['#role']->label;
-    $row = array();
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $row[] = t('@name <em>(required)</em>', array('@name' => $label));
+      $label .= ' ' . t('(required)');
     }
-    else {
-      $row[] = check_plain($label);
-    }
+
+    $row = array();
+    $row[] = theme('label_machine_name__role', array(
+      'label' => $label,
+      'machine_name' => $form['roles'][$role_name]['#role']->name,
+    ));
     $row[] = backdrop_render($form['roles'][$role_name]['weight']);
     $row[] = backdrop_render($form['roles'][$role_name]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));

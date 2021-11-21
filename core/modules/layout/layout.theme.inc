@@ -54,16 +54,16 @@ function theme_layout_info($variables) {
   $preview_img = theme('image', array('path' => $preview_path));
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
-  // Create a link to the settings page
-  $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout', array(
+    'label' => $layout->title,
+    'machine_name' => $layout->name,
+  ));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  $output = '<div class="layout-info">';
   $output .= $preview;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Template: </span>!title', array('!title' => $template)) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
@@ -131,13 +131,16 @@ function theme_layout_template_info($variables) {
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout_template', array(
+    'label' => $template_info['title'],
+    'machine_name' => $template_info['name'],
+  ));
+
+  $output = '<div class="layout-info">';
   $output .= $preview_img;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($template_info['title']) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Machine name: </span>!title', array('!title' => $template_info['name'])) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }

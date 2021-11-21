@@ -681,7 +681,7 @@ function locale_get_plural($count, $langcode = NULL) {
     // If there is a plural formula for the language, evaluate it for the given
     // $count and statically cache the result for the combination of language
     // and count, since the result will always be identical.
-    if (!empty($plural_formulas[$langcode])) {
+    if (!empty($plural_formulas[$langcode]['formula'])) {
       // $n is used inside the expression in the eval().
       $n = $count;
       $plural_indexes[$langcode][$count] = @eval('return intval(' . $plural_formulas[$langcode]['formula'] . ');');
