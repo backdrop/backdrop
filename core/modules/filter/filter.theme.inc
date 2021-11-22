@@ -169,7 +169,7 @@ function theme_filter_admin_format_filter_order($variables) {
  *     filter in one or more text formats. Example:
  *     @code
  *       array(
- *         'Full HTML' => array(
+ *         'Raw HTML' => array(
  *           0 => array(
  *             'tip' => 'Web page addresses and e-mail addresses turn into links automatically.',
  *             'id' => 'filter/2',
@@ -228,7 +228,6 @@ function theme_filter_tips($variables) {
 function theme_filter_format_editor_image_form($variables) {
   $form = $variables['form'];
 
-  $library = backdrop_render($form['library_view']);
   $actions = backdrop_render($form['actions']);
 
   $output = '';
@@ -239,7 +238,6 @@ function theme_filter_format_editor_image_form($variables) {
   $output .= '</div>';
 
   $output .= '<div class="editor-image-library">';
-  $output .= $library;
   $output .= '</div>';
 
   $output .= '</div>';

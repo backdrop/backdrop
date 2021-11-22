@@ -544,7 +544,7 @@ if (update_access_allowed()) {
         break;
       }
 
-    case 'Apply pending updates':
+    case t('Apply pending updates'):
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle

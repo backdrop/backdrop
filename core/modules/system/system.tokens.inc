@@ -57,13 +57,13 @@ function system_token_info() {
   );
   $site['url'] = array(
     'name' => t('URL'),
-    'description' => t("The URL of the site's front page."),
+    'description' => t("The URL of the site's home page."),
     'type' => 'url',
   );
   // @deprecated: Replaced by url:brief.
   $site['url-brief'] = array(
     'name' => t('URL (brief)'),
-    'description' => t("The URL of the site's front page without the protocol."),
+    'description' => t("The URL of the site's home page without the protocol."),
     'deprecated' => TRUE,
   );
   $site['login-url'] = array(
@@ -116,7 +116,7 @@ function system_token_info() {
   );
   $url['args'] = array(
     'name' => t('Arguments'),
-    'description' => t("The specific argument of the current page (e.g. 'arg:1' on the page 'node/1' returns '1')."),
+    'description' => t("The specific argument of the current page (e.g. 'args:value:1' on the page 'node/123' returns '123')."),
     'type' => 'array',
   );
 

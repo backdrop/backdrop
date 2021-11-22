@@ -644,13 +644,14 @@ function admin_bar_links_search() {
   $search['search']['search'] = array(
     '#type' => 'search',
     '#title' => t('Admin search'),
-    '#title_display' => 'attribute',
+    '#title_display' => 'invisible',
     '#attributes' => array(
       'placeholder' => t('Menu search'),
       'autocomplete' => 'off',
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
 }
@@ -778,7 +779,7 @@ function admin_bar_flush_cache($name = NULL) {
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
-  // destination parameter, the redirect ends on the front page.
+  // destination parameter, the redirect ends on the home page.
   backdrop_goto();
 }
 

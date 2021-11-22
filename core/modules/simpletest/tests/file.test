@@ -2872,6 +2872,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
    * Test the URI and target functions.
    */
   function testUriFunctions() {
+    $site_config = config('system.core');
     $instance = file_stream_wrapper_get_instance_by_uri($this->scheme . '://foo');
     $this->assertEqual($this->classname, get_class($instance), 'Got correct class type for dummy URI.');
 
@@ -2884,8 +2885,8 @@ class StreamWrapperTest extends BackdropWebTestCase {
 
     // Test file_build_uri() and BackdropLocalStreamWrapper::getDirectoryPath().
     $this->assertEqual(file_build_uri('foo/bar.txt'), 'public://foo/bar.txt', 'Expected scheme was added.');
-    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath(), config_get('system.core', 'file_public_path'), 'Expected default directory path was returned.');
-    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath(), config_get('system.core', 'file_temporary_path'), 'Expected temporary directory path was returned.');
+    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath(), $site_config->get('file_public_path'), 'Expected default directory path was returned.');
+    $this->assertEqual(file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath(), $site_config->get('file_temporary_path'), 'Expected temporary directory path was returned.');
 
     config_set('system.core', 'file_default_scheme', 'private');
     $this->assertEqual(file_build_uri('foo/bar.txt'), 'private://foo/bar.txt', 'Got a valid URI from foo/bar.txt.');

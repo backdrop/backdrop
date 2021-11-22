@@ -1,0 +1,127 @@
+<?php
+/**
+ * @file
+ * Functional tests for the Filter module.
+ */
+
+/**
+ * Test for filter dialog link validation.
+ */
+class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+  protected $editorUser;
+  protected $format;
+
+  /**
+   * Set up testing environment.
+   */
+  public function setUp() {
+    parent::setUp(
+      'filter',
+      'ckeditor',
+      'filter_formtest',
+      'language',
+      'locale'
+    );
+
+    // Add a language and set it as default.
+    $german = (object) array(
+      'langcode' => 'de',
+      'name' => 'German',
+      'direction' => LANGUAGE_LTR,
+    );
+    language_save($german);
+    config_set('system.core', 'language_default', 'de');
+
+    // Create text format using filter default settings.
+    $filter_info = filter_filter_info();
+    $filters = array_fill_keys(array_keys($filter_info), array());
+    $format = (object) array(
+      'format' => 'filter_custom',
+      'name' => 'Filter custom',
+      'filters' => $filters,
+      'editor' => 'ckeditor',
+    );
+    filter_format_save($format);
+    $permission = filter_permission_name($format);
+    $this->format = $format;
+
+    // Create content type.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+
+    // Create user and log in.
+    $this->editorUser = $this->backdropCreateUser(array(
+      'access content',
+      'bypass node access',
+      $permission,
+    ));
+    $this->backdropLogin($this->editorUser);
+  }
+
+  /**
+   * Check function _filter_format_editor_link_url_validate().
+   */
+  public function testEditorLinkValidate() {
+    // Create a node and get the nid for the calling path.
+    $node = $this->backdropCreateNode();
+    $calling_path = "node/{$node->nid}/edit";
+    $link_token = filter_editor_dialog_token($this->format, 'link', $this->editorUser, $calling_path);
+    $german = language_load('de');
+    $options = array(
+      'query' => array(
+        'token' => $link_token,
+        'calling_path' => $calling_path,
+      ),
+      'language' => $german,
+    );
+    $this->backdropGet('editor/dialog/link/' . $this->format->format, $options);
+
+    $edit = array(
+      'attributes[text]' => 'The link',
+    );
+    $invalid_urls = array(
+      'javascript://boo',
+      'http://foo>bar.baz',
+      'http://foobar\.baz',
+    );
+    foreach ($invalid_urls as $url) {
+      $edit['attributes[href]'] = $url;
+      $this->backdropPost(NULL, $edit, t('Save'));
+      $this->assertRaw('The URL <em class="placeholder">' . check_plain($url) . '</em> is not valid.', format_string('Invalid URL %url did not pass validation', array(
+        '%url' => $url,
+      )));
+    }
+
+    $valid_urls = array(
+      // Should get altered.
+      'node/1' => '/de/node/1',
+      'ärger-im-büro' => '/de/%C3%A4rger-im-b%C3%BCro',
+      '<front>?page=1#main-content' => '/de?page=1#main-content',
+      // Should stay untouched.
+      '/en/node/1' => '/en/node/1',
+      '#main-content' => '#main-content',
+      'http://domain.tld:8080/index.php?page=3&foo=bar' => 'http://domain.tld:8080/index.php?page=3&foo=bar',
+      'http://user:pass@domain.tld/path' => 'http://user:pass@domain.tld/path',
+      '/de/%C3%A4rger-im-b%C3%BCro' => '/de/%C3%A4rger-im-b%C3%BCro',
+      '//domain.tld' => '//domain.tld',
+      'mailto:boo@example.com' => 'mailto:boo@example.com',
+      'telnet://host.tld' => 'telnet://host.tld',
+    );
+    foreach ($valid_urls as $url => $altered_or_not) {
+      $edit['attributes[href]'] = $url;
+      $this->backdropPost(NULL, $edit, t('Save'));
+      // No form error.
+      $this->assertNoRaw('The URL <em class="placeholder">' . check_plain($url) . '</em> is not valid.', format_string('Valid URL %url passes validation', array(
+        '%url' => $url,
+      )));
+      // The filter_formtest helper module sets the value from $form_state as
+      // message. It would be impossible to validate, what CKEditor inserts via
+      // Javascript.
+      $this->assertRaw('Output href is: ' . check_plain($altered_or_not), format_string('Expected output value @value found', array(
+        '@value' => $altered_or_not,
+      )));
+    }
+  }
+
+}
