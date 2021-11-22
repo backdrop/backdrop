@@ -365,9 +365,9 @@ function standard_install() {
   );
   field_create_instance($instance);
 
-
   // Create three default Card nodes.
 
+  
 
   $node = new Node();
   $node->type = 'card';
@@ -380,11 +380,26 @@ function standard_install() {
   $node->comment = 0;
 
   $node->body['und'][] = array('value' => '<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>', 'format' => 'filtered_html');
+  
+
+  $cardpath = 'public://field/image';
+  file_prepare_directory($cardpath, FILE_CREATE_DIRECTORY);
   $image_path = 'core/profiles/standard/images/library_cards.jpg';
   $image_object = file_get_contents($image_path);
-  $file = file_unmanaged_save_data($image_object, 'public://field/image/library_cards.jpg', FILE_EXISTS_RENAME);
-  $file->uid = 1;
-  $node->field_image['und'][0] = (array)$file;
+  file_unmanaged_save_data($image_object, 'public://field/image/library_cards.jpg');
+  $node->field_image['und'][] = array(
+    'fid' => 1,
+    'type' => 'image',
+    'uid' => 1,
+    'filename' => 'library_cards.jpg',
+    'uri' => 'public://field/image/library_cards.jpg',
+    'filemime' => 'image/jpeg',
+    'status' => 0,
+    'alt' => 'test',
+    'height' => '225',
+    'width' => '300',
+  );
+
 
 
   $node = node_submit($node);
