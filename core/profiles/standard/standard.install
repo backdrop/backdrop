@@ -368,6 +368,10 @@ function standard_install() {
   // Create three default Card nodes.
 
   
+  // Testing something I did in my Sample Animal Content module
+  // https://github.com/backdrop-contrib/sample_animal_content/blob/1.x-1.x/sample_animal_content.install
+  // It worked there, but not here. I am doing something a little different with the
+  // image here. I tried the other, but no luck. 
 
   $node = new Node();
   $node->type = 'card';
@@ -402,6 +406,9 @@ function standard_install() {
 
   $node = node_submit($node);
   node_save($node);
+
+  // Here is another try that is based upon how the Install Profile created it's 
+  // previous nodes. 
 
   $card = new Node(
     array(
@@ -439,6 +446,8 @@ function standard_install() {
     )
   );
   $card->save();
+
+  // The last one does not try to add an image.
 
   $card = new Node(
     array(
