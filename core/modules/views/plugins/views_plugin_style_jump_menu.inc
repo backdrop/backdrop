@@ -146,7 +146,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       $lookup_options = array();
       // We need to check if the path is absolute
       // or else language is not taken in account.
-      if ($this->view->display[$this->view->current_display]->display_options['fields'][$this->options['path']]['absolute']) {
+      if (!empty($this->view->display[$this->view->current_display]->display_options['fields'][$this->options['path']]['absolute'])) {
         $lookup_options['absolute'] = TRUE;
       }
       $lookup_url = url($_GET['q'], $lookup_options);
