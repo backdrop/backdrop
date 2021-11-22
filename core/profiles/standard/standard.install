@@ -190,118 +190,10 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
+    ->set('node_card_pattern', 'card/[node:title]')
     ->save();
 
-  // Create three default Promobox nodes.
-  $card = new Node(
-    array(
-      'title' => st('Organize your content'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('
-              <p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'),
-            'format' => 'filtered_html',
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
-  );
-  $card->save();
-
-  $card = new Node(
-    array(
-      'title' => st('What is a Card?'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st("
-              <p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
-            ),
-            'format' => 'filtered_html',
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
-  );
-  $card->save();
-
-  $card = new Node(
-    array(
-      'title' => st('The home page layout'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('
-              <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
-            ),
-            'format' => 'filtered_html',
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
-  );
-  $card->save();
-
-  // Create two default posts to display on front page.
-  $post = new Node(
-    array(
-      'title' => st('Your first post!'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is your first post! You may edit or delete it.'),
-            'format' => 'filtered_html'
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 1,
-      'type' => 'post',
-    )
-  );
-  $post->save();
-
-  // Create an "About" page node.
-  $page = new Node(
-    array(
-      'title' => st('About'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
-            'format' => 'filtered_html',
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'page',
-    )
-  );
-  $page->save();
-
-  // Create an "About" link in the main menu.
-  $item = array(
-    'link_path' => 'node/' . $page->nid,
-    'link_title' => 'About',
-    'weight' => 1,
-  );
-  menu_link_save($item);
+  cache_clear_all();
 
   // Create a default vocabulary named "Tags", enabled for the 'post' content type.
   $description = st('Use tags to group posts on similar topics into categories.');
@@ -424,6 +316,172 @@ function standard_install() {
     ),
   );
   field_create_instance($instance);
+
+  $instance = array(
+    'field_name' => 'field_image',
+    'entity_type' => 'node',
+    'label' => 'Image',
+    'bundle' => 'card',
+    'description' => st('Upload an image to go with this card.'),
+    'required' => FALSE,
+
+    'settings' => array(
+      'file_directory' => 'field/image',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => TRUE,
+      'title_field' => '',
+    ),
+
+    'widget' => array(
+      'type' => 'image_image',
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ),
+      'weight' => -1,
+    ),
+
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array('image_style' => 'large', 'image_link' => ''),
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array(
+          'image_style' => 'medium',
+          'image_link' => 'content',
+          'image_float' => 'right',
+        ),
+        'weight' => -1,
+      ),
+    ),
+  );
+  field_create_instance($instance);
+
+
+  // Create three default Card nodes.
+
+
+  $node = new Node();
+  $node->type = 'card';
+  $node->title = 'Organize your content';
+  node_object_prepare($node);
+  $node->language = LANGUAGE_NONE;
+  $node->uid = 1;
+  $node->status = 1;
+  $node->promote = 0;
+  $node->comment = 0;
+
+  $node->body['und'][] = array('value' => '<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>', 'format' => 'filtered_html');
+  $image_path = 'core/profiles/standard/images/library_cards.jpg';
+  $image_object = file_get_contents($image_path);
+  $file = file_unmanaged_save_data($image_object, 'public://field/image/library_cards.jpg', FILE_EXISTS_RENAME);
+  $file->uid = 1;
+  $node->field_image['und'][0] = (array)$file;
+
+
+  $node = node_submit($node);
+  node_save($node);
+
+  $card = new Node(
+    array(
+      'title' => st('What is a Card?'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st("
+              <p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
+  );
+  $card->save();
+
+  $card = new Node(
+    array(
+      'title' => st('The home page layout'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('
+              <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
+  );
+  $card->save();
+
+  // Create two default posts to display on front page.
+  $post = new Node(
+    array(
+      'title' => st('Your first post!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first post! You may edit or delete it.'),
+            'format' => 'filtered_html'
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('About'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
+  // Create an "About" link in the main menu.
+  $item = array(
+    'link_path' => 'node/' . $page->nid,
+    'link_title' => 'About',
+    'weight' => 1,
+  );
+  menu_link_save($item);
+
+
+
 
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
