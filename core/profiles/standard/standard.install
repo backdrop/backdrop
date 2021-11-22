@@ -400,8 +400,6 @@ function standard_install() {
     'width' => '300',
   );
 
-
-
   $node = node_submit($node);
   node_save($node);
 
@@ -415,6 +413,22 @@ function standard_install() {
               <p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
             ),
             'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'field_image' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'fid' => 1,
+            'type' => 'image',
+            'uid' => 1,
+            'filename' => 'library_cards.jpg',
+            'uri' => 'public://field/image/library_cards.jpg',
+            'filemime' => 'image/jpeg',
+            'status' => 0,
+            'alt' => 'test',
+            'height' => '225',
+            'width' => '300',
           ),
         ),
       ),
