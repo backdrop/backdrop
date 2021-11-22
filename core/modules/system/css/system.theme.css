@@ -243,7 +243,7 @@ abbr.ajax-changed {
   background-repeat: no-repeat;
 }
 .fieldset-legend span.summary {
-  color: #999;
+  color: #707070;
   font-size: 0.9em;
   margin-left: 0.5em; /* LTR */
 }
@@ -550,4 +550,11 @@ img.align-right {
   content: '';
   display: table;
   clear: both;
+}
+
+/**
+ * Labels & machine names.
+ */
+.machine-name {
+  font-size: smaller;
 }

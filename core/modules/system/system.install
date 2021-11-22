@@ -3193,13 +3193,32 @@ function system_update_1075() {
   update_variable_del('block_interest_cohort');
 }
 
-/*
+/**
  * Add default values for dismissible message settings.
  */
 function system_update_1076() {
   $config = config('system.core');
   $config->set('messages_dismissible', 1);
   $config->save();
+}
+
+/**
+ * Explicitly set the admin theme to an actual theme, instead of the special
+ * 'Default theme' option.
+ */
+function system_update_1077() {
+  $config = config('system.core');
+  $admin_theme = $config->get('admin_theme');
+  $default_theme = $config->get('theme_default');
+
+  // Check whether the admin theme is currently set to the special 'Default
+  // theme' option, or if empty.
+  if ($admin_theme == '0' || $admin_theme == '') {
+    // Explicitly set the admin theme to whichever actual theme is selected as
+    // the default.
+    $config->set('admin_theme', $default_theme);
+    $config->save();
+  }
 }
 
 /**

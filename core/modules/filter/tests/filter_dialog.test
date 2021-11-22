@@ -22,7 +22,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
       'ckeditor',
       'filter_formtest',
       'language',
-      'locale',
+      'locale'
     );
 
     // Add a language and set it as default.

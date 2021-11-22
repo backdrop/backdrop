@@ -25,10 +25,10 @@
  * (1) https://ckeditor.com/cke4/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) https://ckeditor.com/cke4/builder/c4ff62270bc49c073c585b8344da9856
+ * (2) https://ckeditor.com/cke4/builder/e2775d98e9027860cab8aa76fbf4430a
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) https://ckeditor.com/cke4/builder/download/c4ff62270bc49c073c585b8344da9856
+ * (3) https://ckeditor.com/cke4/builder/download/e2775d98e9027860cab8aa76fbf4430a
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -53,28 +53,37 @@ var CKBUILDER_CONFIG = {
 		'.npm',
 		'.nvmrc',
 		'.travis.yml',
+		'README.md',
+		'SECURITY.md',
+		'adapters',
 		'bender-err.log',
 		'bender-out.log',
+		'bender-runner.config.json',
 		'bender.ci.js',
 		'bender.js',
+		'config.js',
+		'contents.css',
 		'dev',
 		'gruntfile.js',
 		'less',
 		'node_modules',
 		'package-lock.json',
 		'package.json',
+		'plugins/dialog/samples',
+		'plugins/enterkey/samples',
+		'plugins/htmlwriter/samples',
+		'plugins/image2/samples',
+		'plugins/magicline/samples',
+		'plugins/sharedspace/samples',
+		'plugins/sourcedialog/samples',
+		'plugins/tableresize/samples',
+		'plugins/toolbar/samples',
+		'plugins/wysiwygarea/samples',
+		'samples',
+		'skins/moono-lisa/readme.md',
+		'styles.js',
 		'tests'
 	],
-// So that they are not shipped with Backdrop, after using this config file
-// for rebuilding, the following are removed manually, because adding them
-// to the ignore array does not cause them to be ignored:
-// 'README.md',
-// 'adapters',
-// 'config.js',
-// 'contents.css',
-// 'samples',
-// 'skins/moono-lisa/readme.md',
-// 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
