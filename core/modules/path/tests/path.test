@@ -58,10 +58,10 @@ class PathTestCase extends BackdropWebTestCase {
    * Tests alias functionality through the URL alias add/edit admin interfaces.
    */
   function testAdminAlias() {
-    // Create test node.
+    // Create a test node.
     $node1 = $this->backdropCreateNode();
 
-    // Create alias.
+    // Create an alias.
     $edit = array();
     $edit['source'] = 'node/' . $node1->nid;
     $edit['alias'] = $this->randomName(8);
@@ -72,7 +72,7 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertText($node1->title, 'Alias works.');
     $this->assertResponse(200);
 
-    // Change alias to one containing "exotic" characters.
+    // Change the alias to one containing "exotic" characters.
     $pid = $this->getPID($edit['alias']);
 
     $previous = $edit['alias'];
@@ -90,12 +90,12 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
 
     backdrop_static_reset('backdrop_lookup_path');
-    // Confirm that previous alias no longer works.
+    // Confirm that the previous alias no longer works.
     $this->backdropGet($previous);
     $this->assertNoText($node1->title, 'Previous alias no longer works.');
     $this->assertResponse(404);
 
-    // Create second test node.
+    // Create a second test node.
     $node2 = $this->backdropCreateNode();
 
     // Set alias to second test node.
@@ -103,10 +103,10 @@ class PathTestCase extends BackdropWebTestCase {
     // leave $edit['alias'] the same
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
-    // Confirm no duplicate was created.
+    // Confirm that no duplicate alias was created.
     $this->assertRaw(t('The alias %alias is already in use in this language.', array('%alias' => $edit['alias'])), 'Attempt to move alias was rejected.');
 
-    // Delete alias.
+    // Delete the alias.
     $this->backdropPost('admin/config/urls/path/edit/' . $pid, array(), t('Delete'));
     $this->backdropPost(NULL, array(), t('Confirm'));
 
@@ -115,7 +115,7 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertNoText($node1->title, 'Alias was successfully deleted.');
     $this->assertResponse(404);
 
-    // Create third test node.
+    // Create a third test node.
     $node3 = $this->backdropCreateNode();
 
     // Ensure that leading slashes are stripped from internal path aliases, to
@@ -130,10 +130,10 @@ class PathTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
     // Confirm that the alias with leading slash is not found.
     $this->assertNoText($edit['alias'], 'The alias with leading slash was not found.');
-    // The alias without leading slash is found.
+    // Confirm that the alias without leading slash is found.
     $this->assertText(trim($edit['alias'], '/'), 'The alias without leading slash was found.');
 
-    // Create fourth test node.
+    // Create a fourth test node.
     $node4 = $this->backdropCreateNode();
 
     $alias = $this->randomName(8);
@@ -143,7 +143,7 @@ class PathTestCase extends BackdropWebTestCase {
 
     // Confirm that the alias with trailing slash is not found.
     $this->assertNoText($edit['alias'], 'The alias with trailing slash was not found.');
-    // The alias without trailing slash is found.
+    // Confirm that the alias without trailing slash is found.
     $this->assertText(trim($edit['alias'], '/'), 'The alias without trailing slash was found.');
   }
 
@@ -151,10 +151,10 @@ class PathTestCase extends BackdropWebTestCase {
    * Tests alias functionality through the node edit interface.
    */
   function testNodeAlias() {
-    // Create test node.
+    // Create a test node.
     $node1 = $this->backdropCreateNode();
 
-    // Create alias.
+    // Create an alias.
     $edit = array();
     $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $this->randomName(8);
@@ -165,7 +165,7 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertText($node1->title, 'Alias works.');
     $this->assertResponse(200);
 
-    // Change alias to one containing "exotic" characters.
+    // Change the alias to one containing "exotic" characters.
     $edit['path[auto]'] = FALSE;
     $previous = $edit['path[alias]'];
     // "Special" ASCII characters.
@@ -181,22 +181,22 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertText($node1->title, 'Changed alias works.');
     $this->assertResponse(200);
 
-    // Make sure that previous alias no longer works.
+    // Make sure that the previous alias no longer works.
     $this->backdropGet($previous);
     $this->assertNoText($node1->title, 'Previous alias no longer works.');
     $this->assertResponse(404);
 
-    // Create second test node.
+    // Create a second test node.
     $node2 = $this->backdropCreateNode();
 
     // Set alias to second test node.
     // Leave $edit['path[alias]'] the same.
     $this->backdropPost('node/' . $node2->nid . '/edit', $edit, t('Save'));
 
-    // Confirm that the alias didn't make a duplicate.
+    // Confirm that no duplicate alias was created.
     $this->assertText(t('The alias is already in use.'), 'Attempt to moved alias was rejected.');
 
-    // Delete alias.
+    // Delete the alias.
     $this->backdropPost('node/' . $node1->nid . '/edit', array('path[alias]' => ''), t('Save'));
 
     // Confirm that the alias no longer works.
@@ -204,20 +204,36 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertNoText($node1->title, 'Alias was successfully deleted.');
     $this->assertResponse(404);
 
-    // Create third test node.
+    // Create a third test node.
     $node3 = $this->backdropCreateNode();
+
+    // Set its path alias to have a leading slash.
+    $edit = array();
+    $edit['path[auto]'] = FALSE;
+    $edit['path[alias]'] = '/' . $this->randomName(8);
+    $this->backdropPost('node/' . $node3->nid . '/edit', $edit, t('Save'));
+
+    // Confirm that the leading slash was removed from the alias.
+    $this->backdropGet('admin/config/urls/path');
+    // Confirm that the alias with leading slash is not found.
+    $this->assertNoText($edit['path[alias]'], 'The alias with leading slash was not found.');
+    // Confirm that the alias without leading slash is found.
+    $this->assertText(trim($edit['path[alias]'], '/'), 'The alias without leading slash was found.');
+
+    // Create a fourth test node.
+    $node4 = $this->backdropCreateNode();
 
     // Set its path alias to have a trailing slash.
     $edit = array();
     $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $this->randomName(8) . '/';
-    $this->backdropPost('node/' . $node3->nid . '/edit', $edit, t('Save'));
+    $this->backdropPost('node/' . $node4->nid . '/edit', $edit, t('Save'));
 
     // Confirm that the trailing slash was removed from the alias.
     $this->backdropGet('admin/config/urls/path');
     // Confirm that the alias with trailing slash is not found.
     $this->assertNoText($edit['path[alias]'], 'The alias with trailing slash was not found.');
-    // The alias without trailing slash is found.
+    // Confirm that the alias without trailing slash is found.
     $this->assertText(trim($edit['path[alias]'], '/'), 'The alias without trailing slash was found.');
   }
 
