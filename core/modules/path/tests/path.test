@@ -274,6 +274,8 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertText($node1->title, 'Programmatically-added alias works.');
     $this->assertResponse(200);
 
+    // Confirm that the previous alias does not exist.
+    $this->assertNull($this->getPID($previous), 'Attempting to get the PID of the previous alias returns NULL.');
     // Make sure that the previous alias no longer works.
     $this->backdropGet($previous);
     $this->assertNoText($node1->title, 'Previous programmatically-added alias no longer works.');
