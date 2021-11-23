@@ -217,7 +217,8 @@ function path_admin_form_delete_submit($form, &$form_state) {
 function path_admin_form_validate($form, &$form_state) {
   $source = &$form_state['values']['source'];
   $source = backdrop_get_normal_path($source);
-  $alias = $form_state['values']['alias'];
+  // Trim the submitted value of leading/trailing whitespace and slashes.
+  $alias = trim(trim($form_state['values']['alias']), " \\/");
   $pid = isset($form_state['values']['pid']) ? $form_state['values']['pid'] : 0;
   // Language is only set if language.module is enabled, otherwise save for all
   // languages.
