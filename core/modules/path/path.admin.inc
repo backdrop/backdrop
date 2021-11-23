@@ -130,7 +130,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#default_value' => $path['source'],
     '#maxlength' => 255,
     '#size' => 45,
-    '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
+    '#description' => t('Start typing the title of the content you wish to alias, or specify its path (for example: <code>node/28</code> or <code>taxonomy/term/1</code>).'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
     '#required' => TRUE,
     '#autocomplete_path' => 'path-autocomplete',
