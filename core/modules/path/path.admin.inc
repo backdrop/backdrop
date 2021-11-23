@@ -141,7 +141,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#default_value' => $path['alias'],
     '#maxlength' => 255,
     '#size' => 45,
-    '#description' => t('Specify an alternative path where this page will appear. Do not include a trailing slash.'),
+    '#description' => t('Specify an alternative path where this page will appear.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
     '#required' => TRUE,
   );
