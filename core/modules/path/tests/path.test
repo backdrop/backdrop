@@ -118,38 +118,27 @@ class PathTestCase extends BackdropWebTestCase {
     // Create third test node.
     $node3 = $this->backdropCreateNode();
 
-    // Create an invalid alias with a leading slash and verify that the slash
-    // is removed when the link is generated. This ensures that URL aliases
-    // cannot be used to inject external URLs.
-    // @todo The user interface should either display an error message or
-    //   automatically trim these invalid aliases, rather than allowing them to
-    //   be silently created, at which point the functional aspects of this
-    //   test will need to be moved elsewhere and switch to using a
-    //   programmatically-created alias instead.
+    // Ensure that leading slashes are stripped from internal path aliases, to
+    // prevent them from becoming external URLs without protocol. /example.com
+    // should not be turned into //example.com.
+    // See SA-CORE-2018-006:
+    //   - https://www.drupal.org/sa-core-2018-006
+    //   - https://backdropcms.org/security/backdrop-sa-core-2018-006
     $alias = $this->randomName(8);
+    // Attempt to create an alias with a leading slash.
     $edit = array('source' => 'node/' . $node3->nid, 'alias' => '/' . $alias);
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
-    $this->backdropGet('admin/content');
-    // This checks the link href before clicking it, rather than using
-    // BackdropWebTestCase::assertUrl() after clicking it, because the test
-    // browser does not always preserve the correct number of slashes in the
-    // URL when it visits internal links; using BackdropWebTestCase::assertUrl()
-    // would actually make the test pass unconditionally on the testbot (or
-    // anywhere else where Backdrop is installed in a subdirectory).
-    $link_xpath = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $node3->title));
-    $link_href = (string) $link_xpath[0]['href'];
-    $link_prefix = base_path() . (config_get('system.core', 'clean_url') ? '' : '?q=');
-    $this->assertEqual($link_href, $link_prefix . $alias);
-    $this->clickLink($node3->title);
-    $this->assertResponse(404);
+    // Confirm that the alias with leading slash is not found.
+    $this->assertNoText($edit['alias'], 'The alias with leading slash was not found.');
+    // The alias without leading slash is found.
+    $this->assertText(trim($edit['alias'], '/'), 'The alias without leading slash was found.');
 
     // Create fourth test node.
     $node4 = $this->backdropCreateNode();
 
+    $alias = $this->randomName(8);
     // Attempt to create an alias with a trailing slash.
-    $edit = array();
-    $edit['source'] = '/node/' . $node4->id();
-    $edit['alias'] = $this->randomName(8) . '/';
+    $edit = array('source' => 'node/' . $node4->nid, 'alias' => $alias . '/');
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     // Confirm that the alias with trailing slash is not found.
