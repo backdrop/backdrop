@@ -297,7 +297,7 @@ function _path_clean_separators($string, $separator = NULL) {
  * Clean up a URL alias.
  *
  * Performs the following alterations:
- * - Trim duplicate, leading, and trailing back-slashes.
+ * - Trim duplicate, leading, and trailing slashes.
  * - Trim duplicate, leading, and trailing separators.
  * - Shorten to a desired length and logical position based on word boundaries.
  *
@@ -319,12 +319,12 @@ function path_clean_alias($alias) {
   $output = $alias;
 
   // Trim duplicate, leading, and trailing separators. Do this before cleaning
-  // backslashes since a pattern like "[token1]/[token2]-[token3]/[token4]"
-  // could end up like "value1/-/value2" and if backslashes were cleaned first
-  // this would result in a duplicate blackslash.
+  // slashes, since a pattern like "[token1]/[token2]-[token3]/[token4]" could
+  // end up like "value1/-/value2". If slashes were cleaned first, this would
+  // result in a duplicate slash.
   $output = _path_clean_separators($output);
 
-  // Trim duplicate, leading, and trailing backslashes.
+  // Trim duplicate, leading, and trailing slashes.
   $output = _path_clean_separators($output, '/');
 
   // Shorten to a logical place based on word boundaries.
