@@ -130,7 +130,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#default_value' => $path['source'],
     '#maxlength' => 255,
     '#size' => 45,
-    '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
+    '#description' => t('Start typing the title of the content you wish to alias, or specify its path (for example: <code>node/28</code> or <code>taxonomy/term/1</code>).'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
     '#required' => TRUE,
     '#autocomplete_path' => 'path-autocomplete',
@@ -141,7 +141,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#default_value' => $path['alias'],
     '#maxlength' => 255,
     '#size' => 45,
-    '#description' => t('Specify an alternative path where this page will appear. Do not include a trailing slash.'),
+    '#description' => t('Specify an alternative path where this page will appear.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
     '#required' => TRUE,
   );
@@ -217,7 +217,9 @@ function path_admin_form_delete_submit($form, &$form_state) {
 function path_admin_form_validate($form, &$form_state) {
   $source = &$form_state['values']['source'];
   $source = backdrop_get_normal_path($source);
-  $alias = $form_state['values']['alias'];
+  // Trim the submitted value of leading/trailing whitespace and slashes.
+  $alias = trim(trim($form_state['values']['alias']), " \\/");
+  form_set_value($form['alias'], $alias, $form_state);
   $pid = isset($form_state['values']['pid']) ? $form_state['values']['pid'] : 0;
   // Language is only set if language.module is enabled, otherwise save for all
   // languages.
