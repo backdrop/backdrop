@@ -380,7 +380,10 @@ function standard_install() {
 
   // Creating First Card
 
-  $image_url = $base_url . '/core/profiles/standard/images/library_cards.jpg';
+  
+  $image_url = url('core/profiles/standard/images/library_cards.jpg', array('absolute' => TRUE));
+  
+ 
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
   watchdog('tim', $image_url);
   watchdog('tim', $image_dir);
