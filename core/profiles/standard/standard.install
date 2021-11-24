@@ -236,7 +236,7 @@ function standard_install() {
         'type' => 'taxonomy_term_reference_link',
         'weight' => 10,
       ),
-      'teaser' => array(https://tinyurl.com/backdrop-office-hours
+      'teaser' => array(
         'type' => 'taxonomy_term_reference_link',
         'weight' => 10,
       ),
