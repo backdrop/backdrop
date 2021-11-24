@@ -371,7 +371,7 @@ function standard_install() {
   file_prepare_directory($new_image_dir, FILE_CREATE_DIRECTORY);
   $image_dir = 'public://field/image/';
 
-  global $base_url;
+  global $base_url, $base_secure_url, $base_insecure_url;
 
   // Links to three images - until we find better ones.
   // https://en.wikipedia.org/wiki/500_(card_game)#/media/File:Six-handed_500_playing_cards.jpg
@@ -380,7 +380,7 @@ function standard_install() {
 
   // Creating First Card
 
-  $image_url = $base_url . '/core/profiles/standard/images/library_cards.jpg';
+  $image_url = $base_secure_url . '/core/profiles/standard/images/library_cards.jpg';
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
   $card = new Node(
     array(
@@ -416,7 +416,7 @@ function standard_install() {
 
   // Creating Second Card
 
-  $image_url = $base_url . '/core/profiles/standard/images/playing_cards.jpg';
+  $image_url = $base_secure_url . '/core/profiles/standard/images/playing_cards.jpg';
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
 
   $card = new Node(
@@ -453,7 +453,7 @@ function standard_install() {
 
   // Creating Third Card
 
-  $image_url = $base_url . '/core/profiles/standard/images/buffalo_front_page.jpg';
+  $image_url = $base_secure_url . '/core/profiles/standard/images/buffalo_front_page.jpg';
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
 
   $card = new Node(
@@ -653,7 +653,7 @@ function standard_install() {
   config_set('system.core', 'cache', '1');
 
 
-  $image_url = $base_url . '/core/profiles/standard/images/drop_paw.png';
+  $image_url = $base_secure_url . '/core/profiles/standard/images/drop_paw.png';
   system_retrieve_file($image_url, 'public://', TRUE);
   config_set('system.core', 'site_logo_path', 'public://drop_paw.png');
 }
