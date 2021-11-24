@@ -380,12 +380,13 @@ function standard_install() {
 
   // Creating First Card
 
-  $image_url = url('core/profiles/standard/images/library_cards.jpg', array('absolute' => TRUE));
+
+  $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/library_cards.jpg'; 
   
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-  watchdog('tim2', $image_url);
+  watchdog('tim3', $image_url);
   watchdog('tim2', $image_dir);
-  watchdog('tim2', $base_url);
+  watchdog('tim1', $base_url);
   $card = new Node(
     array(
       'title' => st('Organize your content'),
