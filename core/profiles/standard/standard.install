@@ -369,7 +369,7 @@ function standard_install() {
 
   $new_image_dir = 'public://field/image';
   file_prepare_directory($new_image_dir, FILE_CREATE_DIRECTORY);
-  $image_dir = 'public://field/image/';
+  $image_dir = 'public://field/image';
 
   global $base_url;
 
@@ -383,9 +383,9 @@ function standard_install() {
   $image_url = url('core/profiles/standard/images/library_cards.jpg', array('absolute' => TRUE));
   
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-  watchdog('tim', $image_url);
-  watchdog('tim', $image_dir);
-  watchdog('tim', $base_url);
+  watchdog('tim2', $image_url);
+  watchdog('tim2', $image_dir);
+  watchdog('tim2', $base_url);
   $card = new Node(
     array(
       'title' => st('Organize your content'),
