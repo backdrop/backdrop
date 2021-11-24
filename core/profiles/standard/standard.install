@@ -236,7 +236,7 @@ function standard_install() {
         'type' => 'taxonomy_term_reference_link',
         'weight' => 10,
       ),
-      'teaser' => array(
+      'teaser' => array(https://tinyurl.com/backdrop-office-hours
         'type' => 'taxonomy_term_reference_link',
         'weight' => 10,
       ),
@@ -381,7 +381,7 @@ function standard_install() {
   // Creating First Card
 
   
-  $image_url = url('core/profiles/standard/images/library_cards.jpg', array('absolute' => TRUE));
+  $image_url = url($base_url . '/core/profiles/standard/images/library_cards.jpg', array('absolute' => TRUE));
   
  
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
