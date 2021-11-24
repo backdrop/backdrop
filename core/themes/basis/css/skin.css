@@ -847,10 +847,11 @@ ul.action-links a {
   }
 }
 
+/* https://pixabay.com/illustrations/digital-art-landscape-fantasy-3563931/ */
 /* Default background when hero doesn't have image */
 .block-hero-no-image {
   background-color: #0074bd;
-  background-image: url(../images/texture.png);
+  background-image: url(../images/digital_landscape.jpg);
   background-repeat: repeat;
   background-position: center center;
   background-blend-mode: luminosity; /* Colorizes bg image */

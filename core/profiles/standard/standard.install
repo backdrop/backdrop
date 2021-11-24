@@ -365,50 +365,59 @@ function standard_install() {
   );
   field_create_instance($instance);
 
-  // Create three default Card nodes.
+  // Prepping to create three default Card nodes.
 
-  
-  // Testing something I did in my Sample Animal Content module
-  // https://github.com/backdrop-contrib/sample_animal_content/blob/1.x-1.x/sample_animal_content.install
-  // It worked there, but not here. I am doing something a little different with the
-  // image here. I tried the other, but no luck. 
+  $new_image_dir = 'public://field/image';
+  file_prepare_directory($new_image_dir, FILE_CREATE_DIRECTORY);
+  $image_dir = 'public://field/image/';
 
-  $node = new Node();
-  $node->type = 'card';
-  $node->title = 'Organize your content';
-  node_object_prepare($node);
-  $node->language = LANGUAGE_NONE;
-  $node->uid = 1;
-  $node->status = 1;
-  $node->promote = 0;
-  $node->comment = 0;
+  global $base_url;
 
-  $node->body['und'][] = array('value' => '<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>', 'format' => 'filtered_html');
-  
+  // Links to three images - until we find better ones.
+  // https://en.wikipedia.org/wiki/500_(card_game)#/media/File:Six-handed_500_playing_cards.jpg
+  // https://pixabay.com/photos/library-old-historical-shelf-2614804/
+  // https://commons.wikimedia.org/wiki/File:New_Buffalo_Times_Front_Page.jpg
 
-  $cardpath = 'public://field/image';
-  file_prepare_directory($cardpath, FILE_CREATE_DIRECTORY);
-  $image_path = 'core/profiles/standard/images/library_cards.jpg';
-  $image_object = file_get_contents($image_path);
-  file_unmanaged_save_data($image_object, 'public://field/image/library_cards.jpg');
-  $node->field_image['und'][] = array(
-    'fid' => 1,
-    'type' => 'image',
-    'uid' => 1,
-    'filename' => 'library_cards.jpg',
-    'uri' => 'public://field/image/library_cards.jpg',
-    'filemime' => 'image/jpeg',
-    'status' => 0,
-    'alt' => 'test',
-    'height' => '225',
-    'width' => '300',
+  // Creating First Card
+
+  $image_url = $base_url . '/core/profiles/standard/images/library_cards.jpg';
+  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
+  $card = new Node(
+    array(
+      'title' => st('Organize your content'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('
+              <p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'
+            ),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'field_image' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'fid' => $new_file->fid,
+            'filename' => 'library_cards.jpg',
+            'uri' => 'public://field/image/library_cards.jpg',
+            'filemime' => 'image/jpeg',
+            'status' => 0,
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'card',
+    )
   );
+  $card->save();
 
-  $node = node_submit($node);
-  node_save($node);
+  // Creating Second Card
 
-  // Here is another try that is based upon how the Install Profile created it's 
-  // previous nodes. 
+  $image_url = $base_url . '/core/profiles/standard/images/playing_cards.jpg';
+  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
 
   $card = new Node(
     array(
@@ -426,16 +435,11 @@ function standard_install() {
       'field_image' => array(
         LANGUAGE_NONE => array(
           array(
-            'fid' => 1,
-            'type' => 'image',
-            'uid' => 1,
-            'filename' => 'library_cards.jpg',
-            'uri' => 'public://field/image/library_cards.jpg',
+            'fid' => $new_file->fid,
+            'filename' => 'playing_cards.jpg',
+            'uri' => 'public://field/image/playing_cards.jpg',
             'filemime' => 'image/jpeg',
             'status' => 0,
-            'alt' => 'test',
-            'height' => '225',
-            'width' => '300',
           ),
         ),
       ),
@@ -447,7 +451,10 @@ function standard_install() {
   );
   $card->save();
 
-  // The last one does not try to add an image.
+  // Creating Third Card
+
+  $image_url = $base_url . '/core/profiles/standard/images/buffalo_front_page.jpg';
+  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
 
   $card = new Node(
     array(
@@ -459,6 +466,17 @@ function standard_install() {
               <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
             ),
             'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'field_image' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'fid' => $new_file->fid,
+            'filename' => 'buffalo_front_page.jpg',
+            'uri' => 'public://field/image/buffalo_front_page.jpg',
+            'filemime' => 'image/jpeg',
+            'status' => 0,
           ),
         ),
       ),
@@ -477,7 +495,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first post! You may edit or delete it.'),
+            'value' => st('<p>This is your first post! This post has been promoted to the front page and is displayed as part of the Promoted content view. You may edit or delete this or any of the sample pieces of content.</p>'),
             'format' => 'filtered_html'
           ),
         ),
@@ -517,9 +535,6 @@ function standard_install() {
     'weight' => 1,
   );
   menu_link_save($item);
-
-
-
 
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
@@ -636,4 +651,9 @@ function standard_install() {
   config_set('system.core', 'preprocess_css', '1');
   config_set('system.core', 'preprocess_js', '1');
   config_set('system.core', 'cache', '1');
+
+
+  $image_url = $base_url . '/core/profiles/standard/images/drop_paw.png';
+  system_retrieve_file($image_url, 'public://', TRUE);
+  config_set('system.core', 'site_logo_path', 'public://drop_paw.png');
 }
