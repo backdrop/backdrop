@@ -19,7 +19,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   if (!empty($definition['override handler']) && !class_exists($definition['override handler'])) {
     watchdog('views',
       '_views_create_handler - loading override handler @type failed: class @override_handler could not be loaded. ' .
-      'Verify the class file has been registered in the corresponding .info-file (files[]).',
+      'Verify that the class has been declared and the class file has been registered in a hook_autoload_info() implementation.',
       array(
         '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
         '@override_handler' => $definition['override handler']
@@ -31,7 +31,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
   if (!class_exists($definition['handler'])) {
     watchdog('views',
       '_views_create_handler - loading handler @type failed: class @handler could not be loaded. ' .
-      'Verify the class file has been registered in the corresponding .info-file (files[]).',
+      'Verify that the class has been declared and the class file has been registered in a hook_autoload_info() implementation.',
       array(
         '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
         '@handler' => $definition['handler']
