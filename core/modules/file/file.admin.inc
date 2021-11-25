@@ -369,7 +369,7 @@ function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
   $formatter = $form_state['values']['display']['formatter'];
-  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings']: array();
+  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : array();
 
 
   $display = array(
