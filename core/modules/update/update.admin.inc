@@ -35,6 +35,12 @@ function update_settings($form, &$form_state) {
     '#title' => t('Also check for updates of disabled modules, themes, and layouts'),
     '#default_value' => $config->get('update_disabled_extensions'),
   );
+  $form['check']['update_report_usage'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow this site to be included in usage statistics'),
+    '#default_value' => $config->get('update_report_usage'),
+    '#description' => t('For more information on this data, see the <a href="!url">Backdrop CMS privacy policy</a>.', array('!url' => 'https://backdropcms.org/privacy')),
+  );
 
   $form['email'] = array(
     '#type' => 'fieldset',
@@ -166,8 +172,9 @@ function update_settings_submit($form, $form_state) {
   }
 
   $config
-    ->set('update_disabled_extensions', $form_state['values']['update_check_disabled'])
-    ->set('update_interval_days', $form_state['values']['update_check_frequency'])
+    ->set('update_interval_days', (int) $form_state['values']['update_check_frequency'])
+    ->set('update_disabled_extensions', (bool) $form_state['values']['update_check_disabled'])
+    ->set('update_report_usage', (bool) $form_state['values']['update_report_usage'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
     ->save();

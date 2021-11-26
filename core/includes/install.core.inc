@@ -1890,27 +1890,25 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#attributes' => array('id' => 'edit-clean-url', 'class' => array('install')),
   );
 
-  $form['update_notifications'] = array(
+  $form['communication'] = array(
     '#type' => 'fieldset',
-    '#title' => st('Update notifications'),
+    '#title' => st('Communication options'),
     '#collapsible' => FALSE,
   );
-  $form['update_notifications']['update_status_module'] = array(
-    '#type' => 'checkboxes',
-    '#options' => array(
-      1 => st('Check for updates automatically'),
-      2 => st('Receive e-mail notifications'),
-    ),
-    '#default_value' => array(1, 2),
-    '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),
-    '#weight' => 15,
+
+  $form['communication']['update_emails'] = array(
+    '#type' => 'checkbox',
+    '#title' => st('Receive emails when updates are available'),
+    '#description' => st('Emails are sent by this installation of Backdrop CMS and requires that your server be able to send email.'),
+    '#default_value' => TRUE,
+    '#weight' => 10,
   );
-  $form['update_notifications']['update_status_module'][2] = array(
-    '#states' => array(
-      'visible' => array(
-        'input[name="update_status_module[1]"]' => array('checked' => TRUE),
-      ),
-    ),
+  $form['communication']['report_usage'] = array(
+    '#type' => 'checkbox',
+    '#title' => st('Send anonymous usage information'),
+    '#description' => st('Help improve Backdrop CMS by sending information about this site\'s configuration. This data never contains personal or visitor information. For more information see the <a href="!url">Backdrop CMS privacy policy</a>.', array('!url' => 'https://backdropcms.org/privacy')),
+    '#default_value' => TRUE,
+    '#weight' => 15,
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -1950,16 +1948,22 @@ function install_configure_form_submit($form, &$form_state) {
     ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
     ->save();
 
-  // Enable checking for updates on cron.
+  // Update module is always enabled, but configured differently based on
+  // the install configuration.
   if (module_exists('update')) {
-    // Set the update interval to 0 if automatic checking is disabled.
-    config_set('update.settings', 'update_interval_days', (int) $form_state['values']['update_status_module'][1]);
+    // Disable or enable Update module usage setting.
+    config_set('update.settings', 'update_report_usage', (int) $form_state['values']['report_usage']);
 
     // Add the site maintenance account's email address to the list of
     // addresses to be notified when updates are available, if selected.
-    if ($form_state['values']['update_status_module'][2]) {
+    if ($form_state['values']['update_emails']) {
       config_set('update.settings', 'update_emails', array($form_state['values']['account']['mail']));
     }
+  }
+
+  // Enable Telemetry module based on the install report_usage setting.
+  if ($form_state['values']['report_usage']) {
+    module_enable(array('telemetry'));
   }
 
   // We precreated user 1 with placeholder values. Let's save the real values.
