@@ -844,7 +844,6 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
   // and others list an actual file (i.e., MODULE/README.MD).
@@ -1091,7 +1090,7 @@ function installer_manager_batch_project_get($project, $url, &$context) {
   // This is here to show the user that we are in the process of downloading.
   if (!isset($context['sandbox']['started'])) {
     $context['sandbox']['started'] = TRUE;
-    $context['message'] = t('Downloading %project', array('%project' => $project));
+    $context['message'] = t('Downloading %project', array('%project' => $project['project']));
     $context['finished'] = 0;
     return;
   }

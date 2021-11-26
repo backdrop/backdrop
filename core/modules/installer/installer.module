@@ -367,6 +367,42 @@ function installer_delete_file_if_stale($path) {
 function installer_cron() {
   // Clear garbage from disk.
   installer_clear_update_disk_cache();
+
+  // Automatically update Backdrop if the site site is configured to do so.
+  $update_automatic = config_get('update.settings', 'update_automatic');
+  if ($update_automatic) {
+    require_once BACKDROP_ROOT . '/core/includes/file.inc';
+    $directory = _installer_manager_extract_directory();
+    $project_location = $directory . '/backdrop';
+    $project_realpath = backdrop_realpath($project_location);
+    $projects[] = array(
+      'project' => 'backdrop',
+      'updater_name' => 'CoreUpdater',
+      'local_url' => $project_realpath,
+    );
+    // Get the backdrop.zip.
+    module_load_include('inc', 'installer', 'installer.manager');
+    $state['values']['projects']['backdrop'] = 'backdrop';
+    $state['values']['project_downloads']['backdrop'] =
+      'https://github.com/backdrop/backdrop/releases/latest/download/backdrop.zip';
+    $fake_context = array(
+      'sandbox' => array(
+        'started' => TRUE,
+      ),
+    );
+    installer_manager_batch_project_get(
+      $projects,
+      $state['values']['project_downloads']['backdrop'],
+      $fake_context
+    );
+    // Update Backdrop core.
+    module_load_include('inc', 'installer', 'installer.authorize');
+    $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
+    installer_authorize_run_update($filetransfer, $projects);
+
+    // Run database updates.
+    // @todo.
+  }
 }
 
 /**

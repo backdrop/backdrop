@@ -149,7 +149,12 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
   }
 
   /* @var Updater $updater */
-  $updater = new $updater_name($project_realpath);
+  if ($project == 'backdrop') {
+    $updater = new CoreUpdater($project_realpath);
+  }
+  else {
+    $updater = new $updater_name($project_realpath);
+  }
 
   try {
     if ($updater->isInstalled()) {
@@ -190,10 +195,15 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
  *   An associative array of results from the batch operation.
  */
 function installer_authorize_update_batch_finished($success, $results) {
-  foreach ($results['log'] as $project => $messages) {
-    if (!empty($messages['#abort'])) {
-      $success = FALSE;
+  if (!empty($results['log'])) {
+    foreach ($results['log'] as $project => $messages) {
+      if (!empty($messages['#abort'])) {
+        $success = FALSE;
+      }
     }
+  }
+  else {
+    $results['log'] = array();
   }
   $offline = state_get('maintenance_mode', FALSE);
   if ($success) {

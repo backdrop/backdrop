@@ -87,12 +87,12 @@ function update_settings($form, &$form_state) {
     '#default_value' => $core_update,
     '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
   );
-  $form['self_update']['automatic_update'] = array(
+  $update_automatic = $config->get('update_automatic');
+  $form['self_update']['update_automatic'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Automatic self-update (coming soon!)'),
+    '#title' => t('Automatic self-update (experimental)'),
     '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
-    '#default_value' => FALSE, // @todo update when #414 goes in
-    '#disabled' => TRUE, // @todo update when #414 goes in
+    '#default_value' => $update_automatic,
     '#states' => array(
       'visible' => array(
         'input[name=update_check_frequency]' => array('!value' => 0),
@@ -170,6 +170,7 @@ function update_settings_submit($form, $form_state) {
     ->set('update_interval_days', $form_state['values']['update_check_frequency'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
+    ->set('update_automatic', (int) $form_state['values']['update_automatic'])
     ->save();
 
   // Save the installer setting.
