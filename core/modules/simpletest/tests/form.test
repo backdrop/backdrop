@@ -720,12 +720,12 @@ class FormValidationTestCase extends BackdropWebTestCase {
       'name' => 'element_validate_access',
     );
     $this->backdropPost(NULL, $edit, 'Save');
-    $this->assertNoFieldByName('name', t('Form element was hidden.'));
+    $this->assertNoFieldByName('name', 'Form element was hidden.');
     $this->assertText('Name value: element_validate_access', 'Value for inaccessible form element exists.');
 
     // Verify that value for inaccessible form element persists.
     $this->backdropPost(NULL, array(), 'Save');
-    $this->assertNoFieldByName('name', t('Form element was hidden.'));
+    $this->assertNoFieldByName('name', 'Form element was hidden.');
     $this->assertText('Name value: element_validate_access', 'Value for inaccessible form element exists.');
 
     // Verify that #validate handlers don't run if the CSRF token is invalid.
@@ -1054,14 +1054,14 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
       $element = 'tableselect[' . $row . ']';
       $edit = array($element => TRUE);
       $result = $this->backdropPostAJAX('form_test/tableselect/multiple-true', $edit, $element);
-      $this->assertFalse(empty($result), t('Ajax triggers on checkbox for @row.', array('@row' => $row)));
+      $this->assertFalse(empty($result), format_string('Ajax triggers on checkbox for @row.', array('@row' => $row)));
     }
     // Test radios (#multiple == FALSE).
     $element = 'tableselect';
     foreach ($rows as $row) {
       $edit = array($element => $row);
       $result = $this->backdropPostAjax('form_test/tableselect/multiple-false', $edit, $element);
-      $this->assertFalse(empty($result), t('Ajax triggers on radio for @row.', array('@row' => $row)));
+      $this->assertFalse(empty($result), format_string('Ajax triggers on radio for @row.', array('@row' => $row)));
     }
   }
 

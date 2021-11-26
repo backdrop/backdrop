@@ -56,7 +56,7 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
       if ($key == 0) {
         continue;
       }
-      $this->assertTrue($this->nodeTitles[$key - 1] == trim($title), t('Title @title should appear on the jump list, as we do not filter', array('@title' => $title)));
+      $this->assertTrue($this->nodeTitles[$key - 1] == trim($title), format_string('Title @title should appear on the jump list, as we do not filter', array('@title' => $title)));
     }
   }
 

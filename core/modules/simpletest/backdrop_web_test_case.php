@@ -1206,7 +1206,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     menu_rebuild();
     node_add_body_field($type);
 
-    $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
+    $this->assertEqual($saved_type, SAVED_NEW, format_string('Created content type %type.', array('%type' => $type->type)));
 
     // Reset permissions so that permissions for this content type are available.
     $this->checkPermissions(array(), TRUE);
@@ -1328,7 +1328,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $account = entity_create('user', $edit);
     $account->save();
 
-    $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', array('%name' => $edit['name'], '%pass' => $edit['pass'])), t('User login'));
+    $this->assertTrue(!empty($account->uid), format_string('User created with name %name and pass %pass', array('%name' => $edit['name'], '%pass' => $edit['pass'])), 'User login');
     if (empty($account->uid)) {
       return FALSE;
     }
@@ -1366,9 +1366,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     user_role_save($role);
     user_role_grant_permissions($role->name, $permissions);
     $role = user_role_load($role->name);
-    $this->assertTrue(isset($role->name), t('Created role of name: @name', array('@name' => $name)), t('Role'));
+    $this->assertTrue(isset($role->name), t('Created role of name: @name', array('@name' => $name)), 'Role');
     if ($role && !empty($role->name)) {
-      $this->assertTrue(count($role->permissions) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+      $this->assertTrue(count($role->permissions) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), 'Role');
       return $role->name;
     }
     else {
@@ -1450,7 +1450,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Check for the logged-in class.
     $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
-    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
+    $pass = $this->assertEqual(count($result), 1, format_string('User %name successfully logged in.', array('%name' => $account->name)), 'User login');
 
     if ($pass) {
       $this->loggedInUser = $account;
@@ -1473,8 +1473,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     // screen.
     $this->backdropGet('user/logout');
     $this->backdropGet('user');
-    $pass = $this->assertField('name', t('Username field found.'), t('Logout'));
-    $pass = $pass && $this->assertField('pass', t('Password field found.'), t('Logout'));
+    $pass = $this->assertField('name', 'Username field found.', 'Logout');
+    $pass = $pass && $this->assertField('pass', 'Password field found.', 'Logout');
 
     if ($pass) {
       $this->loggedInUser = FALSE;
@@ -1752,7 +1752,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
     if ($modules) {
       $success = module_enable($modules, TRUE);
-      $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
+      $this->assertTrue($success, format_string('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
     }
 
     // Reset/rebuild all data structures after enabling the modules.
@@ -2055,7 +2055,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       '!length' => format_size(strlen($this->backdropGetContent()))
     );
     $message = t('!method @url returned @status (!length).', $message_vars);
-    $this->assertTrue($this->backdropGetContent() !== FALSE, $message, t('Browser'));
+    $this->assertTrue($this->backdropGetContent() !== FALSE, $message, 'Browser');
     return $this->backdropGetContent();
   }
 
@@ -2345,7 +2345,7 @@ class BackdropWebTestCase extends BackdropTestCase {
         $this->fail(t('Failed to set field @name to @value', array('@name' => $name, '@value' => $value)));
       }
       if (!$ajax && isset($submit)) {
-        $this->assertTrue($submit_matches, t('Found the @submit button', array('@submit' => $submit)));
+        $this->assertTrue($submit_matches, format_string('Found the @submit button', array('@submit' => $submit)));
       }
       $this->fail(t('Found the requested form fields at @path', array('@path' => $path)));
     }

@@ -101,7 +101,7 @@ class ViewsModuleTest extends ViewsSqlTest {
     $types = array('field', 'area', 'filter');
     foreach ($types as $type) {
       $handler = views_get_handler($this->randomName(), $this->randomName(), $type);
-      $this->assertEqual('views_handler_' . $type . '_broken', get_class($handler), t('Make sure that a broken handler of type: @type are created', array('@type' => $type)));
+      $this->assertEqual('views_handler_' . $type . '_broken', get_class($handler), format_string('Make sure that a broken handler of type: @type are created', array('@type' => $type)));
     }
 
     $views_data = $this->viewsData();

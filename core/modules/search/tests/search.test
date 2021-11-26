@@ -778,11 +778,11 @@ class SearchCommentTestCase extends BackdropWebTestCase {
       'search_block_form' => "'" . $comment_body . "'",
     );
     $this->backdropPost('user', $edit, t('Search'));
-    $this->assertText($node->title, t('Node found in search results.'));
+    $this->assertText($node->title, 'Node found in search results.');
 
     // Verify that comment is rendered using proper format.
-    $this->assertText($comment_body, t('Comment body text found in search results.'));
-    $this->assertNoRaw(t('n/a'), t('HTML in comment body is not hidden.'));
+    $this->assertText($comment_body, 'Comment body text found in search results.');
+    $this->assertNoRaw(t('n/a'), 'HTML in comment body is not hidden.');
     $this->assertNoRaw(check_plain($edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]']), 'HTML in comment body is not escaped.');
 
     // Hide comments.

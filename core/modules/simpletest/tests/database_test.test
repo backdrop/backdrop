@@ -821,10 +821,10 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
       ->fields(array('id' => 42, 'name' => 'John'))
       ->condition('id', 1)
       ->execute();
-    $this->assertIdentical($num_updated, 1, t('Updated 1 record.'));
+    $this->assertIdentical($num_updated, 1, 'Updated 1 record.');
 
     $saved_name= db_query('SELECT name FROM {test} WHERE id = :id', array(':id' => 42))->fetchField();
-    $this->assertIdentical($saved_name, 'John', t('Updated primary key successfully.'));
+    $this->assertIdentical($saved_name, 'John', 'Updated primary key successfully.');
   }
 }
 
@@ -1018,7 +1018,7 @@ class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
       ->condition('pid', $subquery, 'IN');
 
     $num_deleted = $delete->execute();
-    $this->assertEqual($num_deleted, 1, "Deleted 1 record.");
+    $this->assertEqual($num_deleted, 1, 'Deleted 1 record.');
 
     $num_records_after = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();
     $this->assertEqual($num_records_before, $num_records_after + $num_deleted, 'Deletion adds up.');
@@ -1478,7 +1478,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
       ->condition('age', NULL)
       ->execute()->fetchCol();
 
-    $this->assertEqual(count($names), 0, t('No records found when comparing to NULL.'));
+    $this->assertEqual(count($names), 0, 'No records found when comparing to NULL.');
   }
 
   /**
@@ -2108,9 +2108,9 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
 
     // Check that the 'all_fields' statement is handled properly.
     $tables = $query->getTables();
-    $this->assertEqual($tables['test']['all_fields'], 1, 'Query correctly sets \'all_fields\' statement.');
+    $this->assertEqual($tables['test']['all_fields'], 1, "Query correctly sets 'all_fields' statement.");
     $tables = $count->getTables();
-    $this->assertFalse(isset($tables['test']['all_fields']), 'Count query correctly unsets \'all_fields\' statement.');
+    $this->assertFalse(isset($tables['test']['all_fields']), "Count query correctly unsets 'all_fields' statement.");
 
     // Check that the ordering clause is handled properly.
     $orderby = $query->getOrderBy();
@@ -2767,7 +2767,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
       ))->execute();
 
     $from_database = db_query('SELECT name FROM {test} WHERE name = :name', array(':name' => $name))->fetchField();
-    $this->assertIdentical($name, $from_database, "The database handles UTF-8 characters cleanly.");
+    $this->assertIdentical($name, $from_database, 'The database handles UTF-8 characters cleanly.');
   }
 
   /**
@@ -3737,7 +3737,7 @@ class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
          ),
        );
        db_create_table('date_table', $date_table);
-       $this->assertTrue(db_table_exists('date_table'), t('Created table with date field'));
+       $this->assertTrue(db_table_exists('date_table'), 'Created table with date field');
 
        db_insert('date_table')->fields(array('date_field'))
          ->values(array('date_field' => '2001-01-01'))
@@ -3746,19 +3746,19 @@ class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
          ->execute();
 
        $num_records = (int) db_query('SELECT COUNT(*) FROM {date_table}')->fetchField();
-       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+       $this->assertEqual($num_records, 3, 'Inserted 3 records, and counted 3 records');
        $res = db_query('SELECT date_field from {date_table} ORDER BY date_field');
 
        $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '1856-12-31', t('Date retrieved in order @date', array('@date' => $date)));
+       $this->assertEqual($date, '1856-12-31', format_string('Date retrieved in order @date', array('@date' => $date)));
        $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '2001-01-01', t('Date retrieved in order @date', array('@date' => $date)));
+       $this->assertEqual($date, '2001-01-01', format_string('Date retrieved in order @date', array('@date' => $date)));
        $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '2100-06-30', t('Date retrieved in order @date', array('@date' => $date)));
+       $this->assertEqual($date, '2100-06-30', format_string('Date retrieved in order @date', array('@date' => $date)));
 
 
        db_drop_table('date_table');
-       $this->assertFalse(db_table_exists('date_table'), t('Dropped table with date field'));
+       $this->assertFalse(db_table_exists('date_table'), 'Dropped table with date field');
 
      } catch (Exception $e) {
        $this->fail($e->getMessage());
@@ -3781,7 +3781,7 @@ class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
          ),
        );
        db_create_table('time_table', $time_table);
-       $this->assertTrue(db_table_exists('time_table'), t('Created table with time field'));
+       $this->assertTrue(db_table_exists('time_table'), 'Created table with time field');
 
        db_insert('time_table')->fields(array('time_field'))
          ->values(array('time_field' => '12:59:00'))
@@ -3790,18 +3790,18 @@ class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
          ->execute();
 
        $num_records = (int) db_query('SELECT COUNT(*) FROM {time_table}')->fetchField();
-       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+       $this->assertEqual($num_records, 3, 'Inserted 3 records, and counted 3 records');
        $res = db_query('SELECT time_field from {time_table} ORDER BY time_field');
 
        $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '00:01:00', t('Time retrieved in order @time', array('@time' => $time)));
+       $this->assertEqual($time, '00:01:00', format_string('Time retrieved in order @time', array('@time' => $time)));
        $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '12:59:00', t('Time retrieved in order @time', array('@time' => $time)));
+       $this->assertEqual($time, '12:59:00', format_string('Time retrieved in order @time', array('@time' => $time)));
        $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '23:17:00', t('Time retrieved in order @time', array('@time' => $time)));
+       $this->assertEqual($time, '23:17:00', format_string('Time retrieved in order @time', array('@time' => $time)));
 
        db_drop_table('time_table');
-       $this->assertFalse(db_table_exists('time_table'), t('Dropped table with time field'));
+       $this->assertFalse(db_table_exists('time_table'), 'Dropped table with time field');
      } catch (Exception $e) {
        $this->fail($e->getMessage());
      }

@@ -75,7 +75,7 @@ class FileTestHelper extends BackdropWebTestCase {
     $filepath = $settings['scheme'] . '://' . $settings['filepath'];
 
     file_put_contents($filepath, $settings['contents']);
-    $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
+    $this->assertTrue(is_file($filepath), 'The test file exists on the disk.', 'Create test file');
 
     $file = new File();
     $file->uri = $filepath;
@@ -103,7 +103,7 @@ class FileTestHelper extends BackdropWebTestCase {
 
     // Write the record directly rather than calling file_save() so we don't
     // invoke the hooks.
-    $this->assertNotIdentical(backdrop_write_record('file_managed', $file), FALSE, t('The file was added to the database.'), 'Create test file');
+    $this->assertNotIdentical(backdrop_write_record('file_managed', $file), FALSE, 'The file was added to the database.', 'Create test file');
 
     return $file;
   }
@@ -738,7 +738,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
           break;
       }
       $error_message = t('Only files with the following extensions are allowed: %files-allowed.', array('%files-allowed' => 'txt'));
-      $this->assertRaw($error_message, t('Validation error when file with wrong extension uploaded (JSMode=%type).', array('%type' => $type)));
+      $this->assertRaw($error_message, format_string('Validation error when file with wrong extension uploaded (JSMode=%type).', array('%type' => $type)));
 
       // Upload file with correct extension, check that error message is removed.
       $edit[$name] = backdrop_realpath($test_file_text->uri);
@@ -752,7 +752,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
           $this->backdropPostAJAX(NULL, $edit, array((string) $button[0]['name'] => (string) $button[0]['value']));
           break;
       }
-      $this->assertNoRaw($error_message, t('Validation error removed when file with correct extension uploaded (JSMode=%type).', array('%type' => $type)));
+      $this->assertNoRaw($error_message, format_string('Validation error removed when file with correct extension uploaded (JSMode=%type).', array('%type' => $type)));
     }
   }
 
@@ -1966,9 +1966,9 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
     // MIME type is assigned to a file type. Check to see if each file was
     // assigned a proper file type.
     $file_type = $this->getFileType($text_file);
-    $this->assertEqual($file_type['type'], 'document', t('The text file was properly assigned the Document file type.'));
+    $this->assertEqual($file_type['type'], 'document', 'The text file was properly assigned the Document file type.');
     $file_type = $this->getFileType($image_file);
-    $this->assertEqual($file_type['type'], 'image', t('The image file was properly assigned the Image file type.'));
+    $this->assertEqual($file_type['type'], 'image', 'The image file was properly assigned the Image file type.');
   }
 
   /**
@@ -2116,17 +2116,17 @@ class FileEditTestCase extends FileTestHelper {
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename($file->filename);
-    $this->assertTrue($file, t('File found in database.'));
+    $this->assertTrue($file, 'File found in database.');
 
     // Check that "edit" link points to correct page.
     $this->backdropGet('admin/content/files');
     $this->clickLink(t('Manage'));
     $edit_url = url("file/$file->fid/manage", array('absolute' => TRUE));
     $actual_url = strtok($this->getURL(), '?');
-    $this->assertEqual($edit_url, $actual_url, t('On edit page.'));
+    $this->assertEqual($edit_url, $actual_url, 'On edit page.');
 
     // Check that the name field is displayed with the correct value.
-    $this->assertFieldByName($name_key, $file->filename, t('Name field displayed.'));
+    $this->assertFieldByName($name_key, $file->filename, 'Name field displayed.');
 
     // The user does not have "delete" permissions so no delete button should be found.
     $this->assertNoFieldByName('op', t('Delete'), 'Delete button not found.');
@@ -2138,7 +2138,7 @@ class FileEditTestCase extends FileTestHelper {
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Check that the name field is displayed with the updated values.
-    $this->assertText($edit[$name_key], t('Name displayed.'));
+    $this->assertText($edit[$name_key], 'Name displayed.');
   }
 
 }
@@ -2179,10 +2179,10 @@ class FileUploadWizardTestCase extends FileTestHelper {
     // Check that the file exists in the database.
     $fid = $this->getLastFileId();
     $file = file_load($fid);
-    $this->assertTrue($file, t('File found in database.'));
+    $this->assertTrue($file, 'File found in database.');
 
     // Check that the document file has been uploaded.
-    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $file->filename)), t('Document file uploaded.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $file->filename)), 'Document file uploaded.');
   }
 
   /**
@@ -2208,10 +2208,10 @@ class FileUploadWizardTestCase extends FileTestHelper {
     // Check that the file exists in the database.
     $fid = $this->getLastFileId();
     $file = file_load($fid);
-    $this->assertTrue($file, t('File found in database.'));
+    $this->assertTrue($file, 'File found in database.');
 
     // Check that the document file has been uploaded.
-    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document 2', '%name' => $file->filename)), t('Document 2 file uploaded.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document 2', '%name' => $file->filename)), 'Document 2 file uploaded.');
   }
 
   /**
@@ -2236,10 +2236,10 @@ class FileUploadWizardTestCase extends FileTestHelper {
     // Check that the file exists in the database.
     $fid = $this->getLastFileId();
     $file = file_load($fid);
-    $this->assertTrue($file, t('File found in database.'));
+    $this->assertTrue($file, 'File found in database.');
 
     // Check that the document file has been uploaded.
-    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $file->filename)), t('Document file uploaded privately.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => $file->filename)), 'Document file uploaded privately.');
   }
 
   /**
@@ -2287,18 +2287,18 @@ class FileUploadWizardTestCase extends FileTestHelper {
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Check that the image file has been uploaded.
-    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Image', '%name' => $filename)), t('Image file uploaded.'));
+    $this->assertRaw(t('@type %name was uploaded.', array('@type' => 'Image', '%name' => $filename)), 'Image file uploaded.');
 
     // Check that the file exists in the database.
     $fid = $this->getLastFileId();
     $file = file_load($fid);
-    $this->assertTrue($file, t('File found in database.'));
+    $this->assertTrue($file, 'File found in database.');
 
     // Check that the alt and title text was loaded from the fields.
     $alt_value = $file->field_file_image_alt_text['und'][0]['value'];
-    $this->assertEqual($alt_value, $alt, t('Alt text was stored as field data.'));
+    $this->assertEqual($alt_value, $alt, 'Alt text was stored as field data.');
     $title_value = $file->field_file_image_title_text['und'][0]['value'];
-    $this->assertEqual($title_value, $title, t('Title text was stored as field data.'));
+    $this->assertEqual($title_value, $title, 'Title text was stored as field data.');
   }
 
   /**
@@ -2395,12 +2395,12 @@ class FileUploadWizardTestCase extends FileTestHelper {
       // Check that the file exists in the database.
       $fid = $this->getLastFileId();
       $file = file_load($fid);
-      $this->assertTrue($file, t('File found in database.'));
+      $this->assertTrue($file, 'File found in database.');
 
       // Determine the file's file type.
       $type = file_type_load($file->type);
       // Check that the image file has been uploaded.
-      $this->assertRaw(t('@type %name was uploaded.', array('@type' => $type->name, '%name' => $file->filename)), t('Image file uploaded.'));
+      $this->assertRaw(t('@type %name was uploaded.', array('@type' => $type->name, '%name' => $file->filename)), 'Image file uploaded.');
 
       // Reset 'skip' variables.
       $config = config('file.settings');
@@ -2664,7 +2664,7 @@ class FileUsageTestCase extends FileTestHelper {
       'count' => 1,
     );
     foreach ($expected_values as $name => $value) {
-      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), t('File usage @name was found in the table.', array('@name' => $name)));
+      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), format_string('File usage @name was found in the table.', array('@name' => $name)));
     }
 
     // Add a reference to the file from the same entity but registered by a
@@ -2676,7 +2676,7 @@ class FileUsageTestCase extends FileTestHelper {
     $this->backdropGet('file/' . $file->fid . '/usage');
     $expected_values['count'] = 3;
     foreach ($expected_values as $name => $value) {
-      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), t('File usage @name was found in the table.', array('@name' => $name)));
+      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), format_string('File usage @name was found in the table.', array('@name' => $name)));
     }
 
     // Add a reference to the file from an entity that doesn't exist to ensure
@@ -2696,7 +2696,7 @@ class FileUsageTestCase extends FileTestHelper {
       'count' => 1,
     );
     foreach ($expected_values as $name => $value) {
-      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), t('File usage @name was found in the table.', array('@name' => $name)));
+      $this->assertTrue($this->xpath('//table/tbody/tr/td[normalize-space(text())=:text]', array(':text' => $value)), format_string('File usage @name was found in the table.', array('@name' => $name)));
     }
   }
 }
@@ -2839,7 +2839,7 @@ class FileTypeTestCase extends FileTestHelper {
     $type_machine_label = 'foobar';
     $type = $this->createFileType(array('type' => $type_machine_type, 'name' => $type_machine_label));
     $loaded_type = file_type_load($type_machine_type);
-    $this->assertEqual($loaded_type->name, $type_machine_label, "Was able to create a type and retrieve it.");
+    $this->assertEqual($loaded_type->name, $type_machine_label, 'Was able to create a type and retrieve it.');
   }
 
   /**
@@ -2915,7 +2915,7 @@ class FileTypeTestCase extends FileTestHelper {
 
     // Edit exported file type.
     $this->backdropGet('admin/structure/file-types/manage/image/edit');
-    $this->assertRaw(t('Image'), 'name found on file type edit page');
+    $this->assertRaw(t('Image'), 'Name found on file type edit page');
     $this->assertText("image/*", 'Mime-type configuration found on file type edit page');
     $this->backdropPost(NULL, array('name' => t('Funky images')), t('Save'));
     $this->assertText(t('The file type @type has been updated.', array('@type' => t('Funky images'))), 'File type was modified.');
@@ -2961,7 +2961,7 @@ class FileTypeTestCase extends FileTestHelper {
         break;
       }
     }
-    $this->assertTrue(isset($index), t('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
+    $this->assertTrue(isset($index), format_string('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
     if (isset($index)) {
       return $this->clickLink($label, $index);
     }

@@ -141,7 +141,7 @@ class CommentHelperCase extends BackdropWebTestCase {
         $this->assertText($subject, 'Comment subject posted.');
       }
       $this->assertText($comment, 'Comment body posted.');
-      $this->assertTrue((!empty($match) && !empty($match[1])), 'Comment id found.');
+      $this->assertTrue((!empty($match) && !empty($match[1])), 'Comment ID found.');
     }
 
     if (isset($match[1])) {
@@ -2331,7 +2331,7 @@ class CommentAuthorDeletionTestCase extends CommentHelperCase {
     // Create a comment as the admin user.
     $this->backdropLogin($this->admin_user);
     $comment = $this->postComment($this->node, $this->randomName());
-    $this->assertTrue($this->commentExists($comment), t('Comment is displayed initially.'));
+    $this->assertTrue($this->commentExists($comment), 'Comment is displayed initially.');
     $this->backdropLogout();
 
     // Delete the admin user, and check that the node which displays the
@@ -2339,8 +2339,8 @@ class CommentAuthorDeletionTestCase extends CommentHelperCase {
     // there.
     user_delete($this->admin_user->uid);
     $this->backdropGet('node/' . $this->node->nid);
-    $this->assertResponse(200, t('Node page is accessible after the comment author is deleted.'));
-    $this->assertFalse($this->commentExists($comment), t('Comment is not displayed after the comment author is deleted.'));
+    $this->assertResponse(200, 'Node page is accessible after the comment author is deleted.');
+    $this->assertFalse($this->commentExists($comment), 'Comment is not displayed after the comment author is deleted.');
   }
 
   /**
@@ -2350,7 +2350,7 @@ class CommentAuthorDeletionTestCase extends CommentHelperCase {
     // Create a comment as the admin user.
     $this->backdropLogin($this->admin_user);
     $comment = $this->postComment($this->node, $this->randomName());
-    $this->assertTrue($this->commentExists($comment), t('Comment is displayed initially.'));
+    $this->assertTrue($this->commentExists($comment), 'Comment is displayed initially.');
     $this->backdropLogout();
 
     // Delete the admin user while the comment module is disabled, and ensure
@@ -2362,8 +2362,8 @@ class CommentAuthorDeletionTestCase extends CommentHelperCase {
     cache('entity_comment')->flush();
     module_enable(array('comment'));
     $this->backdropGet('node/' . $this->node->nid);
-    $this->assertResponse(200, t('Node page is accessible after the comment author is deleted.'));
-    $this->assertFalse($this->commentExists($comment), t('Comment is not displayed after the comment author is deleted.'));
+    $this->assertResponse(200, 'Node page is accessible after the comment author is deleted.');
+    $this->assertFalse($this->commentExists($comment), 'Comment is not displayed after the comment author is deleted.');
   }
 
 }

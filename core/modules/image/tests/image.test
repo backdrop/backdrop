@@ -771,7 +771,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     field_update_instance($instance);
     $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'active')));
     $this->backdropGet('node/' . $nid);
-    $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
+    $this->assertRaw($default_output, 'Image linked to content formatter displaying correctly on full node view.');
 
     // Test the lazy loading attribute.
     $instance['display']['default']['settings']['image_link'] = '';
@@ -780,7 +780,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $image_info['attributes']['loading'] = 'lazy';
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
-    $this->assertRaw($default_output, t('Image loaded lazily displaying correctly on full node view.'));
+    $this->assertRaw($default_output, 'Image loaded lazily displaying correctly on full node view.');
 
     // Test the lazy loading attribute.
     $instance['display']['default']['settings']['image_load'] = 'eager';
@@ -788,7 +788,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $image_info['attributes']['loading'] = 'eager';
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
-    $this->assertRaw($default_output, t('Image loaded eagerly displaying correctly on full node view.'));
+    $this->assertRaw($default_output, 'Image loaded eagerly displaying correctly on full node view.');
 
     // Test the image style 'thumbnail' formatter.
     $instance['display']['default']['settings']['image_load'] = 'auto';
@@ -847,8 +847,8 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // and title fields do not display until the image has been attached.
     $nid = $this->uploadNodeImage($test_image, $field_name, 'post');
     $this->backdropGet('node/' . $nid . '/edit');
-    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][alt]', '', t('Alt field displayed on post form.'));
-    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][title]', '', t('Title field displayed on post form.'));
+    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][alt]', '', 'Alt field displayed on post form.');
+    $this->assertFieldByName($field_name . '[' . LANGUAGE_NONE . '][0][title]', '', 'Title field displayed on post form.');
     // Verify that the attached image is being previewed using the 'medium'
     // style.
     $node = node_load($nid, NULL, TRUE);
@@ -859,7 +859,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       'height' => '150',
     );
     $default_output = theme('image_style', $image_info);
-    $this->assertRaw($default_output, "Preview image is displayed using 'medium' style.");
+    $this->assertRaw($default_output, 'Preview image is displayed using "medium" style.');
 
     // Add alt/title fields to the image and verify that they are displayed.
     $image_info = array(

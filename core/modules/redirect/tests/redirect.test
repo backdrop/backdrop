@@ -23,7 +23,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
     $source_url = url($redirect->source, array('absolute' => TRUE) + $redirect->source_options);
     $redirect_url = url($redirect->redirect, array('absolute' => TRUE) + $redirect->redirect_options);
     $this->backdropGet($source_url);
-    $this->assertEqual($this->getUrl(), $redirect_url, t('Page %source was redirected to %redirect.', array('%source' => $source_url, '%redirect' => $redirect_url)));
+    $this->assertEqual($this->getUrl(), $redirect_url, format_string('Page %source was redirected to %redirect.', array('%source' => $source_url, '%redirect' => $redirect_url)));
 
     // Reload the redirect.
     if (!empty($redirect->rid)) {
@@ -35,7 +35,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
   protected function assertNoRedirect($redirect) {
     $source_url = url($redirect->source, array('absolute' => TRUE) + $redirect->source_options);
     $this->backdropGet($source_url);
-    $this->assertEqual($this->getUrl(), $source_url, t('Page %url was not redirected.', array('%url' => $source_url)));
+    $this->assertEqual($this->getUrl(), $source_url, format_string('Page %url was not redirected.', array('%url' => $source_url)));
   }
 
   /**
@@ -76,7 +76,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
     $options['absolute'] = TRUE;
     $url = url($url, $options);
     $cache = cache_get($url, 'cache_page');
-    $this->assertTrue($cache, t('Page %url was cached.', array('%url' => $url)));
+    $this->assertTrue($cache, format_string('Page %url was cached.', array('%url' => $url)));
     return $cache;
   }
 
@@ -84,7 +84,7 @@ class RedirectTestHelper extends BackdropWebTestCase {
     $options['absolute'] = TRUE;
     $url = url($url, $options);
     $cache = cache_get($url, 'cache_page');
-    $this->assertFalse($cache, t('Page %url was not cached.', array('%url' => $url)));
+    $this->assertFalse($cache, format_string('Page %url was not cached.', array('%url' => $url)));
   }
 
   protected function assertHeader($name, $expected, $headers = NULL) {

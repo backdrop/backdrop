@@ -742,7 +742,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     // Verify that newlines are properly added inside style tags.
     $query_string = state_get('css_js_query_string', '0');
     $css_processed = "<style media=\"all\">\n@import url(\"" . check_plain(file_create_url($css)) . "?" . $query_string ."\");\n</style>";
-    $this->assertEqual(trim($styles), $css_processed, t('Rendered CSS includes newlines inside style tags for JavaScript use.'));
+    $this->assertEqual(trim($styles), $css_processed, 'Rendered CSS includes newlines inside style tags for JavaScript use.');
   }
 
   /**
@@ -1128,7 +1128,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
   function testBackdropHTTPRequestHeaders() {
     // Check the default header.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE)));
-    $this->assertEqual($request->headers['content-language'], 'en', t('Content-Language HTTP header is English.'));
+    $this->assertEqual($request->headers['content-language'], 'en', 'Content-Language HTTP header is English.');
 
     // Add French language.
     $language = (object) array(
@@ -1139,7 +1139,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
 
     // Request home page in French and check for matching Content-language.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE, 'language' => $language)));
-    $this->assertEqual($request->headers['content-language'], 'fr', t('Content-Language HTTP header is French.'));
+    $this->assertEqual($request->headers['content-language'], 'fr', 'Content-Language HTTP header is French.');
   }
 }
 
@@ -1460,8 +1460,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
     $expected_2 = "<!--[if !IE]><!-->\n" . '<script>jQuery(function () { });</script>' . "\n<!--<![endif]-->";
 
-    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
-    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
+    $this->assertTrue(strpos($javascript, $expected_1) > 0, 'Rendered JavaScript within downlevel-hidden conditional comments.');
+    $this->assertTrue(strpos($javascript, $expected_2) > 0, 'Rendered JavaScript within downlevel-revealed conditional comments.');
   }
 
   /**
@@ -1471,7 +1471,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     backdrop_add_js('core/misc/collapse.js', array('version' => 'foo'));
     backdrop_add_js('core/misc/ajax.js', array('version' => 'bar'));
     $javascript = backdrop_get_js();
-    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js?v=foo') > 0 && strpos($javascript, 'core/misc/ajax.js?v=bar') > 0 , t('JavaScript version identifiers correctly appended to URLs'));
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js?v=foo') > 0 && strpos($javascript, 'core/misc/ajax.js?v=bar') > 0 , 'JavaScript version identifiers correctly appended to URLs');
   }
 
   /**
@@ -1495,7 +1495,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
       '<script src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
       '<script src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
     ));
-    $this->assertTrue(strpos($javascript, $expected) > 0, t('Unaggregated JavaScript is added in the expected group order.'));
+    $this->assertTrue(strpos($javascript, $expected) > 0, 'Unaggregated JavaScript is added in the expected group order.');
 
     // Now ensure that with aggregation on, one file is made for the
     // 'every_page' files, and one file is made for the others.
@@ -1511,7 +1511,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
       '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/collapse.js' => $js_items['core/misc/collapse.js'], 'core/misc/batch.js' => $js_items['core/misc/batch.js']))) . '"></script>',
       '<script src="' . file_create_url(backdrop_build_js_cache(array('core/misc/ajax.js' => $js_items['core/misc/ajax.js'], 'core/misc/autocomplete.js' => $js_items['core/misc/autocomplete.js']))) . '"></script>',
     ));
-    $this->assertTrue(strpos($javascript, $expected) > 0, t('JavaScript is aggregated in the expected groups and order.'));
+    $this->assertTrue(strpos($javascript, $expected) > 0, 'JavaScript is aggregated in the expected groups and order.');
   }
 
   /**
@@ -1780,7 +1780,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    */
   function testLibraryRender() {
     $result = backdrop_add_library('system', 'farbtastic');
-    $this->assertTrue($result !== FALSE, t('Library was added without errors.'));
+    $this->assertTrue($result !== FALSE, 'Library was added without errors.');
     $scripts = backdrop_get_js();
     $styles = backdrop_get_css();
     $this->assertTrue(strpos($scripts, 'core/misc/farbtastic/farbtastic.js'), 'JavaScript for library was added to the page.');
@@ -2175,8 +2175,8 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
 
     config_set('system.core', 'error_level', ERROR_REPORTING_DISPLAY_ALL);
     $this->backdropGet('common-test/backdrop-render-invalid-keys');
-    $this->assertResponse(200, t('Received expected HTTP status code.'));
-    $this->assertRaw($message, t('Found error message: !message.', array('!message' => $message)));
+    $this->assertResponse(200, 'Received expected HTTP status code.');
+    $this->assertRaw($message, format_string('Found error message: !message.', array('!message' => $message)));
   }
 
   protected function assertRenderedElement(array $element, $xpath, array $xpath_args = array()) {
@@ -2465,7 +2465,7 @@ class CommonBackdropWriteRecordTestCase extends BackdropWebTestCase {
     // Insert a record with no columns populated.
     $record = array();
     $insert_result = backdrop_write_record('test', $record);
-    $this->assertTrue($insert_result == SAVED_NEW, t('Correct value returned when an empty record is inserted with backdrop_write_record().'));
+    $this->assertTrue($insert_result == SAVED_NEW, 'Correct value returned when an empty record is inserted with backdrop_write_record().');
 
     // Insert a record - no columns allow NULL values.
     $person = new stdClass();
@@ -2656,7 +2656,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
     $this->assertEqual($error['caller']['function'], $function, format_string("Function was %function", array('%function' => $function)));
     $this->assertEqual(backdrop_basename($error['caller']['file']), $file, format_string("File was %file", array('%file' => $file)));
     if (isset($message)) {
-      $this->assertEqual($error['message'], $message, t("Message was %message", array('%message' => $message)));
+      $this->assertEqual($error['message'], $message, format_string('Message was %message', array('%message' => $message)));
     }
   }
 }

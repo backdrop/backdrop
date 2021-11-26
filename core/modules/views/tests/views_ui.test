@@ -222,7 +222,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
         break;
       }
     }
-    $this->assertTrue(isset($index), t('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
+    $this->assertTrue(isset($index), format_string('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
     if (isset($index)) {
       return $this->clickLink($label, $index);
     }
@@ -428,7 +428,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $pos1 = strpos($content, $node1->title);
     $pos2 = strpos($content, $node2->title);
     $pos3 = strpos($content, $node3->title);
-    $this->assertTrue($pos1 < $pos2 && $pos2 < $pos3, t('The nodes appear in the expected order in a view that sorts by oldest first.'));
+    $this->assertTrue($pos1 < $pos2 && $pos2 < $pos3, 'The nodes appear in the expected order in a view that sorts by oldest first.');
 
     // Create a view that sorts newest first.
     $view2 = array();
@@ -451,7 +451,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
     $pos3 = strpos($content, $node3->title);
     $pos2 = strpos($content, $node2->title);
     $pos1 = strpos($content, $node1->title);
-    $this->assertTrue($pos3 < $pos2 && $pos2 < $pos1, t('The nodes appear in the expected order in a view that sorts by newest first.'));
+    $this->assertTrue($pos3 < $pos2 && $pos2 < $pos1, 'The nodes appear in the expected order in a view that sorts by newest first.');
   }
 }
 
@@ -507,7 +507,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $pos4 = strpos($content, $node4->title);
     $pos3 = strpos($content, $node3->title);
     $pos2 = strpos($content, $node2->title);
-    $this->assertTrue($pos5 < $pos4 && $pos4 < $pos3 && $pos3 < $pos2, t('The nodes appear in the expected order in the page display.'));
+    $this->assertTrue($pos5 < $pos4 && $pos4 < $pos3 && $pos3 < $pos2, 'The nodes appear in the expected order in the page display.');
 
     // Put the block into the first sidebar region, visit a page that displays
     // the block, and check that the nodes we expect appear in the correct
@@ -528,7 +528,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
     $pos5 = strpos($content, $node5->title);
     $pos4 = strpos($content, $node4->title);
     $pos3 = strpos($content, $node3->title);
-    $this->assertTrue($pos5 < $pos4 && $pos4 < $pos3, t('The nodes appear in the expected order in the block display.'));
+    $this->assertTrue($pos5 < $pos4 && $pos4 < $pos3, 'The nodes appear in the expected order in the block display.');
   }
 }
 
@@ -568,7 +568,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
         break;
       }
     }
-    $this->assertTrue($found, t('Found a link to %path in the primary navigation', array('%path' => $view['page[path]'])));
+    $this->assertTrue($found, format_string('Found a link to %path in the primary navigation', array('%path' => $view['page[path]'])));
   }
 }
 
