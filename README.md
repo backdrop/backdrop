@@ -48,9 +48,7 @@ contact the security team before filing an issue.
 
 Developers
 ----------
-Backdrop is a fork of Drupal. It preserves the legacy audience of developers who
-value ease of use and speed of learning over architectural flexibility. You can
-join Backdrop's developer community by
+Backdrop is a Drupal fork. It caters to developers who place a premium on ease of use and speed of learning over architectural flexibility. You may join the Backdrop development community by clicking here.
 [forking Backdrop](https://github.com/backdrop/backdrop) on GitHub.
 
 When submitting a pull request, please make sure there is an open issue in the
@@ -85,20 +83,14 @@ Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api
 Code of Conduct
 ---------------
 
-A primary goal of the Backdrop CMS community is to be inclusive to the largest
-number of contributors, with the most varied and diverse backgrounds possible.
-As such, we are committed to providing a friendly, safe and welcoming
-environment for all, regardless of ability, ethnicity, gender, sexual
-orientation, sexual preferences, socioeconomic status, geographic location, or
-religion (or lack thereof).
+One of the key goals of the Backdrop CMS community is to include as many contributors as possible, from as many different backgrounds as feasible. As a result, regardless of ability, race, gender, sexual orientation, sexual preferences, socioeconomic level, geographic location, or religion, we are devoted to creating a warm, safe, and inclusive atmosphere for all (or lack thereof).
 
 Our
 [code of conduct](https://github.com/backdrop-ops/conduct/blob/main/code_of_conduct.md)
 outlines our expectations for all those who participate in our community, as
 well as the consequences for unacceptable behavior.
 
-We invite all those who participate in the Backdrop CMS community to help us
-create safe and positive experiences for everyone.
+We invite all members of the Backdrop CMS community to join us in ensuring that everyone has a safe and enjoyable experience
 
 License
 -------
