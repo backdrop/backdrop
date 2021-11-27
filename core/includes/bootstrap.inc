@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.14.x-dev');
+define('BACKDROP_VERSION', '1.21.x-dev');
 
 /**
  * Core API compatibility.
@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
@@ -761,8 +762,11 @@ function backdrop_environment_initialize() {
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
- * @return
- *  TRUE if only containing valid characters, or FALSE otherwise.
+ * @param string $host
+ *   The host name to validate.
+ *
+ * @return bool
+ *   TRUE only if containing valid characters; FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
   // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
@@ -818,7 +822,7 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
   $settings = array();
 
@@ -1659,7 +1663,7 @@ function backdrop_page_header() {
   $headers_sent = TRUE;
 
   $default_headers = array(
-    'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
+    'Expires' => 'Fri, 16 Jan 2015 07:50:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
     'Cache-Control' => 'no-cache, must-revalidate',
     'X-Content-Type-Options' => 'nosniff',
@@ -1738,9 +1742,16 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-  if ($if_modified_since && $if_none_match
-      && $if_none_match == $etag // etag must match
-      && $if_modified_since == $cache->created) {  // if-modified-since must match
+  // Handle an exact match based on Etag. The If-None-Match header takes full
+  // precedence over If-Modified-Since header.
+  if ($if_none_match == $etag) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+    backdrop_send_headers($default_headers);
+    return;
+  }
+
+  // Handle a loose match based on date only, if no Etag was provided.
+  if (!$if_none_match && $if_modified_since && $if_modified_since >= $cache->created) {
     header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
     backdrop_send_headers($default_headers);
     return;
@@ -1757,7 +1768,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   // by sending an Expires date in the past. HTTP/1.1 clients ignores the
   // Expires header if a Cache-Control: max-age= directive is specified (see RFC
   // 2616, section 14.9.3).
-  $default_headers['Expires'] = 'Sun, 19 Nov 1978 05:00:00 GMT';
+  $default_headers['Expires'] = 'Fri, 16 Jan 2015 07:50:00 GMT';
 
   backdrop_send_headers($default_headers);
 
@@ -2010,7 +2021,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -2292,7 +2303,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
-  if (!$in_error_state && function_exists('module_implements')) {
+  if (!$in_error_state && function_exists('module_invoke_all')) {
     $in_error_state = TRUE;
 
     // The user object may not exist in all conditions, so 0 is substituted if needed.
@@ -2315,9 +2326,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     );
 
     // Call the logging hooks to log/process the message
-    foreach (module_implements('watchdog') as $module) {
-      module_invoke($module, 'watchdog', $log_entry);
-    }
+    module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
     // watchdog() call (not outside the loop), to prevent recursive execution.
@@ -2937,9 +2946,9 @@ function backdrop_get_user_timezone() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler($error_level, $message, $filename, $line) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-  _backdrop_error_handler_real($error_level, $message, $filename, $line, $context);
+  _backdrop_error_handler_real($error_level, $message, $filename, $line);
 }
 
 /**
@@ -2964,7 +2973,7 @@ function _backdrop_exception_handler($exception) {
     // make any FATAL errors return 500 responses instead of 200, and also
     // account for cases where an exception was thrown before the 500 status
     // could be set (e.g. while loading a maintenance theme from cache).
-    drupal_add_http_header('Status', '500 Internal Server Error');
+    backdrop_add_http_header('Status', '500 Internal Server Error');
 
     // Another uncaught exception was thrown while handling the first one. If we
     // are displaying errors, then do so with no possibility of a further
@@ -3004,6 +3013,11 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
+  // Untrusted host names, throw an exception for the end-user.
+  if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
+    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
+  }
+
   // Check that the config directory is not empty.
   if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
@@ -3018,6 +3032,7 @@ function _backdrop_bootstrap_configuration() {
  */
 function _backdrop_bootstrap_page_cache() {
   global $user;
+  $site_config = config('system.core');
 
   // Allow specifying special cache handlers in settings.php, like
   // using memcached or files for storing cache information.
@@ -3027,7 +3042,7 @@ function _backdrop_bootstrap_page_cache() {
   }
 
   try {
-    $cache_enabled = config_get('system.core', 'cache') ? TRUE : FALSE;
+    $cache_enabled = $site_config->get('cache') ? TRUE : FALSE;
   }
   catch (ConfigException $e) {
     $cache_enabled = FALSE;
@@ -3043,7 +3058,7 @@ function _backdrop_bootstrap_page_cache() {
     // checked, hook_boot might check for anonymous user etc.
     $user = backdrop_anonymous_user();
     // Get the page from the cache.
-    $background_fetch_enabled = config_get('system.core', 'page_cache_background_fetch');
+    $background_fetch_enabled = $site_config->get('page_cache_background_fetch');
     $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
@@ -3052,7 +3067,7 @@ function _backdrop_bootstrap_page_cache() {
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
       // on its creation date.
-      $lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $lifetime = $site_config->get('page_cache_maximum_age');
       $expires_on = $cache->created + $lifetime;
       $cache_expired = REQUEST_TIME > $expires_on;
 
@@ -3249,7 +3264,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3280,7 +3298,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
@@ -3511,11 +3529,16 @@ function language_multilingual() {
  *   (optional) Whether to return a list of options instead of objects. This
  *   list is suitable for use in a select list #options array. This list is
  *   ordered by weight and then language name.
+ * @param bool $native_names
+ *   (optional) Whether the option_list labels should use the native name
+ *   instead of the English language name. Only applies if $option_list is TRUE.
  *
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
+ *
+ * @since 1.18.2 Added $native_names parameter.
  */
-function language_list($only_enabled = FALSE, $option_list = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3548,6 +3571,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
       $languages['all']['en'] = (object) array(
         'langcode' => 'en',
         'name' => 'English',
+        'native' => 'English',
         'direction' => 0,
         'enabled' => TRUE,
         'weight' => 0,
@@ -3574,7 +3598,13 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
     require_once __DIR__ . '/common.inc';
     backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
     foreach ($this_list as $language) {
-      $list[$language->langcode] = $language->name;
+      if ($native_names && isset($language->native)) {
+        $label = $language->native;
+      }
+      else {
+        $label = $language->name;
+      }
+      $list[$language->langcode] = $label;
     }
     return $list;
   }
@@ -3674,7 +3704,7 @@ function language_default() {
  *   base_path() returns "/backdropfolder/".
  * - http://example.com/path/alias (which is a path alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
- * - http://example.com/index.php returns an empty string (meaning: front page).
+ * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.
  *
  * @return
@@ -3706,13 +3736,13 @@ function request_path() {
     // If the path equals the script filename, either because 'index.php' was
     // explicitly provided in the URL, or because the server added it to
     // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-    // versions of Microsoft IIS do this), the front page should be served.
+    // versions of Microsoft IIS do this), the home page should be served.
     if ($path == basename($_SERVER['PHP_SELF'])) {
       $path = '';
     }
   }
   else {
-    // This is the front page.
+    // This is the home page.
     $path = '';
   }
 
@@ -3984,6 +4014,7 @@ function backdrop_autoload($class) {
     // module_invoke_all() because it uses array_merge_recursive(), which is an
     // expensive O(n^2) operation. Instead we use module_implements() and merge
     // the array manually, which is O(n).
+    include_once BACKDROP_ROOT . '/core/includes/module.inc';
     foreach (module_implements('autoload_info') as $module) {
       $module_classes = module_invoke($module, 'autoload_info');
       $module_path = backdrop_get_path('module', $module);
@@ -4369,4 +4400,39 @@ function backdrop_clear_opcode_cache($filepath) {
     // @see http://php.net/apc-delete-file
     @apc_delete_file($filepath);
   }
+}
+
+/**
+ * Checks if a host matches the trusted host patterns in settings.php.
+ *
+ * @param string $host
+ *   The host to check against the patterns specified in settings.php.
+ *
+ * @return
+ *   TRUE if the host can be trusted; FALSE otherwise.
+ *
+ * @since Backdrop 1.14.0
+ */
+function backdrop_check_trusted_hosts($host) {
+  $trusted_hosts = &backdrop_static(__FUNCTION__, array());
+  $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+
+  if (PHP_SAPI !== 'cli' && !empty($trusted_host_patterns)) {
+
+    if (in_array($host, $trusted_hosts)) {
+      return $host;
+    }
+
+    foreach ($trusted_host_patterns as $pattern) {
+      $pattern = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
+      if (preg_match($pattern, $host)) {
+        $trusted_hosts[] = $host;
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  return TRUE;
 }

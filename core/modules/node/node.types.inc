@@ -13,7 +13,7 @@ function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Operations'));
   $rows = array();
 
   // Sort the list of content types by label instead of machine name.
@@ -22,7 +22,12 @@ function node_overview_types() {
   foreach ($names as $key => $name) {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
-    $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $row = array(theme('label_machine_name__node_type', array(
+      'label' => $name,
+      'machine_name' => $type->type,
+    )));
+    $row[] = filter_xss_admin($type->description);
+    $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => 'admin/structure/types/manage/' . $type_url_str,
@@ -204,10 +209,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
     '#options' => array(
-      'sticky_enabled' => t('Show option to make posts sticky'),
-      'sticky_default' => t('Make posts sticky by default'),
+      'sticky_enabled' => t('Show option to make sticky'),
+      'sticky_default' => t('Make sticky by default'),
     ),
-    '#description' => t('Sticky posts may be shown at the top of listings.'),
+    '#description' => t('Sticky content may be shown at the top of listings.'),
   );
   $form['workflow']['sticky']['sticky_enabled'] = array(
     '#default_value' => $type->settings['sticky_enabled'],
@@ -223,10 +228,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
     '#options' => array(
-      'promote_enabled' => t('Show option to promote posts'),
-      'promote_default' => t('Promote posts by default'),
+      'promote_enabled' => t('Show option to promote'),
+      'promote_default' => t('Promote by default'),
     ),
-    '#description' => t('Promoted posts will often be shown on the main homepage or blog.'),
+    '#description' => t('Promoted content will often be shown on the main homepage or blog.'),
   );
   $form['workflow']['promote']['promote_enabled'] = array(
     '#default_value' => $type->settings['promote_enabled'],
@@ -252,7 +257,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
       '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new content is saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
 
@@ -312,18 +317,34 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $node_submitted_state = array(
+    'visible' => array(
+      'input[name="node_submitted"]' => array('checked' => TRUE),
+    ),
+  );
+  $form['display']['node_submitted_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author/date format'),
+    '#default_value' => $type->settings['node_submitted_format'],
+    '#description' => t('The format to use for the author username and publish date. Example: "Submitted by [node:author] on [node:created:medium]"'),
+    '#states' => $node_submitted_state,
+  );
+  $form['display']['node_submitted_tokens'] = array(
+    '#type' => 'item', // Needed for states to work.
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#states' => $node_submitted_state,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display the author picture'),
       '#default_value' => $type->settings['node_user_picture'],
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
-      '#states' => array(
-        // Hide the picture settings when submitted info is disabled.
-        'visible' => array(
-          'input[name="node_submitted"]' => array('checked' => TRUE),
-        ),
-      ),
+      // Hide the picture settings when submitted info is disabled.
+      '#states' => $node_submitted_state,
     );
   }
   $form['display']['hidden_path'] = array(
@@ -470,6 +491,17 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
+  // Make the new content type indexable by default if Search module is enabled.
+  if (module_exists('search')) {
+    $search_content_types = config_get('search.settings', 'content_types');
+    // If no types are specified, then all types are enabled and there's no need to make any changes.
+    if ($search_content_types) {
+      $search_content_types[] = $type->type;
+      natsort($search_content_types);
+      config_set('search.settings', 'content_types', $search_content_types);
+    }
+  }
+
   $form_state['redirect'] = 'admin/structure/types';
   return;
 }
@@ -591,6 +623,7 @@ function node_node_type_load(&$types) {
 
       // Submitted information.
       'node_submitted' => TRUE,
+      'node_submitted_format' => t('[node:created:medium] by [node:author]'),
       'node_user_picture' => TRUE,
 
       // Setting to prevent page from being accessed directly.
@@ -622,7 +655,7 @@ function node_node_type_update($info) {
     $update_count = node_type_update_nodes($info->old_type, $info->type);
 
     if ($update_count) {
-      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
+      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 piece of content from %old-type to %type.', 'Changed the content type of @count pieces of content from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
     }
   }
 }

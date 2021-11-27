@@ -20,9 +20,5 @@ function admin_bar_schema() {
 function admin_bar_install() {
   // Increase the module weight, so admin_bar catches any alterations made by
   // other modules in hook_menu_alter().
-  db_update('system')
-    ->fields(array('weight' => 100))
-    ->condition('type', 'module')
-    ->condition('name', 'admin_bar')
-    ->execute();
+  module_set_weight('admin_bar', 100);
 }

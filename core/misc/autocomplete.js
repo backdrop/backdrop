@@ -320,8 +320,9 @@ Backdrop.ACDB.prototype.search = function (searchString) {
     // Ajax GET request for autocompletion.
     $.ajax({
       type: 'GET',
-      url: db.uri + '/' + encodeURIComponent(searchString),
+      url: Backdrop.sanitizeAjaxUrl(db.uri + '/' + encodeURIComponent(searchString)),
       dataType: 'json',
+      jsonp: false,
       success: function (matches) {
         if (typeof matches.status === 'undefined' || matches.status !== 0) {
           db.cache[searchString] = matches;

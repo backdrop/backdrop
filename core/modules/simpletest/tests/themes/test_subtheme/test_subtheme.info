@@ -1,5 +1,6 @@
 name = Theme test subtheme
 description = Test theme which uses test_basetheme as the base theme.
+version = BACKDROP_VERSION
 backdrop = 1.x
 type = theme
 base theme = test_basetheme
