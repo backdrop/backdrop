@@ -645,8 +645,8 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * The available hooks to implement are explained here in the Hooks section of
  * the developer documentation. The string "hook" is used as a placeholder for
  * the module name in the hook definitions. For example, if the module file is
- * called example.module, then hook_help() as implemented by that module would
- * be defined as example_help().
+ * called example.module, then hook_menu() as implemented by that module would
+ * be defined as example_menu().
  *
  * The example functions included are not part of the Backdrop core, they are
  * just models that you can modify. Only the hooks implemented within modules
