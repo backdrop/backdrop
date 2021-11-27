@@ -287,7 +287,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
         $output = _text_sanitize($instance, $langcode, $item, 'value');
         if ($display['type'] == 'text_trimmed') {
           if ($settings['word_boundary']) {
-            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis']));
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], TRUE));
           }
           else {
             $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);
@@ -305,7 +305,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
         else {
           $output = _text_sanitize($instance, $langcode, $item, 'value');
           if ($settings['word_boundary']) {
-            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis']));
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], TRUE));
           }
           else {
             $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);

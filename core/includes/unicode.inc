@@ -323,10 +323,11 @@ function backdrop_truncate_bytes($string, $len) {
  * @return string
  *   The truncated string.
  */
-function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = FALSE, $min_wordsafe_length = 1) {
+function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = FALSE, $min_wordsafe_length = 1, $include_newlines = FALSE) {
   $ellipsis = '';
   $max_length = max($max_length, 0);
   $min_wordsafe_length = max($min_wordsafe_length, 0);
+  $dotall = $include_newlines ? 's' : '';
 
   if (backdrop_strlen($string) <= $max_length) {
     // No truncation needed, so don't add ellipsis, just return.
@@ -350,7 +351,7 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
     // Find the last word boundary, if there is one within $min_wordsafe_length
     // to $max_length characters. preg_match() is always greedy, so it will
     // find the longest string possible.
-    $found = preg_match('/^(.{' . $min_wordsafe_length . ',' . $max_length . '})[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . ']/u', $string, $matches);
+    $found = preg_match('/^(.{' . $min_wordsafe_length . ',' . $max_length . '})[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . ']/u' . $dotall, $string, $matches);
     if ($found) {
       $string = $matches[1];
     }
