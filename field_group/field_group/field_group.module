@@ -317,6 +317,13 @@ function field_group_field_group_formatter_info() {
         'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
         'default_formatter' => 'collapsible',
       ),
+      'details' => array(
+        'label' => t('Details'),
+        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'format_types' => array('open', 'closed'),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'default_formatter' => 'closed',
+      ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
         'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
@@ -390,6 +397,13 @@ function field_group_field_group_formatter_info() {
         'format_types' => array('open', 'collapsible', 'collapsed'),
         'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
         'default_formatter' => 'collapsible',
+      ),
+      'details' => array(
+        'label' => t('Details'),
+        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'format_types' => array('open', 'closed'),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'default_formatter' => 'closed',
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
@@ -574,6 +588,9 @@ function field_group_field_group_format_settings($group) {
     case 'fieldset':
       $form['label']['#description'] = t('Please enter a label for collapsible elements');
       break;
+    case 'details':
+      $form['label']['#description'] = t('Please enter a label for the summary');
+      break;
     case 'multipage-group':
       $form['instance_settings']['page_header'] = array(
         '#title' => t('Format page title'),
@@ -695,6 +712,29 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
 
   if ($group->collapsible || $group->collapsed) {
     $element['#attached']['library'][] = array('system', 'backdrop.collapse');
+  }
+}
+
+/**
+ * Implements field_group_pre_render_<format-type>.
+ * Format type: Details.
+ *
+ * @param $element The field group form element.
+ * @param $group The Field group object prepared for pre_render.
+ * @param $form The root element or form.
+ */
+function field_group_pre_render_details(&$element, $group, &$form) {
+  $element += array(
+    '#type' => 'details',
+    '#summary' => check_plain(t($group->label)),
+    '#attributes' => array('class' => explode(' ', $group->classes)),
+    '#details' => $group->description,
+  );
+  if (!empty($element['#id'])) {
+    $element['#attributes']['id'] = $element['#id'];
+  }
+  if (!$group->collapsed) {
+    $element['#attributes']['open'] = TRUE;
   }
 }
 

@@ -456,6 +456,9 @@ function field_group_format_settings_label_validate($element, &$form_state) {
   if ($group['format']['type'] == 'fieldset' && ($settings['formatter'] == 'collapsed' || $settings['formatter'] == 'collapsible') && empty($settings['label'])) {
     form_error($element, t('The label is required when formatter is collapsible or collapsed'));
   }
+  if ($group['format']['type'] == 'details' && empty($settings['label'])) {
+    form_error($element, t('The label is required'));
+  }
 
 }
 
