@@ -319,6 +319,13 @@ function backdrop_truncate_bytes($string, $len) {
  *   that "See" alone is too short, and would then just truncate ignoring word
  *   boundaries, giving you "See myverylongurl..." (assuming you had set
  *   $add_ellipses to TRUE).
+ * @param $include_newlines
+ *   If TRUE, adds the 'dotall' modifier to the preg_match() regular expression.
+ *   This means the truncated string *can* include line breaks. Defaults to
+ *   FALSE, in which case the truncated string will *not* include line breaks
+ *   and so may be significantly shorter than $max_length.
+ *
+ * @since 1.21.0 $include_newlines parameter added.
  *
  * @return string
  *   The truncated string.

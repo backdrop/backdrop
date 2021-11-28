@@ -244,10 +244,9 @@ function text_field_formatter_settings_form($field, $instance, $view_mode, $form
       '#description' => t('Trim to the nearest word, rather than the nearest paragraph, line break, or sentence.'),
     );
     $element['ellipsis'] = array(
-      '#title' => t('Add ellipsis'),
+      '#title' => t('Add an ellipsis (…) to the end of the trimmed text'),
       '#type' => 'checkbox',
       '#default_value' => $settings['ellipsis'],
-      '#description' => t('Add an ellipsis (...) to the end of the trimmed text.'),
       '#states' => array(
         'visible' => array(
           ':input[name$="[settings][word_boundary]"]' => array('checked' => TRUE),
@@ -299,7 +298,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
         $output = _text_sanitize($instance, $langcode, $item, 'value');
         if ($display['type'] == 'text_trimmed') {
           if ($settings['word_boundary']) {
-            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], TRUE));
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], 1, TRUE));
           }
           else {
             $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);
@@ -320,7 +319,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
         else {
           $output = _text_sanitize($instance, $langcode, $item, 'value');
           if ($settings['word_boundary']) {
-            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], TRUE));
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis'], 1, TRUE));
           }
           else {
             $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);
