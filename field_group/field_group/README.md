@@ -11,6 +11,7 @@ Field groups have unlimited nesting and display control. Note that field_group w
 Available group types:
 
 * Fieldsets
+* [HTML Details](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details)
 * Horizontal tabs
 * Vertical tabs
 * Accordions
