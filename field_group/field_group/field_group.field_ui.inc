@@ -237,7 +237,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#type' => 'submit',
         '#name' => $name . '_group_settings_edit',
         '#value' => t('Configure'),
-        '#attributes' => array('class' => array('field-formatter-settings-edit'), 'alt' => t('Configure')),
+        '#attributes' => array('class' => array('field-formatter-settings-edit button-secondary'), 'alt' => t('Configure')),
         '#op' => 'edit',
         // Do not check errors for the 'Configure' button.
         '#limit_validation_errors' => array(),
