@@ -829,14 +829,13 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
   $form['additional_settings']['field_group'] = array(
     '#type' => 'fieldset',
     '#title' => t('Fieldgroups'),
-    '#description' => t('<p class="fieldgroup-help">Fields can be dragged into groups with unlimited nesting. Each fieldgroup format comes with a configuration form, specific for that format type.<br />Note that some formats come in pair. These types have a html wrapper to nest its fieldgroup children. E.g. Place accordion items into the accordion, vertical tabs in vertical tab group and horizontal tabs in the horizontal tab group. There is one exception to this rule, you can use a vertical tab without a wrapper when the additional settings tabs are available. E.g. node forms.</p>'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#parents' => array('additional_settings'),
   );
   $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
-    '#title' => t('Select source view mode or form'),
-    '#description' => t('Clone fieldgroups from selected view mode to the current display'),
+    '#title' => t('Clone Fieldgroups'),
+    '#description' => t('Select source view mode or form.'),
     '#type' => 'select',
     '#options' => $view_modes,
     '#default_value' => 'none'
@@ -846,6 +845,14 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
     '#value' => t('Clone'),
     '#validate' => array('field_group_field_ui_clone_field_groups_validate'),
     '#submit' => array('field_group_field_ui_clone_field_groups')
+  );
+  $form['additional_settings']['field_group']['help_title'] = array(
+    '#type' => 'item',
+    '#title' => t('Configuring fieldgroups'),
+  );
+  $form['additional_settings']['field_group']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<p>Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type.</p><p>Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place accordion items into the accordion; vertical tabs into the vertical tab group; and horizontal tabs into the horizontal tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.</p>'),
   );
 
 }
