@@ -13,6 +13,11 @@ Backdrop.FieldGroup.setGroupWithfocus = function(element) {
   Backdrop.FieldGroup.groupWithfocus = element;
 }
 
+Backdrop.FieldGroup.setDetailsWithfocus = function(element) {
+  element.attr('open', 'TRUE');
+  Backdrop.FieldGroup.groupWithfocus = element;
+}
+
 /**
  * Implements Backdrop.FieldGroup.processHook().
  */
@@ -27,6 +32,26 @@ Backdrop.FieldGroup.Effects.processFieldset = {
         if ($('.error', $(this)).length) {
           $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
           Backdrop.FieldGroup.setGroupWithfocus($(this));
+        }
+      });
+    }
+  }
+}
+
+/**
+ * Implements Backdrop.FieldGroup.processHook().
+ */
+ Backdrop.FieldGroup.Effects.processDetails = {
+  execute: function (context, settings, type) {
+    if (type == 'form') {
+      // Add required fields mark to any details containing required fields
+      $('details', context).once('fieldgroup-effects', function(i) {
+        if ($(this).is('.required-fields') && $(this).find('.form-required').length > 0) {
+          $('summary span', $(this)).eq(0).append(' ').append($('.form-required').eq(0).clone());
+        }
+        if ($('.error', $(this)).length) {
+          $('summary span', $(this)).eq(0).addClass('error');
+          Backdrop.FieldGroup.setDetailsWithfocus($(this));
         }
       });
     }

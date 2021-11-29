@@ -30,15 +30,15 @@ This project is GPL v2 software. See the LICENSE.txt file in this directory for 
 Maintainers
 -----------
 
-Herb v/d Dool (https://github.com/herbdool)
+[Herb v/d Dool](https://github.com/herbdool)
 
 Credit
 ------
 
 Drupal 7 version:
 
-* stalski - http://drupal.org/user/322618
-* swentel - http://drupal.org/user/107403
-* zuuperman - http://drupal.org/user/361625
+* [stalski](http://drupal.org/user/322618)
+* [swentel](http://drupal.org/user/107403)
+* [zuuperman](http://drupal.org/user/361625)
 
-Ported to Backdrop CMS by Herb v/d Dool (https://github.com/herbdool).
+Ported to Backdrop CMS by [Herb v/d Dool](https://github.com/herbdool).
