@@ -22,7 +22,7 @@ function theme_color_preview($variables) {
 
   $output  = '<div class="color-preview">';
   $output .= $preview_link;
-  $output .= '<object id="preview" data="' . $variables['preview_url'] . '"></iframe>';
+  $output .= '<object id="preview" data="' . $variables['preview_url'] . '"></object>';
   $output .= '</div>';
 
   return $output;

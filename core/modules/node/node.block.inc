@@ -8,6 +8,10 @@ class NodeBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Existing content');
   }
 
@@ -15,6 +19,10 @@ class NodeBlock extends Block {
    * Returns a preview for this block.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
   }
 

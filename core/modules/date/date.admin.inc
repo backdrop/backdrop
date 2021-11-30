@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Date administration code.
+ * Admin page callbacks for the Date module.
  */
 
 /**
@@ -400,7 +400,7 @@ function _date_field_widget_settings_form($field, $instance) {
       'within' => t('Within'),
       'none' => t('None'),
     );
-    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day' . 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
+    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day'. 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
   }
   else {
     $options = array(

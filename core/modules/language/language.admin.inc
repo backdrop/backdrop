@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administration functions for language.module.
+ * Admin page callbacks for the Language module.
  */
 
 /**
@@ -28,13 +27,19 @@ function language_admin_overview_form($form, &$form_state) {
   );
 
   foreach ($languages as $langcode => $language) {
+    if (isset($language->native)) {
+      $language_name = $language->name . ' (' . $language->native . ')';
+    }
+    else {
+      $language_name = $language->name;
+    }
     $form['languages'][$langcode]['#weight'] = $language->weight;
     $form['languages'][$langcode]['name'] = array(
-      '#markup' => check_plain($language->name),
+      '#markup' => check_plain($language_name),
     );
     $form['languages'][$langcode]['enabled'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enable @title', array('@title' => $language->name)),
+      '#title' => t('Enable @title', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#default_value' => (int) $language->enabled,
       '#disabled' => $langcode == $default->langcode,
@@ -42,7 +47,7 @@ function language_admin_overview_form($form, &$form_state) {
     $form['languages'][$langcode]['default'] = array(
       '#type' => 'radio',
       '#parents' => array('site_default'),
-      '#title' => t('Set @title as default', array('@title' => $language->name)),
+      '#title' => t('Set @title as default', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#return_value' => $langcode,
       '#default_value' => ($langcode == $default->langcode ? $langcode : NULL),
@@ -50,7 +55,7 @@ function language_admin_overview_form($form, &$form_state) {
     );
     $form['languages'][$langcode]['weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $language->name)),
+      '#title' => t('Weight for @title', array('@title' => $language_name)),
       '#title_display' => 'invisible',
       '#default_value' => $language->weight,
       '#attributes' => array(
@@ -208,9 +213,16 @@ function _language_admin_common_controls(&$form, $language = NULL) {
   }
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Language name'),
+    '#title' => t('Language name in English'),
     '#maxlength' => 64,
     '#default_value' => @$language->name,
+    '#required' => TRUE,
+  );
+  $form['native'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Native language name'),
+    '#maxlength' => 64,
+    '#default_value' => isset($language->native) ? $language->native : '',
     '#required' => TRUE,
   );
   $form['direction'] = array(
@@ -267,6 +279,7 @@ function language_admin_add_custom_form_submit($form, &$form_state) {
   $language = (object) array(
     'langcode' => $langcode,
     'name' => $form_state['values']['name'],
+    'native' => $form_state['values']['native'],
     'direction' => $form_state['values']['direction'],
   );
   language_save($language);
@@ -301,6 +314,9 @@ function language_admin_edit_form_validate($form, &$form_state) {
   if ($form_state['values']['name'] != check_plain($form_state['values']['name'])) {
     form_set_error('name', t('%field cannot contain any markup.', array('%field' => $form['name']['#title'])));
   }
+  if ($form_state['values']['native'] != check_plain($form_state['values']['native'])) {
+    form_set_error('native', t('%field cannot contain any markup.', array('%field' => $form['native']['#title'])));
+  }
 }
 
 /**
@@ -312,6 +328,7 @@ function language_admin_edit_form_submit($form, &$form_state) {
   $langcode = $form_state['values']['langcode'];
   $language = $languages[$langcode];
   $language->name = $form_state['values']['name'];
+  $language->native = $form_state['values']['native'];
   $language->direction = $form_state['values']['direction'];
   language_save($language);
   // Display status messages for this form.

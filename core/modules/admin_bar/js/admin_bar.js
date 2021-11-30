@@ -411,12 +411,14 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
-    if (show) {
-      $adminBar.find('.active-search-item').removeClass('active-search-item');
-      $(this).addClass('active-search-item');
-    }
-    else {
+    $adminBar.find('.active-search-item').each(function () {
       $(this).removeClass('active-search-item');
+      if ($(this).is('[class=""]')) {
+        $(this).removeAttr('class');
+      }
+    });
+    if (show) {
+      $this.addClass('active-search-item');
     }
     $this.trigger(show ? 'showPath' : 'hidePath', [this]);
   }

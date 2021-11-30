@@ -14,7 +14,7 @@ class CoreUpdater extends Updater {
    * Return the Backdrop core directory.
    */
   public function getInstallDirectory() {
-    return BACKDROP_ROOT;
+    return realpath(BACKDROP_ROOT);
   }
 
   public function isInstalled() {
@@ -80,7 +80,7 @@ class ModuleUpdater extends Updater {
     else {
       $relative_path = 'modules';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {
@@ -149,7 +149,7 @@ class ThemeUpdater extends Updater {
     else {
       $relative_path = 'themes';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {
@@ -205,7 +205,7 @@ class LayoutUpdater extends Updater {
     else {
       $relative_path = 'layouts';
     }
-    return BACKDROP_ROOT . '/' . $relative_path;
+    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
   }
 
   public function isInstalled() {

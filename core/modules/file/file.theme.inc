@@ -339,8 +339,13 @@ function theme_file_formatter_table($variables) {
  * Returns HTML for the file type overview page.
  *
  * Specifically, this returns HTML for a file type name and description.
+ *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
  */
 function theme_file_type_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   return check_plain($variables['name']) . '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 }
 
@@ -417,7 +422,7 @@ function theme_file_download_link($variables) {
   $variables['text'] = token_replace($variables['text'], array('file' => $file), array('clear' => TRUE, 'sanitize' => !empty($uri['options']['html'])));
 
   $output = '<span class="file">' . $icon . ' ' . l($variables['text'], $uri['path'], $uri['options']);
-  $output .= ' ' . '<span class="file-size">(' . format_size($file->filesize) . ')</span>';
+  $output .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span>';
   $output .= '</span>';
 
   return $output;
