@@ -321,7 +321,7 @@ function field_group_field_group_formatter_info() {
         'label' => t('Details'),
         'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => '', 'label_element' => 'span'),
         'default_formatter' => 'closed',
       ),
       'tabs' => array(
@@ -590,6 +590,13 @@ function field_group_field_group_format_settings($group) {
       break;
     case 'details':
       $form['label']['#description'] = t('Please enter a label for the summary');
+      $form['instance_settings']['label_element'] = array(
+        '#title' => t('Label element'),
+        '#type' => 'select',
+        '#options' => array('span' => t('Span'), 'strong' => t('Strong'),  'em' => t('Emphasis'), 'h2' => t('Header 2'), 'h3' => t('Header 3')),
+        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#weight' => 2,
+      );
       break;
     case 'multipage-group':
       $form['instance_settings']['page_header'] = array(
@@ -724,9 +731,10 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
  * @param $form The root element or form.
  */
 function field_group_pre_render_details(&$element, $group, &$form) {
+  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'span';
   $element += array(
     '#type' => 'details',
-    '#summary' => check_plain(t($group->label)),
+    '#summary' => '<' . $label_element . '>' . check_plain(t($group->label)) . '</' . $label_element . '>',
     '#attributes' => array('class' => explode(' ', $group->classes)),
     '#details' => $group->description,
   );
