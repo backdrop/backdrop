@@ -263,7 +263,7 @@ class GroupDisplayTestCase extends GroupTestCase {
 
     // Test group ids and classes.
     $this->assertFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Wrapper id set on wrapper div'));
-    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Test class set on wrapper div') . 'class="' . $group->group_name . ' test-class');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, t('Test class set on wrapper div') . ' class="' . $group->group_name . ' test-class');
 
     // Test group label.
     $this->assertNoRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is not shown'));
@@ -509,6 +509,54 @@ class GroupDisplayTestCase extends GroupTestCase {
     // Test if correctly nested
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]", NULL, 'First item is displayed as child of the wrapper.');
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]", NULL, 'Second item is displayed as child of the wrapper.');
+  }
+
+  /**
+   * Test the details formatter.
+   */
+  function testDetails() {
+
+    $data = array(
+      'label' => 'Wrapper',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'details',
+      'format_settings' => array(
+        'label' => 'Link',
+        'instance_settings' => array(
+          'required_fields' => 0,
+          'id' => 'detail-id',
+          'classes' => 'test-class',
+          'description' => 'description of details',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $group = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test group ids and classes.
+    $this->assertFieldByXPath("//details[contains(@id, 'detail-id')]", NULL, t('Detail id set on detail'));
+    $this->assertFieldByXPath("//details[contains(@class, 'test-class')]", NULL, t('Test class set on details') . ' class="' . $group->group_name . ' test-class');
+
+    // Test group label.
+    $this->assertRaw('<summary><span>' . $data['label'] . '</span></summary>', t('Label is shown'));
+    $this->assertRaw('<div class="details-content-wrapper">description of details</div>', t('Description of details is shown'));
+
+    $this->assertFieldByXPath("//details[contains(@open, '1')]", NULL, t('Open attribute is set'));
+
+    // Change to closed
+    $group->format_settings['formatter'] = 'closed';
+
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    $this->assertNoFieldByXPath("//details[contains(@open, '1')]", NULL, t('Open attribute is not set'));
   }
 
 }
