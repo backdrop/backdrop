@@ -227,7 +227,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
           $element['#title'] = t('!title', array('!title' => $title));
         }
         else {
-          $element['#title'] = t('!title (value @number)', array('@number' => $delta + 1, '!title' => $title));
+          $element['#title'] = t('!title (value @number)', array('!title' => $title, '@number' => $delta + 1));
         }
         $element['#title_display'] = 'invisible';
         $element['#description'] = '';
