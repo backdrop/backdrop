@@ -526,7 +526,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     );
     $form['region_names']['region_' . $i]['classes'] = array(
       '#type' => 'textfield',
-      '#title' => t('Additional classes'),
+      '#title' => t('Additional CSS classes'),
       '#description' => t('Define multiples classes separated by spaces.'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
     );
@@ -534,7 +534,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_styles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Style'),
+    '#title' => t('Row Style'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
   );
@@ -570,7 +570,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   $form['region_styles']['container']['no_container']['#description'] = t('No container-related classes added to the row (e.g. for Hero blocks).');
 
   $form['region_styles']['row_classes'] = array(
-    '#title' => t('Additional row classes'),
+    '#title' => t('Additional row CSS classes'),
     '#type' => 'textfield',
     '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
   );
