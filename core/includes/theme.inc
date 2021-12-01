@@ -2376,6 +2376,10 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - empty: A message to display when there are no items. Allowed value is a
+ *     string or render array.
+ *
+ * @since 1.21.0: added the "empty" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2434,6 +2438,9 @@ function theme_item_list($variables) {
       $output .= '<li' . backdrop_attributes($attributes) . '>' . $value . '</li>';
     }
     $output .= "</$type>";
+  }
+  elseif (!empty($variables['empty'])) {
+    $output .= render($variables['empty']);
   }
 
   // Only output the list container and title, if there are any list items.
