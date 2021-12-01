@@ -1791,20 +1791,6 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('node/add');
     $this->assertRaw('core/themes/stark', 'Site default theme used on the add content page.');
 
-    // Reset to the default theme settings.
-    config_set('system.core', 'theme_default', 'basis');
-    $edit = array(
-      'admin_theme' => '0',
-      'node_admin_theme' => FALSE,
-    );
-    $this->backdropPost('admin/appearance', $edit, t('Save configuration'));
-
-    $this->backdropGet('admin');
-    $this->assertRaw('core/themes/basis', 'Site default theme used on administration page.');
-
-    $this->backdropGet('node/add');
-    $this->assertRaw('core/themes/basis', 'Site default theme used on the add content page.');
-
     // Check that Stark does not show up on the Appearance page.
     $this->backdropGet('admin/appearance');
     $this->assertNoText('Stark', 'Stark theme not shown on appearance page.');
@@ -1836,6 +1822,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    */
   function testThemeSettings() {
     theme_enable(array('basis'));
+    module_enable(array('color'));
     // Change Basis settings so config file is created.
     $edit = array();
     $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));

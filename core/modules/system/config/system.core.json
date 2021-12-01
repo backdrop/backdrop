@@ -49,6 +49,7 @@
     "maintenance_page_maximum_age": 10,
     "maintenance_theme": null,
     "menu_route_handler": null,
+    "messages_dismissible": 1,
     "node_admin_theme": "",
     "page_cache_maximum_age": 300,
     "page_cache_background_fetch": 1,
