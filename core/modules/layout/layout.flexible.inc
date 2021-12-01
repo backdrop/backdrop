@@ -505,30 +505,21 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
       '#title' => t('Region name'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_name']) ? $row_data['region_names']['region_' . $i]['region_name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
-    $form['region_names']['region_' . $i]['class_name'] = array(
-      '#type' => 'machine_name',
-      '#description' => t('A machine name to be used as the CSS class. It must only contain lowercase letters, numbers and hyphens.'),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['class_name']) ? $row_data['region_names']['region_' . $i]['class_name'] : '',
-      '#maxlength' => 255,
-      '#field_prefix' => '<span dir="ltr">region-',
-      '#field_suffix' => '</span>&lrm;',
-      '#size' => 15,
-      '#disabled' => FALSE,
-      '#machine_name' => array(
-        'exists' => '_layout_flexible_template_region_class_name_exists',
-        'source' => array('region_names', 'region_' . $i, 'region_name'),
-        'standalone' => TRUE,
-        'label' => t('CSS class'),
-        'replace_pattern' => '[^a-z0-9-]+',
-        'replace' => '-',
-        '#required' => FALSE,
-      ),
+    $form['region_names']['region_' . $i]['region_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create CSS classes'),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_class_enable']) ? $row_data['region_names']['region_' . $i]['region_class_enable'] : 0,
     );
     $form['region_names']['region_' . $i]['classes'] = array(
       '#type' => 'textfield',
-      '#title' => t('Additional CSS classes'),
+      '#title' => t('CSS classes'),
       '#description' => t('Define multiples classes separated by spaces.'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="region_names[region_' . $i . '][region_class_enable]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
   }
 
@@ -604,26 +595,6 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   );
 
   return $form;
-}
-
-/**
- * Callback: Check if machine_name is unique.
- *
- * Even though callback is required for the Form API machine_name field type,
- * the region classes are not required to be unique. It will accept any
- * machine_name.
- *
- * @param $machine_name
- *   The machine (class) name.
- *
- * @return
- *   Whether or not the class name is taken.
- *
- * @see layout_flexible_template_edit_row_form()
- * @see form_validate_machine_name()
- */
-function _layout_flexible_template_region_class_name_exists($machine_name) {
-  return FALSE;
 }
 
 /**

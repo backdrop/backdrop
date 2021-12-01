@@ -352,9 +352,7 @@ function layout_preprocess_layout(&$variables) {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
           $region_name = $row['region_names']['region_0']['region_name'];
-          $class_name = isset($row['region_names']['region_0']['class_name']) ? $row['region_names']['region_0']['class_name'] : backdrop_html_class($row['region_names']['region_0']['region_name']);
-          $classes = isset($row['region_names']['region_0']['classes']) ? ' ' . $row['region_names']['region_0']['classes'] : '';
-          $region_classes .= 'region-' . $class_name . $classes;
+          $region_classes .= isset($row['region_names']['region_0']['classes']) && !empty($row['region_names']['region_0']['region_class_enable']) ? $row['region_names']['region_0']['classes'] : '';
         }
         else {
           $region_name = $name;
@@ -373,9 +371,7 @@ function layout_preprocess_layout(&$variables) {
           $region_classes = '';
           if (!empty($row['region_names']['region_' . $i])) {
             $region_name = $row['region_names']['region_' . $i]['region_name'];
-            $class_name = isset($row['region_names']['region_' . $i]['class_name']) ? $row['region_names']['region_' . $i]['class_name'] : backdrop_html_class($row['region_names']['region_' . $i]['region_name']);
-            $classes = isset($row['region_names']['region_' . $i]['classes']) ? ' ' .$row['region_names']['region_' . $i]['classes'] : '';
-            $region_classes = 'region-' . $class_name . $classes;
+            $region_classes .= isset($row['region_names']['region_' . $i]['classes']) && !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $row['region_names']['region_' . $i]['classes'] : '';
           }
           else {
             $region_name = $name . ' ' . $i;
