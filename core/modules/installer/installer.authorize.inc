@@ -228,10 +228,36 @@ function installer_authorize_update_batch_finished($success, $results) {
       'type' => 'error',
     );
   }
-  // Since we're doing an update of existing code, always add a task for
-  // running update.php.
   $results['tasks'][] = t('Your projects have been downloaded and updated.');
-  $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  $updates_needed = FALSE;
+  include_once(BACKDROP_ROOT . '/core/includes/install.inc');
+  foreach (module_list() as $module) {
+    $updates = backdrop_get_schema_versions($module);
+    if ($updates !== FALSE) {
+      $current_schema = backdrop_get_installed_schema_version($module);
+      $latest_schema = end($updates);
+      if ($current_schema < $latest_schema) {
+        $updates_needed = TRUE;
+        break;
+      }
+    }
+  }
+  // Only add a task for running update.php if it is actually needed.
+  if ($updates_needed) {
+    $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  } else {
+    $results['tasks'][] = t('No database updates are required.');
+    $results['tasks'][] = l(t('Home page'), '<front>');
+    if (module_exists('dashboard') && user_access('access dashboard')) {
+      $results['tasks'][] = l(t('Dashboard'), 'admin/dashboard');
+    }
+    elseif (user_access('access administration pages')) {
+      $results['tasks'][] = l(t('Administration pages'), 'admin');
+    }
+    if (user_access('administer site configuration')) {
+      $results['tasks'][] = l(t('Status report'), 'admin/reports/status');
+    }
+  }
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);
