@@ -3159,7 +3159,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the block add page.');
 
     // Check that header region class has changed.
-    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-new-header-new'));
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'new-header-new'));
     $this->assertEqual(count($rows), 1, 'The header region class has been renamed in the block add page.');
 
     // Go to the layout path and check that the header region was renamed and
