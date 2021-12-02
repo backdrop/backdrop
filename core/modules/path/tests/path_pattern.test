@@ -544,7 +544,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'path[alias]' => $manual_alias,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $this->assertText("Page '$expected_title' has been updated.");
+    $this->assertText("Page $expected_title has been updated.");
 
     // Check that the automatic URL alias checkbox is now unchecked by default.
     $this->backdropGet("node/{$node->nid}/edit");
@@ -553,7 +553,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Submit the node form with the default values.
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText("Page '$expected_title' has been updated.");
+    $this->assertText("Page $expected_title has been updated.");
 
     // Test that the old (automatic) URL alias has been deleted and only accessible
     // through the new (manual) alias.
