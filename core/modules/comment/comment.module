@@ -2153,8 +2153,9 @@ function comment_submit($comment) {
     $comment->name = config_get('system.core', 'anonymous');
   }
 
-  // Validate the comment's subject. If not specified, extract from comment body.
-  if (trim($comment->subject) == '') {
+  // Validate the comment's subject. If not specified, extract from comment
+  // body.
+  if ($comment->subject == '') {
     // The body may be in any format, so:
     // 1) Filter it into HTML
     // 2) Strip out all HTML tags
@@ -2172,7 +2173,7 @@ function comment_submit($comment) {
     $comment->subject = truncate_utf8(trim(decode_entities(strip_tags($comment_text))), 29, TRUE);
     // Edge cases where the comment body is populated only by HTML tags will
     // require a default subject.
-    if (trim($comment->subject) == '') {
+    if ($comment->subject === '') {
       $comment->subject = t('(No subject)');
     }
   }
