@@ -228,7 +228,6 @@ function installer_authorize_update_batch_finished($success, $results) {
       'type' => 'error',
     );
   }
-  $results['tasks'][] = t('Your projects have been downloaded and updated.');
   $updates_needed = FALSE;
   include_once(BACKDROP_ROOT . '/core/includes/install.inc');
   foreach (module_list() as $module) {
