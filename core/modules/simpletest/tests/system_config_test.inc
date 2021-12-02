@@ -51,7 +51,7 @@ class SystemConfigFormCase extends BackdropWebTestCase {
     $this->assertTrue($valid_form, t('Input values: %values<br/>Validation handler errors: %errors', $args));
 
     foreach ($this->values as $form_key => $data) {
-      $this->assertEqual($data['#value'], config($data['#config_name'])->get($data['#config_key']));
+      $this->assertEqual(trim($data['#value']), config($data['#config_name'])->get($data['#config_key']));
     }
   }
 }
