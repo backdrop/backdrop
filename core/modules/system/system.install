@@ -3226,7 +3226,7 @@ function system_update_1077() {
  * if Basis and/or Seven are set as themes or sub-themes.
  */
 function system_update_1078() {
-  config_set('layout.settings', 'use_layout_contextual_links', TRUE);
+  config_set('layout.settings', 'use_layout_contextual_links', FALSE);
   config_set('layout.settings', 'include_theme_contextual_links', TRUE);
 
   $contrib_config = config('layout_contextual_links.settings');
