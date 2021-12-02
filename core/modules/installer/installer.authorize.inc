@@ -244,18 +244,10 @@ function installer_authorize_update_batch_finished($success, $results) {
   // Only add a task for running update.php if it is actually needed.
   if ($updates_needed) {
     $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
-  } else {
-    $results['tasks'][] = t('No database updates are required.');
-    $results['tasks'][] = l(t('Home page'), '<front>');
-    if (module_exists('dashboard') && user_access('access dashboard')) {
-      $results['tasks'][] = l(t('Dashboard'), 'admin/dashboard');
-    }
-    elseif (user_access('access administration pages')) {
-      $results['tasks'][] = l(t('Administration pages'), 'admin');
-    }
-    if (user_access('administer site configuration')) {
-      $results['tasks'][] = l(t('Status report'), 'admin/reports/status');
-    }
+  }
+  elseif ($success) {
+    backdrop_set_message($page_message['message'], $page_message['type']);
+    backdrop_goto('admin/config/system/updates');
   }
 
   // Unset the variable since it is no longer needed.
