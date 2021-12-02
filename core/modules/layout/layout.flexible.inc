@@ -497,12 +497,11 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
     $form['region_names']['region_' . $i] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Region') . ' ' . ($i + 1),
+      '#type' => 'container',
     );
     $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Region name'),
+      '#title' => t('Region name') . ' ' . ($i + 1),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_name']) ? $row_data['region_names']['region_' . $i]['region_name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
     $form['region_names']['region_' . $i]['region_class_enable'] = array(
