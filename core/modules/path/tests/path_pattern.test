@@ -512,7 +512,9 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $title = ' Testing: node title [';
     $automatic_alias = 'content/testing-node-title';
     $this->backdropPost(NULL, array('title' => $title), 'Save');
-    $node = $this->backdropGetNodeByTitle($title);
+    // Leading/trailing spaces are automatically trimmed from text input fields.
+    $expected_title = trim($title);
+    $node = $this->backdropGetNodeByTitle($expected_title);
 
     // Look for URL alias generated in the form.
     $this->backdropGet("node/{$node->nid}/edit");
@@ -521,7 +523,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Check whether the URL alias actually works.
     $this->backdropGet($automatic_alias);
-    $this->assertText($title, 'Node accessible through automatic alias.');
+    $this->assertText($expected_title, 'Node accessible through automatic alias.');
 
     // Disable the update action. The checkbox should not be visible.
     $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
@@ -542,7 +544,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       'path[alias]' => $manual_alias,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $this->assertText("Page $title has been updated.");
+    $this->assertText("Page '$expected_title' has been updated.");
 
     // Check that the automatic URL alias checkbox is now unchecked by default.
     $this->backdropGet("node/{$node->nid}/edit");
@@ -551,14 +553,14 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Submit the node form with the default values.
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText("Page $title has been updated.");
+    $this->assertText("Page '$expected_title' has been updated.");
 
     // Test that the old (automatic) URL alias has been deleted and only accessible
     // through the new (manual) alias.
     $this->backdropGet($automatic_alias);
     $this->assertResponse(404, 'Node not accessible through automatic alias.');
     $this->backdropGet($manual_alias);
-    $this->assertText($title, 'Node accessible through manual alias.');
+    $this->assertText($expected_title, 'Node accessible through manual alias.');
 
     // Now attempt to create a node that has no pattern (post content type).
     // The automatic URL alias checkbox should not exist.
