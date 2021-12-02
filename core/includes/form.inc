@@ -4594,7 +4594,12 @@ function form_validate_number(&$element, &$form_state) {
     $offset = isset($element['#min']) ? $element['#min'] : 0.0;
 
     if (!valid_number_step($value, $element['#step'], $offset)) {
-      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+      $number_of_digits = strlen(substr($element['#step'], strpos($element['#step'], '.') + 1));
+      if ($number_of_digits == 0) {
+        form_error($element, t('%name is configured to accept no decimals.', array('%name' => $name)));
+      } else {
+        form_error($element, t('%name is configured to accept up to @digits decimal @digit_label.', array('%name' => $name, '@digits' => $number_of_digits, '@digit_label' => format_plural($number_of_digits, 'place', 'places'))));
+      }
     }
   }
 }
