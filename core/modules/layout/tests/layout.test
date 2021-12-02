@@ -3142,6 +3142,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $edit = array(
       'region_names[region_0][region_name]' => 'New header',
       'region_names[region_0][classes]' => 'new-header-new',
+      'region_names[region_0][region_enable_class]' => 1,
       'row_classes' => 'new-class another-class',
       'element' => 'main',
       'container' => 'no_container',
