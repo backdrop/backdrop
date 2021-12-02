@@ -473,7 +473,7 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
   $more = array('class', 'target', 'id', 'title', 'rel', 'data-file-id');
   foreach ($more as $attribute) {
     if (isset($form_state['values']['attributes'][$attribute])) {
-      $value = trim($form_state['values']['attributes'][$attribute]);
+      $value = $form_state['values']['attributes'][$attribute];
       if (strlen($value) === 0 || ($attribute === 'target' && empty($value))) {
         unset($form_state['values']['attributes'][$attribute]);
       }
@@ -528,7 +528,7 @@ function filter_format_editor_dialog_save($form, &$form_state) {
  * @see filter_format_editor_image_form()
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
-  $value = trim($element['#value']);
+  $value = $element['#value'];
 
   // Allow empty values, since this will not result in a link tag anyway.
   if ($value === '') {

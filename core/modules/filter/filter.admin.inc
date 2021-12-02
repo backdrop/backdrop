@@ -625,8 +625,8 @@ function filter_admin_format_filter_settings_ajax($form, &$form_state) {
  * @see filter_admin_format_form_submit()
  */
 function filter_admin_format_form_validate($form, &$form_state) {
-  $format_format = trim($form_state['values']['format']);
-  $format_name = trim($form_state['values']['name']);
+  $format_format = $form_state['values']['format'];
+  $format_name = $form_state['values']['name'];
 
   // Ensure that the values to be saved later are exactly the ones validated.
   form_set_value($form['format'], $format_format, $form_state);
