@@ -1,4 +1,11 @@
+/**
+ * @file
+ * Styles for administration pages.
+ */
 
+/**
+ * Taxonomy term form.
+ */
 .taxonomy-term-preview {
   background-color: #eee;
 }
@@ -10,4 +17,17 @@
 }
 .taxonomy-term-description {
   margin: 5px 0 20px;
+}
+
+/**
+ * Vocabulary listing page.
+ */
+.vocabulary-name .vocabulary-label {
+  font-weight: bold;
+}
+.vocabulary-name .vocabulary-machine-name {
+  font-size: smaller;
+}
+.vocabulary-term-count {
+  text-align: right;
 }

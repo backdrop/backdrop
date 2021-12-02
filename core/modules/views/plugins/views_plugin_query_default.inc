@@ -117,7 +117,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid', $options) {
+  function init($base_table, $base_field, $options) {
     parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;

@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.19.x-dev');
+define('BACKDROP_VERSION', '1.21.x-dev');
 
 /**
  * Core API compatibility.
@@ -1742,9 +1742,16 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-  if ($if_modified_since && $if_none_match
-      && $if_none_match == $etag // etag must match
-      && $if_modified_since == $cache->created) {  // if-modified-since must match
+  // Handle an exact match based on Etag. The If-None-Match header takes full
+  // precedence over If-Modified-Since header.
+  if ($if_none_match == $etag) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+    backdrop_send_headers($default_headers);
+    return;
+  }
+
+  // Handle a loose match based on date only, if no Etag was provided.
+  if (!$if_none_match && $if_modified_since && $if_modified_since >= $cache->created) {
     header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
     backdrop_send_headers($default_headers);
     return;
@@ -2296,7 +2303,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
-  if (!$in_error_state && function_exists('module_implements')) {
+  if (!$in_error_state && function_exists('module_invoke_all')) {
     $in_error_state = TRUE;
 
     // The user object may not exist in all conditions, so 0 is substituted if needed.
@@ -2319,9 +2326,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     );
 
     // Call the logging hooks to log/process the message
-    foreach (module_implements('watchdog') as $module) {
-      module_invoke($module, 'watchdog', $log_entry);
-    }
+    module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
     // watchdog() call (not outside the loop), to prevent recursive execution.
@@ -2941,9 +2946,9 @@ function backdrop_get_user_timezone() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler($error_level, $message, $filename, $line) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-  _backdrop_error_handler_real($error_level, $message, $filename, $line, $context);
+  _backdrop_error_handler_real($error_level, $message, $filename, $line);
 }
 
 /**
