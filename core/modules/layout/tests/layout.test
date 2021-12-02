@@ -3132,10 +3132,6 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
     $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
 
-    // Check the header region class.
-    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-header'));
-    $this->assertEqual(count($rows), 1, 'The header region class is correct.');
-
     // Edit the header row and check that the changes are reflected on the
     // template editor page and the layout path.
     $this->clickLink(t('Configure'), 0);
