@@ -2133,7 +2133,11 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
       // be explicitly distinguished from missing input. (see below)
       $input_exists = NULL;
       $input = backdrop_array_get_nested_value($form_state['input'], $element['#parents'], $input_exists);
-      if (!empty($element['#trim'])) {
+      // Trim any leading/trailing whitespace from text input fields, unless
+      // their default '#trim' property has been overridden. To see which types
+      // of input elements are being trimmed by default, see
+      // system_element_info().
+      if (isset($element['#trim']) && $element['#trim'] != FALSE) {
         $input = trim($input);
         // If the trimmed input is empty, ensure that #required and other
         // validation handlers are triggered accordingly.
