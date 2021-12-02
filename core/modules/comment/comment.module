@@ -2155,7 +2155,7 @@ function comment_submit($comment) {
 
   // Validate the comment's subject. If not specified, extract from comment
   // body.
-  if ($comment->subject == '') {
+  if ($comment->subject === '') {
     // The body may be in any format, so:
     // 1) Filter it into HTML
     // 2) Strip out all HTML tags
