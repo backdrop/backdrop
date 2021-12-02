@@ -2255,7 +2255,7 @@ function layout_form_contextual_settings_form_alter(&$form, &$form_state, $form_
   $form['layout']['use_layout_contextual_links'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use contextual links for layout'),
-    '#description' => t('Wrap all layouts in contextual links to configure the layout and/or manage its blocks.'),
+    '#description' => t('Wrap all layouts in contextual links to configure the layout and/or manage its blocks. Warning: this may have unexpected side effects on certain themes.'),
     '#default_value' => $config->get('use_layout_contextual_links'),
   );
   $form['layout']['include_theme_contextual_links'] = array(
@@ -2278,8 +2278,6 @@ function layout_form_contextual_settings_form_alter(&$form, &$form_state, $form_
         ':input[name="use_layout_contextual_links"]' => array('checked' => TRUE),
       ),
     ),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
   );
   $themes = list_themes();
   $theme_default = $themes[config_get('system.core', 'theme_default')]->info['name'];
