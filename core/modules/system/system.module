@@ -289,6 +289,7 @@ function system_element_info() {
   );
   $types['textfield'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
@@ -298,6 +299,7 @@ function system_element_info() {
   );
   $types['tel'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 30,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
@@ -307,6 +309,7 @@ function system_element_info() {
   );
   $types['email'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 60,
     '#maxlength' => EMAIL_MAX_LENGTH,
     '#autocomplete_path' => FALSE,
@@ -317,6 +320,7 @@ function system_element_info() {
   );
   $types['url'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 60,
     '#maxlength' => 255,
     '#autocomplete_path' => FALSE,
@@ -327,6 +331,7 @@ function system_element_info() {
   );
   $types['color'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#process' => array('ajax_process_form'),
     '#element_validate' => array('form_validate_color'),
     '#theme' => 'color',
@@ -334,6 +339,7 @@ function system_element_info() {
   );
   $types['number'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#step' => 1,
     '#process' => array('ajax_process_form'),
     '#element_validate' => array('form_validate_number'),
@@ -342,6 +348,7 @@ function system_element_info() {
   );
   $types['range'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 30,
     '#step' => 1,
     '#min' => 0,
@@ -354,6 +361,7 @@ function system_element_info() {
   );
   $types['search'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#size' => 60,
     '#maxlength' => 128,
     '#autocomplete_path' => FALSE,
@@ -363,6 +371,7 @@ function system_element_info() {
   );
   $types['machine_name'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#default_value' => NULL,
     '#required' => TRUE,
     '#maxlength' => 64,
@@ -392,6 +401,7 @@ function system_element_info() {
   );
   $types['textarea'] = array(
     '#input' => TRUE,
+    '#trim' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
     '#resizable' => TRUE,
