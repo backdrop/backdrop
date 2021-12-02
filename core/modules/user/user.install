@@ -1202,6 +1202,9 @@ function user_update_1015() {
 function user_update_1016() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store User entity records.";
+  if (db_table_exists('cache_entity_user')) {
+    db_drop_table('cache_entity_user');
+  }
   db_create_table('cache_entity_user', $table);
 }
 
