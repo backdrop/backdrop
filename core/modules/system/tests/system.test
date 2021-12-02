@@ -1463,16 +1463,6 @@ class PageTitleFiltering extends BackdropWebTestCase {
   }
 
   /**
-   * Reset page title.
-   */
-  function tearDown() {
-    // Restore the page title.
-    backdrop_set_title($this->saved_title, PASS_THROUGH);
-
-    parent::tearDown();
-  }
-
-  /**
    * Tests the handling of HTML by backdrop_set_title() and backdrop_get_title()
    */
   function testTitleTags() {
@@ -1505,7 +1495,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
    */
   function testTitleXSS() {
     // Set some title with JavaScript and HTML chars to escape.
-    $title = '</title><script type="text/javascript">alert("Title XSS!");</script> & < > " \' ';
+    $title = '</title><script type="text/javascript">alert("Title XSS!");</script> & < > " \'';
     $title_filtered = check_plain($title);
 
     $slogan = '<script type="text/javascript">alert("Slogan XSS!");</script>';
