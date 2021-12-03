@@ -382,7 +382,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
 
-  if (config_get('layout.settings', 'use_layout_contextual_links')) {
+  if (module_exists('contextual') && config_get('layout.settings', 'use_layout_contextual_links')) {
     // Wrap the output in contextual links via the renderer if applicable.
     if (user_access('access contextual links')) {
       $layout = $variables['layout'];
