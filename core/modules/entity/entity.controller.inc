@@ -616,6 +616,14 @@ class DefaultEntityController implements EntityControllerInterface {
     // We don't need duplicate rendering info in entity->content.
     unset($entity->content);
 
+    // If $context['page'] exists it will control how the entity is rendered:
+    // if TRUE the entity will be rendered without its title, so that it can be
+    // embeded in another context. If FALSE the entity will be displayed with
+    // its title in a mode suitable for lists. If unset, the page mode will be
+    // enabled if the current path is the URI of the entity, as returned by
+    // entity_uri().
+    $page = isset($context['page']) ? $context['page'] : NULL;
+
     $build += array(
       // If the entity type provides an implementation, use this instead the
       // generic one.
@@ -625,7 +633,7 @@ class DefaultEntityController implements EntityControllerInterface {
       '#entity' => $entity,
       '#view_mode' => $view_mode,
       '#language' => $langcode,
-      '#page' => isset($context['page']) ? $context['page'] : NULL,
+      '#page' => $page,
     );
     // Allow modules to modify the structured entity.
     backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
