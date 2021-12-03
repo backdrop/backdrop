@@ -3356,6 +3356,13 @@ function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
   // Build the actual file display.
   // @todo Figure out how to clean this crap up.
   $file->content['file'] = file_view_file($file, $view_mode, $langcode);
+  if (isset($file->content['file'])) {
+    if (isset($file->content['file']['#theme']) && !in_array($file->content['file']['#theme'], array('file_link', 'file_download_link'))) {
+      unset($file->content['file']['#file']);
+    }
+    unset($file->content['file']['#view_mode']);
+    unset($file->content['file']['#language']);
+  }
 
   // Build fields content.
   $file->content += field_attach_view('file', $file, $view_mode, $langcode);
