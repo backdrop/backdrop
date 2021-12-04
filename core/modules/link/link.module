@@ -369,11 +369,6 @@ function _link_load($field, $item, $instance) {
  * Prepares the item attributes and URL for storage.
  */
 function _link_process(&$item, $delta, $field, $entity) {
-  // Trim whitespace from URL.
-  if (!empty($item['url'])) {
-    $item['url'] = trim($item['url']);
-  }
-
   // If no attributes are set then make sure $item['attributes'] is an empty
   // array, so $field['attributes'] can override it.
   if (empty($item['attributes'])) {
@@ -400,12 +395,12 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
   if ($item['url'] && !(isset($instance['default_value'][$delta]['url']) && $item['url'] === $instance['default_value'][$delta]['url'] && !$instance['required'])) {
     // Validate the link.
     if ($instance['settings']['validate_url']) {
-      $url_valid = link_validate_url(trim($item['url']));
+      $url_valid = link_validate_url($item['url']);
       if ($url_valid === FALSE) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'link_required',
           'message' => t('The value %value provided for %field is not a valid URL.', array(
-            '%value' => trim($item['url']),
+            '%value' => $item['url'],
             '%field' => $instance['label'],
           )),
           'error_element' => array('url' => TRUE, 'title' => FALSE),
@@ -413,7 +408,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
       }
     }
     // Require a title for the link if necessary.
-    if ($instance['settings']['title'] == 'required' && strlen(trim($item['title'])) == 0) {
+    if ($instance['settings']['title'] == 'required' && strlen($item['title']) == 0) {
       $errors[$field['field_name']][$langcode][$delta][] = array(
         'error' => 'link_required',
         'message' => t('Titles are required for all links.'),
@@ -422,7 +417,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     }
   }
   // Require a link if we have a title.
-  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : NULL) > 0 && strlen(trim($item['url'])) == 0) {
+  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : NULL) > 0 && strlen($item['url']) == 0) {
     $errors[$field['field_name']][$langcode][$delta][] = array(
       'error' => 'link_required',
       'message' => t('You cannot enter a title without a link url.'),
@@ -432,7 +427,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
 
   // In a totally bizzaro case, where URLs and titles are optional but the field
   // is required, ensure there is at least one link.
-  if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && (strlen(trim($item['url'])) !== 0 || strlen(trim($item['title'])) !== 0)) {
+  if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && (strlen($item['url']) !== 0 || strlen($item['title']) !== 0)) {
     $optional_field_found = TRUE;
   }
 
