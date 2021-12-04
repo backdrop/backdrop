@@ -2137,7 +2137,7 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
       // their default '#trim' property has been overridden. To see which types
       // of input elements are being trimmed by default, see
       // system_element_info().
-      if (isset($element['#trim']) && $element['#trim'] != FALSE) {
+      if (isset($element['#trim']) && $element['#trim'] != FALSE && is_string($input)) {
         $input = trim($input);
         // If the trimmed input is empty, ensure that #required and other
         // validation handlers are triggered accordingly.
