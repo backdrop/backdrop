@@ -380,7 +380,38 @@ function layout_preprocess_layout(&$variables) {
       }
       $variables['row_data'][$name] = $row;
     }
+  }
 
+  if (module_exists('contextual') && config_get('layout.settings', 'use_layout_contextual_links')) {
+    // Wrap the output in contextual links via the renderer if applicable.
+    if (user_access('access contextual links')) {
+      $layout = $variables['layout'];
+      $links = array();
+      if (user_access('administer layouts')) {
+        $name = $layout->name;
+        $query = array('destination' => current_path());
+        $links[] = '<div class="info">' . t('Layout: %title', array('%title' => $layout->title)) . '</div>';
+        $links[] = l(t('Manage blocks'), 'admin/structure/layouts/manage/' . $name, array('query' => $query));
+        $links[] = l(t('Configure layout'), 'admin/structure/layouts/manage/' . $name . '/configure', array('query' => $query));
+        if (config_get('layout.settings', 'include_theme_contextual_links')) {
+          global $theme_key;
+          $themes = list_themes();
+          $theme = $themes[$theme_key];
+        $links[] = '<div class="info">' . t('Theme: %title', array('%title' => $theme->info['name'])) . '</div>';
+        $links[] = l(t('Theme settings'), 'admin/appearance/settings/' . $theme_key, array('query' => $query));
+        }
+      }
+      if (!empty($links)) {
+        $variables['renderer']->prefix = '
+          <div class="contextual-links-region contextual-links-region-layout">
+            <div class="contextual-links-wrapper">
+              <ul class="contextual-links">
+                <li>' . implode('</li><li>', $links) . '</li>
+              </ul>
+            </div>' . $variables['renderer']->prefix;
+        $variables['renderer']->suffix = $variables['renderer']->suffix . '</div>';
+      }
+    }
   }
 }
 

@@ -3222,6 +3222,45 @@ function system_update_1077() {
 }
 
 /**
+ * Initialize the layout contextual links settings, including positional shift
+ * if Basis and/or Seven are set as themes or sub-themes.
+ */
+function system_update_1078() {
+  config_set('layout.settings', 'use_layout_contextual_links', FALSE);
+  config_set('layout.settings', 'include_theme_contextual_links', TRUE);
+
+  $contrib_config = config('layout_contextual_links.settings');
+  if ($contrib_config) {
+    config_set('layout.settings', 'default_theme_shift', config_get('layout_contextual_links.settings', 'default_theme_shift'));
+    config_set('layout.settings', 'admin_theme_shift', config_get('layout_contextual_links.settings', 'admin_theme_shift'));
+    module_disable(array('layout_contextual_links'));
+    backdrop_uninstall_modules(array('layout_contextual_links'));
+    return t('The Layout Contextual Links settings have been copied into Backdrop and the module disabled and uninstalled.');
+  }
+  else {
+    $themes = list_themes();
+    $shift_info = array(
+      'theme_default' => 'default_theme_shift',
+      'admin_theme' => 'admin_theme_shift',
+    );
+    foreach ($shift_info as $theme_setting => $layout_setting) {
+      $theme_key = config_get('system.core', $theme_setting);
+      $shift = FALSE;
+      if ($theme_key) {
+        if ($theme_key == 'basis') {
+          $shift = TRUE;
+        }
+        elseif (isset($themes[$theme_key]->info['base theme'])) {
+          $base_themes = backdrop_find_base_themes($themes, $theme_key);
+          $shift = isset($base_themes['basis']);
+        }
+      }
+      config_set('layout.settings', $layout_setting, $shift);
+    }
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

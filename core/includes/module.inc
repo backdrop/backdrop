@@ -1009,6 +1009,7 @@ function backdrop_merged_modules() {
     'options_element', // Backdrop 1.12.0.
     'field_formatter_settings', // Backdrop 1.13.0.
     'imagecache_token', // Backdrop 1.17.0.
+    'layout_contextual_links', // Backdrop 1.21.0.
   );
 }
 
