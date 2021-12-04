@@ -1064,7 +1064,9 @@ function search_box($form, &$form_state, $form_id) {
     '#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => '',
-    '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+    '#required' => TRUE,
+    '#required_error' => t('Please enter some keywords in the search field.'),
+    '#attributes' => array('title' => t('Enter the keywords you wish to search for.')),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
@@ -1083,16 +1085,6 @@ function search_box_form_submit($form, &$form_state) {
   // (see http://drupal.org/node/292565).
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
-  }
-
-  // Check to see if the form was submitted empty.
-  // If it is empty, display an error message.
-  // (This method is used instead of setting #required to TRUE for this field
-  // because that results in a confusing error message.  It would say a plain
-  // "field is required" because the search keywords field has no title.
-  // The error message would also complain about a missing #title field.)
-  if ($form_state['values']['search_block_form'] == '') {
-    form_set_error('keys', t('Please enter some keywords.'));
   }
 
   $form_id = $form['form_id']['#value'];
