@@ -10,6 +10,12 @@ description = Test text_summary() with different strings and lengths.
 group = Field types
 file = text.test
 
+[TrimOnWordBoundaryTestCase]
+name = Trim on word boundary
+description = Test trimming strings on word boundary.
+group = Field types
+file = text.test
+
 [TextTranslationTestCase]
 name = Text translation
 description = Check if the text field is correctly prepared for translation.

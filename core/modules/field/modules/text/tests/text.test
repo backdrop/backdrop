@@ -260,6 +260,11 @@ class TextSummaryTestCase extends BackdropWebTestCase {
                 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.';
     // First three sentences add up to: 336, so add one for space and then 3 to get half-way into next word.
     $this->assertTextSummary($text, $expected, NULL, 340);
+
+    // Test what happens part-way through a word when there's no period
+    // (full-stop) nearby.
+    $expected = 'Lorem ipsum dolor sit amet, consectetur adip';
+    $this->assertTextSummary($text, $expected, NULL, 44);
   }
 
   /**
@@ -386,6 +391,36 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
     $this->assertIdentical($node->body['und'][0]['summary'], $summary, 'Post with with summary and no body has been submitted.');
+  }
+}
+
+class TrimOnWordBoundaryTestCase extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp();
+  }
+
+  /**
+   * Test trimming strings on word boundary.
+   */
+  function testWordBoundary() {
+    $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    $expected = 'Lorem ipsum dolor sit amet, consectetur';
+    // 44 characters puts us part-way into the word 'adipisicing'.
+    $this->assertWordBoundary($text, $expected, 44);
+
+    // Test with ellipsis.
+    $expected = 'Lorem ipsum dolor sit amet, consectetur…';
+    $this->assertWordBoundary($text, $expected, 44, TRUE);
+  }
+
+  /**
+   * Calls the functions to trim on word boundary and asserts that the expected
+   * string is returned.
+   * @see text_field_formatter_view()
+   */
+  function assertWordBoundary($text, $expected, $size, $ellipsis = FALSE) {
+    $trimmed = _filter_htmlcorrector(truncate_utf8($text, $size, TRUE, $ellipsis, 1, TRUE));
+    $this->assertIdentical($trimmed, $expected, format_string('Trimmed "@trimmed" matches expected "@expected".', array('@trimmed' => str_replace("\n", '\n', $trimmed), '@expected' => str_replace("\n", '\n', $expected))));
   }
 }
 
