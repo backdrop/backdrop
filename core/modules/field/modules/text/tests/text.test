@@ -403,7 +403,8 @@ class TrimOnWordBoundaryTestCase extends BackdropWebTestCase {
    * Test trimming strings on word boundary.
    */
   function testWordBoundary() {
-    $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+            'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
     $expected = 'Lorem ipsum dolor sit amet, consectetur';
     // 44 characters puts us part-way into the word 'adipisicing'.
     $this->assertWordBoundary($text, $expected, 44);
@@ -411,6 +412,10 @@ class TrimOnWordBoundaryTestCase extends BackdropWebTestCase {
     // Test with ellipsis.
     $expected = 'Lorem ipsum dolor sit amet, consectetur…';
     $this->assertWordBoundary($text, $expected, 44, TRUE);
+
+    // Test near period (full-stop), part-way into 'sint'.
+    $expected = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur';
+    $this->assertWordBoundary($text, $expected, 137);
   }
 
   /**
