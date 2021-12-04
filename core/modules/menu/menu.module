@@ -593,12 +593,11 @@ function menu_node_save(Node $node) {
         menu_link_delete($link['mlid']);
       }
     }
-    elseif (trim($link['link_title'])) {
-      $link['link_title'] = trim($link['link_title']);
+    elseif ($link['link_title']) {
       $link['link_path'] = "node/$node->nid";
       $link['langcode'] = $node->langcode;
-      if (trim($link['description'])) {
-        $link['options']['attributes']['title'] = trim($link['description']);
+      if ($link['description']) {
+        $link['options']['attributes']['title'] = $link['description'];
       }
       else {
         // If the description field was left empty, remove the title attribute
