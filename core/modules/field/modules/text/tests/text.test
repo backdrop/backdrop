@@ -403,7 +403,7 @@ class TrimOnWordBoundaryTestCase extends BackdropWebTestCase {
    * Test trimming strings on word boundary.
    */
   function testWordBoundary() {
-    $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
+    $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' .
             'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
     $expected = 'Lorem ipsum dolor sit amet, consectetur';
     // 44 characters puts us part-way into the word 'adipisicing'.
