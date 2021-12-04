@@ -270,7 +270,7 @@ function path_node_type_form_submit($form, &$form_state) {
   if (isset($form_state['values']['path_pattern'])) {
     $config = config('path.settings');
     $pattern_type  = 'node_' . $form_state['values']['type'] . '_pattern';
-    $pattern = trim($form_state['values']['path_pattern']);
+    $pattern = $form_state['values']['path_pattern'];
     $generic_pattern = $config->get('node_pattern');
     // Don't save the specific pattern if it matches the general pattern.
     if (($pattern !== '') && ($pattern !== $generic_pattern)) {
@@ -330,7 +330,7 @@ function path_taxonomy_form_vocabulary_submit($form, &$form_state) {
   if (isset($form_state['values']['path_pattern'])) {
     $config = config('path.settings');
     $pattern_type  = 'taxonomy_term_' . $form['#vocabulary']->machine_name . '_pattern';
-    $pattern = trim($form_state['values']['path_pattern']);
+    $pattern = $form_state['values']['path_pattern'];
     $generic_pattern = $config->get('taxonomy_term_pattern');
 
     // Don't save the specific pattern if it matches the general pattern.
@@ -445,7 +445,7 @@ function path_entity_insert(Entity $entity) {
   $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
   $uri = $entity->uri();
 
-  // Only generate alais if entity has a uri
+  // Only generate alais if entity has a URI.
   if (!empty($uri)) {
     $path = array();
     if (isset($entity->path)) {
@@ -463,8 +463,8 @@ function path_entity_insert(Entity $entity) {
       'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
     );
 
-    // Trim whitespace and slashes from alias start and end.
-    $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
+    // Trim slashes from alias start and end.
+    $path['alias'] = trim($path['alias'], '/');
 
     // Save an automatic alias if specified.
     if ($path['auto']) {
@@ -502,8 +502,8 @@ function path_entity_update(Entity $entity) {
       'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
     );
 
-    // Trim whitespace and slashes from alias start and end.
-    $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
+    // Trim slashes from alias start and end.
+    $path['alias'] = trim($path['alias'], '/');
 
     // Save an automatic alias if specified.
     if ($path['auto']) {
@@ -615,7 +615,7 @@ function path_get_info() {
 }
 
 /**
- * Load an URL alias pattern by entity, bundle, and language.
+ * Load a URL alias pattern by entity, bundle, and language.
  *
  * @param string $entity_type
  *   An entity type (e.g. node, taxonomy, user, etc.)
@@ -907,9 +907,6 @@ function path_form_element(Entity $entity) {
  */
 function path_form_element_validate($element, &$form_state, $complete_form) {
   if (!empty($form_state['values']['path']['alias'])) {
-    // Trim the submitted value.
-    $alias = trim($form_state['values']['path']['alias']);
-    form_set_value($element['alias'], $alias, $form_state);
     // Node language needs special care. Since the language of the URL alias
     // depends on the node language, and the node language can be switched
     // right within the same form, we need to conditionally overload the
