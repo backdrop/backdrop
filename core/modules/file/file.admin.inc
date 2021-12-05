@@ -368,10 +368,13 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
+  $formatter = $form_state['values']['display']['formatter'];
+  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : array();
+
 
   $display = array(
-    'formatter' => $form_state['values']['display']['formatter'],
-    'settings' => $form_state['values']['display']['settings'],
+    'formatter' => $formatter,
+    'settings' => $settings,
   );
 
   file_display_save($form['#file_type'], $form['#view_mode'], $display);
