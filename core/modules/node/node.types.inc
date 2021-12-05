@@ -91,6 +91,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
     backdrop_set_title(t('Add content type'));
   }
 
+  // Add CSS that will let the Permissions tab scroll sideways if needed.
+  $form['#attached'] = array(
+    'css' => array(backdrop_get_path('module', 'node') . '/css/node.admin.css'),
+  );
+
   // Make the type object available to implementations of hook_form_alter().
   $form['#node_type'] = $type;
 
