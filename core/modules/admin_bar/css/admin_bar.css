@@ -157,6 +157,22 @@
   padding-right: 28px;
 }
 
+/* Page link */
+#admin-bar .dropdown .admin-bar-page-links > span {
+  background: transparent url(../images/info-circle--white--64.png) 90% center no-repeat;
+  background-size: 16px;
+  padding-right: 28px; /* LTR */
+}
+[dir="rtl"] #admin-bar .dropdown .admin-bar-page-links > span {
+  background-position: 10% center;
+  padding-right: 10px;
+  padding-left: 28px;
+}
+/* Override the margin added to the 'layout' class */
+#admin-bar .dropdown .admin-bar-page-links a.layout {
+  margin: 0;
+}
+
 /* Logged in users */
 #admin-bar .dropdown .admin-bar-users > a {
   background: transparent url(../images/user-friends--white--64.png) 90% center no-repeat;
