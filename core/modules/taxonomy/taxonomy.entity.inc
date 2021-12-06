@@ -346,7 +346,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $term, $view_mode = 'full', $langcode = NULL, $context = array()) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
