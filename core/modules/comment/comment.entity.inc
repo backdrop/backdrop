@@ -490,6 +490,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // Populate $comment->content with a render() array.
     $this->buildContent($comment, $view_mode, $langcode, $context);
 
+    $node = $context['node'];
+
     $build = $comment->content;
     // We don't need duplicate rendering info in comment->content.
     unset($comment->content);
