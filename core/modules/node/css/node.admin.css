@@ -14,5 +14,5 @@
  * Allow permissions matrix to scroll on "Add Content Type" form.
  */
 #edit-permissions > .fieldset-wrapper > .form-item {
-  overflow-x: scroll;
+  overflow-x: auto;
 }
