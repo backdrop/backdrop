@@ -676,11 +676,14 @@ function admin_bar_links_page() {
     // Get the layout used by the current page/path.
     $layout = layout_get_layout_by_path();
 
-    $links['page']['layout'] = array(
+    // We use 'page-layout' here for the array key as it get added to the link
+    // as a class. A generic class like 'layout' would cause issues with the
+    // Basis theme.
+    $links['page']['page-layout'] = array(
       '#title' => t('Layout (@layout)', array('@layout' => $layout->title)),
       '#href' => 'admin/structure/layouts/manage/' . $layout->name,
     );
-    $links['page']['layout']['configure'] = array(
+    $links['page']['page-layout']['configure'] = array(
       '#title' => t('Configure'),
       '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
     );
@@ -691,7 +694,7 @@ function admin_bar_links_page() {
     $theme_data = list_themes();
     $theme_object = $theme_data[$theme];
 
-    $links['page']['theme'] = array(
+    $links['page']['page-theme'] = array(
       '#title' => t('Theme (@theme)', array('@theme' => $theme_object->info['name'])),
       '#href' => 'admin/appearance/settings/' . $theme_object->name,
     );
