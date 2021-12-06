@@ -2137,12 +2137,25 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
       // their default '#trim' property has been overridden. To see which types
       // of input elements are being trimmed by default, see
       // system_element_info().
-      if (isset($element['#trim']) && $element['#trim'] != FALSE && is_string($input)) {
-        $input = trim($input);
-        // If the trimmed input is empty, ensure that #required and other
-        // validation handlers are triggered accordingly.
-        if ($input === '') {
-          $input_exists = FALSE;
+      if (isset($element['#trim']) && $element['#trim'] != FALSE) {
+        if (is_string($input)) {
+          $input = trim($input);
+          // If the trimmed input is empty, ensure that #required and other
+          // validation handlers are triggered accordingly.
+          if ($input === '') {
+            $input_exists = FALSE;
+          }
+        }
+        // Form elements of type 'password_confirm' are comprised of 2 elements
+        // of type 'password' (see form_process_password_confirm()). Make sure
+        // that both values are trimmed off leading/trailing whitespace.
+        elseif (is_array($input) && $element['#type'] === 'password_confirm') {
+          $input = array_map('trim', $input);
+          // If the trimmed input is empty, ensure that #required and other
+          // validation handlers are triggered accordingly.
+          if (implode($input) === '') {
+            $input_exists = FALSE;
+          }
         }
       }
       // For browser-submitted forms, the submitted values do not contain values
@@ -3056,10 +3069,9 @@ function form_process_password_confirm($element) {
 function password_confirm_validate($element, &$element_state) {
   $pass1 = $element['pass1']['#value'];
   $pass2 = $element['pass2']['#value'];
-  if (strlen($pass1) > 0 || strlen($pass2) > 0) {
-    if (strcmp($pass1, $pass2)) {
-      form_error($element, t('The specified passwords do not match.'));
-    }
+
+  if (strcmp($pass1, $pass2)) {
+    form_error($element, t('The specified passwords do not match.'));
   }
   elseif ($element['#required'] && !empty($element_state['input'])) {
     form_error($element, t('Password field is required.'));

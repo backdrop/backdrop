@@ -477,7 +477,8 @@ class FormsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Assert that the values submitted to a form matches the default values of the elements.
+   * Assert that the values submitted to a form matches the default values of
+   * the elements.
    */
   function assertFormValuesDefault($values, $form) {
     foreach (element_children($form) as $key) {
