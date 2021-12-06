@@ -168,8 +168,9 @@
   padding-right: 10px;
   padding-left: 28px;
 }
-/* Override the margin added to the 'layout' class */
+/* Override '.layout' class styling */
 #admin-bar .dropdown .admin-bar-page-links a.layout {
+  height: auto;
   margin: 0;
 }
 

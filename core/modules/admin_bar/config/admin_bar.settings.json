@@ -6,6 +6,7 @@
         "admin_bar.icon",
         "admin_bar.menu",
         "admin_bar.search",
+        "admin_bar.page",
         "admin_bar.users",
         "admin_bar.account"
     ]

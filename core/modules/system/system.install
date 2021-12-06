@@ -1809,6 +1809,7 @@ function system_update_1009() {
     'admin_bar.icon',
     'admin_bar.menu',
     'admin_bar.search',
+    'admin_bar.page',
     'admin_bar.users',
     'admin_bar.account',
   ));
@@ -3219,6 +3220,17 @@ function system_update_1077() {
     $config->set('admin_theme', $default_theme);
     $config->save();
   }
+}
+
+/**
+ * Enable Admin Menu's Page Links component.
+ */
+function system_update_1078() {
+  $config = config('admin_bar.settings');
+  $components = $config->get('components');
+  $components[] = 'admin_bar.page';
+  $config->set('components', array_unique($components));
+  $config->save();
 }
 
 /**
