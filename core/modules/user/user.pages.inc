@@ -65,7 +65,7 @@ function user_pass() {
  * @see user_pass_submit()
  */
 function user_pass_validate($form, &$form_state) {
-  $name = trim($form_state['values']['name']);
+  $name = $form_state['values']['name'];
   // Try to load by email.
   $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
   $account = reset($users);
