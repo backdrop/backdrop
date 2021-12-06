@@ -482,13 +482,13 @@ class CommentStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $comment, $view_mode = 'full', $langcode = NULL, $context = array()) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
     // Populate $comment->content with a render() array.
-    $this->buildContent($comment, $node, $view_mode, $langcode, $context);
+    $this->buildContent($comment, $view_mode, $langcode, $context);
 
     $build = $comment->content;
     // We don't need duplicate rendering info in comment->content.
