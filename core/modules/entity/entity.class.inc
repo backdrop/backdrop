@@ -124,6 +124,14 @@ interface EntityInterface {
   public function delete();
 
   /**
+   * View an entity.
+   *
+   * @return
+   *   A render array of the entity.
+   */
+  public function view();
+
+  /**
    * Creates a duplicate of the entity.
    *
    * @return EntityInterface
@@ -276,6 +284,13 @@ abstract class Entity extends stdClass implements EntityInterface {
     if (!$this->isNew()) {
       entity_get_controller($this->entityType())->delete(array($this->id()));
     }
+  }
+
+  /**
+   * Implements EntityInterface::view().
+   */
+  public function view() {
+    return entity_get_controller($this->entityType())->view($this);
   }
 
   /**
