@@ -499,6 +499,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
     $build += array(
       '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
       '#comment' => $comment,
+      '#entity' => $comment,
       '#node' => $node,
       '#view_mode' => $view_mode,
       '#language' => $langcode,

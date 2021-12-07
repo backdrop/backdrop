@@ -50,7 +50,7 @@ function template_preprocess_entity(&$variables) {
   $variables['theme_hook_suggestions'][] = $entity_type;
   $variables['theme_hook_suggestions'][] = $entity_type . '__' . $bundle;
   $variables['theme_hook_suggestions'][] = $entity_type . '__' . $bundle . '__' . $variables['view_mode'];
-  if ($id = entity_id($entity_type, $entity)) {
+  if ($id = $entity->id()) {
     $variables['theme_hook_suggestions'][] = $entity_type . '__' . $id;
   }
 }
