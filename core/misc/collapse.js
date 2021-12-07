@@ -15,11 +15,12 @@ Backdrop.toggleFieldset = function (fieldset) {
       duration: 'fast',
       easing: 'linear',
       complete: function () {
-        if (insideDialog === false) {
-          Backdrop.collapseScrollIntoView(fieldset);
-        }
         $fieldset.trigger({ type: 'collapsed', value: false });
         $(window).triggerHandler('resize');
+        Backdrop.optimizedResize.trigger();
+        if (insideDialog === false) {
+          Backdrop.collapseScrollIntoView(fieldset, insideDialog);
+        }
         fieldset.animating = false;
       }
     });
@@ -31,6 +32,7 @@ Backdrop.toggleFieldset = function (fieldset) {
         .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Show'));
       $fieldset.trigger({ type: 'collapsed', value: true });
       $(window).triggerHandler('resize');
+      Backdrop.optimizedResize.trigger();
       fieldset.animating = false;
     });
   }
