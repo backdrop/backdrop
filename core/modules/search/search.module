@@ -994,8 +994,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * @param $action
  *   Form action. Defaults to "search/$path", where $path is the search path
- *   associated with the module in its hook_search_info(). This will be
- *   run through url().
+ *   associated with the module in its hook_search_info(). This will be run
+ *   through url().
  * @param $keys
  *   The search string entered by the user, containing keywords for the search.
  * @param $module
@@ -1039,9 +1039,11 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   $form['basic']['keys'] = array(
     '#type' => 'search',
     '#title' => $prompt,
-    '#default_value' => $keys,
     '#size' => $prompt ? 40 : 20,
     '#maxlength' => 255,
+    '#default_value' => $keys,
+    '#required' => TRUE,
+    '#required_error' => t('Please enter some keywords in the search field.'),
   );
   // processed_keys is used to coordinate keyword passing between other forms
   // that hook into the basic search form.
