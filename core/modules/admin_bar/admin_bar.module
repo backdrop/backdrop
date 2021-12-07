@@ -380,9 +380,12 @@ function admin_bar_deliver($page_callback_result) {
 
 /**
  * Implements hook_admin_bar_replacements().
+ *
+ * @see admin_bar_links_page()
  */
 function admin_bar_admin_bar_replacements($complete) {
   $items = array();
+
   // If the complete menu is output, then it is uncached and will contain the
   // current counts already.
   if (!$complete) {
@@ -392,7 +395,28 @@ function admin_bar_admin_bar_replacements($complete) {
       // Replace the counters in the cached menu output with current counts.
       $items['.admin-bar-users a'] = $user_count;
     }
+
+    // Check whether the page links component is enabled.
+    if (in_array('admin_bar.page', $components)) {
+      if (user_access('administer layouts')) {
+        $layout = layout_get_layout_by_path();
+        $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name);
+        $items['#admin-bar-page-layout'] .= theme('admin_bar_links', array('elements' => array(
+          array(
+            '#title' => t('Configure'),
+            '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+          ),
+        )));
+      }
+      if (user_access('administer themes')) {
+        global $theme;
+        $theme_data = list_themes();
+        $theme_object = $theme_data[$theme];
+        $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name);
+      }
+    }
   }
+
   return $items;
 }
 

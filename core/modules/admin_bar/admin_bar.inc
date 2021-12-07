@@ -663,6 +663,7 @@ function admin_bar_links_search() {
  * Build Page links.
  *
  * @see theme_admin_bar_links()
+ * @see admin_bar_admin_bar_replacements()
  */
 function admin_bar_links_page() {
   $links = array(
@@ -682,6 +683,9 @@ function admin_bar_links_page() {
     $links['page']['page-layout'] = array(
       '#title' => t('Layout (@layout)', array('@layout' => $layout->title)),
       '#href' => 'admin/structure/layouts/manage/' . $layout->name,
+      '#attributes' => array(
+        'id' => array('admin-bar-page-layout'),
+      ),
     );
     $links['page']['page-layout']['configure'] = array(
       '#title' => t('Configure'),
@@ -697,6 +701,9 @@ function admin_bar_links_page() {
     $links['page']['page-theme'] = array(
       '#title' => t('Theme (@theme)', array('@theme' => $theme_object->info['name'])),
       '#href' => 'admin/appearance/settings/' . $theme_object->name,
+      '#attributes' => array(
+        'id' => array('admin-bar-page-theme'),
+      ),
     );
   }
 
