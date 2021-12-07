@@ -542,6 +542,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     $build += array(
       '#theme' => 'user_profile__' . $view_mode,
       '#account' => $account,
+      '#entity' => $account,
       '#view_mode' => $view_mode,
       '#language' => $langcode,
     );
