@@ -19,7 +19,7 @@ Backdrop.toggleFieldset = function (fieldset) {
         $(window).triggerHandler('resize');
         Backdrop.optimizedResize.trigger();
         if (insideDialog === false) {
-          Backdrop.collapseScrollIntoView(fieldset, insideDialog);
+          Backdrop.collapseScrollIntoView(fieldset);
         }
         fieldset.animating = false;
       }
