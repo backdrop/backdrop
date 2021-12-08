@@ -564,17 +564,17 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // All comparisons are done against 1.x-2.4.5-beta3.
       'common_test' => TRUE,
       // Branch incompatibility.
-      'common_test (1.x.x)' => FALSE,
+      'common_test (1.x)' => FALSE,
       // Branch compatibility.
-      'common_test (2.x.x)' => TRUE,
+      'common_test (2.x)' => TRUE,
       // Another branch incompatibility.
-      'common_test (>2.x.x)' => FALSE,
+      'common_test (>2.x)' => FALSE,
       // Another branch compatibility.
-      'common_test (<=2.x.x)' => TRUE,
+      'common_test (<=2.x)' => TRUE,
       // Another branch incompatibility.
-      'common_test (<2.x.x)' => FALSE,
+      'common_test (<2.x)' => FALSE,
       // Another branch compatibility.
-      'common_test (>=2.x.x)' => TRUE,
+      'common_test (>=2.x)' => TRUE,
       // Higher rc version. Incompatible.
       'common_test (>=1.x-2.4.5-rc1)' => FALSE,
       // Higher beta version. Incompatible.
@@ -586,11 +586,11 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Nonsense, misses a dash. Incompatible with everything.
       'common_test (=1.x2.x.5, >=2.4.5)' => FALSE,
       // Core version is optional. Compatible.
-      'common_test (=1.x-2.x.x, >=2.4.5-alpha2)' => TRUE,
+      'common_test (=1.x-2.x, >=2.4.5-alpha2)' => TRUE,
       // Test !=, explicitly incompatible.
       'common_test (=2.x, !=2.4.5-beta3)' => FALSE,
       // Three operations. Compatible.
-      'common_test (=2.x.x, !=2.3.4, <2.5.0)' => TRUE,
+      'common_test (=2.x, !=2.3.4, <2.5.0)' => TRUE,
       // Testing extra version. Incompatible.
       'common_test (<=2.4.5-beta2)' => FALSE,
       // Testing extra version. Compatible.
