@@ -350,17 +350,16 @@ function layout_preprocess_layout(&$variables) {
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
-        $region_md = '';
         if (!empty($row['region_names']['region_0'])) {
           $region_name = $row['region_names']['region_0']['region_name'];
-          $region_classes .= isset($row['region_names']['region_0']['classes']) && !empty($row['region_names']['region_0']['region_class_enable']) ? $row['region_names']['region_0']['classes'] : '';
-          $region_md = empty($row['region_names']['region_0']['region_class_enable']) ? 'col-md-12' : '';
+          $region_classes .= 'region-' . backdrop_html_class($region_name);
+          $region_classes .= isset($row['region_names']['region_0']['classes']) && !empty($row['region_names']['region_0']['region_class_enable']) ? ' ' . $row['region_names']['region_0']['classes'] : '';
         }
         else {
           $region_name = $name;
-          $region_classes = 'region-' . backdrop_html_class($name);
+          $region_classes .= 'region-' . backdrop_html_class($name);
         }
-        $row['regions'][0]['region_md'] = $region_md;
+        $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
         $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
@@ -371,18 +370,17 @@ function layout_preprocess_layout(&$variables) {
         $i = 0;
         foreach ($split as $col) {
           $region_classes = '';
-          $region_md = '';
           if (!empty($row['region_names']['region_' . $i])) {
             $region_name = $row['region_names']['region_' . $i]['region_name'];
-            $region_classes .= isset($row['region_names']['region_' . $i]['classes']) && !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $row['region_names']['region_' . $i]['classes'] : '';
-            $region_md = empty($row['region_names']['region_' . $i]['region_class_enable']) ? 'col-md-' . $col : '';
+            $region_classes .= 'region-' . backdrop_html_class($region_name);
+            $region_classes .= isset($row['region_names']['region_' . $i]['classes']) && !empty($row['region_names']['region_' . $i]['region_class_enable']) ? ' ' . $row['region_names']['region_' . $i]['classes'] : '';
           }
           else {
             $region_name = $name . ' ' . $i;
-            $region_classes = 'region-' . backdrop_html_class($name . ' ' . $i);
+            $region_classes .= 'region-' . backdrop_html_class($region_name);
           }
           $row['regions'][] = array(
-            'region_md' => $region_md,
+            'region_md' => $col,
             'region_name' => $region_name,
             'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
