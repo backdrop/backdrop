@@ -2582,7 +2582,7 @@ function node_form_search_form_alter(&$form, $form_state) {
       '#suffix' => '</div>',
       '#options' => $types,
     );
-    $form['advanced']['actions'] = array('#type' => 'submit');
+    $form['advanced']['actions'] = array('#type' => 'actions');
     $form['advanced']['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Advanced search'),
