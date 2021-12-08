@@ -3138,7 +3138,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $edit = array(
       'region_names[region_0][region_name]' => 'New header',
       'region_names[region_0][classes]' => 'blue-blue',
-      'region_names[region_0][region_class_enable]' => 1,
+      'region_names[region_0][region_class_enable]' => TRUE,
       'row_classes' => 'new-class another-class',
       'element' => 'main',
       'container' => 'no_container',
@@ -3158,6 +3158,21 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // Check that header region class has changed.
     $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-new-header blue-blue'));
     $this->assertEqual(count($rows), 1, 'The header region class has been renamed in the block add page.');
+
+    // Disable the additional CSS classes.
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->clickLink(t('Configure'), 0);
+    $edit = array(
+      'region_names[region_0][region_class_enable]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Go to the block add page and check that the header region class does not
+    // have additional classes.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'region-new-header blue-blue'));
+    $this->assertNotEqual(count($rows), 1, 'The header region class has no additional classes.');
 
     // Go to the layout path and check that the header region was renamed and
     // the block is still in the header region.
