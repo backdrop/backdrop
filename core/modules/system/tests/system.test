@@ -586,7 +586,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Nonsense, misses a dash. Incompatible with everything.
       'common_test (=1.x2.x.5, >=2.4.5)' => FALSE,
       // Core version is optional. Compatible.
-      'common_test (=1.x-2.x.x, >=2.4.5-alpha2)' => TRUE,
+      'common_test (=1.x-2.x, >=2.4.5-alpha2)' => TRUE,
       // Test !=, explicitly incompatible.
       'common_test (=2.x, !=2.4.5-beta3)' => FALSE,
       // Three operations. Compatible.
