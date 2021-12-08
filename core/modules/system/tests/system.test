@@ -590,7 +590,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Test !=, explicitly incompatible.
       'common_test (=2.x, !=2.4.5-beta3)' => FALSE,
       // Three operations. Compatible.
-      'common_test (=2.x.x, !=2.3.4, <2.5.0)' => TRUE,
+      'common_test (=2.x, !=2.3.4, <2.5.0)' => TRUE,
       // Testing extra version. Incompatible.
       'common_test (<=2.4.5-beta2)' => FALSE,
       // Testing extra version. Compatible.
