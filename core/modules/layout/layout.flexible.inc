@@ -506,13 +506,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     );
     $form['region_names']['region_' . $i]['region_class_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Create CSS classes'),
+      '#title' => t('Additional CSS classes'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_class_enable']) ? $row_data['region_names']['region_' . $i]['region_class_enable'] : 0,
     );
     $form['region_names']['region_' . $i]['classes'] = array(
       '#type' => 'textfield',
       '#title' => t('CSS classes'),
-      '#description' => t('Define multiples classes separated by spaces.'),
+      '#description' => t('Define multiple classes separated by spaces.'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
       '#states' => array(
         'visible' => array(
