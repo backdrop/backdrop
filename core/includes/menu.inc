@@ -343,23 +343,28 @@ function menu_get_ancestors($parts) {
       // We have exhausted the masks of a given length, so decrease the length.
       --$length;
     }
-    $current = '';
+    $current_wildcard = '';
+    $current_placeholder = '';
     for ($j = $length; $j >= 0; $j--) {
       // Check the bit on the $j offset.
       if ($i & (1 << $j)) {
         // Bit one means the original value.
-        $current .= $parts[$length - $j];
+        $current_wildcard .= $parts[$length - $j];
+        $current_placeholder .= $parts[$length - $j];
       }
       else {
         // Bit zero means means wildcard.
-        $current .= '%';
+        $current_wildcard .= '*';
+        $current_placeholder .= '%';
       }
       // Unless we are at offset 0, add a slash.
       if ($j) {
-        $current .= '/';
+        $current_wildcard .= '/';
+        $current_placeholder .= '/';
       }
     }
-    $ancestors[] = $current;
+    $ancestors[] = $current_wildcard;
+    $ancestors[] = $current_placeholder;
   }
   return $ancestors;
 }
