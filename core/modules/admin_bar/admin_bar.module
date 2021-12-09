@@ -398,13 +398,18 @@ function admin_bar_admin_bar_replacements($complete) {
 
     // Check whether the page links component is enabled.
     if (in_array('admin_bar.page', $components)) {
+      $query = array('query' => array(
+        'destination' => current_path(),
+      ));
+
       if (user_access('administer layouts')) {
         $layout = layout_get_layout_by_path();
-        $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name);
+        $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name, $query);
         $items['#admin-bar-page-layout'] .= theme('admin_bar_links', array('elements' => array(
           array(
             '#title' => t('Configure'),
             '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+            '#options' => $query,
           ),
         )));
       }
@@ -412,7 +417,7 @@ function admin_bar_admin_bar_replacements($complete) {
         global $theme;
         $theme_data = list_themes();
         $theme_object = $theme_data[$theme];
-        $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name);
+        $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name, $query);
       }
     }
   }

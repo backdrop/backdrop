@@ -666,6 +666,10 @@ function admin_bar_links_search() {
  * @see admin_bar_admin_bar_replacements()
  */
 function admin_bar_links_page() {
+  $query = array('query' => array(
+    'destination' => current_path(),
+  ));
+
   $links = array(
     '#theme' => 'admin_bar_links',
   );
@@ -686,10 +690,12 @@ function admin_bar_links_page() {
       '#attributes' => array(
         'id' => array('admin-bar-page-layout'),
       ),
+      '#options' => $query,
     );
     $links['page']['page-layout']['configure'] = array(
       '#title' => t('Configure'),
       '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+      '#options' => $query,
     );
   }
   if (user_access('administer themes')) {
@@ -704,6 +710,7 @@ function admin_bar_links_page() {
       '#attributes' => array(
         'id' => array('admin-bar-page-theme'),
       ),
+      '#options' => $query,
     );
   }
 
