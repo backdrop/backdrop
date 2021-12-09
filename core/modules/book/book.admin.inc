@@ -80,9 +80,12 @@ function book_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('book_navigation_options'),
     '#options' => array(
       'tree' => t('Table of contents'),
-      'prev' => t('Previous link'),
-      'next' => t('Next link'),
-      'up' => t('Up link (aka parent page)'),
+      'pager' => t('Previous, Next, and Up links'),
+    ),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="book_navigation"]' => array('checked' => FALSE),
+      ),
     ),
   );
   $form['book_options']['book_links'] = array(
