@@ -159,14 +159,14 @@
 
 /* Page link */
 #admin-bar .dropdown .admin-bar-page-links > span {
-  background: transparent url(../images/info-circle--white--64.png) 90% center no-repeat;
-  background-size: 16px;
-  padding-right: 28px; /* LTR */
+  background: transparent url(../images/page--white--64.png) 90% center no-repeat;
+  background-size: 14px;
+  padding-right: 30px; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown .admin-bar-page-links > span {
   background-position: 10% center;
   padding-right: 10px;
-  padding-left: 28px;
+  padding-left: 30px;
 }
 
 /* Logged in users */
