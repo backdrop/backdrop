@@ -120,8 +120,11 @@ function layout_list_page() {
   $page = array();
   $page['help'] = array(
     '#type' => 'details',
-    '#summary' => t('Help'),
+    '#summary' => t('How layouts work'),
     '#details' => $help,
+    '#attributes' => array(
+      'class' => array('details-help'),
+    ),
   );
 
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';

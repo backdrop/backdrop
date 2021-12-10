@@ -803,6 +803,9 @@ details summary span {
   color: #0074bd;
   font-size: 120%;
 }
+details.details-help summary span {
+  font-size: 100%;
+}
 details .details-content-wrapper,
 details .details-child-wrapper {
   margin: 10px 0;
