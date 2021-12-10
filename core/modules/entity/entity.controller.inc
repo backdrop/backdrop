@@ -64,12 +64,11 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
-   * @param array $context
    *
    * @return
    *   The renderable array.
    */
-  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array());
+  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
 
   /**
    * Creates a rendered entity.
@@ -78,12 +77,11 @@ interface EntityControllerInterface {
    *   An entity object.
    * @param string $view_mode
    * @param string|NULL $langcode
-   * @param array $context
    *
    * @return array
    *   The renderable array.
    */
-  public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array());
+  public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
 }
 
 /**

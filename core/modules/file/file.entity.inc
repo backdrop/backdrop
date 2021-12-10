@@ -244,7 +244,7 @@ class FileStorageController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::buildContent().
    */
-  public function buildContent(EntityInterface $file, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function buildContent(EntityInterface $file, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->language;
     }
@@ -297,13 +297,13 @@ class FileStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $file, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $file, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
     // Populate $file->content with a render() array.
-    $this->buildContent($file, $view_mode, $langcode, $context);
+    $this->buildContent($file, $view_mode, $langcode);
 
     $build = $file->content;
     // We don't need duplicate rendering info in $file->content.

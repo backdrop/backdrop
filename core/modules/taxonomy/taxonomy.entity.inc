@@ -301,7 +301,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::buildContent().
    */
-  public function buildContent(EntityInterface $term, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function buildContent(EntityInterface $term, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->language;
     }
@@ -346,13 +346,13 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $term, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $term, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
     // Populate $term->content with a render() array.
-    $this->buildContent($term, $view_mode, $langcode, $context);
+    $this->buildContent($term, $view_mode, $langcode);
     $build = $term->content;
 
     // We don't need duplicate rendering info in $term->content.

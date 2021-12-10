@@ -706,7 +706,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::buildContent().
    */
-  public function buildContent(EntityInterface $node, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function buildContent(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
@@ -766,7 +766,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
@@ -777,7 +777,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     }
 
     // Populate $node->content with a render() array.
-    $this->buildContent($node, $view_mode, $langcode, $context);
+    $this->buildContent($node, $view_mode, $langcode);
 
     $build = $node->content;
     // We don't need duplicate rendering info in node->content.

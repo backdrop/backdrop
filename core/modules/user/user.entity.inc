@@ -499,7 +499,7 @@ class UserStorageController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::buildContent().
    */
-  public function buildContent(EntityInterface $account, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function buildContent(EntityInterface $account, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
@@ -527,13 +527,13 @@ class UserStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $account, $view_mode = 'full', $langcode = NULL, $context = array()) {
+  public function view(EntityInterface $account, $view_mode = 'full', $langcode = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
     // Retrieve all profile fields and attach to $account->content.
-    $this->buildContent($account, $view_mode, $langcode, $context);
+    $this->buildContent($account, $view_mode, $langcode);
 
     $build = $account->content;
     // We don't need duplicate rendering info in account->content.
