@@ -248,13 +248,12 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * @param array $context
- *   An array of context variables.
  */
-function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL, $context = array()) {
+function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
+  debug($entity, 'entity_build_content');
   $info = entity_get_info($entity->entityType());
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode, $context);
+    return entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
   }
   return FALSE;
 }
@@ -262,25 +261,29 @@ function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full
 /**
  * Generate an array for rendering the given entity.
  *
- * @param array $entities
+ * @param EntityInterface $entity
  *   An array of entity objects to render.
  * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * @param array $context
- *   An array of context variables.
+ *
  * @return
  *   The renderable array. If there is no information on how to view an entity,
  *   FALSE is returned.
  */
-function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL, $context = array()) {
-  $info = entity_get_info($entity->entityType());
+function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+  $entity_type = $entity->entityType();
+  $info = entity_get_info($entity_type);
 
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity->entityType())->view($entities, $view_mode, $langcode, $context);
+    $view = entity_get_controller($entity_type)->view(array($entity->id() => $entity), $view_mode, $langcode);
+    // $view is an array keyed by the entity type and entity id. Extract
+    // the specific build for this entity.
+    return $view[$entity_type][$entity->id()];
   }
+
   return FALSE;
 }
 

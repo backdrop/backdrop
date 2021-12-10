@@ -935,7 +935,10 @@ function comment_prepare_thread(&$comments) {
  *   An array as expected by backdrop_render().
  */
 function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  $build = entity_get_controller('comment')->view(array($comment->cid => $comment), $view_mode, $langcode);
+  $view = entity_get_controller('comment')->view(array($comment->cid => $comment), $view_mode, $langcode);
+  // $view is an array keyed by the entity type and entity id. Extract
+  // the specific build for this entity.
+  $build = $view['comment'][$comment->cid];
 
   return $build;
 }
