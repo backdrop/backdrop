@@ -343,28 +343,23 @@ function menu_get_ancestors($parts) {
       // We have exhausted the masks of a given length, so decrease the length.
       --$length;
     }
-    $current_wildcard = '';
-    $current_placeholder = '';
+    $current = '';
     for ($j = $length; $j >= 0; $j--) {
       // Check the bit on the $j offset.
       if ($i & (1 << $j)) {
         // Bit one means the original value.
-        $current_wildcard .= $parts[$length - $j];
-        $current_placeholder .= $parts[$length - $j];
+        $current .= $parts[$length - $j];
       }
       else {
         // Bit zero means means wildcard.
-        $current_wildcard .= '*';
-        $current_placeholder .= '%';
+        $current .= '%';
       }
       // Unless we are at offset 0, add a slash.
       if ($j) {
-        $current_wildcard .= '/';
-        $current_placeholder .= '/';
+        $current .= '/';
       }
     }
-    $ancestors[] = $current_wildcard;
-    $ancestors[] = $current_placeholder;
+    $ancestors[] = $current;
   }
   return $ancestors;
 }
@@ -470,6 +465,8 @@ function menu_get_item($path = NULL, $router_item = NULL) {
 
     $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
     $ancestors = menu_get_ancestors($parts);
+    $ancestors = array_merge($ancestors, menu_get_path_wildcards($path));
+
     $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
 
     if ($router_item) {
@@ -492,6 +489,43 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     $router_items[$path] = $router_item;
   }
   return $router_items[$path];
+}
+
+function menu_get_path_wildcards($string) {
+  $results = array();
+  $array = explode('/', $string);
+  $first_char = array_shift($array);
+  $count = count($array);
+  $max = bindec(str_pad('', $count, '1'));
+
+  for ($i = 0; $i <= $max; $i++) {
+    $binary = str_pad(decbin($i), $count, '0', STR_PAD_LEFT);
+    $string = '';
+
+    for ($j = 0; $j < $count; $j++) {
+      if ($j !== 0) {
+        $string .= '/';
+      }
+
+      if ($binary[$j] == '1') {
+        $string .= '*';
+      }
+      else {
+        $string .= $array[$j];
+      }
+    }
+
+    $results[] = $string;
+  }
+
+  $all_results = array();
+  foreach ($results as $line) {
+    $line = $first_char . '/' . $line;
+    $line = preg_replace('#(\/\*)\\1+$#','/*',$line);
+    $all_results[] = $line;
+  }
+
+  return $all_results;
 }
 
 /**
