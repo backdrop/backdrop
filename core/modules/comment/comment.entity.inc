@@ -24,6 +24,13 @@ class Comment extends Entity {
   public $pid;
 
   /**
+   * The ID of the node to which the comment is attached.
+   *
+   * @var integer
+   */
+  public $nid;
+
+  /**
    * The comment type (bundle).
    *
    * @var string
@@ -444,7 +451,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    $node = $context['node'];
+    $node = node_load($comment->nid);
 
     // Remove previously built content, if exists.
     $comment->content = array();
@@ -490,7 +497,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // Populate $comment->content with a render() array.
     $this->buildContent($comment, $view_mode, $langcode, $context);
 
-    $node = $context['node'];
+    $node = node_load($comment->nid);
 
     $build = $comment->content;
     // We don't need duplicate rendering info in comment->content.
