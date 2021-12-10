@@ -260,10 +260,14 @@ function system_requirements($phase) {
         'directory' => $private_files_directory,
       );
     }
-    $htaccess_files['temporary://.htaccess'] = array(
-      'title' => $t('Temporary files directory'),
-      'directory' => file_directory_temp(),
-    );
+    // Ignore the temporary directory if it's outside the webroot.
+    $temp_dir = file_directory_temp();
+    if (strpos(realpath($temp_dir), realpath(BACKDROP_ROOT)) !== 0) {
+      $htaccess_files['temporary://.htaccess'] = array(
+        'title' => $t('Temporary files directory'),
+        'directory' => $temp_dir,
+      );
+    }
 
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
