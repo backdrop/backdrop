@@ -6,6 +6,7 @@
  *
  * Available variables:
  * - $author: Comment author. Can be link or plain text.
+ * - $bundle: The bundle the comment belongs to, e.g. 'comment_node_post'.
  * - $content: An array of comment items. Use render($content) to print them
  *   all, or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
@@ -45,9 +46,10 @@
  *   modules, intended to be displayed after the main title tag that appears in
  *   the template.
  *
- * These two variables are provided for context:
+ * These variables are provided for context:
  * - $comment: Full comment object.
  * - $node: Node entity the comments are attached to.
+ * - $view_mode: Display mode, e.g. 'full', or 'default'.
  *
  * @see template_preprocess()
  * @see template_preprocess_comment()

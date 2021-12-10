@@ -308,7 +308,6 @@ function template_preprocess_username(&$variables) {
  */
 function template_preprocess_user_profile(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $variables['bundle'] = $variables['elements']['#bundle'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.
