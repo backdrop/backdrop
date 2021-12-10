@@ -3438,7 +3438,7 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
     }
     $display_info = array(
       'type' => $formatter,
-      'settings' => $display['settings'][$formatter],
+      'settings' => isset($display['settings'][$formatter]) ? $display['settings'][$formatter] : array(),
     );
     $element = $function($file, $display_info, $langcode);
   }
