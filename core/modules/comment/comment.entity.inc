@@ -489,58 +489,64 @@ class CommentStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $comment, $view_mode = 'full', $langcode = NULL) {
+  public function view($comments, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    // Populate $comment->content with a render() array.
-    $this->buildContent($comment, $view_mode, $langcode);
+    $view = array();
+    foreach ($comments as $comment) {
+      /* @var Comment $comment */
+      // Populate $comment->content with a render() array.
+      $this->buildContent($comment, $view_mode, $langcode);
 
-    $node = node_load($comment->nid);
+      $node = node_load($comment->nid);
 
-    $build = $comment->content;
-    // We don't need duplicate rendering info in comment->content.
-    unset($comment->content);
+      $build = $comment->content;
+      // We don't need duplicate rendering info in comment->content.
+      unset($comment->content);
 
-    $build += array(
-      '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
-      '#comment' => $comment,
-      '#entity' => $comment,
-      '#node' => $node,
-      '#view_mode' => $view_mode,
-      '#language' => $langcode,
-    );
-    $node_type = node_type_get_type($node->type);
+      $build += array(
+        '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
+        '#comment' => $comment,
+        '#entity' => $comment,
+        '#node' => $node,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+      $node_type = node_type_get_type($node->type);
 
-    if (empty($comment->in_preview)) {
-      $prefix = '';
-      $is_threaded = isset($comment->divs) && $node_type->settings['comment_mode'] == COMMENT_MODE_THREADED;
+      if (empty($comment->in_preview)) {
+        $prefix = '';
+        $is_threaded = isset($comment->divs) && $node_type->settings['comment_mode'] == COMMENT_MODE_THREADED;
 
-      // Add 'new' anchor if needed.
-      if (!empty($comment->first_new)) {
-        $prefix .= "<a id=\"new\"></a>\n";
+        // Add 'new' anchor if needed.
+        if (!empty($comment->first_new)) {
+          $prefix .= "<a id=\"new\"></a>\n";
+        }
+
+        // Add indentation div or close open divs as needed.
+        if ($is_threaded) {
+          $prefix .= $comment->divs <= 0 ? str_repeat('</div>', abs($comment->divs)) : "\n" . '<div class="indented">';
+        }
+
+        // Add anchor for each comment.
+        $prefix .= "<a id=\"comment-$comment->cid\"></a>\n";
+        $build['#prefix'] = $prefix;
+
+        // Close all open divs.
+        if ($is_threaded && !empty($comment->divs_final)) {
+          $build['#suffix'] = str_repeat('</div>', $comment->divs_final);
+        }
       }
 
-      // Add indentation div or close open divs as needed.
-      if ($is_threaded) {
-        $prefix .= $comment->divs <= 0 ? str_repeat('</div>', abs($comment->divs)) : "\n" . '<div class="indented">';
-      }
-
-      // Add anchor for each comment.
-      $prefix .= "<a id=\"comment-$comment->cid\"></a>\n";
-      $build['#prefix'] = $prefix;
-
-      // Close all open divs.
-      if ($is_threaded && !empty($comment->divs_final)) {
-        $build['#suffix'] = str_repeat('</div>', $comment->divs_final);
-      }
+      // Allow modules to modify the structured comment.
+      $type = 'comment';
+      backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
+      $view[$type][$comment->id()] = $build;
     }
 
-    // Allow modules to modify the structured comment.
-    $type = 'comment';
-    backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
-
-    return $build;
+    return $view;
   }
 }

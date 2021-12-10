@@ -527,30 +527,36 @@ class UserStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $account, $view_mode = 'full', $langcode = NULL) {
+  public function view($accounts, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    // Retrieve all profile fields and attach to $account->content.
-    $this->buildContent($account, $view_mode, $langcode);
+    $view = array();
+    foreach ($accounts as $account) {
+      /* @var User $account */
+      // Retrieve all profile fields and attach to $account->content.
+      $this->buildContent($account, $view_mode, $langcode);
 
-    $build = $account->content;
-    // We don't need duplicate rendering info in account->content.
-    unset($account->content);
+      $build = $account->content;
+      // We don't need duplicate rendering info in account->content.
+      unset($account->content);
 
-    $build += array(
-      '#theme' => 'user_profile__' . $view_mode,
-      '#account' => $account,
-      '#entity' => $account,
-      '#view_mode' => $view_mode,
-      '#language' => $langcode,
-    );
+      $build += array(
+        '#theme' => 'user_profile__' . $view_mode,
+        '#account' => $account,
+        '#entity' => $account,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
 
-    // Allow modules to modify the structured user.
-    $type = 'user';
-    backdrop_alter(array('user_view', 'entity_view'), $build, $type);
+      // Allow modules to modify the structured user.
+      $type = 'user';
+      backdrop_alter(array('user_view', 'entity_view'), $build, $type);
+      $view[$type][$account->id()] = $build;
+    }
 
-    return $build;
+    return $view;
   }
 }

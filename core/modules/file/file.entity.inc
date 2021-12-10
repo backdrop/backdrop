@@ -297,39 +297,45 @@ class FileStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $file, $view_mode = 'full', $langcode = NULL) {
+  public function view($files, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    // Populate $file->content with a render() array.
-    $this->buildContent($file, $view_mode, $langcode);
+    $view = array();
+    foreach ($files as $file) {
+      /* @var File $file */
+      // Populate $file->content with a render() array.
+      $this->buildContent($file, $view_mode, $langcode);
 
-    $build = $file->content;
-    // We don't need duplicate rendering info in $file->content.
-    unset($file->content);
+      $build = $file->content;
+      // We don't need duplicate rendering info in $file->content.
+      unset($file->content);
 
-    $build += array(
-      '#theme' => 'file_entity',
-      '#file' => $file,
-      '#entity' => $file,
-      '#view_mode' => $view_mode,
-      '#language' => $langcode,
-    );
+      $build += array(
+        '#theme' => 'file_entity',
+        '#file' => $file,
+        '#entity' => $file,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
 
-    // Add contextual links for this file, except when the file is already being
-    // displayed on its own page. Modules may alter this behavior (for example,
-    // to restrict contextual links to certain view modes) by implementing
-    // hook_file_view_alter().
-    if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
-      $build['#contextual_links']['file'] = array('file', array($file->fid));
+      // Add contextual links for this file, except when the file is already
+      // being displayed on its own page. Modules may alter this behavior (for
+      // example, to restrict contextual links to certain view modes) by
+      // implementing hook_file_view_alter().
+      if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
+        $build['#contextual_links']['file'] = array('file', array($file->fid));
+      }
+
+      // Allow modules to modify the structured file.
+      $type = 'file';
+      backdrop_alter(array('file_view', 'entity_view'), $build, $type);
+      $view[$type][$file->id()] = $build;
     }
 
-    // Allow modules to modify the structured file.
-    $type = 'file';
-    backdrop_alter(array('file_view', 'entity_view'), $build, $type);
-
-    return $build;
+    return $view;
   }
 
 }

@@ -766,43 +766,49 @@ class NodeStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
+  public function view($nodes, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    if (isset($node->preview) && ($node->preview == 'Preview')) {
-      backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-      backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+    $view = array();
+    foreach ($nodes as $node) {
+      /* @var Node $node */
+      if (isset($node->preview) && ($node->preview == 'Preview')) {
+        backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
+        backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+      }
+
+      // Populate $node->content with a render() array.
+      $this->buildContent($node, $view_mode, $langcode);
+
+      $build = $node->content;
+      // We don't need duplicate rendering info in node->content.
+      unset($node->content);
+
+      $build += array(
+        '#theme' => 'node__' . $node->type . '__' . $view_mode,
+        '#node' => $node,
+        '#entity' => $node,
+        '#view_mode' => $view_mode,
+        '#langcode' => $langcode,
+        '#page' => $page,
+      );
+
+      // Add contextual links for this node, except when the node is already
+      // being displayed on its own page. Modules may alter this behavior (for
+      // example, to restrict contextual links to certain display modes) by
+      // implementing hook_node_view_alter().
+      if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
+        $build['#contextual_links']['node'] = array('node', array($node->nid));
+      }
+
+      // Allow modules to modify the structured node.
+      $type = 'node';
+      backdrop_alter(array('node_view', 'entity_view'), $build, $type);
+      $view[$type][$node->id()] = $build;
     }
 
-    // Populate $node->content with a render() array.
-    $this->buildContent($node, $view_mode, $langcode);
-
-    $build = $node->content;
-    // We don't need duplicate rendering info in node->content.
-    unset($node->content);
-
-    $build += array(
-      '#theme' => 'node__' . $node->type . '__' . $view_mode,
-      '#node' => $node,
-      '#entity' => $node,
-      '#view_mode' => $view_mode,
-      '#langcode' => $langcode,
-    );
-
-    // Add contextual links for this node, except when the node is already being
-    // displayed on its own page. Modules may alter this behavior (for example,
-    // to restrict contextual links to certain display modes) by implementing
-    // hook_node_view_alter().
-    if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
-      $build['#contextual_links']['node'] = array('node', array($node->nid));
-    }
-
-    // Allow modules to modify the structured node.
-    $type = 'node';
-    backdrop_alter(array('node_view', 'entity_view'), $build, $type);
-
-    return $build;
+    return $view;
   }
 }

@@ -346,32 +346,38 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::view().
    */
-  public function view(EntityInterface $term, $view_mode = 'full', $langcode = NULL) {
+  public function view($terms, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     if (!isset($langcode)) {
       $langcode = $GLOBALS['language_content']->langcode;
     }
 
-    // Populate $term->content with a render() array.
-    $this->buildContent($term, $view_mode, $langcode);
-    $build = $term->content;
+    $view = array();
+    foreach ($terms as $term) {
+      /* @var TaxonomyTerm $term */
+      // Populate $term->content with a render() array.
+      $this->buildContent($term, $view_mode, $langcode);
+      $build = $term->content;
 
-    // We don't need duplicate rendering info in $term->content.
-    unset($term->content);
+      // We don't need duplicate rendering info in $term->content.
+      unset($term->content);
 
-    $build += array(
-      '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
-      '#term' => $term,
-      '#entity' => $term,
-      '#view_mode' => $view_mode,
-      '#language' => $langcode,
-    );
+      $build += array(
+        '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
+        '#term' => $term,
+        '#entity' => $term,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
 
-    $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css';
+      $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css';
 
-    // Allow modules to modify the structured taxonomy term.
-    $type = 'taxonomy_term';
-    backdrop_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
+      // Allow modules to modify the structured taxonomy term.
+      $type = 'taxonomy_term';
+      backdrop_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
+      $view[$type][$term->id()] = $build;
+    }
 
-    return $build;
+    return $view;
   }
 }

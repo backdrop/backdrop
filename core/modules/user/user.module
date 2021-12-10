@@ -2270,7 +2270,7 @@ function user_view_page($account) {
  *   An array as expected by backdrop_render().
  */
 function user_view($account, $view_mode = 'full', $langcode = NULL) {
-  $build = entity_get_controller('user')->view($account, $view_mode, $langcode, array());
+  $build = entity_get_controller('user')->view(array($account->uid => $account), $view_mode, $langcode);
 
   return $build;
 }
