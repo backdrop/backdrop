@@ -619,6 +619,9 @@ abstract class BackdropTestCase {
       $this->httpauth_credentials = $username . ':' . $password;
     }
 
+    // Select a database prefix to use for this test.
+    $this->prepareDatabasePrefix();
+
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
@@ -668,6 +671,16 @@ abstract class BackdropTestCase {
     // Clear out the error messages and restore error handler.
     backdrop_get_messages();
     restore_error_handler();
+
+    // Release the test prefix so it can be used by another test.
+    db_update('simpletest_prefix')
+      ->condition('test_id', $this->testId)
+      ->condition('prefix', $this->databasePrefix)
+      ->fields(array(
+        'test_id' => 0,
+        'in_use' => 0
+      ))
+      ->execute();
 
     // Get the stop time and put it in the results to display later.
     $end = microtime(TRUE);
@@ -896,8 +909,6 @@ class BackdropUnitTestCase extends BackdropTestCase {
       'weight' => 0,
     );
 
-    $this->prepareDatabasePrefix();
-
     // Reset all statics so that test is performed with a clean environment.
     backdrop_static_reset();
 
@@ -941,16 +952,6 @@ class BackdropUnitTestCase extends BackdropTestCase {
     // Get back to the original connection.
     Database::removeConnection('default');
     Database::renameConnection('simpletest_original_default', 'default');
-
-    // Set the database table prefix as not in use.
-    db_update('simpletest_prefix')
-      ->condition('test_id', $this->testId)
-      ->condition('prefix', $this->databasePrefix)
-      ->fields(array(
-        'test_id' => 0,
-        'in_use' => 0
-      ))
-      ->execute();
 
     $conf['file_public_path'] = $this->originalFileDirectory;
     // Restore modules if necessary.
