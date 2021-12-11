@@ -110,6 +110,10 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     if ($install_profile_module_exists) {
       module_enable(array($this->profile), FALSE);
     }
+
+    // Reset caches and menus.
+    $this->resetAll();
+
     return TRUE;
   }
 

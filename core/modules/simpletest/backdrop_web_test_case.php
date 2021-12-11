@@ -174,7 +174,10 @@ abstract class BackdropTestCase {
    */
   protected function prepareDatabasePrefix() {
     $lock_id = 'simpletest:' . $this->profile;
-    lock_wait($lock_id);
+    if (!lock_acquire($lock_id)) {
+      lock_wait($lock_id);
+      return $this->prepareDatabasePrefix();
+    }
 
     // Check if there is an existing prefix that is not in use.
     $prefix = db_query("SELECT prefix FROM {simpletest_prefix} WHERE test_id = 0 AND profile = :profile AND in_use = 0", array(
@@ -620,7 +623,9 @@ abstract class BackdropTestCase {
     }
 
     // Select a database prefix to use for this test.
-    $this->prepareDatabasePrefix();
+    if (empty($this->databasePrefix)) {
+      $this->prepareDatabasePrefix();
+    }
 
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
@@ -672,15 +677,24 @@ abstract class BackdropTestCase {
     backdrop_get_messages();
     restore_error_handler();
 
-    // Release the test prefix so it can be used by another test.
-    db_update('simpletest_prefix')
-      ->condition('test_id', $this->testId)
-      ->condition('prefix', $this->databasePrefix)
-      ->fields(array(
-        'test_id' => 0,
-        'in_use' => 0
-      ))
-      ->execute();
+    if ($this->useCache) {
+      // Release the test prefix so it can be used by another test.
+      db_update('simpletest_prefix')
+        ->condition('test_id', $this->testId)
+        ->condition('prefix', $this->databasePrefix)
+        ->fields(array(
+          'test_id' => 0,
+          'in_use' => 0,
+        ))
+        ->execute();
+    }
+    else {
+      // Delete the database table prefix record.
+      db_delete('simpletest_prefix')
+        ->condition('test_id', $this->testId)
+        ->condition('prefix', $this->databasePrefix)
+        ->execute();
+    }
 
     // Get the stop time and put it in the results to display later.
     $end = microtime(TRUE);
@@ -1759,8 +1773,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $language_url, $conf;
-    // Create the database prefix for this test.
-    $this->prepareDatabasePrefix();
+
+    if (empty($this->databasePrefix)) {
+      // Create the database prefix for this test.
+      $this->prepareDatabasePrefix();
+    }
 
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
@@ -1970,23 +1987,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
 
-    // Delete the database table prefix record.
-    if (!$this->useCache) {
-      db_delete('simpletest_prefix')
-        ->condition('test_id', $this->testId)
-        ->condition('prefix', $this->databasePrefix)
-        ->execute();
-    }
-    else {
-      db_update('simpletest_prefix')
-        ->condition('test_id', $this->testId)
-        ->condition('prefix', $this->databasePrefix)
-        ->fields(array(
-          'test_id' => 0,
-          'in_use' => 0,
-        ))
-        ->execute();
-    }
     // Set the configuration directories back to the originals.
     $config_directories = $this->originalConfigDirectories;
 
