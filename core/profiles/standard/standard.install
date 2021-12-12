@@ -384,8 +384,11 @@ function standard_install() {
   $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/library_cards.jpg'; 
   
   $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-  watchdog('tim3', $image_url);
-  watchdog('tim2', $image_dir);
+  $new_file_too = file_unmanaged_copy($image_url, $image_dir);
+  $new_file_too_two = file_unmanaged_copy($image_url);
+
+  watchdog('tim3', $new_file_too);
+  watchdog('tim2', $new_file_too_two);
   watchdog('tim1', $base_url);
   $card = new Node(
     array(
