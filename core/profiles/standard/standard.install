@@ -372,24 +372,23 @@ function standard_install() {
   // https://pixabay.com/photos/library-old-historical-shelf-2614804/
   // https://commons.wikimedia.org/wiki/File:New_Buffalo_Times_Front_Page.jpg
 
+  // Creating First Card
+
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
   $cards = array(
     'library_cards' => array(
       'title' => st('Organize your content'),
-      'body' => st('<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'
-      ),
+      'body' => st('<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'),
     ),
     'playing_cards' => array(
       'title' => st('What is a Card?'),
-      'body' => st('<p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'
-      ),
+      'body' => st('<p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'),
     ),
     'buffalo_front_page' => array(
       'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
-      ),
+      'body' => st('<p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'),
     ),
   );
 
@@ -405,14 +404,13 @@ function standard_install() {
     ));
 
     $file->save();
-
     $card = new Node(
       array(
         'title' => $info['title'],
         'body' => array(
           LANGUAGE_NONE => array(
             array(
-              'value' => $info['body']),
+              'value' => $info['body'],
               'format' => 'filtered_html',
             ),
           ),
@@ -434,6 +432,7 @@ function standard_install() {
         'type' => 'card',
       )
     );
+
     $card->save();
   }
 
