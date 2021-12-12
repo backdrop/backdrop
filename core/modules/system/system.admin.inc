@@ -2850,7 +2850,7 @@ function system_transliterate_ajax_access() {
  * @return string
  *   The transliterated and cleaned up string.
  */
-function system_transliterate_machine_name($string, $options) {
+function system_transliterate_machine_name($string, $options = array()) {
   include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
   $defaults = array(
     'langcode' => $GLOBALS['language']->langcode,
