@@ -665,9 +665,9 @@ function standard_install() {
   $image = entity_create('file', array(
     'filename' => 'librarycards',
     'uri' => $new_file_too,
-    'uid' => 1,
+    // 'uid' => 1,
   ));
-  $image->save();
+  // $image->save();
 
   watchdog('tim3', $image);
   watchdog('tim2', $new_file_too_two);
