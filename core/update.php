@@ -208,23 +208,24 @@ function update_results_page() {
   update_task_list();
   // Report end result.
   if (module_exists('dblog') && user_access('access site reports')) {
-    $log_message = ' All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
+    $log_message = 'All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
   }
   else {
-    $log_message = ' All errors have been logged.';
+    $log_message = 'All errors have been logged.';
   }
 
+  $output = '';
   if ($_SESSION['update_success']) {
-    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . $log_message . '</p>';
+    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
     $updates_remaining = reset($_SESSION['updates_remaining']);
     list($module, $version) = array_pop($updates_remaining);
-    $output = '<p class="error">The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . $log_message;
+    $message = 'The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . ' ' . $log_message;
     if (module_exists('dblog')) {
-      $output .= ' You may need to check the <code>watchdog</code> database table manually.';
+      $message .= ' ' . 'You may need to check the <code>watchdog</code> database table manually.';
     }
-    $output .= '</p>';
+    backdrop_set_message($message, 'error');
   }
 
   if (settings_get('update_free_access')) {
