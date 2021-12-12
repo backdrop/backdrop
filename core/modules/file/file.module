@@ -1434,6 +1434,15 @@ function file_managed_file_process($element, &$form_state, $form) {
     }
   }
 
+  // Custom styling for the upload file widget.
+  // Inspired by https://stackoverflow.com/questions/21842274/cross-browser-custom-styling-for-file-upload-button
+  // tabindex needs to be set here, otherwise this form element will be skipped.
+  // @todo: although "for" is set here, pressing space/enter while the <label>
+  //   element is focused still doesn't trigger the upload dialog - clicking it
+  //   does work though.
+  $element['upload']['#prefix'] = '<label for="' . $element['#id'] . '-upload" tabindex="0" class="upload-file-label">';
+  $element['upload']['#suffix'] = '<span>' . t('Upload new file') . '</span></label>';
+
   // Prefix and suffix used for Ajax replacement.
   $element['#prefix'] = '<div id="' . $element['#id'] . '-ajax-wrapper">';
   $element['#suffix'] = '</div>';
