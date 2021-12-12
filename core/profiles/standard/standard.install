@@ -367,141 +367,75 @@ function standard_install() {
 
   // Prepping to create three default Card nodes.
 
-  $new_image_dir = 'public://field/image';
-  file_prepare_directory($new_image_dir, FILE_CREATE_DIRECTORY);
-  $image_dir = 'public://field/image';
-
-  global $base_url;
-
   // Links to three images - until we find better ones.
   // https://en.wikipedia.org/wiki/500_(card_game)#/media/File:Six-handed_500_playing_cards.jpg
   // https://pixabay.com/photos/library-old-historical-shelf-2614804/
   // https://commons.wikimedia.org/wiki/File:New_Buffalo_Times_Front_Page.jpg
 
-  // Creating First Card
+  $field_image_dir = 'public://field/image';
+  file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
-
-  $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/library_cards.jpg'; 
-  
-  // $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-  $new_file = file_unmanaged_copy($image_url, $image_dir);
-
-  $moved_file = entity_create('file', array(
-    'filename' => 'library_cards',
-    'uri' => $new_file,
-  ));
-
-  $moved_file->save();
-  //watchdog('tim3', $new_file);
-  // watchdog('tim2', $moved_file->fid);
-  // watchdog('tim1', $image_url);
-  // watchdog('tim4', backdrop_realpath($image_dir));
-
-  $card = new Node(
-    array(
+  $cards = array(
+    'library_cards' => array(
       'title' => st('Organize your content'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('
-              <p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'
-            ),
-            'format' => 'filtered_html',
-          ),
-        ),
+      'body' => st('<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'
       ),
-      'field_image' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'fid' => $moved_file->fid,
-            'filename' => 'library_cards.jpg',
-            'uri' => 'public://field/image/library_cards.jpg',
-            'filemime' => 'image/jpeg',
-            'status' => 0,
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
-  );
-  $card->save();
-
-  // Creating Second Card
-
-  $image_url = $base_secure_url . '/core/profiles/standard/images/playing_cards.jpg';
-  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-
-  $card = new Node(
-    array(
+    ),
+    'playing_cards' => array(
       'title' => st('What is a Card?'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st("
-              <p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>"
-            ),
-            'format' => 'filtered_html',
-          ),
-        ),
+      'body' => st('<p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'
       ),
-      'field_image' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'fid' => $new_file->fid,
-            'filename' => 'playing_cards.jpg',
-            'uri' => 'public://field/image/playing_cards.jpg',
-            'filemime' => 'image/jpeg',
-            'status' => 0,
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
-  );
-  $card->save();
-
-  // Creating Third Card
-
-  $image_url = $base_secure_url . '/core/profiles/standard/images/buffalo_front_page.jpg';
-  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-
-  $card = new Node(
-    array(
+    ),
+    'buffalo_front_page' => array(
       'title' => st('The home page layout'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('
-              <p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
-            ),
-            'format' => 'filtered_html',
-          ),
-        ),
+      'body' => st('<p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'
       ),
-      'field_image' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'fid' => $new_file->fid,
-            'filename' => 'buffalo_front_page.jpg',
-            'uri' => 'public://field/image/buffalo_front_page.jpg',
-            'filemime' => 'image/jpeg',
-            'status' => 0,
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'card',
-    )
+    ),
   );
-  $card->save();
+
+  foreach ($cards as $key => $info) {
+    $image_filename = $key . '.jpg';
+    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename; 
+    $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
+
+    $file = entity_create('file', array(
+      'filename' => $image_filename,
+      'uri' => $new_file,
+      'uid' => 1,
+    ));
+
+    $file->save();
+
+    $card = new Node(
+      array(
+        'title' => $info['title'],
+        'body' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => $info['body']),
+              'format' => 'filtered_html',
+            ),
+          ),
+        ),
+        'field_image' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'fid' => $file->fid,
+              'filename' => $image_filename,
+              'uri' => 'public://field/image/' . $image_filename,
+              'filemime' => 'image/jpeg',
+              'status' => 0,
+            ),
+          ),
+        ),
+        'uid' => 1,
+        'status' => 1,
+        'promote' => 0,
+        'type' => 'card',
+      )
+    );
+    $card->save();
+  }
 
   // Create two default posts to display on front page.
   $post = new Node(
