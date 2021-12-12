@@ -228,7 +228,7 @@ function update_results_page() {
   }
 
   if (settings_get('update_free_access')) {
-    backdrop_set_message(t("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>."), 'warning');
+    backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
   }
 
   $output .= theme('links', array('links' => update_helpful_links()));
