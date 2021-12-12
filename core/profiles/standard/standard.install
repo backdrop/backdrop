@@ -662,7 +662,9 @@ function standard_install() {
   system_retrieve_file($image_url, 'public://', TRUE);
   config_set('system.core', 'site_logo_path', 'public://drop_paw.png');
 
-  $image = entity_create('file', array(
+  // Create an "About" page node.
+  $image = new File(
+    array(
     'filename' => 'librarycards',
     'uri' => $new_file_too,
     // 'uid' => 1,
