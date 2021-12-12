@@ -497,6 +497,32 @@ class ConfigurationUITest extends BackdropWebTestCase {
   }
 
   /**
+   * Test skipping the clearing of the staging directory after import.
+   */
+  public function testClearStagingDirectory() {
+    $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
+
+    // Copy active to staging
+    $this->copyConfig('active', 'staging');
+
+    // Set staging system.core so it doesn't clear the staging directory.
+    $staging_config = config('system.core', 'staging');
+    $staging_config->set('config_sync_clear_staging', 0);
+    $staging_config->save();
+
+    // Verify that both appear as ready to import.
+    $this->backdropGet('admin/config/development/configuration');
+    $this->assertText('system.core');
+
+    // Sync changes
+    $this->backdropPost(NULL, array(), t('Import all'));
+
+    // Assert that staging directory is not empty.
+    $staging_files = $staging_storage->listAll();
+    $this->assert(!empty($staging_files), 'Staging directory is not empty.');
+  }
+
+  /**
    * Copies configuration objects from source storage to target storage.
    *
    * @param string $source
@@ -513,3 +539,57 @@ class ConfigurationUITest extends BackdropWebTestCase {
     }
   }
 }
+
+/**
+ * Tests that hook_config_create() is run during config sync.
+ */
+class ConfigurationSyncTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  protected function setUp() {
+    parent::setUp(array('config_test_hooks'));
+
+    // Create a blank content type into which our new config-based field will be
+    // added.
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'bypass node access',
+      'administer nodes',
+      'create post content',
+      'edit any post content',
+    ));
+  }
+
+  /**
+   * Tests that hook_config_create() is run during config sync.
+   */
+  public function testSync() {
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('brie', $config_data['favorite_cheese'], 'Config variable is set to brie.');
+    $this->assertFalse(field_info_field('field_config_test'), 'The test field does not exist.');
+
+    module_enable(array('config_test'));
+    // Test that config value is altered when default config is synced from
+    // another module.
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('cheddar', $config_data['favorite_cheese'], 'Config variable is set to cheddar.');
+    $this->assertTrue(field_info_field('field_config_test'), 'The test field has been installed.');
+
+    // Test that content can actually be saved into the new field that was
+    // created.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/post', array(
+      'title' => 'Test post',
+      'field_config_test[und][0][value]' => 'Test value in the new field',
+    ), t('Save'));
+
+    $this->assertText('Post Test post has been created.');
+    $this->assertText('Test value in the new field');
+  }
+}
+

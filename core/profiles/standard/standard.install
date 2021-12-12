@@ -63,9 +63,11 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
+  // Changed display name from Full HTML to Raw HTML but keeping machine name 
+  // for backward compatibility.
   $full_html_format = array(
     'format' => 'full_html',
-    'name' => 'Full HTML',
+    'name' => 'Raw HTML',
     'weight' => 1,
     'editor' => NULL,
     'filters' => array(
@@ -106,7 +108,7 @@ function standard_install() {
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "home".
+  // Set home page to "home".
   config_set('system.core', 'site_frontpage', 'home');
   backdrop_flush_all_caches();
 
@@ -386,9 +388,7 @@ function standard_install() {
     'access administration pages',
     'access site in maintenance mode',
     'flush caches',
-    'edit terms in tags',
-    'delete terms in tags',
-    'administer taxonomy',
+    'create terms in tags',
     'administer nodes',
     'search content',
     'use advanced search',

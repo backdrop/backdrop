@@ -650,7 +650,17 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   foreach ($projects as $project) {
     if ($project['type'] == 'module' && isset($modules[$project['name']])) {
       foreach ($modules as $module) {
-        if (isset($module->info['project']) && isset($modules[$project['name']]->info['project']) && $modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name && !$module->info['hidden']) {
+        // Ignore stand-alone and hidden modules.
+        if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
+          continue;
+        }
+        // The "type" key is required. Skip over any (sub)module not specifying
+        // it in its .info file.
+        if (!isset($module->info['type'])) {
+          continue;
+        }
+        // Collect information about sub-modules.
+        if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name) {
           $projects[$module->name] = array(
             'type' => $module->info['type'],
             'title' => $module->info['name'],
@@ -686,19 +696,25 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
             $dependencies[] = $dependency_name . ' (<span class="admin-missing">' . t('missing') . '</span>)';
           }
         }
-        if ($dependency_check) {
-          $options[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
-        }
-        else {
-          $missing[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
+        // Build the list of options, but only include (sub)modules that are not
+        // hidden. This check also helps with the rare case where the main
+        // module within a project needs to be hidden, and submodules enabled
+        // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
+        if (empty($modules[$project['name']]->info['hidden'])) {
+          if ($dependency_check) {
+            $options[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
+          else {
+            $missing[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
         }
       }
       else {
