@@ -383,10 +383,19 @@ function standard_install() {
 
   $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/library_cards.jpg'; 
   
-  $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
-  watchdog('tim3', $image_url);
-  watchdog('tim2', $image_dir);
-  watchdog('tim1', $base_url);
+  // $new_file = system_retrieve_file($image_url, $image_dir, TRUE);
+  $new_file = file_unmanaged_copy($image_url, $image_dir, TRUE);
+
+  $moved_file = entity_create('file', array(
+    'filename' => 'library_cards',
+    'uri' => $new_file,
+  ));
+
+  $moved_file->save();
+  watchdog('tim3', $new_file);
+  watchdog('tim2', $moved_file);
+  watchdog('tim1', $image_url);
+  watchdog('tim4', backdrop_realpath($image_dir));
   $card = new Node(
     array(
       'title' => st('Organize your content'),
@@ -403,7 +412,7 @@ function standard_install() {
       'field_image' => array(
         LANGUAGE_NONE => array(
           array(
-            'fid' => $new_file->fid,
+            'fid' => $moved_file->fid,
             'filename' => 'library_cards.jpg',
             'uri' => 'public://field/image/library_cards.jpg',
             'filemime' => 'image/jpeg',
