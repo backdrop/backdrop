@@ -387,7 +387,14 @@ function standard_install() {
   $new_file_too = file_unmanaged_copy($image_url, $image_dir);
   $new_file_too_two = file_unmanaged_copy($image_url);
 
-  watchdog('tim3', $new_file_too);
+  $image = entity_create('file', array(
+    'filename' => 'librarycards',
+    'uri' => $new_file_too,
+    'uid' => 1,
+  ));
+  $image->save();
+
+  watchdog('tim3', $image);
   watchdog('tim2', $new_file_too_two);
   watchdog('tim1', $base_url);
   $card = new Node(
