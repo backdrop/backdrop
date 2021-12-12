@@ -387,16 +387,6 @@ function standard_install() {
   $new_file_too = file_unmanaged_copy($image_url, $image_dir);
   $new_file_too_two = file_unmanaged_copy($image_url);
 
-  $image = entity_create('file', array(
-    'filename' => 'librarycards',
-    'uri' => $new_file_too,
-    'uid' => 1,
-  ));
-  $image->save();
-
-  watchdog('tim3', $image);
-  watchdog('tim2', $new_file_too_two);
-  watchdog('tim1', $base_url);
   $card = new Node(
     array(
       'title' => st('Organize your content'),
@@ -671,4 +661,15 @@ function standard_install() {
   $image_url = $base_secure_url . '/core/profiles/standard/images/drop_paw.png';
   system_retrieve_file($image_url, 'public://', TRUE);
   config_set('system.core', 'site_logo_path', 'public://drop_paw.png');
+
+  $image = entity_create('file', array(
+    'filename' => 'librarycards',
+    'uri' => $new_file_too,
+    'uid' => 1,
+  ));
+  $image->save();
+
+  watchdog('tim3', $image);
+  watchdog('tim2', $new_file_too_two);
+  watchdog('tim1', $base_url);
 }
