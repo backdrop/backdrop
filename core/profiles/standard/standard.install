@@ -380,7 +380,7 @@ function standard_install() {
   $cards = array(
     'library_cards.jpg' => array(
       'title' => st('Organize your content'),
-      'body' => st('<p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom content types can also be added.</p>'),
+      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
     ),
     'playing_cards.jpg' => array(
       'title' => st('What is a Card?'),
@@ -388,7 +388,7 @@ function standard_install() {
     ),
     'buffalo_front_page.jpg' => array(
       'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a layout. Blocks can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a view that was placed as a block.</p>'),
+      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a <a href="https://docs.backdropcms.org/documentation/views">view</a> that was placed as a block.</p>'),
     ),
   );
 
@@ -442,7 +442,9 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('<p>This is your first post! This post has been promoted to the front page and is displayed as part of the Promoted content view. You may edit or delete this or any of the sample pieces of content.</p>'),
+            'value' => st('<p>This is your first post! This post has been promoted to the front page and is displayed as part of the Promoted content view (/admin/structure/views/view/promoted). You may edit or delete this or any of the sample pieces of content through the admin content page (/admin/content).</p>
+
+<p>Please, visit our <a href="https://docs.backdropcms.org/documentation/user-guide">Backdrop User Guide</a> to help you get started.</p>'),
             'format' => 'filtered_html'
           ),
         ),
