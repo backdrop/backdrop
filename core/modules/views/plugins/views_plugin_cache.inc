@@ -192,16 +192,11 @@ class views_plugin_cache extends views_plugin {
    * Gather out of band data, compare it to what we started with and store the difference.
    */
   function gather_headers() {
-    // Simple replacement for head
-    if (isset($this->storage['head'])) {
-      $this->storage['head'] = str_replace($this->storage['head'], '', backdrop_add_html_head());
-    }
-    else {
-      $this->storage['head'] = '';
-    }
-
     // Check if the advanced mapping function of D 7.23 is available.
     $array_mapping_func = function_exists('backdrop_array_diff_assoc_recursive') ? 'backdrop_array_diff_assoc_recursive' : 'array_diff_assoc';
+
+    // Get difference for head.
+    $this->storage['head'] = $array_mapping_func(backdrop_add_html_head(), $this->storage['head']);
 
     // Slightly less simple for CSS:
     $css = backdrop_add_css();
@@ -261,7 +256,9 @@ class views_plugin_cache extends views_plugin {
    */
   function restore_headers() {
     if (!empty($this->storage['head'])) {
-      backdrop_add_html_head($this->storage['head']);
+      foreach ($this->storage['head'] as $key => $data) {
+        backdrop_add_html_head($this->storage['head']);
+      }
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {

@@ -271,7 +271,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         $field_elements['add_more'] = array(
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          '#value' => t('Add another'),
           '#attributes' => array('class' => array('field-add-more-submit')),
           '#limit_validation_errors' => array(array_merge($parents, array($field_name, $langcode))),
           '#submit' => array('field_add_more_submit'),
@@ -347,7 +347,7 @@ function field_default_form_errors($entity_type, $entity, $field, $instance, $la
 }
 
 /**
- * Submit handler for the "Add another item" button of a field form.
+ * Submit handler for the "Add another" button of a field form.
  *
  * This handler is run regardless of whether JS is enabled or not. It makes
  * changes to the form state. If the button was clicked with JS disabled, then

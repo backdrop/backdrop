@@ -798,7 +798,8 @@ class Layout {
       if (!isset($context->position) && !is_object($context->data)) {
         $context_info = layout_get_context_info($context->plugin);
         if (isset($context_info['load callback'])) {
-          $context_data = call_user_func_array($context_info['load callback'], $context->settings);
+          $load_arguments = array_values($context->settings);
+          $context_data = call_user_func_array($context_info['load callback'], $load_arguments);
           $context->setData($context_data);
         }
       }
