@@ -7,7 +7,7 @@
 /**
  * Implements hook_token_info().
  */
-function date_token_info() {  
+function date_token_info() {
   // All date types can share the same date value type.
   $info['types']['date-field-value'] = array(
     'name' => t('Date field values'),
@@ -21,7 +21,6 @@ function date_token_info() {
     'name' => t('Date'),
     'description' => t('The date value.'),
     'type' => 'date',
-
   );
   $info['tokens']['date-field-value']['to-date'] = array(
     'name' => t('End Date'),
@@ -63,7 +62,7 @@ function date_token_info_alter(&$info) {
 
         if ($field_info[$field_name]['cardinality'] != 1) {
           $info['tokens'][$token_type][$field_name]['dynamic'] = TRUE;
-          $info['tokens'][$token_type][$field_name]['description'] .= ' Replace the ? with the delta for multi-value fields.';
+          $info['tokens'][$token_type][$field_name]['description'] .= t(' Replace the ? with the delta for multi-value fields.');
         }
 
         if (empty($field_info[$field_name]['settings']['todate'])) {
