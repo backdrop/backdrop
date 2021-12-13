@@ -1,0 +1,130 @@
+{
+    "_config_name": "views.view.card_grid",
+    "name": "card_grid",
+    "description": "",
+    "tag": "default",
+    "disabled": false,
+    "base_table": "node",
+    "human_name": "Card grid",
+    "core": "1.20.x-dev",
+    "display": {
+        "default": {
+            "display_title": "Master",
+            "display_plugin": "default",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                },
+                "access": {
+                    "type": "perm",
+                    "perm": "access content"
+                },
+                "cache": {
+                    "type": "none"
+                },
+                "exposed_form": {
+                    "type": "basic"
+                },
+                "pager": {
+                    "type": "some",
+                    "options": {
+                        "items_per_page": "3"
+                    }
+                },
+                "style_plugin": "grid",
+                "row_plugin": "node",
+                "fields": {
+                    "title": {
+                        "id": "title",
+                        "table": "node",
+                        "field": "title",
+                        "label": "",
+                        "alter": {
+                            "alter_text": 0,
+                            "make_link": 0,
+                            "absolute": 0,
+                            "trim": 0,
+                            "word_boundary": 0,
+                            "ellipsis": 0,
+                            "strip_tags": 0,
+                            "html": 0
+                        },
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "link_to_node": 1
+                    }
+                },
+                "filters": {
+                    "status": {
+                        "value": 1,
+                        "table": "node",
+                        "field": "status",
+                        "id": "status",
+                        "expose": {
+                            "operator": false
+                        },
+                        "group": 1
+                    },
+                    "type": {
+                        "id": "type",
+                        "table": "node",
+                        "field": "type",
+                        "value": {
+                            "card": "card"
+                        }
+                    }
+                },
+                "sorts": {
+                    "created": {
+                        "id": "created",
+                        "table": "node",
+                        "field": "created",
+                        "order": "ASC"
+                    }
+                },
+                "title": "Card grid",
+                "row_options": {
+                    "build_mode": "full",
+                    "title": true,
+                    "links": false,
+                    "comments": false
+                },
+                "style_options": {
+                    "row_class": "",
+                    "default_row_class": 1,
+                    "row_class_special": 1,
+                    "uses_fields": 0,
+                    "columns": "3",
+                    "alignment": "horizontal",
+                    "deprecated_table": 0,
+                    "fill_single_line": 1,
+                    "caption": "",
+                    "summary": ""
+                },
+                "css_class": "row"
+            }
+        },
+        "page": {
+            "display_title": "Page",
+            "display_plugin": "page",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                },
+                "path": "card-grid"
+            }
+        },
+        "block": {
+            "display_title": "Block",
+            "display_plugin": "block",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                }
+            }
+        }
+    }
+}
