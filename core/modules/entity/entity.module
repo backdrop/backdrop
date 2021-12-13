@@ -44,33 +44,6 @@ function entity_flush_caches() {
 }
 
 /**
- * Implements hook_theme().
- */
-function entity_theme() {
-  // Build a pattern in the form of "(type1|type2|...)(\.|__)" such that all
-  // templates starting with an entity type or named like the entity type
-  // are found.
-  // This has to match the template suggestions provided in
-  // template_preprocess_entity().
-  $types = array();
-  foreach (entity_get_info() as $type => $info) {
-    if (isset($info['controller class']) && in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-      $types[] = $type;
-    }
-  }
-  $pattern = '(' . implode('|', $types) . ')(\.|__)';
-
-  return array(
-    'entity' => array(
-      'render element' => 'elements',
-      'template' => 'templates/entity',
-      'pattern' => $pattern,
-      'file' => 'entity.theme.inc',
-    ),
-  );
-}
-
-/**
  * Load a custom entity display mode by entity type and machine name.
  *
  * @param string $entity_type
