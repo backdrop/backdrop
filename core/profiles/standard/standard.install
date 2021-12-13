@@ -598,9 +598,4 @@ function standard_install() {
   config_set('system.core', 'preprocess_css', '1');
   config_set('system.core', 'preprocess_js', '1');
   config_set('system.core', 'cache', '1');
-
-
-  $image_url = $base_secure_url . '/core/profiles/standard/images/drop_paw.png';
-  system_retrieve_file($image_url, 'public://', TRUE);
-  config_set('system.core', 'site_logo_path', 'public://drop_paw.png');
 }
