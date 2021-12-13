@@ -7,14 +7,7 @@
 /**
  * Implements hook_token_info().
  */
-function date_token_info() {
-  // Type for date fields
-  $info['types']['date-field'] = array(
-    'name' => t('Date fields'),
-    'description' => t('Tokens related to date fields.'),
-    'needs-date' => 'date-field',
-  );
-  
+function date_token_info() {  
   // All date types can share the same date value type.
   $info['types']['date-field-value'] = array(
     'name' => t('Date field values'),
