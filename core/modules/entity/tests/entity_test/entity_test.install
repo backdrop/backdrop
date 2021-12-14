@@ -66,5 +66,43 @@ function entity_test_schema() {
     ),
     'primary key' => array('id'),
   );
+
+  // Add schema for the revision-test-entity.
+  $schema['entity_test2'] = $schema['entity_test'];
+  $schema['entity_test2']['fields']['revision_id'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'The ID of the entity\'s default revision.',
+  );
+  $schema['entity_test2']['fields']['title'] = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  );
+
+  $schema['entity_test2_revision'] = $schema['entity_test'];
+  $schema['entity_test2_revision']['fields']['revision_id'] = array(
+    'type' => 'serial',
+    'not null' => TRUE,
+    'description' => 'Primary Key: Unique revision ID.',
+  );
+  $schema['entity_test2_revision']['fields']['pid'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'The ID of the attached entity.',
+  );
+  $schema['entity_test2_revision']['fields']['title'] = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  $schema['entity_test2_revision']['primary key'] = array('revision_id');
+
   return $schema;
 }

@@ -19,11 +19,12 @@ class EntityAPITestCase extends BackdropWebTestCase {
   function testCRUD() {
     $user1 = $this->backdropCreateUser();
 
-    // Create some test entities.
+    // Create test entities associated to user1.
     $entity = entity_create('entity_test', array('name' => 'test', 'uid' => $user1->uid));
     $entity->save();
     $entity = entity_create('entity_test', array('name' => 'test2', 'uid' => $user1->uid));
     $entity->save();
+    // Create a test entity associated to any user.
     $entity = entity_create('entity_test', array('name' => 'test', 'uid' => NULL));
     $entity->save();
 
@@ -55,6 +56,111 @@ class EntityAPITestCase extends BackdropWebTestCase {
 
     $all = entity_test_load_multiple(FALSE);
     $this->assertTrue(empty($all), 'Deleted all entities.');
+  }
+
+  /**
+   * Tests CRUD for entities supporting revisions.
+   */
+  function testCRUDRevisisions() {
+    // Add text field to entity.
+    $field_info = array(
+      'field_name' => 'field_text',
+      'type' => 'text',
+      'entity_types' => array('entity_test2'),
+    );
+    field_create_field($field_info);
+
+    $instance = array(
+      'label' => 'Text Field',
+      'field_name' => 'field_text',
+      'entity_type' => 'entity_test2',
+      'bundle' => 'entity_test2',
+      'settings' => array(),
+      'required' => FALSE,
+    );
+    field_create_instance($instance);
+
+    // Create a test entity.
+    $entity_first_revision = entity_create('entity_test2', array('title' => 'first revision', 'name' => 'main', 'uid' => 1));
+    $entity_first_revision->field_text[LANGUAGE_NONE][0]['value'] = 'first revision text';
+    entity_save('entity_test2', $entity_first_revision);
+
+    $entities = array_values(entity_load('entity_test2', FALSE));
+    $this->assertEqual(count($entities), 1, 'Entity created.');
+    $this->assertTrue($entities[0]->default_revision, 'Initial entity revision is marked as default revision.');
+
+    // Saving the entity in revision mode should create a new revision.
+    $entity_second_revision = clone $entity_first_revision;
+    $entity_second_revision->title = 'second revision';
+    $entity_second_revision->is_new_revision = TRUE;
+    $entity_second_revision->default_revision = TRUE;
+    $entity_second_revision->field_text[LANGUAGE_NONE][0]['value'] = 'second revision text';
+
+    entity_save('entity_test2', $entity_second_revision);
+    $this->assertNotEqual($entity_second_revision->revision_id, $entity_first_revision->revision_id, 'Saving an entity in new revision mode creates a revision.');
+    $this->assertTrue($entity_second_revision->default_revision, 'New entity revision is marked as default revision.');
+
+    // Check the saved entity.
+    $entity = current(entity_load('entity_test2', array($entity_first_revision->pid), array(), TRUE));
+    $this->assertNotEqual($entity->title, $entity_first_revision->title, 'Default revision was changed.');
+
+    // Create third revision that is not default.
+    $entity_third_revision = clone $entity_first_revision;
+    $entity_third_revision->title = 'third revision';
+    $entity_third_revision->is_new_revision = TRUE;
+    $entity_third_revision->default_revision = FALSE;
+    $entity_third_revision->field_text[LANGUAGE_NONE][0]['value'] = 'third revision text';
+    entity_save('entity_test2', $entity_third_revision);
+    $this->assertNotEqual($entity_second_revision->revision_id, $entity_third_revision->revision_id, 'Saving an entity in revision mode creates a revision.');
+    $this->assertFalse($entity_third_revision->default_revision, 'Entity revision is not marked as default revision.');
+
+    $entity = current(entity_load('entity_test2', array($entity_first_revision->pid), array(), TRUE));
+    $this->assertEqual($entity->title, $entity_second_revision->title, 'Default revision was not changed.');
+    $this->assertEqual($entity->field_text[LANGUAGE_NONE][0]['value'], $entity_second_revision->field_text[LANGUAGE_NONE][0]['value'], 'Default revision text field was not changed.');
+
+    // Load not default revision.
+    $revision = entity_revision_load('entity_test2', $entity_third_revision->revision_id);
+    $this->assertEqual($revision->revision_id, $entity_third_revision->revision_id, 'Revision successfully loaded.');
+    $this->assertFalse($revision->default_revision, 'Entity revision is not marked as default revision after loading.');
+
+    // Save not default revision.
+    $entity_third_revision->title = 'third revision updated';
+    $entity_third_revision->field_text[LANGUAGE_NONE][0]['value'] = 'third revision text updated';
+    entity_save('entity_test2', $entity_third_revision);
+
+    // Ensure that not default revision has been changed.
+    $entity = entity_revision_load('entity_test2', $entity_third_revision->revision_id);
+    $this->assertEqual($entity->title, 'third revision updated', 'Not default revision was updated successfully.');
+    $this->assertEqual($entity->field_text[LANGUAGE_NONE][0]['value'], 'third revision text updated', 'Not default revision field was updated successfully.');
+
+    // Ensure that default revision has not been changed.
+    $entity = current(entity_load('entity_test2', array($entity_first_revision->pid), array(), TRUE));
+    $this->assertEqual($entity->title, $entity_second_revision->title, 'Default revision was not changed.');
+
+    // Try to delete default revision.
+    $result = entity_revision_delete('entity_test2', $entity_second_revision->revision_id);
+    $this->assertFalse($result, 'Default revision cannot be deleted.');
+
+    // Make sure default revision is still set after trying to delete it.
+    $entity = current(entity_load('entity_test2', array($entity_first_revision->pid), array(), TRUE));
+    $this->assertEqual($entity->revision_id, $entity_second_revision->revision_id, 'Second revision is still default.');
+
+    // Delete first revision.
+    $result = entity_revision_delete('entity_test2', $entity_first_revision->revision_id);
+    $this->assertTrue($result, 'Not default revision deleted.');
+
+    $entity = entity_revision_load('entity_test2', $entity_first_revision->revision_id);
+    $this->assertFalse($entity, 'First revision deleted.');
+
+    // Delete the entity and make sure third revision has been deleted as well.
+    entity_delete('entity_test2', $entity_second_revision->pid);
+    $entity_info = entity_get_info('entity_test2');
+    $result = db_select($entity_info['revision table'])
+      ->condition('revision_id', $entity_third_revision->revision_id)
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertEqual($result, 0, 'Entity deleted with its all revisions.');
   }
 }
 
