@@ -704,8 +704,10 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
         if ($this->revisionKey) {
           $return = $this->saveRevision($entity);
         }
+
         $this->resetCache(array($entity->{$this->idKey}));
-        $this->invoke('update', $entity);
+        $this->postSave($entity, TRUE);
+        $this->invokeHook('update', $entity);
 
         // Field API always saves as default revision. So if the revision saved
         // is not default, then we have to restore the field values of the
@@ -713,11 +715,6 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
         if ($this->revisionKey && !$entity->{$this->defaultRevisionKey} && !empty($this->entityInfo['fieldable'])) {
           field_attach_update($this->entityType, $entity->original);
         }
-
-        $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
-        $this->resetCache(array($entity->{$this->idKey}));
-        $this->postSave($entity, TRUE);
-        $this->invokeHook('update', $entity);
       }
       else {
         $return = backdrop_write_record($this->entityInfo['base table'], $entity);
