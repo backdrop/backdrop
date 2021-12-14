@@ -9,7 +9,11 @@
 .layout-list .layout-group td:first-child {
   font-weight: bold;
 }
-.layout-list .layout-row td:first-child {
+.layout-list .layout-group td.missing-path,
+ .layout-list .layout-group td.missing-path a {
+   color: #c40d00;
+ }
+ .layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
 .layout-list tr.disabled td {
@@ -46,6 +50,13 @@
 .layout-list .layout-conditions-list ul {
   margin-left: 0;
 }
+
+.layout-list thead .layout-title {
+   padding-left: 71px;
+ }
+ [dir="rtl"] .layout-list thead .layout-title {
+   padding-right: 71px;
+ }
 
 /* Individual layout settings form. */
 .layout-settings-page .form-type-checkboxes,
