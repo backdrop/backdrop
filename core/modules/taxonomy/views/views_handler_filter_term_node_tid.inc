@@ -132,7 +132,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         if ($tree) {
           foreach ($tree as $term) {
             $choice = new stdClass();
-            $choice->option = array($term->tid => str_repeat('-', $term->depth) . $term->name);
+            $choice->option = array($term->tid => str_repeat('· ', $term->depth) . $term->name);
             $options[] = $choice;
           }
         }

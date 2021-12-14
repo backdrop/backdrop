@@ -99,3 +99,9 @@ name = Tests handler filter_comment_user_uid
 description = Tests the user posted or commented filter Views handler.
 group = Comment
 file = comment_views_handler_filter_user_uid.test
+
+[CommentAuthorDeletionTestCase]
+name = 'Comment author deletion'
+description = 'Test the behavior of comments when the comment author is deleted.'
+group = Comment
+file = comment.test

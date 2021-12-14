@@ -115,6 +115,11 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This page allows you to add or remove rows, and change the order of rows by dragging them up and down. You can also change the number of regions within each row, and adjust the width of each region.'),
+  );
+
   $messages = array();
   $form['messages'] = array(
     '#theme' => 'status_messages',
@@ -162,7 +167,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
-    '#attributes' => array('class' => array('flexible-layout-add-row')),
+    '#attributes' => array('class' => array('layout-flexible-add-row', 'button-secondary')),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),
@@ -505,11 +510,6 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     '#collapsible' => TRUE,
   );
 
-  $form['region_styles']['row_classes'] = array(
-    '#title' => t('Additional row classes'),
-    '#type' => 'textfield',
-    '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
-  );
   $options = array(
     'div' => 'DIV',
     'nav' => 'NAV',
@@ -528,13 +528,22 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_styles']['container'] = array(
     '#title' => t('Row width behavior'),
-    '#type' => 'select',
+    '#type' => 'radios',
     '#options' => array(
-      'container_fluid' => t("Maximum width (adds the 'container-fluid' row class)"),
-      'container' => t("Fixed width (adds the 'container' row class)"),
-      'no_container' => t('Always full width of page (no row classes added)'),
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
+  );
+  $form['region_styles']['container']['container']['#description'] = t('Adds the <code>container</code> class to the row.');
+  $form['region_styles']['container']['container_fluid']['#description'] = t('Adds the <code>container-fluid</code> class to the row (no <code>max-width</code>, but <code>padding</code>).');
+  $form['region_styles']['container']['no_container']['#description'] = t('No container-related classes added to the row (e.g. for Hero blocks).');
+
+  $form['region_styles']['row_classes'] = array(
+    '#title' => t('Additional row classes'),
+    '#type' => 'textfield',
+    '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
   );
 
   $form['actions'] = array('#type' => 'actions');
