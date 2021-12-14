@@ -365,13 +365,13 @@ class DefaultEntityController implements EntityControllerInterface {
    * See CommentController::buildQuery() or TaxonomyTermController::buildQuery()
    * for examples.
    *
-   * @param $ids
+   * @param array $ids
    *   An array of entity IDs, or FALSE to load all entities.
-   * @param $conditions
+   * @param array $conditions
    *   An array of conditions. Keys are field names on the entity's base table.
    *   Values will be compared for equality. All the comparisons will be ANDed
    *   together. This parameter is deprecated; use an EntityFieldQuery instead.
-   * @param $revision_id
+   * @param int|FALSE $revision_id
    *   The ID of the revision to load, or FALSE if this query is asking for the
    *   most current revision(s).
    *
@@ -409,7 +409,7 @@ class DefaultEntityController implements EntityControllerInterface {
       }
       $query->fields('revision', $entity_revision_fields);
 
-      // Compare revision id of the base and revision table, if equal then this
+      // Compare revision id of the base and revision table. If equal, then this
       // is the active revision.
       $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'is_active_revision');
     }
@@ -540,19 +540,19 @@ interface EntityStorageControllerInterface extends EntityControllerInterface {
   /**
    * Constructs a new entity object, without permanently saving it.
    *
-   * @param $values
+   * @param array $values
    *   An array of values to set, keyed by property name. If the entity type has
    *   bundles the bundle key has to be specified.
    *
    * @return EntityInterface
    *   A new entity object.
    */
-  public function create(array $values);
+  public function create(array $values = array());
 
   /**
    * Deletes permanently saved entities.
    *
-   * @param $ids
+   * @param array $ids
    *   An array of entity IDs.
    *
    * @throws EntityStorageException
@@ -582,9 +582,29 @@ interface EntityStorageControllerInterface extends EntityControllerInterface {
 class EntityStorageException extends Exception { }
 
 /**
+ * Interface for EntityControllers of entities that support revisions.
+ */
+interface EntityStorageControllerRevisionableInterface extends EntityStorageControllerInterface {
+
+  /**
+   * Delete an entity revision.
+   *
+   * Note that the default revision of an entity cannot be deleted.
+   *
+   * @param $revision_id
+   *   The ID of the revision to delete.
+   *
+   * @return boolean
+   *   TRUE if the entity revision could be deleted, FALSE otherwise.
+   */
+  public function deleteRevision($revision_id);
+
+}
+
+/**
  * Implements the entity storage controller interface for the database.
  */
-class EntityDatabaseStorageController extends DefaultEntityController implements EntityStorageControllerInterface {
+class EntityDatabaseStorageController extends DefaultEntityController implements EntityStorageControllerRevisionableInterface {
 
   /**
    * Implements EntityStorageControllerInterface::create().
@@ -618,6 +638,12 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       db_delete($this->entityInfo['base table'])
         ->condition($this->idKey, $ids, 'IN')
         ->execute();
+
+      if (isset($this->revisionTable)) {
+        db_delete($this->revisionTable)
+          ->condition($this->idKey, $ids, 'IN')
+          ->execute();
+      }
       // Reset the cache as soon as the changes have been applied.
       $this->resetCache($ids);
 
@@ -636,6 +662,26 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
   }
 
   /**
+   * Implements EntityStorageControllerRevisionableInterface::deleteRevision().
+   */
+  public function deleteRevision($revision_id) {
+    if ($entity_revision = entity_revision_load($this->entityType, $revision_id)) {
+      // Prevent deleting the default revision.
+      if (entity_revision_is_default($this->entityType, $entity_revision)) {
+        return FALSE;
+      }
+
+      db_delete($this->revisionTable)
+        ->condition($this->revisionKey, $revision_id)
+        ->execute();
+
+      $this->invokeHook('revision_delete', $entity_revision);
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Implements EntityStorageControllerInterface::save().
    */
   public function save(EntityInterface $entity) {
@@ -650,6 +696,24 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       $this->invokeHook('presave', $entity);
 
       if (!$entity->isNew()) {
+        // Update the base table if the entity doesn't have revisions or if we
+        // are updating the default revision.
+        if (!$this->revisionKey || !empty($entity->{$this->defaultRevisionKey})) {
+          $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        }
+        if ($this->revisionKey) {
+          $return = $this->saveRevision($entity);
+        }
+        $this->resetCache(array($entity->{$this->idKey}));
+        $this->invoke('update', $entity);
+
+        // Field API always saves as default revision. So if the revision saved
+        // is not default, then we have to restore the field values of the
+        // default revision now by invoking field_attach_update() once again.
+        if ($this->revisionKey && !$entity->{$this->defaultRevisionKey} && !empty($this->entityInfo['fieldable'])) {
+          field_attach_update($this->entityType, $entity->original);
+        }
+
         $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         $this->resetCache(array($entity->{$this->idKey}));
         $this->postSave($entity, TRUE);
@@ -658,6 +722,10 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       else {
         $return = backdrop_write_record($this->entityInfo['base table'], $entity);
         // Reset general caches, but keep caches specific to certain entities.
+        if ($this->revisionKey) {
+          $this->saveRevision($entity);
+        }
+
         $this->resetCache(array());
         $this->postSave($entity, FALSE);
         $this->invokeHook('insert', $entity);
@@ -666,6 +734,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       // Ignore slave server temporarily.
       db_ignore_slave();
       unset($entity->is_new);
+      unset($entity->is_new_revision);
       unset($entity->original);
 
       return $return;
@@ -675,6 +744,52 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       watchdog_exception($this->entityType, $e);
       throw new EntityStorageException($e->getMessage(), (int) $e->getCode(), $e);
     }
+  }
+
+  /**
+   * Saves an entity revision.
+   *
+   * @param Entity $entity
+   *   Entity revision to save.
+   */
+  protected function saveRevision(EntityInterface $entity) {
+    // Convert the entity into an array, as it might not have the same
+    // properties as the entity. It is just a raw structure.
+    $record = (array) $entity;
+    // File fields assumes we are using $entity->revision instead of
+    // $entity->is_new_revision, so we also support it and make sure it's set to
+    // the same value.
+    $entity->is_new_revision = !empty($entity->is_new_revision) || !empty($entity->revision) || $entity->is_new;
+    $entity->revision = &$entity->is_new_revision;
+    $entity->{$this->defaultRevisionKey} = !empty($entity->{$this->defaultRevisionKey}) || $entity->is_new;
+
+    // When saving a new revision, set any existing revision ID to NULL, so as
+    // to ensure that a new revision will actually be created.
+    if ($entity->is_new_revision && isset($record[$this->revisionKey])) {
+      $record[$this->revisionKey] = NULL;
+    }
+
+    if ($entity->is_new_revision) {
+      backdrop_write_record($this->revisionTable, $record);
+      $update_default_revision = $entity->{$this->defaultRevisionKey};
+    }
+    else {
+      backdrop_write_record($this->revisionTable, $record, $this->revisionKey);
+      // @todo: Fix original entity to be of the same revision and check whether
+      // the default revision key has been set.
+      $update_default_revision = $entity->{$this->defaultRevisionKey} && $entity->{$this->revisionKey} != $entity->original->{$this->revisionKey};
+    }
+    // Make sure to update the new revision key for the entity.
+    $entity->{$this->revisionKey} = $record[$this->revisionKey];
+
+    // Mark this revision as the default one.
+    if ($update_default_revision) {
+      db_update($this->entityInfo['base table'])
+        ->fields(array($this->revisionKey => $record[$this->revisionKey]))
+        ->condition($this->idKey, $entity->{$this->idKey})
+        ->execute();
+    }
+    return $entity->is_new_revision ? SAVED_NEW : SAVED_UPDATED;
   }
 
   /**

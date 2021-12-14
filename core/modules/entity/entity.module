@@ -174,6 +174,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *   - view
  *   - update
  *   - delete
+ *   - revision delete
  * @param string $entity_type
  *   The entity type of the entity to check for.
  * @param EntityInterface $entity
@@ -189,7 +190,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  * @see entity_type_supports()
  */
 function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $account = NULL) {
-  if (!in_array($op, array('create', 'view', 'update', 'delete'), TRUE)) {
+  if (!in_array($op, array('create', 'view', 'update', 'delete', 'revision delete'), TRUE)) {
     // If the $op was not one of the supported ones, we return access denied.
     return FALSE;
   }
@@ -526,11 +527,11 @@ function entity_delete_multiple($entity_type, $ids) {
  * @param $entity_type
  *   The type of the entity.
  * @param $revision_id
- *   The id of the revision to load.
+ *   The ID of the revision to load.
  *
  * @return
  *   The entity object, or FALSE if there is no entity with the given revision
- *   id.
+ *   ID.
  */
 function entity_revision_load($entity_type, $revision_id) {
   $info = entity_get_info($entity_type);
@@ -557,7 +558,7 @@ function entity_revision_delete($entity_type, $revision_id) {
   if (isset($info['revision deletion callback'])) {
     return $info['revision deletion callback']($revision_id, $entity_type);
   }
-  elseif (in_array('EntityAPIControllerRevisionableInterface', class_implements($info['controller class']))) {
+  elseif (in_array('EntityStorageControllerRevisionableInterface', class_implements($info['controller class']))) {
     return entity_get_controller($entity_type)->deleteRevision($revision_id);
   }
   return FALSE;
@@ -589,7 +590,7 @@ function entity_revision_is_default($entity_type, $entity) {
   if (!empty($entity->is_new) || empty($entity->{$info['entity keys']['id']})) {
     return TRUE;
   }
-  if (in_array('EntityAPIControllerRevisionableInterface', class_implements($info['controller class']))) {
+  if (in_array('EntityStorageControllerRevisionableInterface', class_implements($info['controller class']))) {
     $key = !empty($info['entity keys']['default revision']) ? $info['entity keys']['default revision'] : 'default_revision';
     return !empty($entity->$key);
   }
@@ -608,8 +609,8 @@ function entity_revision_is_default($entity_type, $entity) {
  * Sets a given entity revision as default revision.
  *
  * Note that the default revision flag will only be supported by entity types
- * based upon the EntityAPIController, i.e. implementing the
- * EntityAPIControllerRevisionableInterface.
+ * based upon the EntityStorageController, i.e. implementing the
+ * EntityStorageControllerRevisionableInterface.
  *
  * @param $entity_type
  *   The type of the entity.
