@@ -547,7 +547,7 @@ interface EntityStorageControllerInterface extends EntityControllerInterface {
    * @return EntityInterface
    *   A new entity object.
    */
-  public function create(array $values = array());
+  public function create(array $values);
 
   /**
    * Deletes permanently saved entities.
