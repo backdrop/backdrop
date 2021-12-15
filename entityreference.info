@@ -3,4 +3,3 @@ description = Defines a field type for referencing from other entities, such as 
 package = Fields
 backdrop = 1.x
 type = module
-dependencies[] = entity_plus

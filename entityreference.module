@@ -58,6 +58,11 @@ function entityreference_theme($existing, $type, $theme, $path) {
     'entityreference_entity_id' => array(
       'variables' => array('item' => NULL, 'settings' => NULL),
     ),
+    'entityreference_entity' => array(
+      'render element' => 'elements',
+      'template' => 'templates/entityreference-entity',
+      'file' => 'entityreference.theme.inc',
+    ),
   );
 }
 
@@ -1374,8 +1379,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
         $target_entity = clone $item['entity'];
         unset($target_entity->content);
-        $result[$delta] = entity_plus_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $target_langcode, !empty($settings['hide_title']));
-
+        $result[$delta] = entityreference_view(array($target_entity->id() => $target_entity), $settings['view_mode'], $target_langcode, !empty($settings['hide_title']));
         if (empty($settings['links']) && isset($result[$delta][$target_type][$item[$column]]['links'])) {
           $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
         }
@@ -1385,6 +1389,124 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
   }
 
   return $result;
+}
+
+/**
+ * Generate a rendering for the given entities.
+ *
+ * @param array $entities
+ *   An array of EntityInterface entities to render.
+ * @param string $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ * @param bool|NULL $page
+ *   (optional) If set will control if the entity is rendered: if TRUE
+ *   the entity will be rendered without its title, so that it can be embeded
+ *   in another context. If FALSE the entity will be displayed with its title
+ *   in a mode suitable for lists.
+ *   If unset, the page mode will be enabled if the current path is the URI
+ *   of the entity, as returned by entity_uri().
+ *
+ * @return
+ *   The renderable array. If there is no information on how to view an entity,
+ *   FALSE is returned.
+ */
+function entityreference_view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+  $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->langcode;
+
+  $view = array();
+  foreach ($entities as $entity) {
+    /* @var EntityInterface $entity */
+    entityreference_build_content($entity, $view_mode, $langcode);
+
+    $build = $entity->content;
+
+    // Entity-specific builds
+    // @todo update once core has a build content method on entities.
+    $entity_type = $entity->entityType();
+    $build_function = $entity_type . '_build_content';
+    if (function_exists($build_function)) {
+      switch ($build_function) {
+        case 'comment_build_content':
+          // Comments also need to know their Node context.
+          $node = node_load($entity->nid);
+          comment_build_content($entity, $node, $view_mode, $langcode);
+          break;
+        case 'file_build_content':
+          file_build_content($entity, $view_mode, $langcode);
+          // @see https://github.com/backdrop/backdrop-issues/issues/5370
+          // @todo Remove once core is fixed.
+          $entity->content['file']['#file'] = $entity;
+          break;
+        default:
+          $build_function($entity, $view_mode, $langcode);
+      }
+    }
+
+    $build = $entity->content;
+    // We don't need duplicate rendering info in entity->content.
+    unset($entity->content);
+
+    $build += array(
+      // @see template_preprocess_entityreference_entity()
+      '#theme' => 'entityreference_entity',
+      '#entity_type' => $entity_type,
+      '#view_mode' => $view_mode,
+      '#language' => $langcode,
+      '#entity' => $entity,
+      '#page' => $page,
+    );
+
+    // Allow modules to modify the structured entity.
+    backdrop_alter(array('entityreference_view'), $build, $entity_type);
+    $view[$entity_type][$entity->id()] = $build;
+  }
+
+  return $view;
+}
+
+/**
+ * Builds a structured array representing the entity's content.
+ *
+ * The content built for the entity will vary depending on the $view_mode
+ * parameter.
+ *
+ * @param EntityInterface $entity
+ *   An entity object.
+ * @param string $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ */
+function entityreference_build_content(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+  $entity_type = $entity->entityType();
+  $entity_info = entity_get_info($entity_type);
+
+  // Remove previously built content, if exists.
+  $entity->content = array();
+
+  $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->langcode;
+
+  if (!empty($entity_info['fieldable'])) {
+    // Perform the preparation tasks if they have not been performed yet.
+    // An internal flag prevents the operation from running twice.
+    field_attach_prepare_view($entity_type, array($entity->id() => $entity), $view_mode);
+    $entity->content += field_attach_view($entity_type, $entity, $view_mode, $langcode);
+  }
+  entity_prepare_view($entity_type, array($entity->id() => $entity));
+
+  // Allow modules to change the view mode.
+  $view_mode_context = array(
+    'entity_type' => $entity_type,
+    'entity' => $entity,
+    'langcode' => $langcode,
+  );
+  backdrop_alter('entityreference_view_mode', $view_mode, $view_mode_context);
+  // Make sure the used view-mode gets stored.
+  $entity->content += array('#view_mode' => $view_mode);
 }
 
 /**
