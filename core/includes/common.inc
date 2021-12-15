@@ -2354,13 +2354,13 @@ function format_size($size, $langcode = NULL) {
 /**
  * Formats a time interval with the requested granularity.
  *
- * @param $interval
+ * @param int $interval
  *   The length of the interval in seconds.
- * @param $granularity
+ * @param int $granularity
  *   How many different units to display in the string.
- * @param $langcode
- *   Optional language code to translate to a language other than
- *   what is used to display the page.
+ * @param string $langcode
+ *   Optional language code to translate to a language other than what is used
+ *   to display the page.
  *
  * @return
  *   A translated string representation of the interval.
@@ -2380,7 +2380,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     $key = explode('|', $key);
     if ($interval >= $value) {
       $output .= ($output ? ' ' : '') . format_plural(floor($interval / $value), $key[0], $key[1], array(), array('langcode' => $langcode));
-      $interval %= (int) $interval % $value;
+      $interval = (int) $interval % $value;
       $granularity--;
     }
 
