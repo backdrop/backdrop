@@ -281,14 +281,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
-  $items = array(
-    t('Content: <code>node/%</code>'),
-    t('User accounts: <code>user/%</code>'),
-    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
-    t('Comments: <code>comment/%</code>'),
-  );
-  $description_list = theme('item_list', array('items' => $items));
-
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
@@ -297,6 +289,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
+
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $path_matches = db_query('
     SELECT path, page_callback
@@ -315,6 +308,14 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#prefix' => '<p id="path-matches">',
     '#suffix' => '</p>',
   );
+
+  $description_items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = theme('item_list', array('items' => $description_items));
   $form['path_details'] = array(
     '#type' => 'details',
     '#summary' => t('Paths and placeholders'),
