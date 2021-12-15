@@ -295,9 +295,36 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
     '#access' => !$layout->isDefault(),
+    '#ajax' => array(
+      'callback' => 'layout_path_matches_callback',
+      'wrapper' => 'path-matches',
+    ),
   );
+  $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
+  $path_matches = db_query('
+    SELECT path, page_callback
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchAllKeyed();
+  if (count($path_matches)) {
+    $path_match_text = t('This layout will override the page(s) created by function %page_callback.', array('%page_callback' => $path_matches[$path]));
+  }
+  else {
+    $path_match_text = t('This path will create a layout-provided page.');
+  }
+  $form['path_matches'] = array(
+    '#markup' => $path_match_text,
+    '#prefix' => '<p id="path-matches">',
+    '#suffix' => '</p>',
+  );
+  $form['path_details'] = array(
+    '#type' => 'details',
+    '#summary' => t('Paths and placeholders'),
+    '#details' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
+  );
+
   $form['path_update'] = array(
     '#type' => 'submit',
     '#value' => t('Check path'),
@@ -327,7 +354,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
+    '#description' => t('Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
     // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
@@ -613,6 +640,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   return $form;
+}
+
+/**
+ * Callback to return the path matching information.
+ */
+function layout_path_matches_callback($form, &$form_state) {
+  return $form['path_matches'];
 }
 
 /**
