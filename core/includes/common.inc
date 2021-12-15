@@ -8509,7 +8509,6 @@ function watchdog_severity_levels() {
   );
 }
 
-
 /**
  * Explodes a string of tags into an array.
  *
@@ -8519,7 +8518,7 @@ function backdrop_explode_tags($tags) {
   // This regexp allows the following types of user input:
   // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
-  preg_match_all($regexp, $tags, $matches);
+  preg_match_all($regexp, (string) $tags, $matches);
   $typed_tags = array_unique($matches[1]);
 
   $tags = array();
