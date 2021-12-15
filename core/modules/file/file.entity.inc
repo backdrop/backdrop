@@ -315,7 +315,6 @@ class FileStorageController extends EntityDatabaseStorageController {
       $build += array(
         '#theme' => 'file_entity',
         '#file' => $file,
-        '#entity' => $file,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,

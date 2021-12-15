@@ -223,7 +223,6 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
  *   content language of the current request.
  */
 function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
-  debug($entity, 'entity_build_content');
   $info = entity_get_info($entity->entityType());
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
     return entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
@@ -258,6 +257,19 @@ function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = N
   }
 
   return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function entity_theme() {
+  return array(
+    'entity' => array(
+      'render element' => 'elements',
+      'template' => 'templates/entity',
+      'file' => 'entity.theme.inc',
+    ),
+  );
 }
 
 /**
