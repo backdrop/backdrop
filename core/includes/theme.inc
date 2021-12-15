@@ -429,6 +429,7 @@ class ThemeRegistry Extends BackdropCacheArray {
     return array_fill_keys(array_keys($this->completeRegistry), NULL);
   }
 
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     // Since the theme registry allows for theme hooks to be requested that
     // are not registered, just check the existence of the key in the registry.
@@ -437,6 +438,7 @@ class ThemeRegistry Extends BackdropCacheArray {
     return array_key_exists($offset, $this->storage);
   }
 
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     // If the offset is set but empty, it is a registered theme hook that has
     // not yet been requested. Offsets that do not exist at all were not

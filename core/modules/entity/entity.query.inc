@@ -560,6 +560,7 @@ class EntityFieldQuery {
    * @return EntityFieldQuery
    *   The called object.
    */
+  #[\ReturnTypeWillChange]
   public function count() {
     $this->count = TRUE;
     return $this;

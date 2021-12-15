@@ -171,6 +171,8 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
  * @see image_crop()
  */
 function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = NULL) {
+  $width = (int) $width;
+  $height = (int) $height;
   $res = image_gd_create_tmp($image, $width, $height);
 
   // Convert the hexadecimal background value to a color index value.
@@ -180,9 +182,9 @@ function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = N
   imagefill($res, 0, 0, $background);
 
   // Copy the source image to our new destination image. We use
-  // $image->info['width'] instead of $width because we are copying using the
-  // source image's width and height, not the destination width and height.
-  if (!imagecopyresampled($res, $image->resource, -$x, -$y, 0, 0, $image->info['width'], $image->info['height'], $image->info['width'], $image->info['height'])) {
+  // $image->info['width'] instead of $width because we are copying the source
+  // image's width and height, not the destination width and height.
+  if (!imagecopyresampled($res, $image->resource, (int) -$x, (int) -$y, 0, 0, $image->info['width'], $image->info['height'], $image->info['width'], $image->info['height'])) {
     return FALSE;
   }
 

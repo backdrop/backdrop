@@ -1925,7 +1925,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $good_realpath_filename = backdrop_realpath('temporary://' . $good_filename);
     imagejpeg($good_image, $good_realpath_filename);
 
-    $bad_image =  imagecreate(1024, 260);
+    $bad_image = imagecreate(1024, 260);
     imagecolorallocate($bad_image, 255, 0, 0); // Red image.
     $bad_filename = 'bad.jpg';
     $bad_realpath_filename = backdrop_realpath('temporary://' . $bad_filename);

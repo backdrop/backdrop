@@ -285,7 +285,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       if ($record->picture) {
         $picture_fids[] = $record->picture;
       }
-      $queried_users[$key]->data = unserialize($record->data);
+      $queried_users[$key]->data = unserialize((string) $record->data);
       $queried_users[$key]->roles = array();
       if ($record->uid) {
         $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_ROLE;

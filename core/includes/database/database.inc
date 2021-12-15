@@ -22,11 +22,11 @@
  * The system is built atop PHP's PDO (PHP Data Objects) database API and
  * inherits much of its syntax and semantics.
  *
- * Most Backdrop database SELECT queries are performed by a call to db_query() or
- * db_query_range(). Module authors should also consider using the PagerDefault
- * Extender for queries that return results that need to be presented on
- * multiple pages (see https://drupal.org/node/508796), and the TableSort
- * Extender for generating appropriate queries for sortable tables
+ * Most Backdrop database SELECT queries are performed by a call to db_query()
+ * or db_query_range(). Module authors should also consider using the
+ * PagerDefault Extender for queries that return results that need to be
+ * presented on multiple pages (see https://drupal.org/node/508796), and the
+ * TableSort Extender for generating appropriate queries for sortable tables
  * (see https://drupal.org/node/1848372).
  *
  * For example, one might wish to return a list of the most recent 10 nodes
@@ -2263,6 +2263,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
     $this->setFetchMode(PDO::FETCH_OBJ);
   }
 
+  #[\ReturnTypeWillChange]
   public function execute($args = array(), $options = array()) {
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
@@ -2401,22 +2402,27 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
 
   /* Implementations of Iterator. */
 
+  #[\ReturnTypeWillChange]
   public function current() {
     return NULL;
   }
 
+  #[\ReturnTypeWillChange]
   public function key() {
     return NULL;
   }
 
+  #[\ReturnTypeWillChange]
   public function rewind() {
     // Nothing to do: our DatabaseStatement can't be rewound.
   }
 
+  #[\ReturnTypeWillChange]
   public function next() {
     // Do nothing, since this is an always-empty implementation.
   }
 
+  #[\ReturnTypeWillChange]
   public function valid() {
     return FALSE;
   }
