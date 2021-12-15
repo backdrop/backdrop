@@ -64,10 +64,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // rows that actually didn't have to be updated because the values didn't
       // change. This matches common behaviour among other database systems.
       PDO::MYSQL_ATTR_FOUND_ROWS => TRUE,
-      // So we don't have to mess around with cursors and unbuffered queries by default.
+      // So we don't have to mess around with cursors and unbuffered queries by
+      // default.
       PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
-      // Because MySQL's prepared statements skip the query cache, because it's dumb.
+      // Because MySQL's prepared statements skip the query cache, because it's
+      // dumb.
       PDO::ATTR_EMULATE_PREPARES => TRUE,
+      // Convert numeric values to strings when fetching. In PHP 8.1,
+      // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
+      // prepares and returns integers. See https://externals.io/message/113294
+      // for further discussion.
+      PDO::ATTR_STRINGIFY_FETCHES => TRUE,
     );
     if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
       // An added connection option in PHP 5.5.21+ to optionally limit SQL to a
