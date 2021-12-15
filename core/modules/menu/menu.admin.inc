@@ -102,6 +102,9 @@ function menu_overview_form($form, &$form_state, $menu) {
   foreach ($result as $item) {
     $links[] = $item;
   }
+  $link_count = db_query("SELECT COUNT(*) AS counter FROM {menu_links} WHERE menu_name = :menu AND link_path NOT LIKE :link_path", array(':menu' => $menu['menu_name'], ':link_path' => '%\%%'))->fetchObject();
+  $counter = intval($link_count->counter / 2 ) + 1;
+
   $tree = menu_tree_data($links);
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
@@ -111,10 +114,11 @@ function menu_overview_form($form, &$form_state, $menu) {
   $menu_admin = FALSE;
 
   $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
-  $form = array_merge($form, _menu_overview_tree_form($tree, $tree_langcode));
-  $form['#menu'] =  $menu;
+  $delta = _menu_get_menu_weight_delta($menu['menu_name'], $counter);
+  $form = array_merge($form, _menu_overview_tree_form($tree, $delta, $tree_langcode));
+  $form['#menu'] = $menu;
 
-  if (count($links)) {
+  if (element_children($form)) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -132,10 +136,12 @@ function menu_overview_form($form, &$form_state, $menu) {
  *
  * @param $tree
  *   The menu_tree retrieved by menu_tree_data.
+ * @param $delta
+ *   The number of items to use in the menu weight selector. Defaults to 50.
  * @param $langcode
  *   A language code by which to filter the list of menu items.
  */
-function _menu_overview_tree_form($tree, $langcode = NULL) {
+function _menu_overview_tree_form($tree, $delta = 50, $langcode = NULL) {
   $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
   $language_options = language_list(TRUE, TRUE);
   $language_options[LANGUAGE_NONE] = t('All');
@@ -175,7 +181,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
       );
       $form[$mlid]['weight'] = array(
         '#type' => 'weight',
-        '#delta' => 50,
+        '#delta' => $delta,
         '#default_value' => $item['weight'],
         '#title_display' => 'invisible',
         '#title' => t('Weight for @title', array('@title' => $item['title'])),
@@ -215,7 +221,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
     }
 
     if ($data['below']) {
-      _menu_overview_tree_form($data['below'], $langcode);
+      _menu_overview_tree_form($data['below'], $delta, $langcode);
     }
   }
   return $form;
@@ -422,10 +428,22 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
   );
+  // Get number of items in all possible parent menus, so the weight selector is
+  // sized appropriately.
+  $menu_names = array_keys(menu_get_menus());
+  $menu_options = array();
+  foreach ($menu_names as $menu_name) {
+    if (isset($options[$menu_name . ':0'])) {
+      $menu_options[] = $menu_name;
+    }
+  }
+  // Make sure that we always have values in menu_options.
+  $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
+
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => 50,
+    '#delta' => _menu_get_menu_weight_delta($menu_options),
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
   );
