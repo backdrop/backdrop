@@ -296,10 +296,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-    '#ajax' => array(
-      'callback' => 'layout_path_matches_callback',
-      'wrapper' => 'path-matches',
-    ),
   );
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $path_matches = db_query('
@@ -643,13 +639,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 }
 
 /**
- * Callback to return the path matching information.
- */
-function layout_path_matches_callback($form, &$form_state) {
-  return $form['path_matches'];
-}
-
-/**
  * Validates layout_settings_form(), ensuring a valid path.
  */
 function layout_settings_form_validate(&$form, &$form_state) {
@@ -701,19 +690,22 @@ function layout_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form() that updates available contexts.
+ * Submit handler for layout_settings_form() that updates available contexts
+ * and information about path matching.
  */
 function layout_settings_form_path_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
 /**
- * AJAX handler for layout_settings_form() the returns updated contexts.
+ * AJAX handler for layout_settings_form() the returns updated contexts and
+ * information about path matching.
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
+  $commands[] = ajax_command_html('#path-matches', backdrop_render($form['path_matches']));
   return array(
     '#type' => 'ajax',
     '#commands' => $commands,
