@@ -3301,7 +3301,8 @@ function backdrop_set_time_limit($time_limit) {
  *   The path to the requested item or an empty string if the item is not found.
  */
 function backdrop_get_path($type, $name) {
-  return dirname(backdrop_get_filename($type, $name));
+  $path = backdrop_get_filename($type, $name);
+  return dirname((string) $path);
 }
 
 /**

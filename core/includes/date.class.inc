@@ -6,6 +6,7 @@
  * This class provides granularity handling, merge functionality and
  * slightly more flexible initialization parameters.
  */
+#[\ReturnTypeWillChange]
 class BackdropDateTime extends DateTime {
   public $granularity = array();
   public $errors = array();

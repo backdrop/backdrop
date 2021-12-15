@@ -2022,7 +2022,7 @@ function file_fnmatch($pattern, $string) {
   if (!function_exists('fnmatch')) {
     return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
   }
-  return fnmatch($pattern, $string);
+  return fnmatch((string) $pattern, (string) $string);
 }
 
 function file_get_mimetype_type($file) {
