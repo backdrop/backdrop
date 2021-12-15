@@ -305,7 +305,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     ', array(':path' => $path))
     ->fetchAllKeyed();
   if (count($path_matches)) {
-    $path_match_text = t('This layout will override the page(s) created by function %page_callback.', array('%page_callback' => $path_matches[$path]));
+    $path_match_text = t('This layout will override the default layout for existing page(s) (created by %page_callback).', array('%page_callback' => $path_matches[$path]));
   }
   else {
     $path_match_text = t('This path will create a layout-provided page.');
