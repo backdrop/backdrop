@@ -45,4 +45,12 @@ function template_preprocess_entity(&$variables) {
   // Gather css classes.
   $variables['classes'][] = backdrop_html_class('entity-' . $entity_type);
   $variables['classes'][] = backdrop_html_class($entity_type . '-' . $bundle);
+
+  // Add suggestions.
+  $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type;
+  $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type . '__' . $bundle;
+  $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type . '__' . $bundle . '__' . $variables['view_mode'];
+  if ($id = $entity->id()) {
+    $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type . '__' . $id;
+  }
 }
