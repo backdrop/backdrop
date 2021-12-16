@@ -692,7 +692,9 @@ function _update_get_cache_multiple($cid_prefix) {
  *   the exact cache ID specified by $cid. Defaults to FALSE.
  */
 function _update_cache_clear($cid = NULL, $wildcard = FALSE) {
-  if (empty($cid)) {
+  // When clearing caches via Admin Bar links, the string "update" is passed to
+  // this function as $cid by the menu system.
+  if (empty($cid) || $cid == 'update') {
     db_delete('cache_update')
       // Clear everything except fetch task information because these are used
       // to ensure that the fetch task queue items are not added multiple times.

@@ -445,6 +445,9 @@ function comment_update_1005() {
 function comment_update_1006() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store Comment entity records.";
+  if (db_table_exists('cache_entity_comment')) {
+    db_drop_table('cache_entity_comment');
+  }
   db_create_table('cache_entity_comment', $table);
 }
 
