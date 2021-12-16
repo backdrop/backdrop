@@ -150,45 +150,6 @@ function system_theme() {
   ));
 }
 
-function system_transliterate_machine_name($string, $options = array()) {
-  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
-  $defaults = array(
-    'langcode' => $GLOBALS['language']->langcode,
-    'replace' => '_',
-    'replace_pattern' => NULL,
-    'maxlength' => NULL,
-  );
-  $options = array_intersect_key($options, $defaults) + $defaults;
-
-  // Build the default replacement pattern on the given "replace" property.
-  if (!isset($options['replace_pattern'])) {
-    $options['replace_pattern'] = '[^0-9A-Za-z' . $options['replace'] . ']+';
-  }
-
-  $replace = $options['replace'];
-  $string = transliteration_get($string, $replace, $options['langcode']);
-
-  // Remove remaining unsafe characters.
-  if ($options['replace_pattern']) {
-    $string = preg_replace('/' . $options['replace_pattern'] . '/', $options['replace'], $string);
-  }
-  // Replace whitespace.
-  $string = str_replace(' ', $replace, $string);
-  // Remove leading and trailing whitespace/unknown characters.
-  $string = trim($string, $replace);
-  // Collapse multiple consecutive replacement characters.
-  $replace_regex = strlen($replace) ? "([$replace])[$replace]+|" : '';
-  $string = preg_replace("/{$replace_regex}(_)_+|(\\.)\\.+|(-)-+/", '$1$2$3$4$5', $string);
-
-  // Set maxlength.
-  if ($options['maxlength']) {
-    $string = substr($string, 0, $options['maxlength']);
-  }
-
-  return $string;
-}
-
-
 /**
  * Implements hook_permission().
  */
@@ -4600,3 +4561,42 @@ function system_theme_debug_enabled_warning() {
     backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
   }
 }
+
+function system_transliterate_machine_name($string, $options = array()) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $defaults = array(
+    'langcode' => $GLOBALS['language']->langcode,
+    'replace' => '_',
+    'replace_pattern' => NULL,
+    'maxlength' => NULL,
+  );
+  $options = array_intersect_key($options, $defaults) + $defaults;
+
+  // Build the default replacement pattern on the given "replace" property.
+  if (!isset($options['replace_pattern'])) {
+    $options['replace_pattern'] = '[^0-9A-Za-z' . $options['replace'] . ']+';
+  }
+
+  $replace = $options['replace'];
+  $string = transliteration_get($string, $replace, $options['langcode']);
+
+  // Remove remaining unsafe characters.
+  if ($options['replace_pattern']) {
+    $string = preg_replace('/' . $options['replace_pattern'] . '/', $options['replace'], $string);
+  }
+  // Replace whitespace.
+  $string = str_replace(' ', $replace, $string);
+  // Remove leading and trailing whitespace/unknown characters.
+  $string = trim($string, $replace);
+  // Collapse multiple consecutive replacement characters.
+  $replace_regex = strlen($replace) ? "([$replace])[$replace]+|" : '';
+  $string = preg_replace("/{$replace_regex}(_)_+|(\\.)\\.+|(-)-+/", '$1$2$3$4$5', $string);
+
+  // Set maxlength.
+  if ($options['maxlength']) {
+    $string = substr($string, 0, $options['maxlength']);
+  }
+
+  return $string;
+}
+
