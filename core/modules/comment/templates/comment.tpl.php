@@ -45,11 +45,11 @@
  * - $title_suffix (array): An array containing additional output populated by
  *   modules, intended to be displayed after the main title tag that appears in
  *   the template.
+ * - $view_mode: Display mode, e.g. 'full', or 'default'.
  *
- * These variables are provided for context:
+ * These two variables are provided for context:
  * - $comment: Full comment object.
  * - $node: Node entity the comments are attached to.
- * - $view_mode: Display mode, e.g. 'full', or 'default'.
  *
  * @see template_preprocess()
  * @see template_preprocess_comment()
