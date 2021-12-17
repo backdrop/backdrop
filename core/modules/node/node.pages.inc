@@ -389,7 +389,7 @@ function node_form($form, &$form_state, Node $node) {
     // @todo candidate for conversion to '#type' => 'html_tag'.
     // See: https://github.com/backdrop/backdrop-issues/issues/5223
     '#type' => 'markup',
-    '#prefix' => '<label id="promote-stiky-label">',
+    '#prefix' => '<label id="promote-sticky-label">',
     '#markup' => $node->nid ? t('Additional options') : t('Additional actions'),
     '#suffix' => '</label>',
     '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
