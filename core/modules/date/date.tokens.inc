@@ -119,11 +119,11 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
         if (empty($chained_token)) {
           $chained_token = array('date:medium' => $original);
         } 
-        $replacements += token_generate('date-field-value', $chained_token,array('item' => $field_items[$delta]), $options);
+        $replacements += token_generate('date-field-value', $chained_token,array('date-field-value' => $field_items[$delta]), $options);
 
       } else {
         // If no delta is specified, send the first item of the field
-        $replacements += token_generate('date-field-value', array($token => $original), array('item' => $field_items[0]), $options);
+        $replacements += token_generate('date-field-value', array($token => $original), array('date-field-value' => $field_items[0]), $options);
       }
     }
   }
@@ -131,8 +131,8 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
   // Process date field item. The token at this point is in the format 
   // "[date||end-date]:[format]", where format is 'long', 'medium', etc. 
   // or 'custom'.
-  elseif (($type == 'date-field-value') && !empty($data['item'])) {
-    $item = $data['item'];
+  elseif (($type == 'date-field-value') && !empty($data['date-field-value'])) {
+    $item = $data['date-field-value'];
 
     // Create tokens for the field's "Date" or "Start date".
     if (($date_tokens = token_find_with_prefix($tokens, 'date')) && !empty($item['value'])) {
