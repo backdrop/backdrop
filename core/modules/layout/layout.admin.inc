@@ -289,7 +289,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
     '#description' => t('Use the percent symbol ("%") to indicate a placeholder in the path.'),
-    '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
   );
 
   $description_items = array(
