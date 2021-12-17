@@ -350,8 +350,11 @@ class DateFieldTestCase extends DateFieldBasic {
   }
 }
 
-
 class DateFieldTokenTestCase extends DateFieldBasic {
+
+  /**
+   * Tests that date field tokens functions properly.
+   */
   public function testDateFieldToken() {
     $timestamp = REQUEST_TIME;
     $timestamp_end = $timestamp + 7200; // Two hours later.
@@ -384,7 +387,8 @@ class DateFieldTokenTestCase extends DateFieldBasic {
 
     $this->backdropPost('node/add/story', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);  
-    
+
+    // Ceate several tokens.
     $tokens = array(
       'field_date_single:long' => format_date($timestamp, 'long'),
       'field_date_single:medium' => format_date($timestamp, 'medium'),
@@ -413,6 +417,9 @@ class DateFieldTokenTestCase extends DateFieldBasic {
     }
   }
 
+  /**
+   * Helper function that creates a properly formatted token map. 
+   */
   function mapTokenNames($type, array $tokens = array()) {
     $return = array();
     foreach ($tokens as $token) {
