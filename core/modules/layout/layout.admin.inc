@@ -320,6 +320,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'details',
     '#summary' => t('Paths and placeholders'),
     '#details' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
+    '#attributes' => array('class' => array('description')),
   );
 
   $form['path_update'] = array(

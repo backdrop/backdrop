@@ -809,6 +809,28 @@ details .details-child-wrapper {
 }
 
 /**
+ * Description version of details element.
+ */
+details.description {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: transparent;
+  display: table-cell;
+}
+details.description summary span {
+  color: #000000;
+  font-size: 100%;
+}
+details.description .details-content-wrapper,
+details.description .details-child-wrapper {
+  color: #666;
+  font-size: 0.85em;
+}
+
+/**
  * Views exposed form (matches fieldsets).
  */
 form.views-exposed-form {
