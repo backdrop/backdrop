@@ -219,7 +219,25 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => t('Save vocabulary'),
+    '#weight' => 2,
+  );
+
+  // Only show 'Save and add terms' button when creating new vocabulary.
+  if ($vocabulary->machine_name == NULL) {
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and add terms'),
+      '#weight' => 1,
+    );
+  }
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/structure/taxonomy',
+    '#options' => array('attributes' => array('class' => array('form-cancel'))),
+    '#weight' => 15,
   );
 
   return $form;
@@ -348,7 +366,7 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
     case SAVED_NEW:
       backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
       watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
-      $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
+      $form_state['redirect'] = 'admin/structure/taxonomy';
       // Save new permissions
       foreach ($form_state['values']['roles'] as $role_name => $role) {
         $valid_perms = array();
@@ -360,6 +378,10 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
           }
         }
         user_role_grant_permissions($role->name, $valid_perms);
+      }
+
+      if ($form_state['triggering_element']['#value'] == t('Save and add terms')) {
+        $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add';
       }
       break;
 
@@ -774,7 +796,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
   }
-  
+
   // During initial form build, add the term entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
@@ -913,8 +935,9 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   else {
     $path = '<front>';
   }
-  $options = backdrop_parse_url($path);
-  $options['attributes']['class'][] = 'form-cancel';
+
+  $cancel_options = backdrop_parse_url($path);
+  $cancel_options['attributes']['class'][] = 'form-cancel';
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -935,12 +958,11 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   else {
     $form_state['redirect'] = $_GET['q'];
   }
-
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => $options['path'],
-    '#options' => $options,
+    '#href' => $cancel_options['path'],
+    '#options' => $cancel_options,
     '#weight' => 15,
   );
 

@@ -26,37 +26,48 @@
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
   <div class="layout-flexible-content <?php $region_buttons ? print 'layout-flexible-editor' : ''; ?>">
-  <?php foreach ($row_data as $name => $row): ?>
+    <?php foreach ($row_data as $name => $row): ?>
       <?php
         $row_classes = array('flexible-row', 'l-' . $name);
         if ($row['element'] == 'header' || $row['element'] == 'footer') {
-            $row_classes[] = 'l-' . $row['element'];
+          $row_classes[] = 'l-' . $row['element'];
         }
       ?>
       <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
-      <div class="<?php print $row['row_class']; ?>">
-        <?php if ($region_buttons): ?>
-          <div class="layout-flexible-region-buttons clearfix">
-            <?php print $region_buttons[$name]; ?>
-          </div>
-        <?php endif; ?>
-        <div class="l-flexible-row row">
-        <?php foreach ($row['regions'] as $region): ?>
-          <div class="l-col col-md-<?php print $region['region_md']; ?>">
-            <?php if ($region_buttons): ?>
-              <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
-                <div class="layout-editor-region-title clearfix">
-                  <h2 class="label"><?php print $region['region_name']; ?></h2>
-                </div>
+        <div class="<?php print $row['row_class']; ?>">
+          <?php if ($region_buttons): ?>
+            <div class="layout-flexible-region-top clearfix">
+              <div class="layout-editor-block-title clearfix">
+                <span class="handle"></span>
+                <span class="text"><?php print t('Row'); ?></span>
+                <span class="buttons">
+                  <?php print $region_buttons[$name]; ?>
+                </span>
               </div>
-            <?php else: ?>
-              <?php print $content[$region['content_key']]; ?>
-            <?php endif; ?>
+            </div>
+          <?php endif; ?>
+          <div class="l-flexible-row row">
+            <?php foreach ($row['regions'] as $region): ?>
+              <div class="l-col col-md-<?php print $region['region_md']; ?>">
+                <?php if ($region_buttons): ?>
+                  <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
+                    <div class="layout-editor-region-title clearfix">
+                      <h2 class="label"><?php print $region['region_name']; ?></h2>
+                    </div>
+                    <div class="layout-editor-block">
+                      <div class="layout-editor-block-content">
+                        <p><?php print t('Sample Block'); ?></p>
+                      </div>
+                    </div>
+                  </div>
+                <?php else: ?>
+                  <?php print $content[$region['content_key']]; ?>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
           </div>
-        <?php endforeach; ?>
         </div>
-      </div>
-    </<?php print $row['element']; ?>>
-  <?php endforeach; ?>
+      </<?php print $row['element']; ?>>
+    <?php endforeach; ?>
   </div>
 </div>

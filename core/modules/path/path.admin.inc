@@ -858,8 +858,7 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
     }
   }
   else {
-    $error_operation = reset($operations);
-    backdrop_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    backdrop_set_message(t('An error occurred while generating the URL aliases.'), 'error');
   }
 }
 

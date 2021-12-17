@@ -238,9 +238,8 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   );
   $form['admin_theme']['admin_theme'] = array(
     '#type' => 'select',
-    '#options' => array(0 => t('Default theme')) + $theme_options,
+    '#options' => $theme_options,
     '#title' => t('Administration theme'),
-    '#description' => t('Choose "Default theme" to always use the same theme as the rest of the site.'),
     '#default_value' => config_get('system.core', 'admin_theme'),
   );
   $form['admin_theme']['actions'] = array('#type' => 'actions');
@@ -263,11 +262,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
   $current_admin_theme = $config->get('admin_theme');
   $new_admin_theme = $form_state['values']['admin_theme'];
 
-  if (!$new_admin_theme) {
-    $current_default_theme_name = $themes[$current_default_theme]->info['name'];
-    backdrop_set_message(t('The administration theme will be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
-  }
-  elseif ($current_admin_theme != $new_admin_theme) {
+  if ($current_admin_theme != $new_admin_theme) {
     $new_admin_theme_name = $themes[$new_admin_theme]->info['name'];
     backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
   }
@@ -423,8 +418,6 @@ function system_theme_settings($form, &$form_state, $key) {
     '#type' => 'value',
     '#value' => $key,
   );
-  // Store the form before processing theme settings so we can check for changes.
-  $form_original = $form;
 
   // Create a list which includes the current theme and all its base themes.
   if (isset($themes[$key]->base_themes)) {
@@ -458,14 +451,12 @@ function system_theme_settings($form, &$form_state, $key) {
     )), 'info');
   }
 
-  if ($form_original !== $form) {
-    // If the form was modified, add the submit button.
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save theme settings'),
-    );
-  }
+  // Add the submit button.
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save theme settings'),
+  );
 
   return $form;
 }

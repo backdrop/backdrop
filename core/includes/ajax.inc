@@ -428,8 +428,8 @@ function ajax_form_callback() {
  * administration theme. Depending on whether the "Use the administration theme
  * when editing or creating content" checkbox is checked, the node edit form may
  * be displayed in either theme, but the Ajax response to the Field module's
- * "Add another item" button should be rendered using the same theme as the rest
- * of the page. Therefore, system_menu() sets the 'theme callback' for
+ * "Add another" button should be rendered using the same theme as the rest of
+ * the page. Therefore, system_menu() sets the 'theme callback' for
  * 'system/ajax' to this function, and it is recommended that modules
  * implementing other generic Ajax paths do the same.
  *

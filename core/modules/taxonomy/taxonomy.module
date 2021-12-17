@@ -1181,6 +1181,7 @@ function taxonomy_autoload_info() {
     'views_handler_argument_term_language' => 'views/views_handler_argument_term_language.inc',
     'views_handler_field_taxonomy' => 'views/views_handler_field_taxonomy.inc',
     'views_handler_field_term_node_tid' => 'views/views_handler_field_term_node_tid.inc',
+    'views_handler_field_term_path' => 'views/views_handler_field_term_path.inc',
     'views_handler_field_term_link_edit' => 'views/views_handler_field_term_link_edit.inc',
     'views_handler_field_vocabulary' => 'views/views_handler_field_vocabulary.inc',
     'views_handler_filter_term_node_tid' => 'views/views_handler_filter_term_node_tid.inc',
