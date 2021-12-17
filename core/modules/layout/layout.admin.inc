@@ -95,23 +95,18 @@ function layout_list_page() {
   );
 
   $help_items = array();
-  $help_items[] = t('To determine which layout is to be used for a page, the path of the page is matched against the paths in these tables.');
-  $help_items[] = t('The paths used by layouts are <em>system paths</em> (also called <em>normal paths</em>), not path aliases.');
-  $help_items[] = t('The various paths that layouts handle are listed alphabetically within each table. Each listed path groups all layouts that may possibly apply to it.');
-  $help_items[] = t('Paths without a layout explicitly defined for them will use one of the <em>Default layouts</em> (listed at the bottom of the Layout overrides table).');
+  $help_items[] = t('To determine which layout is to be used for a page, the path is compared to those shown here.');
+  $help_items[] = t('Paths used by the layout system are <em>system paths</em> (also called <em>normal paths</em>), not !link.', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
+  $help_items[] = t('They are listed alphabetically below. All layouts that might apply to each path are listed below the path.');
+  $help_items[] = t('All pages without a layout explicitly defined for its path will use one of the <em>Default layouts</em> (shown at the bottom of this page).');
   $help_items[] = array(
-    'data' => t('Each path listed here may have one or multiple layouts defined within its group:'),
+    'data' => t('Each path listed here will have one or more layouts defined:'),
     'children' => array(
-      t('If any path has <strong>exactly one layout defined</strong>, then that layout will be used (unless visibility conditions rule it out).'),
-      array(
-        'data' => t('If any path has <strong>multiple layouts defined</strong>, then:'),
-        'children' => array(
-          t('Starting from top to bottom, all layouts <em>within the path group</em> are checked for matching visibility conditions.'),
-          t('The first layout within the path group that matches all conditions will be the one that gets used.'),
-          t('To affect priority, you may reorder any layout <em>within the same path group</em>.'),
-          t('If no matching layout is found, it will fall back to one of the Default layouts, depending on whether the path is an admin path or not.'),
-        ),
-      ),
+      t('If any path has exactly one layout defined, then that layout will be used (if visibility conditions allow).'),
+      t('Otherwise, starting from top to bottom, all layouts for that path are checked for matching visibility conditions.'),
+      t('The first layout that matches all conditions will be the one that gets used.'),
+      t('To adjust priority, you may reorder the layouts for a given path.'),
+      t('If no match is found, the page will use one of the Default layouts.'),
     ),
   );
   $help = theme('item_list', array('items' => $help_items));
@@ -123,7 +118,7 @@ function layout_list_page() {
     '#summary' => t('How layouts work'),
     '#details' => $help,
     '#attributes' => array(
-      'class' => array('details-help'),
+      'class' => array('description'),
     ),
   );
 
