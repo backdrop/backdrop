@@ -83,7 +83,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
   $language_code = isset($options['language']) ? $options['language']->langcode : NULL;
 
   // Process date fields attached to entities.
-  if (isset($data[$type]) && !empty($data[$type]) && is_a($data[$type], 'Entity')) {
+  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
     $entity_type = $entity->entityType();
     $entity_info = entity_get_info($entity_type); 
@@ -115,14 +115,14 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
         $delta = $explode[0];
         $chained_token = token_find_with_prefix(array($token => $original), $delta);
 
-        // If there is no arguments after delta, send date:medium as default
+        // If there is no arguments after delta, send date:medium as default.
         if (empty($chained_token)) {
           $chained_token = array('date:medium' => $original);
         } 
         $replacements += token_generate('date-field-value', $chained_token,array('date-field-value' => $field_items[$delta]), $options);
 
       } else {
-        // If no delta is specified, send the first item of the field
+        // If no delta is specified, send the first item of the field.
         $replacements += token_generate('date-field-value', array($token => $original), array('date-field-value' => $field_items[0]), $options);
       }
     }
