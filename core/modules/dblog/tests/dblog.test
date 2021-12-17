@@ -258,18 +258,21 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/reports/dblog');
     $this->assertResponse(200);
 
+    // Timezone for all dates is from the logged in user.
+    $admin_timezone = $this->big_user->timezone;
+
     // Verify that the expected events were recorded.
     // Add user.
     // Default display includes name and email address; if too long, the email
     // address is replaced by three periods.
     $this->assertLogMessage(t('New user: %name (%email).', array('%name' => $name, '%email' => $user->mail)), 'DBLog event was recorded: [add user]');
-    $this->assertText(format_date($new_user_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($new_user_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Login user.
     $this->assertLogMessage(t('Session opened for %name.', array('%name' => $name)), 'DBLog event was recorded: [login user]');
-    $this->assertText(format_date($login_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($login_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Logout user.
     $this->assertLogMessage(t('Session closed for %name.', array('%name' => $name)), 'DBLog event was recorded: [logout user]');
-    $this->assertText(format_date($logout_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($logout_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Delete user.
     $message = t('Deleted user: %name %email.', array('%name' => $name, '%email' => '<' . $user->mail . '>'));
     $message_text = truncate_utf8(filter_xss($message, array()), 56, TRUE, TRUE);

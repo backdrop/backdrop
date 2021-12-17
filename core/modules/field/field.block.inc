@@ -80,9 +80,26 @@ class FieldBlock extends Block {
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
 
-    // Do not render if the entity is not found on this layout.
-    if (empty($entity)) {
-      return NULL;
+    // If the entity is not an EntityInterface object, try to get one.
+    if (!is_a($entity, 'EntityInterface')) {
+      $info = entity_get_info($entity_type);
+      $id_key = $info['entity keys']['id'];
+
+      // Unable to load an entity without an id property value.
+      if (!isset($entity->{$id_key})) {
+        return NULL;
+      }
+
+      $entity = $info['load hook']($entity->{$id_key});
+
+      // Either there is a problem with this entity type definition,
+      //  or the entity does not exist or is failing to load for some reason.
+      if (!is_a($entity, 'EntityInterface')) {
+        return NULL;
+      }
+
+      // Save the EntityInterface object for future use.
+      $this->contexts[$entity_type]->setData($entity);
     }
 
     // Load the entity type's information for this field.

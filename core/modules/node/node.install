@@ -84,7 +84,7 @@ function node_schema() {
         'default' => 0,
       ),
       'promote' => array(
-        'description' => 'Boolean indicating whether the node should be displayed on the front page.',
+        'description' => 'Boolean indicating whether the node should be displayed on the home page.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -248,7 +248,7 @@ function node_schema() {
         'default' => 0,
       ),
       'promote' => array(
-        'description' => 'Boolean indicating whether the node (at the time of this revision) should be displayed on the front page.',
+        'description' => 'Boolean indicating whether the node (at the time of this revision) should be displayed on the home page.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -368,10 +368,10 @@ function node_update_dependencies() {
  */
 
 /**
- * Set 'node' as front page path if it implicitly was before.
+ * Set 'node' as home page path if it implicitly was before.
  *
- * Node module became optional. The default front page path was changed to
- * 'user'. Since 'node' was the implicit default front page path previously and
+ * Node module became optional. The default home page path was changed to
+ * 'user'. Since 'node' was the implicit default home page path previously and
  * may not have been explicitly configured as such, this update ensures that the
  * old implicit default is still the default.
  *
@@ -1077,11 +1077,12 @@ function node_update_1009() {
  * Set all nodes to be language agnostic on mono-lingual sites.
  */
 function node_update_1010() {
+  $site_config = config('system.core');
   // Because this update may adversely affect sites that once were multilingual
   // but are now mono-lingual, we only apply if we're absolutely sure only a
   // single language is used, both in the configuration and in the node table.
-  $language_count = config_get('system.core', 'language_count');
-  $default_langcode = config_get('system.core', 'language_default');
+  $language_count = $site_config->get('language_count');
+  $default_langcode = $site_config->get('language_default');
   $other_languages = db_query("SELECT COUNT(langcode) FROM {node} WHERE langcode NOT IN (:list)", array(':list' => array('und', $default_langcode)))->fetchField();
   if ($language_count == 1 && $other_languages == 0) {
     db_query("UPDATE {node} SET langcode = 'und' WHERE langcode = :default", array('default' => $default_langcode));
@@ -1194,8 +1195,8 @@ function node_update_1018() {
   // See if the content admin view has been modified on this site.
   $config = config('views.view.node_admin_content');
 
-  // Only update if view isn't overridden.
-  if ($config->get('storage') == VIEWS_STORAGE_OVERRIDE) {
+  // Only update if view isn't overridden (VIEWS_STORAGE_OVERRIDE).
+  if ($config->get('storage') == 2) {
     return;
   }
   $data = array (
@@ -1994,7 +1995,7 @@ function node_update_1021() {
 function node_update_1022() {
   $config = config('views.view.node_admin_content');
   // Only update if the view is in the default state (VIEWS_STORAGE_DEFAULT).
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') == 4) {
     $config->set('display.default.display_options.fields.timestamp', array(
       'id' => 'timestamp',
       'table' => 'history',

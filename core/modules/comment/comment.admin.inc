@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the Comment module.

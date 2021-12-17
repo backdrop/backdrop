@@ -19,6 +19,15 @@ function entity_modules_disabled() {
 }
 
 /**
+ * Implements hook_modules_uninstalled().
+ */
+function entity_modules_uninstalled($modules) {
+  // It is important that the entity info cache gets flushed last to prevent
+  // fatal errors with outdated entity information.
+  backdrop_register_shutdown_function('entity_info_cache_clear');
+}
+
+/**
  * Implements hook_flush_caches().
  */
 function entity_flush_caches() {
@@ -341,8 +350,14 @@ function entity_extract_ids($entity_type, $entity) {
   $info = entity_get_info($entity_type);
 
   // Objects being created might not have id/vid yet.
-  $id = isset($entity->{$info['entity keys']['id']}) ? $entity->{$info['entity keys']['id']} : NULL;
-  $vid = ($info['entity keys']['revision'] && isset($entity->{$info['entity keys']['revision']})) ? $entity->{$info['entity keys']['revision']} : NULL;
+  if (!empty($info['entity keys'])) {
+    $id = isset($entity->{$info['entity keys']['id']}) ? $entity->{$info['entity keys']['id']} : NULL;
+    $vid = ($info['entity keys']['revision'] && isset($entity->{$info['entity keys']['revision']})) ? $entity->{$info['entity keys']['revision']} : NULL;
+  }
+  else {
+    $id = NULL;
+    $vid = NULL;
+  }
 
   if (!empty($info['entity keys']['bundle'])) {
     // Explicitly fail for malformed entities missing the bundle property.
