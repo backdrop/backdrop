@@ -7,3 +7,5 @@ tags[] = User interface
 tags[] = System
 backdrop = 1.x
 dependencies[] = update
+
+configure = admin/config/system/updates/settings

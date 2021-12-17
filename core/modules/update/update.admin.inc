@@ -13,6 +13,7 @@
  */
 function update_settings($form, &$form_state) {
   $config = config('update.settings');
+  $form['#config'] = 'update.settings';
 
   $form['check'] = array(
     '#type' => 'fieldset',
@@ -20,7 +21,7 @@ function update_settings($form, &$form_state) {
     '#description' =>  t('This website will check for new releases of Backdrop core, as well as contributed modules, themes, and layouts. If there are updates available, a message will appear on the <a href="@status_report">status report</a> page. An error message will appear if there is a security update available.',
       array('@status_report' => url('admin/reports/status'))),
   );
-  $form['check']['update_check_frequency'] = array(
+  $form['check']['update_interval_days'] = array(
     '#type' => 'radios',
     '#title' => t('How frequently should this website check for updates?'),
     '#default_value' => $config->get('update_interval_days'),
@@ -30,7 +31,7 @@ function update_settings($form, &$form_state) {
       '0' => t('Do not check automatically'),
     ),
   );
-  $form['check']['update_check_disabled'] = array(
+  $form['check']['update_disabled_extensions'] = array(
     '#type' => 'checkbox',
     '#title' => t('Also check for updates of disabled modules, themes, and layouts'),
     '#default_value' => $config->get('update_disabled_extensions'),
@@ -46,7 +47,7 @@ function update_settings($form, &$form_state) {
       ),
     ),
   );
-  $form['email']['update_notification_threshold'] = array(
+  $form['email']['update_threshold'] = array(
     '#type' => 'radios',
     '#title' => t('When should this website send e-mail notifications?'),
     '#default_value' => $config->get('update_threshold'),
@@ -60,7 +61,7 @@ function update_settings($form, &$form_state) {
   if (empty($notify_emails)) {
     $notify_emails = array();
   }
-  $form['email']['update_notify_emails'] = array(
+  $form['email']['update_emails'] = array(
     '#type' => 'textarea',
     '#title' => t('E-mail addresses to notify when updates are available'),
     '#rows' => 4,
@@ -73,37 +74,10 @@ function update_settings($form, &$form_state) {
     ),
   );
 
-  $docs = l('File permissions and ownership', 'https://backdropcms.org/file-permissions-and-ownership');
-  $form['self_update'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Self-updates'),
-    '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. For more details, see !link.',
-      array('!link' => $docs)),
-  );
-  $core_update = config_get('installer.settings', 'core_update');
-  $form['self_update']['core_update'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Manual self-update'),
-    '#default_value' => $core_update,
-    '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
-  );
-  $form['self_update']['automatic_update'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Automatic self-update (coming soon!)'),
-    '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
-    '#default_value' => FALSE, // @todo update when #414 goes in
-    '#disabled' => TRUE, // @todo update when #414 goes in
-    '#states' => array(
-      'visible' => array(
-        'input[name=update_check_frequency]' => array('!value' => 0),
-      ),
-    ),
-  );
-
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
 
   return $form;
@@ -112,16 +86,17 @@ function update_settings($form, &$form_state) {
 /**
  * Form validation handler for update_settings().
  *
- * Validates the e-mail addresses and ensures the field is formatted correctly.
+ * Validates entered e-mail addresses, and prepares the field value for being
+ * saved into configuration.
  *
  * @see update_settings_submit()
  */
 function update_settings_validate($form, &$form_state) {
   $form_state['notify_emails'] = array();
-  if (!empty($form_state['values']['update_notify_emails'])) {
+  if (!empty($form_state['values']['update_emails'])) {
     $valid = array();
     $invalid = array();
-    foreach (explode("\n", trim($form_state['values']['update_notify_emails'])) as $email) {
+    foreach (explode("\n", trim($form_state['values']['update_emails'])) as $email) {
       $email = trim($email);
       if (!empty($email)) {
         if (valid_email_address($email)) {
@@ -133,13 +108,19 @@ function update_settings_validate($form, &$form_state) {
       }
     }
     if (empty($invalid)) {
-      $form_state['notify_emails'] = $valid;
-    }
-    elseif (count($invalid) == 1) {
-      form_set_error('update_notify_emails', t('%email is not a valid e-mail address.', array('%email' => reset($invalid))));
+      $form_state['values']['update_emails'] = $valid;
+
     }
     else {
-      form_set_error('update_notify_emails', t('%emails are not valid e-mail addresses.', array('%emails' => implode(', ', $invalid))));
+      $invalid_emails = format_plural(count($invalid),
+        '%email is not a valid e-mail address.',
+        '%emails are not valid e-mail addresses.',
+        array(
+          '%email' => reset($invalid),
+          '%emails' => implode(', ', $invalid),
+        )
+      );
+      form_set_error('update_emails', $invalid_emails);
     }
   }
 }
@@ -156,25 +137,10 @@ function update_settings_validate($form, &$form_state) {
  *
  * @see update_settings_validate()
  */
-function update_settings_submit($form, $form_state) {
-  $config = config('update.settings');
-
-  // See if the update_check_disabled setting is being changed, and if so,
-  // invalidate all cached update status data.
-  if ($form_state['values']['update_check_disabled'] != $config->get('update_disabled_extensions')) {
+function update_settings_submit($form, &$form_state) {
+  if ($form_state['values']['update_disabled_extensions'] != config_get('update.settings', 'update_disabled_extensions')) {
     _update_cache_clear();
   }
 
-  $config
-    ->set('update_disabled_extensions', $form_state['values']['update_check_disabled'])
-    ->set('update_interval_days', $form_state['values']['update_check_frequency'])
-    ->set('update_emails', $form_state['notify_emails'])
-    ->set('update_threshold', $form_state['values']['update_notification_threshold'])
-    ->save();
-
-  // Save the installer setting.
-  config_set('installer.settings', 'core_update', $form_state['values']['core_update']);
-
-  // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  system_settings_form_submit($form, $form_state);
 }
