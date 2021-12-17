@@ -77,8 +77,8 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
     }
     else {
       return t('@entity ID is: @entity_id', array(
-        '@entity'  => $this->entity_info['label'],
-        '@entity_id'  => $this->settings['entity_id'],
+        '@entity' => $this->entity_info['label'],
+        '@entity_id' => $this->settings['entity_id'],
       ));
     }
   }
