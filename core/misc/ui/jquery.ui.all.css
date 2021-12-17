@@ -8,5 +8,5 @@
  *
  * http://api.jqueryui.com/category/theming/
  */
-@import "base.css";
-@import "theme.css";
+@import "jquery.ui.base.css";
+@import "jquery.ui.theme.css";
