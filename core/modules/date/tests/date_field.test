@@ -353,7 +353,7 @@ class DateFieldTestCase extends DateFieldBasic {
 class DateFieldTokenTestCase extends DateFieldBasic {
 
   /**
-   * Tests that date field tokens functions properly.
+   * Tests that date field tokens function properly.
    */
   public function testDateFieldToken() {
     $timestamp = REQUEST_TIME;
