@@ -288,25 +288,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-  );
-
-  $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
-  $path_matches = db_query('
-    SELECT path, page_callback
-    FROM {menu_router}
-    WHERE path = :path
-    ', array(':path' => $path))
-    ->fetchAllKeyed();
-  if (count($path_matches)) {
-    $path_match_text = t('This layout will override the default layout for existing page(s) (created by %page_callback).', array('%page_callback' => $path_matches[$path]));
-  }
-  else {
-    $path_match_text = t('This path will create a layout-provided page.');
-  }
-  $form['path_matches'] = array(
-    '#markup' => $path_match_text,
-    '#prefix' => '<p id="path-matches">',
-    '#suffix' => '</p>',
+    '#description' => t('Use the percent symbol ("%") to indicate a placeholder in the path.'),
+    '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
   );
 
   $description_items = array(
@@ -318,9 +301,28 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $description_list = theme('item_list', array('items' => $description_items));
   $form['path_details'] = array(
     '#type' => 'details',
-    '#summary' => t('Paths and placeholders'),
-    '#details' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
+    '#summary' => t('Placeholder examples'),
+    '#details' => '<p>' . t('Some common examples of placeholders include:') . '</p>' . $description_list,
     '#attributes' => array('class' => array('description')),
+  );
+
+  $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
+  $path_matches = db_query('
+    SELECT path, page_callback
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchAllKeyed();
+  if (count($path_matches)) {
+    $path_match_text = t('This layout will override the default layout for existing page(s) (which are created by %page_callback).', array('%page_callback' => $path_matches[$path]));
+  }
+  else {
+    $path_match_text = t('This path will create a page.');
+  }
+  $form['path_matches'] = array(
+    '#markup' => $path_match_text,
+    '#prefix' => '<p id="path-matches">',
+    '#suffix' => '</p>',
   );
 
   $form['path_update'] = array(
@@ -348,12 +350,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Get all contexts except those provided by relationships.
   $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
+  $context_description = t('Contexts provide additional information to blocks displayed within the layout. Most placeholders in the path will automatically create context(s).');
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
-    // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
@@ -362,7 +363,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'container',
     '#parents' => array('context'),
   );
-
+  $form['context_wrapper']['context']['description'] = array(
+    '#markup' => '',
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
+  );
   $form['context_wrapper']['context']['links'] = array(
     '#theme' => 'layout_action_links',
   );
@@ -397,7 +402,9 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
         'callback' => 'layout_ajax_form_open_dialog',
       ),
     );
+    $context_description .= ' ' . t('Relationships create contexts from data provided by existing contexts.');
   }
+  $form['context_wrapper']['context']['description']['#markup'] = $context_description;
 
   $all_context_info = _layout_get_all_info('layout_context');
   $context_options = array();
@@ -544,9 +551,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['conditions'] = array(
     '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same placeholder path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
+  );
+  $form['conditions']['description'] = array(
+    '#markup' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same path.'),
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
   );
   $form['conditions']['links'] = array(
     '#theme' => 'layout_action_links',
@@ -564,6 +575,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+
   $form['conditions']['active'] = array(
     '#type' => 'container',
     '#theme' => 'layout_conditions',
