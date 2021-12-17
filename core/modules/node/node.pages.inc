@@ -401,7 +401,7 @@ function node_form($form, &$form_state, Node $node) {
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
     '#attributes' => array(
-      'aria-labelledby' => array('promote-stiky-label'),
+      'aria-labelledby' => array('promote-sticky-label'),
     ),
   );
   $form['options']['sticky'] = array(
@@ -410,7 +410,7 @@ function node_form($form, &$form_state, Node $node) {
     '#default_value' => $node->sticky,
     '#access' => $node_type->settings['sticky_enabled'],
     '#attributes' => array(
-      'aria-labelledby' => array('promote-stiky-label'),
+      'aria-labelledby' => array('promote-sticky-label'),
     ),
   );
 
