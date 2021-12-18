@@ -99,10 +99,12 @@ Backdrop.tableDrag = function (table, tableSettings) {
   $(table).before($('<a href="#" class="tabledrag-toggle-weight"></a>')
     .attr('title', Backdrop.t('Re-order rows by numerical weight instead of dragging.'))
     .click(function () {
-      if ($.cookie('Backdrop.tableDrag.showWeight') == 1) {
+      if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
+        localStorage.setItem('Backdrop.tableDrag.showWeight', '0');
         self.hideColumns();
       }
       else {
+        localStorage.setItem('Backdrop.tableDrag.showWeight', '1');
         self.showColumns();
       }
       return false;
@@ -131,7 +133,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
  *
  * Identify and mark each cell with a CSS class so we can toggle show/hide it.
  * Finally, hide columns if user does not have a 'Backdrop.tableDrag.showWeight'
- * cookie.
+ * in localStorage.
  */
 Backdrop.tableDrag.prototype.initColumns = function () {
   var $table = $(this.table), hidden, cell, columnIndex;
@@ -158,19 +160,15 @@ Backdrop.tableDrag.prototype.initColumns = function () {
     }
   }
 
-  // Now hide cells and reduce colspans unless cookie indicates previous choice.
-  // Set a cookie if it is not already present.
-  if ($.cookie('Backdrop.tableDrag.showWeight') === null) {
-    $.cookie('Backdrop.tableDrag.showWeight', 0, {
-      path: Backdrop.settings.basePath,
-      // The cookie expires in one year.
-      expires: 365
-    });
+  // Now hide cells and reduce colspans unless localStorage indicates previous choice.
+  // Set localStorage if it is not already present.
+  if (localStorage.getItem('Backdrop.tableDrag.showWeight') === null) {
+    localStorage.setItem('Backdrop.tableDrag.showWeight', '0');
     this.hideColumns();
   }
-  // Check cookie value and show/hide weight columns accordingly.
+  // Check localStorage value and show/hide weight columns accordingly.
   else {
-    if ($.cookie('Backdrop.tableDrag.showWeight') == 1) {
+    if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
       this.showColumns();
     }
     else {
@@ -225,12 +223,6 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
   });
   // Change link text.
   $('.tabledrag-toggle-weight').text(Backdrop.t('Show row weights'));
-  // Change cookie.
-  $.cookie('Backdrop.tableDrag.showWeight', 0, {
-    path: Backdrop.settings.basePath,
-    // The cookie expires in one year.
-    expires: 365
-  });
   // Trigger an event to allow other scripts to react to this display change.
   $('table.tabledrag-processed').trigger('columnschange', 'hide');
 };
@@ -251,12 +243,6 @@ Backdrop.tableDrag.prototype.showColumns = function () {
   });
   // Change link text.
   $('.tabledrag-toggle-weight').text(Backdrop.t('Hide row weights'));
-  // Change cookie.
-  $.cookie('Backdrop.tableDrag.showWeight', 1, {
-    path: Backdrop.settings.basePath,
-    // The cookie expires in one year.
-    expires: 365
-  });
   // Trigger an event to allow other scripts to react to this display change.
   $('table.tabledrag-processed').trigger('columnschange', 'show');
 };
