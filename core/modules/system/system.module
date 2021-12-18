@@ -1847,6 +1847,7 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
+      'core/misc/ui/vendor/jquery-color/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
       'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
     ),
   );
