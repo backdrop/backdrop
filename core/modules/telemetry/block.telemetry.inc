@@ -65,18 +65,18 @@ class TelemetryBlock extends Block {
     if (user_access('administer modules')) {
       $items[] = l(t('Disable the telemetry module'), 'admin/modules');
     }
+    $items[] = l(t('View the Backdrop CMS data collection policy'), 'https://backdropcms.org/philosophy');
+    $items[] = l(t('View public Backdrop CMS data'), 'https://backdropcms.org/project/backdrop/telemetry');
 
     $panel = array();
     $panel['enabled'] = array(
       '#type' => 'help',
       '#markup' => t('Telemetry is enabled'),
     );
-    if (!empty($items)) {
-      $panel['list'] = array(
-        '#theme' => 'item_list',
-        '#items' => $items,
-      );
-    }
+    $panel['list'] = array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+    );
 
     return $panel;
   }
