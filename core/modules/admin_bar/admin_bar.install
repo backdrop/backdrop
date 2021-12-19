@@ -22,3 +22,33 @@ function admin_bar_install() {
   // other modules in hook_menu_alter().
   module_set_weight('admin_bar', 100);
 }
+
+/**
+ * Migrate Admin Bar variables to config.
+ */
+function admin_bar_update_1000() {
+  $config = config('admin_bar.settings');
+  $config->set('components', update_variable_get('admin_menu_components', array(
+    'admin_bar.icon',
+    'admin_bar.menu',
+    'admin_bar.search',
+    'admin_bar.users',
+    'admin_bar.account'
+  )));
+  $config->set('margin_top', update_variable_get('admin_menu_margin_top', 1));
+  $config->set('position_fixed', update_variable_get('admin_menu_position_fixed', 1));
+  $config->save();
+
+  update_variable_del('admin_menu_components');
+  update_variable_del('admin_menu_margin_top');
+  update_variable_del('admin_menu_position_fixed');
+  update_variable_del('admin_menu_tweak_modules');
+  update_variable_del('admin_menu_tweak_tabs');
+  update_variable_del('admin_menu_show_all');
+  update_variable_del('admin_menu_display');
+  update_variable_del('admin_menu_cache_server');
+  update_variable_del('admin_menu_cache_client');
+  update_variable_del('admin_menu_devel_modules');
+  update_variable_del('admin_menu_devel_modules_enabled');
+  update_variable_del('admin_menu_devel_modules_skip');
+}
