@@ -2834,19 +2834,3 @@ function system_transliterate_ajax_access() {
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
 
-/**
- * Wrapper around transliteration_get() that handles common clean up on strings.
- *
- * @param string $string
- *   The string to be transliterated.
- * @param $options
- *   An array of options for further cleanup. This array includes:
- *   - langcode: The language code of the source string.
- *   - replace: The character with which to replace unknown characters in the
- *     string. Defaults to '_'.
- *   - replace_pattern: A pattern for replacing unknown characters with the
- *     "replace" value.
- *   - maxlength: The maximum allowed length of the returned string.
- * @return string
- *   The transliterated and cleaned up string.
- */
