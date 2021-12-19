@@ -1229,25 +1229,6 @@ div.error:before {
 
 /* Card view on default home page */
 
-.view-card-grid .views-grid-box {
-  border: none;
-}
-
-.block-views-card-grid-block {
-  margin-top: -2em;
-  background-color: #f2f2f2;
-}
-
-.block-views-card-grid-block .views-view-grid-cols-3 {
-  grid-template-columns: repeat(1, 1fr);
-}
-
-@media (min-width: 48em) {
-  .block-views-card-grid-block .views-view-grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .block-views-card-grid-block {
   margin-top: -2em;
   padding-top: 2rem;
