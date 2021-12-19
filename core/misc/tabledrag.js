@@ -134,7 +134,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
   $(document).on('mousemove pointermove', function (event) { return self.dragRow(event, self); });
   $(document).on('mouseup pointerup', function (event) { return self.dropRow(event, self); });
   // React to localStorage event showing or hiding weight columns.
-  $(window).bind('storage', $.proxy(function (e) {
+  $(window).on('storage', $.proxy(function (e) {
     // Only react to 'Backdrop.tableDrag.showWeight' value change.
     if (e.originalEvent.key === 'Backdrop.tableDrag.showWeight') {
       // This was changed in another window, get the new value for this window.
