@@ -375,7 +375,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['source'] = array(
     '#type' => 'textfield',
     '#title' => t('From'),
-    '#description' => t('Enter an internal Backdrop path or path alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array('%example1' => 'node/123', '%example2' => 'taxonomy/term/123', '%anchor' => '#anchor')),
+    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array('%example1' => 'node/123', '%example2' => 'taxonomy/term/123', '%anchor' => '#anchor')),
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->source ? redirect_url($redirect->source, $redirect->source_options + array('alter' => FALSE)) : '',
     '#required' => TRUE,
@@ -394,7 +394,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->redirect ? redirect_url($redirect->redirect, $redirect->redirect_options, TRUE) : '',
     '#required' => TRUE,
-    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
+    '#description' => t('Enter an internal Backdrop path, URL alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
     '#autocomplete_path' => 'path-autocomplete',
   );

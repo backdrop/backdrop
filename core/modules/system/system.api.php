@@ -3496,11 +3496,11 @@ function hook_system_themes_page_alter(&$theme_groups) {
  * Alters inbound URL requests.
  *
  * @param $path
- *   The path being constructed, which, if a path alias, has been resolved to a
+ *   The path being constructed, which, if a URL alias, has been resolved to a
  *   Backdrop path by the database, and which also may have been altered by
  *   other modules before this one.
  * @param $original_path
- *   The original path, before being checked for path aliases or altered by any
+ *   The original path, before being checked for URL aliases or altered by any
  *   modules.
  * @param $path_language
  *   The language of the path.
@@ -3519,8 +3519,8 @@ function hook_url_inbound_alter(&$path, $original_path, $path_language) {
  * Alters outbound URLs.
  *
  * @param $path
- *   The outbound path to alter, not adjusted for path aliases yet. It won't be
- *   adjusted for path aliases until all modules are finished altering it, thus
+ *   The outbound path to alter, not adjusted for URL aliases yet. It won't be
+ *   adjusted for URL aliases until all modules are finished altering it, thus
  *   being consistent with hook_url_inbound_alter(), which adjusts for all path
  *   aliases before allowing modules to alter it. This may have been altered by
  *   other modules before this one.

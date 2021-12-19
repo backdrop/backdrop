@@ -959,7 +959,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
-    'description' => 'Settings related to URLs including path aliases and URL recirects.',
+    'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',

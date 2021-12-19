@@ -2175,7 +2175,7 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
 }
 
 /**
- * Given a path alias, return the internal path it represents.
+ * Given a URL alias, return the internal path it represents.
  *
  * @deprecated since 1.0.0
  * @see backdrop_get_normal_path()
@@ -2208,7 +2208,7 @@ function drupal_match_path($path, $patterns) {
 }
 
 /**
- * Rebuild the path alias white list.
+ * Rebuild the URL alias white list.
  *
  * @deprecated since 1.0.0
  */

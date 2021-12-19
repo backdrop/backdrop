@@ -3,7 +3,7 @@
  * @file
  * Hooks provided by the Path module.
  *
- * Path module provides automatic path aliasing by using tokens in path
+ * Path module provides automatic URL aliasing by using tokens in path
  * patterns. Thus the simplest integration is just to provide tokens using
  * hook_token_info() and hook_tokens().
  *
@@ -45,7 +45,7 @@
  *   An associative array containing the following keys:
  *   - source: The internal system path.
  *   - alias: The URL alias.
- *   - pid: Unique path alias identifier.
+ *   - pid: Unique URL alias identifier.
  *   - langcode: The language code of the alias.
  *
  * @see path_save()
@@ -66,7 +66,7 @@ function hook_path_insert($path) {
  *   An associative array containing the following keys:
  *   - source: The internal system path.
  *   - alias: The URL alias.
- *   - pid: Unique path alias identifier.
+ *   - pid: Unique URL alias identifier.
  *   - langcode: The language code of the alias.
  *
  * @see path_save()
@@ -85,7 +85,7 @@ function hook_path_update($path) {
  *   An associative array containing the following keys:
  *   - source: The internal system path.
  *   - alias: The URL alias.
- *   - pid: Unique path alias identifier.
+ *   - pid: Unique URL alias identifier.
  *   - langcode: The language code of the alias.
  *
  * @see path_delete()

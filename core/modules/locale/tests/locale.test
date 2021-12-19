@@ -1700,7 +1700,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
 }
 
 /**
- * Functional tests for configuring a different path alias per language.
+ * Functional tests for configuring a different URL alias per language.
  */
 class LocalePathFunctionalTest extends BackdropWebTestCase {
   function setUp() {
@@ -1708,7 +1708,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test if a language can be associated with a path alias.
+   * Test if a language can be associated with a URL alias.
    */
   function testPathLanguageConfiguration() {
     global $base_url;
@@ -1745,7 +1745,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
 
-    // Create a path alias in default language (English).
+    // Create a URL alias in default language (English).
     $path = 'admin/config/urls/path/add';
     $english_path = $this->randomName(8);
     $edit = array(
@@ -1755,7 +1755,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save URL alias'));
 
-    // Create a path alias in new custom language.
+    // Create a URL alias in new custom language.
     $custom_language_path = $this->randomName(8);
     $edit = array(
       'source'   => 'node/' . $node->nid,
@@ -1764,11 +1764,11 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save URL alias'));
 
-    // Confirm English language path alias works.
+    // Confirm English language URL alias works.
     $this->backdropGet($english_path);
     $this->assertText($node->title, 'English alias works.');
 
-    // Confirm custom language path alias works.
+    // Confirm custom language URL alias works.
     $this->backdropGet($prefix . '/' . $custom_language_path);
     $this->assertText($node->title, 'Custom language alias works.');
 
@@ -1793,7 +1793,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     $first_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $second_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
-    // Assign a custom path alias to the first node with the English language.
+    // Assign a custom URL alias to the first node with the English language.
     $edit = array(
       'source'   => 'node/' . $first_node->nid,
       'alias'    => $custom_path,
@@ -1801,7 +1801,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     path_save($edit);
 
-    // Assign a custom path alias to second node with LANGUAGE_NONE.
+    // Assign a custom URL alias to second node with LANGUAGE_NONE.
     $edit = array(
       'source'   => 'node/' . $second_node->nid,
       'alias'    => $custom_path,
@@ -1809,13 +1809,13 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     path_save($edit);
 
-    // Test that both node titles link to our path alias.
+    // Test that both node titles link to our URL alias.
     $this->backdropGet('<front>');
     $custom_path_url = base_path() . (config_get('system.core', 'clean_url') ? $custom_path : '?q=' . $custom_path);
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $first_node->title));
-    $this->assertTrue(!empty($elements), 'First node links to the path alias.');
+    $this->assertTrue(!empty($elements), 'First node links to the URL alias.');
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $second_node->title));
-    $this->assertTrue(!empty($elements), 'Second node links to the path alias.');
+    $this->assertTrue(!empty($elements), 'Second node links to the URL alias.');
 
     // Confirm that the custom path leads to the first node.
     $this->backdropGet($custom_path);

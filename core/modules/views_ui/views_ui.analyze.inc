@@ -113,7 +113,7 @@ function views_ui_views_analyze($view) {
     if ($display->handler->has_path() && $path = $display->handler->get_option('path')) {
       $normal_path = backdrop_get_normal_path($path);
       if ($path != $normal_path) {
-        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is an path alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
+        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is a URL alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
       }
     }
   }
