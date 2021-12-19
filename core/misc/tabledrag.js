@@ -100,7 +100,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
     .attr('title', Backdrop.t('Re-order rows by numerical weight instead of dragging.'))
     .click(function () {
       if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
-        localStorage.setItem('Backdrop.tableDrag.showWeight', '0');
+        localStorage.removeItem('Backdrop.tableDrag.showWeight');
         self.hideColumns();
       }
       else {
@@ -163,7 +163,6 @@ Backdrop.tableDrag.prototype.initColumns = function () {
   // Now hide cells and reduce colspans unless localStorage indicates previous choice.
   // Set localStorage if it is not already present.
   if (localStorage.getItem('Backdrop.tableDrag.showWeight') === null) {
-    localStorage.setItem('Backdrop.tableDrag.showWeight', '0');
     this.hideColumns();
   }
   // Check localStorage value and show/hide weight columns accordingly.
