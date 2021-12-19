@@ -2044,7 +2044,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Check page title exists.
     $this->backdropGet('node/1');
 
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-top")])//h1');
     $this->assertEqual(count($page_title), 1, 'The page title was found.');
     $this->assertEqual((string) $page_title[0], 'Test node title');
 
@@ -2064,7 +2064,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Go to the welcome page and check that the title div is absent.
     $this->backdropGet('node/1');
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-top")])//h1');
     $this->assertEqual(count($page_title), 0, 'The page title was not found.');
 
     // Check the title block shows.
@@ -2136,7 +2136,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Check the normal page title exists again.
     $this->backdropGet('node/1');
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-top")])//h1');
     $this->assertEqual(count($page_title), 1, 'The page title was found.');
     $this->assertEqual((string) $page_title[0], 'Test node title');
 
