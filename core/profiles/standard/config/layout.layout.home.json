@@ -152,7 +152,7 @@
                             "title_tag": "h2",
                             "title_classes": "block-title",
                             "content_tag": "div",
-                            "content_classes": "container"
+                            "content_classes": "container card-design"
                         }
                     }
                 }
