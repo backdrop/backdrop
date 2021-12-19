@@ -802,7 +802,7 @@ function views_ui_add_form_save_submit($form, &$form_state) {
     if ($display->handler->has_path()) {
       $one_path = $display->handler->get_option('path');
       if (strpos($one_path, '%') === FALSE) {
-        backdrop_set_message(t('Your view was saved. Click here to <a href="@configure_view_link">configure the view</a> or <a href="@views_listing_page_link">return to the views listing page.</a>', array(
+        backdrop_set_message(t('Your view was saved. You may <a href="@configure_view_link">configure it</a> or <a href="@views_listing_page_link">return to the views listing page.</a>', array(
           '@configure_view_link' => url('admin/structure/views/view/' . $view->name . '/configure'),
           '@views_listing_page_link' => url('admin/structure/views/list'),
         )));
