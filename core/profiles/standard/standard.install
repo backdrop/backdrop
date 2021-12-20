@@ -426,17 +426,17 @@ function standard_install() {
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
   $cards = array(
-    'kelly-sikkema-io0zlybu31s-unsplash.jpg' => array(
-      'title' => st('Organize your content'),
-      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
+    'kelly-sikkema-jr61khawkek-unsplash.jpg' => array(
+      'title' => st('The home page layout'),
+      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a <a href="https://docs.backdropcms.org/documentation/views">view</a> that was placed as a block.</p>'),
     ),
     'rich-smith-l8lqr8i_uug-unsplash.jpg' => array(
       'title' => st('What is a Card?'),
       'body' => st('<p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'),
     ),
-    'kelly-sikkema-jr61khawkek-unsplash.jpg' => array(
-      'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a <a href="https://docs.backdropcms.org/documentation/views">view</a> that was placed as a block.</p>'),
+    'kelly-sikkema-io0zlybu31s-unsplash.jpg' => array(
+      'title' => st('Organize your content'),
+      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
     ),
   );
 
