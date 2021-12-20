@@ -366,6 +366,9 @@ function taxonomy_update_1007() {
 function taxonomy_update_1008() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store Taxonomy Term entity records.";
+  if (db_table_exists('cache_entity_taxonomy_term')) {
+    db_drop_table('cache_entity_taxonomy_term');
+  }
   db_create_table('cache_entity_taxonomy_term', $table);
 }
 
