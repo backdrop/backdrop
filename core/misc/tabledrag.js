@@ -174,6 +174,16 @@ Backdrop.tableDrag.prototype.initColumns = function () {
       this.hideColumns();
     }
   }
+
+  // Add event listener to storage events in other windows on the same domain.
+  window.addEventListener("storage", function () {
+    if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
+      Backdrop.tableDrag.prototype.showColumns();
+    }
+    else {
+      Backdrop.tableDrag.prototype.hideColumns();
+    }
+  });
 };
 
 /**
