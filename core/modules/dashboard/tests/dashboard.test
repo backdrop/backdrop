@@ -12,7 +12,7 @@ class DashboardTest extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp(array('layout', 'layout_test', 'taxonomy', 'comment', 'node', 'dashboard', 'menu', 'telemetry'));
+    parent::setUp(array('telemetry', 'layout', 'layout_test', 'taxonomy', 'comment', 'node', 'dashboard', 'menu'));
 
     $this->backdropCreateContentType(array(
       'type' => 'test_content_type_1',
