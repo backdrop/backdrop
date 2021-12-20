@@ -37,7 +37,7 @@
             "weight": 0
         }
     },
-    "description": "Default display will work best with short body field. Ideally, less than 80 words. ",
+    "description": "Cards usually work best with a relatively short body field.",
     "required": 0,
     "deleted": 0,
     "default_value": [
