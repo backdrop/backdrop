@@ -372,7 +372,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('<p>This is your first post! This post has been promoted to the front page and is displayed as part of the Promoted content view (/admin/structure/views/view/promoted). You may edit or delete this or any of the sample pieces of content through the admin content page (/admin/content).</p>
+            'value' => st('<p>Posts are one of the three content types provided by default and are commonly used for a blog or for news articles. This post has been promoted to the front page and is displayed as part of the Promoted content view. You may edit or delete this or any of the sample pieces of content through the admin content page.</p>
 
 <p>Please, visit our <a href="https://docs.backdropcms.org/documentation/user-guide">Backdrop User Guide</a> to help you get started.</p>'),
             'format' => 'filtered_html'
@@ -394,7 +394,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'value' => st('<p>This is a page.</p><p>Pages are one of the three content types provided by default and are commonly used for static content that does not change frequently. Pages are often included in the main navigation of your site.</p><p>You may edit or delete this page.</p>'),
             'format' => 'filtered_html',
           ),
         ),
@@ -427,16 +427,16 @@ function standard_install() {
 
   $cards = array(
     'kelly-sikkema-jr61khawkek-unsplash.jpg' => array(
-      'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout as a block that contains a <a href="https://docs.backdropcms.org/documentation/views">view</a> of 3 promoted Cards.</p>'),
+      'title' => st('Organize your content'),
+      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
     ),
     'rich-smith-l8lqr8i_uug-unsplash.jpg' => array(
       'title' => st('What is a Card?'),
-      'body' => st('<p>Card content will not be visible on a stand-alone page. It will only appear as part of another page. A Card can be be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'),
+      'body' => st('<p>Cards are one of the three content types provided by default. Cards will not be visible to site visitors at their own path, they only appear as part of another page. A Card can be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'),
     ),
     'kelly-sikkema-io0zlybu31s-unsplash.jpg' => array(
-      'title' => st('Organize your content'),
-      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
+      'title' => st('The home page layout'),
+      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout as a block that contains a <a href="https://docs.backdropcms.org/documentation/views">view</a> of 3 promoted Cards.</p>'),
     ),
   );
 
