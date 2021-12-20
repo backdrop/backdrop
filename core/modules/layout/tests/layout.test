@@ -112,7 +112,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // rather than the current user, should be available.
     // The current user is User 2.
     $this->backdropGet('node/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->web_user), '@title' => $this->test_node2->title)));
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
 
     // Change the user context on the test block to use the current user and
@@ -124,12 +124,12 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node2->nid);
-    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->web_user), '@title' => $this->test_node2->title)));
 
     // Visit a node created by the current user (User 2) and test that the
     // correct user is displayed.
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node1->title)));
 
      // Remove the author from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
@@ -712,7 +712,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid . '/foo/' . $this->web_user->uid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->web_user), '@title' => $this->test_node1->title)));
 
     // Modify the layout path to remove "node/", removing the auto-selection.
     $edit = array(
@@ -726,7 +726,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check that the block still works, even with the contexts changed.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->web_user->uid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->web_user), '@title' => $this->test_node1->title)));
 
     // Change the second context to be a node context. The user context should
     // still work, as it will use the current user context.
@@ -737,7 +737,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the page should show the current user instead of the one in the URL.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node1->title)));
 
     // Change the "my_node" context to use the argument in position 3 instead
     // of position 1.
@@ -753,7 +753,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the second node should be used as the title in the page.
     $this->backdropGet('foo/' . $this->test_node1->nid .  '/bar/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node2->title)));
 
     // Delete the layout to prevent it interfering with following tests.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
@@ -888,7 +888,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node1->title)));
 
     // Add another custom node context to the layout.
     $edit = array();
@@ -920,7 +920,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the second node should be used as the title in the page.
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node2->title)));
 
     // Add a custom user context to the layout.
     $edit = array();
@@ -952,7 +952,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the web user's name should be used as the title in the page.
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->web_user), '@title' => $this->test_node2->title)));
 
     // Test that custom layouts and path layouts work together.
     $layout_title = $this->randomName();
@@ -1004,7 +1004,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Go to a node path and check that the block shows with the correct
     // content.
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($this->admin_user), '@title' => $this->test_node2->title)));
 
   }
 

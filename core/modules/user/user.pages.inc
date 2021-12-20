@@ -94,7 +94,7 @@ function user_pass_submit($form, &$form_state) {
   // Mail one time login URL and instructions using current language.
   $mail = _user_mail_notify('password_reset', $account, $language);
   if (!empty($mail)) {
-    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => user_format_name($account), '%email' => $account->mail));
     backdrop_set_message(t('Further instructions have been sent to your e-mail address.'));
   }
 
@@ -122,14 +122,14 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
   if ($user->uid) {
     // The existing user is already logged in.
     if ($user->uid == $uid) {
-      backdrop_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => $user->name, '!user_edit' => url("user/$user->uid/edit"))));
+      backdrop_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => user_format_name($user), '!user_edit' => url("user/$user->uid/edit"))));
     }
     // A different user is already logged in on the computer.
     else {
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
         backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
-          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
+          array('%other_user' => user_format_name($user), '%resetting_user' => user_format_name($reset_link_account), '!logout' => url('user/logout'))), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
@@ -154,7 +154,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
           $user = $account;
           user_login_finalize();
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
-          watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
+          watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => user_format_name($account), '%timestamp' => format_date(REQUEST_TIME, 'long')));
           backdrop_goto();
         }
         else {
@@ -221,7 +221,7 @@ function user_pass_reset_form_submit($form, &$form_state) {
   // invalidates further use of the one-time login link.
   user_login_finalize();
   backdrop_set_message(t('Your account password has been updated.'));
-  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
+  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => user_format_name($form['#account']), '%timestamp' => format_date(REQUEST_TIME, 'long')));
   backdrop_goto();
 }
 
@@ -231,7 +231,7 @@ function user_pass_reset_form_submit($form, &$form_state) {
 function user_logout() {
   global $user;
 
-  watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
+  watchdog('user', 'Session closed for %name.', array('%name' => user_format_name($user)));
 
   module_invoke_all('user_logout', $user);
 
@@ -418,7 +418,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     $question = t('Are you sure you want to cancel your account?');
   }
   else {
-    $question = t('Are you sure you want to cancel the account %name?', array('%name' => $account->name));
+    $question = t('Are you sure you want to cancel the account %name?', array('%name' => user_format_name($account)));
   }
   $description = '';
   if ($can_select_method) {
@@ -472,7 +472,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
     $account->save();
     _user_mail_notify('cancel_confirm', $account);
     backdrop_set_message(t('A confirmation request to cancel your account has been sent to your e-mail address.'));
-    watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+    watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => user_format_name($account), '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
 
     $form_state['redirect'] = "user/$account->uid";
   }

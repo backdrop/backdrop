@@ -87,7 +87,7 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
 
     case 'bar':
       $block['subject'] = 'Bar subject';
-      $block['content'] = format_string('The user name is @name and the node title is @title', array('@name' => $contexts['my_user']->name, '@title' => $contexts['my_node']->title));
+      $block['content'] = format_string('The user name is @name and the node title is @title', array('@name' => user_format_name($contexts['my_user']), '@title' => $contexts['my_node']->title));
       break;
 
     case 'test_node_title':

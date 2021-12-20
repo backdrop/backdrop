@@ -1938,7 +1938,7 @@ function user_authenticate($name, $password) {
  */
 function user_login_finalize(&$edit = array()) {
   global $user;
-  watchdog('user', 'Session opened for %name.', array('%name' => $user->name));
+  watchdog('user', 'Session opened for %name.', array('%name' => user_format_name($user)));
   // Update the user table timestamp noting user has logged in.
   // This is also used to invalidate one-time login links.
   $user->login = REQUEST_TIME;
@@ -2134,6 +2134,8 @@ function user_cancel($edit, $uid, $method) {
 function _user_cancel($edit, $account, $method) {
   global $user;
 
+  $username = user_format_name($account);
+
   switch ($method) {
     case 'user_cancel_block':
     case 'user_cancel_block_unpublish':
@@ -2144,8 +2146,8 @@ function _user_cancel($edit, $account, $method) {
       }
       $account->status = 0;
       $account->save();
-      backdrop_set_message(t('%name has been disabled.', array('%name' => $account->name)));
-      watchdog('user', 'Blocked user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+      backdrop_set_message(t('%name has been disabled.', array('%name' => $username)));
+      watchdog('user', 'Blocked user: %name %email.', array('%name' => $username, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
       break;
 
     case 'user_cancel_reassign':
@@ -2155,8 +2157,8 @@ function _user_cancel($edit, $account, $method) {
         _user_mail_notify('status_canceled', $account);
       }
       user_delete($account->uid);
-      backdrop_set_message(t('%name has been deleted.', array('%name' => $account->name)));
-      watchdog('user', 'Deleted user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+      backdrop_set_message(t('%name has been deleted.', array('%name' => $username)));
+      watchdog('user', 'Deleted user: %name %email.', array('%name' => $username, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
       break;
   }
 
@@ -3250,7 +3252,7 @@ function user_register_submit($form, &$form_state) {
   // New administrative account without notification.
   $uri = $account->uri();
   if ($admin && !$notify) {
-    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => user_format_name($account))));
   }
   // No email verification required; log in user immediately.
   elseif (!$admin && !$user_email_verification && $account->status) {
@@ -3265,7 +3267,7 @@ function user_register_submit($form, &$form_state) {
     $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
     _user_mail_notify($op, $account);
     if ($notify) {
-      backdrop_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+      backdrop_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => user_format_name($account))));
     }
     else {
       backdrop_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));

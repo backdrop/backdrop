@@ -1450,7 +1450,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Check for the logged-in class.
     $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
-    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
+    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', array('%name' => user_format_name($account))), t('User login'));
 
     if ($pass) {
       $this->loggedInUser = $account;

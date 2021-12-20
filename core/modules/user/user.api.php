@@ -67,7 +67,7 @@ function hook_user_predelete($account) {
  * @see user_delete_multiple()
  */
 function hook_user_delete($account) {
-  backdrop_set_message(t('User: @name has been deleted.', array('@name' => $account->name)));
+  backdrop_set_message(t('User: @name has been deleted.', array('@name' => user_format_name($account))));
 }
 
 /**
