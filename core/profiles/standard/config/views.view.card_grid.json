@@ -1,7 +1,7 @@
 {
     "_config_name": "views.view.card_grid",
     "name": "card_grid",
-    "description": "",
+    "description": "Provides a block of 3 promoted Cards. Used by default on the home page.",
     "tag": "default",
     "disabled": false,
     "base_table": "node",
@@ -415,7 +415,8 @@
                 "query": {
                     "type": "views_query",
                     "options": []
-                }
+                },
+                "block_description": "3 Promoted Cards",   
             }
         }
     }
