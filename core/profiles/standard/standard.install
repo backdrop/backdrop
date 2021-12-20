@@ -428,7 +428,7 @@ function standard_install() {
   $cards = array(
     'kelly-sikkema-jr61khawkek-unsplash.jpg' => array(
       'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout through a <a href="https://docs.backdropcms.org/documentation/views">view</a> that was placed as a block.</p>'),
+      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout as a block that contains a <a href="https://docs.backdropcms.org/documentation/views">view</a> of 3 promoted Cards.</p>'),
     ),
     'rich-smith-l8lqr8i_uug-unsplash.jpg' => array(
       'title' => st('What is a Card?'),
