@@ -415,12 +415,12 @@ function standard_install() {
   );
   menu_link_save($item);
 
-  // Prepping to create three default Card nodes.
+  // Creating three default Card nodes.
 
-  // Links to three images - until we find better ones.
-  // https://en.wikipedia.org/wiki/500_(card_game)#/media/File:Six-handed_500_playing_cards.jpg
-  // https://pixabay.com/photos/library-old-historical-shelf-2614804/
-  // https://commons.wikimedia.org/wiki/File:New_Buffalo_Times_Front_Page.jpg
+  // Credits for images.
+  // -- @TODO
+  // -- @TODO
+  // -- @TODO
 
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
