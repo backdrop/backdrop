@@ -176,12 +176,14 @@ Backdrop.tableDrag.prototype.initColumns = function () {
   }
 
   // Add event listener to storage events in other windows on the same domain.
-  window.addEventListener("storage", function () {
-    if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
-      Backdrop.tableDrag.prototype.showColumns();
-    }
-    else {
-      Backdrop.tableDrag.prototype.hideColumns();
+  window.addEventListener('storage', function (event) {
+    if (event.key === 'Backdrop.tableDrag.showWeight') {
+      if (event.newValue === '1') {
+        Backdrop.tableDrag.prototype.showColumns();
+      }
+      else {
+        Backdrop.tableDrag.prototype.hideColumns();
+      }
     }
   });
 };
