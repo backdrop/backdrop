@@ -49,7 +49,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
       switch ($login_method) {
         case USER_LOGIN_EMAIL_ONLY:
           if (!$by_email) {
-            $this->assertRaw(t('The e-mail address %email is not valid.', array('%email' => $account->name)));
+            $this->assertRaw(t('The e-mail address %email is not valid.', array('%email' => user_format_name($account))));
           }
           else {
             $this->assertRaw(t('Sorry, no account with that email address found.'));
@@ -730,7 +730,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
     // Confirm that the confirmation message made it through to the end user.
-    $this->assertRaw(t('%name has been disabled.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
+    $this->assertRaw(t('%name has been disabled.', array('%name' => user_format_name($account))), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -774,7 +774,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue($test_node->status == 0, 'Node revision of the user has been unpublished.');
 
     // Confirm that the confirmation message made it through to the end user.
-    $this->assertRaw(t('%name has been disabled.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
+    $this->assertRaw(t('%name has been disabled.', array('%name' => user_format_name($account))), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -825,7 +825,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue(($test_node->uid != 0 && $test_node->status == 1), "Current revision of the user's node was not attributed to anonymous user.");
 
     // Confirm that the confirmation message made it through to the end user.
-    $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
+    $this->assertRaw(t('%name has been deleted.', array('%name' => user_format_name($account))), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -892,7 +892,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertFalse(comment_load($comment->cid), 'Comment of the user has been deleted.');
 
     // Confirm that the confirmation message made it through to the end user.
-    $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'Confirmation message displayed to user.');
+    $this->assertRaw(t('%name has been deleted.', array('%name' => user_format_name($account))), 'Confirmation message displayed to user.');
   }
 
   /**
@@ -911,12 +911,12 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Delete regular user.
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertRaw(t('Are you sure you want to cancel the account %name?', array('%name' => $account->name)), 'Confirmation form to cancel account displayed.');
+    $this->assertRaw(t('Are you sure you want to cancel the account %name?', array('%name' => user_format_name($account))), 'Confirmation form to cancel account displayed.');
     $this->assertText(t('Select the method to cancel the account above.'), 'Allows to select account cancellation method.');
 
     // Confirm deletion.
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertRaw(t('%name has been deleted.', array('%name' => $account->name)), 'User deleted.');
+    $this->assertRaw(t('%name has been deleted.', array('%name' => user_format_name($account))), 'User deleted.');
     $this->assertFalse(user_load($account->uid), 'User is not found in the database.');
   }
 
@@ -959,7 +959,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, NULL, t('Cancel accounts'));
     $status = TRUE;
     foreach ($users as $account) {
-      $status = $status && (strpos($this->content, t('%name has been deleted.', array('%name' => $account->name))) !== FALSE);
+      $status = $status && (strpos($this->content, t('%name has been deleted.', array('%name' => user_format_name($account)))) !== FALSE);
       $status = $status && !user_load($account->uid, TRUE);
     }
     $this->assertTrue($status, 'Users deleted and not found in the database.');
@@ -1898,13 +1898,13 @@ class UserEditTestCase extends BackdropWebTestCase {
     // Test that error message appears when attempting to use a non-unique user name.
     $edit['name'] = $user2->name;
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
+    $this->assertRaw(t('The name %name is already taken.', array('%name' => user_format_name($user2))));
 
     // Repeat the test with user pictures enabled, which modifies the form.
     $config->set('user_pictures', 1)->save();
 
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
+    $this->assertRaw(t('The name %name is already taken.', array('%name' => user_format_name($user2))));
 
     // Test that the error message appears when attempting to change the mail or
     // pass without the current password.
@@ -2114,7 +2114,7 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
     // Attempt to change username to an email other than my own.
     $edit['name'] = $this->randomName() . '@example.com';
     $this->backdropPost('user/' . $account->uid . '/edit', $edit, t('Save'));
-    $this->assertText(t('An email address was provided as a username, but does not match the account email address.', array('%name' => $edit['name'])), 'Error message found when an email username does not match user email.');
+    $this->assertText(t('An email address was provided as a username, but does not match the account email address.'), 'Error message found when an email username does not match user email.');
     $this->assertNoText(t('The changes have been saved.'), 'The user account was not saved.');
 
     // Lookup user by name to make sure we didn't actually change the name.

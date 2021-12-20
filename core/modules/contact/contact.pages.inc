@@ -303,7 +303,7 @@ function contact_personal_form_submit($form, &$form_state) {
     array(
       '%sender-name' => $values['name'],
       '@sender-from' => $from,
-      '%recipient-name' => $values['recipient']->name,
+      '%recipient-name' => user_format_name($values['recipient']),
     ));
 
   // Jump to the contacted user's profile page.

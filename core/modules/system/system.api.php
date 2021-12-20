@@ -1871,7 +1871,7 @@ function hook_watchdog(array $log_entry) {
     '@request_uri'   => $log_entry['request_uri'],
     '@referer_uri'   => $log_entry['referer'],
     '@uid'           => $log_entry['user']->uid,
-    '@name'          => $log_entry['user']->name,
+    '@name'          => user_format_name($log_entry['user']),
     '@link'          => strip_tags($log_entry['link']),
     '@message'       => strip_tags($log_entry['message']),
   ));

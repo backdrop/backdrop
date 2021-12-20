@@ -3216,7 +3216,7 @@ class FileAccessTestCase extends FileTestHelper {
         $file = $this->createFile(array('type' => 'document', 'uid' => $account->uid, 'scheme' => 'private'));
 
         // Check if the physical file is there.
-        $arguments = array('%name' => $file->filename, '%username' => $account->name, '%uri' => $file->uri);
+        $arguments = array('%name' => $file->filename, '%username' => user_format_name($account), '%uri' => $file->uri);
         $this->assertTrue(is_file($file->uri), format_string('File %name owned by %username successfully created at %uri.', $arguments));
         $url = file_create_url($file->uri);
         $message_file_info = ' ' . format_string('File %uri was checked.', array('%uri' => $file->uri));

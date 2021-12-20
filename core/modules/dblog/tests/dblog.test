@@ -246,7 +246,7 @@ class DBLogTestCase extends BackdropWebTestCase {
       $ids[] = $row->wid;
     }
     $count_before = (isset($ids)) ? count($ids) : 0;
-    $this->assertTrue($count_before > 0, format_string('DBLog contains @count records for @name', array('@count' => $count_before, '@name' => $user->name)));
+    $this->assertTrue($count_before > 0, format_string('DBLog contains @count records for @name', array('@count' => $count_before, '@name' => user_format_name($user))));
 
     // Login the admin user.
     $this->backdropLogin($this->big_user);
