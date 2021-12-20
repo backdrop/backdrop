@@ -26,8 +26,8 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
   function option_definition() {
     $options = parent::option_definition();
 
-    // Intentionally setting $options['quantity'] to NULL here instead of
-    // unset()'ing it, otherwise it throws "undefined index" notices.
+    // Intentionally setting $options['quantity'] to NULL here instead of using
+    // unset(), otherwise it throws "undefined index" notices.
     // See: https://github.com/backdrop/backdrop-issues/issues/1435
     $options['quantity'] = NULL;
     unset($options['tags']['first']);
