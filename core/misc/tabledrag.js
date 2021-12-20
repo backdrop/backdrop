@@ -160,8 +160,8 @@ Backdrop.tableDrag.prototype.initColumns = function () {
     }
   }
 
-  // Now hide cells and reduce colspans unless localStorage indicates previous choice.
-  // Set localStorage if it is not already present.
+  // Now hide cells and reduce colspans unless localStorage indicates previous
+  // choice.
   if (localStorage.getItem('Backdrop.tableDrag.showWeight') === null) {
     this.hideColumns();
   }
