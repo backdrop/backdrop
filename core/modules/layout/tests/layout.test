@@ -17,7 +17,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $orphaned_blocks = FALSE;
 
   function setUp() {
-    parent::setUp('layout_test', 'telemetry');
+    parent::setUp('layout_test');
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
