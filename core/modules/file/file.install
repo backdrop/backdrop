@@ -1194,5 +1194,8 @@ function file_update_1007() {
 function file_update_1008() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store File entity records.";
+  if (db_table_exists('cache_entity_file')) {
+    db_drop_table('cache_entity_file');
+  }
   db_create_table('cache_entity_file', $table);
 }

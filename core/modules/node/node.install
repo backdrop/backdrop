@@ -1986,6 +1986,9 @@ function node_update_1020() {
 function node_update_1021() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store Node entity records.";
+  if (db_table_exists('cache_entity_node')) {
+    db_drop_table('cache_entity_node');
+  }
   db_create_table('cache_entity_node', $table);
 }
 

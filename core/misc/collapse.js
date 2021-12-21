@@ -7,6 +7,7 @@ Backdrop.toggleFieldset = function (fieldset) {
   var $fieldset = $(fieldset);
   if ($fieldset.is('.collapsed')) {
     var $content = $('> .fieldset-wrapper', fieldset).hide();
+    var insideDialog = Boolean($fieldset.parents('.ui-dialog-content').length);
     $fieldset
       .removeClass('collapsed')
       .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Hide'));
@@ -14,15 +15,13 @@ Backdrop.toggleFieldset = function (fieldset) {
       duration: 'fast',
       easing: 'linear',
       complete: function () {
-        Backdrop.collapseScrollIntoView(fieldset);
         $fieldset.trigger({ type: 'collapsed', value: false });
         $(window).triggerHandler('resize');
         Backdrop.optimizedResize.trigger();
+        if (insideDialog === false) {
+          Backdrop.collapseScrollIntoView(fieldset);
+        }
         fieldset.animating = false;
-      },
-      step: function () {
-        // Scroll the fieldset into view.
-        Backdrop.collapseScrollIntoView(fieldset);
       }
     });
   }
@@ -46,13 +45,12 @@ Backdrop.collapseScrollIntoView = function (node) {
   var h = document.documentElement.clientHeight || document.body.clientHeight || 0;
   var offset = document.documentElement.scrollTop || document.body.scrollTop || 0;
   var posY = $(node).offset().top;
-  var fudge = 55;
-  if (posY + node.offsetHeight + fudge > h + offset) {
+  if (posY + node.offsetHeight > h + offset) {
     if (node.offsetHeight > h) {
-      window.scrollTo(0, posY);
+      node.scrollIntoView({behavior: "smooth"});
     }
     else {
-      window.scrollTo(0, posY + node.offsetHeight - h + fudge);
+      node.scrollIntoView({behavior: "smooth", block: "end"});
     }
   }
 };
