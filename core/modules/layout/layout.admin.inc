@@ -306,17 +306,22 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
-  $path_matches = db_query('
-    SELECT path, page_callback
-    FROM {menu_router}
-    WHERE path = :path
-    ', array(':path' => $path))
-    ->fetchAllKeyed();
-  if (count($path_matches)) {
-    $path_match_text = t('This layout will override the default layout for existing page(s) (which are created by %page_callback).', array('%page_callback' => $path_matches[$path]));
+  if (!empty($path)) {
+    $path_matches = db_query('
+      SELECT path, page_callback
+      FROM {menu_router}
+      WHERE path = :path
+      ', array(':path' => $path))
+      ->fetchAllKeyed();
+    if (count($path_matches)) {
+      $path_match_text = t('This layout will override the default layout for existing page(s) (which are created by %page_callback).', array('%page_callback' => $path_matches[$path]));
+    }
+    else {
+      $path_match_text = t('This path will create a page.');
+    }
   }
   else {
-    $path_match_text = t('This path will create a page.');
+    $path_match_text = '';
   }
   $form['path_matches'] = array(
     '#markup' => $path_match_text,
