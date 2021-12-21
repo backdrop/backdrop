@@ -386,11 +386,18 @@
                     }
                 },
                 "sorts": {
-                    "created": {
-                        "id": "created",
+                    "nid": {
+                        "id": "nid",
                         "table": "node",
-                        "field": "created",
-                        "order": "DESC"
+                        "field": "nid",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "order": "ASC",
+                        "exposed": false,
+                        "expose": {
+                            "label": ""
+                        }
                     }
                 },
                 "title": "Card grid",
