@@ -418,9 +418,9 @@ function standard_install() {
   // Creating three default Card nodes.
 
   // Credits for images.
-  // -- @TODO
-  // -- @TODO
-  // -- @TODO
+  // --- @TODO
+  // --- @TODO
+  // --- @TODO
 
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
