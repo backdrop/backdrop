@@ -960,7 +960,7 @@ function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langco
  *   content language of the current request.
  */
 function comment_build_content(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('comment')->buildContent($comment, $view_mode, $langcode, array('node' => $node));
+  entity_get_controller('comment')->buildContent($comment, $view_mode, $langcode);
 }
 
 /**
