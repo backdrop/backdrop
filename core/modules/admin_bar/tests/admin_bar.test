@@ -217,7 +217,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
       'name' => 'test',
       'label' => 'Test',
     );
-    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
 
     // Grant the 'administer content types' permission for the role.
     $edit = array(

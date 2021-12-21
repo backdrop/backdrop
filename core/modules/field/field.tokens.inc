@@ -123,7 +123,7 @@ function _field_token_info($field_name = NULL) {
 
   $cache = cache('token');
 
-  if (!isset($fields)) {
+  if (!isset($info)) {
     if ($cached = $cache->get('field:info')) {
       $info = $cached->data;
     }

@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function deprecated_redirect_test_menu() {
+  $items['new/path/simple'] = array(
+    'page callback' => '_deprecated_redirect_test_page',
+    'access callback' => TRUE,
+  );
+  $items['new/path/%/with/%/wildcards/%'] = array(
+    'page callback' => '_deprecated_redirect_test_page',
+    'access callback' => TRUE,
+  );
+  $items['old/path/simple'] = array(
+    'page callback' => 'system_redirect_deprecated_page',
+    'page arguments' => array('new/path/simple'),
+    'access callback' => TRUE,
+  );
+  $items['old/path/%/same/%/positions/%'] = array(
+    'page callback' => 'system_redirect_deprecated_page',
+    'page arguments' => array('new/path/%/with/%/wildcards/%'),
+    'access callback' => TRUE,
+  );
+  $items['old/path/different/%/wildcard/%/%/positions'] = array(
+    'page callback' => 'system_redirect_deprecated_page',
+    'page arguments' => array('new/path/%/with/%/wildcards/%', array(3 => 2, 5 => 4, 6 => 6)),
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+function _deprecated_redirect_test_page() {
+  return format_string('Current path: @path', array('@path' => $_GET['q']));
+}

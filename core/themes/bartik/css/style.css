@@ -567,10 +567,19 @@ ul.tips {
   color: #333;
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+.l-header ul.menu a,
+.js .menu-dropdown a,
+.js .menu-dropdown a:hover,
+.js .menu-dropdown a:focus,
+.js .menu-dropdown a:active,
+/* Prevents 2+ level menu items with child items from "jumping" when their 
+   child items are hovered over. */
+.js .menu-dropdown .has-children a {
   height: 2.4em;
   line-height: 2.4em;
   padding: 0 0.8em;
-  text-decoration: none;
 }
 .l-header ul.menu li li a {
   background: rgba(255, 255, 255, 0.8);
