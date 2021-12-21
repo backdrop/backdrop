@@ -401,9 +401,11 @@ function comment_permission() {
   return array(
     'administer comment settings' => array(
       'title' => t('Administer comment settings'),
+      'description' => t('Edit comment settings per content type.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
+      'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -1150,6 +1152,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
+      '#access' => user_access('administer comment settings'),
       '#attributes' => array(
         'class' => array('comment-node-type-settings-form'),
       ),
