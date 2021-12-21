@@ -670,9 +670,6 @@ function admin_bar_links_page() {
     'destination' => current_path(),
   ));
 
-  $links = array(
-    '#theme' => 'admin_bar_links',
-  );
   $links['page'] = array(
     '#title' => theme('admin_bar_icon_page'),
     '#attributes' => array('class' => array('admin-bar-page-links')),
