@@ -15,9 +15,18 @@ define('BACKDROP_VERSION', '1.21.x-dev');
 define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 
 /**
- * Minimum supported version of PHP.
+ * Minimum Backdrop-supported version of PHP.
  */
 define('BACKDROP_MINIMUM_PHP', '5.3.2');
+
+/**
+ * Minimum supported version ID of PHP.
+ * @see http://php.net/supported-versions.php
+ *
+ * Version ID = major version * 10000 + minor version * 100 + release version
+ * So for 7.1.0, Version ID = 70000 + 100 + 0 = 70100
+ */
+define('MINIMUM_SUPPORTED_PHP_VERSION_ID', '70100');
 
 /**
  * Minimum recommended value of PHP memory_limit.
