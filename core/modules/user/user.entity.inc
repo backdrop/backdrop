@@ -500,9 +500,8 @@ class UserStorageController extends EntityDatabaseStorageController {
    * Implements EntityControllerInterface::buildContent().
    */
   public function buildContent(EntityInterface $account, $view_mode = 'full', $langcode = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
     $account->content = array();
@@ -528,9 +527,8 @@ class UserStorageController extends EntityDatabaseStorageController {
    * Overrides DefaultEntityController::view().
    */
   public function view($accounts, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $view = array();
     foreach ($accounts as $account) {

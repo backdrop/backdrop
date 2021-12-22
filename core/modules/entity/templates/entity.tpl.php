@@ -9,18 +9,26 @@
  *   print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
  *   given element.
+ * - $content_attributes: An array of content attributes to wrap around content.
  * - $title: The (sanitized) entity label.
+ * - $title_attributes: Array of title attributes to wrap around the label.
  * - $url: Direct url of the current entity if specified.
  * - $page: Flag for the full page state.
- * - Array of html class attribute values. By default the following classes are
- *   available, where the parts enclosed by {} are replaced by the appropriate
- *   values:
+ * - $classes: Array of classes that can be used to style contextually through
+ *   CSS. By default the following classes are available, where the parts
+ *   enclosed by {} are replaced by the appropriate values:
  *   - entity-{ENTITY_TYPE}
  *   - {ENTITY_TYPE}-{BUNDLE}
+ * - $attributes: Array of additional HTML attributes that should be added to
+ *   the wrapper element. Flatten with backdrop_attributes().
+ *
+ * Other variables:
+ * - $entity: Full entity. Contains data that may not be safe.
+ * - $entity_type: Entity type.
+ * - $view_mode: Display mode, e.g. 'full', or 'teaser'.
  *
  * @see template_preprocess()
  * @see template_preprocess_entity()
- * @see template_process()
  */
 ?>
 <div class="<?php print implode(' ', $classes); ?>"<?php (empty($attributes)) ? '' : print backdrop_attributes($attributes); ?>>

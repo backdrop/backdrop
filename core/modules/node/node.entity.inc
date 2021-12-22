@@ -707,9 +707,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
    * Implements EntityControllerInterface::buildContent().
    */
   public function buildContent(EntityInterface $node, $view_mode = 'full', $langcode = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
     $node->content = array();
@@ -767,9 +766,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
    * Overrides DefaultEntityController::view().
    */
   public function view($nodes, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $view = array();
     foreach ($nodes as $node) {

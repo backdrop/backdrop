@@ -44,7 +44,7 @@ function template_preprocess_entity(&$variables) {
 
   // Gather css classes.
   $variables['classes'][] = backdrop_html_class('entity-' . $entity_type);
-  $variables['classes'][] = backdrop_html_class($entity_type . '-' . $bundle);
+  $variables['classes'][] = backdrop_html_class('entity-' . $entity_type . '-' . $bundle);
 
   // Add suggestions.
   $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type;

@@ -245,9 +245,8 @@ class FileStorageController extends EntityDatabaseStorageController {
    * Implements EntityControllerInterface::buildContent().
    */
   public function buildContent(EntityInterface $file, $view_mode = 'full', $langcode = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->language;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
     $file->content = array();
@@ -298,9 +297,8 @@ class FileStorageController extends EntityDatabaseStorageController {
    * Overrides DefaultEntityController::view().
    */
   public function view($files, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $view = array();
     foreach ($files as $file) {

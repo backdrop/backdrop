@@ -447,9 +447,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
    * Implements EntityControllerInterface::buildContent().
    */
   public function buildContent(EntityInterface $comment, $view_mode = 'full', $langcode = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $node = node_load($comment->nid);
 
@@ -490,9 +489,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
    * Overrides DefaultEntityController::view().
    */
   public function view($comments, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $view = array();
     foreach ($comments as $comment) {

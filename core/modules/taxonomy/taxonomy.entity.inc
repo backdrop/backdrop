@@ -302,9 +302,8 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
    * Implements EntityControllerInterface::buildContent().
    */
   public function buildContent(EntityInterface $term, $view_mode = 'full', $langcode = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->language;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
     $term->content = array();
@@ -347,9 +346,8 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
    * Overrides DefaultEntityController::view().
    */
   public function view($terms, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    if (!isset($langcode)) {
-      $langcode = $GLOBALS['language_content']->langcode;
-    }
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
 
     $view = array();
     foreach ($terms as $term) {
