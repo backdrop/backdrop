@@ -823,12 +823,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
  *   An array as expected by backdrop_render().
  */
 function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('taxonomy_term')->view(array($term->tid => $term), $view_mode, $langcode);
-  // $view is an array keyed by the entity type and entity id. Extract
-  // the specific build for this entity.
-  $build = $view['taxonomy_term'][$term->tid];
-
-  return $build;
+  return entity_get_controller('taxonomy_term')->view(array($term->tid => $term), $view_mode, $langcode);
 }
 
 /**

@@ -3293,12 +3293,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  *   An array as expected by backdrop_render().
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('file')->view(array($file->fid => $file), $view_mode, $langcode);
-  // $view is an array keyed by the entity type and entity id. Extract
-  // the specific build for this entity.
-  $build = $view['file'][$file->fid];
-
-  return $view;
+  return entity_get_controller('file')->view(array($file->fid => $file), $view_mode, $langcode);
 }
 
 /**
