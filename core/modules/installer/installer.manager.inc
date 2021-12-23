@@ -507,11 +507,10 @@ function installer_manager_install_form($form, &$form_state) {
   backdrop_set_title('Manual installation');
 
   $form['help_text'] = array(
-    '#prefix' => '<p>',
+    '#type' => 'help',
     '#markup' => t('You can find modules, themes, and layouts on <a href="https://backdropcms.org">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
       '%extensions' => archiver_get_extensions(),
     )),
-    '#suffix' => '</p>',
   );
 
   $form['bulk_wrapper'] = array(
@@ -619,8 +618,7 @@ function _installer_manager_check_backends(&$form, $operation) {
 
   // Otherwise, show the available backends.
   $form['available_backends'] = array(
-    '#prefix' => '<p>',
-    '#suffix' => '</p>',
+    '#type' => 'help',
   );
 
   $available_backends = backdrop_get_filetransfer_info();
