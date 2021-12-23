@@ -259,7 +259,9 @@ function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = N
 /**
  * Generate an array for rendering the given entity.
  *
- * @param $entities
+ * @param string $entity_type
+ *   The type of the entity.
+ * @param array $entities
  *   An array of entity objects to render.
  * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
@@ -278,8 +280,7 @@ function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = N
  *   The renderable array, keyed by the entity type and by entity ID. If
  *   there is no information on how to view an entity, FALSE is returned.
  */
-function entity_view_multiple($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-  $entity_type = $entity->entityType();
+function entity_view_multiple($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
   $info = entity_get_info($entity_type);
 
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
