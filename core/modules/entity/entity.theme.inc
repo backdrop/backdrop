@@ -10,10 +10,11 @@
  */
 function template_preprocess_entity(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $entity_type = $variables['elements']['#entity_type'];
-  $variables['entity_type'] = $entity_type;
-  $entity = $variables['elements']['#entity'];
-  $variables[$entity_type] = $entity;
+  $variables['entity_type'] = $variables['elements']['#entity_type'];
+  $entity_type = $variables['entity_type'];
+  $variables['entity'] = $variables['elements']['#entity'];
+  $entity = $variables['entity'];
+  $variables['entity_id'] = $entity->id();
   $info = entity_get_info($entity_type);
 
   $variables['title'] = check_plain(entity_label($entity_type, $entity));
@@ -45,6 +46,9 @@ function template_preprocess_entity(&$variables) {
   // Gather css classes.
   $variables['classes'][] = backdrop_html_class('entity-' . $entity_type);
   $variables['classes'][] = backdrop_html_class('entity-' . $entity_type . '-' . $bundle);
+  if ($variables['view_mode']) {
+    $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
+  }
 
   // Add suggestions.
   $variables['theme_hook_suggestions'][] = 'entity__' . $entity_type;
