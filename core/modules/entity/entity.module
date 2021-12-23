@@ -234,7 +234,7 @@ function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full
  * Generate an array for rendering the given entity.
  *
  * @param EntityInterface $entity
- *   An array of entity objects to render.
+ *   An entity object to render.
  * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
  * @param string $langcode
@@ -246,14 +246,10 @@ function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full
  *   FALSE is returned.
  */
 function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
-  $entity_type = $entity->entityType();
   $info = entity_get_info($entity_type);
 
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    $view = entity_get_controller($entity_type)->view(array($entity->id() => $entity), $view_mode, $langcode);
-    // $view is an array keyed by the entity type and entity id. Extract
-    // the specific build for this entity.
-    return $view[$entity_type][$entity->id()];
+    return entity_get_controller($entity->entityType())->view(array($entity->id() => $entity), $view_mode, $langcode);
   }
 
   return FALSE;
