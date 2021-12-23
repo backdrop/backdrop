@@ -3044,36 +3044,36 @@ function _menu_navigation_links_rebuild($menu) {
     }
   }
   $paths = array_keys($menu);
+
   // Updated and customized items whose router paths are gone need new ones.
-  $result = db_select('menu_links', NULL, array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('menu_links', array(
-      'link_path',
-      'mlid',
-      'router_path',
-      'updated',
-    ))
-    ->condition(db_or()
-      ->condition('updated', 1)
-      ->condition(db_and()
-        ->condition('router_path', $paths, 'NOT IN')
-        ->condition('external', 0)
-        ->condition('customized', 1)
-      )
-    )
-    ->execute();
+  $result = array();
+  foreach ($menu_links_cache as $menu_link) {
+    if ((int) $menu_link->updated === 1 || (
+        (int) $menu_link->customized === 1
+        && (int) $menu_link->external === 0
+        && in_array($menu_link->router_path, $paths)
+      )) {
+      $result[] = $menu_link;
+    }
+  }
+
   foreach ($result as $item) {
-    $router_path = _menu_find_router_path($item['link_path']);
-    if (!empty($router_path) && ($router_path != $item['router_path'] || $item['updated'])) {
+    $router_path = _menu_find_router_path($item->link_path);
+    if (!empty($router_path) && ($router_path != $item->router_path || $item->updated)) {
       // If the router path and the link path matches, it's surely a working
       // item, so we clear the updated flag.
-      $updated = $item['updated'] && $router_path != $item['link_path'];
+      $updated = $item->updated && $router_path != $item->link_path;
       db_update('menu_links')
         ->fields(array(
           'router_path' => $router_path,
           'updated' => (int) $updated,
         ))
-        ->condition('mlid', $item['mlid'])
+        ->condition('mlid', $item->mlid)
         ->execute();
+
+      // Update $menu_links_cache so other functions have the changed data.
+      $menu_links_cache[$menu_link->link_path]->router_path = $router_path;
+      $menu_links_cache[$menu_link->link_path]->updated = $updated;
     }
   }
 
