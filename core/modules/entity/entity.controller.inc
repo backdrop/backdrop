@@ -64,9 +64,6 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
-   *
-   * @return
-   *   The renderable array.
    */
   public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
 
