@@ -245,10 +245,12 @@ function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full
  *   FALSE is returned.
  */
 function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+  $entity_type = $entity->entityType();
   $info = entity_get_info($entity_type);
 
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity->entityType())->view(array($entity->id() => $entity), $view_mode, $langcode);
+    $view = entity_get_controller($entity_type)->view(array($entity->id() => $entity), $view_mode, $langcode);
+    return $view[$entity_type][$entity->id()];
   }
 
   return FALSE;

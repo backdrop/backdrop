@@ -1114,7 +1114,8 @@ function node_revision_delete($revision_id) {
  *   An array as expected by backdrop_render().
  */
 function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
-  return entity_get_controller('node')->view(array($node->nid => $node), $view_mode, $langcode);
+  $view = entity_get_controller('node')->view(array($node->nid => $node), $view_mode, $langcode);
+  return $view['node'][$node->nid];
 }
 
 /**
