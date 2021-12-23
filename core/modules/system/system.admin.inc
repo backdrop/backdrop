@@ -1558,7 +1558,8 @@ function system_cron_settings($form, &$form_state) {
   global $base_url;
   $form['#config'] = 'system.core';
   $form['description'] = array(
-    '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.'),
   );
   $form['run'] = array(
     '#type' => 'submit',
@@ -1572,7 +1573,8 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $form['cron_url'] = array(
-    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
   );
 
   $form['cron'] = array(
@@ -2518,7 +2520,7 @@ function system_utf8mb4_convert_form($form, &$form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => '<p>' . $requirements['description'] . '</p>',
+    '#markup' => $requirements['description'],
   );
 
   // Not active and/or supported. Existing messages should be sufficient.

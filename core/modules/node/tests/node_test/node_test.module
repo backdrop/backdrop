@@ -37,7 +37,8 @@ function node_test_node_view(Node $node, $view_mode) {
 
     // Add content that should be displayed only in the RSS feed.
     $node->content['extra_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)),
       '#weight' => 10,
     );
   }
@@ -45,7 +46,8 @@ function node_test_node_view(Node $node, $view_mode) {
   if ($view_mode != 'rss') {
     // Add content that should NOT be displayed in the RSS feed.
     $node->content['extra_non_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)),
     );
   }
 }

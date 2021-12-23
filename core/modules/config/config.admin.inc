@@ -18,7 +18,8 @@ function config_sync_form(array $form, array &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))),
   );
 
   if ($changed_config_count === 0) {
@@ -176,7 +177,8 @@ function config_diff_page($config_file) {
  */
 function config_export_full_form(array $form, array $form_state) {
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form may be used to generate a full export of your entire site\'s configuration. This configuration file should remain compressed when you upload it to the destination site.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('This form may be used to generate a full export of your entire site\'s configuration. This configuration file should remain compressed when you upload it to the destination site.'),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -214,7 +216,8 @@ function config_download_full_export() {
  */
 function config_import_full_form(array $form, array &$form_state) {
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form imports a site configuration archive from another site. Upload an export file below to stage the changes (you\'ll have a chance to review and confirm the changes first). To generate an export file, visit the <a href="!export">full export</a> page.', array('!export' => url('admin/config/development/configuration/full/export'))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('This form imports a site configuration archive from another site. Upload an export file below to stage the changes (you\'ll have a chance to review and confirm the changes first). To generate an export file, visit the <a href="!export">full export</a> page.', array('!export' => url('admin/config/development/configuration/full/export'))),
   );
   $form['import_tarball'] = array(
     '#type' => 'managed_file',
@@ -275,7 +278,8 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form may be used to export a single configuration so that it may be imported on a different site. Select a configuration group and name to generate configuration for copy/paste.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('This form may be used to export a single configuration so that it may be imported on a different site. Select a configuration group and name to generate configuration for copy/paste.'),
   );
 
   // Pull config group from URL if not provided.
@@ -397,7 +401,8 @@ function config_import_single_form(array $form, array &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => url('admin/config/development/configuration/single/export'))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('This form imports a single configuration file from another site. To generate an export, visit the <a href="!export">single export</a> page.', array('!export' => url('admin/config/development/configuration/single/export'))),
   );
   $form['import'] = array(
     '#title' => t('Paste your configuration here'),
