@@ -225,9 +225,8 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
 function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
   $info = entity_get_info($entity->entityType());
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
+    entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
   }
-  return FALSE;
 }
 
 /**
