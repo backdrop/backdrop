@@ -68,8 +68,8 @@ class EntityLayoutContext extends LayoutContext {
     if (empty($form_state['values']['id'])) {
       form_set_error('id', t('An ID is required.'));
     }
-    $info = entity_get_info($this->entity_type);
-    if (!entity_load($this->entity_type, $form_state['values']['id'])) {
+    elseif (!entity_load($this->entity_type, $form_state['values']['id'])) {
+      $info = entity_get_info($this->entity_type);
       form_set_error('id', t('The selected @entity does not exist.', array('@entity' => $info['label'])));
     }
   }
@@ -78,7 +78,7 @@ class EntityLayoutContext extends LayoutContext {
    * Submit handler for the settings form for this context item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs'));
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs', 'context_add_button'));
     $settings = array_diff_key($form_state['values'], $excluded);
     // This produces config keys for contexts in the format "node1" or "user3".
     $this->name = $this->plugin . $settings['id'];

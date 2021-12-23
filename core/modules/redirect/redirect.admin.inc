@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Redirect module.
+ * Admin page callbacks for the Redirect module.
  */
 
 /**
@@ -394,7 +394,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->redirect ? redirect_url($redirect->redirect, $redirect->redirect_options, TRUE) : '',
     '#required' => TRUE,
-    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the front page.', array('%front' => '<front>')),
+    '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the home page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
     '#autocomplete_path' => 'path-autocomplete',
   );
@@ -486,9 +486,9 @@ function redirect_element_validate_source($element, &$form_state) {
 
   $parsed_value = _redirect_extract_url_options($element, $form_state);
 
-  // Disallow redirects from the front page.
+  // Disallow redirects from the home page.
   if ($parsed_value['path'] === '<front>') {
-    form_error($element, t('The source path cannot be the front page.'));
+    form_error($element, t('The source path cannot be the home page.'));
   }
 
   // Cannot create redirects for valid paths.

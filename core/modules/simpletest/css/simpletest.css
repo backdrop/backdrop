@@ -42,6 +42,16 @@
 #simpletest-form-table tr.simpletest-group label {
   display: inline;
 }
+#simpletest-form-table tr.test-even td {
+  background-color: #f3f4ee;
+}
+#simpletest-test-form .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 
 /* Test results */
 .simpletest-pass {
