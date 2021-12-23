@@ -2318,6 +2318,8 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     // Create a web user.
     $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
 
+    // Test ordinary role-based selection.
+
     // Create a layout at a custom path.
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name;
@@ -2328,7 +2330,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'layout_template' => 'moscone_flipped',
     );
 
-    // Note that this adds a condition, not saving the layout yet.
+    // This adds a condition, not saving the layout yet.
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
 
     // Select the condition to add.
@@ -2360,53 +2362,16 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     // View as anonymous, where they should get a 404.
     $this->backdropGet($layout_path);
     $this->assertResponse(404);
-  }
 
-  /**
-   * Test negation of role-based selection of layouts.
-   */
-  function testRoleNegationSelection() {
-    // Create and login admin user.
-    $admin_user = $this->backdropCreateUser(array(
-      'access administration pages',
-      'administer site configuration',
-      'administer modules',
-      'administer layouts',
-      'administer nodes',
-    ));
+     // Go back and configure the visibility condition to test a negated role.
     $this->backdropLogin($admin_user);
 
-    // Create a web user.
-    $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
-
-    // Create a layout at a custom path.
-    $layout_name = strtolower($this->randomName());
-    $layout_path = $layout_name;
     $edit = array(
-      'name' => $layout_name,
-      'title' => $layout_name,
-      'path' => $layout_path,
-      'layout_template' => 'moscone_flipped',
-    );
-
-    // Note that this adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
-
-    // Select the condition to add.
-    $edit = array(
-      'condition' => 'user_role',
-    );
-    $this->backdropPost(NULL, $edit, t('Load condition'));
-
-    // Deny anonymous users to see the layout.
-    $edit = array(
+      'roles[authenticated]' => FALSE,
       'roles[anonymous]' => TRUE,
       'negate' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Create layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/condition/edit/layout/0', $edit, t('Save visibility condition'));
 
     // View as an administrator.
     $this->backdropGet($layout_path);
