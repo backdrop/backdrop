@@ -1572,17 +1572,24 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $form['cron_url'] = array(
-    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
+  );
+
+  $form['cron_info'] = array(
+    '#type' => 'help',
+    '#markup' => t('Information about setting up scheduled tasks is in <a href="@url">the cron section of the User Guide</a>.', array('@url' => url('https://backdropcms.org/cron'))),
   );
 
   $form['cron'] = array(
-    '#title' => t('Cron configuration'),
+    '#title' => t('Automated cron configuration'),
     '#type' => 'fieldset',
+    '#description' => t('Automated cron will attach cron runs to the end of page requests if needed.'),
   );
   $form['cron']['cron_safe_threshold'] = array(
     '#type' => 'select',
     '#title' => t('Run cron every'),
-    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial</a>.', array('@url' => url('https://backdropcms.org/cron'))),
+    '#description' => t('You can set this to "Never" if you have set up an external cron job.'),
     '#default_value' => config('system.core')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
