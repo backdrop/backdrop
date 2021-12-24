@@ -137,7 +137,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
   $(window).on('storage', function (e) {
     // Only react to 'Backdrop.tableDrag.showWeight' value change.
     if (e.originalEvent.key === 'Backdrop.tableDrag.showWeight') {
-      // This was changed in another window, get the new value for this window.
+      // This was changed in another window. Get the new value for this window.
       showWeight = JSON.parse(e.originalEvent.newValue);
       self.displayColumns(showWeight);
     }
