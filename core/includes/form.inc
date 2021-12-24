@@ -4601,7 +4601,7 @@ function form_validate_number(&$element, &$form_state) {
         form_error($element, t('%name: the value must be an integer.', array('%name' => $name)));
       }
       else {
-        form_error($element, t('%name: the value must be an integral number of steps %step from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+        form_error($element, t('%name: the value must be a whole number of steps %step from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
       }
     }
   }
