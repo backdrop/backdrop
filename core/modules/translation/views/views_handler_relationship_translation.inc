@@ -64,20 +64,20 @@ class views_handler_relationship_translation extends views_handler_relationship 
       switch ($this->options['language']) {
         case 'current':
           $def['extra'][] = array(
-            'field' => 'language',
+            'field' => 'langcode',
             'value' => '***CURRENT_LANGUAGE***',
           );
           break;
         case 'default':
           $def['extra'][] = array(
-            'field' => 'language',
+            'field' => 'langcode',
             'value' => '***DEFAULT_LANGUAGE***',
           );
           break;
         // Other values will be the language codes.
         default:
           $def['extra'][] = array(
-            'field' => 'language',
+            'field' => 'langcode',
             'value' => $this->options['language'],
           );
           break;

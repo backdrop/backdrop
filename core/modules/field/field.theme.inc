@@ -206,6 +206,11 @@ function template_preprocess_field(&$variables, $hook) {
     'field-type-' . $variables['field_type_css'],
     'field-label-' . $element['#label_display'],
   );
+  // Add a "clearfix" class to the wrapper since we float the label and the
+  // field items in field.css if the label is inline.
+  if ($element['#label_display'] == 'inline') {
+    $variables['classes'][] = 'clearfix';
+  }
 
   // Add specific suggestions that can override the default implementation.
   $variables['theme_hook_suggestions'] = array(

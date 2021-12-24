@@ -102,6 +102,57 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test number_decimal field step validation.
+   */
+  public function testNumberDecimalFieldStepValidation() {
+    // Create a field with settings to validate, this time with higher
+    // precision and scale.
+    $this->field = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'number_decimal',
+      'settings' => array(
+        'precision' => 14,
+        'scale' => 10,
+        'decimal_separator' => '.',
+      ),
+    );
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_decimal',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    // Valid values but problematic because of php floating point precision.
+    // All these values are divisible by 0.0000000001 (1.0E-10), so the step
+    // validation must pass.
+    $valid_values = array(
+      20.123456789,
+      9999.1933172003,
+      219.200005,
+      199.200001,
+    );
+    foreach ($valid_values as $index => $decimal) {
+      $langcode = LANGUAGE_NONE;
+      $this->backdropGet('test-entity/add/test-bundle');
+      $edit = array(
+        "{$this->field['field_name']}[$langcode][0][value]" => $decimal,
+      );
+      $this->backdropPost(NULL, $edit, t('Save'));
+      $this->assertNoRaw(format_string('%name is not a valid number.', array('%name' => $this->field['field_name'])));
+    }
+  }
+
+  /**
    * Test number_integer field.
    */
   function testNumberIntegerField() {

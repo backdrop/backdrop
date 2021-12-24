@@ -724,7 +724,7 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
         // first operator dropdown we encounter, going backwards from the current
         // row. This dropdown is the one associated with the current row's filter
         // group.
-        var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').html();
+        var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').last().html();
         var operatorLabel = '<span class="views-operator-label">' + operatorValue + '</span>';
         // If the next visible row after this one is a draggable filter row,
         // display the operator label next to the current row. (Checking for

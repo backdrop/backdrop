@@ -404,7 +404,12 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   public function stream_open($uri, $mode, $options, &$opened_path) {
     $this->uri = $uri;
     $path = $this->getLocalPath();
-    $this->handle = ($options & STREAM_REPORT_ERRORS) ? fopen($path, $mode) : @fopen($path, $mode);
+    if ($path) {
+      $this->handle = ($options & STREAM_REPORT_ERRORS) ? fopen($path, $mode) : @fopen($path, $mode);
+    }
+    else {
+      $this->handle = NULL;
+    }
 
     if ((bool) $this->handle && $options & STREAM_USE_PATH) {
       $opened_path = $path;
