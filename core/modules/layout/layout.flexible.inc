@@ -506,13 +506,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     );
     $form['region_names']['region_' . $i]['region_class_enable'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Additional CSS classes'),
+      '#title' => t('Add CSS classes'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_class_enable']) ? $row_data['region_names']['region_' . $i]['region_class_enable'] : 0,
     );
     $form['region_names']['region_' . $i]['classes'] = array(
       '#type' => 'textfield',
-      '#title' => t('CSS classes'),
-      '#description' => t('Define multiple classes separated by spaces.'),
+      '#title' => t('Additional region CSS classes'),
+      '#description' => t('Separate multiple classes with spaces.'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
       '#states' => array(
         'visible' => array(
@@ -563,6 +563,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     '#title' => t('Additional row CSS classes'),
     '#type' => 'textfield',
     '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
+    '#description' => t('Separate multiple classes with spaces.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
