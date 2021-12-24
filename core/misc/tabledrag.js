@@ -113,10 +113,10 @@ Backdrop.tableDrag = function (table, tableSettings) {
   // Add a link before the table for users to show or hide weight columns.
   $(table).before($('<a href="#" class="tabledrag-toggle-weight"></a>')
     .attr('title', Backdrop.t('Re-order rows by numerical weight instead of dragging.'))
-    .click($.proxy(function (e) {
+    .click(function (e) {
       e.preventDefault();
-      this.toggleColumns();
-    }, this))
+      self.toggleColumns();
+    })
     .wrap('<div class="tabledrag-toggle-weight-wrapper"></div>')
     .parent()
   );
@@ -134,14 +134,14 @@ Backdrop.tableDrag = function (table, tableSettings) {
   $(document).on('mousemove pointermove', function (event) { return self.dragRow(event, self); });
   $(document).on('mouseup pointerup', function (event) { return self.dropRow(event, self); });
   // React to localStorage event showing or hiding weight columns.
-  $(window).on('storage', $.proxy(function (e) {
+  $(window).on('storage', function (e) {
     // Only react to 'Backdrop.tableDrag.showWeight' value change.
     if (e.originalEvent.key === 'Backdrop.tableDrag.showWeight') {
       // This was changed in another window, get the new value for this window.
       showWeight = JSON.parse(e.originalEvent.newValue);
-      this.displayColumns(showWeight);
+      self.displayColumns(showWeight);
     }
-  }, this));
+  });
 };
 
 /**
