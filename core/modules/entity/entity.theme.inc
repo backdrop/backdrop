@@ -20,6 +20,7 @@ function template_preprocess_entity(&$variables) {
   $variables['title'] = check_plain(entity_label($entity_type, $entity));
 
   $uri = entity_uri($entity_type, $entity);
+  $uri += array('options' => array());
   $variables['url'] = $uri && !empty($uri['path']) ? url($uri['path'], $uri['options']) : FALSE;
 
   if (isset($variables['elements']['#page'])) {
