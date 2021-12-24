@@ -21,9 +21,9 @@ class UserViewsHandlerFieldNameTest extends ViewsSqlTest {
     $view->row_index = 0;
 
     $view->field['name']->options['link_to_user'] = TRUE;
-    $user = user_load(1);
-    $user_id = $user->uid;
-    $user_path = $user->path['alias'] ? $user->path['alias'] : 'user/' . $user->uid;
+    $user_id = 1;
+    $user = user_load($user_id);
+    $user_path = $user->path['alias'] ? $user->path['alias'] : 'user/' . $user_id;
     $username = $view->result[0]->users_name = $this->randomName();
     $view->result[0]->uid = $user_id;
     $render = $view->field['name']->advanced_render($view->result[0]);
