@@ -8743,12 +8743,18 @@ function backdrop_check_incompatibility(array $dependency_info, $current_version
  * Converts a Backdrop version string into numeric-only version string.
  *
  * @param string $version_string
- *   A version string such as 1.10.0-beta4 or 1.4.x-dev.
+ *   A version string such as 1.x-1.2.3, or 1.10.0-beta4, or 1.4.x-dev.
  * @return string
  *   A converted string only containing numbers, for use in PHP's
  *   version_compare() function.
  */
 function _backdrop_version_compare_convert($version_string) {
+  // Remove the "1.x-" prefix (indicating Backdrop core version compatibility).
+  $core_prefix = BACKDROP_CORE_COMPATIBILITY . '-';
+  if (substr($version_string, 0, strlen($core_prefix)) == $core_prefix) {
+    $version_string = substr($version_string, strlen($core_prefix));
+  }
+
   // Convert "dev" releases to be the highest possible version number. For
   // example 1.5.x-dev should be considered higher than any other 1.5 release,
   // so we replace .x with 99999.
