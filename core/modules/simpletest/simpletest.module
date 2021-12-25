@@ -366,12 +366,12 @@ function simpletest_test_get_all() {
       $groups = array();
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
+        // If the .tests.info file contained no classes, then it puts a slew of
+        // hard-to-diagnose errors into the watchdog log when the testing page
+        // is loaded. So we'll check and put a more informative error here.
         $class_values = array_values($classes);
         if (empty($classes) || !is_array($class_values[0])) {
-          // If the .tests.info file contained no classes, then it puts a slew
-          // of hard-to-diagnose errors into the watchdog log when the testing
-          // page is loaded. So we'll put a more informative error here.
-          watchdog('simpletest', 'There are no testing classes in file %uri', array('%uri' => $file->uri), WATCHDOG_WARNING);
+          watchdog('simpletest', 'File %uri contains no testing classes.', array('%uri' => $file->uri), WATCHDOG_WARNING);
           continue;
         }
         foreach ($classes as $class => $info) {
