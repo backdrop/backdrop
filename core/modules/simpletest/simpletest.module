@@ -371,7 +371,7 @@ function simpletest_test_get_all() {
         // is loaded. So we'll check and put a more informative error here.
         $class_values = array_values($classes);
         if (empty($classes) || !is_array($class_values[0])) {
-          watchdog('simpletest', 'File %uri contains no testing classes.', array('%uri' => $file->uri), WATCHDOG_WARNING);
+          watchdog('simpletest', 'File %uri contains no testing classes. <a href="https://docs.backdropcms.org/documentation/testing-framework">See the Testing Framework documentation for details.</a>', array('%uri' => $file->uri), WATCHDOG_WARNING);
           continue;
         }
         foreach ($classes as $class => $info) {
