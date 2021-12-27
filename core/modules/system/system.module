@@ -4575,6 +4575,7 @@ function system_theme_debug_enabled_warning() {
  *   - replace_pattern: A pattern for replacing unknown characters with the
  *     "replace" value.
  *   - maxlength: The maximum allowed length of the returned string.
+ *
  * @return string
  *   The transliterated and cleaned up string.
  */
