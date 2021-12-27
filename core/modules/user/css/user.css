@@ -24,7 +24,7 @@
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
 }
-#user-admin-permissions,
+#user-admin-permissions .permissions-matrix,
 #edit-permissions > .fieldset-wrapper > .form-item,
 #edit-permissions-wrapper > .fieldset-wrapper > .form-item {
   overflow-x: auto;
