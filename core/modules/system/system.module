@@ -4567,7 +4567,7 @@ function system_theme_debug_enabled_warning() {
  *
  * @param string $string
  *   The string to be transliterated.
- * @param $options
+ * @param array $options
  *   An array of options for further cleanup. This array includes:
  *   - langcode: The language code of the source string.
  *   - replace: The character with which to replace unknown characters in the
