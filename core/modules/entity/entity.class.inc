@@ -319,7 +319,8 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements EntityInterface::view().
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
-    return entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
+    $view = entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
+    return $view[$this->entityType()][$this->id()];
   }
 
   /**

@@ -1114,8 +1114,7 @@ function node_revision_delete($revision_id) {
  *   An array as expected by backdrop_render().
  */
 function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('node')->view(array($node->nid => $node), $view_mode, $langcode);
-  return $view['node'][$node->nid];
+  return $node->view($view_mode, $langcode);
 }
 
 /**
@@ -1147,7 +1146,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('node')->buildContent($node, $view_mode, $langcode);
+  $node->buildContent($view_mode, $langcode);
 }
 
 /**

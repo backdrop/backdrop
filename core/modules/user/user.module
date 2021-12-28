@@ -2270,8 +2270,7 @@ function user_view_page($account) {
  *   An array as expected by backdrop_render().
  */
 function user_view($account, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('user')->view(array($account->uid => $account), $view_mode, $langcode);
-  return $view['user'][$account->uid];
+  return $account->view($view_mode, $langcode);
 }
 
 /**
@@ -2286,7 +2285,7 @@ function user_view($account, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('user')->buildContent($account, $view_mode, $langcode);
+  $account->buildContent($view_mode, $langcode);
 }
 
 /**

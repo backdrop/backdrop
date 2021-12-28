@@ -935,8 +935,7 @@ function comment_prepare_thread(&$comments) {
  *   An array as expected by backdrop_render().
  */
 function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('comment')->view(array($comment->cid => $comment), $view_mode, $langcode);
-  return $view['comment'][$comment->cid];
+  return $comment->view($view_mode, $langcode);
 }
 
 /**
@@ -956,7 +955,7 @@ function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langco
  *   content language of the current request.
  */
 function comment_build_content(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('comment')->buildContent($comment, $view_mode, $langcode);
+  $comment->buildContent($view_mode, $langcode);
 }
 
 /**

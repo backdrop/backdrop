@@ -805,7 +805,7 @@ function taxonomy_term_view_multiple($terms, $view_mode = 'teaser', $weight = 0,
  *   content language of the current request.
  */
 function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('taxonomy_term')->buildContent($term, $view_mode, $langcode);
+  $term->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -823,8 +823,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
  *   An array as expected by backdrop_render().
  */
 function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('taxonomy_term')->view(array($term->tid => $term), $view_mode, $langcode);
-  return $view['taxonomy_term'][$term->tid];
+  return $term->view($view_mode, $langcode);
 }
 
 /**

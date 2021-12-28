@@ -3293,8 +3293,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  *   An array as expected by backdrop_render().
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
-  $view = entity_get_controller('file')->view(array($file->fid => $file), $view_mode, $langcode);
-  return $view['file'][$file->fid];
+  return $file->view($view_mode, $langcode);
 }
 
 /**
@@ -3309,7 +3308,7 @@ function file_view($file, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
-  entity_get_controller('file')->buildContent($file, $view_mode, $langcode);
+  $file->buildContent($view_mode, $langcode);
 }
 
 /**
