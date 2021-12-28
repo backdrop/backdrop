@@ -127,6 +127,7 @@ function theme_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $role_name) {
     $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
   }
+  // Wrap the table in its own class so that we can make it scrollable.
   $output = '<div class="permissions-matrix">';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= '</div>';
