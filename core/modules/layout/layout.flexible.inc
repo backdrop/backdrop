@@ -499,21 +499,30 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     $form['region_names']['region_' . $i] = array(
       '#type' => 'container',
     );
+    if (isset($row_data['region_names']['region_' . $i]['region_name'])) {
+      $region_name = $row_data['region_names']['region_' . $i]['region_name'];
+    }
     $form['region_names']['region_' . $i]['region_name'] = array(
       '#type' => 'textfield',
       '#title' => t('Region name') . ' ' . ($i + 1),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_name']) ? $row_data['region_names']['region_' . $i]['region_name'] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+      '#default_value' => !empty($region_name) ? $region_name : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
+    if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])){
+      $region_class_enable = $row_data['region_names']['region_' . $i]['region_class_enable'];
+    }
     $form['region_names']['region_' . $i]['region_class_enable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Add CSS classes'),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['region_class_enable']) ? $row_data['region_names']['region_' . $i]['region_class_enable'] : 0,
+      '#default_value' => !empty($region_class_enable) ? $region_class_enable : 0,
     );
+    if (isset($row_data['region_names']['region_' . $i]['classes'])) {
+      $classes = $row_data['region_names']['region_' . $i]['classes'];
+    }
     $form['region_names']['region_' . $i]['classes'] = array(
       '#type' => 'textfield',
       '#title' => t('Additional region CSS classes'),
       '#description' => t('Separate multiple classes with spaces.'),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['classes']) ? $row_data['region_names']['region_' . $i]['classes'] : '',
+      '#default_value' => !empty($classes) ? $classes : '',
       '#states' => array(
         'visible' => array(
           ':input[name="region_names[region_' . $i . '][region_class_enable]"]' => array('checked' => TRUE),
