@@ -174,6 +174,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *   - view
  *   - update
  *   - delete
+ *   - revision delete
  * @param string $entity_type
  *   The entity type of the entity to check for.
  * @param EntityInterface $entity
@@ -189,7 +190,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  * @see entity_type_supports()
  */
 function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $account = NULL) {
-  if (!in_array($op, array('create', 'view', 'update', 'delete'), TRUE)) {
+  if (!in_array($op, array('create', 'view', 'update', 'delete', 'revision delete'), TRUE)) {
     // If the $op was not one of the supported ones, we return access denied.
     return FALSE;
   }
@@ -519,6 +520,113 @@ function entity_load_unchanged($entity_type, $id) {
 function entity_delete_multiple($entity_type, $ids) {
   entity_get_controller($entity_type)->delete($ids);
 }
+
+/**
+ * Loads an entity revision.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $revision_id
+ *   The ID of the revision to load.
+ *
+ * @return
+ *   The entity object, or FALSE if there is no entity with the given revision
+ *   ID.
+ */
+function entity_revision_load($entity_type, $revision_id) {
+  $info = entity_get_info($entity_type);
+  if (!empty($info['entity keys']['revision'])) {
+    $entity_revisions = entity_load($entity_type, FALSE, array($info['entity keys']['revision'] => $revision_id));
+    return reset($entity_revisions);
+  }
+  return FALSE;
+}
+
+/**
+ * Deletes an entity revision.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $revision_id
+ *   The revision ID to delete.
+ *
+ * @return
+ *   TRUE if the entity revision could be deleted, FALSE otherwise.
+ */
+function entity_revision_delete($entity_type, $revision_id) {
+  $info = entity_get_info($entity_type);
+  if (isset($info['revision deletion callback'])) {
+    return $info['revision deletion callback']($revision_id, $entity_type);
+  }
+  elseif (in_array('EntityStorageControllerRevisionableInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->deleteRevision($revision_id);
+  }
+  return FALSE;
+}
+
+/**
+ * Checks whether the given entity is the default revision.
+ *
+ * Note that newly created entities will always be created in default revision,
+ * thus TRUE is returned for not yet saved entities.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   The entity object to check.
+ *
+ * @return boolean
+ *   A boolean indicating whether the entity is in default revision is returned.
+ *   If the entity is not revisionable or is new, TRUE is returned.
+ *
+ * @see entity_revision_set_default()
+ */
+function entity_revision_is_default($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+  if (empty($info['entity keys']['revision'])) {
+    return TRUE;
+  }
+  // Newly created entities will always be created in default revision.
+  if (!empty($entity->is_new) || empty($entity->{$info['entity keys']['id']})) {
+    return TRUE;
+  }
+  if (in_array('EntityStorageControllerRevisionableInterface', class_implements($info['controller class']))) {
+    $key = !empty($info['entity keys']['default revision']) ? $info['entity keys']['default revision'] : 'default_revision';
+    return !empty($entity->$key);
+  }
+  else {
+    // Else, load only the default entity, and compare the ID. Usually, the
+    // entity should be already statically cached anyway.
+    $default = entity_load_single($entity_type, $entity->{$info['entity keys']['id']});
+    if (!is_object($default)) {
+      return TRUE;
+    }
+    return $default->{$info['entity keys']['revision']} == $entity->{$info['entity keys']['revision']};
+  }
+}
+
+/**
+ * Sets a given entity revision as default revision.
+ *
+ * Note that the default revision flag will only be supported by entity types
+ * based upon the EntityStorageController, i.e. implementing the
+ * EntityStorageControllerRevisionableInterface.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   The entity revision to update.
+ *
+ * @see entity_revision_is_default()
+ */
+function entity_revision_set_default($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+  if (!empty($info['entity keys']['revision'])) {
+    $key = !empty($info['entity keys']['default revision']) ? $info['entity keys']['default revision'] : 'default_revision';
+    $entity->$key = TRUE;
+  }
+}
+
 
 /**
  * Constructs a new entity object, without permanently saving it.
