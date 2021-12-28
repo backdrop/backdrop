@@ -2479,3 +2479,25 @@ function layout_flexible_row_styles() {
 
   return $styles;
 }
+
+/**
+ * Utility function to clean CSS for Layout UI.
+ *
+ * @param string $classes
+ *  CSS classes, as entered into the Layout user interface.
+ *
+ * @return string
+ *   String of santized classes separated by spaces.
+ */
+function _layout_clean_custom_css($classes = array()) {
+  if (!empty($classes)) {
+    $new_classes = explode(' ', $classes);
+    foreach ($new_classes as $class) {
+      $clean_classes[] = backdrop_clean_css_identifier($class, array());
+    }
+    $clean_classes = array_filter($clean_classes);
+    return implode(' ', $clean_classes);
+  }
+
+  return '';
+}
