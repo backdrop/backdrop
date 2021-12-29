@@ -28,7 +28,7 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
 
     // Intentionally setting $options['quantity'] to NULL here instead of using
     // unset(), otherwise it throws "undefined index" notices.
-    // See: https://github.com/backdrop/backdrop-issues/issues/1435
+    // @see https://github.com/backdrop/backdrop-issues/issues/1435
     $options['quantity'] = NULL;
     unset($options['tags']['first']);
     unset($options['tags']['last']);
