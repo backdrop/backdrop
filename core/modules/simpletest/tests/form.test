@@ -369,8 +369,8 @@ class FormsTestCase extends BackdropWebTestCase {
       'no_number' => '%name: the value must be numeric.',
       'too_low' => '%name: the value must be greater than or equal to %min.',
       'too_high' => '%name: the value must be less than or equal to %max.',
-      'step_mismatch_integer' => '%name: the value must be an integer.',
-      'step_mismatch_general' => '%name: the value must be a whole number of steps %step from %offset.',
+      'step_mismatch_integer' => '%name: the value must be a whole number.',
+      'step_mismatch_general' => '%name: the value must be a whole number of steps of size %step, starting from %offset.',
     );
 
     // The expected errors.
