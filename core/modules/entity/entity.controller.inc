@@ -64,6 +64,9 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
+   *
+   * @return
+   *   The renderable array.
    */
   public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
 
@@ -83,7 +86,7 @@ interface EntityControllerInterface {
    *   of the entity, as returned by entity_uri().
    *
    * @return array
-   *   The renderable array.
+   *   The renderable array, keyed by entity type and entity ID.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL);
 }
@@ -595,6 +598,8 @@ class DefaultEntityController implements EntityControllerInterface {
     module_invoke_all($this->entityType . '_view', $entity, $view_mode, $langcode);
 
     module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
+
+    return $entity->content;
   }
 
   /**
