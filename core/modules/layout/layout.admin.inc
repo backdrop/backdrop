@@ -303,6 +303,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#summary' => t('Placeholder examples'),
     '#details' => t('Some common examples of placeholders include:') . $description_list,
     '#attributes' => array('class' => array('description')),
+    '#access' => !$layout->isDefault(),
   );
 
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
