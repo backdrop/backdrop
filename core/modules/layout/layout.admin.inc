@@ -301,7 +301,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['path_details'] = array(
     '#type' => 'details',
     '#summary' => t('Placeholder examples'),
-    '#details' => '<p>' . t('Some common examples of placeholders include:') . '</p>' . $description_list,
+    '#details' => t('Some common examples of placeholders include:') . $description_list,
     '#attributes' => array('class' => array('description')),
   );
 
@@ -314,7 +314,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ', array(':path' => $path))
       ->fetchAllKeyed();
     if (count($path_matches)) {
-      $path_match_text = t('This layout will override the default layout for existing page(s) (which are created by %page_callback).', array('%page_callback' => $path_matches[$path]));
+      $path_match_text = t('This layout will override the default layout for existing page(s).');
     }
     else {
       $path_match_text = t('This path will create a page.');
@@ -323,10 +323,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   else {
     $path_match_text = '';
   }
-  $form['path_matches'] = array(
+
+  $form['path_matches_wrapper'] = array(
+    '#type' => 'container',
+    '#id' => 'path-matches',
+  );
+  $form['path_matches_wrapper']['path_matches'] = array(
     '#markup' => $path_match_text,
-    '#prefix' => '<p id="path-matches">',
-    '#suffix' => '</p>',
   );
 
   $form['path_update'] = array(
@@ -723,7 +726,7 @@ function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
-  $commands[] = ajax_command_html('#path-matches', backdrop_render($form['path_matches']));
+  $commands[] = ajax_command_html('#path-matches', backdrop_render($form['path_matches_wrapper']['path_matches']));
   return array(
     '#type' => 'ajax',
     '#commands' => $commands,
