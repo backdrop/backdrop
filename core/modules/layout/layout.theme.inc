@@ -353,8 +353,8 @@ function layout_preprocess_layout(&$variables) {
         if (!empty($row['region_names']['region_0'])) {
           $region_name = $row['region_names']['region_0']['region_name'];
           $region_classes .= 'l-region--1';
-          $custom_classes = isset($row['region_names']['region_0']['classes']) ? $row['region_names']['region_0']['classes'] : '';
-          $region_classes .= empty($row['region_names']['region_0']['region_class_enable']) ? ' ' . _layout_clean_custom_css($custom_classes) : '';
+          $custom_classes = !empty($row['region_names']['region_0']['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_0']['classes']) : '';
+          $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? $custom_classes : '';
         }
         else {
           $region_name = $name;
@@ -374,8 +374,8 @@ function layout_preprocess_layout(&$variables) {
           if (!empty($row['region_names']['region_' . $i])) {
             $region_name = $row['region_names']['region_' . $i]['region_name'];
             $region_classes .= 'l-region--' . ($i + 1);
-            $custom_classes = isset($row['region_names']['region_' . $i]['classes']) ? $row['region_names']['region_' . $i]['classes'] : '';
-            $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? ' ' . _layout_clean_custom_css($custom_classes) : '';
+            $custom_classes = !empty($row['region_names']['region_' . $i]['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_' . $i]['classes']) : '';
+            $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $custom_classes : '';
           }
           else {
             $region_name = $name . ' ' . $i;
