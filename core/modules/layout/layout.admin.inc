@@ -328,6 +328,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['path_matches_wrapper'] = array(
     '#type' => 'container',
     '#id' => 'path-matches',
+    '#access' => !$layout->isDefault(),
   );
   $form['path_matches_wrapper']['path_matches'] = array(
     '#markup' => $path_match_text,
