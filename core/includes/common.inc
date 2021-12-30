@@ -770,7 +770,7 @@ function backdrop_parse_url($url) {
  *   The encoded path.
  */
 function backdrop_encode_path($path) {
-  return str_replace('%2F', '/', rawurlencode($path));
+  return str_replace('%2F', '/', rawurlencode((string) $path));
 }
 
 /**
@@ -1102,7 +1102,7 @@ function backdrop_http_request($url, array $options = array()) {
   // or PUT request. Some non-standard servers get confused by Content-Length in
   // at least HEAD/GET requests, and Squid always requires Content-Length in
   // POST/PUT requests.
-  $content_length = strlen($options['data']);
+  $content_length = strlen((string) $options['data']);
   if ($content_length > 0 || $options['method'] == 'POST' || $options['method'] == 'PUT') {
     $options['headers']['Content-Length'] = $content_length;
   }
@@ -1178,7 +1178,7 @@ function backdrop_http_request($url, array $options = array()) {
   $result->headers = array();
 
   // Parse the response headers.
-  while ($line = trim(array_shift($response))) {
+  while ($line = trim((string) array_shift($response))) {
     list($name, $value) = explode(':', $line, 2);
     $name = strtolower($name);
     if (isset($result->headers[$name]) && $name == 'set-cookie') {
@@ -2380,7 +2380,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     $key = explode('|', $key);
     if ($interval >= $value) {
       $output .= ($output ? ' ' : '') . format_plural(floor($interval / $value), $key[0], $key[1], array(), array('langcode' => $langcode));
-      $interval %= $value;
+      $interval = (int) $interval % $value;
       $granularity--;
     }
 
@@ -2649,7 +2649,7 @@ function url($path = NULL, array $options = array()) {
   // Strip leading slashes from internal paths to prevent them becoming external
   // URLs without protocol. /example.com should not be turned into
   // //example.com.
-  $path = ltrim($path, '/');
+  $path = ltrim((string) $path, '/');
 
   global $base_url, $base_secure_url, $base_insecure_url;
 
@@ -2686,7 +2686,7 @@ function url($path = NULL, array $options = array()) {
   }
 
   $base = $options['absolute'] ? $options['base_url'] . '/' : base_path();
-  $prefix = empty($path) ? rtrim($options['prefix'], '/') : $options['prefix'];
+  $prefix = empty($path) ? rtrim((string) $options['prefix'], '/') : $options['prefix'];
 
   // Cache the clean URLs setting, as url() is called very frequently.
   static $backdrop_static_fast;
@@ -2752,6 +2752,7 @@ function url($path = NULL, array $options = array()) {
  *   Boolean TRUE or FALSE, where TRUE indicates an external path.
  */
 function url_is_external($path) {
+  $path = (string) $path;
   $colonpos = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);

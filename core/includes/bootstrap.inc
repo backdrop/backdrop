@@ -373,6 +373,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetExists().
    */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     return $this->offsetGet($offset) !== NULL;
   }
@@ -380,6 +381,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetGet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     if (isset($this->storage[$offset]) || array_key_exists($offset, $this->storage)) {
       return $this->storage[$offset];
@@ -392,6 +394,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetSet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetSet($offset, $value) {
     $this->storage[$offset] = $value;
   }
@@ -399,6 +402,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetUnset().
    */
+  #[\ReturnTypeWillChange]
   public function offsetUnset($offset) {
     unset($this->storage[$offset]);
   }
@@ -2553,7 +2557,7 @@ function backdrop_random_bytes($count)  {
   // $random_state does not use backdrop_static as it stores random bytes.
   static $random_state, $bytes, $has_openssl;
 
-  $missing_bytes = $count - strlen($bytes);
+  $missing_bytes = $count - strlen((string) $bytes);
 
   if ($missing_bytes > 0) {
     // PHP versions prior 5.3.4 experienced openssl_random_pseudo_bytes()
