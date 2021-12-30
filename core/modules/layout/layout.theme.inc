@@ -375,7 +375,6 @@ function layout_preprocess_layout(&$variables) {
             $region_name = $row['region_names']['region_' . $i]['region_name'];
             $region_classes .= 'l-region--' . ($i + 1);
             $custom_classes = isset($row['region_names']['region_' . $i]['classes']) ? $row['region_names']['region_' . $i]['classes'] : '';
-            $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? ' ' . _layout_clean_custom_css($custom_classes) : '';
             $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? ' ' . _layout_clean_custom_css($custom_classes) : '';
           }
           else {
