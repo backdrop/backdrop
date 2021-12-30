@@ -641,7 +641,7 @@ function path_get_pattern_by_entity_type($entity_type, $bundle = '', $langcode =
     $variables[] = "{$entity_type}_pattern";
 
     foreach ($variables as $variable) {
-      if ($pattern = trim($config->get($variable))) {
+      if ($pattern = trim((string) $config->get($variable))) {
         break;
       }
     }
