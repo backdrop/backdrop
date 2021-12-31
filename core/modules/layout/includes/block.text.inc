@@ -101,7 +101,7 @@ class BlockText extends Block {
     );
 
     // Add additional description text for reusable blocks.
-    $form['admin_label']['admin_label']['#description'] .= t('Required for reusable blocks.');
+    $form['admin_label']['admin_label']['#description'] = t('Required for reusable blocks.');
 
     // Add additional machine name for reusable blocks.
     $form['admin_label']['delta'] = array(
