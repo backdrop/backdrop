@@ -137,12 +137,9 @@ function locale_autoload_info() {
     'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
     'views_handler_field_term_language' => 'views/views_handler_field_term_language.inc',
     'views_handler_filter_term_language' => 'views/views_handler_filter_term_language.inc',
-    'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
     'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
-    'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
     'views_handler_field_locale_language' => 'views/views_handler_field_locale_language.inc',
     'views_handler_field_locale_link_edit' => 'views/views_handler_field_locale_link_edit.inc',
-    'views_handler_filter_locale_group' => 'views/views_handler_filter_locale_group.inc',
     'views_handler_filter_locale_language' => 'views/views_handler_filter_locale_language.inc',
     'views_handler_filter_locale_version' => 'views/views_handler_filter_locale_version.inc',
   );
