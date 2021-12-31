@@ -297,4 +297,84 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
     backdrop_static_reset('taxonomy_term_load_children');
     parent::resetCache($ids);
   }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $term, $view_mode = 'full', $langcode = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    // Remove previously built content, if exists.
+    $term->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare('taxonomy_term', array($term->tid => $term), $view_mode, $langcode));
+
+    // Add the term description if the term has one and it is visible.
+    $type = 'taxonomy_term';
+    $entity_ids = entity_extract_ids($type, $term);
+    $settings = field_view_mode_settings($type, $entity_ids[2]);
+    $fields = field_extra_fields_get_display($type, $entity_ids[2], $view_mode);
+    if (!empty($term->description) && isset($fields['description']) && $fields['description']['visible']) {
+      $term->content['description'] = array(
+        '#markup' => check_markup($term->description, $term->format, '', TRUE),
+        '#weight' => $fields['description']['weight'],
+        '#prefix' => '<div class="taxonomy-term-description">',
+        '#suffix' => '</div>',
+      );
+    }
+
+    // Build fields content.
+    // In case of a multiple view, taxonomy_term_view_multiple() already ran the
+    // 'prepare_view' step. An internal flag prevents the operation from running
+    // twice.
+    field_attach_prepare_view('taxonomy_term', array($term->tid => $term), $view_mode, $langcode);
+    entity_prepare_view('taxonomy_term', array($term->tid => $term), $langcode);
+    $term->content += field_attach_view('taxonomy_term', $term, $view_mode, $langcode);
+
+    // Allow modules to make their own additions to the taxonomy term.
+    module_invoke_all('taxonomy_term_view', $term, $view_mode, $langcode);
+    module_invoke_all('entity_view', $term, 'taxonomy_term', $view_mode, $langcode);
+
+    // Make sure the current display mode is stored if no module has already
+    // populated the related key.
+    $term->content += array('#view_mode' => $view_mode);
+  }
+
+  /**
+   * Overrides DefaultEntityController::view().
+   */
+  public function view($terms, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    $view = array();
+    foreach ($terms as $term) {
+      /* @var TaxonomyTerm $term */
+      // Populate $term->content with a render() array.
+      $this->buildContent($term, $view_mode, $langcode);
+      $build = $term->content;
+
+      // We don't need duplicate rendering info in $term->content.
+      unset($term->content);
+
+      $build += array(
+        '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
+        '#term' => $term,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+
+      $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css';
+
+      // Allow modules to modify the structured taxonomy term.
+      $type = 'taxonomy_term';
+      backdrop_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
+      $view[$type][$term->id()] = $build;
+    }
+
+    return $view;
+  }
 }

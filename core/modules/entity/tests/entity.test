@@ -56,6 +56,22 @@ class EntityAPITestCase extends BackdropWebTestCase {
     $all = entity_test_load_multiple(FALSE);
     $this->assertTrue(empty($all), 'Deleted all entities.');
   }
+
+  /**
+   * Tests basic View functionality of the Entity API.
+   */
+  function testEntityView() {
+    $user1 = $this->backdropCreateUser();
+
+    // Create a test entity.
+    $entity = entity_create('entity_test', array('name' => 'test', 'uid' => $user1->uid));
+    $entity->field_test_text[LANGUAGE_NONE][0]['value'] = 'Some random text';
+    $entity->save();
+
+    $this->backdropGet('test/' . $entity->id());
+    $this->assertRaw('<h1 class="page-title">Entity test</h1>');
+    $this->assertText('Some random text', 'Found the field text on the rendered entity.');
+  }
 }
 
 /**
