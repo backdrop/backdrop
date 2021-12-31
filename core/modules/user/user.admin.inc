@@ -537,7 +537,7 @@ function user_admin_roles($form, $form_state) {
     '#title' => t('Roles available for assignment'),
     '#default_value' => $system_config->get('user_assignable_roles'),
     '#options' => $roles,
-    '#description' => t('Anyone with the <em>assign roles</em> permission will be able to grant these roles themselves, as well as to others.'),
+    '#description' => t('Anyone with the <em>Assign roles</em> permission will be able to grant these roles to themselves, as well as to others.'),
   );
 
   // Settings for anonymous users.
