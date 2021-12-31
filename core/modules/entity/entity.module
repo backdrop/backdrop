@@ -214,15 +214,17 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
  * The content built for the entity will vary depending on the $view_mode
  * parameter.
  *
- * @param Entity $entity
+ * @param EntityInterface $entity
  *   An entity object.
  * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
+ *
+ * @since 1.21.0 Function added.
  */
-function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
+function entity_build_content(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
   $info = entity_get_info($entity->entityType());
   if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
     entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
@@ -240,9 +242,11 @@ function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
  *
- * @return
+ * @return array|FALSE
  *   The renderable array. If there is no information on how to view an entity,
  *   FALSE is returned.
+ *
+ * @since 1.21.0 Function added.
  */
 function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
   $entity_type = $entity->entityType();
@@ -276,9 +280,11 @@ function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = N
  *   If unset, the page mode will be enabled if the current path is the URI
  *   of the entity, as returned by entity_uri().
  *
- * @return
+ * @return array|FALSE
  *   The renderable array, keyed by the entity type and by entity ID. If
  *   there is no information on how to view an entity, FALSE is returned.
+ *
+ * @since 1.21.0 Function added.
  */
 function entity_view_multiple($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
   $info = entity_get_info($entity_type);
