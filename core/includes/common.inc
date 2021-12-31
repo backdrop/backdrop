@@ -1822,7 +1822,7 @@ function filter_xss($string, $allowed_tags = NULL) {
   }
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
-  if (!backdrop_validate_utf8($string)) {
+  if (!$string || !backdrop_validate_utf8($string)) {
     return '';
   }
   // Store the text format.
@@ -3301,7 +3301,8 @@ function backdrop_set_time_limit($time_limit) {
  *   The path to the requested item or an empty string if the item is not found.
  */
 function backdrop_get_path($type, $name) {
-  return dirname(backdrop_get_filename($type, $name));
+  $path = (string) backdrop_get_filename($type, $name);
+  return dirname($path);
 }
 
 /**
@@ -8518,6 +8519,9 @@ function watchdog_severity_levels() {
  * @see backdrop_implode_tags()
  */
 function backdrop_explode_tags($tags) {
+  if (empty($tags)) {
+    return array();
+  }
   // This regexp allows the following types of user input:
   // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
