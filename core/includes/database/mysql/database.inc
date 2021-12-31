@@ -72,7 +72,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
       // prepares and returns integers. See https://externals.io/message/113294
       // for further discussion.
-      //PDO::ATTR_STRINGIFY_FETCHES => TRUE,
+      PDO::ATTR_STRINGIFY_FETCHES => TRUE,
     );
     if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
       // An added connection option in PHP 5.5.21+ to optionally limit SQL to a
