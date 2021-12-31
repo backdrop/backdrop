@@ -382,13 +382,15 @@ function simpletest_test_get_all() {
               continue;
             }
             else {
+              $missing_keys = array();
               foreach ($check_keys as $key) {
                 if (!isset($info[$key])) {
-                  $error = format_string('File %uri contains a definition for %class that is missing field %key.', array('%class' => $class, '%key' => $key));
-                  break;
+                  $missing_keys[] = $key;
                 }
               }
-              if (!empty($error)) {
+              if (!empty($missing_keys)) {
+                $keys = implode(', ', $missing_keys);
+                $error = format_plural(count($missing_keys), 'File %uri contains a definition for %class that is missing field %keys.','File %uri contains a definition for %class that is missing fields %keys.', array('%class' => $class, '%keys' => $keys));
                 continue;
               }
             }
