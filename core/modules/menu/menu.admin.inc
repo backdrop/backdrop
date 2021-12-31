@@ -10,11 +10,15 @@
 function menu_overview_page() {
   $menus = menu_load_all();
   backdrop_sort($menus, array('title' => SORT_STRING));
-  $header = array(t('Title'), t('Operations'));
+  $header = array(t('Title'), t('Description'), t('Operations'));
   $rows = array();
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $row[] = theme('label_machine_name__menu', array(
+      'label' => $menu['title'],
+      'machine_name' => $menu['menu_name'],
+    ));
+    $row[] = filter_xss_admin($menu['description']);
     $links = array();
     $links['list'] = array(
       'title' => t('Manage links'),

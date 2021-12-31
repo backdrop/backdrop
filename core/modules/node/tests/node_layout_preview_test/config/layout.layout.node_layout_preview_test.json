@@ -1,7 +1,7 @@
 {
-    "_config_name": "layout.layout.preview_test",
+    "_config_name": "layout.layout.node_layout_preview_test",
     "path": "node/%",
-    "name": "preview_test",
+    "name": "node_layout_preview_test",
     "title": "Custom Node",
     "description": null,
     "renderer_name": "standard",

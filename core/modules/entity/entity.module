@@ -209,6 +209,101 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
 }
 
 /**
+ * Builds a structured array representing the entity's content.
+ *
+ * The content built for the entity will vary depending on the $view_mode
+ * parameter.
+ *
+ * @param Entity $entity
+ *   An entity object.
+ * @param string $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ */
+function entity_build_content(EntityInterface $entity = NULL, $view_mode = 'full', $langcode = NULL) {
+  $info = entity_get_info($entity->entityType());
+  if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
+    entity_get_controller($entity->entityType())->buildContent($entity, $view_mode, $langcode);
+  }
+}
+
+/**
+ * Generate an array for rendering the given entity.
+ *
+ * @param EntityInterface $entity
+ *   An entity object to render.
+ * @param string $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ *
+ * @return
+ *   The renderable array. If there is no information on how to view an entity,
+ *   FALSE is returned.
+ */
+function entity_view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+  $entity_type = $entity->entityType();
+  $info = entity_get_info($entity_type);
+
+  if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
+    $view = entity_get_controller($entity_type)->view(array($entity->id() => $entity), $view_mode, $langcode);
+    return $view[$entity_type][$entity->id()];
+  }
+
+  return FALSE;
+}
+
+/**
+ * Generate an array for rendering the given entity.
+ *
+ * @param string $entity_type
+ *   The type of the entity.
+ * @param array $entities
+ *   An array of entity objects to render.
+ * @param string $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ * @param bool|NULL $page
+ *   (optional) If set will control if the entity is rendered: if TRUE
+ *   the entity will be rendered without its title, so that it can be embeded
+ *   in another context. If FALSE the entity will be displayed with its title
+ *   in a mode suitable for lists.
+ *   If unset, the page mode will be enabled if the current path is the URI
+ *   of the entity, as returned by entity_uri().
+ *
+ * @return
+ *   The renderable array, keyed by the entity type and by entity ID. If
+ *   there is no information on how to view an entity, FALSE is returned.
+ */
+function entity_view_multiple($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+  $info = entity_get_info($entity_type);
+
+  if (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->view($entities, $view_mode, $langcode, $page);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function entity_theme() {
+  return array(
+    'entity' => array(
+      'render element' => 'elements',
+      'template' => 'templates/entity',
+      'file' => 'entity.theme.inc',
+    ),
+  );
+}
+
+/**
  * Gets the entity info array of an entity type.
  *
  * @param $entity_type
@@ -350,8 +445,14 @@ function entity_extract_ids($entity_type, $entity) {
   $info = entity_get_info($entity_type);
 
   // Objects being created might not have id/vid yet.
-  $id = isset($entity->{$info['entity keys']['id']}) ? $entity->{$info['entity keys']['id']} : NULL;
-  $vid = ($info['entity keys']['revision'] && isset($entity->{$info['entity keys']['revision']})) ? $entity->{$info['entity keys']['revision']} : NULL;
+  if (!empty($info['entity keys'])) {
+    $id = isset($entity->{$info['entity keys']['id']}) ? $entity->{$info['entity keys']['id']} : NULL;
+    $vid = ($info['entity keys']['revision'] && isset($entity->{$info['entity keys']['revision']})) ? $entity->{$info['entity keys']['revision']} : NULL;
+  }
+  else {
+    $id = NULL;
+    $vid = NULL;
+  }
 
   if (!empty($info['entity keys']['bundle'])) {
     // Explicitly fail for malformed entities missing the bundle property.

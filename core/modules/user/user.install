@@ -1202,6 +1202,9 @@ function user_update_1015() {
 function user_update_1016() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store User entity records.";
+  if (db_table_exists('cache_entity_user')) {
+    db_drop_table('cache_entity_user');
+  }
   db_create_table('cache_entity_user', $table);
 }
 
@@ -1275,6 +1278,19 @@ function user_update_1020() {
     }
     $mail_config->set('_config_translatables', $mail_translatables);
     $mail_config->save();
+  }
+}
+
+/**
+ * Make sure that generation of automatic path alias is enabled for user 1.
+ */
+function user_update_1021() {
+  if (module_exists('path') && config_get('path.settings', 'user_pattern')) {
+    $admin_user = user_load(1);
+    if ($admin_user->path['auto'] == FALSE) {
+      $admin_user->path['auto'] = TRUE;
+      user_save($admin_user);
+    }
   }
 }
 

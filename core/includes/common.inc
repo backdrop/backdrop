@@ -3048,6 +3048,19 @@ function backdrop_deliver_html_page($page_callback_result) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
+  if ($site_config->get('block_interest_cohort')) {
+    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
+    if (is_null($permissions_policy)) {
+      backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
+    }
+    else {
+      // Only add interest-cohort if the header does not contain it already.
+      if (strpos($permissions_policy, 'interest-cohort') === FALSE) {
+        backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()', TRUE);
+      }
+    }
+  }
+
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
     // @todo: Break these up into separate functions?
@@ -7973,6 +7986,9 @@ function backdrop_common_theme() {
     'container' => array(
       'render element' => 'element',
     ),
+    'details' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -8649,12 +8665,13 @@ function backdrop_parse_dependency($dependency) {
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
+  $p_patch = '(?P<patch>(?:\d+|x)(?:-[A-Za-z]+\d+)?)?';
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {
     $value['original_version'] = '(' . $parts[1];
     foreach (explode(',', $parts[1]) as $version) {
-      if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor/", $version, $matches)) {
+      if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor\.?$p_patch/", $version, $matches)) {
         $op = !empty($matches['operation']) ? $matches['operation'] : '=';
         if ($matches['minor'] == 'x') {
           // Backdrop considers "2.x" to mean any version that begins with
@@ -8672,7 +8689,23 @@ function backdrop_parse_dependency($dependency) {
             $op = '>=';
           }
         }
-        $value['versions'][] = array('op' => $op, 'version' => $matches['major'] . '.' . $matches['minor']);
+
+        if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
+          if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
+            // See comments above about "x" in minor. 
+            // Same principle applies to patch in relation to minor.
+            if ($op == '>' || $op == '<=') {
+              $matches['minor']++;
+            }
+            if ($op == '=' || $op == '==') {
+              $value['versions'][] = array('op' => '<', 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x');
+              $op = '>=';
+            }
+          }
+        }
+        $version = $matches['major'] . '.' . $matches['minor'];
+        $version .= (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) ? '.' . $matches['patch'] : '';
+        $value['versions'][] = array('op' => $op, 'version' => $version);
       }
     }
   }

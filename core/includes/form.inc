@@ -3617,7 +3617,10 @@ function form_process_container($element, &$form_state) {
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
  *
- * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * theme_container() also handles 'checkboxes' and 'radios' elements.
+ * See: https://docs.backdropcms.org/change-records/functions-theme_radios-and-theme_checkboxes-have-been-removed
+ *
+ * See the @link https://docs.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
  * for more information on the #theme_wrappers render array property.
  *
  * @param $variables
@@ -3629,12 +3632,77 @@ function form_process_container($element, &$form_state) {
  */
 function theme_container($variables) {
   $element = $variables['element'];
+  // Ensure #attributes is set, while preserving any existing attribute(s).
+  $element += array('#attributes' => array());
+
+  // Special handling for form elements.
+  if (isset($element['#array_parents'])) {
+    // Assign an HTML ID.
+    if (!array_key_exists('id', $element['#attributes'])) {
+      $element['#attributes']['id'] = $element['#id'];
+    }
+    // Add the 'form-wrapper' class if not already added, but only for
+    // 'container' elements. theme_container() also handles 'checkboxes' and
+    // 'radios' elements, but #states breaks for them if the 'form-wrapper'
+    // class is added.
+    if (isset($element['#type']) && $element['#type'] == 'container') {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      if (!in_array('form-wrapper', $element['#attributes']['class'])) {
+        $element['#attributes']['class'][] = 'form-wrapper';
+      }
+    }
+  }
+
+  return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
+}
+
+/**
+ * Processes a details element.
+ *
+ * @param array $element
+ *   An associative array containing the properties and children of the
+ *   details.
+ * @param array $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return array
+ *   The processed element.
+ */
+function form_process_details($element, &$form_state) {
+  // Generate the ID of the element if it's not explicitly given.
+  if (!array_key_exists('#id', $element)) {
+    $element['#id'] = backdrop_html_id(implode('-', $element['#parents']) . '-wrapper');
+  }
+  return $element;
+}
+
+/**
+ * Returns HTML to wrap children in a details element.
+ *
+ * Used for grouped form items. Can also be used as a theme wrapper for any
+ * renderable element, to surround it with a <details> tag and add attributes
+ * such as classes or an HTML id.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #id, #attributes, #children, #summary, #details, #open.
+ *
+ * @return string
+ *   The rendered HTML output.
+ *
+ * @ingroup themeable
+ */
+function theme_details($variables) {
+  $element = $variables['element'];
   // Ensure #attributes is set.
   $element += array('#attributes' => array());
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an html ID.
+    // Assign an HTML ID.
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
@@ -3643,8 +3711,22 @@ function theme_container($variables) {
       $element['#attributes']['class'][] = 'form-wrapper';
     }
   }
+  // Set initial collapsed/expanded display.
+  if (isset($element['#open']) && $element['#open']) {
+    $element['#attributes']['open'] = 'open';
+  }
 
-  return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
+  $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
+  $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
+  if (isset($element['#details']) && !empty($element['#details'])) {
+    $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
+  }
+  if (isset($element['#children']) && !empty($element['#children'])) {
+    $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
+  }
+  $output .= '</details>';
+
+  return $output;
 }
 
 /**
