@@ -5,8 +5,8 @@ group = Node
 file = node.test
 
 [NodeFrontPageCallback]
-name = Custom front page
-description = Test changing front page to custom redirect /node to custom page.
+name = Custom home page
+description = Test changing home page to custom redirect /node to custom page.
 group = Node
 file = node.test
 
@@ -31,6 +31,12 @@ file = node.test
 [PagePreviewTestCase]
 name = Node preview
 description = Test node preview functionality.
+group = Node
+file = node.test
+
+[NodeLayoutPreviewTestCase]
+name = Node layout preview test
+description = Tests that the correct layout is used for node previews.
 group = Node
 file = node.test
 

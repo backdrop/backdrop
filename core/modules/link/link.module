@@ -1094,7 +1094,7 @@ function link_validate_url($text) {
   $news_pattern = '/^news:(' . $newsgroup_name . '|' . $message_id . ')$/i';
 
   $email_user = '([^ @\-][^ @]*)';
-  $email_pattern = '/^mailto:' . $email_user . '@' . '(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
+  $email_pattern = '/^mailto:' . $email_user . '@(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
 
   if (strcmp($text, '<front>') === 0) {
     return LINK_FRONT;

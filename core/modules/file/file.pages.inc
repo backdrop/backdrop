@@ -1023,7 +1023,17 @@ function file_usage_page($file) {
 
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
-          $entity_label = l($label, $entity_uri['path']);
+          // Unlike Node or Term entities File entities have a stream wrapper
+          // to the file set as their path, but the path to the entities' page
+          // is "path/[fid]".
+          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
+          if ($entity_type == 'file') {
+            $uri = 'file/' . $entity_id;
+          }
+          else {
+            $uri = $entity_uri['path'];
+          }
+          $entity_label = l($label, $uri);
         }
         else {
           $entity_label = check_plain($label);

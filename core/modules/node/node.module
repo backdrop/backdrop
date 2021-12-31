@@ -1114,37 +1114,7 @@ function node_revision_delete($revision_id) {
  *   An array as expected by backdrop_render().
  */
 function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Populate $node->content with a render() array.
-  node_build_content($node, $view_mode, $langcode);
-
-  $build = $node->content;
-  // We don't need duplicate rendering info in node->content.
-  unset($node->content);
-
-  $build += array(
-    '#theme' => 'node__' . $node->type . '__' . $view_mode,
-    '#node' => $node,
-    '#view_mode' => $view_mode,
-    '#langcode' => $langcode,
-  );
-
-  // Add contextual links for this node, except when the node is already being
-  // displayed on its own page. Modules may alter this behavior (for example,
-  // to restrict contextual links to certain display modes) by implementing
-  // hook_node_view_alter().
-  if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
-    $build['#contextual_links']['node'] = array('node', array($node->nid));
-  }
-
-  // Allow modules to modify the structured node.
-  $type = 'node';
-  backdrop_alter(array('node_view', 'entity_view'), $build, $type);
-
-  return $build;
+  return $node->view($view_mode, $langcode);
 }
 
 /**
@@ -1176,60 +1146,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Remove previously built content, if exists.
-  $node->content = array();
-
-  // Allow modules to change the display mode.
-  $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
-
-  // The 'view' hook can be implemented to overwrite the default function
-  // to display nodes.
-  if (node_hook($node, 'view')) {
-    $node = node_invoke($node, 'view', $view_mode, $langcode);
-  }
-
-  // Build fields content.
-  // In case of a multiple view, node_view_multiple() already ran the
-  // 'prepare_view' step. An internal flag prevents the operation from running
-  // twice.
-  field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-  entity_prepare_view('node', array($node->nid => $node));
-  $node->content += field_attach_view('node', $node, $view_mode, $langcode);
-
-  // Always display a read more link on teasers because we have no way
-  // to know when a teaser view is different than a full view.
-  $links = array();
-  $node->content['links'] = array(
-    '#theme' => 'links__node',
-    '#pre_render' => array('backdrop_pre_render_links'),
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-  if ($view_mode == 'teaser') {
-    $node_title_stripped = strip_tags($node->title);
-    $links['node-readmore'] = array(
-      'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
-      'href' => 'node/' . $node->nid,
-      'html' => TRUE,
-      'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
-    );
-  }
-  $node->content['links']['node'] = array(
-    '#theme' => 'links__node__node',
-    '#links' => $links,
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-
-  // Allow modules to make their own additions to the node.
-  module_invoke_all('node_view', $node, $view_mode, $langcode);
-  module_invoke_all('entity_view', $node, 'node', $view_mode, $langcode);
-
-  // Make sure the current display mode is stored if no module has already
-  // populated the related key.
-  $node->content += array('#view_mode' => $view_mode);
+  $node->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -1737,6 +1654,47 @@ function node_layout_context_info() {
 }
 
 /**
+ * Implements hook_layout_load_by_router_item_alter().
+ *
+ * When creating node preview pages, the path will be of the form
+ * node/preview/<type>/<id>, where <type> is the node type and <id> is the
+ * tempstore ID of the node begin previewed. But we want to display it using a
+ * layout whose system path is node/%. So we choose those layouts and set the
+ * context from the tempstore node.
+ */
+function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  $map = $router_item['map'];
+  if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
+    return;
+  }
+  $path_is_preview = FALSE;
+  foreach (node_type_get_types() as $type_obj) {
+    if ($type_obj->type == $map[2]) {
+      $path_is_preview = TRUE;
+      break;
+    }
+  }
+  if (!$path_is_preview) {
+    return;
+  }
+  $tempstore_id = $map[3];
+  $temp_node = node_get_node_tempstore($tempstore_id);
+  if ($temp_node) {
+    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+    if ($node_layouts) {
+      $layouts = $node_layouts;
+      foreach ($layouts as $layout) {
+        foreach ($layout->getContexts() as $context) {
+          if (isset($context->position)) {
+            $context->setData($temp_node);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function node_menu() {
@@ -1762,7 +1720,7 @@ function node_menu() {
 
   $items['admin/structure/types'] = array(
     'title' => 'Content types',
-    'description' => 'Manage content types, including default status, front page promotion, comment settings, etc.',
+    'description' => 'Manage content types, including default status, home page promotion, comment settings, etc.',
     'page callback' => 'node_overview_types',
     'access arguments' => array('administer content types'),
     'file' => 'node.types.inc',

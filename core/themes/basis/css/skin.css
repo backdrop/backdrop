@@ -29,6 +29,10 @@ a:active {
   background: #dddddd;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 blockquote,
 figcaption {
   border-left-color: #bbbbbb;
@@ -421,17 +425,6 @@ fieldset .fieldset-legend {
   text-decoration: underline;
 }
 
-.drop-lounging {
-  /* To make Drop larger/smaller, adjust the width below. */
-  width: 7em;
-}
-
-.drop-lounging:before {
-  /* Uncomment below to remove Drop, or remove markup from block--system--powered-by.tpl.php */
-  /* display: none; */
-  background-image: url("../images/drop-lounging.png");
-}
-
 /**
  * Breadcrumb
  */
@@ -545,7 +538,10 @@ input.form-submit:active {
 }
 
 .button,
-input.form-submit,
+input.form-submit {
+  color: #444b53;
+  background: #e5e5e6;
+}
 input.button-primary,
 button.button-primary,
 .ui-state-default,
@@ -571,6 +567,7 @@ button.button-primary:active {
   color: white;
 }
 
+a.button-secondary,
 input.button-secondary,
 button.button-secondary {
   color: #828188;
@@ -754,10 +751,6 @@ ul.action-links a {
 .pager-item {
   background: #586172;
   color: #ffffff;
-}
-
-.pager-ellipsis {
-  color: #586172;
 }
 
 .pager-first a,

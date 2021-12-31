@@ -59,15 +59,28 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     // Visit the main taxonomy administration page.
     $this->backdropGet('admin/structure/taxonomy');
 
-    // Create a new vocabulary.
+    // Create a new vocabulary and then add terms.
     $this->clickLink(t('Add vocabulary'));
     $edit = array();
     $machine_name = backdrop_strtolower($this->randomName());
     $edit['name'] = $this->randomName();
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = $machine_name;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save and add terms'));
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
+    $this->assertRaw(t('Add term'), 'Redirected to add term form');
+
+    // Create a new vocabulary.
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->clickLink(t('Add vocabulary'));
+    $edit = array();
+    $machine_name = backdrop_strtolower($this->randomName());
+    $edit['name'] = $this->randomName();
+    $edit['description'] = $this->randomName();
+    $edit['machine_name'] = $machine_name;
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
+    $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
+    $this->assertRaw(t('Add vocabulary'), 'Redirected to vocabulary listing page');
 
     // Configure the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');
@@ -75,18 +88,18 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Configure'));
     $edit = array();
     $edit['name'] = $this->randomName();
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
     $this->backdropGet('admin/structure/taxonomy');
     $this->assertText($edit['name'], 'Vocabulary found in the vocabulary overview listing.');
 
     // Try to submit a vocabulary with a duplicate machine name.
     $edit['machine_name'] = $machine_name;
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('The machine-readable name is already in use. It must be unique.'));
 
     // Try to submit an invalid machine name.
     $edit['machine_name'] = '!&^%';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('The machine-readable name must contain only lowercase letters, numbers, and underscores.'));
 
     // Ensure that vocabulary titles are escaped properly.
@@ -94,7 +107,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit['name'] = 'Don\'t Panic';
     $edit['description'] = $this->randomName();
     $edit['machine_name'] = 'don_t_panic';
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
 
     $site_name = config_get('system.core', 'site_name');
     $this->backdropGet('admin/structure/taxonomy/don_t_panic');
@@ -115,7 +128,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   }
 
   /**
-   * Tests that node types permissions are correctly set from the Node Type UI.
+   * Tests that vocabulary permissions are correctly set from the Taxonomy UI.
    */
   function testVocabularyPermissions() {
     // Create admin user.
@@ -146,7 +159,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit = array(
       $role_name . '[edit terms in tags]' => TRUE,
     );
-    $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save vocabulary'));
 
     // Check that the permission changes are saved on the permissions page.
     $this->backdropGet('admin/config/people/permissions');
@@ -173,33 +186,33 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit terms in tags', $account), "Web user has edit terms in tags permission.");
     $this->assertTrue(user_access('delete terms in tags', $account), "Web user has delete terms in tags permission.");
-  }
 
-  /**
-   * Changing weights on the vocabulary overview with two or more vocabularies.
-   */
-  function testTaxonomyAdminChangingWeights() {
-    // Create some vocabularies.
-    for ($i = 0; $i < 10; $i++) {
-      $this->createVocabulary();
-    }
-    // Get all vocabularies and change their weights.
-    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $edit = array();
-    foreach ($vocabularies as $key => $vocabulary) {
-      $edit[$key . '[weight]'] = -$vocabulary->weight;
-    }
-    // Saving the new weights via the interface.
-    $this->backdropPost('admin/structure/taxonomy', $edit, t('Save'));
+    $vocabulary = taxonomy_vocabulary_load('tags');
+    $this->createTerm($vocabulary);
+    $this->createTerm($vocabulary);
+    $this->backdropGet('admin/structure/taxonomy/tags');
+    $this->assertText(t('Edit'), "Edit action is found on vocabulary form.");
+    $this->assertText(t('Delete'), "Delete action is found on vocabulary form.");
+    $this->assertNoText(t('Add term'), "Add term link found on vocabulary form.");
+    $this->assertText(t('Weight for added term'), 'Weight visible on term listing page.');
 
-    // Load the vocabularies from the database.
-    backdrop_static_reset('taxonomy_vocabulary_load_multiple');
-    $new_vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
+    // Add "create term" permissions for the "tags" vocabulary.
+    $this->backdropLogin($admin_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
 
-    // Check that the weights are saved in the database correctly.
-    foreach ($vocabularies as $key => $vocabulary) {
-      $this->assertEqual($new_vocabularies[$key]->weight, $edit[$key . '[weight]'], 'The vocabulary weight was changed.');
-    }
+    $edit = array(
+      $role_name . '[create terms in tags]' => TRUE,
+    );
+    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+
+    // Test that the permissions actually exist
+    $this->backdropLogin($web_user);
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+
+    $this->backdropGet('admin/structure/taxonomy/tags');
+    $this->assertText(t('Add term'), "Add term link found on vocabulary form.");
   }
 
   /**
@@ -228,7 +241,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
       'name' => $this->randomName(),
       'machine_name' => $vocabulary_name,
     );
-    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save'));
+    $this->backdropPost('admin/structure/taxonomy/add', $edit, t('Save vocabulary'));
     $this->assertText(t('Created new vocabulary'), 'New vocabulary was created.');
 
     // Check the created vocabulary.
@@ -1706,7 +1719,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Configure'));
     $edit = array();
     $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
 
     // Check vocabulary settings.
     $this->backdropGet('admin/structure/taxonomy');
@@ -1723,7 +1736,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
     $this->clickLink(t('Configure'));
     $edit = array();
     $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
-    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->backdropPost(NULL, $edit, t('Save vocabulary'));
 
     $terms = array(
       'term1' => $this->randomName(),
@@ -1839,7 +1852,7 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
     $result = $result['taxonomy_term'];
     asort($result);
     $this->assertEqual(array_keys($terms), array_keys($result), 'Taxonomy terms were retrieved by EntityFieldQuery.');
- 
+
     $first_result = reset($result);
     $term = _field_create_entity_from_ids($first_result);
     $this->assertEqual($term->tid, $first_result->entity_id, 'Taxonomy term can be created based on the IDs');

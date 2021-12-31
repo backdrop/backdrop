@@ -251,6 +251,13 @@ input.form-radio {
   box-sizing: border-box;
 }
 
+#edit-page-style .views-ui-ajax-wrapper,
+#edit-page-style .views-ui-ajax-wrapper div,
+#edit-block-style .views-ui-ajax-wrapper,
+#edit-block-style .views-ui-ajax-wrapper div {
+  display: block;
+}
+
 @media (max-width: 600px) {
   .edit-page-style-wrapper div,
   .edit-page-style-wrapper label,
@@ -290,14 +297,6 @@ input.form-radio {
 .horizontal > * + * {
   margin-left: 9px; /* LTR */
   padding-left: 9px; /* LTR */
-}
-
-.views-ui-view-name {
-  font-weight: bold;
-}
-
-.views-ui-view-machine-name {
-  font-size: smaller;
 }
 
 @media (max-width: 768px) {
