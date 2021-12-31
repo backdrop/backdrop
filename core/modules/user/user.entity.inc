@@ -423,6 +423,9 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Move account cancellation information into $entity->data.
     foreach (array('user_cancel_method', 'user_cancel_notify') as $key) {
       if (isset($entity->{$key})) {
+        if (!$entity->data) {
+          $entity->data = array();
+        }
         $entity->data[$key] = $entity->{$key};
       }
     }
