@@ -24,7 +24,7 @@ function telemetry_telemetry_info() {
     'project' => 'backdrop',
   );
   $info['web_server'] = array(
-    'label' => t('Web Server'),
+    'label' => t('Web server'),
     'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
     'project' => 'backdrop',
   );
