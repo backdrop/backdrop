@@ -1046,7 +1046,7 @@ input.button-secondary:focus,
 button.button-secondary:hover,
 button.button-secondary:focus {
   color: white;
-  background-color: #97979e;
+  background-color: #595959;
 }
 a.button-danger,
 input.button-danger,
@@ -1064,7 +1064,7 @@ input.button-danger:focus,
 button.button-danger:hover,
 button.button-danger:focus {
   color: white;
-  background-color: #595959;
+  background-color: #e7251b;
 }
 input.form-button-disabled,
 input.form-button-disabled:active,
