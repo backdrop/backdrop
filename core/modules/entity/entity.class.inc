@@ -313,6 +313,8 @@ abstract class Entity extends stdClass implements EntityInterface {
 
   /**
    * Implements EntityInterface::buildContent().
+   *
+   * @since 1.21.0 Method added.
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     return entity_get_controller($this->entityType())->buildContent($this, $view_mode, $langcode);
@@ -320,6 +322,8 @@ abstract class Entity extends stdClass implements EntityInterface {
 
   /**
    * Implements EntityInterface::view().
+   *
+   * @since 1.21.0 Method added.
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
     $view = entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
