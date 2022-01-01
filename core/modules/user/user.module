@@ -1765,7 +1765,7 @@ function user_login_default_validators() {
  * Check for invalid email addresses and blocked accounts.
  */
 function user_login_name_validate($form, &$form_state) {
-  // Ensure POST values are a strings, arrays may come from malformed HTML or
+  // Ensure POST values are strings. Arrays may come from malformed HTML or
   // malicious attacks.
   if (is_array($form_state['values']['name'])) {
     $form_state['values']['name'] = reset($form_state['values']['name']);
