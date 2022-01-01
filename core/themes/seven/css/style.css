@@ -1033,7 +1033,7 @@ button.button-primary:focus {
 a.button-secondary,
 input.button-secondary,
 button.button-secondary {
-  color: #828188;
+  color: #57575c;
   background-color: white;
   -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
   -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
@@ -1064,7 +1064,7 @@ input.button-danger:focus,
 button.button-danger:hover,
 button.button-danger:focus {
   color: white;
-  background-color: #e7251b;
+  background-color: #595959;
 }
 input.form-button-disabled,
 input.form-button-disabled:active,

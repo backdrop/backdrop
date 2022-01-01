@@ -570,23 +570,26 @@ button.button-primary:active {
 a.button-secondary,
 input.button-secondary,
 button.button-secondary {
-  color: #828188;
+  color: #57575c;
   background-color: white;
   box-shadow: inset 0 0 0 0.125em #97979e;
 }
 
+a.button-secondary:hover,
+a.button-secondary:focus,
 input.button-secondary:hover,
 input.button-secondary:focus,
 button.button-secondary:hover,
 button.button-secondary:focus {
   color: white;
-  background-color: #97979e;
+  background-color: #595959;
 }
 
+a.button-secondary:active,
 input.button-secondary:active,
 button.button-secondary:active {
   color: white;
-  background-color: #97979e;
+  background-color: #595959;
   box-shadow: inset 0 0 0 0.125em #555555;
 }
 
