@@ -34,6 +34,20 @@ function entity_test_autoload_info() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function entity_test_menu() {
+  $items['test/%entity_test'] = array(
+  'title' => 'Entity test',
+  'page callback' => 'entity_view',
+  'page arguments' => array(1),
+  'access callback' => TRUE,
+  'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
  * Loads a test entity.
  *
  * @param $id

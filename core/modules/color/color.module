@@ -681,6 +681,10 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   foreach ($style as $chunk) {
     if ($is_color) {
       $chunk = backdrop_strtolower($chunk);
+      // Convert short hex codes to their long equivalents.
+      if (backdrop_strlen($chunk) == 4) {
+        $chunk = '#' . $chunk[1] . $chunk[1] . $chunk[2] . $chunk[2] . $chunk[3] . $chunk[3];
+      }
       // Check if this is one of the colors in the default palette.
       if ($key = array_search($chunk, $default)) {
         $chunk = $conversion[$key];
@@ -869,8 +873,9 @@ function _color_shift($given, $ref1, $ref2, $target) {
  * Converts a hex color into an RGB triplet.
  */
 function _color_unpack($hex, $normalize = FALSE) {
-  if (strlen($hex) == 4) {
-    $hex = $hex[1] . $hex[1] . $hex[2] . $hex[2] . $hex[3] . $hex[3];
+  $hex = substr($hex, 1);
+  if (strlen($hex) == 3) {
+    $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
   }
   $c = hexdec($hex);
   for ($i = 16; $i >= 0; $i -= 8) {

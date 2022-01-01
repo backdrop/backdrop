@@ -149,6 +149,19 @@ function hook_image_styles_alter(&$styles) {
   }
 }
 
- /**
-  * @} End of "addtogroup hooks".
-  */
+/**
+ * Modify the array of supported image extensions.
+ *
+ * @param array $supported_extensions
+ *   Array of file extensions that are supposed to be supported.
+ *
+ * @see image_field_widget_form()
+ */
+function hook_image_supported_extensions_alter(&$supported_extensions) {
+  // Add Wireless Bitmap Image File to the list.
+  $supported_extensions[] = 'wbmp';
+}
+
+/**
+ * @} End of "addtogroup hooks".
+ */

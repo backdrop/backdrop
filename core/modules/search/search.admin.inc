@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the search module.
+ * Admin page callbacks for the Search module.
  */
 
 /**

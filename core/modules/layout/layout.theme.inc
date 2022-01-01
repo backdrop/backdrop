@@ -54,16 +54,16 @@ function theme_layout_info($variables) {
   $preview_img = theme('image', array('path' => $preview_path));
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
-  // Create a link to the settings page
-  $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout', array(
+    'label' => $layout->title,
+    'machine_name' => $layout->name,
+  ));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  $output = '<div class="layout-info">';
   $output .= $preview;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Template: </span>!title', array('!title' => $template)) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
@@ -131,13 +131,16 @@ function theme_layout_template_info($variables) {
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout_template', array(
+    'label' => $template_info['title'],
+    'machine_name' => $template_info['name'],
+  ));
+
+  $output = '<div class="layout-info">';
   $output .= $preview_img;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($template_info['title']) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Machine name: </span>!title', array('!title' => $template_info['name'])) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
@@ -202,19 +205,21 @@ function theme_layout_settings_context_table($variables) {
   $header = array(
     t('Context'),
     t('Type'),
+    t('Operations'),
   );
   $rows = array();
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $row = array();
-    if (is_numeric($key)) {
-      $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
-      $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+    $row[] = backdrop_render($element[$key]['summary']);
+    $row[] = backdrop_render($element[$key]['plugin']);
+    if (isset($element[$key]['operations'])) {
+      $row[] = backdrop_render($element[$key]['operations']);
     }
     else {
-      $row[] = t('Special context: @key', array('@key' => $key));
+      $row[] = array();
     }
-    $row[] = backdrop_render($element[$key]);
+
     $rows[] = $row;
   }
   return theme('table', array(
@@ -224,6 +229,22 @@ function theme_layout_settings_context_table($variables) {
     'empty' => t('No contexts'),
   ));
 }
+
+/**
+ * Output a list of action links for layouts.
+ */
+function theme_layout_action_links($variables) {
+  $element = $variables['element'];
+  $attributes = array('class' => array('action-links', 'layout-action-links'));
+
+  $output = '<ul ' . backdrop_attributes($attributes) . '>';
+  foreach (element_children($element) as $key) {
+    $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
 
 /**
  * Output the list of visibility conditions for layouts.
@@ -304,7 +325,7 @@ function layout_preprocess_layout(&$variables) {
   }
 
   // Build HTML for displaying flexible templates.
-  if ($variables['layout_info']['template'] == 'layout--flexible') {
+  if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
     if (!empty($variables['renderer']->flexible)) {
       $variables['flexible_editor'] = TRUE;
       $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
@@ -457,6 +478,11 @@ function template_preprocess_block(&$variables) {
       $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
+  }
+
+  // Add a NID class to node blocks.
+  if ($block->plugin == 'node:content') {
+    $variables['classes'][] = 'block-node-content-' . $block->settings['nid'];
   }
 
   // Set up some placeholders for constructing template file names.

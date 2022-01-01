@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the system module.
+ * Admin page callbacks for the System module.
  */
 
 /**
@@ -238,9 +238,8 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   );
   $form['admin_theme']['admin_theme'] = array(
     '#type' => 'select',
-    '#options' => array(0 => t('Default theme')) + $theme_options,
+    '#options' => $theme_options,
     '#title' => t('Administration theme'),
-    '#description' => t('Choose "Default theme" to always use the same theme as the rest of the site.'),
     '#default_value' => config_get('system.core', 'admin_theme'),
   );
   $form['admin_theme']['actions'] = array('#type' => 'actions');
@@ -263,11 +262,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
   $current_admin_theme = $config->get('admin_theme');
   $new_admin_theme = $form_state['values']['admin_theme'];
 
-  if (!$new_admin_theme) {
-    $current_default_theme_name = $themes[$current_default_theme]->info['name'];
-    backdrop_set_message(t('The administration theme will be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
-  }
-  elseif ($current_admin_theme != $new_admin_theme) {
+  if ($current_admin_theme != $new_admin_theme) {
     $new_admin_theme_name = $themes[$new_admin_theme]->info['name'];
     backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
   }
@@ -449,6 +444,14 @@ function system_theme_settings($form, &$form_state, $key) {
     }
   }
 
+  if (isset($themes[$key]->info['settings']['color']) && !module_exists('color')) {
+    // Notify the user that the theme supports the color module.
+    backdrop_set_message(t('This theme supports custom color palettes. <a href="@url">Enable the Color module</a> to start customising it.', array(
+      '@url' =>   url('admin/modules', array('query' => array('search' => 'color')))
+    )), 'info');
+  }
+
+  // Add the submit button.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -704,6 +707,7 @@ function system_modules($form, $form_state = array()) {
       ),
     );
   }
+  ksort($form['modules']);
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -1302,7 +1306,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
   $form['front_page']['default_nodes_main'] = array(
@@ -1310,7 +1314,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
-    '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
+    '#access' => ($site_config->get('site_frontpage') == 'node'),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
@@ -1322,7 +1326,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
   $form['error_page']['site_404'] = array(
@@ -1331,7 +1335,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
 
@@ -1354,7 +1358,7 @@ function system_site_information_settings($form, &$form_state) {
 
       // Prepare local file path for description.
       if ($original_path && isset($friendly_path)) {
-        $local_file = strtr($original_path, array('public:/' => config_get('system.core', 'file_public_path')));
+        $local_file = strtr($original_path, array('public:/' => $site_config->get('file_public_path')));
       }
       else {
         $local_file = path_to_theme() . '/' . $default;
@@ -1610,11 +1614,12 @@ function system_run_cron_submit($form, &$form_state) {
  * @see system_logging_settings_validate()
  */
 function system_logging_settings($form, &$form_state) {
+  $site_config = config('system.core');
   $form['#config'] = 'system.core';
   $form['error_level'] = array(
     '#type' => 'radios',
     '#title' => t('Error messages to display'),
-    '#default_value' => config_get('system.core', 'error_level'),
+    '#default_value' => $site_config->get('error_level'),
     '#options' => array(
       ERROR_REPORTING_HIDE => t('None'),
       ERROR_REPORTING_DISPLAY_SOME => t('Errors and warnings'),
@@ -1636,7 +1641,7 @@ function system_logging_settings($form, &$form_state) {
       WATCHDOG_DEBUG => t('Debug'),
       WATCHDOG_DEPRECATED => t('Deprecated'),
     ),
-    '#default_value' => config_get('system.core', 'watchdog_enabled_severity_levels'),
+    '#default_value' => $site_config->get('watchdog_enabled_severity_levels'),
     '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
 
@@ -1788,11 +1793,13 @@ function system_clear_page_cache_submit($form, &$form_state) {
  * @ingroup forms
  */
 function system_file_system_settings() {
+  $config = config('system.core');
+
   $form['#config'] = 'system.core';
   $form['file_public_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Public file system path'),
-    '#default_value' => config_get('system.core', 'file_public_path'),
+    '#default_value' => $config->get('file_public_path'),
     '#maxlength' => 255,
     '#description' => t('A local file system path where public files will be stored. This directory must exist and be writable by Backdrop. This directory must be relative to the Backdrop installation directory and be accessible over the web.'),
     '#after_build' => array('system_check_directory'),
@@ -1801,9 +1808,9 @@ function system_file_system_settings() {
   $form['file_private_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Private file system path'),
-    '#default_value' => config_get('system.core', 'file_private_path'),
+    '#default_value' => $config->get('file_private_path'),
     '#maxlength' => 255,
-    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://www.drupal.org/docs/7/core/modules/file/overview')),
+    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://backdropcms.org/user-guide/file-system')),
     '#after_build' => array('system_check_directory'),
   );
 
@@ -1822,7 +1829,7 @@ function system_file_system_settings() {
   }
 
   if (!empty($options)) {
-    $default_scheme = config_get('system.core', 'file_default_scheme');
+    $default_scheme = $config->get('file_default_scheme');
     $default_scheme = isset($options[$default_scheme]) ? $default_scheme : key($options);
     $form['file_default_scheme'] = array(
       '#type' => 'radios',
@@ -1842,13 +1849,13 @@ function system_file_system_settings() {
     '#type' => 'checkbox',
     '#title' => t('Transliterate file names during upload'),
     '#description' => t('Enable to convert file names to US-ASCII character set for cross-platform compatibility. If you enable this setting later, you may want to <a href="@transliteration">retroactively transliterate existing file names</a>.', array('@transliteration' => url('admin/config/media/file-system/transliteration'))),
-    '#default_value' => config_get('system.core', 'file_transliterate_uploads'),
+    '#default_value' => $config->get('file_transliterate_uploads'),
   );
   $form['transliteration']['file_transliterate_uploads_display_name'] = array(
     '#type' => 'checkbox',
     '#title' => t('Transliterate the displayed file name'),
     '#description' => t('Enable to also convert the file name that is displayed within the site (for example, in link text).'),
-    '#default_value' => config_get('system.core', 'file_transliterate_uploads_display_name'),
+    '#default_value' => $config->get('file_transliterate_uploads_display_name'),
     '#states' => array(
       'invisible' => array(
         'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
@@ -1858,8 +1865,8 @@ function system_file_system_settings() {
   $form['transliteration']['file_transliterate_lowercase'] = array(
     '#type' => 'checkbox',
     '#title' => t('Lowercase transliterated file names'),
-    '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
-    '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
+    '#default_value' => $config->get('file_transliterate_lowercase'),
+    '#description' => t('Enable to convert file names to lowercase. This is recommended to prevent issues with case-insensitive file systems.'),
     '#states' => array(
       'invisible' => array(
         'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
@@ -1882,7 +1889,7 @@ function system_image_toolkit_settings() {
   if (count($toolkits_available) == 0) {
     config_set('system.core', 'image_toolkit', '');
     $form['image_toolkit_help'] = array(
-      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should consult your system administrator to have them enabled, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
+      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should enable them, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
     );
     return $form;
   }
@@ -2142,6 +2149,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
  * @ingroup forms
  */
 function system_urls_settings($form, &$form_state) {
+  $config = config('system.core');
   $available = FALSE;
   $conflict = FALSE;
 
@@ -2167,7 +2175,7 @@ function system_urls_settings($form, &$form_state) {
 
       // If the test failed while clean URLs are enabled, make sure clean URLs
       // can be disabled.
-      if (config_get('system.core', 'clean_url')) {
+      if ($config->get('clean_url')) {
         $conflict = TRUE;
         // Warn the user of a conflicting situation, unless after processing
         // a submitted form.
@@ -2189,7 +2197,7 @@ function system_urls_settings($form, &$form_state) {
     $form['clean_url'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable clean URLs'),
-      '#default_value' => config_get('system.core', 'clean_url'),
+      '#default_value' => $config->get('clean_url'),
       '#description' => t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
     );
     if ($conflict) {
@@ -2224,7 +2232,7 @@ function system_urls_settings($form, &$form_state) {
   $form['canonical_secure'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),
-    '#default_value' => config_get('system.core', 'canonical_secure'),
+    '#default_value' => $config->get('canonical_secure'),
     '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable <code>https</code> should be set to <code>TRUE</code> in your file <code>settings.php</code>' ),
   );
 
@@ -2340,8 +2348,7 @@ function system_date_delete_format_form_submit($form, &$form_state) {
  */
 function system_date_time_formats() {
   $header = array(
-    array('data' => t('Label')),
-    array('data' => t('Machine name')),
+    array('data' => t('Name')),
     array('data' => t('Pattern')),
     array('data' => t('Operations'))
   );
@@ -2353,8 +2360,10 @@ function system_date_time_formats() {
       // Do not display date formats that are hidden.
       if (empty($format_info['hidden'])) {
         $row = array();
-        $row[] = array('data' => check_plain($format_info['label']));
-        $row[] = array('data' => $date_format_name);
+        $row[] = theme('label_machine_name__date_format', array(
+          'label' => $format_info['label'],
+          'machine_name' => $date_format_name,
+        ));
         $row[] = array('data' => format_date(REQUEST_TIME, 'custom', $format_info['pattern']));
 
         // Prepare Operational links.
@@ -2440,7 +2449,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',

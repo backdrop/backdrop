@@ -186,7 +186,14 @@ function node_form($form, &$form_state, Node $node) {
   $form['#node'] = $node;
 
   if ($node_type->settings['language'] && module_exists('language')) {
-    $language_options = language_list(TRUE, TRUE);
+    $language_options = array();
+    foreach (language_list(TRUE) as $langcode => $language) {
+      $option_label = $language->name;
+      if (isset($language->native)) {
+        $option_label .= ' (' . $language->native . ')';
+      }
+      $language_options[$langcode] = $option_label;
+    }
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -560,7 +567,7 @@ function node_form_submit($form, &$form_state) {
  * @return
  *   An HTML-formatted string of a node preview.
  *
- * @see node_form_build_preview()
+ * @see node_form_preview()
  *
  * @since 1.11.0
  */
@@ -663,12 +670,6 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
-
-  // We render this message here instead of in node_form_preview() in order to
-  // make it persistent across page refreshes while still in preview mode, and
-  // also while switching to different display modes.
-  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
 
   $form['node'] = array(
     '#type' => 'value',
