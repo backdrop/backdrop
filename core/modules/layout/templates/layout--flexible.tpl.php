@@ -32,6 +32,9 @@
         if ($row['element'] == 'header' || $row['element'] == 'footer') {
           $row_classes[] = 'l-' . $row['element'];
         }
+        if (!empty($row['error'])) {
+          $row_classes[] = 'error';
+        }
       ?>
       <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
         <div class="<?php print $row['row_class']; ?>">

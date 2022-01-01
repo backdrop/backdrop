@@ -2233,8 +2233,14 @@ function layout_layout_info() {
       'libraries' => array('bootstrap4-gs'),
     );
     foreach ($flexible_template->rows as $row_name => $region) {
-      $region_style = $styles[$region['contains']];
-      for ($i = 0; $i < $region_style['region_count']; $i++) {
+      if (isset($styles[$region['contains']])) {
+        $region_style = $styles[$region['contains']];
+        $region_count = $region_style['region_count'];
+      }
+      else {
+        $region_count = count($region['region_names']);
+      }
+      for ($i = 0; $i < $region_count; $i++) {
         if (!empty($region['region_names']['region_name_' . $i])) {
           $region_name = $region['region_names']['region_name_' . $i];
         }
@@ -2476,6 +2482,10 @@ function layout_flexible_row_styles() {
       'name' => t('Four regions') . (' 33% : 17% : 33% : 17%'),
     ),
   );
+
+  $module_styles = module_invoke_all('layout_flexible_row_styles');
+  $styles = array_merge($styles, $module_styles);
+  backdrop_alter('layout_flexible_row_styles', $styles);
 
   return $styles;
 }
