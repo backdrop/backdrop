@@ -1842,13 +1842,23 @@ function system_library_info() {
       array('system', 'ui'),
     ),
   );
+  $libraries['jquery.color'] = array(
+    'title' => 'jQuery Color',
+    'website' => 'https://github.com/jquery/jquery-color',
+    'version' => '2.2.0',
+    'js' => array(
+      'core/misc/ui/vendor/jquery-color/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+  );
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/vendor/jquery-color/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
       'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.color'),
     ),
   );
   $libraries['effects.blind'] = array(
