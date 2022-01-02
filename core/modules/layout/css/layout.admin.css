@@ -85,6 +85,34 @@
   margin-left: 0;
 }
 
+/* Inject a little space after the path matches text within the description. */
+#path-matches {
+  margin-bottom: 0.5em;
+}
+
+/* Toggle for the placeholder examples */
+.placeholder-examples-toggle {
+  white-space: nowrap;
+}
+.placeholder-examples-toggle .arrow {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 0.3333em 0.3333em 0;
+  display: inline-block;
+  height: 0;
+  line-height: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0.15em 0.3333em;
+}
+.placeholder-examples-toggle .arrow.close {
+  border-top-color: transparent;
+  border-bottom-color: #0074bd;
+  border-width: 0 0.3333em 0.3333em;
+}
+
 /* Menu item argument settings. */
 #layout-arguments strong,
 #layout-context-table strong {

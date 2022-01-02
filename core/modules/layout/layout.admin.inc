@@ -281,31 +281,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
-  $form['path'] = array(
-    '#title' => t('Path'),
-    '#field_prefix' => url('', array('absolute' => TRUE)),
-    '#type' => 'textfield',
-    '#default_value' => $layout->getPath(),
-    '#required' => TRUE,
-    '#access' => !$layout->isDefault(),
-    '#description' => t('Use the percent symbol ("%") to indicate a placeholder in the path.'),
-  );
-
-  $description_items = array(
-    t('Content: <code>node/%</code>'),
-    t('User accounts: <code>user/%</code>'),
-    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
-    t('Comments: <code>comment/%</code>'),
-  );
-  $description_list = theme('item_list', array('items' => $description_items));
-  $form['path_details'] = array(
-    '#type' => 'details',
-    '#summary' => t('Placeholder examples'),
-    '#details' => t('Some common examples of placeholders include:') . $description_list,
-    '#attributes' => array('class' => array('description')),
-    '#access' => !$layout->isDefault(),
-  );
-
+  // Path entry field with dynamic information about the entered path and
+  // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   if (!empty($path)) {
     $path_matches = db_query('
@@ -315,23 +292,43 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ', array(':path' => $path))
       ->fetchAllKeyed();
     if (count($path_matches)) {
-      $path_match_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+      $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
     }
     else {
-      $path_match_text = t('This path will create a page.');
+      $path_matches_text = t('This path will create a page.');
     }
   }
   else {
-    $path_match_text = '';
+    $path_matches_text = t('Please enter a path.');
   }
-
-  $form['path_matches_wrapper'] = array(
-    '#type' => 'container',
-    '#id' => 'path-matches',
-    '#access' => !$layout->isDefault(),
+  $form['path_matches_text'] = array(
+    '#type' => 'value',
+    '#value' => $path_matches_text,
   );
-  $form['path_matches_wrapper']['path_matches'] = array(
-    '#markup' => $path_match_text,
+  $path_matches = array(
+    '#type' => 'container',
+    '#access' => !$layout->isDefault(),
+    '#attributes' => array(
+      'id' => array('path-matches'),
+    ),
+    'path_matches_text' => array('#markup' => $path_matches_text),
+  );
+  $path_matches_description = backdrop_render($path_matches);
+  $toggle .= ' <a class="placeholder-examples-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
+  $description_items = array(
+    t('Content: <code>node/%</code>'),
+    t('User accounts: <code>user/%</code>'),
+    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+    t('Comments: <code>comment/%</code>'),
+  );
+  $description_list = '<div class="placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  $form['path'] = array(
+    '#title' => t('Path'),
+    '#type' => 'textfield',
+    '#default_value' => $layout->getPath(),
+    '#required' => TRUE,
+    '#access' => !$layout->isDefault(),
+    '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
   );
 
   $form['path_update'] = array(
@@ -727,8 +724,8 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
 function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+  $commands[] = ajax_command_html('#path-matches', $form['path_matches_text']['#value']);
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
-  $commands[] = ajax_command_html('#path-matches', backdrop_render($form['path_matches_wrapper']['path_matches']));
   return array(
     '#type' => 'ajax',
     '#commands' => $commands,
