@@ -40,10 +40,10 @@ Backdrop.behaviors.layoutConfigure = {
     function examples_toggle_handler(e) {
       var $examples = $(this).next().toggle();
       if ($examples.is(':visible')) {
-        $(this).text(Backdrop.t('less')).append('<span class="arrow close"></span>');
+        $(this).text(Backdrop.t('Hide examples')).append('<span class="arrow close"></span>');
       }
       else {
-        $(this).text(Backdrop.t('more')).append('<span class="arrow"></span>');
+        $(this).text(Backdrop.t('Show examples')).append('<span class="arrow"></span>');
       }
       e.preventDefault();
       e.stopPropagation();

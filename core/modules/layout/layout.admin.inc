@@ -314,7 +314,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     'path_matches_text' => array('#markup' => $path_matches_text),
   );
   $path_matches_description = backdrop_render($path_matches);
-  $toggle = ' <a class="placeholder-examples-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
+  $toggle = ' <a class="placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
   $description_items = array(
     t('Content: <code>node/%</code>'),
     t('User accounts: <code>user/%</code>'),
