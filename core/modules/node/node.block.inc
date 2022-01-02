@@ -89,9 +89,12 @@ class NodeBlock extends Block {
 
     // Add author and date information settings.
     $content['#display_submitted'] = !empty($this->settings['display_submitted']);
+    $original_theme = $content['#theme'];
 
-    // Add theme hook suggestion.
-    $content['#theme'] = 'node__block_' . $this->settings['nid'];
+    // Add theme hook suggestions.
+    $content['#theme'] = array();
+    $content['#theme'][] = 'node__block_' . $this->settings['nid'];
+    $content['#theme'][] = $original_theme . '__block_' . $this->settings['nid'];;
 
     return $content;
   }
