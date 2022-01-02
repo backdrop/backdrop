@@ -1383,7 +1383,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     // The following errors are always shown.
     if (isset($elements['#needs_validation'])) {
       // Verify that the value is not longer than #maxlength.
-      if (isset($elements['#maxlength']) && backdrop_strlen($elements['#value']) > $elements['#maxlength']) {
+      if (isset($elements['#maxlength']) && is_string($elements['#value']) && backdrop_strlen($elements['#value']) > $elements['#maxlength']) {
         form_error($elements, $t('!name cannot be longer than %max characters but is currently %length characters long.', array('!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'], '%max' => $elements['#maxlength'], '%length' => backdrop_strlen($elements['#value']))));
       }
 
