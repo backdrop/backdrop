@@ -3089,8 +3089,26 @@ function _menu_navigation_links_rebuild($menu) {
 }
 
 /**
- * Stores a copy of menu_links in memory for when lots of functions need to
- * query from the table.
+ * Stores a copy of menu_links in memory for menu load and save functions.
+ *
+ * Rather than querying the database for the menu links, menu operations are
+ * expected to utilize this cache. Modification of links directly in the
+ * database may cause this cache to become inconsistent, in which case it
+ * should be rebuilt via menu_rebuild() if needed within the same request.
+ *
+ * This single cache is utilized by the following functions:
+ *   - _menu_navigation_links_rebuild()
+ *   - _menu_link_find_parent()
+ *   - menu_link_children_relative_depth()
+ *   - menu_link_save()
+ *
+ * Though this cache may be large (several megabytes for large menues), the
+ * cache is left intact for the entire request in the event that multiple
+ * menu links are modified in a single request, such as when updating the
+ * weights or parents of several links in a single form.
+ *
+ * @return array
+ *   An array of all rows within the menu_links table. Passed by reference.
  */
 function &_menu_links_cache($reset = FALSE) {
   $menu_links = &backdrop_static(__FUNCTION__);
