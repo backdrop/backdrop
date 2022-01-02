@@ -2983,7 +2983,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp('layout', 'layout_test');
+    parent::setUp('layout', 'layout_test', 'layout_flex_test');
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -3169,14 +3169,22 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
     $this->backdropGet($flexible_layout_configure_link);
     $this->backdropPost(NULL, array(), t('Add row'));
+
+    // Test hook_layout_flexible_row_styles(). The 6-column region style is not
+    // in core, but is provided by the hook implementation.
     $edit = array(
-      'region_count' => 3,
+      'region_count' => 6,
     );
     $this->backdropPost(NULL, $edit, t('Choose region widths'));
     $edit = array(
-      'region_style' => 'region_4_4_4',
+      'region_style' => 'region_2',
     );
     $this->backdropPost(NULL, $edit, t('Continue'));
+
+    // Test hook_layout_flexible_row_styles_alter(). The region style name
+    // should have changed to the altered version.
+    $this->assertText(t('Six 17% regions'));
+
     // Rename just the first region.
     $edit = array(
       'region_names[region_name_0]' => 'First region',
@@ -3194,12 +3202,12 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $data_row_id = (string) $last_row_attr[0][0];
     $last_row_id = 'flexible-row--' . $last_row_attr[0][0];
 
-    // The last row has 3 regions.
+    // The last row has 6 regions.
     $row_count = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div', array(
       ':id' => $last_row_id,
       ':class' => 'l-flexible-row row',
     ));
-    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+    $this->assertEqual(count($row_count), 6, 'The last row has 6 regions.');
 
     // Check that the first region has the expected title.
     $fourth_row_first_region_title = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
@@ -3212,12 +3220,12 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // Go to the block add page and check that the new row shows correctly.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
 
-    // The last row has 3 regions.
+    // The last row has 6 regions.
     $row_count = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div', array(
       ':id' => $data_row_id,
       ':class' => 'l-flexible-row row',
     ));
-    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+    $this->assertEqual(count($row_count), 6, 'The last row has 6 regions.');
 
     // Check that the first region has the expected title.
     $fourth_row_first_region_title = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
@@ -3353,6 +3361,80 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // Go to the layout created with this template and confirm still has access.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Disable the test module to lose the hook_layout_flexible_row_styles()
+    // implementation then test that everything still works.
+    $this->backdropLogin($this->admin_user);
+    module_disable(array('layout_flex_test'));
+
+    // Go to the layout path and check that the layout still has correct
+    // regions.
+    $this->backdropGet($layout_url);
+
+    // The last row still has 6 regions.
+    $row_count = $this->xpath('//div[contains(@class, :class)]', array(
+      ':class' => 'l-col col-md-2',
+    ));
+    $this->assertEqual(count($row_count), 6, 'The last row has 6 regions.');
+
+    // Go to the configuration pages and check that the error messages appear.
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->assertText(t('The flexible row style "region_2" was not found.'));
+    $this->clickLink(t('Configure'), 2);
+    $this->assertText(t('Missing style'));
+
+    // Saving still works. Rename just the first region.
+    $edit = array(
+      'region_names[region_name_0]' => 'First region renamed',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $last_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region renamed',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Go to the block add page and check that the row still shows correctly.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $data_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region renamed',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Add a block to the last row fourth region.
+    $this->clickLink(t('Add block'), 5);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 20,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the the layout path and confirm the blocks exist, have the right
+    // setting, and are in the right place.
+    $this->backdropGet($layout_url);
+    $region_block_settings = array('19', '18', '17', '20');
+    foreach ($region_block_settings as $index => $setting) {
+      $string = format_string('The setting of count is @setting.', array('@setting' => $setting));
+      $elements = $this->xpath('//*[contains(@data-row-id,:id)]//div[contains(@class,:row)]/div[:index]//div[normalize-space(text())=:string]', array(
+        ':id' => $data_row_id,
+        ':row' => 'l-flexible-row row',
+        ':index' => $index + 1,
+        ':string' => $string,
+      ));
+      $this->assertEqual(count($elements), 1, "The sample block was found in the correct region.");
+    }
   }
 
 }
