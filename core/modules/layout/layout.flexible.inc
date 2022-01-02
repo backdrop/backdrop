@@ -460,7 +460,10 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $row_styles = layout_flexible_row_styles();
   $selected_style = t('Missing style');
-  $region_count = count($flexible_template->rows[$original_row]['region_names']);
+  $region_count = 1;
+  if ($original_row != 'add') {
+    $region_count = count($flexible_template->rows[$original_row]['region_names']);
+  }
   if (isset($row_styles[$region_style])) {
     $selected_style = $row_styles[$region_style]['name'];
     $region_count = $row_styles[$region_style]['region_count'];
