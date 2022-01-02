@@ -284,7 +284,7 @@ function hook_taxonomy_term_view_alter(&$build) {
  * @see taxonomy_term_page()
  */
 function hook_taxonomy_term_page_alter(&$build) {
-  // Remove the list of nodes with this term (build).
+  // Remove the list of nodes with this term.
   unset($build['nodes']);
   // Remove the pager for the list of nodes.
   unset($build['pager']);
