@@ -49,7 +49,7 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
         vals.push(Backdrop.t('Scheduled for @date', { '@date': date }));
       }
       else {
-        var statusLabel = $status.parent().text();
+        var statusLabel = $status.parent().find('label').text();
         vals.push(Backdrop.checkPlain($.trim(statusLabel)));
       }
 
