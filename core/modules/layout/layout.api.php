@@ -736,5 +736,44 @@ function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
 }
 
 /**
+ * Provides information on row styles that can be used by flexible layouts.
+ *
+ * @return
+ *   An associative array which defines row styles, with the following
+ *   key-value pairs:
+ *   - split: (required) The percentage width of each column, separated by a colon.
+ *   - bootstrap: (required) The Bootstrap column values; should add up to 12.
+ *   - region_count: (required) The total number of columns.
+ *   - name: (required) A human-readable name for this style.
+ *
+ * @see layout_flexible_row_styles()
+ */
+function hook_layout_flexible_row_styles() {
+  $styles = array(
+    'region_2' => array(
+      'split' => '17:17:17:17:17:17',
+      'bootstrap' => '2:2:2:2:2:2',
+      'region_count' => 6,
+      'name' => t('Six regions') . (' 17% each'),
+    ),
+  );
+
+  return $styles;
+}
+
+/**
+ * Perform alterations to flexible layout row styles.
+ *
+ * @param $styles
+ *   The styles data as returned from layout_flexible_row_styles(). implementation of the
+ *
+ * @see layout_flexible_row_styles()
+ */
+function hook_layout_flexible_row_styles(&$styles) {
+  // Change the name of a row style.
+  $styles['region_2']['name'] = t('Six 17% regions');
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
