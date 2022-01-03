@@ -76,7 +76,7 @@ Backdrop.behaviors.layoutConfigure = {
     $form.find('.placeholder-examples').hide();
 
     // Handle toggling the placeholder examples.
-   $('a.placeholder-examples-toggle').click(examples_toggle_handler);
+    $('a.placeholder-examples-toggle').click(examples_toggle_handler);
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');
