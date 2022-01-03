@@ -27,8 +27,7 @@
             "5a4ec847-16c1-45dd-b168-58afed5081d4",
             "8ebebe78-4aa4-4d08-a79f-2463daf79863",
             "f149b0ac-ff4c-46f5-8402-ee1aac572dfb",
-            "aab75ee1-7a16-4137-b253-83a0f6323936",
-            "52c0d8ce-cba5-4636-bf65-2dc378740ec0"
+            "aab75ee1-7a16-4137-b253-83a0f6323936"
         ],
         "half2": [
             "271e8ac3-a2a9-4a0b-8d45-69e68e95938a",
@@ -188,31 +187,6 @@
                     ]
                 },
                 "uuid": "aab75ee1-7a16-4137-b253-83a0f6323936",
-                "style": {
-                    "plugin": "default",
-                    "data": {
-                        "settings": {
-                            "classes": ""
-                        }
-                    }
-                }
-            }
-        },
-        "52c0d8ce-cba5-4636-bf65-2dc378740ec0": {
-            "plugin": "telemetry:telemetry",
-            "data": {
-                "module": "telemetry",
-                "delta": "telemetry",
-                "settings": {
-                    "title_display": "default",
-                    "title": "",
-                    "style": "default",
-                    "block_settings": [],
-                    "contexts": [],
-                    "admin_label": "",
-                    "admin_description": ""
-                },
-                "uuid": "52c0d8ce-cba5-4636-bf65-2dc378740ec0",
                 "style": {
                     "plugin": "default",
                     "data": {
