@@ -298,10 +298,20 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ->fetchAllKeyed();
     if (count($path_matches)) {
       if ($has_placeholder) {
-        $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern.');
+        }
       }
       else {
-        $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern.');
+        }
       }
     }
     else {
@@ -310,7 +320,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
           $path_matches_text = t('This path will create pages whose paths match this pattern.');
         }
         else {
-          $path_matches_text = t('This path will provide pages whose paths match this pattern.');
+          $path_matches_text = t('This path provides pages whose paths match this pattern.');
         }
       }
       else {
@@ -318,7 +328,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
           $path_matches_text = t('This path will create a page at this path.');
         }
         else {
-          $path_matches_text = t('This path will provide a page at this path.');
+          $path_matches_text = t('This path provides a page at this path.');
         }
       }
     }
