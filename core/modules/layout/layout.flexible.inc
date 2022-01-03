@@ -521,9 +521,8 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
         'source' => array('region_names', 'region_' . $i, 'label'),
         'standalone' => TRUE,
         'label' => t('Name'),
-        'replace_pattern' => '[^a-z0-9-_]+',
+        'replace_pattern' => '[^a-z0-9-]+',
         'replace' => '-',
-        '#required' => FALSE,
       ),
     );
     if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])){
