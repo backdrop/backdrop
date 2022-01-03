@@ -499,28 +499,28 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     $form['region_names']['region_' . $i] = array(
       '#type' => 'container',
     );
-    if (isset($row_data['region_names']['region_' . $i]['region_name'])) {
-      $region_name = $row_data['region_names']['region_' . $i]['region_name'];
+    if (isset($row_data['region_names']['region_' . $i]['label'])) {
+      $region_name = $row_data['region_names']['region_' . $i]['label'];
     }
-    $form['region_names']['region_' . $i]['region_name'] = array(
+    $form['region_names']['region_' . $i]['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Region name') . ' ' . ($i + 1),
       '#default_value' => !empty($region_name) ? $region_name : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
-    $form['region_names']['region_' . $i]['class_name'] = array(
+    $form['region_names']['region_' . $i]['name'] = array(
       '#type' => 'machine_name',
       '#description' => t('A machine name to be used as the default CSS class. It must only contain uppercase letters, lowercase letters, numbers, hyphens and underscores.'),
-      '#default_value' => !empty($row_data['region_names']['region_' . $i]['class_name']) ? $row_data['region_names']['region_' . $i]['class_name'] : '',
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['name']) ? $row_data['region_names']['region_' . $i]['name'] : '',
       '#maxlength' => 255,
       '#field_prefix' => '<span dir="ltr">l-region--',
       '#field_suffix' => '</span>&lrm;',
       '#size' => 15,
       '#disabled' => FALSE,
       '#machine_name' => array(
-        'exists' => '_layout_flexible_template_region_class_name_exists',
-        'source' => array('region_names', 'region_' . $i, 'region_name'),
+        'exists' => '_layout_flexible_template_region_name_exists',
+        'source' => array('region_names', 'region_' . $i, 'label'),
         'standalone' => TRUE,
-        'label' => t('CSS class'),
+        'label' => t('Name'),
         'replace_pattern' => '[^a-z0-9-_]+',
         'replace' => '-',
         '#required' => FALSE,
@@ -633,15 +633,24 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
  * machine_name.
  *
  * @param $machine_name
- *   The machine (class) name.
+ *   The machine name for a region.
  *
  * @return
- *   Whether or not the class name is taken.
+ *   Whether or not the region name is taken.
  *
  * @see layout_flexible_template_edit_row_form()
  * @see form_validate_machine_name()
  */
-function _layout_flexible_template_region_class_name_exists($machine_name) {
+function _layout_flexible_template_region_name_exists($machine_name, $element, $form_state) {
+  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
+  foreach ($flexible_template->rows as $row) {
+    foreach ($row['region_names'] as $region_name) {
+      if ($region_name['name'] == $machine_name) {
+        return TRUE;
+      }
+    }
+  }
+
   return FALSE;
 }
 
@@ -655,13 +664,13 @@ function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate 
     $regions = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
     foreach ($regions as $key => $region) {
-      $region_names[] = $region['region_name'];
+      $region_names[] = $region['label'];
     }
   }
   else {
     foreach ($flexible_template->rows as $row) {
       foreach ($row['region_names'] as $key => $region) {
-        $region_names[] = $region['region_name'];
+        $region_names[] = $region['label'];
       }
     }
   }
@@ -712,7 +721,7 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
   foreach ($form_state['values']['region_names'] as $key => $region) {
     if (empty($region)) {
       $number = str_replace('region_', '', $key);
-      $form_state['values']['region_names'][$key]['region_name'] = t('Region') . ' ' . ($last_region_number + $number + 1);
+      $form_state['values']['region_names'][$key]['label'] = t('Region') . ' ' . ($last_region_number + $number + 1);
       $last_region_number++;
     }
   }

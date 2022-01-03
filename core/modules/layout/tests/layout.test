@@ -3136,8 +3136,8 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // template editor page and the layout path.
     $this->clickLink(t('Configure'), 0);
     $edit = array(
-      'region_names[region_0][region_name]' => 'New header',
-      'region_names[region_0][class_name]' => 'new-header-new',
+      'region_names[region_0][label]' => 'New header',
+      'region_names[region_0][name]' => 'new-header-new',
       'region_names[region_0][classes]' => 'blue-blue',
       'region_names[region_0][region_class_enable]' => TRUE,
       'row_classes' => 'new-class another-class',
@@ -3201,11 +3201,11 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Continue'));
     // Rename just the first region.
     $edit = array(
-      'region_names[region_0][region_name]' => 'First region',
+      'region_names[region_0][label]' => 'First region',
       // Machine names have to be set manually.
-      'region_names[region_0][class_name]' => 'first-region',
-      'region_names[region_1][class_name]' => 'region-2',
-      'region_names[region_2][class_name]' => 'region-3',
+      'region_names[region_0][name]' => 'first-region',
+      'region_names[region_1][name]' => 'region-2',
+      'region_names[region_2][name]' => 'region-3',
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->backdropPost(NULL, array(), t('Save layout template'));

@@ -351,8 +351,8 @@ function layout_preprocess_layout(&$variables) {
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
-          $region_name = $row['region_names']['region_0']['region_name'];
-          $class_name = isset($row['region_names']['region_0']['class_name']) ? $row['region_names']['region_0']['class_name'] : backdrop_html_class($row['region_names']['region_0']['region_name']);
+          $region_name = $row['region_names']['region_0']['label'];
+          $class_name = isset($row['region_names']['region_0']['name']) ? $row['region_names']['region_0']['name'] : backdrop_html_class($row['region_names']['region_0']['label']);
           $region_classes .= 'l-region--' . $class_name;
           $custom_classes = !empty($row['region_names']['region_0']['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_0']['classes']) : '';
           $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? $custom_classes : '';
@@ -373,8 +373,8 @@ function layout_preprocess_layout(&$variables) {
         foreach ($split as $col) {
           $region_classes = '';
           if (!empty($row['region_names']['region_' . $i])) {
-            $region_name = $row['region_names']['region_' . $i]['region_name'];
-            $class_name = isset($row['region_names']['region_' . $i]['class_name']) ? $row['region_names']['region_' . $i]['class_name'] : backdrop_html_class($row['region_names']['region_' . $i]['region_name']);
+            $region_name = $row['region_names']['region_' . $i]['label'];
+            $class_name = isset($row['region_names']['region_' . $i]['name']) ? $row['region_names']['region_' . $i]['name'] : backdrop_html_class($row['region_names']['region_' . $i]['label']);
             $region_classes .= 'l-region--' . $class_name;
             $custom_classes = !empty($row['region_names']['region_' . $i]['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_' . $i]['classes']) : '';
             $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $custom_classes : '';
