@@ -26,11 +26,15 @@ function telemetry_requirements($phase) {
 
   // Report Backdrop version
   if ($phase == 'runtime') {
-    $requirements['teletry'] = array(
+    $items[] = l($t('View the Backdrop CMS data collection policy'), 'https://backdropcms.org/privacy');
+    $items[] = l($t('View public Backdrop CMS data'), 'https://backdropcms.org/project/backdrop/telemetry');
+    $links = theme('item_list', array('items' => $items));
+
+    $requirements['telemetry'] = array(
       'title' => $t('Telemetry'),
       'value' => $t('Enabled'),
       'severity' => REQUIREMENT_INFO,
-      'description' => $t('Anonymous information about how your site is configured is being sent to @domain to help improve the project. See the <a href="!telemetry_report">Telemetry report page</a> for more information.', array('@domain' => _telemetry_destination_server_name(), '!telemetry_report' => url('admin/reports/telemetry'))),
+      'description' => $t('Anonymous information about how your site is configured is being sent to @domain to help improve the project. See the <a href="!telemetry_report">Telemetry report page</a> for more information.', array('@domain' => _telemetry_destination_server_name(), '!telemetry_report' => url('admin/reports/telemetry'))) . $links,
     );
   }
 
