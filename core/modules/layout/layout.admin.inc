@@ -284,7 +284,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Path entry field with dynamic information about the entered path and
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
-  $is_new = $layout && $layout->is_new;
+  $is_new = isset($layout->is_new) && $layout->is_new;
   $has_placeholder = strpos($path, '%') !== FALSE;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
