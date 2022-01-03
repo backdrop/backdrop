@@ -94,22 +94,21 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
+  $help = '<p>' . t('As a page is rendered, its <em>Path</em> is compared to those listed here. If a match is found, <em>Visibility conditions</em> will be evaluated to determine which <em>Layout</em> is used. If no match is found, or if visbiility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
+
   $help_items = array();
-  $help_items[] = t('To determine which layout is to be used for a page, the path is compared to those shown here.');
-  $help_items[] = t('Paths used by the layout system are <em>system paths</em> (also called <em>normal paths</em>), not !link.', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
-  $help_items[] = t('They are listed alphabetically below. All layouts that might apply to each path are listed below the path.');
-  $help_items[] = t('All pages without a layout explicitly defined for its path will use one of the <em>Default layouts</em> (shown at the bottom of this page).');
+  $help_items[] = t('Paths below are listed alphabetically.');
+  $help_items[] = t('All possible layouts for each path are listed beneath the path.');
   $help_items[] = array(
-    'data' => t('Each path listed here will have one or more layouts defined:'),
+    'data' => t('Each path may have one or more available layouts:'),
     'children' => array(
-      t('If any path has exactly one layout defined, then that layout will be used (if visibility conditions allow).'),
-      t('Otherwise, starting from top to bottom, all layouts for that path are checked for matching visibility conditions.'),
+      t('Starting from top to bottom, all layouts for that path are checked for matching visibility conditions.'),
       t('The first layout that matches all conditions will be the one that gets used.'),
       t('To adjust priority, you may reorder the layouts for a given path.'),
-      t('If no match is found, the page will use one of the Default layouts.'),
     ),
   );
-  $help = theme('item_list', array('items' => $help_items));
+  $help_items[] = t('Paths used by the layout system are <em>system paths</em> (example: <code>node/%</code>), not normal paths (example: <code>node/2</code>) or !link (example: <code>about</code>)', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
+  $help .= theme('item_list', array('items' => $help_items));
   $help .= t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.');
 
   $page = array();
