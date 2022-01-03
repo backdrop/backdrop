@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Layout flexible functionality test module.
+ */
+
+/**
+ * Implements hook_layout_flexible_row_styles().
+ */
+function layout_flex_test_layout_flexible_row_styles() {
+  $styles = array(
+    'region_2' => array(
+      'split' => '17:17:17:17:17:17',
+      'bootstrap' => '2:2:2:2:2:2',
+      'region_count' => 6,
+      'name' => t('Six regions') . (' 17% each'),
+    ),
+  );
+
+  return $styles;
+}
+
+/**
+ * Implements hook_layout_flexible_row_styles_alter().
+ */
+function layout_flex_test_layout_flexible_row_styles_alter(&$styles) {
+  $styles['region_2']['name'] = t('Six 17% regions');
+}

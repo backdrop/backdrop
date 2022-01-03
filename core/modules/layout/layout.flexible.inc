@@ -273,7 +273,10 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
     else {
       $row_style_in_use = $flexible_template->rows[$original_row]['contains'];
     }
-    $default_region_count = $row_styles[$row_style_in_use]['region_count'];
+    if (isset($row_styles[$row_style_in_use])) {
+      $default_region_count = $row_styles[$row_style_in_use]['region_count'];
+    }
+      
   }
   $form['region_count'] = array(
     '#title' => t('Number of regions'),
@@ -456,8 +459,15 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   $form_state['region_style'] = $region_style;
 
   $row_styles = layout_flexible_row_styles();
-  $selected_style = $row_styles[$region_style]['name'];
-  $region_count = $row_styles[$region_style]['region_count'];
+  $selected_style = t('Missing style');
+  $region_count = 1;
+  if ($original_row != 'add') {
+    $region_count = count($flexible_template->rows[$original_row]['region_names']);
+  }
+  if (isset($row_styles[$region_style])) {
+    $selected_style = $row_styles[$region_style]['name'];
+    $region_count = $row_styles[$region_style]['region_count'];
+  }
 
   if ($original_row == 'add') {
     backdrop_set_title(t('Add new row'));

@@ -41,13 +41,18 @@
 
 .layout-flexible-editor .flexible-row {
   padding: 0;
-  border: 1.25px dashed #0074bd;
   margin-bottom: 15px;
   border-radius: 4px;
   -webkit-box-shadow: 3px 3px 0 0 #c6c6c6;
   -moz-box-shadow: 3px 3px 0 0 #c6c6c6;
   box-shadow: 3px 3px 0 0 #c6c6c6;
 }
+
+.layout-flexible-editor .flexible-row.error {
+  border-color: #ff0000;
+  border: 2px dashed #ff0000;
+}
+
 .layout-flexible-editor .flexible-row:hover {
   background-color: #ffffff;
   cursor: move;

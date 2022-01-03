@@ -360,10 +360,26 @@ function layout_preprocess_layout(&$variables) {
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
-        $col_info = $variables['column_data'][$row['contains']];
-        $split = explode(':', $col_info['bootstrap']);
-        $i = 0;
-        foreach ($split as $col) {
+        $split = array();
+        // If the row style (which provides the Bootstrap column spacing) was
+        // provided by an implementation of hook_layout_flexible_row_styles()
+        // then it is possible that this may not be available if the
+        // implementing module is disabled, in which case we just count the
+        // number of regions and split them equally.
+        if (isset($variables['column_data'][$row['contains']])) {
+          $col_info = $variables['column_data'][$row['contains']];
+          $split = explode(':', $col_info['bootstrap']);
+          $col_count = count($split);
+        }
+        else {
+          $col_count = count($row['region_names']);
+          if ($variables['admin']) {
+            backdrop_set_message(t('The flexible row style "@style" was not found.', array('@style' => $row['contains'])), 'error');
+          }
+          $row['error'] = TRUE;
+        }
+        
+        for($i = 0; $i < $col_count; $i++) {
           if (!empty($row['region_names']['region_name_' . $i])) {
             $region_name = $row['region_names']['region_name_' . $i];
           }
@@ -371,11 +387,10 @@ function layout_preprocess_layout(&$variables) {
             $region_name = $name . ' ' . $i;
           }
           $row['regions'][] = array(
-            'region_md' => $col,
+            'region_md' => empty($split) ? (12/$col_count) : $split[$i],
             'region_name' => $region_name,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
-          $i++;
         }
       }
       $variables['row_data'][$name] = $row;
