@@ -94,20 +94,20 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('As a page is rendered, its <em>Path</em> is compared to those listed here. If a match is found, <em>Visibility conditions</em> will be evaluated to determine which <em>Layout</em> is used. If no match is found, or if visbiility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
+  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected. The <em>Path</em> for the page is compared to those listed here. If a match is found, <em>Visibility conditions</em> are evaluated to determine which <em>Layout</em> is used. If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
 
   $help_items = array();
   $help_items[] = t('Paths below are listed alphabetically.');
-  $help_items[] = t('All possible layouts for each path are listed beneath the path.');
+  $help_items[] = t('Each path may have one or more layouts available.');
   $help_items[] = array(
-    'data' => t('Each path may have one or more available layouts:'),
+    'data' => t('Available layouts are listed beneath the path.'),
     'children' => array(
-      t('Starting from top to bottom, all layouts for that path are checked for matching visibility conditions.'),
-      t('The first layout that matches all conditions will be the one that gets used.'),
-      t('To adjust priority, you may reorder the layouts for a given path.'),
+      t('Moving from the top to bottom, each available layout is checked for matching visibility conditions.'),
+      t('The first layout to match all conditions will be selected.'),
+      t('To adjust priority, reorder the layouts for a given path.'),
     ),
   );
-  $help_items[] = t('Paths used by the layout system are <em>system paths</em> (example: <code>node/%</code>), not normal paths (example: <code>node/2</code>) or !link (example: <code>about</code>)', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
+  $help_items[] = t('Paths used by the layout system are <em>menu router paths</em> (example: <code>node/%</code>), not normal paths (example: <code>node/2</code>) or !link (example: <code>about</code>)', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
   $help .= theme('item_list', array('items' => $help_items));
   $help .= t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.');
 
