@@ -36,37 +36,6 @@ function telemetry_hook_info() {
 }
 
 /**
- * Implements hook_block_info().
- */
-function telemetry_block_info() {
-  $blocks = array();
-
-  $blocks['telemetry'] = array(
-    'description' => t('Provides information about telemetry'),
-    'class' => 'TelemetryBlock',
-  );
-
-  if (module_exists('dashboard')) {
-    $blocks['telemetry']['info'] = t('Dashboard - Telemetry');
-    $blocks['telemetry']['required contexts'] = array('dashboard');
-  }
-  else {
-    $blocks['telemetry']['info'] = t('Telemetry');
-  }
-
-  return $blocks;
-}
-
-/**
- * Implements hook_autoload_info().
- */
-function telemetry_autoload_info() {
-  return array(
-    'TelemetryBlock' => 'block.telemetry.inc',
-  );
-}
-
-/**
  * @return array
  *   A list of all items collected by all modules. Keyed by a unique identifier,
  *   each Telemetry item includes the following keys:
