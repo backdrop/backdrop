@@ -1503,7 +1503,7 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.12.1',
+    'version' => '1.13.0',
     'js' => array(
       'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1513,7 +1513,7 @@ function system_library_info() {
       'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.escape-selector.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1842,12 +1842,28 @@ function system_library_info() {
       array('system', 'ui'),
     ),
   );
+
+  // The jQuery Color library was separate from jQuery UI: Effects in version
+  // 1.13.0 of jQuery UI. The version used here should be locked to the version
+  // shipped with jQuery UI.
+  $libraries['jquery.color'] = array(
+    'title' => 'jQuery Color',
+    'website' => 'https://github.com/jquery/jquery-color',
+    'version' => '2.2.0',
+    'js' => array(
+      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+  );
+
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.color'),
     ),
   );
   $libraries['effects.blind'] = array(
