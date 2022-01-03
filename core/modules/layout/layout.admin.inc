@@ -97,17 +97,13 @@ function layout_list_page() {
   $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected. The <em>Path</em> for the page is compared to those listed here. If a match is found, <em>Visibility conditions</em> are evaluated to determine which <em>Layout</em> is selected. If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
 
   $help_items = array();
-  $help_items[] = t('Paths below are listed alphabetically.');
-  $help_items[] = t('Each path may have one or more layouts available.');
-  $help_items[] = array(
-    'data' => t('Available layouts are listed beneath the path.'),
-    'children' => array(
-      t('Moving from the top to bottom, each available layout is checked for matching visibility conditions.'),
-      t('The first layout to match all conditions will be selected.'),
-      t('To adjust priority, reorder the layouts for a given path.'),
-    ),
-  );
-  $help_items[] = t('Paths used by the layout system are <em>menu router paths</em> (example: <code>node/%</code>), not normal paths (example: <code>node/2</code>) or !link (example: <code>about</code>)', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
+  //$help_items[] = t('Paths below are listed alphabetically.');
+  $help_items[] = t('Each path may have one or more layouts available. These are listed beneath the path.');
+  $help_items[] = t('Each available layout is evaluated for matching visibility conditions.');
+  $help_items[] = t('The top available layout is considered first, followed by the second, etc.');
+  $help_items[] = t('The first layout to match all conditions will be selected.');
+  $help_items[] = t('The available layouts for a path can be reordered to adjust priority.');
+  $help_items[] = t('Note: Paths used by the layout system are <em>menu router paths</em> (example: <code>node/%</code>), not normal paths (example: <code>node/2</code>) or !link (example: <code>about</code>)', array('!link' => l(t('URL aliases'), 'admin/config/urls/path')));
   $help .= theme('item_list', array('items' => $help_items));
   $help .= t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.');
 
