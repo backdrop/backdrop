@@ -121,7 +121,7 @@ function user_entity_info() {
   $entity_info = array(
     'user' => array(
       'label' => t('User account'),
-      'bundle label' => t('Type'),
+      'bundle label' => t('User account type'),
       'controller class' => 'UserStorageController',
       'base table' => 'users',
       'fieldable' => TRUE,

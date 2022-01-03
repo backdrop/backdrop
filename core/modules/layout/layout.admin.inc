@@ -3154,12 +3154,9 @@ function layout_block_list() {
   backdrop_sort($rows, array($order['sql'] => SORT_STRING));
   $rows = ($sort == 'asc') ? $rows : array_reverse($rows);
 
-  $page['description_container'] = array(
-    '#type' => 'container',
-  );
-
-  $page['description_container']['description'] = array(
-    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'.") . '<p>',
+  $page['description'] = array(
+    '#type' => 'help',
+    '#markup' => t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'."),
   );
 
   $page['table'] = array(
