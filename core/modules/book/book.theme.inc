@@ -36,7 +36,6 @@ function template_preprocess_book_all_books_block(&$variables) {
  * @see book-navigation.tpl.php
  */
 function template_preprocess_book_navigation(&$variables) {
-  $navigation_options = config_get('book.settings','book_navigation_options');
   $book_link = $variables['book_link'];
 
   // Provide extra variables for themers. Not needed by default.
@@ -47,6 +46,7 @@ function template_preprocess_book_navigation(&$variables) {
   $variables['tree'] = '';
 
   if ($book_link['mlid']) {
+    $navigation_options = config_get('book.settings','book_navigation_options');
     if (in_array('tree', $navigation_options, TRUE)) {
       $variables['tree'] = book_children($book_link);
     }
