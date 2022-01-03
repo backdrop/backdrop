@@ -284,7 +284,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Path entry field with dynamic information about the entered path and
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
-  if (!empty($path)) {
+  $has_placeholder = strpos($path, '%') !== FALSE;
+  if (empty($path)) {
+    $path_matches_text = t('Please enter a path.');
+  }
+  else {
     $path_matches = db_query('
       SELECT path, page_callback
       FROM {menu_router}
@@ -292,14 +296,31 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ', array(':path' => $path))
       ->fetchAllKeyed();
     if (count($path_matches)) {
-      $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+      if ($has_placeholder) {
+        $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+      }
+      else {
+        $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+      }
     }
     else {
-      $path_matches_text = t('This path will create a page.');
+      if ($has_placeholder) {
+        if ($layout->is_new) {
+          $path_matches_text = t('This path will create pages whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This path will provide pages whose paths match this pattern.');
+        }
+      }
+      else {
+        if ($layout->is_new) {
+          $path_matches_text = t('This path will create a page at this path.');
+        }
+        else {
+          $path_matches_text = t('This path will provide a page at this path.');
+        }
+      }
     }
-  }
-  else {
-    $path_matches_text = t('Please enter a path.');
   }
   $form['path_matches_text'] = array(
     '#type' => 'value',
