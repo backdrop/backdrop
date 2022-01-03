@@ -1842,6 +1842,10 @@ function system_library_info() {
       array('system', 'ui'),
     ),
   );
+
+  // The jQuery Color library was separate from jQuery UI: Effects in version
+  // 1.13.0 of jQuery UI. The version used here should be locked to the version
+  // shipped with jQuery UI.
   $libraries['jquery.color'] = array(
     'title' => 'jQuery Color',
     'website' => 'https://github.com/jquery/jquery-color',
@@ -1850,6 +1854,7 @@ function system_library_info() {
       'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
     ),
   );
+
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
     'website' => 'http://jqueryui.com/effect/',
