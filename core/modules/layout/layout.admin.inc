@@ -94,7 +94,7 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected. The <em>Path</em> for the page is compared to those listed here. If a match is found, <em>Visibility conditions</em> are evaluated to determine which <em>Layout</em> is used. If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
+  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected. The <em>Path</em> for the page is compared to those listed here. If a match is found, <em>Visibility conditions</em> are evaluated to determine which <em>Layout</em> is selected. If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.') . '</p>';
 
   $help_items = array();
   $help_items[] = t('Paths below are listed alphabetically.');
