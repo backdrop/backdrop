@@ -2513,6 +2513,16 @@ function element_validate_integer_positive() {
  * This function has been removed with the inclusion of support for HTML5 number
  * elements. See https://api.backdropcms.org/node/43955
  *
+ * @deprecated since 2.0.0
+ */
+function element_validate_integer_positive() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
  * @deprecated since 1.0.0
  */
 function element_validate_number() {
