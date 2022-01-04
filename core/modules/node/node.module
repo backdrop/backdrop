@@ -2229,7 +2229,7 @@ function node_page_default() {
   $deprecation_link = l(
     'The node listing previously provided by node_page_default() is now provided by the "Promoted content" view',
     'https://docs.backdropcms.org/change-records',
-    array('attributes' => array('target' => '_blank')),
+    array('attributes' => array('target' => '_blank'))
   );
   watchdog_deprecated_function('node', __FUNCTION__, $deprecation_link);
 
