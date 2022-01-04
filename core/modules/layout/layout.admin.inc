@@ -97,11 +97,11 @@ function layout_list_page() {
   $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
   $help_items[] = array(
-    'data' => 'The <em>Path</em> for the page is compared those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.',
+    'data' => 'The <em>Path</em> for the page is compared to those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.',
     'children' => array(
       t('Each path may have one or more layouts available. These are listed beneath the path.'),
       array(
-        'data' => t('The top available layout is is evaluated for matching visibility conditions first, followed by the second, etc.'),
+        'data' => t('The top available layout for each path is is evaluated for matching visibility conditions first, followed by the second, etc.'),
         'children' => array(t('Available layouts can be reordered to adjust priority.')),
       ),
       t('The first layout to match all conditions will be selected.'),
