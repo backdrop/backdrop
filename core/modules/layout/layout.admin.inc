@@ -752,8 +752,9 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
 }
 
 /**
- * AJAX handler for layout_settings_form() the returns updated contexts and
- * information about path matching.
+ * AJAX handler for layout_settings_form().
+ *
+ * Returns updated contexts and information about path matching.
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
