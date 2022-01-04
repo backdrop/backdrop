@@ -2235,8 +2235,8 @@ function layout_layout_info() {
     foreach ($flexible_template->rows as $row_name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {
-        if (!empty($region['region_names']['region_' . $i]['region_name'])) {
-          $region_name = $region['region_names']['region_' . $i]['region_name'];
+        if (!empty($region['region_names']['region_' . $i]['label'])) {
+          $region_name = $region['region_names']['region_' . $i]['label'];
         }
         else {
           $region_name = $row_name . ' ' . $i;
