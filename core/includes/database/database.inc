@@ -3151,7 +3151,7 @@ function db_ignore_replica() {
 /**
  * Backwards-compatible wrapper function.
  *
- * @deprecated since 1.22.0
+ * @deprecated since 1.20.4
  */
 function db_ignore_slave() {
   db_ignore_replica();
