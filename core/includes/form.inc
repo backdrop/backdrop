@@ -4564,7 +4564,19 @@ function theme_color($variables) {
 function theme_number($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'number';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder'));
+
+  // The 'size' attribute added to HTML5 number input elements (if the `#size`
+  // property has been specified in the form element) is being ignored by most
+  // browsers. We are working around this by passing the size as a custom style,
+  // which can then be used to set the field width in CSS.
+  // If #max has been specified in the form element, we do not modify anything;
+  // we allow the default browser behavior instead.
+  if (isset($element['#size']) && !isset($element['#max'])) {
+    $style_size_variable = '--backdrop-number-size: ' . $element['#size'];
+    $element['#attributes']['style'] = array("$style_size_variable");
+  }
+
+  element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder', 'style'));
   _form_set_class($element, array('form-number'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />' . backdrop_render_children($element);

@@ -141,6 +141,20 @@ abbr.ajax-changed {
 .form-error input.form-time {
   border: 2px solid red;
 }
+.form-item input.form-number {
+  /**
+   * The custom variable provided here is defined in theme_number() and is equal
+   * to the '#size' property of the form element (if specified).
+   *
+   * We use var() instead of attr(), as the latter only supports strings - not
+   * numeric values. In other words, "width: calc(10px * attr(size));" would NOT
+   * work.
+   *
+   * Themes can modify the width that each digit should take, by changing the
+   * dafault 10px.
+   */
+  width: calc(10px * var(--backdrop-number-size));
+}
 .form-type-checkboxes.form-error,
 .form-type-radios.form-error {
   border: 2px solid red;
