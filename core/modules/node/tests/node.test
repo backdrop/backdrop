@@ -3481,7 +3481,7 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
     $this->assertTrue(backdrop_strlen($title) < strlen($title), 'Title has multi-byte characters.');
     $node = $this->backdropCreateNode(array('title' => $title));
     $this->backdropGet('node/' . $node->nid);
-    $result = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $result = $this->xpath('(//div[contains(@class, "l-top")])//h1');
     $this->assertEqual(trim((string) $result[0]), $title, 'The passed title was returned.');
   }
 }

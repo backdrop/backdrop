@@ -183,27 +183,29 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#group' => 'additional_settings',
     '#weight' => -10,
   );
-  $form['workflow']['status_default'] = array(
-    '#type' => 'radios',
-    '#title' => t('Default status'),
-    '#options' => array(
-      NODE_PUBLISHED => t('Published'),
-      NODE_NOT_PUBLISHED => t('Draft'),
-      NODE_SCHEDULED => t('Schedule for later'),
-    ),
-    '#default_value' => $type->settings['status_default'],
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
-    '#required' => TRUE,
-  );
-  $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
-    'visible' => array(
-      'input[name="scheduling_enabled"]' => array('checked' => TRUE),
-    ),
-  );
   $form['workflow']['scheduling_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show option for scheduling'),
     '#default_value' => $type->settings['scheduling_enabled'],
+  );
+  $form['workflow']['status_default'] = array(
+    '#type' => 'radios',
+    '#title' => t('Default publish action'),
+    '#options' => array(
+      NODE_PUBLISHED => t('Publish immediately'),
+      NODE_NOT_PUBLISHED => t('Save as draft'),
+      NODE_SCHEDULED => t('Schedule for later'),
+    ),
+    '#default_value' => $type->settings['status_default'],
+    '#required' => TRUE,
+  );
+  $form['workflow']['status_default'][NODE_PUBLISHED]['#description'] = t('Published content can be accessed by site visitors.');
+  $form['workflow']['status_default'][NODE_NOT_PUBLISHED]['#description'] = t('Content saved as draft can be accessed only by the content creator or site administrators.');
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#description'] = t('Content is saved as draft. It will be automatically published at the date and time selected.');
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
+    'visible' => array(
+      'input[name="scheduling_enabled"]' => array('checked' => TRUE),
+    ),
   );
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',

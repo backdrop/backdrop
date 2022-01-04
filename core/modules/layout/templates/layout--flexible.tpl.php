@@ -15,6 +15,7 @@
  *   contains the folowing information:
  *   - $row_data['region_md']: the row region widths in Bootstrap format.
  *   - $row_data['region_name']: the region name.
+ *   - $row_data['region_classes']: the region classes.
  *   - $row_data['content_key']: The key of the $content array which contains
  *     the HTML for that region.
  * - $content: An array of content, each item in the array is named to one
@@ -48,7 +49,7 @@
           <?php endif; ?>
           <div class="l-flexible-row row">
             <?php foreach ($row['regions'] as $region): ?>
-              <div class="l-col col-md-<?php print $region['region_md']; ?>">
+              <div class="l-col col-md-<?php print $region['region_md']; ?> <?php print $region['region_classes']; ?>">
                 <?php if ($region_buttons): ?>
                   <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
                     <div class="layout-editor-region-title clearfix">

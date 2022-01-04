@@ -124,6 +124,36 @@ interface EntityInterface {
   public function delete();
 
   /**
+   * Builds a structured array representing the entity's content.
+   *
+   * @param string $view_mode
+   *   View mode, e.g. 'full', 'teaser'...
+   * @param string|NULL $langcode
+   *   (optional) A language code to use for rendering. Defaults to the global
+   *   content language of the current request.
+   *
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL);
+
+  /**
+   * View an entity.
+   *
+   * @param string $view_mode
+   * @param string|NULL $langcode
+   * @param bool|NULL $page
+   *   (optional) If set will control if the entity is rendered: if TRUE
+   *   the entity will be rendered without its title, so that it can be embeded
+   *   in another context. If FALSE the entity will be displayed with its title
+   *   in a mode suitable for lists.
+   *   If unset, the page mode will be enabled if the current path is the URI
+   *   of the entity, as returned by entity_uri().
+   *
+   * @return
+   *   A render array of the entity.
+   */
+  public function view($view_mode = 'full', $langcode = NULL, $page = NULL);
+
+  /**
    * Creates a duplicate of the entity.
    *
    * @return EntityInterface
@@ -276,6 +306,21 @@ abstract class Entity extends stdClass implements EntityInterface {
     if (!$this->isNew()) {
       entity_get_controller($this->entityType())->delete(array($this->id()));
     }
+  }
+
+  /**
+   * Implements EntityInterface::buildContent().
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL) {
+    return entity_get_controller($this->entityType())->buildContent($this, $view_mode, $langcode);
+  }
+
+  /**
+   * Implements EntityInterface::view().
+   */
+  public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
+    $view = entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
+    return $view[$this->entityType()][$this->id()];
   }
 
   /**
