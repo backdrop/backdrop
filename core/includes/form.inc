@@ -4567,8 +4567,11 @@ function theme_number($variables) {
 
   // The 'size' attribute added to HTML5 number input elements (if the `#size`
   // property has been specified in the form element) is being ignored by most
-  // browsers. We are working around this by passing the size as a custom style,
-  // which can then be used to set the field width in CSS.
+  // browsers. We are working around this by passing the size as a custom inline
+  // style added to the element, which can then be used as a custom CSS
+  // variable, to set the field width via a combination of calc() and var().
+  // @see system.theme.css.
+  //
   // If #max has been specified in the form element, we do not modify anything;
   // we allow the default browser behavior instead.
   if (isset($element['#size']) && !isset($element['#max'])) {

@@ -143,15 +143,18 @@ abbr.ajax-changed {
 }
 .form-item input.form-number {
   /**
+   * The Form API supportes '#size' for number form elements, but most browsers
+   * ignore the setting. This here is a workaround for that.
+   *
    * The custom variable provided here is defined in theme_number() and is equal
-   * to the '#size' property of the form element (if specified).
+   * to the '#size' property of the form element (if specified, without '#max').
    *
    * We use var() instead of attr(), as the latter only supports strings - not
    * numeric values. In other words, "width: calc(10px * attr(size));" would NOT
    * work.
    *
    * Themes can modify the width that each digit should take, by changing the
-   * dafault 10px.
+   * dafault 10px in their own CSS.
    */
   width: calc(10px * var(--backdrop-number-size));
 }
