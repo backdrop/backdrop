@@ -2173,7 +2173,7 @@ function node_feed($nids = FALSE, $channel = array()) {
   $deprecation_link = l(
     'The node RSS feed previously provided by node_feed() is now provided by the "Feed" display of the "Promoted content" view',
     'https://docs.backdropcms.org/change-records',
-    array('attributes' => array('target' => '_blank')),
+    array('attributes' => array('target' => '_blank'))
   );
   watchdog_deprecated_function('node', __FUNCTION__, $deprecation_link);
 }
