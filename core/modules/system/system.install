@@ -75,12 +75,13 @@ function system_requirements($phase) {
   }
 
   // Minimum recommended PHP version can be incremented when deprecating older
-  // versions of PHP but while they are still supported.
+  // versions of PHP but while they are still supported. This does not throw
+  // a warning or error on updates to keep upgrade tests compatible.
   $minimum_recommended_version = '5.6.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
   if (version_compare($phpversion, $minimum_recommended_version) < 0) {
     $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
-    $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_WARNING;
+    $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
   }
 
   // If PHP does not meet the bare minimum, remaining checks are unnecessary.
