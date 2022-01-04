@@ -1570,7 +1570,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = config_get('views_ui.settings', 'show_replica_display');
+  $advanced_mode = config_get('views_ui.settings', 'show_default_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -1620,7 +1620,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
-  // The replica display cannot be cloned.
+  // The default display cannot be cloned.
   $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
   $is_enabled = $display->handler->get_option('enabled');
@@ -4505,11 +4505,11 @@ function views_ui_admin_settings_basic() {
   // will make it easier to change if we do.
   $form['basic'] = array();
 
-  $form['basic']['show_replica_display'] = array(
+  $form['basic']['show_default_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the <em>Default</em> display'),
     '#description' => t('Show the <em>Default</em> (i.e. default) display, which is otherwise hidden.'),
-    '#default_value' => $config->get('show_replica_display'),
+    '#default_value' => $config->get('show_default_display'),
   );
 
   $form['basic']['display_embed'] = array(

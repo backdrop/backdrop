@@ -265,8 +265,8 @@ class views_plugin_query_default extends views_plugin_query {
     );
     $form['replica'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use Replica Server'),
-      '#description' => t('This will make the query attempt to connect to a replica server if available.  If no replica server is defined or available, it will fall back to the default server.'),
+      '#title' => t('Use replica server'),
+      '#description' => t('This will make the query attempt to connect to a replica server if available. If no replica server is defined or available, it will fall back to the default server.'),
       '#default_value' => !empty($this->options['replica']),
     );
     $form['query_comment'] = array(

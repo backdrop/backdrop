@@ -2536,9 +2536,7 @@ function db_query_temporary($query, array $args = array(), array $options = arra
  *   A new InsertQuery object for this connection.
  */
 function db_insert($table, array $options = array()) {
-  // @todo Remove this legacy language in Backdrop 2.0.
-  $legacy = $options['target'] == 'slave';
-  if (empty($options['target']) || $options['target'] == 'replica' || $legacy) {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->insert($table, $options);
@@ -2556,9 +2554,7 @@ function db_insert($table, array $options = array()) {
  *   A new MergeQuery object for this connection.
  */
 function db_merge($table, array $options = array()) {
-  // @todo Remove this legacy language in Backdrop 2.0.
-  $legacy = $options['target'] == 'slave';
-  if (empty($options['target']) || $options['target'] == 'replica' || $legacy) {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->merge($table, $options);
@@ -2576,9 +2572,7 @@ function db_merge($table, array $options = array()) {
  *   A new UpdateQuery object for this connection.
  */
 function db_update($table, array $options = array()) {
-  // @todo Remove this legacy language in Backdrop 2.0.
-  $legacy = $options['target'] == 'slave';
-  if (empty($options['target']) || $options['target'] == 'replica' || $legacy) {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->update($table, $options);
@@ -2596,9 +2590,7 @@ function db_update($table, array $options = array()) {
  *   A new DeleteQuery object for this connection.
  */
 function db_delete($table, array $options = array()) {
-  // @todo Remove this legacy language in Backdrop 2.0.
-  $legacy = $options['target'] == 'slave';
-  if (empty($options['target']) || $options['target'] == 'replica' || $legacy) {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->delete($table, $options);
@@ -2616,9 +2608,7 @@ function db_delete($table, array $options = array()) {
  *   A new TruncateQuery object for this connection.
  */
 function db_truncate($table, array $options = array()) {
-  // @todo Remove this legacy language in Backdrop 2.0.
-  $legacy = $options['target'] == 'slave';
-  if (empty($options['target']) || $options['target'] == 'replica' || $legacy) {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->truncate($table, $options);
@@ -3160,8 +3150,23 @@ function db_ignore_replica() {
 
 /**
  * Backwards-compatible wrapper function.
- *   @todo Remove in Backdrop 2.0.
+ *
+ * @deprecated since 1.22.0
  */
 function db_ignore_slave() {
-  db_ignore_replica()
+  db_ignore_replica();
+}
+
+/**
+ * Check if a database has been specified as a replica.
+ *
+ * @param array $db_options
+ *   An array of options to control how the query operates.
+ *
+ * @return bool
+ *   TRUE if a replica, FALSE otherwise.
+ */
+function _db_is_replica($db_options) {
+  // @todo Remove deprecated terminology "slave" in Backdrop 2.0.
+  return empty($db_options['target']) || $db_options['target'] == 'slave' || $options['target'] == 'replica';
 }

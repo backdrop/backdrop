@@ -2358,14 +2358,14 @@ function system_init() {
   // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // primary and then propagated to the replica servers.  This means there is a
+  // primary and then propagated to the replica servers. This means there is a
   // lag between when data is written to the primary and when it is available on
   // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
   // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
   // while for other users we still get the benefits of having a replica server,
-  // just with slightly stale data.  Code that wants to disable the replica
+  // just with slightly stale data. Code that wants to disable the replica
   // server should use the db_ignore_replica() function to set
   // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
