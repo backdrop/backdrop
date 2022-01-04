@@ -1310,11 +1310,16 @@ function system_site_information_settings($form, &$form_state) {
     '#autocomplete_path' => 'path-autocomplete',
   );
   $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select', '#title' => t('Number of posts on home page'),
+    '#type' => 'number',
+    '#title' => t('Number of content items on the home page'),
     '#default_value' => $site_config->get('default_nodes_main'),
-    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
-    '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
-    '#access' => ($site_config->get('site_frontpage') == 'node'),
+    '#min' => 1,
+    '#description' => t('The number of content items per page to show in the list of promoted content on the home page.'),
+    '#states' => array(
+      'visible' => array(
+        array('input[name="site_frontpage"]' => array('value' => 'node')),
+      ),
+    ),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
