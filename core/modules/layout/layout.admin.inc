@@ -743,8 +743,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form() that updates available contexts
- * and information about path matching.
+ * Submit handler for layout_settings_form().
+ *
+ * Updates available contexts and information about path matching.
  */
 function layout_settings_form_path_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
