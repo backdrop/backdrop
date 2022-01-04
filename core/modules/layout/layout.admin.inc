@@ -290,13 +290,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     $path_matches_text = t('Please enter a path.');
   }
   else {
-    $path_matches = db_query('
-      SELECT path, page_callback
-      FROM {menu_router}
-      WHERE path = :path
-      ', array(':path' => $path))
-      ->fetchAllKeyed();
-    if (count($path_matches)) {
+    if (_layout_menu_router_path_exists($path)) {
       if ($has_placeholder) {
         if ($is_new) {
           $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
@@ -341,19 +335,19 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'container',
     '#access' => !$layout->isDefault(),
     '#attributes' => array(
-      'id' => array('path-matches'),
+      'id' => array('layout-path-matches'),
     ),
     'path_matches_text' => array('#markup' => $path_matches_text),
   );
   $path_matches_description = backdrop_render($path_matches);
-  $toggle = ' <a class="placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
   $description_items = array(
     t('Content: <code>node/%</code>'),
     t('User accounts: <code>user/%</code>'),
     t('Taxonomy terms: <code>taxonomy/term/%</code>'),
     t('Comments: <code>comment/%</code>'),
   );
-  $description_list = '<div class="placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
@@ -692,6 +686,20 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 }
 
 /**
+ * Helper function to determine whether a layout path is an existing menu router
+ * path.
+ */
+function _layout_menu_router_path_exists($path) {
+  $path_matches = db_query('
+    SELECT path, page_callback
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchAll();
+  return !empty($path_matches);
+}
+
+/**
  * Validates layout_settings_form(), ensuring a valid path.
  */
 function layout_settings_form_validate(&$form, &$form_state) {
@@ -759,7 +767,7 @@ function layout_settings_form_path_rebuild($form, &$form_state) {
 function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
-  $commands[] = ajax_command_html('#path-matches', $form['path_matches_text']['#value']);
+  $commands[] = ajax_command_html('#layout-path-matches', $form['path_matches_text']['#value']);
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
   return array(
     '#type' => 'ajax',
