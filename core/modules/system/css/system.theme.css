@@ -141,22 +141,29 @@ abbr.ajax-changed {
 .form-error input.form-time {
   border: 2px solid red;
 }
-.form-item input.form-number {
-  /**
-   * The Form API supportes '#size' for number form elements, but most browsers
-   * ignore the setting. This here is a workaround for that.
-   *
-   * The custom variable provided here is defined in theme_number() and is equal
-   * to the '#size' property of the form element (if specified, without '#max').
-   *
-   * We use var() instead of attr(), as the latter only supports strings - not
-   * numeric values. In other words, "width: calc(10px * attr(size));" would NOT
-   * work.
-   *
-   * Themes can modify the width that each digit should take, by changing the
-   * dafault 10px in their own CSS.
-   */
-  width: calc(10px * var(--backdrop-number-size));
+
+/**
+ * The '#size' property is supported by the Form API for number form elements,
+ * but most browsers ignore the 'size' attribute for HTML5 number inputs. This
+ * here is a workaround for that. Firefox supports the 'size' attribute
+ * properly, so we exclude Firefox from the workaround below.
+ */
+@supports not (-moz-appearance: none) {
+  .form-item input.form-number {
+    /**
+     * The custom variable provided here is defined in theme_number() and is equal
+     * to the '#size' property of the form element (if specified, without '#max').
+     *
+     * We use var() instead of attr(), as the latter only supports strings - not
+     * numeric values. In other words, the following would NOT work:
+     *
+     * width: calc(10px * attr(size));
+     *
+     * Themes can modify the width that each digit should take, by changing the
+     * dafault 10px in the clac() function in their own CSS.
+     */
+    width: calc(10px * var(--backdrop-number-size));
+  }
 }
 .form-type-checkboxes.form-error,
 .form-type-radios.form-error {
