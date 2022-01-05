@@ -117,6 +117,18 @@ function menu_update_1003() {
 }
 
 /**
+ * Add new default config values.
+ */
+function menu_update_1004() {
+  $config = config('menu.settings');
+  if ($config->get('menu_breakpoint') == NULL) {
+    $config->set('menu_breakpoint', 'default');
+    $config->set('menu_breakpoint_custom', '');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

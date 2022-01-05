@@ -12,6 +12,7 @@
 .form-type-file label,
 .form-type-password label,
 .form-type-select label,
+.form-type-tel label,
 .form-type-textarea label,
 .form-type-textfield label {
   display: block;
@@ -112,6 +113,13 @@ td.checkbox .form-item input {
   padding: 0.5em 0.8em;
 }
 
+[dir=rtl] .form-item .description,
+[dir=rtl] .password-strength,
+[dir=rtl] .password-match {
+  border-left: none;
+  border-right: 0.25em solid #bbbbbb;
+}
+
 .form-item-radios .description,
 .form-item-checkboxes .description {
   margin-top: 0.375em;
@@ -185,6 +193,8 @@ button.form-submit,
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -203,6 +213,8 @@ textarea.form-textarea {
 }
 
 input.form-text,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-search,
@@ -231,6 +243,8 @@ select.filter-list {
 
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,

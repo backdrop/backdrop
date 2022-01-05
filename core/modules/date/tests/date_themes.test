@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * @file
+ * Test Date module theme functions.
+ */
+
+/**
+ * Testing date theme functions to render dates correctly.
+ */
+class DateThemeTestCase extends BackdropWebTestCase {
+
+  /**
+   * Test date_display_single theme function.
+   */
+  public function testDateDisplaySingle() {
+    // Single date with timezone offset included in format.
+    $variables = array(
+      'date' => '2019-03-29T12:00+0100',
+      'timezone' => '+0100',
+      'dates' => array(
+        'format' => 'Y-m-d\TH:iO',
+      ),
+      'attributes' => array(),
+    );
+    $expected = '<span class="date-display-single">2019-03-29T12:00+0100</span>';
+    $output = theme('date_display_single', $variables);
+    $success = $this->assertEqual($expected, $output, 'Single date with offset renders correctly.');
+    if (!$success) {
+      $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
+    }
+
+    // Single date with timezone name as format.
+    $variables = array(
+      'date' => 'Europe/Berlin',
+      'timezone' => 'Europe/Berlin',
+      'dates' => array(
+        'format' => 'e',
+      ),
+      'attributes' => array(),
+    );
+    $expected = '<span class="date-display-single">Europe/Berlin</span>';
+    $output = theme('date_display_single', $variables);
+    $success = $this->assertEqual($expected, $output, 'Single date as timezone identifier renders correctly.');
+    if (!$success) {
+      $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
+    }
+  }
+
+  /**
+   * Test date_display_combination theme function.
+   */
+  public function testDateDisplayCombination() {
+    // Start and end date on same day, with timezone.
+    // We don't need a full entity, stdClass is sufficient here.
+    $stdobj = new stdClass();
+    $stdobj->date_id = '';
+    $variables = array(
+      'entity' => $stdobj,
+      'entity_type' => 'stdobj',
+      'dates' => array(
+        'value' => array(
+          'formatted' => '2019-03-20 10:00',
+          'formatted_date' => '2019-03-20',
+          'formatted_time' => '10:00',
+          'formatted_timezone' => 'Europe/Berlin',
+        ),
+        'value2' => array(
+          'formatted' => '2019-03-20 16:00',
+          'formatted_date' => '2019-03-20',
+          'formatted_time' => '16:00',
+        ),
+      ),
+      'field' => array(
+        'field_name' => 'date_test_field',
+        'settings' => array(
+          'granularity' => array('year', 'month', 'day', 'hour', 'minute'),
+        ),
+      ),
+      'display' => array(
+          'label' => 'above',
+          'type' => 'date_default',
+          'settings' => array(
+            'format_type' => 'long',
+            'show_repeat_rule' => 'show',
+            'multiple_number' => '',
+            'multiple_from' => '',
+            'multiple_to' => '',
+            'fromto' => 'both',
+          ),
+          'module' => 'date',
+          'weight' => 0 ,
+      ),
+
+      'show_remaining_days' => '',
+    );
+    $expected = '<span class="date-display-single">2019-03-20 <span class="date-display-range">';
+    $expected .= '<span class="date-display-start">10:00</span> to <span class="date-display-end">16:00 Europe/Berlin</span></span></span>';
+    $output = theme('date_display_combination', $variables);
+    $success = $this->assertEqual($expected, $output, 'Start and end date on same day with timezone renders correctly.');
+    if (!$success) {
+      $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
+    }
+
+    // Start and end date on different days, with offset.
+    $variables['dates']['value']['formatted'] = '2019-03-12T12:00+0100';
+    $variables['dates']['value']['formatted_date'] = '2019-03-12';
+    $variables['dates']['value']['formatted_time'] = '12:00';
+    $variables['dates']['value']['formatted_timezone'] = '+0200';
+    $variables['dates']['value2']['formatted'] = '2019-04-12T12:00+0200';
+    $variables['dates']['value2']['formatted_date'] = '2019-04-12';
+    $variables['dates']['value2']['formatted_time'] = '12:00';
+
+    $expected = '<span class="date-display-range"><span class="date-display-start">2019-03-12T12:00+0100</span> to ';
+    $expected .= '<span class="date-display-end">2019-04-12T12:00+0200</span></span>';
+    $output = theme('date_display_combination', $variables);
+    $success = $this->assertEqual($expected, $output, 'Start and end date on different days, with offset is rendered correctly.');
+    if (!$success) {
+      $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
+    }
+
+    // Start and end date on same day, 7 days in future,
+    // with timezone identifier, with remaining days.
+    $timezone = date_default_timezone();
+    $dateTimeStart = new DateTime('now', new DateTimeZone($timezone));
+    $currentHour = $dateTimeStart->format('G');
+    if ($currentHour > 22) {
+      // Make sure start and end are the same day.
+      $dateTimeStart->modify('- 1 hour');
+      $days_remaining = 6; // Because it's one week less one hour.
+    }
+    else {
+      $days_remaining = 7;
+    }
+    $dateTimeStart->modify('+ 1 week');
+    $dateTimeEnd = clone $dateTimeStart;
+    $dateTimeEnd->modify('+ 1 hour');
+
+    $variables['dates']['value']['formatted'] = $dateTimeStart->format('d.m.Y - H:i e');
+    $variables['dates']['value']['formatted_date'] = $dateTimeStart->format('d.m.Y');
+    $variables['dates']['value']['formatted_time'] = $dateTimeStart->format('H:i');
+    $variables['dates']['value']['formatted_timezone'] = $timezone;
+    $variables['dates']['value']['formatted_iso'] = $dateTimeStart->format('Y-m-d\TH:i:sO');
+    $variables['dates']['value2']['formatted'] = $dateTimeEnd->format('d.m.Y - H:i e');
+    $variables['dates']['value2']['formatted_date'] = $dateTimeEnd->format('d.m.Y');
+    $variables['dates']['value2']['formatted_time'] = $dateTimeEnd->format('H:i');
+    $variables['show_remaining_days'] = 1;
+
+    $expected = '<span class="date-display-single">' . $dateTimeStart->format('d.m.Y') . ' - <span class="date-display-range">';
+    $expected .= '<span class="date-display-start">' . $dateTimeStart->format('H:i') . '</span> to ';
+    $expected .= '<span class="date-display-end">' . $dateTimeEnd->format('H:i e') . '</span></span> </span>';
+    $expected .= '<div class="date-display-remaining"><span class="date-display-remaining">' . $days_remaining . ' days remaining to event.</span></div>';
+    $output = theme('date_display_combination', $variables);
+    $success = $this->assertEqual($expected, $output, 'Start and end date on same day with timezone, with remaining days is rendered correctly.');
+    if (!$success) {
+      $this->verbose('<br />Expected:<pre>' . check_plain($expected) . '</pre>Got:<pre>' . check_plain($output) . '</pre>');
+    }
+  }
+
+}

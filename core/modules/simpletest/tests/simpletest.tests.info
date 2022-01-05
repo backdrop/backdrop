@@ -49,14 +49,20 @@ file = simpletest.test
 [SimpleTestInstallationProfileModuleTestsTestCase]
 name = Installation profile module tests
 description = Verifies that tests bundled with installation profile modules are found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
 
 [SimpleTestOtherInstallationProfileModuleTestsTestCase]
 name = Other Installation profiles
 description = Verifies that tests in other installation profiles are not found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
+
+[StandardInstallTestCase]
+name = Standard Installation Tests
+description = Verifies configuration added by the Standard install profile.
+group = Installation profiles
+file = standard.test
 
 [ActionLoopTestCase]
 name = Actions executing in a potentially infinite loop
@@ -404,6 +410,12 @@ file = common.test
 name = Query parsing using backdrop_get_query_array()
 description = Tests that backdrop_get_query_array() correctly parses query parameters.
 group = Common
+file = common.test
+
+[BlockInterestCohortTest]
+name = Block Interest Cohort
+description = Check Permissions-Policy header to disable Google FLoC.
+group = System
 file = common.test
 
 [FeedIconTest]
@@ -892,6 +904,12 @@ description  = Tests a form using form storage and makes sure validation and cac
 group = Form API
 file = form.test
 
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
+group = Form API
+file = form.test
+
 [FormsFormWrapperTestCase]
 name = Form wrapper callback
 description = Tests form wrapper callbacks to pass a prebuilt form to form builder functions.
@@ -949,6 +967,12 @@ file = form.test
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
+group = Form API
+file = form.test
+
+[FormH5datetimeTestCase]
+name = Form API html5 datetime
+description = Tests the form API html5 date and time elements.
 group = Form API
 file = form.test
 
@@ -1066,6 +1090,12 @@ description = Tests active menu trails and alteration functionality.
 group = Menu
 file = menu.test
 
+[MenuChangeTestCase]
+name = Menu changes
+description = Tests that menu links are updated on menu rebuild.
+group = Menu
+file = menu.test
+
 [ModuleUnitTest]
 name = Module API
 description = Test low-level module functions.
@@ -1089,6 +1119,12 @@ name = Module implements alter
 description = Tests the hook_module_implements_alter.
 group = Module
 file = module.test
+
+[PagerFunctionalWebTestCase]
+name = Pager functionality
+description = Tests pager functionality.
+group = Pager
+file = pager.test
 
 [PasswordHashingTest]
 name = Password hashing

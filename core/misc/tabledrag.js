@@ -216,6 +216,7 @@ Backdrop.tableDrag.prototype.addColspanClass = function(columnIndex) {
 Backdrop.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
+  $('table.tabledrag-processed').addClass('tabledrag-handles-shown');
   // Show TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
   // Reduce the colspan of any effected multi-span columns.
@@ -241,6 +242,7 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
 Backdrop.tableDrag.prototype.showColumns = function () {
   // Show weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
+  $('table.tabledrag-processed').removeClass('tabledrag-handles-shown');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
   // Increase the colspan for any columns where it was previously reduced.

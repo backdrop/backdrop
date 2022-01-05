@@ -1,0 +1,500 @@
+<?php
+/**
+ * @file
+ * Definition of ViewsHandlerManyToOneTest.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+/**
+ * Tests the many to one helper handler class.
+ */
+class ViewsHandlerManyToOneTest extends ViewsSqlTest {
+
+  /**
+   * Field definitions used by this test.
+   *
+   * @var array
+   */
+  protected $fields;
+
+  /**
+   * Instances of fields used by this test.
+   *
+   * @var array
+   */
+  protected $instances;
+
+  /**
+   * Nodes used by this test.
+   *
+   * @var Node[]
+   */
+  protected $nodes;
+
+  /**
+   * Accounts used by this test.
+   *
+   * @var User[]
+   */
+  protected $accounts;
+
+  /**
+   * Terms used by this test.
+   *
+   * @var TaxonomyTerm[]
+   */
+  protected $terms;
+
+  /**
+   * Clears views data cache.
+   */
+  protected function clearViewsDataCache() {
+    backdrop_static_reset('_views_fetch_data_cache');
+    backdrop_static_reset('_views_fetch_data_recursion_protected');
+    backdrop_static_reset('_views_fetch_data_fully_loaded');
+  }
+
+  /**
+   * Returns a new term with random properties.
+   *
+   * @param string $vocabulary
+   *   Vocabulary name to create term in.
+   *
+   * @return TaxonomyTrem
+   *   Term with random properties.
+   */
+  protected function createTerm($vocabulary) {
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => 'plain_text',
+      'vocabulary' => $vocabulary->machine_name,
+    ));
+    taxonomy_term_save($term);
+    return $term;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // Create boolean field.
+    $this->fields[0] = array(
+      'field_name' => 'field_bool',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array(
+        'allowed_values' => array(
+          0 => '',
+          1 => '',
+        ),
+      ),
+    );
+    $this->fields[0] = field_create_field($this->fields[0]);
+
+    // Create text list field.
+    $this->fields[1] = array(
+      'field_name' => 'field_list',
+      'type' => 'list_text',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          1 => '1',
+          2 => '2',
+          3 => '3',
+        ),
+      ),
+    );
+    $this->fields[1] = field_create_field($this->fields[1]);
+
+    // Create boolean field instance for post nodes.
+    $instance = array(
+      'field_name' => $this->fields[0]['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'options_onoff',
+      ),
+    );
+    $this->instances[0][] = field_create_instance($instance);
+
+    // Create text list field instance for post nodes.
+    $instance = array(
+      'field_name' => $this->fields[1]['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'options_buttons',
+      ),
+    );
+    $this->instances[1][] = field_create_instance($instance);
+
+    // Create boolean field instance for users.
+    $instance = array(
+      'field_name' => $this->fields[0]['field_name'],
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'widget' => array(
+        'type' => 'options_onoff',
+      ),
+    );
+    $this->instances[0][] = field_create_instance($instance);
+
+    // Create text list field instance for users.
+    $instance = array(
+      'field_name' => $this->fields[1]['field_name'],
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'widget' => array(
+        'type' => 'options_buttons',
+      ),
+    );
+    $this->instances[1][] = field_create_instance($instance);
+
+    // Create tags field instance for users.
+    $instance = array(
+      'field_name' => 'field_tags',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+    );
+    $this->instances[2][] = field_create_instance($instance);
+
+    // Clear views data cache.
+    $this->clearViewsDataCache();
+
+    // Create two tags.
+    $vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+    $this->terms[] = $this->createTerm($vocabulary);
+    $this->terms[] = $this->createTerm($vocabulary);
+
+    // Create a number new users to get past the number of default nodes. We'll
+    // do all our testing with the third one, or $this->accounts[2].
+    $permissions = array('access content');
+    $nodecount = db_query("SELECT count(nid) from {node}")->fetchField();
+    for ($i = 0; $i <= $nodecount; $i++) {
+      // Each user: field_bool is checked, field_list is '1', and tag is term 2.
+      $account = $this->backdropCreateUser($permissions);
+      $account->{$this->fields[0]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
+      $account->{$this->fields[1]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
+      $account->field_tags[LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
+      user_save($account);
+      $this->accounts[$i] = $account;
+    }
+
+    // Delete the two Backdrop default nodes.
+    node_delete_multiple(array(1, 2));
+
+    // Create a node where the field_bool is checked, field_list is '1' and
+    // tag is term 2.
+    $node = array();
+    $node['type'] = 'post';
+    $node[$this->fields[0]['field_name']][LANGUAGE_NONE][]['value'] = '1';
+    $node[$this->fields[1]['field_name']][LANGUAGE_NONE][]['value'] = '1';
+    $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->terms[1]->tid;
+    $this->nodes[0] = $this->backdropCreateNode($node);
+
+    // Create a node where the field_bool is not checked, field_list is empty
+    // and tag is term 1.
+    $node = array();
+    $node['type'] = 'post';
+    $node[$this->fields[0]['field_name']] = array();
+    $node[$this->fields[1]['field_name']] = array();
+    $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
+    $this->nodes[1] = $this->backdropCreateNode($node);
+  }
+
+  /**
+   * Tests duplicate grouped "one of" filters on taxonomy term field.
+   */
+  public function testGroupedOneOf() {
+    $view = $this->getGroupedOneOfTestView();
+    $this->executeView($view);
+
+    // Assert that nodes have been created and have expected field values.
+    $value = field_get_items('node', $this->nodes[0], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 2, 'First node has been created and tags field references term 2.');
+
+    $value = field_get_items('node', $this->nodes[1], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 1, 'Second node has been created and tags field references term 1.');
+
+    // Assert that user has been created and has expected field values.
+    $value = field_get_items('user', $this->accounts[2], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 1, 'User has been created and tags field references term 1.');
+
+    // Assert that node id with empty field value matches user id so that the
+    // node would be excluded from the result, if the joins are missing extras.
+    $this->assertIdentical((int) $this->accounts[2]->uid, (int) $this->nodes[1]->nid, 'Node id of fourth node matches uid of third user.');
+
+    // @todo get this test passing.
+    // Assert correct result set.
+    // $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    // debug('should be 1: ' . $result_count);
+    // $this->assertEqual($result_count, 1, 'View has one result.');
+    // $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    // debug('nid should be ' . $this->nodes[1]->nid . ': ' . $nid);
+    // $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'View result has correct node id.');
+  }
+
+  /**
+   * Tests exposed filter with "Reduce duplicates." and grouped options.
+   */
+  public function testReducedExposedGroupedOptions() {
+    // Assert that nodes have been created and have expected field values.
+    $value = field_get_items('node', $this->nodes[0], 'field_list', LANGUAGE_NONE);
+    $value = isset($value[0]['value']) ? (int) $value[0]['value'] : 0;
+    $this->assertIdentical($value, 1, 'First node has been created and list field has value 1.');
+
+    $value = field_get_items('node', $this->nodes[1], 'field_list', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertFalse($value, 'Second node has been created and list is empty.');
+
+    // Assert that user has been created and has expected field values.
+    $value = field_get_items('user', $this->accounts[2], 'field_list', LANGUAGE_NONE);
+    $value = isset($value[0]['value']) ? (int) $value[0]['value'] : 0;
+    $this->assertIdentical($value, 1, 'User has been created and list field has value 1.');
+
+    // Assert that node id with empty field value matches user id so that the
+    // node would be excluded from the result option 1, if the joins are missing
+    // extras.
+    $this->assertIdentical((int) $this->accounts[2]->uid, (int) $this->nodes[1]->nid, 'Node id of our second node matches uid of our third user.');
+
+    /* Default option: Any. */
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 2, 'Default option: View has two results.');
+
+    /* Option 1: Is none of 1 or 2. */
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_list_value' => '1',
+    ));
+    $this->executeView($view);
+
+    // @todo get this test passing.
+    // Assert correct result set.
+    // $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    // debug('should be 1:' . $result_count);
+    // $this->assertEqual($result_count, 1, 'Option 1: View has one result.');
+    // $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    // debug('nid should be ' . $this->nodes[1]->nid . ': ' . $nid);
+    // $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'Option 1: View result has correct node id.');
+
+    /* Option 2: Is one of 1. */
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_list_value' => '2',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'Option 2: View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 2: View result has correct node id.');
+
+    // @todo: Add test for Option 3: Is one of 1 or 2.
+    // @todo: Add test for Option 4: Is all of 1 and 2.
+
+    /* Option 5: Is empty. */
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_list_value' => '5',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'Option 5: View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'Option 5: View result has correct node id.');
+
+    /* Option 6: Is not empty. */
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_list_value' => '6',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'Option 6: View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 6: View result has correct node id.');
+  }
+
+  /**
+   * Generates test_not view.
+   */
+  protected function getGroupedOneOfTestView() {
+    $view = new view();
+    $view->name = 'test_oneof';
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = 'test_oneof';
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+    /* Sort criterion: Content: Post date */
+    $handler->display->display_options['sorts']['created']['id'] = 'created';
+    $handler->display->display_options['sorts']['created']['table'] = 'node';
+    $handler->display->display_options['sorts']['created']['field'] = 'created';
+    $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+    $handler->display->display_options['filter_groups']['operator'] = 'OR';
+    $handler->display->display_options['filter_groups']['groups'] = array(
+      1 => 'AND',
+      2 => 'AND',
+    );
+    /* Filter criterion: Content: Tags (field_tags) */
+    $handler->display->display_options['filters']['field_tags_tid']['id'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['table'] = 'field_data_field_tags';
+    $handler->display->display_options['filters']['field_tags_tid']['field'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['value'] = array(
+      1 => '1',
+    );
+    $handler->display->display_options['filters']['field_tags_tid']['group'] = 2;
+    $handler->display->display_options['filters']['field_tags_tid']['reduce_duplicates'] = TRUE;
+    $handler->display->display_options['filters']['field_tags_tid']['type'] = 'select';
+    $handler->display->display_options['filters']['field_tags_tid']['vocabulary'] = 'tags';
+    /* Filter criterion: Content: Tags (field_tags) */
+    $handler->display->display_options['filters']['field_tags_tid_1']['id'] = 'field_tags_tid_1';
+    $handler->display->display_options['filters']['field_tags_tid_1']['table'] = 'field_data_field_tags';
+    $handler->display->display_options['filters']['field_tags_tid_1']['field'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid_1']['value'] = array(
+      1 => '1',
+    );
+    $handler->display->display_options['filters']['field_tags_tid_1']['reduce_duplicates'] = TRUE;
+    $handler->display->display_options['filters']['field_tags_tid_1']['type'] = 'select';
+    $handler->display->display_options['filters']['field_tags_tid_1']['vocabulary'] = 'tags';
+    return $view;
+  }
+
+  /**
+   * Generates test_not view.
+   */
+  protected function getReducedExposedGroupedOptionsTestView() {
+    $view = new view();
+    $view->name = 'test_reduced_exposed_grouped_options';
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = 'test_reduced_exposed_grouped_options';
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+    /* Sort criterion: Content: Post date */
+    $handler->display->display_options['sorts']['created']['id'] = 'created';
+    $handler->display->display_options['sorts']['created']['table'] = 'node';
+    $handler->display->display_options['sorts']['created']['field'] = 'created';
+    $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 1;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Content: list (field_list) */
+    $handler->display->display_options['filters']['field_list_value']['id'] = 'field_list_value';
+    $handler->display->display_options['filters']['field_list_value']['table'] = 'field_data_field_list';
+    $handler->display->display_options['filters']['field_list_value']['field'] = 'field_list_value';
+    $handler->display->display_options['filters']['field_list_value']['exposed'] = TRUE;
+    $handler->display->display_options['filters']['field_list_value']['expose']['operator_id'] = 'field_list_value_op';
+    $handler->display->display_options['filters']['field_list_value']['expose']['label'] = 'list (field_list)';
+    $handler->display->display_options['filters']['field_list_value']['expose']['operator'] = 'field_list_value_op';
+    $handler->display->display_options['filters']['field_list_value']['expose']['identifier'] = 'field_list_value';
+    $handler->display->display_options['filters']['field_list_value']['is_grouped'] = TRUE;
+    $handler->display->display_options['filters']['field_list_value']['group_info']['label'] = 'list (field_list)';
+    $handler->display->display_options['filters']['field_list_value']['group_info']['identifier'] = 'field_list_value';
+    $handler->display->display_options['filters']['field_list_value']['group_info']['group_items'] = array(
+      1 => array(
+        'title' => 'Not 1 or 2',
+        'operator' => 'not',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      2 => array(
+        'title' => '1',
+        'operator' => 'or',
+        'value' => array(
+          1 => '1',
+        ),
+      ),
+      3 => array(
+        'title' => '1 or 2',
+        'operator' => 'or',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      4 => array(
+        'title' => '1 and 2',
+        'operator' => 'and',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      5 => array(
+        'title' => 'empty',
+        'operator' => 'empty',
+        'value' => array(),
+      ),
+      6 => array(
+        'title' => 'not empty',
+        'operator' => 'not empty',
+        'value' => array(),
+      ),
+    );
+    return $view;
+  }
+
+}

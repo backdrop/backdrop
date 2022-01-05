@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative pages and callbacks for the Configuration management module.
+ * Admin page callbacks for the Configuration Management module.
  */
 
 /**
@@ -18,7 +18,7 @@ function config_sync_form(array $form, array &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'config') . '/css/config.admin.css';
 
   $form['description'] = array(
-    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p>',
+    '#markup' => '<p>' . t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))) . '</p>',
   );
 
   if ($changed_config_count === 0) {
@@ -542,6 +542,8 @@ function config_get_modified_times() {
  *
  * @return array
  *   An array of formatted strings showing the diffs between the two storages.
+ *
+ * @see config_diff_page()
  */
 function config_diff($name) {
   $active_storage = config_get_config_storage('active');

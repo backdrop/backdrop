@@ -24,6 +24,13 @@ class Comment extends Entity {
   public $pid;
 
   /**
+   * The ID of the node to which the comment is attached.
+   *
+   * @var integer
+   */
+  public $nid;
+
+  /**
    * The comment type (bundle).
    *
    * @var string
@@ -43,7 +50,6 @@ class Comment extends Entity {
    * @var string
    */
   public $subject;
-
 
   /**
    * The comment author ID.
@@ -80,6 +86,16 @@ class Comment extends Entity {
   public $homepage;
 
   /**
+   * A list of comment IDs that make up the parents of this comment.
+   *
+   * For example a thread of 10/20/30 would indicate a comment that has 3 parent
+   * comments, with CID 30 being the immediate parent comment.
+   *
+   * @var string
+   */
+  public $thread;
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -88,10 +104,8 @@ class Comment extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType() {
+  public function entityType() {
     return 'comment';
   }
 
@@ -204,6 +218,18 @@ class Comment extends Entity {
 class CommentStorageController extends EntityDatabaseStorageController {
 
   /**
+   * Overrides DefaultEntityController::load().
+   */
+  public function load($ids = array(), $conditions = array()) {
+    $comments = parent::load($ids, $conditions);
+
+    foreach ($comments as $key => $comment) {
+      $comment->new = node_mark($comment->nid, $comment->changed);
+    }
+    return $comments;
+  }
+
+  /**
    * Overrides EntityDatabaseStorageController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
@@ -224,7 +250,6 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // Set up standard comment properties.
     foreach ($comments as $key => $comment) {
       $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-      $comment->new = node_mark($comment->nid, $comment->changed);
       $comment->node_type = 'comment_node_' . $comment->node_type;
       $comments[$key] = $comment;
     }
@@ -322,6 +347,12 @@ class CommentStorageController extends EntityDatabaseStorageController {
     if ($comment->status == COMMENT_PUBLISHED) {
       module_invoke_all('comment_publish', $comment);
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the node.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      cache('entity_node')->delete($comment->nid);
+    }
   }
 
   /**
@@ -337,7 +368,18 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     foreach ($comments as $comment) {
       $this->updateNodeStatistics($comment->nid);
+      $nodes[] = $comment->nid;
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the nodes that
+    // the deleted comments were on.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      foreach (array_unique($nodes) as $nid) {
+        cache('entity_node')->delete($nid);
+      }
+    }
+
   }
 
   /**
@@ -399,5 +441,109 @@ class CommentStorageController extends EntityDatabaseStorageController {
         ->condition('nid', $nid)
         ->execute();
     }
+  }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $comment, $view_mode = 'full', $langcode = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    $node = node_load($comment->nid);
+
+    // Remove previously built content, if exists.
+    $comment->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare('comment', array($comment->cid => $comment), $view_mode, $langcode));
+
+    // Build fields content.
+    field_attach_prepare_view('comment', array($comment->cid => $comment), $view_mode, $langcode);
+    entity_prepare_view('comment', array($comment->cid => $comment), $langcode);
+    $comment->content += field_attach_view('comment', $comment, $view_mode, $langcode);
+
+    $comment->content['links'] = array(
+      '#theme' => 'links__comment',
+      '#pre_render' => array('backdrop_pre_render_links'),
+      '#attributes' => array('class' => array('links', 'inline')),
+    );
+    if (empty($comment->in_preview)) {
+      $comment->content['links']['comment'] = array(
+        '#theme' => 'links__comment__comment',
+        '#links' => comment_links($comment, $node),
+        '#attributes' => array('class' => array('links', 'inline')),
+      );
+    }
+
+    // Allow modules to make their own additions to the comment.
+    module_invoke_all('comment_view', $comment, $view_mode, $langcode);
+    module_invoke_all('entity_view', $comment, 'comment', $view_mode, $langcode);
+
+    // Make sure the current display mode is stored if no module has already
+    // populated the related key.
+    $comment->content += array('#view_mode' => $view_mode);
+  }
+
+  /**
+   * Overrides DefaultEntityController::view().
+   */
+  public function view($comments, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    $view = array();
+    foreach ($comments as $comment) {
+      /* @var Comment $comment */
+      // Populate $comment->content with a render() array.
+      $this->buildContent($comment, $view_mode, $langcode);
+
+      $node = node_load($comment->nid);
+
+      $build = $comment->content;
+      // We don't need duplicate rendering info in comment->content.
+      unset($comment->content);
+
+      $build += array(
+        '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
+        '#comment' => $comment,
+        '#node' => $node,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+      $node_type = node_type_get_type($node->type);
+
+      if (empty($comment->in_preview)) {
+        $prefix = '';
+        $is_threaded = isset($comment->divs) && $node_type->settings['comment_mode'] == COMMENT_MODE_THREADED;
+
+        // Add 'new' anchor if needed.
+        if (!empty($comment->first_new)) {
+          $prefix .= "<a id=\"new\"></a>\n";
+        }
+
+        // Add indentation div or close open divs as needed.
+        if ($is_threaded) {
+          $prefix .= $comment->divs <= 0 ? str_repeat('</div>', abs($comment->divs)) : "\n" . '<div class="indented">';
+        }
+
+        // Add anchor for each comment.
+        $prefix .= "<a id=\"comment-$comment->cid\"></a>\n";
+        $build['#prefix'] = $prefix;
+
+        // Close all open divs.
+        if ($is_threaded && !empty($comment->divs_final)) {
+          $build['#suffix'] = str_repeat('</div>', $comment->divs_final);
+        }
+      }
+
+      // Allow modules to modify the structured comment.
+      $type = 'comment';
+      backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
+      $view[$type][$comment->id()] = $build;
+    }
+
+    return $view;
   }
 }

@@ -277,7 +277,16 @@ function locale_update_1003() {
   $config->set('_config_static', true);
 
   $config->set('language_negotiation_session_parameter', update_variable_get('locale_language_negotiation_session_param', 'language'));
-  $config->set('language_negotiation_url_part', update_variable_get('locale_language_negotiation_url_part', 'path_prefix'));
+  // Defined constants for locale_language_negotiation_url_part have changed in Backdrop.
+  // (LOCALE_)LANGUAGE_NEGOTIATION_URL_PREFIX: 0 -> 'path_prefix'.
+  // (LOCALE_)LANGUAGE_NEGOTIATION_URL_DOMAIN: 1 -> 'domain'.
+  $negotiation_url = update_variable_get('locale_language_negotiation_url_part', 'path_prefix');
+  if ($negotiation_url === 1) {
+    $config->set('language_negotiation_url_part', 'domain');
+  }
+  else {
+    $config->set('language_negotiation_url_part', 'path_prefix');
+  }
 
   // Ensure defaults are set for all enabled languages.
   $languages = db_query('SELECT * FROM {language} ORDER BY weight ASC, name ASC')->fetchAllAssoc('langcode');

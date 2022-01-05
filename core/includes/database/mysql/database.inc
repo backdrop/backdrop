@@ -81,10 +81,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // certain one has been set; otherwise, MySQL defaults to 'utf8_general_ci'
     // for UTF-8.
     if (!empty($connection_options['collation'])) {
-      $this->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
+      $this->pdo->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
     }
     else {
-      $this->exec('SET NAMES ' . $charset);
+      $this->pdo->exec('SET NAMES ' . $charset);
     }
 
     // Set MySQL init_commands if not already defined.  Default Backdrop's MySQL
@@ -96,12 +96,86 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       'init_commands' => array(),
     );
     $connection_options['init_commands'] += array(
-      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER'",
+      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
-      $this->exec($sql);
+      $this->pdo->exec($sql);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setPrefix($prefix) {
+    if (is_array($prefix)) {
+      $this->prefixes = $prefix + array('default' => '');
+    }
+    else {
+      $this->prefixes = array('default' => $prefix);
+    }
+
+    // This differs from the parent class implementation in that all tables
+    // are escaped with back-ticks. First, do table-specific replacements.
+    $this->prefixSearch = array();
+    $this->prefixReplace = array();
+    foreach ($this->prefixes as $key => $val) {
+      if ($key != 'default') {
+        $this->prefixSearch[] = '{' . $key . '}';
+        // Add backticks around the entire table name to avoid MySQL keywords,
+        // but also add backticks within the prefix value, in the event
+        // different database names are used as a prefix.
+        $this->prefixReplace[] = '`' . str_replace('.', '`.`', $val) . $key . '`';
+      }
+    }
+    // Then replace remaining tables with the default prefix.
+    $this->prefixSearch[] = '{';
+    $this->prefixReplace[] = '`' . $this->prefixes['default'];
+    $this->prefixSearch[] = '}';
+    $this->prefixReplace[] = '`';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeField($field) {
+    $field = parent::escapeField($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeAlias($field) {
+    $field = parent::escapeAlias($field);
+    return $this->quoteIdentifier($field);
+  }
+
+  /**
+   * Quotes an identifier with backticks for MySQL 8 compatibility.
+   *
+   * Not all identifiers need quotes, only keywords, but we add them on all
+   * fields and table names for consistency and to ease compatibility in the
+   * future.
+   *
+   * @param string $identifier
+   *   The field to check.
+   *
+   * @return string
+   *   The identifier, quoted with backticks.
+   */
+  private function quoteIdentifier($identifier) {
+    // Some identifiers are empty, such as when doing expressions.
+    if (strlen($identifier) === 0) {
+      return $identifier;
+    }
+    // Identifiers that have both a table and field should quote both.
+    elseif (strpos($identifier, '.') !== FALSE) {
+      list($table, $identifier) = explode('.', $identifier, 2);
+      return "`$table`" . '.' . "`$identifier`";
+    }
+    // Otherwise quote just the field name.
+    return "`$identifier`";
   }
 
   public function __destruct() {
@@ -208,7 +282,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!PDO::commit()) {
+        if (!$this->doCommit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -231,7 +305,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
             $this->transactionLayers = array();
             // We also have to explain to PDO that the transaction stack has
             // been cleaned-up.
-            PDO::commit();
+            $this->doCommit();
           }
           else {
             throw $e;
@@ -239,6 +313,53 @@ class DatabaseConnection_mysql extends DatabaseConnection {
         }
       }
     }
+  }
+
+  /**
+   * Do the actual commit, including a workaround for PHP 8 behaviour changes.
+   *
+   * @return bool
+   *   Success or otherwise of the commit.
+   */
+  protected function doCommit() {
+    if ($this->pdo->inTransaction()) {
+      return $this->pdo->commit();
+    }
+    else {
+      // In PHP 8.0 a PDOException is thrown when a commit is attempted with no
+      // transaction active. In previous PHP versions this failed silently.
+      return TRUE;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function rollback($savepoint_name = 'backdrop_transaction') {
+    // MySQL will automatically commit transactions when tables are altered or
+    // created (DDL transactions are not supported). Prevent triggering an
+    // exception to ensure that the error that has caused the rollback is
+    // properly reported.
+    if (!$this->pdo->inTransaction()) {
+      // On PHP 7 $this->connection->inTransaction() will return TRUE and
+      // $this->connection->rollback() does not throw an exception; the
+      // following code is unreachable.
+
+      // If \DatabaseConnection::rollback() would throw an
+      // exception then continue to throw an exception.
+      if (!$this->inTransaction()) {
+        throw new DatabaseTransactionNoActiveException();
+      }
+      // A previous rollback to an earlier savepoint may mean that the savepoint
+      // in question has already been accidentally committed.
+      if (!isset($this->transactionLayers[$savepoint_name])) {
+        throw new DatabaseTransactionNoActiveException();
+      }
+
+      trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
+      return;
+    }
+    return parent::rollback($savepoint_name);
   }
 
   public function utf8mb4IsActive() {
@@ -252,7 +373,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
 
     // Ensure that the MySQL driver supports utf8mb4 encoding.
-    $version = $this->getAttribute(PDO::ATTR_CLIENT_VERSION);
+    $version = $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
 
     if (strpos($version, 'mysqlnd') !== FALSE) {
       // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.
