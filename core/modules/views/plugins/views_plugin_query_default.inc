@@ -1638,27 +1638,16 @@ class views_plugin_query_default extends views_plugin_query {
       // There's no way in core to load revisions in bulk.
       $result = array();
       foreach ($ids as $key => $id) {
-        // Nodes can be dealt with in core.
-        if ($entity_type == 'node') {
-          $result[$key] = node_load(NULL, $id);
-        }
-        // Otherwise, see if entity is enabled.
-        elseif (module_exists('entity')) {
-          // @todo: Switch this to entity_revision_load() if that function gets
-          // into core.
-          // See: https://github.com/backdrop/backdrop-issues/issues/3777
-          $entity_info = entity_get_info($entity_type);
-          if (!empty($entity_info['entity keys']['revision'])) {
-            $entity_revisions = entity_load_multiple($entity_type, FALSE, array($entity_info['entity keys']['revision'] => $id));
-            $result[$key] = reset($entity_revisions);
-          }
-          else {
-            $result[$key] = FALSE;
-          }
+        // @todo: Switch this to entity_revision_load() if that function gets
+        // into core.
+        // See: https://github.com/backdrop/backdrop-issues/issues/3777
+        $entity_info = entity_get_info($entity_type);
+        if (!empty($entity_info['entity keys']['revision'])) {
+          $entity_revisions = entity_load_multiple($entity_type, FALSE, array($entity_info['entity keys']['revision'] => $id));
+          $result[$key] = reset($entity_revisions);
         }
         else {
-          // Otherwise, this isn't supported.
-          watchdog('views', 'Attempt to load a revision on an unsupported entity type @entity_type.', array('@entity_type' => $entity_type), WATCHDOG_WARNING);
+          $result[$key] = FALSE;
         }
       }
     }
