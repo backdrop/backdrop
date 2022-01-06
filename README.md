@@ -76,15 +76,14 @@ project:
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
+Please see the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
+Please see the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
 
 Code of Conduct
 ---------------
-
 A primary goal of the Backdrop CMS community is to be inclusive to the largest
 number of contributors, with the most varied and diverse backgrounds possible.
 As such, we are committed to providing a friendly, safe and welcoming
