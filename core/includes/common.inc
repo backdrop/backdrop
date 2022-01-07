@@ -8743,7 +8743,7 @@ function backdrop_check_incompatibility(array $dependency_info, $current_version
  * Converts a Backdrop version string into numeric-only version string.
  *
  * @param string $version_string
- *   A version string such as 1.x-1.2.3, or 1.10.0-beta4, or 1.4.x-dev.
+ *   A version string such as 1.x-1.2.3, 1.10.0-beta4, or 1.4.x-dev.
  * @return string
  *   A converted string only containing numbers, for use in PHP's
  *   version_compare() function.
