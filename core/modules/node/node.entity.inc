@@ -804,13 +804,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       $type = node_type_get_type($node);
       if ($type->settings['hidden_path']) {
         $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
-        if (user_access('administer content types')) {
-          $message .= '<br>' . l(t('Change this setting'), 'admin/structure/types/manage/' . $type->type . '/configure', array('fragment' => 'edit-display'));
-        }
-        if (user_access('administer permissions')) {
-          $message .= '<br>' . l(t('Configure which user roles can view content with hidden path'), 'admin/config/people/permissions', array('fragment' => 'edit-view-hidden-paths'));
-        }
-        backdrop_set_message($message, 'warning');
+        backdrop_set_message($message, 'info');
       }
 
       // Allow modules to modify the structured node.
