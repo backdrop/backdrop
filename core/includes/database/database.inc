@@ -2080,7 +2080,6 @@ interface DatabaseStatementInterface extends Traversable {
    * @return
    *   TRUE on success, or FALSE on failure.
    */
-  #[\ReturnTypeWillChange]
   public function execute($args = array(), $options = array());
 
   /**
@@ -2264,6 +2263,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
     $this->setFetchMode(PDO::FETCH_OBJ);
   }
 
+  #[\ReturnTypeWillChange]
   public function execute($args = array(), $options = array()) {
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
