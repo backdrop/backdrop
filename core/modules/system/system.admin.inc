@@ -1302,11 +1302,11 @@ function system_site_information_settings($form, &$form_state) {
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default home page'),
+    '#title' => t('Path to use for home page'),
     '#required' => TRUE,
     '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
-    '#description' => t('Specify a path to use for the home page.'),
+    '#description' => t('The home page will use whichever layout is currently associated with this path.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
