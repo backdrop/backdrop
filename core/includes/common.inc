@@ -8751,7 +8751,7 @@ function backdrop_check_incompatibility(array $dependency_info, $current_version
 function _backdrop_version_compare_convert($version_string) {
   // Remove the "1.x-" prefix (indicating Backdrop core version compatibility).
   $core_prefix = BACKDROP_CORE_COMPATIBILITY . '-';
-  if (substr($version_string, 0, strlen($core_prefix)) == $core_prefix) {
+  if (strpos($version_string, $core_prefix) === 0) {
     $version_string = substr($version_string, strlen($core_prefix));
   }
 
