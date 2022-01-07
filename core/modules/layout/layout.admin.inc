@@ -285,7 +285,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
-  $has_placeholder = strpos($path, '%') !== FALSE;
+  $has_placeholder = strpos((string) $path, '%') !== FALSE;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
   }
