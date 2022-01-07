@@ -503,7 +503,7 @@ function path_entity_update(Entity $entity) {
     );
 
     // Trim whitespace and slashes from alias start and end.
-    $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
+    $path['alias'] = trim((string) $path['alias'], " \t\n\r\0\x0B/");
 
     // Save an automatic alias if specified.
     if ($path['auto']) {
