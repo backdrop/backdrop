@@ -1302,7 +1302,7 @@ function system_site_information_settings($form, &$form_state) {
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Path to use for the home page.'),
+    '#title' => t('Path to use for the home page'),
     '#required' => TRUE,
     '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
