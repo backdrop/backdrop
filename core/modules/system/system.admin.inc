@@ -1303,9 +1303,10 @@ function system_site_information_settings($form, &$form_state) {
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
     '#title' => t('Default home page'),
+    '#required' => TRUE,
     '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
-    '#description' => t('Specify a path to use for the home page. If left blank, the system will display the home layout if it exists, or an unformatted list of promoted content if it does not.'),
+    '#description' => t('Specify a path to use for the home page.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
@@ -1315,12 +1316,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
-    '#states' => array(
-      // Show this setting when the home page is set to 'node' or is empty.
-      'visible' => array(
-        'input[name="site_frontpage"]' => array('value' => 'node'),
-      ),
-    ),
+    '#access' => ($site_config->get('site_frontpage') == 'node'),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
@@ -1431,23 +1427,9 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for empty home page path.
-  if (empty($form_state['values']['site_frontpage'])) {
-    // Set to default "user".
-    $home_layout = layout_load('home');
-    if (isset($home_layout) && !$home_layout->disabled) {
-      // Set to home layout path.
-      form_set_value($form['front_page']['site_frontpage'], $home_layout->getPath(), $form_state);
-    }
-    else {
-      // Set to default "node".
-      form_set_value($form['front_page']['site_frontpage'], 'node', $form_state);
-    }
-  }
-  else {
-    // Get the normal path of the home page.
-    form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
-  }
+  // Get the normal path of the home page.
+  form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
+  
   // Validate home page path.
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));

@@ -33,6 +33,22 @@ Backdrop.behaviors.layoutList = {
  */
 Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
+
+    /**
+     * Toggle handler for the placeholder examples.
+     */
+    function examples_toggle_handler(e) {
+      var $examples = $(this).next().toggle();
+      if ($examples.is(':visible')) {
+        $(this).text(Backdrop.t('Hide examples')).append('<span class="arrow close"></span>');
+      }
+      else {
+        $(this).text(Backdrop.t('Show examples')).append('<span class="arrow"></span>');
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     var $form = $('.layout-settings-form').once('layout-settings');
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
@@ -43,6 +59,10 @@ Backdrop.behaviors.layoutConfigure = {
           ajax.cleanUp(ajax.currentRequests[n]);
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
+
+      // (Re)install placeholder examples toggle handler.
+      $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
+
       };
       // Update contexts after a slight typing delay.
       var timer = 0;
@@ -51,6 +71,12 @@ Backdrop.behaviors.layoutConfigure = {
         timer = setTimeout(updateContexts, 200);
       });
     }
+
+    // Hide the placeholder examples.
+    $form.find('.layout-placeholder-examples').hide();
+
+    // Handle toggling the placeholder examples.
+    $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');
@@ -135,7 +161,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
         }
       }
 
-      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) { 
+      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) {
         var currentDroppable = $(this).closest('.layout-editor-region');
         var currentDroppableId = currentDroppable.attr('id');
         var that = $(this);

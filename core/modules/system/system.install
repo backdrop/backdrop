@@ -74,10 +74,20 @@ function system_requirements($phase) {
     );
   }
 
+  // Minimum recommended PHP version can be incremented when deprecating older
+  // versions of PHP but while they are still supported. This does not throw
+  // a warning or error on updates to keep upgrade tests compatible.
+  $minimum_recommended_version = '5.6.0';
+  $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
+  if (version_compare($phpversion, $minimum_recommended_version) < 0) {
+    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
+    $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
+  }
+
+  // If PHP does not meet the bare minimum, remaining checks are unnecessary.
   if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
-    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
+    $requirements['php']['description'] = $minimum_warning;
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
-    // If PHP is old, it's not safe to continue with the requirements check.
     return $requirements;
   }
 
@@ -3215,6 +3225,37 @@ function system_update_1077() {
     // the default.
     $config->set('admin_theme', $default_theme);
     $config->save();
+  }
+}
+
+/**
+ * Re-arrange flexible layout configuration so we can save region classes.
+ */
+function system_update_1078() {
+  $flexible_layouts = config_get_names_with_prefix('layout.flexible.');
+  foreach ($flexible_layouts as $layout_name) {
+    $config = config($layout_name);
+    $rows = $config->get('rows');
+    foreach ($rows as $row_key => $row) {
+      foreach ($row['region_names'] as $region_key => $region_name) {
+        $number = str_replace('region_name_', '', $region_key);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.label', $region_name);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.name', backdrop_html_class($region_name));
+        $config->clear('rows.' . $row_key . '.region_names.' . $region_key);
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
+ * Set homepage to 'user' if blank to match previous behavior.
+ */
+function system_update_1079() {
+  $config = config('system.core');
+  $site_frontpage = $config->get('site_frontpage');
+  if (empty($site_frontpage)) {
+    $config->set('site_frontpage', 'user');
   }
 }
 
