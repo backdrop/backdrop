@@ -12,12 +12,6 @@
 global $backdrop_test_info;
 
 /**
- * Experimental!
- * @todo Figure out what breaks require_once inside functions.
- */
-require_once __DIR__ . '/../../../core/includes/errors.inc';
-
-/**
  * Base class for Backdrop tests.
  *
  * Do not extend this class, use one of the subclasses in this file.
