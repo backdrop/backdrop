@@ -111,9 +111,6 @@ function token_replace($text, array $data = array(), array $options = array()) {
  *   An associative array of discovered tokens, grouped by type.
  */
 function token_scan($text) {
-  if (empty($text)) {
-    return array();
-  }
   // Matches tokens with the following pattern: [$type:$name]
   // $type and $name may not contain [ ] characters.
   // $type may not contain : or whitespace characters, but $name may.
@@ -123,7 +120,7 @@ function token_scan($text) {
     :              # : - separator
     ([^\[\]]*)     # match $name not containing [ or ]
     \]             # ] - pattern end
-    /x', $text, $matches);
+    /x', (string) $text, $matches);
 
   $types = $matches[1];
   $tokens = $matches[2];
