@@ -5982,6 +5982,7 @@ function _backdrop_bootstrap_full() {
   require_once BACKDROP_ROOT . '/core/includes/actions.inc';
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   require_once BACKDROP_ROOT . '/core/includes/token.inc';
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
   // Detect string handling method
   unicode_check();
