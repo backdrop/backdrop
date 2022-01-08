@@ -1822,9 +1822,10 @@ function filter_xss($string, $allowed_tags = NULL) {
   }
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
-  if (!$string || !backdrop_validate_utf8($string)) {
+  if (!backdrop_validate_utf8($string)) {
     return '';
   }
+  $string = (string) $string;
   // Store the text format.
   _filter_xss_split($allowed_tags, TRUE);
   // Remove NULL characters (ignored by some browsers).
