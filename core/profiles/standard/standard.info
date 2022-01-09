@@ -13,6 +13,7 @@ dependencies[] = comment
 dependencies[] = config
 dependencies[] = contextual
 dependencies[] = date
+dependencies[] = telemetry
 dependencies[] = dashboard
 dependencies[] = email
 dependencies[] = image
