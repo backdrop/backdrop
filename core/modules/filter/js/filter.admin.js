@@ -329,8 +329,8 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  *     restrictions are applied.
  *  2. all nested within the "properties" key: use the "tags" subkey to list
  *     HTML tags to which you want to apply property restrictions, then use the
- *     "allowed" subkey to allowlist specific property values, and similarly use
- *     the "forbidden" subkey to denylist specific property values.
+ *     "allowed" subkey to allow specific property values, and similarly use the
+ *     "forbidden" subkey to deny specific property values.
  *
  * Examples:
  *  - Allow the "p", "strong" and "a" HTML tags:
