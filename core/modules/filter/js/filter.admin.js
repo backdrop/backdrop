@@ -316,9 +316,9 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  * Backdrop.FilterStatus.
  *
  * A text filter rule object describes
- *  1. allowed or forbidden tags: (optional) allowlist or denylist HTML tags
- *  2. restricted tag properties: (optional) allowlist or denylist attributes,
- *     styles and classes on a set of HTML tags.
+ *  1. allowed or forbidden tags: (optional) allow or deny HTML tags.
+ *  2. restricted tag properties: (optional) allow or deny attributes, styles
+ *     and classes on a set of HTML tags.
  *
  * Typically, each text filter rule object does either 1 or 2, not both.
  *
