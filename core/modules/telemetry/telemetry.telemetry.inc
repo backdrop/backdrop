@@ -43,7 +43,7 @@ function telemetry_telemetry_data($key) {
       // Grab all strings within the version that are a sequence of numbers and
       // dots.
       preg_match_all('/[\d\.]+/', $version, $versions);
-      // Only one version number detencted. Report that.
+      // Only one version number detected. Report that.
       if (count($versions[0]) == 1) {
         $version = $versions[0][0];
       }
@@ -51,7 +51,7 @@ function telemetry_telemetry_data($key) {
       else {
         // Some variations of the MariaDB version string contain the version
         // number more than once. For example:
-        // 5.5.5-10.5.11-MariaDB-1:10.5.11+maria~focal-log
+        // 5.5.5-10.5.11-MariaDB-1:10.5.11+maria~focal-log.
         $versions = array_unique($versions[0]);
         // Sort versions in reverse (descending) order.
         rsort($versions, SORT_NATURAL);
