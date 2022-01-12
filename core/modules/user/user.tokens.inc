@@ -84,7 +84,8 @@ function user_token_info() {
     'type' => 'url',
   );
 
-  // This token is replaced only when the system sends a Password Recovery email to a user.
+  // This token is replaced only when the system sends a Password Recovery email
+  // to a user.
   // @see user_mail_tokens()
   $user['one-time-login-url'] = array(
     'name' => t('One-time login URL'),
