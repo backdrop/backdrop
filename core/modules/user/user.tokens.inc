@@ -74,7 +74,8 @@ function user_token_info() {
     'type' => 'url',
   );
 
-  // This token is replaced only when the system sends an Account Cancellation email to a user.
+  // This token is replaced only when the system sends an Account Cancellation
+  // email to a user.
   // @see user_mail_tokens()
   $user['cancel-url'] = array(
     'name' => t('Account cancellation URL'),
