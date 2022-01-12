@@ -407,10 +407,12 @@ function standard_install() {
   // Set this as the administrator role.
   config_set('system.core', 'user_admin_role', $admin_role->name);
 
-  // Assign user 1 the "administrator" role.
-  db_insert('users_roles')
-    ->fields(array('uid' => 1, 'role' => $admin_role->name))
-    ->execute();
+  // Assign the "Administrator" role to user 1, and make sure that generation of
+  // automatic path alias is enabled.
+  $admin_user = user_load(1);
+  $admin_user->roles[] = $admin_role->name;
+  $admin_user->path['auto'] = TRUE;
+  user_save($admin_user);
 
   // Create a Home link in the main menu.
   $item = array(

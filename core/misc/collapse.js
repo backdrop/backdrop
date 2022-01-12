@@ -15,19 +15,13 @@ Backdrop.toggleFieldset = function (fieldset) {
       duration: 'fast',
       easing: 'linear',
       complete: function () {
-        if (insideDialog === false) {
-          Backdrop.collapseScrollIntoView(fieldset);
-        }
         $fieldset.trigger({ type: 'collapsed', value: false });
         $(window).triggerHandler('resize');
         Backdrop.optimizedResize.trigger();
-        fieldset.animating = false;
-      },
-      step: function () {
-        // Scroll the fieldset into view unless inside a dialog.
         if (insideDialog === false) {
           Backdrop.collapseScrollIntoView(fieldset);
         }
+        fieldset.animating = false;
       }
     });
   }
@@ -51,13 +45,12 @@ Backdrop.collapseScrollIntoView = function (node) {
   var h = document.documentElement.clientHeight || document.body.clientHeight || 0;
   var offset = document.documentElement.scrollTop || document.body.scrollTop || 0;
   var posY = $(node).offset().top;
-  var fudge = 55;
-  if (posY + node.offsetHeight + fudge > h + offset) {
+  if (posY + node.offsetHeight > h + offset) {
     if (node.offsetHeight > h) {
-      window.scrollTo(0, posY);
+      node.scrollIntoView({behavior: "smooth"});
     }
     else {
-      window.scrollTo(0, posY + node.offsetHeight - h + fudge);
+      node.scrollIntoView({behavior: "smooth", block: "end"});
     }
   }
 };
