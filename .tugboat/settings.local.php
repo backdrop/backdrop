@@ -10,4 +10,7 @@ $config_directories['staging'] = 'files/config/staging';
 // Trusted hosts.
 $settings['trusted_host_patterns'] = array('^.+\.tugboat\.qa$');
 
+// Disable sending Telemetry data on cron runs.
+$settings['telemetry_enabled'] = FALSE;
+
 // Miscellaneous.
