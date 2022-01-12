@@ -2497,7 +2497,7 @@ function menu_get_active_menu_names() {
  * menu_execute_active_handler() to generate your page output.
  *
  * @param $path
- *   A Backdrop path - not a path alias.
+ *   A Backdrop path - not a URL alias.
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
