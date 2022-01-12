@@ -322,7 +322,7 @@ function backdrop_match_path($path, $patterns) {
  * - http://example.com/node/306 returns "node/306".
  * - http://example.com/backdropfolder/node/306 returns "node/306" while
  *   base_path() returns "/backdropfolder/".
- * - http://example.com/path/alias (which is a URL alias for node/306) returns
+ * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "node/306" as opposed to the URL alias.
  *
  * This function is not available in hook_boot() so use $_GET['q'] instead.
