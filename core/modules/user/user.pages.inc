@@ -48,8 +48,9 @@ function user_pass() {
     $form['name']['#type'] = 'value';
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
-      '#type' => 'help',
+      '#prefix' => '<p>',
       '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the e-mail.', array('%email' => $user->mail)),
+      '#suffix' => '</p>',
     );
   }
   $form['actions'] = array('#type' => 'actions');

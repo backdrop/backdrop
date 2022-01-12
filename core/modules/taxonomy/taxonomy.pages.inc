@@ -61,8 +61,9 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   }
   else {
     $build['no_content'] = array(
-      '#type' => 'help',
+      '#prefix' => '<p>',
       '#markup' => t('There is currently no content classified with this term.'),
+      '#suffix' => '</p>',
     );
   }
 
