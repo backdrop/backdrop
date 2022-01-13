@@ -26,7 +26,9 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
   function option_definition() {
     $options = parent::option_definition();
 
-    unset($options['quantity']);
+    // Intentionally setting $options['quantity'] to NULL here instead of using
+    // unset(), otherwise it throws "undefined index" notices.
+    $options['quantity'] = NULL;
     unset($options['tags']['first']);
     unset($options['tags']['last']);
     $options['tags']['previous']['default'] = '‹‹';
@@ -42,6 +44,7 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
+
     unset($form['quantity']);
     unset($form['tags']['first']);
     unset($form['tags']['last']);
