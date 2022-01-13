@@ -3256,6 +3256,17 @@ function system_update_1079() {
 }
 
 /**
+ * Set homepage to 'user' if blank to match previous behavior.
+ */
+function system_update_1079() {
+  $config = config('system.core');
+  $site_frontpage = $config->get('site_frontpage');
+  if (empty($site_frontpage)) {
+    $config->set('site_frontpage', 'user');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
