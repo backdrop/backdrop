@@ -3258,7 +3258,7 @@ function system_update_1079() {
 /**
  * Set homepage to 'user' if blank to match previous behavior.
  */
-function system_update_1079() {
+function system_update_1080() {
   $config = config('system.core');
   $site_frontpage = $config->get('site_frontpage');
   if (empty($site_frontpage)) {
