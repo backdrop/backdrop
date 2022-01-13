@@ -3248,7 +3248,7 @@ function system_update_1078() {
   }
 }
 
-/*
+/**
  * Clear the cache to reset allowlist settings.
  */
 function system_update_1079() {
