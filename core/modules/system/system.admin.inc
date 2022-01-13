@@ -1302,15 +1302,16 @@ function system_site_information_settings($form, &$form_state) {
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default home page'),
-    '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
+    '#title' => t('Path to use for the home page'),
+    '#required' => TRUE,
+    '#default_value' => backdrop_get_path_alias($site_config->get('site_frontpage')),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
     '#autocomplete_path' => 'path-autocomplete',
   );
   $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select', '#title' => t('Number of posts on home page'),
+    '#type' => 'select',
+    '#title' => t('Number of posts on home page'),
     '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
@@ -1425,19 +1426,14 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for empty home page path.
-  if (empty($form_state['values']['site_frontpage'])) {
-    // Set to default "user".
-    form_set_value($form['front_page']['site_frontpage'], 'user', $form_state);
-  }
-  else {
-    // Get the normal path of the home page.
-    form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
-  }
+  // Get the normal path of the home page.
+  form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
+  
   // Validate home page path.
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
+
   // Get the normal paths of both error pages.
   if (!empty($form_state['values']['site_403'])) {
     form_set_value($form['error_page']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
@@ -1558,7 +1554,8 @@ function system_cron_settings($form, &$form_state) {
   global $base_url;
   $form['#config'] = 'system.core';
   $form['description'] = array(
-    '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.'),
   );
   $form['run'] = array(
     '#type' => 'submit',
@@ -1572,7 +1569,8 @@ function system_cron_settings($form, &$form_state) {
   );
 
   $form['cron_url'] = array(
-    '#markup' => '<p>' . t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))) . '</p>',
+    '#type' => 'help',
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
   );
 
   $form['cron'] = array(
@@ -1889,7 +1887,7 @@ function system_image_toolkit_settings() {
   if (count($toolkits_available) == 0) {
     config_set('system.core', 'image_toolkit', '');
     $form['image_toolkit_help'] = array(
-      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should consult your system administrator to have them enabled, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
+      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should enable them, or try using a third party toolkit.", array('gd-link' => url('http://php.net/gd'))),
     );
     return $form;
   }
@@ -2518,7 +2516,7 @@ function system_utf8mb4_convert_form($form, &$form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => '<p>' . $requirements['description'] . '</p>',
+    '#markup' => $requirements['description'],
   );
 
   // Not active and/or supported. Existing messages should be sufficient.

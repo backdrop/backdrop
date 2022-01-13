@@ -1425,13 +1425,9 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  *
  * The final setting is obtained from the last value found in the following
  * sources:
- * - the default global settings specified in this function
  * - the default theme-specific settings defined in any base theme's .info file
  * - the default theme-specific settings defined in the theme's .info file
- * - the saved values from the global theme settings form
  * - the saved values from the theme's settings form
- * To only retrieve the default global theme setting, an empty string should be
- * given for $theme.
  *
  * @param $setting_name
  *   The name of the setting to be retrieved.
@@ -2376,6 +2372,10 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - empty: A message to display when there are no items. Allowed value is a
+ *     string or render array.
+ *
+ * @since 1.21.0: added the "empty" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2434,6 +2434,9 @@ function theme_item_list($variables) {
       $output .= '<li' . backdrop_attributes($attributes) . '>' . $value . '</li>';
     }
     $output .= "</$type>";
+  }
+  elseif (!empty($variables['empty'])) {
+    $output .= render($variables['empty']);
   }
 
   // Only output the list container and title, if there are any list items.
