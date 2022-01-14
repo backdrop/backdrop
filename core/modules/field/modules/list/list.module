@@ -55,31 +55,31 @@ function list_field_settings_form($field, $instance, $has_data) {
     case 'list_integer':
     case 'list_float':
     case 'list_text':
+      // Get default value.
+      $options = $field['settings']['allowed_values'];
+      // Toggled by default if options already set.
+      $key_type_toggled = !empty($options);
+
       $form['allowed_values'] = array(
-        '#type' => 'textarea',
+        '#type' => 'options',
         '#title' => t('Allowed values list'),
-        '#default_value' => list_allowed_values_string($settings['allowed_values']),
-        '#rows' => 10,
+        '#description' => '',
+        '#default_value' => '',
+        '#default_value_allowed' => FALSE,
+        '#options' => $options,
         '#element_validate' => array('list_allowed_values_setting_validate'),
         '#field_has_data' => $has_data,
         '#field' => $field,
         '#field_type' => $field['type'],
+        '#key_type' => 'mixed', // Optimal for now.
+        '#key_type_toggle' => t('Custom keys'),
+        '#key_type_toggled' => $key_type_toggled,
         '#access' => empty($settings['allowed_values_function']),
+        '#multiple' => !($field['cardinality'] == 1),
       );
 
-      $description = '<p>' . t('The possible values this field can contain. Enter one value per line, in the format key|label.');
-      if ($field['type'] == 'list_integer' || $field['type'] == 'list_float') {
-        $description .= '<br/>' . t('The key is the stored value, and must be numeric. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single number, it will be used as key and label.');
-        $description .= '<br/>' . t('Lists of labels are also accepted (one label per line), only if the field does not hold any values yet. Numeric keys will be automatically generated from the positions in the list.');
-      }
-      else {
-        $description .= '<br/>' . t('The key is the stored value. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single string, it will be used as key and label.');
-      }
-      $description .= '</p>';
-      $form['allowed_values']['#description'] = $description;
-
+      // Set proper allowed values in $form_state.
+      $form['#validate'][] = 'options_field_settings_validate';
       break;
 
     case 'list_boolean':
@@ -129,7 +129,6 @@ function list_field_settings_form($field, $instance, $has_data) {
   elseif ($instance['widget']['type'] == 'options_buttons') {
     $form['allowed_values']['#description'] .= '<p>' . t("The 'checkboxes/radio buttons' widget will display checkboxes if the <em>Number of values</em> option is greater than 1 for this field, otherwise radios will be displayed.") . '</p>';
   }
-  $form['allowed_values']['#description'] .= '<p>' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</p>';
 
   $form['allowed_values_function'] = array(
     '#type' => 'value',
@@ -146,6 +145,29 @@ function list_field_settings_form($field, $instance, $has_data) {
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+
+function list_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
+  $field = $form['#field'];
+
+  if (in_array($field['type'], array('list_integer', 'list_float', 'list_text'))) {
+
+    // Use options_element default widget instead of field widget.
+    $form['instance']['default_value_widget']['#access'] = FALSE;
+    // Language is hardcoded to 'und' in field_ui_default_value_widget().
+    $default_field_value = $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE]['#default_value'];
+
+    // Overwrite 'allowed_values' element.
+    $form['field']['settings']['allowed_values']['#default_value_allowed'] = TRUE;
+    $form['field']['settings']['allowed_values']['#default_value'] = $default_field_value;
+
+    // Add proper default value inside validate callback.
+    $form['#validate'][] = 'options_field_instance_settings_validate';
+  }
+}
+
+/**
  * Element validate callback; check that the entered values are valid.
  */
 function list_allowed_values_setting_validate($element, &$form_state) {
@@ -153,8 +175,7 @@ function list_allowed_values_setting_validate($element, &$form_state) {
   $has_data = $element['#field_has_data'];
   $field_type = $field['type'];
   $generate_keys = ($field_type == 'list_integer' || $field_type == 'list_float') && !$has_data;
-
-  $values = list_extract_allowed_values($element['#value'], $field['type'], $generate_keys);
+  $values = list_extract_allowed_values($element['#value']['options_text'], $field['type'], $generate_keys);
 
   if (!is_array($values)) {
     form_error($element, t('Allowed values list: invalid input.'));
@@ -343,8 +364,29 @@ function list_extract_allowed_values($string, $field_type, $generate_keys) {
  */
 function list_allowed_values_string($values) {
   $lines = array();
+  $previous_key = FALSE;
+
   foreach ($values as $key => $value) {
-    $lines[] = "$key|$value";
+    // Convert groups.
+    if (is_array($value)) {
+      $lines[] = "<$key>";
+      foreach ($value as $subkey => $subvalue) {
+        $lines[] = "$subkey|$subvalue";
+      }
+      $previous_key = $key;
+    }
+    // Typical key|value pairs.
+    else {
+      // Exit out of any groups.
+      if (isset($values[$previous_key]) && is_array($values[$previous_key])) {
+        $lines[] = "<>";
+      }
+      // Skip empty rows.
+      if ($values[$key] !== '') {
+        $lines[] = "$key|$value";
+      }
+      $previous_key = $key;
+    }
   }
   return implode("\n", $lines);
 }
@@ -448,6 +490,16 @@ function list_field_formatter_info() {
       'label' => t('Key'),
       'field types' => array('list_integer', 'list_float', 'list_text', 'list_boolean'),
     ),
+    'boolean_yes_no' => array(
+      'label' => t('Yes/No'),
+      'field types' => array('list_boolean'),
+      'settings' => array(
+        'format' => 'yes-no',
+        'custom_on' => '',
+        'custom_off' => '',
+        'reverse' => 0,
+      ),
+    )
   );
 }
 
@@ -456,6 +508,7 @@ function list_field_formatter_info() {
  */
 function list_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   switch ($display['type']) {
     case 'list_default':
@@ -477,7 +530,140 @@ function list_field_formatter_view($entity_type, $entity, $field, $instance, $la
         $element[$delta] = array('#markup' => field_filter_xss($item['value']));
       }
       break;
+    case 'boolean_yes_no':
+      foreach ($items as $delta => $item) {
+        $output = list_boolean_display_value_with_format($item['value'], $settings['format'], $settings);
+        $element[$delta] = array('#markup' => field_filter_xss($output));
+      }
+      break;
   }
 
   return $element;
+}
+
+/**
+ * List of boolean display formats.
+ */
+function list_boolean_display_formats(array $options = array()) {
+  $formats = array(
+    'yes-no' => array(t('Yes'), t('No')),
+    'true-false' => array(t('True'), t('False')),
+    'on-off' => array(t('On'), t('Off')),
+    'enabled-disabled' => array(t('Enabled'), t('Disabled')),
+    'boolean' => array(1, 0),
+    'unicode-yes-no' => array('✔', '✖'),
+    'custom' => array(t('Custom')),
+  );
+  if (isset($options['custom_on']) && isset($options['custom_off'])) {
+    $formats['custom'] = array($options['custom_on'], $options['custom_off']);
+  }
+  return $formats;
+}
+
+/**
+ * The display format options for boolean fields.
+ */
+function list_boolean_display_format_options(array $options = array()) {
+  $format_options = array();
+  foreach (list_boolean_display_formats($options) as $key => $format) {
+    $format_options[$key] = implode('/', $format);
+  }
+  return $format_options;
+}
+
+/**
+ * Prepare the boolean display.
+ */
+function list_boolean_display_value_with_format($value, $format, array $options = array()) {
+  $formats = list_boolean_display_formats($options);
+  if (!isset($formats[$format])) {
+    // If format is invalid, default to the first available format.
+    reset($formats);
+    $format = key($formats);
+  }
+  if (!empty($options['reverse'])) {
+    $value = !(bool) $value;
+  }
+  // The first format value is the 'On' value, the second is the 'Off' format.
+  return !empty($value) ? $formats[$format][0] : $formats[$format][1];
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function list_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  switch ($display['type']) {
+    case 'boolean_yes_no':
+      $element['format'] = array(
+        '#type' => 'select',
+        '#title' => t('Output format'),
+        '#options' => list_boolean_display_format_options(),
+        '#default_value' => $settings['format'],
+      );
+
+      $element['custom_on'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom output for On'),
+        '#default_value' => $settings['custom_on'],
+        '#states' => array(
+          'visible' => array(
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
+          ),
+        ),
+      );
+
+      $element['custom_off'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Custom output for Off'),
+        '#default_value' => $settings['custom_off'],
+        '#states' => array(
+          'visible' => array(
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
+          ),
+        ),
+      );
+
+      $element['reverse'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Reverse'),
+        '#description' => t('If checked, true will be displayed as false.'),
+        '#default_value' => $settings['reverse'],
+      );
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function list_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = array();
+
+  switch ($display['type']) {
+    case 'boolean_yes_no':
+      $formats = list_boolean_display_format_options($settings);
+      $summary[] = t('Output format: %format', array('%format' => $formats[$settings['format']]));
+      $summary[] = t('Reversed: @reversed', array('@reversed' => list_boolean_display_value_with_format($settings['reverse'], 'yes-no', array('reverse' => FALSE))));
+      break;
+  }
+
+  return implode('<br/>', $summary);
 }

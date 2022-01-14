@@ -37,7 +37,7 @@ class PathLayoutAccess extends LayoutAccess {
     $path = backdrop_get_path_alias($base_path);
     $page_match = backdrop_match_path($path, $this->settings['paths']);
 
-    // If there's a path alias, we may still be at the un-aliased path
+    // If there's a URL alias, we may still be at the un-aliased path
     // so check that as well.
     if ($path !== $base_path) {
       $page_match = $page_match || backdrop_match_path($base_path, $this->settings['paths']);
@@ -71,7 +71,7 @@ class PathLayoutAccess extends LayoutAccess {
       '#type' => 'textarea',
       '#title' => t('Paths'),
       '#default_value' => $this->settings['paths'],
-      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the front page.', array('@front' => '<front>')),
+      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the home page.', array('@front' => '<front>')),
       '#required' => TRUE,
     );
   }

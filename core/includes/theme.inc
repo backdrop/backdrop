@@ -161,7 +161,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
 
   // Prepare stylesheets from this theme as well as all ancestor themes.
   // We work it this way so that we can have child themes override parent
-  // theme stylesheets easily.
+  // theme stylesheets.
   $final_stylesheets = array();
 
   // Grab stylesheets from base theme
@@ -581,15 +581,15 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         $result[$hook] += array_intersect_key($cache[$hook], $hook_defaults);
       }
 
-      // The following apply only to theming hooks implemented as templates.
+      // The following apply only to theme hooks implemented as templates.
       if (isset($info['template'])) {
-        // Prepend the current theming path when none is set.
+        // Prepend the current theme path when none is set.
         if (!isset($info['path'])) {
           $result[$hook]['template'] = $path . '/' . $info['template'];
         }
       }
 
-      // Allow variable preprocessors for all theming hooks, whether the hook is
+      // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
       // Check for existing variable preprocessors. Ensure arrayness.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
@@ -619,7 +619,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         }
 
         foreach ($prefixes as $prefix) {
-          // Only use non-hook-specific variable preprocessors for theming hooks
+          // Only use non-hook-specific variable preprocessors for theme hooks
           // implemented as templates. See theme().
           if (isset($info['template']) && function_exists($prefix . '_preprocess')) {
             $info['preprocess functions'][] = $prefix . '_preprocess';
@@ -632,9 +632,9 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check for the override flag and prevent the cached variable
       // preprocessors from being used. This allows themes or theme engines to
       // remove variable preprocessors set earlier in the registry build.
-      if (!empty($info['override ' . 'preprocess functions'])) {
+      if (!empty($info['override preprocess functions'])) {
         // Flag not needed inside the registry.
-        unset($result[$hook]['override ' . 'preprocess functions']);
+        unset($result[$hook]['override preprocess functions']);
       }
       elseif (isset($cache[$hook]['preprocess functions']) && is_array($cache[$hook]['preprocess functions'])) {
         $info['preprocess functions'] = array_merge($cache[$hook]['preprocess functions'], $info['preprocess functions']);
@@ -655,7 +655,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         if (!isset($info['preprocess functions'])) {
           $cache[$hook]['preprocess functions'] = array();
         }
-        // Only use non-hook-specific variable preprocessors for theming hooks
+        // Only use non-hook-specific variable preprocessors for theme hooks
         // implemented as templates. See theme().
         if (isset($info['template']) && function_exists($name . '_preprocess')) {
           $cache[$hook]['preprocess functions'][] = $name . '_preprocess';
@@ -879,16 +879,15 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
 /**
  * Generates themed output.
  *
- * All requests for themed output must go through this function (however,
- * calling the theme() function directly is strongly discouraged - see next
- * paragraph). It examines the request and routes it to the appropriate
- * @link themeable theme function or template @endlink, by checking the theme
- * registry.
+ * All requests for themed output must go through this function. It examines the
+ * request and routes it to the appropriate @link themeable theme function or
+ * template @endlink, by checking the theme registry.
  *
- * Avoid calling this function directly. It is preferable to replace direct
- * calls to the theme() function with calls to backdrop_render() by passing a
- * render array with a #theme key to backdrop_render(), which in turn calls
- * theme().
+ * You can call this function directly, or you can make a call to
+ * backdrop_render() by passing a render array with a #theme key, which in turn
+ * calls theme(). Either is acceptable. In some situations a render array will
+ * be preferable when the ability for other modules to alter the render array is
+ * provided.
  *
  * @section sec_theme_hooks Theme Hooks
  * Most commonly, the first argument to this function is the name of the theme
@@ -1214,12 +1213,14 @@ function theme($hook, $variables = array()) {
 /**
  * Returns the path to the current themed element.
  *
- * It can point to the active theme or the module handling a themed
- * implementation. For example, when invoked within the scope of a theming call
- * it will depend on where the theming function is handled. If implemented from
- * a module, it will point to the module. If implemented from the active theme,
- * it will point to the active theme. When called outside the scope of a
- * theming call, it will always point to the active theme.
+ * It can point to the active theme or the module that handles the theme
+ * implementation. For example:
+ * - When invoked within the scope of a theme function it will depend on where
+ *   where that theme function is being handled.
+ * - If implemented from a module, it will point to the module.
+ * - If implemented from the active theme, it will point to the active theme.
+ * - When called outside the scope of a theme function call, it will always
+ *   point to the active theme.
  */
 function path_to_theme() {
   global $theme_path;
@@ -1290,7 +1291,7 @@ function backdrop_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @param $cache
  *   The existing cache of theme hooks to test against.
@@ -1424,13 +1425,9 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  *
  * The final setting is obtained from the last value found in the following
  * sources:
- * - the default global settings specified in this function
  * - the default theme-specific settings defined in any base theme's .info file
  * - the default theme-specific settings defined in the theme's .info file
- * - the saved values from the global theme settings form
  * - the saved values from the theme's settings form
- * To only retrieve the default global theme setting, an empty string should be
- * given for $theme.
  *
  * @param $setting_name
  *   The name of the setting to be retrieved.
@@ -1474,8 +1471,8 @@ function theme_get_setting($setting_name, $theme = NULL) {
  * Detect if a theme has any theme settings.
  *
  * This utility function checks a theme's .info file for any settings. If the
- * theme has a base theme, it loops through the parent themes .info files as
- * well.
+ * theme has a base theme, it loops through the .info files of the parent themes
+ * as well.
  *
  * @param string $theme
  *   The theme name to be checked for settings.
@@ -1491,6 +1488,33 @@ function theme_has_settings($theme) {
   }
   if (isset($theme_info->info['base theme'])) {
     return theme_has_settings($theme_info->info['base theme']);
+  }
+  return FALSE;
+}
+
+/**
+ * Detect if a theme has support for the Color module.
+ *
+ * This utility function checks a theme's .info file for whether support for the
+ * Color module has been enabled. If the theme has a base theme, it loops
+ * through the .info files of the parent themes as well.
+ *
+ * @param string $theme
+ *   The theme name to be checked for Color module support.
+ *
+ * @return bool
+ *   TRUE if the theme supports Color module, FALSE otherwise.
+ *
+ * @since 1.16.0
+ */
+function theme_has_color_support($theme) {
+  $themes = list_themes();
+  $theme_info = $themes[$theme];
+  if (!empty($theme_info->info['settings']['color']) && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
+    return TRUE;
+  }
+  if (isset($theme_info->info['base theme'])) {
+    return theme_has_color_support($theme_info->info['base theme']);
   }
   return FALSE;
 }
@@ -1748,6 +1772,11 @@ function theme_status_messages($variables) {
     else {
       $output .= reset($messages) . "\n";
     }
+    if (config_get('system.core', 'messages_dismissible')) {
+      // Add the 'Dismiss' library and place a 'Dismiss' link on messages.
+      backdrop_add_library('system', 'backdrop.dismiss');
+      $output .= '<a href="#" class="dismiss" title="' . t('Dismiss') . '"><span class="element-invisible">' . t('Dismiss') . '</span></a>' . "\n";
+    }
     $output .= "</div>\n";
   }
 
@@ -1831,8 +1860,8 @@ function theme_link($variables) {
 function theme_links($variables) {
   global $language_url;
 
-  $links = $variables['links'];
-  $attributes = $variables['attributes'];
+  $links = (array) $variables['links'];
+  $attributes = (array) $variables['attributes'];
   $heading = $variables['heading'];
   $output = '';
 
@@ -1993,7 +2022,7 @@ function theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav role="navigation" class="breadcrumb">';
+    $output .= '<nav class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
@@ -2006,7 +2035,7 @@ function theme_breadcrumb($variables) {
 /**
  * Returns HTML for a table.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - header: An array containing the table headers. Each element of the array
  *     can be either a localized string or an associative array with the
@@ -2027,6 +2056,11 @@ function theme_breadcrumb($variables) {
  *       only applies to one column at a time.
  *     - Any HTML attributes, such as "colspan", to apply to the column header
  *       cell.
+ *   - footer: An array of table rows which will be printed within a <tfoot>
+ *     tag, in the same format as the rows element (see above).
+ *     The structure is the same the one defined for the "rows" key except
+ *     that the no_striping boolean has no effect, there is no rows striping
+ *     for the table footer.
  *   - rows: An array of table rows. Every row is an array of cells, or an
  *     associative array with the following keys:
  *     - "data": an array of cells
@@ -2082,13 +2116,18 @@ function theme_breadcrumb($variables) {
  *     );
  *     @endcode
  *     These optional tags are used to group and set properties on columns
- *     within a table. For example, one may easily group three columns and
- *     apply same background style to all.
+ *     within a table. For example, one may group three columns and apply the
+ *     same background style to all.
  *   - sticky: Use a "sticky" table header.
  *   - empty: The message to display in an extra row if table does not have any
  *     rows.
+ *
+ * @return string
+ *   The HTML output.
+ *
+ * @since 1.18.4 "footer" key added to $variables parameter.
  */
-function theme_table($variables) {
+function theme_table(array $variables) {
   $header = (array) $variables['header'];
   $rows = (array) $variables['rows'];
   $attributes = $variables['attributes'];
@@ -2105,7 +2144,7 @@ function theme_table($variables) {
   }
 
   // Format the table columns:
-  if (count($colgroups)) {
+  if (!empty($colgroups)) {
     foreach ($colgroups as $colgroup) {
       $colgroup_attributes = array();
 
@@ -2139,26 +2178,28 @@ function theme_table($variables) {
   }
 
   // Add the 'empty' row message if available.
-  if (!count($rows) && $empty) {
+  if (empty($rows) && $empty) {
     $header_count = 0;
-    foreach ($header as $header_cell) {
-      if (is_array($header_cell)) {
-        $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
-      }
-      else {
-        $header_count++;
+    if (!empty($header)) {
+      foreach ($header as $header_cell) {
+        if (is_array($header_cell)) {
+          $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
+        }
+        else {
+          $header_count++;
+        }
       }
     }
     $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
   }
 
   $responsive_columns = array();
-  // Format the table header:
-  if (count($header)) {
+  // Format the table header.
+  if (!empty($header)) {
     $ts = tablesort_init($header);
     // HTML requires that the thead tag has tr tags in it followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
-    $output .= (count($rows) ? ' <thead><tr>' : ' <tr>');
+    $output .= (!empty($rows) ? ' <thead><tr>' : ' <tr>');
     $i = 0;
     foreach ($header as $cell) {
       $i++;
@@ -2177,23 +2218,39 @@ function theme_table($variables) {
       $cell = tablesort_header($cell, $header, $ts);
       $output .= _theme_table_cell($cell, TRUE);
     }
-    // Close the tags based on whether or not there are rows.
-    $output .= (count($rows) ? " </tr></thead>\n" : "</tr>\n");
+    // Using ternary operator to close the tags, based on whether or not there
+    // are rows.
+    $output .= (!empty($rows) ? " </tr></thead>\n" : "</tr>\n");
   }
   else {
     $ts = array();
   }
 
-  // Format the table rows:
-  if (count($rows)) {
-    $output .= "<tbody>\n";
+  // Format the table and footer rows.
+  $sections = array();
+
+  if (!empty($rows)) {
+    $sections['tbody'] = $rows;
+  }
+
+  if (!empty($variables['footer'])) {
+    $sections['tfoot'] = $variables['footer'];
+  }
+
+  // tbody and tfoot have the same structure, and are built using the same
+  // procedure.
+  foreach ($sections as $tag => $content) {
+    $output .= "<$tag>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
-    foreach ($rows as $number => $row) {
+    $default_no_striping = ($tag === 'tfoot');
+
+    foreach ($content as $number => $row) {
       // Check if we're dealing with a simple or complex row.
+
       if (isset($row['data'])) {
         $cells = $row['data'];
-        $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
+        $no_striping = isset($row['no_striping']) ? $row['no_striping'] : $default_no_striping;
 
         // Set the attributes array and exclude 'data' and 'no_striping'.
         $tr_attributes = $row;
@@ -2203,9 +2260,10 @@ function theme_table($variables) {
       else {
         $cells = $row;
         $tr_attributes = array();
-        $no_striping = FALSE;
+        $no_striping = $default_no_striping;
       }
-      if (count($cells)) {
+
+      if (!empty($cells)) {
         // Add odd/even class.
         if (!$no_striping) {
           $class = $flip[$class];
@@ -2234,11 +2292,12 @@ function theme_table($variables) {
         $output .= " </tr>\n";
       }
     }
-    $output .= "</tbody>\n";
+
+    $output .= "</$tag>\n";
   }
 
   // Add sticky headers if enabled.
-  if (count($header) && $sticky) {
+  if (!empty($header) && $sticky) {
     backdrop_add_js('core/misc/tableheader.js');
     // Add 'sticky-enabled' class to the table to identify it for JS.
     // This is needed to target tables constructed by this function.
@@ -2313,6 +2372,10 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - empty: A message to display when there are no items. Allowed value is a
+ *     string or render array.
+ *
+ * @since 1.21.0: added the "empty" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2372,6 +2435,9 @@ function theme_item_list($variables) {
     }
     $output .= "</$type>";
   }
+  elseif (!empty($variables['empty'])) {
+    $output .= render($variables['empty']);
+  }
 
   // Only output the list container and title, if there are any list items.
   // Check to see whether the block title exists before adding a header.
@@ -2427,10 +2493,14 @@ function theme_feed_icon($variables) {
 /**
  * Returns HTML for a generic HTML tag with attributes.
  *
+ * This function should only be used for adding HTML tags within the HEAD tag
+ * on the page.
+ *
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array describing the tag:
- *     - #tag: The tag name to output. Typical tags added to the HTML HEAD:
+ *     - #tag: The HTML tag to output. Typical tags added within the HEAD tag
+ *       of the page:
  *       - meta: To provide meta information, such as a page refresh.
  *       - link: To refer to stylesheets and other contextual information.
  *       - script: To load JavaScript.
@@ -2442,6 +2512,8 @@ function theme_feed_icon($variables) {
  *       wrapper prefix.
  *     - #value_suffix: (optional) A string to append to #value, e.g. a CDATA
  *       wrapper suffix.
+ *
+ * @since 1.0.0
  */
 function theme_head_tag($variables) {
   $element = $variables['element'];
@@ -2659,8 +2731,10 @@ function template_preprocess_header(&$variables) {
  */
 function template_preprocess_page(&$variables) {
   // Compile a list of classes that are going to be applied to the body element.
-  // This allows advanced theming based on context (home page, node of certain type, etc.).
-  // Add a class that tells us whether we're on the front page or not.
+  // This allows for easy CSS overrides based on context (home page, node of
+  // certain type, etc.).
+
+  // Add a class that tells us whether we're on the home page or not.
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';
   }
@@ -2690,12 +2764,12 @@ function template_preprocess_page(&$variables) {
   if (backdrop_get_title()) {
     $head_title = array(
       'title' => strip_tags(backdrop_get_title()),
-      'name' => check_plain($site_config->get('site_name')),
+      'name' => check_plain($site_config->getTranslated('site_name')),
     );
   }
   else {
-    $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($slogan = $site_config->get('site_slogan')) {
+    $head_title = array('name' => check_plain($site_config->getTranslated('site_name')));
+    if ($slogan = $site_config->getTranslated('site_slogan')) {
       $head_title['slogan'] = check_plain($slogan);
     }
   }
@@ -2790,8 +2864,8 @@ function template_preprocess_maintenance_page(&$variables) {
   // Load site config if available, fallback to the default.
   try {
     $site_config = config('system.core');
-    $site_name = filter_xss_admin($site_config->get('site_name'));
-    $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
+    $site_name = filter_xss_admin($site_config->getTranslated('site_name'));
+    $site_slogan = filter_xss_admin($site_config->getTranslated('site_slogan'));
   }
   catch (ConfigException $e) {
     $site_name = 'Backdrop CMS';

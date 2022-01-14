@@ -57,7 +57,7 @@ Backdrop.behaviors.color = {
         var colors = schemes[schemeName];
         for (var fieldName in colors) {
           if (colors.hasOwnProperty(fieldName)) {
-            var input = $('#edit-palette-' + fieldName);
+            var input = $("input[data-color-name='" + fieldName + "']");
             if (input.val() && input.val() != colors[fieldName]) {
               input.val(colors[fieldName]);
             }
@@ -67,10 +67,9 @@ Backdrop.behaviors.color = {
       }
     });
 
-    $('#palette input').change(function () {
+    $('input[data-color-name]').change(function () {
       var schemeName =  document.getElementById('edit-scheme').value;
-      var key = this.id.substring(13);
-
+      var key = this.dataset.colorName;
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
         resetScheme();
       }
@@ -79,7 +78,11 @@ Backdrop.behaviors.color = {
 
     // Setup the preview.
     $('#system-theme-settings').addClass('has-preview').after(settings.colorPreviewMarkup);
-    updatePreview();
+    // Wait for the iframe to be loaded before attempting to apply the preview
+    // settings for the first time.
+    $('#preview').load(function () {
+      updatePreview();
+    });
 
     /**
      * Saves the current form values and refreshes the preview.
@@ -91,8 +94,8 @@ Backdrop.behaviors.color = {
         palette: {}
       };
       values['scheme'] = $('#edit-scheme').val();
-      $('#color_scheme_form input').each(function () {
-        values['palette'][this.id.substring(13)] = this.value;
+      $('input[data-color-name]').each(function () {
+        values['palette'][this.dataset.colorName] = this.value;
       });
 
       $.ajax({
@@ -100,9 +103,9 @@ Backdrop.behaviors.color = {
         dataType: 'json',
         url : Backdrop.settings.basePath + 'color/save_preview_settings/' + settings.colorThemeName + '/?token=' + settings.colorPreviewToken,
         data: values,
-        success : function(response) {
+        complete : function(response) {
           // Refresh the preview.
-          document.getElementById('preview').contentDocument.location.reload(true);
+          var preview = document.getElementById('preview').contentDocument.location.reload(true);
         }
       });
     }

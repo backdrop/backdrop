@@ -37,27 +37,27 @@ function theme_node_preview_banner_form($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - form: A render element representing the form.
+ *   - element: A render element representing the content rankings portion of the form.
  *
  * @see node_search_admin()
  * @ingroup themeable
  */
-function theme_node_search_admin($variables) {
-  $form = $variables['form'];
+function theme_node_search_factors($variables) {
+  $element = $variables['element'];
 
-  $output = backdrop_render($form['info']);
-
+  $rows = array();
   $header = array(t('Factor'), t('Influence'));
-  foreach (element_children($form['factors']) as $key) {
+  foreach (element_children($element) as $key) {
     $row = array();
-    $row[] = $form['factors'][$key]['#title'];
-    $form['factors'][$key]['#title_display'] = 'invisible';
-    $row[] = backdrop_render($form['factors'][$key]);
+    $row[] = $element[$key]['#title'];
+    $element[$key]['#title_display'] = 'invisible';
+    $row[] = backdrop_render($element[$key]);
     $rows[] = $row;
   }
+  $output = '';
+  $output .= theme('help', array('markup' => $element['#help']));
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
-
-  $output .= backdrop_render_children($form);
+  $output .= backdrop_render_children($element);
   return $output;
 }
 
@@ -161,9 +161,14 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $name = $variables['name'];
   $type = $variables['type'];
 
@@ -205,7 +210,6 @@ function template_preprocess_node(&$variables) {
   $variables['node_url']  = url($uri['path'], $uri['options']);
   $variables['title']     = check_plain($node->title);
   $variables['page']      = ($variables['view_mode'] == 'full' && node_is_page($node)) || (!empty($node->in_preview));
-  $variables['block']     = $variables['view_mode'] == 'block';
 
   // Flatten the node entity's member fields.
   $variables = array_merge((array) $node, $variables);
@@ -226,20 +230,20 @@ function template_preprocess_node(&$variables) {
 
   // Display post information only on certain node types.
   $node_type = node_type_get_type($node->type);
+
+  $variables['display_submitted'] = FALSE;
+  $variables['submitted'] = '';
+  $variables['user_picture'] = '';
+
   if ($node_type->settings['node_submitted']) {
-    if (!$variables['block'] || ($variables['block'] && !empty($variables['elements']['#display_submitted']))) {
+    if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
-      $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
+      $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], array('node' => $node));
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
         $variables['user_picture'] = theme('user_picture', array('account' => $node));
       }
     }
-  }
-  else {
-    $variables['display_submitted'] = FALSE;
-    $variables['submitted'] = '';
-    $variables['user_picture'] = '';
   }
 
   // Add article ARIA role.
@@ -259,8 +263,18 @@ function template_preprocess_node(&$variables) {
   if ($variables['view_mode']) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
+  if (!$node->uid) {
+    $variables['classes'][] = 'node-by-anonymous';
+  }
+  elseif ($node->uid == $variables['user']->uid) {
+      $variables['classes'][] = 'node-by-viewer';
+  }
 
-  // Add an extra theme hook suggetion for node id.
+  // Add an extra theme hook suggestion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
-}
 
+  // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
+  if (strstr($variables['theme_hook_original'], 'node_block')) {
+    $variables['theme_hook_suggestions'][] = 'node__block_' . $node->nid;
+  }
+}

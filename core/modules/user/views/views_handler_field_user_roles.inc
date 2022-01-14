@@ -44,14 +44,14 @@ class views_handler_field_user_roles extends views_handler_field_prerender_list 
   }
 
   function document_self_tokens(&$tokens) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = t('The label of the role.');
-    $tokens['[' . $this->options['id'] . '-name' . ']'] = t('The machine name of the role.');
+    $tokens['[' . $this->options['id'] . '-role]'] = t('The label of the role.');
+    $tokens['[' . $this->options['id'] . '-name]'] = t('The machine name of the role.');
   }
 
   function add_self_tokens(&$tokens, $item) {
     if (!empty($item['role_label'])) {
-      $tokens['[' . $this->options['id'] . '-role' . ']'] = $item['role_label'];
-      $tokens['[' . $this->options['id'] . '-name' . ']'] = $item['role_name'];
+      $tokens['[' . $this->options['id'] . '-role]'] = $item['role_label'];
+      $tokens['[' . $this->options['id'] . '-name]'] = $item['role_name'];
     }
   }
 }

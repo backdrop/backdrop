@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the various handler objects to help build and display views.
@@ -586,9 +585,9 @@ class views_handler extends views_object {
   /**
    * Get the join object that should be used for this handler.
    *
-   * This method isn't used a great deal, but it's very handy for easily
-   * getting the join if it is necessary to make some changes to it, such
-   * as adding an 'extra'.
+   * This method isn't used a great deal, but it's very handy for getting the
+   * join if it is necessary to make some changes to it, such as adding an
+   * 'extra'.
    */
   function get_join() {
     // get the join from this table that links back to the base table.
@@ -711,7 +710,7 @@ class views_many_to_one_helper {
     // Cycle through the joins. This isn't as error-safe as the normal
     // ensure_path logic. Perhaps it should be.
     $r_join = clone $join;
-    while ($r_join->left_table != $base_table) {
+    while (!empty($r_join) && $r_join->left_table != $base_table) {
       $r_join = views_get_table_join($r_join->left_table, $base_table);
     }
     // If we found that there are tables in between, add the relationship.
@@ -786,11 +785,18 @@ class views_many_to_one_helper {
       $field = $this->handler->relationship . '_' . $this->handler->table . '.' . $this->handler->field;
       if ($this->handler->operator == 'or' && empty($this->handler->options['reduce_duplicates'])) {
         if (empty($this->handler->options['add_table']) && empty($this->handler->view->many_to_one_tables[$field])) {
-          // query optimization, INNER joins are slightly faster, so use them
-          // when we know we can.
           $join = $this->get_join();
           if (isset($join)) {
-            $join->type = 'INNER';
+            $join->type = 'LEFT';
+            // INNER joins are slightly faster; use them when we know it's safe.
+            $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
+            $group_type = $this->handler->query->where[$group]['type'];
+            $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
+            // @todo Figure out why taxonomy_index_tid is being special-cased here.
+            // See: https://github.com/backdrop/backdrop-issues/issues/5225
+            if ($group === FALSE || $group_type == 'AND' && $plugin_id && $plugin_id != 'taxonomy_index_tid') {
+              $join->type = 'INNER';
+            }
           }
           $this->handler->table_alias = $this->handler->query->ensure_table($this->handler->table, $this->handler->relationship, $join);
           $this->handler->view->many_to_one_tables[$field] = $this->handler->value;
@@ -817,57 +823,43 @@ class views_many_to_one_helper {
         return $this->handler->table_alias;
       }
 
-      // Case 2: it's an 'and' or an 'or'.
-      // We do one join per selected value.
-      if ($this->handler->operator != 'not') {
-        // Clone the join for each table:
-        $this->handler->table_aliases = array();
-        foreach ($this->handler->value as $value) {
-          $join = $this->get_join();
-          if ($this->handler->operator == 'and') {
-            $join->type = 'INNER';
+      // Case 2: it's anything but an 'or'.
+      // Clone the join for each table:
+      $this->handler->table_aliases = array();
+      $values = $this->handler->operator === 'not' ? array($this->handler->value) : $this->handler->value;
+      foreach ($values as $value) {
+        $join = $this->get_join();
+        if ($this->handler->operator == 'and') {
+          $join->type = 'INNER';
+        }
+        if (empty($join->extra)) {
+          $join->extra = array();
+        }
+        $join->extra[] = array(
+          'field' => $this->handler->real_field,
+          'value' => $value,
+          'numeric' => !empty($this->handler->definition['numeric']),
+        );
+        if (($this->handler->is_a_group() && is_array($value)) || $this->handler->operator === 'not') {
+          $value = serialize($value);
+        }
+        // The table alias needs to be unique to this value across the
+        // multiple times the filter or argument is called by the view.
+        if (!isset($this->handler->view->many_to_one_aliases[$field][$value])) {
+          if (!isset($this->handler->view->many_to_one_count[$this->handler->table])) {
+            $this->handler->view->many_to_one_count[$this->handler->table] = 0;
           }
-          $join->extra = array(
-            array(
-              'field' => $this->handler->real_field,
-              'value' => $value,
-              'numeric' => !empty($this->handler->definition['numeric']),
-            ),
-          );
-
-          // The table alias needs to be unique to this value across the
-          // multiple times the filter or argument is called by the view.
-          if (!isset($this->handler->view->many_to_one_aliases[$field][$value])) {
-            if (!isset($this->handler->view->many_to_one_count[$this->handler->table])) {
-              $this->handler->view->many_to_one_count[$this->handler->table] = 0;
-            }
-            $this->handler->view->many_to_one_aliases[$field][$value] = $this->handler->table . '_value_' . ($this->handler->view->many_to_one_count[$this->handler->table]++);
-          }
-          $alias = $this->handler->table_aliases[$value] = $this->add_table($join, $this->handler->view->many_to_one_aliases[$field][$value]);
-
+          $this->handler->view->many_to_one_aliases[$field][$value] = $this->handler->table . '_value_' . ($this->handler->view->many_to_one_count[$this->handler->table]++);
+          $alias = $this->handler->table_aliases[$value] = $this->add_table($join,
+            $this->handler->view->many_to_one_aliases[$field][$value]);
           // and set table_alias to the first of these.
           if (empty($this->handler->table_alias)) {
             $this->handler->table_alias = $alias;
           }
         }
-      }
-      // Case 3: it's a 'not'.
-      // We just do one join. We'll add a where clause during
-      // the query phase to ensure that $table.$field IS NULL.
-      else {
-        $join = $this->get_join();
-        $join->type = 'LEFT';
-        $join->extra = array();
-        $join->extra_type = 'OR';
-        foreach ($this->handler->value as $value) {
-          $join->extra[] = array(
-            'field' => $this->handler->real_field,
-            'value' => $value,
-            'numeric' => !empty($this->handler->definition['numeric']),
-          );
+        else {
+          $this->handler->table_aliases[$value] = $this->handler->view->many_to_one_aliases[$field][$value];
         }
-
-        $this->handler->table_alias = $this->add_table($join);
       }
     }
     return $this->handler->table_alias;
@@ -899,19 +891,24 @@ class views_many_to_one_helper {
     // add_condition determines whether a single expression is enough(FALSE) or the
     // conditions should be added via an db_or()/db_and() (TRUE).
     $add_condition = TRUE;
-    if ($operator == 'not') {
-      $value = NULL;
-      $operator = 'IS NULL';
-      $add_condition = FALSE;
-    }
-    elseif ($operator == 'or' && empty($options['reduce_duplicates'])) {
+    if ($operator == 'or' && empty($options['reduce_duplicates'])) {
       if (count($value) > 1) {
         $operator = 'IN';
       }
       else {
         $value = is_array($value) ? array_pop($value) : $value;
-        $operator = '=';
+        if (is_array($value) && count($value) > 1) {
+          $operator = 'IN';
+        }
+        else {
+          $operator = '=';
+        }
       }
+      $add_condition = FALSE;
+    }
+    elseif ($operator == 'not') {
+      $value = NULL;
+      $operator = 'IS NULL';
       $add_condition = FALSE;
     }
 
@@ -938,6 +935,9 @@ class views_many_to_one_helper {
       $field = $this->handler->real_field;
       $clause = $operator == 'or' ? db_or() : db_and();
       foreach ($this->handler->table_aliases as $value => $alias) {
+        if ($operator == 'not') {
+          $value = NULL;
+        }
         $clause->condition("$alias.$field", $value);
       }
 
@@ -1064,7 +1064,8 @@ class views_join {
       $left_field = "$left[alias].$this->left_field";
     }
     else {
-      // This can be used if left_field is a formula or something. It should be used only *very* rarely.
+      // This can be used if left_field is a formula or something. It should be
+      // used only *very* rarely.
       $left_field = $this->left_field;
     }
 
@@ -1073,12 +1074,18 @@ class views_join {
 
     // Tack on the extra.
     if (isset($this->extra)) {
-      if (is_array($this->extra)) {
-        $extras = array();
-        foreach ($this->extra as $info) {
+      // If extra has been provided as string instead of an array, convert it
+      // to an array.
+      if (!is_array($this->extra)) {
+        $this->extra = array($this->extra);
+      }
+
+      $extras = array();
+      foreach ($this->extra as $info) {
+        if (is_array($info)) {
           $extra = '';
-          // Figure out the table name. Remember, only use aliases provided
-          // if at all possible.
+          // Figure out the table name. Remember, only use aliases provided if
+          // at all possible.
           $join_table = '';
           if (!array_key_exists('table', $info)) {
             $join_table = $table['alias'] . '.';
@@ -1095,7 +1102,7 @@ class views_join {
           }
 
           // Convert a single-valued array of values to the single-value case,
-          // and transform from IN() notation to = notation
+          // and transform from IN() notation to = notation.
           if (is_array($info['value']) && count($info['value']) == 1) {
             if (empty($info['operator'])) {
               $operator = '=';
@@ -1107,37 +1114,39 @@ class views_join {
           }
 
           if (is_array($info['value'])) {
+            $value_placeholders = array();
+
             // With an array of values, we need multiple placeholders and the
             // 'IN' operator is implicit.
             foreach ($info['value'] as $value) {
-              $placeholder_i = ':views_join_condition_' . $select_query->nextPlaceholder();
+              $placeholder_i = $view_query->placeholder('views_join_condition_');
+              $value_placeholders[] = $placeholder_i;
               $arguments[$placeholder_i] = $value;
             }
 
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
-            $placeholder = '( ' . implode(', ', array_keys($arguments)) . ' )';
+            $placeholder = '( ' . implode(', ', $value_placeholders) . ' )';
           }
           else {
             // With a single value, the '=' operator is implicit.
             $operator = !empty($info['operator']) ? $info['operator'] : '=';
-            $placeholder = ':views_join_condition_' . $select_query->nextPlaceholder();
+            $placeholder = $view_query->placeholder('views_join_condition_');
             $arguments[$placeholder] = $info['value'];
           }
-
           $extras[] = "$join_table$info[field] $operator $placeholder";
         }
-
-        if ($extras) {
-          if (count($extras) == 1) {
-            $condition .= ' AND ' . array_shift($extras);
-          }
-          else {
-            $condition .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
-          }
+        elseif (is_string($info)) {
+          $extras[] = $info;
         }
       }
-      elseif ($this->extra && is_string($this->extra)) {
-        $condition .= " AND ($this->extra)";
+
+      if ($extras) {
+        if (count($extras) == 1) {
+          $condition .= ' AND (' . array_shift($extras) . ')';
+        }
+        else {
+          $condition .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
+        }
       }
     }
 
@@ -1172,7 +1181,7 @@ class views_join_subquery extends views_join {
    * @return
    *
    */
-  function build_join($select_query, $table, $view_query) {
+  public function build_join($select_query, $table, $view_query) {
     if (empty($this->definition['table formula'])) {
       $right_table = "{" . $this->table . "}";
     }
@@ -1185,14 +1194,22 @@ class views_join_subquery extends views_join {
     $arguments = array();
 
     // Tack on the extra.
-    // This is just copied verbatim from the parent class, which itself has a bug: http://drupal.org/node/1118100
+    // This is just copied verbatim from the parent class, which itself has a
+    // bug.
+    // @see http://drupal.org/node/1118100
     if (isset($this->extra)) {
-      if (is_array($this->extra)) {
-        $extras = array();
-        foreach ($this->extra as $info) {
+      // If extra has been provided as string instead of an array, convert it
+      // to an array.
+      if (!is_array($this->extra)) {
+        $this->extra = array($this->extra);
+      }
+
+      $extras = array();
+      foreach ($this->extra as $info) {
+        if (is_array($info)) {
           $extra = '';
-          // Figure out the table name. Remember, only use aliases provided
-          // if at all possible.
+          // Figure out the table name. Remember, only use aliases provided if
+          // at all possible.
           $join_table = '';
           if (!array_key_exists('table', $info)) {
             $join_table = $table['alias'] . '.';
@@ -1218,18 +1235,18 @@ class views_join_subquery extends views_join {
           $extras[] = "$join_table$info[field] $operator $placeholder";
           $arguments[$placeholder] = $info['value'];
         }
-
-        if ($extras) {
-          if (count($extras) == 1) {
-            $condition .= ' AND ' . array_shift($extras);
-          }
-          else {
-            $condition .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
-          }
+        elseif (is_string($info)) {
+          $extras[] = $info;
         }
       }
-      elseif ($this->extra && is_string($this->extra)) {
-        $condition .= " AND ($this->extra)";
+
+      if ($extras) {
+        if (count($extras) == 1) {
+          $condition .= ' AND (' . array_shift($extras) . ')';
+        }
+        else {
+          $condition .= ' AND (' . implode(' ' . $this->extra_type . ' ', $extras) . ')';
+        }
       }
     }
 

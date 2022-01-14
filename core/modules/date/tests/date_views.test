@@ -12,8 +12,8 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Test setup actions.
    */
-  public function setUp() {
-    parent::setUp(array('views', 'views_ui'));
+  public function setUp($modules = array()) {
+    parent::setUp(array('views', 'views_ui', 'views_test'));
 
     // Create a date field.
     $field_name = 'field_test_date_popup';
@@ -138,6 +138,26 @@ class DateViewsTestCase extends DateFieldBasic {
     backdrop_static_reset('_views_fetch_data_cache');
     backdrop_static_reset('_views_fetch_data_recursion_protected');
     backdrop_static_reset('_views_fetch_data_fully_loaded');
+  }
+
+  /**
+   * Test the date views pager plugin.
+   */
+  public function testDateViewsPagerPlugin() {
+    $this->backdropCreateNode();
+    // The view date_views_pager_test ships with the views_test module.
+    $this->backdropGet('date-views-pager-test');
+    $format = config_get('date_views.settings', 'date_views_month_format_with_year');
+    $expected_heading = format_date(time(), 'custom', $format);
+    $this->assertText($expected_heading, 'Date pager shows the expected heading');
+    $this->assertLink('« Prev');
+    $this->assertLink('Next »');
+    // Change the date format setting to show the short month name.
+    $format = 'M Y';
+    config_set('date_views.settings', 'date_views_month_format_with_year', $format);
+    $this->backdropGet('date-views-pager-test');
+    $expected_heading = format_date(time(), 'custom', $format);
+    $this->assertText($expected_heading, 'Date pager shows the expected heading after changing the format');
   }
 
 }

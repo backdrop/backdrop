@@ -8,6 +8,9 @@
 /**
  * A handler to provide proper displays for dates.
  *
+ * This may be used on table fields that hold either UNIX timestamps or SQL
+ * datetime strings.
+ *
  * @ingroup views_field_handlers
  */
 class views_handler_field_date extends views_handler_field {
@@ -47,7 +50,7 @@ class views_handler_field_date extends views_handler_field {
     $form['custom_date_format'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom date format'),
-      '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for date formats. Otherwise, enter the number of different time units to display, which defaults to 2.', array('@url' => 'http://php.net/manual/function.date.php')),
+      '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for available options. Otherwise, enter the number of different time units to display, which defaults to 2.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
     );
     $form['timezone'] = array(
@@ -68,6 +71,12 @@ class views_handler_field_date extends views_handler_field {
 
   function render($values) {
     $value = $this->get_value($values);
+
+    if (!is_numeric($value)) {
+      // If the value isn't numeric, assume it's an SQL DATETIME.
+      $value = strtotime($value);
+    }
+
     $format = $this->options['date_format'];
     if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span'))) {
       $custom_format = $this->options['custom_date_format'];

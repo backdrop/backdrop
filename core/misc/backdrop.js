@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -102,10 +102,10 @@ Backdrop.attachBehaviors = function (context, settings) {
  *     during a tabledrag row swap). After the move is completed,
  *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
- *     do anything simply in response to the element being moved, but because
- *     IFRAME elements reload their "src" when being moved within the DOM,
- *     behaviors bound to IFRAME elements (like WYSIWYG editors) may need to
- *     take some action.
+ *     do anything in response to the element being moved, but because IFRAME
+ *     elements reload their "src" when being moved within the DOM, behaviors
+ *     bound to IFRAME elements (like WYSIWYG editors) may need to take some
+ *     action.
  *   - serialize: When an Ajax form is submitted, this is called with the
  *     form as the context. This provides every behavior within the form an
  *     opportunity to ensure that the field elements have correct content
@@ -412,6 +412,23 @@ Backdrop.relativeUrl = function (url) {
   var port = window.location.port ? (':' + window.location.port) : '';
   return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
 };
+
+/**
+ * Sanitizes a URL for use with jQuery.ajax().
+ *
+ * @param url
+ *   The URL string to be sanitized.
+ *
+ * @return
+ *   The sanitized URL.
+ */
+Backdrop.sanitizeAjaxUrl = function (url) {
+  var regex = /\=\?(&|$)/;
+  while (url.match(regex)) {
+    url = url.replace(regex, '');
+  }
+  return url;
+}
 
 /**
  * Returns true if the URL is within Backdrop's base path.
@@ -809,5 +826,59 @@ Backdrop.optimizedResize = (function() {
     }
   }
 }());
+
+/**
+ * Limits the invocations of a function in a given time frame.
+ *
+ * This can be useful to respond to an event that fires very frequently,
+ * such as a "keyup" event while a user is typing in a field.
+ *
+ * A common use of debouncing in other systems is window resizing,
+ * however Backdrop provides the Backdrop.optimizedResize() method,
+ * which should be used for that purpose.
+ *
+ * @param function func
+ *   The function to be invoked.
+ * @param number wait
+ *   The time period within which the callback function should only be
+ *   invoked once. For example if the wait period is 250ms, then the callback
+ *   will only be called at most 4 times per second.
+ * @param bool immediate
+ *   Whether we wait at the beginning or end to execute the function.
+ *
+ * @return function
+ *   The debounced function.
+ *
+ * @since 1.18.2 Method added.
+ */
+Backdrop.debounce = function (func, wait, immediate) {
+  var timeout;
+  var result;
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var context = this;
+
+    var later = function later() {
+      timeout = null;
+
+      if (!immediate) {
+        result = func.apply(context, args);
+      }
+    };
+
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+
+    if (callNow) {
+      result = func.apply(context, args);
+    }
+
+    return result;
+  };
+};
 
 })(jQuery);

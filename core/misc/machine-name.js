@@ -167,8 +167,9 @@ Backdrop.behaviors.machineName = {
         transliterationOptions[copyOptions[n]] = settings[copyOptions[n]];
       }
     }
+    var urlAppend = encodeURIComponent(source.toLowerCase());
     return $.ajax({
-      url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + source.toLowerCase()),
+      url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + urlAppend),
       data: transliterationOptions,
       dataType: "text"
     }); 

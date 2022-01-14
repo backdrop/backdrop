@@ -229,6 +229,10 @@ class BackdropDateTime extends DateTime {
    *   Returns the formatted date string on success or FALSE on failure.
    */
   public function format($format, $force = FALSE) {
+    // If there are errors, formatting will likely not succeed. Return FALSE.
+    if (!empty($this->errors)) {
+      return FALSE;
+    }
     return parent::format($force ? $format : date_limit_format($format, $this->granularity));
   }
 
