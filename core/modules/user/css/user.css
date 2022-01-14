@@ -24,22 +24,8 @@
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
 }
-
-/**
- * Override default textfield float to put the "Add role" button next to the
- * input textfield.
- */
-#user-admin-roles td.edit-name {
-  clear: both;
-}
-#user-admin-roles .form-item-name {
-  float: left; /* LTR */
-  margin-right: 1em; /* LTR */
-}
-[dir="rtl"] #user-admin-roles .form-item-name {
-  float: right;
-  margin-left: 1em;
-  margin-right: 0;
+.permissions-matrix {
+  overflow-x: auto;
 }
 
 /**

@@ -538,8 +538,8 @@ function filter_update_1004() {
         'multiple' => FALSE,
         'remember' => 0,
         'default_group' => 'All',
-        'default_group_multiple' => [],
-        'group_items' => []
+        'default_group_multiple' => array(),
+        'group_items' => array(),
       ),
     );
     $view_config['display']['default']['display_options']['hide_admin_links'] = TRUE;

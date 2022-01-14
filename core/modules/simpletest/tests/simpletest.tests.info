@@ -904,6 +904,12 @@ description  = Tests a form using form storage and makes sure validation and cac
 group = Form API
 file = form.test
 
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
+group = Form API
+file = form.test
+
 [FormsFormWrapperTestCase]
 name = Form wrapper callback
 description = Tests form wrapper callbacks to pass a prebuilt form to form builder functions.

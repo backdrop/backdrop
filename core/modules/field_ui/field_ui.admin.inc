@@ -316,7 +316,9 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($instance['label']),
+        '#markup' => theme('label_machine_name__node_fields__' . $bundle, array(
+          'label' => $instance['label'],
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -387,7 +389,9 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       '#row_type' => 'extra_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
       'label' => array(
-        '#markup' => check_plain($extra_field['label']),
+        '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
+          'label' => $extra_field['label'],
+        )),
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -916,7 +920,8 @@ function field_ui_display_overview($entity_type, $bundle) {
     '#tree' => TRUE,
     '#view_modes' => $custom + $default,
     '#entity_type' => $entity_type,
-    '#bundle' => $bundle_label,
+    '#bundle' => $bundle,
+    '#bundle_label' => $bundle_label,
     '#admin_path' => $admin_path,
   );
 
@@ -933,12 +938,21 @@ function field_ui_display_overview($entity_type, $bundle) {
 function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
   $bundle_name = '';
   if (is_object($bundle) && property_exists($bundle, 'name')) {
-    $bundle_name = check_plain($bundle->name);
+    $bundle_name = $bundle->name;
   }
   elseif (is_object($bundle) && property_exists($bundle, 'label')) {
-    $bundle_name = check_plain($bundle->label);
+    $bundle_name = $bundle->label;
+  }
+  elseif (is_string($bundle)) {
+    $entity_info = entity_get_info($entity_type);
+    if (isset($entity_info['label'])) {
+      $bundle_name = $entity_info['label'];
+    }
   }
   $page_title = field_ui_manage_display_title($entity_type, $view_mode);
+
+  // Function backdrop_set_title() also sanitizes the raw title components with
+  // check_plain().
   backdrop_set_title(t('!page: !teaser display', array(
     '!page' => $bundle_name,
     '!teaser' => $page_title)));

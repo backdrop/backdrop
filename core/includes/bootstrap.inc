@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.20.x-dev');
+define('BACKDROP_VERSION', '1.21.x-dev');
 
 /**
  * Core API compatibility.
@@ -3224,26 +3224,30 @@ function _backdrop_bootstrap_page_header() {
  */
 function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
-  $whitelist = settings_get('sanitize_input_whitelist', array());
+  $allowlist = settings_get('sanitize_input_allowlist', array());
+  if (empty($allowlist)) {
+    // Backwards compatible setting support. @todo Remove in 2.x.
+    $allowlist = settings_get('sanitize_input_whitelist', array());
+  }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
 
   // Process query string parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from query string parameters (GET): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request body parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from request body parameters (POST): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process cookie parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from cookie parameters (COOKIE): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request global. No need to log; already logged in $_GET and $_POST.
-  _backdrop_bootstrap_sanitize_input($_REQUEST, $whitelist);
+  _backdrop_bootstrap_sanitize_input($_REQUEST, $allowlist);
 
   // Sanitize the destination parameter (which is often used for redirects) to
   // prevent open redirect attacks leading to other domains. Sanitize both
@@ -3269,7 +3273,7 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     if (!empty($destination_parts['query'])) {
-      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
+      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $allowlist);
     }
 
     if ($sanitized_keys) {
@@ -3287,23 +3291,23 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param mixed $input
  *   The input data array from a request to be sanitized.
- * @param string[] $whitelist
- *   Whitelist of input keys that are considered acceptable.
+ * @param string[] $allowlist
+ *   Allowed list of input keys that are considered acceptable.
  *
  * @return string[]
  *   The list of any input keys have been filtered out, if any.
  */
-function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
+function _backdrop_bootstrap_sanitize_input(&$input, $allowlist = array()) {
   $sanitized_keys = array();
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $allowlist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
       elseif (is_array($input[$key])) {
-        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $whitelist));
+        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $allowlist));
       }
     }
   }
@@ -3702,7 +3706,7 @@ function language_default() {
  * - http://example.com/node/306 returns "node/306".
  * - http://example.com/backdropfolder/node/306 returns "node/306" while
  *   base_path() returns "/backdropfolder/".
- * - http://example.com/path/alias (which is a path alias for node/306) returns
+ * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.
