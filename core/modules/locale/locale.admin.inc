@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administration functions for locale.module.
+ * Admin page callbacks for the Locale module.
  */
 
 include_once BACKDROP_ROOT . '/core/includes/language.inc';
@@ -294,6 +294,10 @@ function language_negotiation_configure_url_form_submit($form, &$form_state) {
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
   locale_language_negotiation_url_domains_save($form_state['values']['domain']);
 
+  // Clear menu caches, to ensure that admin bar links are updated to include
+  // any change in the path prefix (so not to 404).
+  menu_cache_clear_all();
+
   backdrop_set_message(t('Configuration saved.'));
 }
 
@@ -345,7 +349,7 @@ function locale_date_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
   );
 
   $form['locales']['default'] = array(

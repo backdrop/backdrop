@@ -27,7 +27,7 @@
  * - $title: Linked title.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - comment: The current template type, i.e., "theming hook".
+ *   - comment: The current template type, i.e., "theme hook".
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.

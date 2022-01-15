@@ -37,9 +37,9 @@ function admin_bar_output($complete = FALSE) {
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
-    // Add site name as CSS class for development/staging theming purposes. We
-    // leverage the cookie domain instead of HTTP_HOST to account for many (but
-    // not all) multi-domain setups (e.g. language-based sub-domains).
+    // Add site name as CSS class for development/staging purposes. We leverage
+    // the cookie domain instead of HTTP_HOST to account for many (but not all)
+    // multi-domain setups (e.g. language-based sub-domains).
     $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
@@ -89,7 +89,7 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
-      $content['extra']['extra']['#title'] = t('More admin tasks');
+      $content['extra']['extra']['#title'] = t('More tasks');
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );
@@ -644,13 +644,14 @@ function admin_bar_links_search() {
   $search['search']['search'] = array(
     '#type' => 'search',
     '#title' => t('Admin search'),
-    '#title_display' => 'attribute',
+    '#title_display' => 'invisible',
     '#attributes' => array(
       'placeholder' => t('Menu search'),
       'autocomplete' => 'off',
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
 }
@@ -778,7 +779,7 @@ function admin_bar_flush_cache($name = NULL) {
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
-  // destination parameter, the redirect ends on the front page.
+  // destination parameter, the redirect ends on the home page.
   backdrop_goto();
 }
 
@@ -823,6 +824,10 @@ function _admin_bar_flush_cache($name = NULL) {
       break;
 
     case 'assets':
+      // Rebuild all color palettes.
+      if (module_exists('color')) {
+        color_rebuild_settings();
+      }
       // Change query-strings on css/js files to enforce reload for all users.
       _backdrop_flush_css_js();
 

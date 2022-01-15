@@ -58,13 +58,26 @@ function theme_image_style_list($variables) {
   $rows = array();
   foreach ($styles as $style) {
     $row = array();
-    $row[] = l($style['label'], 'admin/config/media/image-styles/configure/' . $style['name']);
+    $row[] = theme('label_machine_name__image_style', array(
+      'label' => $style['label'],
+      'machine_name' => $style['name'],
+    ));
 
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Image styles',
+          'name' => 'image.style.' . $style['name'],
+        ),
+      );
+    }
 
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
       $row[] = t('Custom');

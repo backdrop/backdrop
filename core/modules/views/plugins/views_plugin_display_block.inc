@@ -263,7 +263,7 @@ class views_plugin_display_block extends views_plugin_display {
         break;
 
       case 'argument_input':
-        $form['#title'] .= t('Choose the data source for view arguments');
+        $form['#title'] .= t('Choose the data sources for contextual filters');
         $argument_input = $this->get_argument_input();
 
         $form['argument_input']['#tree'] = TRUE;
@@ -278,21 +278,42 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['type'] = array(
             '#type' => 'select',
             '#options' => array(
-              'none' => t('No argument'),
-              'wildcard' => t('Argument wildcard'),
+              'none' => t('No filter'),
+              'url' => t('From URL'),
               //'context' => t('From context'),
               'fixed' => t('Fixed'),
               'user' => t('Input in block settings'),
+              'wildcard' => t('Wildcard (*)'),
             ),
             '#attributes' => array('class' => array('argument-type-' . $safe)),
             '#title' => t('@arg source', array('@arg' => $argument['name'])),
             '#default_value' => $argument['type'],
           );
+          $form['argument_input'][$id]['position'] = array(
+            '#type' => 'select',
+            '#title' => t('URL position'),
+            '#description' => t('In the url http://example.com/foo/bar/baz, for example, foo would be in position 1, bar 2, and baz 3.'),
+            '#default_value' => $argument['position'],
+            '#options' => array(
+              // Humans don't count from zero, adjust by one.
+              0 => 1,
+              1 => 2,
+              2 => 3,
+              3 => 4,
+              4 => 5,
+              5 => 6
+            ),
+            '#states' => array(
+              'visible' => array(
+                'select.argument-type-' . $safe => array('value' => 'url'),
+              ),
+            ),
+          );
           /*
           $form['argument_input'][$id]['context'] = array(
             '#type' => 'select',
             '#title' => t('Required context'),
-            '#description' => t('If "From context" is selected, which type of context to use.'),
+            '#description' => t('Which type of context to use.'),
             '#default_value' => $argument['context'],
             '#options' => array(), // @todo: Context options.
             '#states' => array(
@@ -306,7 +327,7 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['context_optional'] = array(
             '#type' => 'checkbox',
             '#title' => t('Context is optional'),
-            '#description' => t('This context need not be present for the block to function. If you plan to use this, ensure that the argument handler can handle empty values gracefully.'),
+            '#description' => t('This context need not be present for the block to function. If you plan to use this, ensure that the contextual filter handler can handle empty values gracefully.'),
             '#default_value' => $argument['context_optional'],
             '#states' => array(
               'visible' => array(
@@ -318,7 +339,7 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['fixed'] = array(
             '#type' => 'textfield',
             '#title' => t('Fixed argument'),
-            '#description' => t('If "Fixed" is selected, what to use as an argument.'),
+            '#description' => t('This value will be set permanently as the filter value.'),
             '#default_value' => $argument['fixed'],
             '#states' => array(
               'visible' => array(
@@ -330,7 +351,7 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Label'),
-            '#description' => t('If this argument is presented to the administrator configuring a layout, what label to apply to it.'),
+            '#description' => t('Label to apply to the filter when it is presented to the person configuring a layout.'),
             '#default_value' => empty($argument['label']) ? $argument['name'] : $argument['label'],
             '#states' => array(
               'visible' => array(

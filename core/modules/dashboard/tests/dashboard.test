@@ -1,0 +1,294 @@
+<?php
+/**
+ * @file
+ * Tests for dashboard.module.
+ */
+
+/**
+ * Tests that the dashboard functions correctly.
+ */
+class DashboardTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test', 'taxonomy', 'comment', 'node', 'dashboard', 'menu'));
+
+    $this->backdropCreateContentType(array(
+      'type' => 'test_content_type_1',
+      'name' => '<XSS>Test Content Type 1</XSS>',
+    ));
+    $this->backdropCreateContentType(array(
+      'type' => 'test_content_type_2',
+      'name' => 'Test Content Type 2',
+    ));
+
+    user_role_save((object) array(
+      'name' => 'test_user_role_1',
+      'label' => '<XSS>Test User Role 1</XSS>',
+    ));
+    user_role_save((object) array(
+      'name' => 'test_user_role_2',
+      'label' => 'Test User Role 2',
+    ));
+
+    $vocabulary1 = new TaxonomyVocabulary(array(
+      'machine_name' => 'test_vocabulary_1',
+      'name' => '<XSS>Test Vocabulary 1</XSS>',
+    ));
+    $vocabulary1->save();
+    $vocabulary2 = new TaxonomyVocabulary(array(
+      'machine_name' => 'test_vocabulary_2',
+      'name' => 'Test Vocabulary 2',
+    ));
+    $vocabulary2->save();
+
+    // Create some sample content.
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_1',
+    ));
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_1',
+    ));
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_2',
+    ));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access dashboard',
+      'access administration pages',
+      'create test_content_type_1 content',
+      'create test_content_type_2 content',
+      'administer layouts',
+      'administer menu',
+      'administer content types',
+      'administer nodes',
+      'administer taxonomy',
+      'administer users',
+      'administer dashboard',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+  }
+
+  /**
+   * Test the dashboard layout.
+   */
+  function testDashboardLayout() {
+    $this->backdropGet('admin/dashboard');
+
+    // The welcome to Backdrop block was found.
+    $this->assertText('Welcome to Backdrop CMS!', 'Welcome to Backdrop block found.');
+
+    // The create content block exists with two links.
+    $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
+      ':block' => 'block-dashboard-create',
+    ));
+    $this->assertEqual(count($page_link), 2, 'Two create content links were found.');
+    $this->assertLink('Add new <XSS>Test Content Type 1</XSS>', 0, 'The create content1 link was found.');
+    $this->assertLink('Add new Test Content Type 2', 0, 'The create content2 link was found.');
+
+    // The content overview blocks was found, with two items.
+    $content_list_items = $this->xpath('//*[contains(@class,:block)]//li', array(
+      ':block' => 'block-dashboard-overview-content',
+    ));
+    $this->assertEqual(count($content_list_items), 2, 'The content overview list was found.');
+    $this->assertRaw('2 &lt;XSS&gt;Test Content Type 1&lt;/XSS&gt; items', 'The content1 item was found.');
+    $this->assertText('1 Test Content Type 2 item', 'The content2 item was found.');
+    // The manage content link is present.
+    $this->assertLink('Manage content', 0, 'The Manage content link was found.');
+
+    // The user overview block was found.
+    $user_list_items = $this->xpath('//*[contains(@class,:block)]//li', array(
+      ':block' => 'block-dashboard-overview-user',
+    ));
+    $this->assertEqual(count($user_list_items), 3, 'The user overview list was found, with 3 items.');
+    $this->assertText('2 total user accounts', 'Two total user accounts found.');
+    $this->assertText('1 active user account', 'One active account was found.');
+    $this->assertText('0 blocked user account', 'Zero blocked user was found.');
+    // The manage user accounts link is present.
+    $this->assertLink('Manage user accounts', 0, 'The Manage user accounts link was found.');
+
+    // The backdrop-news block was found.
+    $this->assertText('Backdrop News', 'Backdrop News block found.');
+    $this->assertText('No news at this time.');
+
+    // The menu admin block was found.
+    $menu_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr/td[contains(text(),:menu)]', array(
+      ':block' => 'block-dashboard-menu',
+      ':menu' => 'Primary navigation',
+    ));
+    $this->assertEqual(count($menu_admin_block), 1, 'The menu admin list was found.');
+    // The manage menus link is present.
+    $this->assertLink('Manage menus', 0, 'The Manage menus link was found.');
+
+    // The content type admin block was found, has 2 rows.
+    $content_type_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
+      ':block' => 'block-dashboard-node-types',
+    ));
+    $this->assertEqual(count($content_type_admin_block), 2, 'The content type admin list was found.');
+    // The manage content types link is present.
+    $this->assertLink('Manage content types', 0, 'The Manage content types link was found.');
+
+    // The taxonomy admin block was found, has 2 rows.
+    $taxonomy_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
+      ':block' => 'block-dashboard-taxonomy',
+    ));
+    $this->assertEqual(count($taxonomy_admin_block), 2, 'The taxonomy admin block was found.');
+    // The manage taxonomy link is present.
+    $this->assertLink('Manage taxonomy', 0, 'The Manage taxonomy link was found.');
+
+    // Add new content types.
+    $this->backdropCreateContentType(array(
+      'type' => 'foo',
+      'name' => 'Foo',
+      'settings' => array(
+        'comment_default' => 2, // COMMENT_NODE_OPEN
+      ),
+    ));
+    $this->backdropCreateContentType(array(
+      'type' => 'bar',
+      'name' => 'Bar',
+    ));
+    $this->backdropGet('admin/dashboard');
+
+    // The create content block exists, still with two links.
+    $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
+      ':block' => 'block-dashboard-create',
+    ));
+    $this->assertEqual(count($page_link), 2, 'Two create content links were found.');
+
+    // But four content types should be listed.
+    $content_type_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
+      ':block' => 'block-dashboard-node-types',
+    ));
+    $this->assertEqual(count($content_type_admin_block), 4, 'Four content types found in the admin list.');
+
+    // There should be no foo items.
+    $this->assertText('0 Foo items', 'No Foo items found.');
+
+    // Create a new admin user with Foo and 2 access.
+    $this->new_admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access dashboard',
+      'access administration pages',
+      'create foo content',
+      'create test_content_type_2 content',
+      'administer layouts',
+      'administer menu',
+      'administer content types',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->new_admin_user);
+
+    // After login, administrator is redirected to the Dashboard.
+    $this->assertTitle(t('Dashboard | Backdrop CMS'), 'Page title is "Dashboard".');
+
+    // The create content block exists, now with two links.
+    $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
+      ':block' => 'block-dashboard-create',
+    ));
+    $this->assertEqual(count($page_link), 2, 'Two create content links found.');
+    $this->assertLink('Add new Test Content Type 2', 0, 'The create content2 link was found.');
+    $this->assertLink('Add new Foo', 0, 'The create foo link was found.');
+
+    // Create a new Foo item.
+    $node = $this->backdropCreateNode(array(
+      'type' => 'foo',
+      'title' => $this->randomString(),
+    ));
+    $this->backdropGet('node/' . $node->nid);
+    // @todo post a comment.
+
+    $this->backdropGet('admin/dashboard');
+    // There should be one foo item.
+    $this->assertText('1 Foo item', 'One Foo item found.');
+
+    // The taxonomy admin block should be missing, since this user doesn't have
+    // access.
+    $taxonomy_admin_block = $this->xpath('//*[contains(@class,:block)]', array(
+      ':block' => 'block-dashboard-taxonomy',
+    ));
+    $this->assertEqual(count($taxonomy_admin_block), 0, 'The taxonomy overview list was not found.');
+
+    // There should now be three user acounts.
+    $this->assertText('3 total user accounts', 'Three user accounts found.');
+
+    // The dashboard should also accept new blocks.
+    $this->backdropGet('admin/structure/layouts/manage/dashboard');
+    // Add a block.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the layout is in the listing of layouts.
+    $this->backdropGet('admin/structure/layouts');
+    $this->assertText('dashboard');
+    $this->assertLink('admin/dashboard', 0, 'The dashboard menu item was found.');
+
+    // Go to the dashboard and confirm the block exists.
+    $this->backdropGet('admin/dashboard');
+    $this->assertText('Foo subject');
+    $this->assertText(format_string('The setting of count is @setting.', array('@setting' => 5)));
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-halves-region',
+      ':block' => 'block-layout-test-foo',
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block was found in the sidebar.');
+
+    // Test administer dashboard access.
+    $this->backdropGet('admin/dashboard/settings');
+    $this->assertResponse(403);
+
+    // Swich to user with access, and test the dashboard settings form.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/dashboard/settings');
+    $edit = array(
+      'dashboard_login_redirect' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    // Create a another new user.
+    $this->another_admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access dashboard',
+      'access administration pages',
+      'create foo content',
+      'create test_content_type_2 content',
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->another_admin_user);
+    $this->assertNoTitle(t('Dashboard | Backdrop CMS'), 'Page title is "Dashboard".');
+
+    // Check that the dashboard is not accessible once the layout is disabled.
+    $this->backdropGet('admin/structure/layouts');
+    $disable_link = $this->xpath('//a[starts-with(@href,:path)]', array(
+      ':path' => base_path() . 'admin/structure/layouts/manage/dashboard/disable',
+    ));
+    $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
+    $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
+
+    $this->backdropGet('admin/dashboard');
+    $this->assertResponse(404);
+
+    // Check that the dashboard is accessible once the layout is enabled again.
+    $this->backdropGet('admin/structure/layouts');
+    $enable_link = $this->xpath('//a[starts-with(@href,:path)]', array(
+      ':path' => base_path() . 'admin/structure/layouts/manage/dashboard/enable',
+    ));
+    $enable_url_parts = backdrop_parse_url($enable_link[0]['href']);
+    $this->backdropGet($enable_url_parts['path'], $enable_url_parts);
+
+    $this->backdropGet('admin/dashboard');
+    $this->assertResponse(200);
+  }
+}

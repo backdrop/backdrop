@@ -189,7 +189,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
 
     // Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get_translated('system.core', 'site_name')));
     $this->backdropGet('node');
     $this->assertText($offline_message);
     $this->backdropGet('menu_login_callback');
@@ -289,7 +289,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
       ->execute();
     menu_cache_clear('main-menu');
 
-    // Load front page.
+    // Load home page.
     $this->backdropGet('<front>');
     $this->assertLink(t('Menu link #1'), 0, 'Found menu link #1');
     $this->assertLink(t('Menu link #1-1'), 0, 'Found menu link #1-1');
@@ -496,7 +496,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     );
     menu_link_save($menu_link);
 
-    // Load front page.
+    // Load home page.
     $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
     $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
@@ -600,6 +600,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
       'link_title' => 'Menu link test',
       'module' => $module,
       'menu_name' => 'menu_test',
+      'customized' => 1,
     );
 
     $links['parent'] = $base_options + array(
@@ -695,39 +696,6 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
       );
       $this->assertMenuLinkParents($links, $expected_hierarchy);
     }
-
-    // Start over, forcefully delete child-1 from the database, simulating a
-    // database crash. Check that the children of child-1 have been reassigned
-    // to the parent, going up on the old path hierarchy stored in each of the
-    // links.
-    $links = $this->createLinkHierarchy($module);
-    // Don't do that at home.
-    db_delete('menu_links')
-      ->condition('mlid', $links['child-1']['mlid'])
-      ->execute();
-
-    $expected_hierarchy = array(
-      'parent' => FALSE,
-      'child-1-1' => 'parent',
-      'child-1-2' => 'parent',
-      'child-2' => 'parent',
-    );
-    $this->assertMenuLinkParents($links, $expected_hierarchy);
-
-    // Start over, forcefully delete the parent from the database, simulating a
-    // database crash. Check that the children of parent are now top-level.
-    $links = $this->createLinkHierarchy($module);
-    // Don't do that at home.
-    db_delete('menu_links')
-      ->condition('mlid', $links['parent']['mlid'])
-      ->execute();
-
-    $expected_hierarchy = array(
-      'child-1-1' => 'child-1',
-      'child-1-2' => 'child-1',
-      'child-2' => FALSE,
-    );
-    $this->assertMenuLinkParents($links, $expected_hierarchy);
   }
 
   /**
@@ -763,6 +731,8 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['parent']['mlid'])
       ->execute();
+    menu_rebuild();
+
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
@@ -778,6 +748,8 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['child-2']['mlid'])
       ->execute();
+    menu_rebuild();
+
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
@@ -1276,7 +1248,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     ));
     $this->backdropLogout();
 
-    // Verify that there is no breadcrumb on front page.
+    // Verify that there is no breadcrumb on home page.
     $this->assertBreadcrumb('<front>', array());
 
     // Verify breadcrumb on user pages for anonymous user.
@@ -1592,4 +1564,34 @@ class MenuTrailTestCase extends MenuWebTestCase {
       $this->assertBreadcrumb(NULL, $expected_trail[$status_code]['final']);
     }
   }
+}
+
+/**
+ * Tests menu changes.
+ */
+class MenuChangeTestCase extends MenuWebTestCase {
+  /**
+   * Set up testing environment.
+   */
+  public function setUp() {
+    parent::setUp('menu_test');
+  }
+
+  /**
+   * Test that updating the type of a menu item works correctly.
+   */
+  public function testMenuChangeTypeTestCase() {
+    // Check that the test menu item exists.
+    $sql = "SELECT type FROM {menu_links}, {menu_router} WHERE {menu_links}.router_path = {menu_router}.path AND {menu_links}.router_path = 'menu-test/changes'";
+    $type = db_query($sql)->fetchField();
+    $this->assertEqual($type, MENU_NORMAL_ITEM, t('Menu item exists and is type MENU_NORMAL_ITEM.'));
+
+    // Change item type to MENU_CALLBACK and rebuild menu.
+    menu_test_change_menu_type('callback');
+    menu_rebuild();
+
+    $result = db_query($sql)->rowCount();
+    $this->assertEqual($result, 0, t('Menu item no longer exists in menu_links table after menu_rebuild.'));
+  }
+
 }
