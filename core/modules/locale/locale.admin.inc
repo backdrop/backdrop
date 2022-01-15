@@ -164,18 +164,18 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#attributes' => array('class' => array('messages', 'warning')),
   );
   $warning_message['message_wrapper']['warning'] = array(
-    '#markup' => t('Modifying this value may break existing URLs. Use with caution in a production environment.'),
+    '#markup' => t('Modifying these settings may break existing URLs. Use with caution in a production environment.'),
   );
 
-  $description[] = t('For the default language, this value may be left blank.');
-  $description[] = t('Using language codes is the most common use case, but any arbitrary text may be used. For example, specifying the full name of the language (<strong><code>deutsch</code></strong>) as the path prefix code for German, results in URLs like <code>https://example.com/<strong>deutsch</strong>/contact</code>.');
-  $description = theme('item_list', array('items' => $description));
+  // Get the enabled languages only.
+  $language_list = language_list(TRUE, TRUE);
+  $default_language = language_default();
 
   $form['prefix'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Path prefix configuration'),
-    '#description' => t('Text to use as a path prefix for URL language detection.') . $description,
+    '#description' => t('Text to use as a path prefix for URL language detection. Using language codes is the most common use case, but any arbitrary text may be used. For example, specifying the full name of the language (<strong><code>deutsch</code></strong>) as the path prefix code for German, results in URLs like <code>https://example.com/<strong>deutsch</strong>/contact</code>.'),
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
@@ -190,7 +190,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Domain configuration'),
-    '#description' => t('The domain names to use for these languages.') . $description,
+    '#description' => t('The domain name to use for each language. Using language codes is the most common use case, but any arbitrary text may be used. For example, specifying the full name of the language (<strong><code>deutsch</code></strong>) as the domain for German, results in URLs like <code>https://<strong>deutsch</strong>.example.com/contact</code>.'),
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
@@ -201,8 +201,6 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   );
   $form['domain'] += $warning_message;
 
-  // Get the enabled languages only.
-  $language_list = language_list(TRUE, TRUE);
   $prefixes = locale_language_negotiation_url_prefixes();
   $domains = locale_language_negotiation_url_domains();
 
@@ -212,12 +210,15 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     'langcode' => '',
   ));
   foreach ($language_list as $langcode => $label) {
+    $description = $default_language->langcode == $langcode ? t('This is the default language. This value may be left blank.') : '';
     $form['prefix'][$langcode] = array(
       '#type' => 'textfield',
       '#title' => t('%language (%langcode) path prefix', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
-      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
+      '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+      '#required' => $default_language->langcode != $langcode,
+      '#description' => $description,
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',
@@ -225,6 +226,8 @@ function language_negotiation_configure_url_form($form, &$form_state) {
       '#maxlength' => 128,
       '#default_value' => isset($domains[$langcode]) ? $domains[$langcode] : '',
       '#field_prefix' => backdrop_is_https() ? 'https://' : 'http://',
+      '#required' => $default_language->langcode != $langcode,
+      '#description' => $description,
     );
   }
 
@@ -241,8 +244,8 @@ function language_negotiation_configure_url_form($form, &$form_state) {
 /**
  * Validation handler for url provider configuration.
  *
- * Validate that the prefixes and domains are unique, and make sure that
- * the prefix and domain are only blank for the default.
+ * Validate that the prefixes and domains are unique, and make sure that the
+ * prefix and domain are blank only for the default language.
  */
 function language_negotiation_configure_url_form_validate($form, &$form_state) {
   // Get the enabled languages only.
@@ -255,12 +258,14 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
 
     if ($value === '') {
       if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_PREFIX) {
-        // Validation error if the prefix is blank for a non-default language, and value is for selected negotiation type.
+        // Validation error if the prefix is blank for a non-default language,
+        // and value is for selected negotiation type.
         form_error($form['prefix'][$langcode], t('The prefix may only be left blank for the default language.'));
       }
     }
     elseif (isset($count[$value]) && $count[$value] > 1) {
-      // Validation error if there are two languages with the same domain/prefix.
+      // Validation error if there are two languages with the same
+      // domain/prefix.
       form_error($form['prefix'][$langcode], t('The prefix for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }
   }
@@ -272,12 +277,14 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
 
     if ($value === '') {
       if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_DOMAIN) {
-        // Validation error if the domain is blank for a non-default language, and value is for selected negotiation type.
+        // Validation error if the domain is blank for a non-default language,
+        // and value is for selected negotiation type.
         form_error($form['domain'][$langcode], t('The domain may only be left blank for the default language.'));
       }
     }
     elseif (isset($count[$value]) && $count[$value] > 1) {
-      // Validation error if there are two languages with the same domain/domain.
+      // Validation error if there are two languages with the same
+      // domain/domain.
       form_error($form['domain'][$langcode], t('The domain for %language, %value, is not unique.', array('%language' => $language->name, '%value' => $value)));
     }
   }
