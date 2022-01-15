@@ -383,7 +383,8 @@ details.more-less-toggle > summary {
   pointer-events: none;
 }
 /* Hide the toggle arrow. Must be combined with "list-style: none;" above. */
-details.more-less-toggle summary::marker {
+details.more-less-toggle summary::marker,
+details.more-less-toggle summary::-webkit-details-marker {
   display: none;
 }
 details.more-less-toggle > summary a {
