@@ -396,10 +396,10 @@ details.more-less-toggle > summary::after {
   white-space: nowrap;
 }
 details.more-less-toggle[open] summary::after {
-  content: ' ' attr(data-close-label) ' ⬆';
+  content: ' ' attr(data-close-label) ' ↑';
 }
 details.more-less-toggle:not([open]) summary::after {
-  content: ' ' attr(data-open-label) ' ⬇';
+  content: ' ' attr(data-open-label) ' ↓';
 }
 details.more-less-toggle .details-content-wrapper {
   margin-top: 0.5em;
