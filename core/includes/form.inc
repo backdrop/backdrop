@@ -3695,8 +3695,8 @@ function form_process_details($element, &$form_state) {
  *     - #id
  *     - #attributes
  *     - #open
- *     - #open_label: optional, defaults to "open".
- *     - #close_label: optional, defaults to "close".
+ *     - #open_label
+ *     - #close_label
  *
  * @return string
  *   The rendered HTML output.
@@ -3726,8 +3726,12 @@ function theme_details($variables) {
 
   // Support for custom labels for the open/close toggle.
   $summary_more_less_attributes = array();
-  $summary_more_less_attributes['data-open-label'] = isset($element['#open_label']) ? $element['#open_label'] : t('open');
-  $summary_more_less_attributes['data-close-label'] = isset($element['#close_label']) ? $element['#close_label'] : t('close');
+  if (isset($element['#open_label'])) {
+    $summary_more_less_attributes['data-open-label'] = $element['#open_label'];
+  }
+  if (isset($element['#close_label'])) {
+    $summary_more_less_attributes['data-close-label'] = $element['#close_label'];
+  }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary' . backdrop_attributes($summary_more_less_attributes) . '>' . $element['#summary'] . '</summary>';
