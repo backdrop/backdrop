@@ -712,11 +712,11 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $placeholders = array(
       '%name' => 'Maximum URL alias length',
     );
-    $this->assertRaw(format_string('%name: the value must be numeric.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be numeric.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
     );
-    $this->assertRaw(format_string('%name: the value must be numeric.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be numeric.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
@@ -726,12 +726,12 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       '%name' => 'Maximum URL alias length',
       '%min' => 1,
     );
-    $this->assertRaw(format_string('%name: the value must be greater than or equal to %min.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be greater than or equal to %min.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
       '%min' => 1,
     );
-    $this->assertRaw(format_string('%name: the value must be greater than or equal to %min.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be greater than or equal to %min.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
@@ -742,12 +742,12 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
       '%name' => 'Maximum URL alias length',
       '%max' => 255,
     );
-    $this->assertRaw(format_string('%name: the value must be less than or equal to %max.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be less than or equal to %max.', $placeholders));
     $placeholders = array(
       '%name' => 'Maximum component length',
       '%max' => 255,
     );
-    $this->assertRaw(format_string('%name: the value must be less than or equal to %max.', $placeholders));
+    $this->assertRaw(format_string('The value for %name must be less than or equal to %max.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';

@@ -4576,18 +4576,18 @@ function form_validate_number(&$element, &$form_state) {
   // should prevent this but themers could override element implementation. Same
   // goes for min/max/step validation below.
   if (!is_numeric($value)) {
-    form_error($element, t('%name: the value must be numeric.', array('%name' => $name)));
+    form_error($element, t('The value for %name must be numeric.', array('%name' => $name)));
     return;
   }
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('%name: the value must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('The value for %name must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('%name: the value must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('The value for %name must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4598,10 +4598,10 @@ function form_validate_number(&$element, &$form_state) {
     if (!valid_number_step($value, $element['#step'], $offset)) {
       // Integer steps are the most common use case, so give a specific message.
       if ($element['#step'] == 1 && is_numeric($offset) && $offset == round($offset)) {
-        form_error($element, t('%name: the value must be a whole number.', array('%name' => $name)));
+        form_error($element, t('The value for %name must be a whole number.', array('%name' => $name)));
       }
       else {
-        form_error($element, t('%name: the value must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
       }
     }
   }
