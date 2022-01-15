@@ -402,5 +402,5 @@ details.more-less-toggle:not([open]) summary::after {
   content: ' ' attr(data-open-label) ' ⬇';
 }
 details.more-less-toggle .details-content-wrapper {
-  margin: 0;
+  margin-top: 0.5em;
 }
