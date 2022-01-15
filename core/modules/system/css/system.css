@@ -371,23 +371,36 @@ summary {
   display: block;
 }
 
-details {
+details.more-less-toggle {
+  background-color: transparent;
+  border: none;
   cursor: text;
+  margin: 0;
+  padding: 0;
 }
-details > summary {
+details.more-less-toggle > summary {
+  list-style: none;
   pointer-events: none;
 }
-details > summary a {
+/* Hide the toggle arrow. Must be combined with "list-style: none;" above. */
+details.more-less-toggle summary::marker {
+  display: none;
+}
+details.more-less-toggle > summary a {
   pointer-events: auto;
 }
-details > summary::after {
+details.more-less-toggle > summary::after {
   color: #0074bd;
   cursor: pointer;
   pointer-events: auto;
+  white-space: nowrap;
 }
-details[open] summary::after {
-  content: ' ' attr(data-close);
+details.more-less-toggle[open] summary::after {
+  content: ' ' attr(data-close-label) ' ⬆';
 }
-details:not([open]) summary::after {
-  content: ' ' attr(data-open);
+details.more-less-toggle:not([open]) summary::after {
+  content: ' ' attr(data-open-label) ' ⬇';
+}
+details.more-less-toggle .details-content-wrapper {
+  margin: 0;
 }

@@ -182,11 +182,12 @@ function theme_system_modules_fieldset($variables) {
     $requirements .= '</div>';
 
     $module_details = array(
-      '#title' => '<span class="text table-filter-text-source"> ' . backdrop_render($module['description']) . '</span>',
-      '#children' => $requirements,
-      '#collapsed' => TRUE,
+      '#summary' => '<span class="text table-filter-text-source">' . $module['description']['#markup'] . '</span>',
+      '#details' => $requirements,
+      '#open' => FALSE,
       '#open_label' => t('more'),
       '#close_label' => t('less'),
+      '#attributes' => array('class' => array('more-less-toggle')),
     );
     $details = theme('details', array('element' => $module_details));
 
@@ -361,12 +362,12 @@ function theme_status_report($variables) {
 
     if (!empty($requirement['description'])) {
       $description_details = array(
-        '#title' => $requirement['value'],
-        '#children' => $requirement['description'],
-        '#collapsed' => !in_array($requirement['severity'], array(REQUIREMENT_WARNING, REQUIREMENT_ERROR)),
+        '#summary' => $requirement['value'],
+        '#details' => $requirement['description'],
+        '#open' => in_array($requirement['severity'], array(REQUIREMENT_WARNING, REQUIREMENT_ERROR)),
         '#open_label' => t('more'),
         '#close_label' => t('less'),
-        '#attributes' => array('class' => array('status-summary')),
+        '#attributes' => array('class' => array('status-summary', 'more-less-toggle')),
       );
       $description = theme('details', array('element' => $description_details));
     }

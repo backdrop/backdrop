@@ -3688,7 +3688,15 @@ function form_process_details($element, &$form_state) {
  * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #id, #attributes, #children, #summary, #details, #open.
+ *     Properties used:
+ *     - #summary
+ *     - #details
+ *     - #children
+ *     - #id
+ *     - #attributes
+ *     - #open
+ *     - #open_label: optional, defaults to "open".
+ *     - #close_label: optional, defaults to "close".
  *
  * @return string
  *   The rendered HTML output.
@@ -3716,8 +3724,13 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
+  // Support for custom labels for the open/close toggle.
+  $summary_more_less_attributes = array();
+  $summary_more_less_attributes['data-open-label'] = isset($element['#open_label']) ? $element['#open_label'] : t('open');
+  $summary_more_less_attributes['data-close-label'] = isset($element['#close_label']) ? $element['#close_label'] : t('close');
+
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
+  $output .= '<summary' . backdrop_attributes($summary_more_less_attributes) . '>' . $element['#summary'] . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }

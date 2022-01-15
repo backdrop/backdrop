@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Styles for administration pages.
@@ -115,6 +114,10 @@ small .admin-link:after {
 #system-modules td.operations {
   width: 120px;
 }
+#system-modules details.more-less-toggle > summary > span {
+  color: #000;
+  font-size: 100%;
+}
 div.admin-requirements,
 div.admin-required {
   font-size: 0.9em;
@@ -193,12 +196,12 @@ span.admin-missing {
   display: block;
   font-weight: normal;
 }
-.system-status-report .status-summary .details-content {
+.system-status-report .status-summary .details-content-wrapper {
   font-size: 0.9em;
   color: #444;
 }
 .system-status-report .report-error .status-summary,
-.system-status-report .report-error .status-summary .details-content,
+.system-status-report .report-error .status-summary .details-content-wrapper,
 .system-status-report .report-error .status-summary-mobile {
   color: #EC351C;
 }
