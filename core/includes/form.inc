@@ -3726,11 +3726,10 @@ function theme_details($variables) {
 
   // Support for custom labels for the open/close toggle.
   $summary_more_less_attributes = array();
-  if (isset($element['#open_label'])) {
+  if (isset($element['#open_label']) && isset($element['#close_label'])) {
     $summary_more_less_attributes['data-open-label'] = $element['#open_label'];
-  }
-  if (isset($element['#close_label'])) {
     $summary_more_less_attributes['data-close-label'] = $element['#close_label'];
+    $element['#attributes']['class'][] = 'more-less-toggle';
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';

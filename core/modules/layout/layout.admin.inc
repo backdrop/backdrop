@@ -355,7 +355,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#open' => FALSE,
     '#open_label' => t('show examples'),
     '#close_label' => t('hide examples'),
-    '#attributes' => array('class' => array('layout-placeholder-examples', 'more-less-toggle')),
+    '#attributes' => array('class' => array('layout-placeholder-examples')),
   );
 
   $form['path'] = array(

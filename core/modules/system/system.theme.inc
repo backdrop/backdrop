@@ -187,7 +187,6 @@ function theme_system_modules_fieldset($variables) {
       '#open' => FALSE,
       '#open_label' => t('more'),
       '#close_label' => t('less'),
-      '#attributes' => array('class' => array('more-less-toggle')),
     );
     $details = theme('details', array('element' => $module_details));
 
@@ -367,7 +366,7 @@ function theme_status_report($variables) {
         '#open' => in_array($requirement['severity'], array(REQUIREMENT_WARNING, REQUIREMENT_ERROR)),
         '#open_label' => t('more'),
         '#close_label' => t('less'),
-        '#attributes' => array('class' => array('status-summary', 'more-less-toggle')),
+        '#attributes' => array('class' => array('status-summary')),
       );
       $description = theme('details', array('element' => $description_details));
     }
