@@ -378,29 +378,51 @@ details.more-less-toggle {
   margin: 0;
   padding: 0;
 }
+
+/**
+ * Special type of details elements, which use a customizable more/less toggle.
+ */
 details.more-less-toggle > summary {
   list-style: none;
+  /* Prevent the summary text from triggering open/close of details. */
   pointer-events: none;
 }
-/* Hide the toggle arrow. Must be combined with "list-style: none;" above. */
+/* Hide the toggle arrow (must be combined with "list-style: none;" above). */
 details.more-less-toggle summary::marker,
 details.more-less-toggle summary::-webkit-details-marker {
   display: none;
 }
+/* Allow links within the summary to be clickable. */
 details.more-less-toggle > summary a {
   pointer-events: auto;
 }
-details.more-less-toggle > summary::after {
+details.more-less-toggle > summary > span {
+  font-size: 100%;
+}
+details.more-less-toggle summary > span.more-less-toggle-label::before,
+details.more-less-toggle summary > span.more-less-toggle-label::after {
   color: #0074bd;
   cursor: pointer;
+  /* Allow the more/less toggle and icon to trigger open/close of details. */
   pointer-events: auto;
+  /* Prevent the more/less text from being split from the toggle icon. */
   white-space: nowrap;
 }
-details.more-less-toggle[open] summary::after {
-  content: ' ' attr(data-close-label) ' ↑';
+details.more-less-toggle[open] summary .more-less-toggle-label::before {
+  content: ' ' attr(data-close-label) ' ';
 }
-details.more-less-toggle:not([open]) summary::after {
-  content: ' ' attr(data-open-label) ' ↓';
+details.more-less-toggle:not([open]) summary .more-less-toggle-label::before {
+  content: ' ' attr(data-open-label) ' ';
+}
+/* The arrow icon next to the more/less toggle label. */
+details.more-less-toggle summary .more-less-toggle-label::after {
+  display: inline-block;
+  content: '▶';
+  font-size: smaller;
+  transition: 0.2s;
+}
+details.more-less-toggle[open] summary .more-less-toggle-label::after {
+  transform: rotate(90deg);
 }
 details.more-less-toggle .details-content-wrapper {
   margin-top: 0.5em;
