@@ -3724,14 +3724,17 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
-  // Support for custom labels for the open/close toggle.
+  $summary_content = '<span>' . $element['#summary'] . '</span>';
+
+  // Custom labels for the open/close toggle.
+  $more_less_toggle = '';
   if (isset($element['#open_label']) && isset($element['#close_label'])) {
-    $element['#summary'] .= ' <span class="more-less-toggle-label" data-open-label="' . $element['#open_label'] . '" data-close-label="' . $element['#close_label'] . '"></span>';
+    $more_less_toggle = '<span class="more-less-toggle-label" data-open-label="' . $element['#open_label'] . '" data-close-label="' . $element['#close_label'] . '"></span>';
     $element['#attributes']['class'][] = 'more-less-toggle';
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary>' . $element['#summary'] . '</summary>';
+  $output .= '<summary>' . $summary_content . ' ' . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }
