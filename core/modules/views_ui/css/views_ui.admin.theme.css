@@ -299,14 +299,6 @@ input.form-radio {
   padding-left: 9px; /* LTR */
 }
 
-.views-ui-view-name {
-  font-weight: bold;
-}
-
-.views-ui-view-machine-name {
-  font-size: smaller;
-}
-
 @media (max-width: 768px) {
   table.sticky-header {
     display: none;

@@ -316,9 +316,9 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  * Backdrop.FilterStatus.
  *
  * A text filter rule object describes
- *  1. allowed or forbidden tags: (optional) whitelist or blacklist HTML tags
- *  2. restricted tag properties: (optional) whitelist or blacklist attributes,
- *     styles and classes on a set of HTML tags.
+ *  1. allowed or forbidden tags: (optional) allow or deny HTML tags.
+ *  2. restricted tag properties: (optional) allow or deny attributes, styles
+ *     and classes on a set of HTML tags.
  *
  * Typically, each text filter rule object does either 1 or 2, not both.
  *
@@ -329,11 +329,11 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  *     restrictions are applied.
  *  2. all nested within the "properties" key: use the "tags" subkey to list
  *     HTML tags to which you want to apply property restrictions, then use the
- *     "allowed" subkey to whitelist specific property values, and similarly use
- *     the "forbidden" subkey to blacklist specific property values.
+ *     "allowed" subkey to allow specific property values, and similarly use the
+ *     "forbidden" subkey to deny specific property values.
  *
  * Examples:
- *  - Whitelist the "p", "strong" and "a" HTML tags:
+ *  - Allow the "p", "strong" and "a" HTML tags:
  *    {
  *      tags: ['p', 'strong', 'a'],
  *      allow: true,
