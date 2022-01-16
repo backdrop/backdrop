@@ -69,15 +69,25 @@ function system_requirements($phase) {
     $requirements['php'] = array(
       'title' => $t('PHP'),
       'value' => $phpversion,
-      'description' => $t('The phpinfo() function has been disabled for security reasons. To see your server\'s phpinfo() information, change your PHP settings or contact your server administrator. For more information, <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'http://drupal.org/node/243993')),
+      'description' => $t('The phpinfo() function has been disabled for security reasons. To see your server\'s phpinfo() information, change your PHP settings. For more information, see the <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'https://backdropcms.org/user-guide/enabling-and-disabling-phpinfo')),
       'severity' => REQUIREMENT_INFO,
     );
   }
 
+  // Minimum recommended PHP version can be incremented when deprecating older
+  // versions of PHP but while they are still supported. This does not throw
+  // a warning or error on updates to keep upgrade tests compatible.
+  $minimum_recommended_version = '5.6.0';
+  $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
+  if (version_compare($phpversion, $minimum_recommended_version) < 0) {
+    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
+    $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
+  }
+
+  // If PHP does not meet the bare minimum, remaining checks are unnecessary.
   if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
-    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
+    $requirements['php']['description'] = $minimum_warning;
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
-    // If PHP is old, it's not safe to continue with the requirements check.
     return $requirements;
   }
 
@@ -221,10 +231,7 @@ function system_requirements($phase) {
 
     if (!empty($description)) {
       if ($php_ini_path = get_cfg_var('cfg_file_path')) {
-        $description .= ' ' . $t('Increase the memory limit by editing the memory_limit parameter in the file %configuration-file and then restart your web server (or contact your system administrator or hosting provider for assistance).', array('%configuration-file' => $php_ini_path));
-      }
-      else {
-        $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
+        $description .= ' ' . $t('Increase the memory limit by editing the memory_limit parameter in the file %configuration-file and then restart your web server.', array('%configuration-file' => $php_ini_path));
       }
 
       $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url" target="_blank">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
@@ -884,7 +891,7 @@ function system_schema() {
   $schema['cache_menu'] = $schema['cache'];
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
-  $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
+  $schema['cache_path']['description'] = 'Cache table for URL alias lookup.';
   $schema['cache_token'] = $schema['cache'];
   $schema['cache_token']['description'] = 'Cache table for token information.';
 
@@ -1557,7 +1564,7 @@ function system_schema() {
     'description' => 'A list of URL aliases for Backdrop paths; a user may visit either the source or destination path.',
     'fields' => array(
       'pid' => array(
-        'description' => 'A unique path alias identifier.',
+        'description' => 'A unique URL alias identifier.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -3218,6 +3225,44 @@ function system_update_1077() {
     // the default.
     $config->set('admin_theme', $default_theme);
     $config->save();
+  }
+}
+
+/**
+ * Re-arrange flexible layout configuration so we can save region classes.
+ */
+function system_update_1078() {
+  $flexible_layouts = config_get_names_with_prefix('layout.flexible.');
+  foreach ($flexible_layouts as $layout_name) {
+    $config = config($layout_name);
+    $rows = $config->get('rows');
+    foreach ($rows as $row_key => $row) {
+      foreach ($row['region_names'] as $region_key => $region_name) {
+        $number = str_replace('region_name_', '', $region_key);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.label', $region_name);
+        $config->set('rows.' . $row_key . '.region_names.region_' . $number . '.name', backdrop_html_class($region_name));
+        $config->clear('rows.' . $row_key . '.region_names.' . $region_key);
+      }
+    }
+    $config->save();
+  }
+}
+
+/**
+ * Clear the cache to reset allowlist settings.
+ */
+function system_update_1079() {
+  backdrop_flush_all_caches();
+}
+
+/**
+ * Set homepage to 'user' if blank to match previous behavior.
+ */
+function system_update_1080() {
+  $config = config('system.core');
+  $site_frontpage = $config->get('site_frontpage');
+  if (empty($site_frontpage)) {
+    $config->set('site_frontpage', 'user');
   }
 }
 
