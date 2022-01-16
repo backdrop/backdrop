@@ -3734,7 +3734,7 @@ function theme_details($variables) {
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary>' . $summary_content . ' ' . $more_less_toggle . '</summary>';
+  $output .= '<summary>' . $summary_content . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }

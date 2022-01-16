@@ -114,10 +114,6 @@ small .admin-link:after {
 #system-modules td.operations {
   width: 120px;
 }
-#system-modules details.more-less-toggle > summary > span {
-  color: #000;
-  font-size: 100%;
-}
 div.admin-requirements,
 div.admin-required {
   font-size: 0.9em;

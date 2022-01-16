@@ -371,6 +371,9 @@ summary {
   display: block;
 }
 
+/**
+ * Special type of details elements, which use a customizable more/less toggle.
+ */
 details.more-less-toggle {
   background-color: transparent;
   border: none;
@@ -379,29 +382,31 @@ details.more-less-toggle {
   padding: 0;
 }
 
-/**
- * Special type of details elements, which use a customizable more/less toggle.
- */
+/* Remove the default details toggle icon (triangle). */
 details.more-less-toggle > summary {
+  /* This must be combined with "display: none;" for ::marker below. */
   list-style: none;
   /* Prevent the summary text from triggering open/close of the details. */
   pointer-events: none;
 }
-/* Hide the toggle arrow (must be combined with "list-style: none;" above). */
 details.more-less-toggle summary::marker,
 details.more-less-toggle summary::-webkit-details-marker {
+  /* Required in order to remove the default toggle icon (see above). */
   display: none;
 }
+
 /* Specifically trigger open/close of the details via the more/less toggle. */
 details.more-less-toggle summary span.more-less-toggle-label {
   pointer-events: auto;
   /* Prevent the more/less text from being split from the toggle icon. */
   white-space: nowrap;
+  padding: 0 3px;
 }
-/* Also allow any links within the summary text to be clickable. */
+/* Allow any links within the summary text to be clickable. */
 details.more-less-toggle summary a {
   pointer-events: auto;
 }
+
 details.more-less-toggle summary > span.more-less-toggle-label::before,
 details.more-less-toggle summary > span.more-less-toggle-label::after {
   color: #0074bd;
@@ -420,6 +425,7 @@ details.more-less-toggle:not([open]) summary .more-less-toggle-label::before {
 [dir="rtl"] details.more-less-toggle:not([open]) summary .more-less-toggle-label::after {
   content: attr(data-open-label);
 }
+
 /* The arrow icon next to the more/less toggle label. */
 details.more-less-toggle summary .more-less-toggle-label::after {
   content: '▶';
@@ -443,6 +449,7 @@ details.more-less-toggle[open] summary .more-less-toggle-label::after {
 [dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::before {
   transform: rotate(-90deg);
 }
+
 details.more-less-toggle .details-content-wrapper {
   margin-top: 0.5em;
 }
