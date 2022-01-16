@@ -384,7 +384,7 @@ details.more-less-toggle {
  */
 details.more-less-toggle > summary {
   list-style: none;
-  /* Prevent the summary text from triggering open/close of details. */
+  /* Prevent the summary text from triggering open/close of the details. */
   pointer-events: none;
 }
 /* Hide the toggle arrow (must be combined with "list-style: none;" above). */
@@ -392,37 +392,56 @@ details.more-less-toggle summary::marker,
 details.more-less-toggle summary::-webkit-details-marker {
   display: none;
 }
-/* Allow links within the summary to be clickable. */
-details.more-less-toggle > summary a {
+/* Specifically trigger open/close of the details via the more/less toggle. */
+details.more-less-toggle summary span.more-less-toggle-label {
   pointer-events: auto;
+  /* Prevent the more/less text from being split from the toggle icon. */
+  white-space: nowrap;
 }
-details.more-less-toggle > summary > span {
-  font-size: 100%;
+/* Also allow any links within the summary text to be clickable. */
+details.more-less-toggle summary a {
+  pointer-events: auto;
 }
 details.more-less-toggle summary > span.more-less-toggle-label::before,
 details.more-less-toggle summary > span.more-less-toggle-label::after {
   color: #0074bd;
   cursor: pointer;
-  /* Allow the more/less toggle and icon to trigger open/close of details. */
-  pointer-events: auto;
-  /* Prevent the more/less text from being split from the toggle icon. */
-  white-space: nowrap;
+  padding: 0 2px;
 }
 details.more-less-toggle[open] summary .more-less-toggle-label::before {
-  content: ' ' attr(data-close-label) ' ';
+  content: attr(data-close-label);
 }
 details.more-less-toggle:not([open]) summary .more-less-toggle-label::before {
-  content: ' ' attr(data-open-label) ' ';
+  content: attr(data-open-label);
+}
+[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::after {
+  content: attr(data-close-label);
+}
+[dir="rtl"] details.more-less-toggle:not([open]) summary .more-less-toggle-label::after {
+  content: attr(data-open-label);
 }
 /* The arrow icon next to the more/less toggle label. */
 details.more-less-toggle summary .more-less-toggle-label::after {
-  display: inline-block;
   content: '▶';
-  font-size: smaller;
+  display: inline-block;
+  font-size: 80%;
+  transition: 0.2s;
+}
+[dir="rtl"] details.more-less-toggle summary .more-less-toggle-label::before {
+  content: '◀';
+  display: inline-block;
+  font-size: 80%;
   transition: 0.2s;
 }
 details.more-less-toggle[open] summary .more-less-toggle-label::after {
   transform: rotate(90deg);
+}
+[dir="rtl"] details.more-less-toggle summary .more-less-toggle-label::after {
+  font-size: 100%;
+  transform: none;
+}
+[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::before {
+  transform: rotate(-90deg);
 }
 details.more-less-toggle .details-content-wrapper {
   margin-top: 0.5em;

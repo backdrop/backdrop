@@ -799,7 +799,7 @@ details {
   background-color: #ffffff;
   display: table-cell;
 }
-details summary span {
+details:not(.more-less-toggle) summary span {
   color: #0074bd;
   font-size: 120%;
 }
