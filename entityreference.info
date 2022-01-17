@@ -3,3 +3,7 @@ description = Defines a field type for referencing from other entities, such as 
 package = Fields
 backdrop = 1.x
 type = module
+
+dependencies[] = system (>= 1.21.0)
+dependencies[] = field
+dependencies[] = entity
