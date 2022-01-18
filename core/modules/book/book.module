@@ -335,8 +335,8 @@ function book_block_configure($delta = '', $settings = array()) {
     '#options' => $options,
     '#default_value' => $settings['book_mode'],
   );
-  $form['book_mode']['all pages']['#description'] = t('The block will contain the automatically generated menus for all of the site\'s books.');
-  $form['book_mode']['book pages']['#description'] = t('The block will contain only the one menu corresponding to the current page\'s book. If the current page is not in a book, no block will be displayed.');
+  $form['book_mode']['all pages']['#description'] = t("The block will contain the automatically generated menus for all of the site's books.");
+  $form['book_mode']['book pages']['#description'] = t("The block will contain only the one menu corresponding to the current page's book. If the current page is not in a book, no block will be displayed.");
 
   return $form;
 }
