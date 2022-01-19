@@ -13,7 +13,7 @@ define('ENTITYREFERENCE_DENIED', '- Restricted access -');
 function entityreference_field_info() {
   return array(
     'entityreference' => array(
-      'label' => 'Reference',
+      'label' => 'Entity Reference',
       'description' => t('Defines a field type for referencing other entities.'),
       'settings' => array(
         'target_type' => 'node',
@@ -1433,7 +1433,7 @@ function entityreference_entityreference_selection_plugins() {
   );
   if (module_exists('views')) {
     $plugins['views'] = array(
-        'title' => t('Views: Filter by a reference view'),
+        'title' => t('Views: Filter by an entity reference view'),
         'class' => 'EntityReferenceSelectionHandlerViews',
         'weight' => 0,
     );

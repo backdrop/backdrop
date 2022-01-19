@@ -25,7 +25,7 @@ function entityreference_field_views_data($field) {
         'base' => $entity_info['base table'],
         'base field' => $entity_info['entity keys']['id'],
         'label' => t('@entity referenced from !field_name', $parameters),
-        'group' => t('Reference'),
+        'group' => t('Entity Reference'),
         'title' => t('Referenced Entity'),
         'help' => t('A bridge to the @entity entity that is referenced via !field_name', $parameters),
       );
@@ -77,7 +77,7 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
         'base' => $entity_info['base table'],
         'base field' => $entity_info['entity keys']['id'],
         'label' => t('@entity referencing @target_entity from !field_name', $replacements),
-        'group' => t('Reference'),
+        'group' => t('Entity Reference'),
         'title' => t('Referencing entity'),
         'help' => t('A bridge to the @entity entity that is referencing @target_entity via !field_name', $replacements),
         'join_extra' => array(
@@ -103,7 +103,7 @@ function entityreference_views_plugins() {
   $plugins = array(
     'display' => array(
       'entityreference' => array(
-        'title' => t('Reference'),
+        'title' => t('Entity Reference'),
         'admin' => t('Reference Source'),
         'help' => 'Selects referenceable entities for a reference field',
         'handler' => 'entityreference_plugin_display',
@@ -118,7 +118,7 @@ function entityreference_views_plugins() {
     ),
     'style' => array(
       'entityreference_style' => array(
-        'title' => t('Reference list'),
+        'title' => t('Entity Reference list'),
         'help' => 'Returns results as a list of labels and rendered rows.',
         'handler' => 'entityreference_plugin_style',
         'theme' => 'views_view_unformatted',
