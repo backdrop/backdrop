@@ -1378,6 +1378,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
         if (empty($settings['links']) && isset($result[$delta][$target_type][$item[$column]]['links'])) {
           $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
         }
+        $result[$delta][$target_type][$item[$column]]['#theme'] .= '__entityreference';
         $depth = 0;
       }
       break;
@@ -1560,7 +1561,6 @@ function theme_entityreference_label($vars) {
  * @ingroup themeable.
  */
 function theme_entityreference_entity_id($vars) {
-  $settings = $vars['settings'];
   $item = $vars['item'];
 
   $output = '';
@@ -1568,4 +1568,41 @@ function theme_entityreference_entity_id($vars) {
   $output = check_plain($item['target_id']);
 
   return $output;
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function entityreference_preprocess_node(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Implements hook_preprocess_file_entity().
+ */
+function entityreference_preprocess_file_entity(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Implements hook_preprocess_taxonomy_term().
+ */
+function entityreference_preprocess_taxonomy_term(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Pass title display setting to templates.
+ *
+ * If #page is set in the rendered entity reference display mode then pass it to the template.
+ *
+ * @param array $variables
+ */
+function _entityreference_preprocess_set_title_display(&$variables) {
+  if (!strstr($variables['theme_hook_original'], 'entityreference')) {
+    return;
+  }
+  if (isset($variables['elements']['#page']) && $variables['elements']['#page'] !== NULL) {
+    $variables['page'] = $variables['elements']['#page'];
+  }
 }
