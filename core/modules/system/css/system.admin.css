@@ -234,7 +234,9 @@ span.admin-missing {
     white-space: nowrap;
   }
 }
-
+.system-status-report .duplicate-module-overriding {
+  font-weight: bold;
+}
 
 /**
  * Theme settings.
