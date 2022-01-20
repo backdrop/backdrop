@@ -534,7 +534,7 @@ function system_requirements($phase) {
     // Check for multiple versions of the same module.
     $files = system_rebuild_module_data();
     foreach ($files as $filename => $file) {
-      if (count($file->all_uris) > 1) {
+      if (isset($file->all_uris) && count($file->all_uris) > 1) {
         $items = array();
         foreach ($file->all_uris as $i => $uri) {
           $items[] = array(
