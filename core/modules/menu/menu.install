@@ -129,6 +129,22 @@ function menu_update_1004() {
 }
 
 /**
+ * Clean up duplicate menu item entries for login page router item.
+ */
+function menu_update_1005() {
+  // Get the lowest menu item id, which is the valid one. No regular menu items,
+  // which are provided by the menu module.
+  $valid_item = db_query("SELECT MIN(mlid) FROM {menu_links} WHERE link_path = 'user/login' AND module = 'system'")->fetchField();
+  // Delete all rows with path "user/login", that are not regular menu items
+  // (hence system module), and have a higher id than the valid one.
+  db_delete('menu_links')
+    ->condition('link_path', 'user/login')
+    ->condition('module', 'system')
+    ->condition('mlid', $valid_item, '>')
+    ->execute();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
