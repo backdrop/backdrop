@@ -532,8 +532,8 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 function system_modules($form, $form_state = array()) {
   backdrop_set_title('Modules');
 
-  // Collect status messages if we need them.
-  $messages = array();
+  // Collect multiple-version modules if we have any.
+  $multiple_version_modules = array();
 
   // JS-only table filters.
   $form['filter'] = array(
@@ -695,14 +695,18 @@ function system_modules($form, $form_state = array()) {
     // Note whether there are multiples module files with the same name in the
     // system and post them as warning messages.
     if (isset($module->all_uris) && count($module->all_uris) > 1) {
-      $messages['warning'][] = t('There are multiple versions of the %name module in the installation. See the <a href="/admin/reports/status">Status Report</a> for details.', array('%name' => $module->info['name']));
+      $multiple_version_modules[] = $module;
     }
 
     $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
   }
 
-  // Gather any messages and add them to the top of the form.
-  if (!empty($messages)) {
+  // If there are multiple versions, add a message about them to the top of the form.
+  if (!empty($multiple_version_modules)) {
+    foreach ($multiple_version_modules as $module) {
+      $items[] = $module->info['name'];
+    }
+    $messages['warning'][] = t('There are multiple versions of the following modules in the installation.') . theme('item_list', array('items' => $items)) . t('See the <a href="/admin/reports/status">Status Report</a> for details.');
     $form['messages'] = array(
       '#theme' => 'status_messages',
       '#messages' => $messages,
