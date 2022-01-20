@@ -532,6 +532,9 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 function system_modules($form, $form_state = array()) {
   backdrop_set_title('Modules');
 
+  // Collect status messages if we need them.
+  $messages = array();
+
   // JS-only table filters.
   $form['filter'] = array(
     '#type' => 'container',
@@ -688,7 +691,23 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
+
+    // Note whether there are multiples module files with the same name in the
+    // system and post them as warning messages.
+    if (count($module->all_uris) > 1) {
+      $messages['warning'][] = t('There are multiple versions of the %name module in the installation. See the <a href="/admin/reports/status">Status Report</a> for details.', array('%name' => $module->info['name']));
+    }
+
     $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
+  }
+
+  // Gather any messages and add them to the top of the form.
+  if (!empty($messages)) {
+    $form['messages'] = array(
+      '#theme' => 'status_messages',
+      '#messages' => $messages,
+      '#weight' => -100,
+    );
   }
 
   // Add basic information to the fieldsets.
@@ -1428,7 +1447,7 @@ function system_site_information_settings_validate($form, &$form_state) {
 
   // Get the normal path of the home page.
   form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
-  
+
   // Validate home page path.
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
