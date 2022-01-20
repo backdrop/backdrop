@@ -694,7 +694,7 @@ function system_modules($form, $form_state = array()) {
 
     // Note whether there are multiples module files with the same name in the
     // system and post them as warning messages.
-    if (count($module->all_uris) > 1) {
+    if (isset($module->all_uris) && count($module->all_uris) > 1) {
       $messages['warning'][] = t('There are multiple versions of the %name module in the installation. See the <a href="/admin/reports/status">Status Report</a> for details.', array('%name' => $module->info['name']));
     }
 
