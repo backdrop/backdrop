@@ -129,9 +129,17 @@ function menu_update_1004() {
 }
 
 /**
- * Clean up duplicate system menu item entries.
+ * Clean up duplicate user/login menu item entries.
  */
 function menu_update_1005() {
+  // Empty for sites that already patched with PR to remove user/login:
+  // @see https://github.com/backdrop/backdrop-issues/issues/5460
+}
+
+/**
+ * Clean up duplicate system menu item entries.
+ */
+function menu_update_1006() {
   // With MIN() we make sure, we get the lowest mlid, which is the valid one of
   // duplicates.
   $query = 'SELECT MIN(mlid) as min_mlid, link_path, menu_name, plid, depth FROM {menu_links}';
