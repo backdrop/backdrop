@@ -600,7 +600,6 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
       'link_title' => 'Menu link test',
       'module' => $module,
       'menu_name' => 'menu_test',
-      'customized' => 1,
     );
 
     $links['parent'] = $base_options + array(
@@ -696,6 +695,39 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
       );
       $this->assertMenuLinkParents($links, $expected_hierarchy);
     }
+
+    // Start over, forcefully delete child-1 from the database, simulating a
+    // database crash. Check that the children of child-1 have been reassigned
+    // to the parent, going up on the old path hierarchy stored in each of the
+    // links.
+    $links = $this->createLinkHierarchy($module);
+    // Don't do that at home.
+    db_delete('menu_links')
+      ->condition('mlid', $links['child-1']['mlid'])
+      ->execute();
+
+    $expected_hierarchy = array(
+      'parent' => FALSE,
+      'child-1-1' => 'parent',
+      'child-1-2' => 'parent',
+      'child-2' => 'parent',
+    );
+    $this->assertMenuLinkParents($links, $expected_hierarchy);
+
+    // Start over, forcefully delete the parent from the database, simulating a
+    // database crash. Check that the children of parent are now top-level.
+    $links = $this->createLinkHierarchy($module);
+    // Don't do that at home.
+    db_delete('menu_links')
+      ->condition('mlid', $links['parent']['mlid'])
+      ->execute();
+
+    $expected_hierarchy = array(
+      'child-1-1' => 'child-1',
+      'child-1-2' => 'child-1',
+      'child-2' => FALSE,
+    );
+    $this->assertMenuLinkParents($links, $expected_hierarchy);
   }
 
   /**
@@ -731,8 +763,6 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['parent']['mlid'])
       ->execute();
-    menu_rebuild();
-
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
@@ -748,8 +778,6 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     db_delete('menu_links')
       ->condition('mlid', $links['child-2']['mlid'])
       ->execute();
-    menu_rebuild();
-
     $expected_hierarchy = array(
       'child-1' => FALSE,
       'child-1-1' => 'child-1',
