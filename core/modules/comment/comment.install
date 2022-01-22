@@ -66,6 +66,9 @@ function comment_uninstall() {
   if (db_field_exists('node', 'comment_close_override')) {
     db_drop_field('node', 'comment_close_override');
   }
+  // Flush outdated cache data.
+  // @todo Be more specific re cache prefix.
+  cache('cache')->flush();
 
   // Remove default, un-modified view.
   $config = config('views.view.comments_recent');
