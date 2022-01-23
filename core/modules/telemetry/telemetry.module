@@ -100,19 +100,21 @@ function telemetry_get_data() {
  * Implements hook_cron().
  */
 function telemetry_cron() {
-  $last_run = state_get('telemetry_cron');
-  $interval = 86400; // One day in seconds.
-  if (REQUEST_TIME - $last_run > $interval) {
-    $telemetry_data = telemetry_get_data();
-    $destination_url = config_get('telemetry.settings', 'destination');
-    $response = backdrop_http_request($destination_url, array(
-      'method' => 'POST',
-      'data' => backdrop_json_encode($telemetry_data),
-      'headers' => array(
-        'Content-Type' => 'application/json',
-        'X-Site-Key' => _telemetry_site_key(),
-      ),
-    ));
+  if (settings_get('telemetry_enabled', TRUE)) {
+    $last_run = state_get('telemetry_cron');
+    $interval = 86400; // One day in seconds.
+    if (REQUEST_TIME - $last_run > $interval) {
+      $telemetry_data = telemetry_get_data();
+      $destination_url = config_get('telemetry.settings', 'destination');
+      $response = backdrop_http_request($destination_url, array(
+        'method' => 'POST',
+        'data' => backdrop_json_encode($telemetry_data),
+        'headers' => array(
+          'Content-Type' => 'application/json',
+          'X-Site-Key' => _telemetry_site_key(),
+        ),
+      ));
+    }
   }
 }
 

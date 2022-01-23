@@ -1834,7 +1834,7 @@ function filter_xss($string, $allowed_tags = NULL) {
 
   // Defuse all HTML entities.
   $string = str_replace('&', '&amp;', $string);
-  // Change back only well-formed entities in our whitelist:
+  // Change back only well-formed entities in our allowlist:
   // Decimal numeric entities.
   $string = preg_replace('/&amp;#([0-9]+;)/', '&#\1', $string);
   // Hexadecimal numeric entities.
@@ -2544,7 +2544,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     arguments for internal paths must be supplied in $options['query'], not
  *     included in $path.
  *   - If you provide an internal path and $options['alias'] is set to TRUE, the
- *     path is assumed already to be the correct path alias, and the alias is
+ *     path is assumed already to be the correct URL alias, and the alias is
  *     not looked up.
  *   - The special string '<front>' generates a link to the site's base URL.
  *   - If your external URL contains a query (e.g. http://example.com/foo?a=b),
@@ -2678,7 +2678,7 @@ function url($path = NULL, array $options = array()) {
     $langcode = isset($options['language']) && isset($options['language']->langcode) ? $options['language']->langcode : '';
     $alias = backdrop_get_path_alias($original_path, $langcode);
     if ($alias != $original_path) {
-      // Strip leading slashes from internal path aliases to prevent them
+      // Strip leading slashes from internal URL aliases to prevent them
       // becoming external URLs without protocol. /example.com should not be
       // turned into //example.com.
       $path = ltrim($alias, '/');
@@ -2814,7 +2814,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *   // will return an onmouseout attribute with JavaScript code that, when used
  *   // as attribute in a tag, will cause users to be redirected to another site.
  *   //
- *   // In this case, the 'onmouseout' attribute should not be whitelisted --
+ *   // In this case, the 'onmouseout' attribute should not be allowed --
  *   // you don't want users to have the ability to add this attribute or others
  *   // that take JavaScript commands.
  *   backdrop_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));
@@ -8743,12 +8743,18 @@ function backdrop_check_incompatibility(array $dependency_info, $current_version
  * Converts a Backdrop version string into numeric-only version string.
  *
  * @param string $version_string
- *   A version string such as 1.10.0-beta4 or 1.4.x-dev.
+ *   A version string such as 1.x-1.2.3, 1.10.0-beta4, or 1.4.x-dev.
  * @return string
  *   A converted string only containing numbers, for use in PHP's
  *   version_compare() function.
  */
 function _backdrop_version_compare_convert($version_string) {
+  // Remove the "1.x-" prefix (indicating Backdrop core version compatibility).
+  $core_prefix = BACKDROP_CORE_COMPATIBILITY . '-';
+  if (strpos($version_string, $core_prefix) === 0) {
+    $version_string = substr($version_string, strlen($core_prefix));
+  }
+
   // Convert "dev" releases to be the highest possible version number. For
   // example 1.5.x-dev should be considered higher than any other 1.5 release,
   // so we replace .x with 99999.

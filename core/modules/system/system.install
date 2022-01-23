@@ -891,7 +891,7 @@ function system_schema() {
   $schema['cache_menu'] = $schema['cache'];
   $schema['cache_menu']['description'] = 'Cache table for the menu system to store router information as well as generated link trees for various menu/page/user combinations.';
   $schema['cache_path'] = $schema['cache'];
-  $schema['cache_path']['description'] = 'Cache table for path alias lookup.';
+  $schema['cache_path']['description'] = 'Cache table for URL alias lookup.';
   $schema['cache_token'] = $schema['cache'];
   $schema['cache_token']['description'] = 'Cache table for token information.';
 
@@ -1564,7 +1564,7 @@ function system_schema() {
     'description' => 'A list of URL aliases for Backdrop paths; a user may visit either the source or destination path.',
     'fields' => array(
       'pid' => array(
-        'description' => 'A unique path alias identifier.',
+        'description' => 'A unique URL alias identifier.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -3245,6 +3245,24 @@ function system_update_1078() {
       }
     }
     $config->save();
+  }
+}
+
+/**
+ * Clear the cache to reset allowlist settings.
+ */
+function system_update_1079() {
+  backdrop_flush_all_caches();
+}
+
+/**
+ * Set homepage to 'user' if blank to match previous behavior.
+ */
+function system_update_1080() {
+  $config = config('system.core');
+  $site_frontpage = $config->get('site_frontpage');
+  if (empty($site_frontpage)) {
+    $config->set('site_frontpage', 'user');
   }
 }
 

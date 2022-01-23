@@ -60,7 +60,9 @@ jobs:
           curl -sI 'http://localhost/'
 
       - name: Install Backdrop
-        run: core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
+        run: |
+          cp ./.github/misc/settings.local.php .
+          core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
 
       - name: Run tests
         run: |
