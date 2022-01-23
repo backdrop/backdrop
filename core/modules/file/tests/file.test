@@ -2869,7 +2869,7 @@ class FileTypeTestCase extends FileTestHelper {
     $this->assertText($edit['name'], 'New file type created: name found.');
     $this->assertText($edit['description'], 'New file type created: description found.');
     $this->assertFieldByXPath("//table//td[1]//div[1]", $edit['name'], 'The label of the newly-created file type is shown in the table.');
-    $this->assertFieldByXPath("//table//td[1]//div[2]", '(' . t('Machine name: @machine_name', array('@machine_name' => $edit['type']])) . ')', 'The machine name of the newly-created file type is shown in the table.');
+    $this->assertFieldByXPath("//table//td[1]//div[2]", '(' . t('Machine name: @machine_name', array('@machine_name' => $edit['type'])) . ')', 'The machine name of the newly-created file type is shown in the table.');
     $this->assertFieldByXPath("//table//td[2]", $edit['description'], 'The description of the newly-created file type is shown in the table.');
     $this->assertFieldByXPath("//table//td[3]", t('Custom'), 'The storage state of the newly-created file type is shown in the table.');
     $this->assertLink(t('Disable'), 0, 'Able to disable newly created file type.');

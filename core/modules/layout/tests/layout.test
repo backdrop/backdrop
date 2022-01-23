@@ -2040,6 +2040,11 @@ class LayoutBlockTest extends BackdropWebTestCase {
       'type' => 'page',
       'title' => "Test node title",
     ));
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Remove'), 3);
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check page title exists.
     $this->backdropGet('node/1');
@@ -2062,7 +2067,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
 
-    // Go to the welcome page and check that the title div is absent.
+    // Go to the "your first post" page and check that the title div is absent.
     $this->backdropGet('node/1');
     $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
     $this->assertEqual(count($page_title), 0, 'The page title was not found.');
@@ -2318,6 +2323,8 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     // Create a web user.
     $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
 
+    // Test ordinary role-based selection.
+
     // Create a layout at a custom path.
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name;
@@ -2328,7 +2335,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'layout_template' => 'moscone_flipped',
     );
 
-    // Note that this adds a condition, not saving the layout yet.
+    // This adds a condition, not saving the layout yet.
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
 
     // Select the condition to add.
@@ -2345,6 +2352,31 @@ class LayoutSelectionTest extends BackdropWebTestCase {
 
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Create layout'));
+
+    // View as an administrator.
+    $this->backdropGet($layout_path);
+    $this->assertResponse(200);
+    $this->backdropLogout();
+
+    // View as a basic user.
+    $this->backdropLogin($web_user);
+    $this->backdropGet($layout_path);
+    $this->assertResponse(200);
+    $this->backdropLogout();
+
+    // View as anonymous, where they should get a 404.
+    $this->backdropGet($layout_path);
+    $this->assertResponse(404);
+
+     // Go back and configure the visibility condition to test a negated role.
+    $this->backdropLogin($admin_user);
+
+    $edit = array(
+      'roles[authenticated]' => FALSE,
+      'roles[anonymous]' => TRUE,
+      'negate' => TRUE,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/condition/edit/layout/0', $edit, t('Save visibility condition'));
 
     // View as an administrator.
     $this->backdropGet($layout_path);
@@ -3134,9 +3166,12 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
 
     // Edit the header row and check that the changes are reflected on the
     // template editor page and the layout path.
-    $this->clickLink(t('Configure row'), 0);
+    $this->clickLink(t('Configure'), 0);
     $edit = array(
-      'region_names[region_name_0]' => 'New header',
+      'region_names[region_0][label]' => 'New header',
+      'region_names[region_0][name]' => 'new-header-new',
+      'region_names[region_0][classes]' => 'blue-blue',
+      'region_names[region_0][region_class_enable]' => TRUE,
       'row_classes' => 'new-class another-class',
       'element' => 'main',
       'container' => 'no_container',
@@ -3152,6 +3187,25 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     $header_row = $this->xpath("//main[contains(@class, :row_class)]//h2[text()=:row_title]", array(':row_class' => 'l-' . $layout_region_names[0], ':row_title' => 'New header'));
     $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the block add page.');
+
+    // Check that header region class has changed.
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'l-region--new-header-new blue-blue'));
+    $this->assertEqual(count($rows), 1, 'The header region class has been renamed in the block add page.');
+
+    // Disable the additional CSS classes.
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->clickLink(t('Configure'), 0);
+    $edit = array(
+      'region_names[region_0][region_class_enable]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Go to the block add page and check that the header region class does not
+    // have additional classes.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $rows = $this->xpath("//div[contains(@class, :region_class)]", array(':region_class' => 'l-region--1 blue-blue'));
+    $this->assertNotEqual(count($rows), 1, 'The header region class has no additional classes.');
 
     // Go to the layout path and check that the header region was renamed and
     // the block is still in the header region.
@@ -3179,7 +3233,11 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Continue'));
     // Rename just the first region.
     $edit = array(
-      'region_names[region_name_0]' => 'First region',
+      'region_names[region_0][label]' => 'First region',
+      // Machine names have to be set manually.
+      'region_names[region_0][name]' => 'first-region',
+      'region_names[region_1][name]' => 'region-2',
+      'region_names[region_2][name]' => 'region-3',
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->backdropPost(NULL, array(), t('Save layout template'));

@@ -1297,7 +1297,7 @@ class views_handler_filter extends views_handler {
         }
 
         if ($this->operator != 'empty' && $this->operator != 'not empty') {
-          if ($value == 'All' || $value === array()) {
+          if ($value === 'All' || $value === array() || $value === 0) {
             return FALSE;
           }
         }

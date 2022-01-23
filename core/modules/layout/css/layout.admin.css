@@ -1,3 +1,7 @@
+/**
+ * Layout admin css.
+ */
+
 /* Layout listing form. */
 .layout-list .layout-group td {
   background: #dddddd;
@@ -81,6 +85,37 @@
   margin-left: 0;
 }
 
+/* Inject a little space after the path matches text within the description. */
+#layout-path-matches {
+  margin-bottom: 0.5em;
+}
+.layout-placeholder-examples {
+  margin-top: 0.5em;
+}
+
+/* Toggle for the placeholder examples */
+.layout-placeholder-examples-toggle {
+  white-space: nowrap;
+}
+.layout-placeholder-examples-toggle .arrow {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 0.3333em 0.3333em 0;
+  display: inline-block;
+  height: 0;
+  line-height: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0.15em 0.3333em;
+}
+.layout-placeholder-examples-toggle .arrow.close {
+  border-top-color: transparent;
+  border-bottom-color: #0074bd;
+  border-width: 0 0.3333em 0.3333em;
+}
+
 /* Menu item argument settings. */
 #layout-arguments strong,
 #layout-context-table strong {
@@ -149,6 +184,9 @@
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
+.layout-editor-region-title {
+  padding: 0 0 10px 0;
+}
 .layout-editor-region-title .label {
   float: left; /* LTR */
   margin: 0;
@@ -156,7 +194,7 @@
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
-  color: #908990;
+  color: #5b575b;
 }
 [dir="rtl"] .layout-editor-region-title .label {
   float: right;
@@ -169,7 +207,7 @@
 .layout-editor-region-title .dropbutton-wrapper {
   float: left; /* LTR */
   width: 140px;
-  margin: 4px 0 10px
+  margin: 4px 0 10px;
 }
 [dir="rtl"] .layout-editor-region-title .dropbutton-wrapper {
   float: right;
@@ -337,39 +375,6 @@
   }
 }
 
-.layout-flexible-region-buttons {
-  padding-bottom: 5px;
-}
-
-.layout-flexible-editor .flexible-row {
-  padding: 15px 0 0;
-}
-
-.layout-flexible-editor .flexible-row:hover {
-  background-color: #ffffff;
-  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
-  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
-  box-shadow: 2px 2px 0 0 #d0d0d0;
-  cursor: move;
-}
-
-.flexible-layout-add-row {
-  margin: 20px 40px 0;
-}
-
-.flexible-icon {
-  border: 2px solid #999;
-  border-radius: 3px;
-  padding: 1px;
-}
-
-.flexible-icon-region {
-  background-color: #ccc;
-  color: #fff;
-  background-clip: content-box;
-  text-align: center;
-}
-
 .form-item .form-item.form-item-region-count {
   margin-right: 2em;
   display: inline;
@@ -379,7 +384,9 @@
   padding: 0.5em 0.5em;
   background: #e9e8e8;
   border-radius: 4px 4px 0 0;
-  margin: 1em 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  margin: 1em 0 0;
 }
 .edit-layout-top .dropbutton-wrapper {
   float: right; /* LTR */

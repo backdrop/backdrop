@@ -499,6 +499,11 @@ function user_admin_permissions_submit($form, &$form_state) {
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
+  $form['roles_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
+  );
+
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
@@ -639,7 +644,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#size' => 30,
     '#required' => TRUE,
     '#maxlength' => 64,
-    '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
+    '#description' => t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
   );
   $form['name'] = array(
     '#type' => 'machine_name',
@@ -658,6 +663,13 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#value' => empty($role->weight) ? 0 : $role->weight,
   );
   $form['actions'] = array('#type' => 'actions');
+  // Only show the 'Save and set permissions' button when creating a new role.
+  if (empty($role)) {
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and set permissions'),
+    );
+  }
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save role'),
@@ -666,8 +678,8 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#type' => 'link',
     '#href' => 'admin/config/people/roles',
     '#title' => t('Cancel'),
+    '#options' => array('attributes' => array('class' => array('form-cancel'))),
   );
-  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
@@ -676,6 +688,9 @@ function user_admin_role($form, &$form_state, $role = NULL) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
+  // Set the default redirect.
+  $redirect = 'admin/config/people/roles';
+
   if (empty($form_state['role'])) {
     // Save a new role.
     $role = (object) array(
@@ -684,6 +699,11 @@ function user_admin_role_submit($form, &$form_state) {
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
+    // Determine whether it was the 'Save and set permissions' or the 'Save
+    // role' button that was clicked, and set the form redirect accordingly.
+    if ($form_state['triggering_element']['#id'] == 'edit-continue') {
+      $redirect = 'admin/config/people/permissions';
+    }
   }
   else {
     // Update existing role.
@@ -695,7 +715,7 @@ function user_admin_role_submit($form, &$form_state) {
     backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
   }
 
-  $form_state['redirect'] = 'admin/config/people/roles';
+  $form_state['redirect'] = $redirect;
 }
 
 /**

@@ -1383,7 +1383,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     // The following errors are always shown.
     if (isset($elements['#needs_validation'])) {
       // Verify that the value is not longer than #maxlength.
-      if (isset($elements['#maxlength']) && backdrop_strlen($elements['#value']) > $elements['#maxlength']) {
+      if (isset($elements['#maxlength']) && is_string($elements['#value']) && backdrop_strlen($elements['#value']) > $elements['#maxlength']) {
         form_error($elements, $t('!name cannot be longer than %max characters but is currently %length characters long.', array('!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'], '%max' => $elements['#maxlength'], '%length' => backdrop_strlen($elements['#value']))));
       }
 
@@ -3617,7 +3617,10 @@ function form_process_container($element, &$form_state) {
  * renderable element, to surround it with a <div> and add attributes such as
  * classes or an HTML id.
  *
- * See the @link https://api.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
+ * theme_container() also handles 'checkboxes' and 'radios' elements.
+ * See: https://docs.backdropcms.org/change-records/functions-theme_radios-and-theme_checkboxes-have-been-removed
+ *
+ * See the @link https://docs.backdropcms.org/form_api#theme_wrappers Form API reference @endlink
  * for more information on the #theme_wrappers render array property.
  *
  * @param $variables
@@ -3629,18 +3632,26 @@ function form_process_container($element, &$form_state) {
  */
 function theme_container($variables) {
   $element = $variables['element'];
-  // Ensure #attributes is set.
+  // Ensure #attributes is set, while preserving any existing attribute(s).
   $element += array('#attributes' => array());
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an html ID.
+    // Assign an HTML ID.
     if (!array_key_exists('id', $element['#attributes'])) {
       $element['#attributes']['id'] = $element['#id'];
     }
-    // Add the form-wrapper class.
-    if (empty($element['#attributes']['class'])) {
-      $element['#attributes']['class'][] = 'form-wrapper';
+    // Add the 'form-wrapper' class if not already added, but only for
+    // 'container' elements. theme_container() also handles 'checkboxes' and
+    // 'radios' elements, but #states breaks for them if the 'form-wrapper'
+    // class is added.
+    if (isset($element['#type']) && $element['#type'] == 'container') {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      if (!in_array('form-wrapper', $element['#attributes']['class'])) {
+        $element['#attributes']['class'][] = 'form-wrapper';
+      }
     }
   }
 

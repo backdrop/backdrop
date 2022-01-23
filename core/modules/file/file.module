@@ -3293,37 +3293,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  *   An array as expected by backdrop_render().
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Populate $file->content with a render() array.
-  file_build_content($file, $view_mode, $langcode);
-
-  $build = $file->content;
-  // We don't need duplicate rendering info in $file->content.
-  unset($file->content);
-
-  $build += array(
-    '#theme' => 'file_entity',
-    '#file' => $file,
-    '#view_mode' => $view_mode,
-    '#language' => $langcode,
-  );
-
-  // Add contextual links for this file, except when the file is already being
-  // displayed on its own page. Modules may alter this behavior (for example,
-  // to restrict contextual links to certain view modes) by implementing
-  // hook_file_view_alter().
-  if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
-    $build['#contextual_links']['file'] = array('file', array($file->fid));
-  }
-
-  // Allow modules to modify the structured file.
-  $type = 'file';
-  backdrop_alter(array('file_view', 'entity_view'), $build, $type);
-
-  return $build;
+  return $file->view($view_mode, $langcode);
 }
 
 /**
@@ -3338,53 +3308,7 @@ function file_view($file, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->language;
-  }
-
-  // Remove previously built content, if exists.
-  $file->content = array();
-
-  // In case of a multiple view, file_view_multiple() already ran the
-  // 'prepare_view' step. An internal flag prevents the operation from running
-  // twice.
-  // Allow modules to change the view mode.
-  $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $view_mode, $langcode));
-  field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
-  entity_prepare_view('file', array($file->fid => $file), $langcode);
-
-  // Build the actual file display.
-  // @todo Figure out how to clean this crap up.
-  $file->content['file'] = file_view_file($file, $view_mode, $langcode);
-  if (isset($file->content['file'])) {
-    if (isset($file->content['file']['#theme']) && $file->content['file']['#theme'] != 'file_link') {
-      unset($file->content['file']['#file']);
-    }
-    unset($file->content['file']['#view_mode']);
-    unset($file->content['file']['#language']);
-  }
-  else {
-    unset($file->content['file']);
-  }
-
-  // Build fields content.
-  $file->content += field_attach_view('file', $file, $view_mode, $langcode);
-
-  $links = array();
-  $file->content['links'] = array(
-    '#theme' => 'links__file',
-    '#pre_render' => array('backdrop_pre_render_links'),
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-  $file->content['links']['file'] = array(
-    '#theme' => 'links__file__file',
-    '#links' => $links,
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-
-  // Allow modules to make their own additions to the file.
-  module_invoke_all('file_view', $file, $view_mode, $langcode);
-  module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
+  $file->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -3438,7 +3362,7 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
     }
     $display_info = array(
       'type' => $formatter,
-      'settings' => $display['settings'][$formatter],
+      'settings' => isset($display['settings'][$formatter]) ? $display['settings'][$formatter] : array(),
     );
     $element = $function($file, $display_info, $langcode);
   }

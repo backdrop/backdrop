@@ -959,7 +959,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
-    'description' => 'Settings related to URLs including path aliases and URL recirects.',
+    'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1503,7 +1503,7 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.12.1',
+    'version' => '1.13.0',
     'js' => array(
       'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1513,7 +1513,7 @@ function system_library_info() {
       'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.escape-selector.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1842,12 +1842,28 @@ function system_library_info() {
       array('system', 'ui'),
     ),
   );
+
+  // The jQuery Color library was separate from jQuery UI: Effects in version
+  // 1.13.0 of jQuery UI. The version used here should be locked to the version
+  // shipped with jQuery UI.
+  $libraries['jquery.color'] = array(
+    'title' => 'jQuery Color',
+    'website' => 'https://github.com/jquery/jquery-color',
+    'version' => '2.2.0',
+    'js' => array(
+      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+  );
+
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.color'),
     ),
   );
   $libraries['effects.blind'] = array(
@@ -2838,7 +2854,11 @@ function system_update_files_database(&$files, $type) {
   // If any module or theme was moved to a new location, we need to reset the
   // system_list() cache or we will continue to load the old copy, look for
   // schema updates in the wrong place, etc.
-  system_list_reset();
+  // We avoid system_list_reset() since this resets the static storage in
+  // system_rebuild_module_data(), which itself calls this function.
+  backdrop_static_reset('system_list');
+  backdrop_static_reset('list_themes');
+  cache('bootstrap')->deleteMultiple(array('bootstrap_modules', 'system_list'));
 }
 
 /**
@@ -3908,8 +3928,10 @@ function system_get_date_formats($date_format_name = NULL) {
   $date_formats = &backdrop_static(__FUNCTION__, array());
   if (empty($date_formats)) {
     $date_formats = config_get('system.date', 'formats');
-    foreach ($date_formats as $name => $format) {
-      $date_formats[$name]['name'] = $name;
+    if (is_array($date_formats)) {
+      foreach ($date_formats as $name => $format) {
+        $date_formats[$name]['name'] = $name;
+      }
     }
   }
 
@@ -4555,3 +4577,60 @@ function system_theme_debug_enabled_warning() {
     backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
   }
 }
+
+/**
+ * Wrapper around transliteration_get() that handles common clean up on strings.
+ *
+ * @param string $string
+ *   The string to be transliterated.
+ * @param array $options
+ *   An array of options for further cleanup. This array includes:
+ *   - langcode: The language code of the source string.
+ *   - replace: The character with which to replace unknown characters in the
+ *     string. Defaults to '_'.
+ *   - replace_pattern: A pattern for replacing unknown characters with the
+ *     "replace" value.
+ *   - maxlength: The maximum allowed length of the returned string.
+ *
+ * @return string
+ *   The transliterated and cleaned up string.
+ */
+
+function system_transliterate_machine_name($string, $options = array()) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $defaults = array(
+    'langcode' => $GLOBALS['language']->langcode,
+    'replace' => '_',
+    'replace_pattern' => NULL,
+    'maxlength' => NULL,
+  );
+  $options = array_intersect_key($options, $defaults) + $defaults;
+
+  // Build the default replacement pattern on the given "replace" property.
+  if (!isset($options['replace_pattern'])) {
+    $options['replace_pattern'] = '[^0-9A-Za-z' . $options['replace'] . ']+';
+  }
+
+  $replace = $options['replace'];
+  $string = transliteration_get($string, $replace, $options['langcode']);
+
+  // Remove remaining unsafe characters.
+  if ($options['replace_pattern']) {
+    $string = preg_replace('/' . $options['replace_pattern'] . '/', $options['replace'], $string);
+  }
+  // Replace whitespace.
+  $string = str_replace(' ', $replace, $string);
+  // Remove leading and trailing whitespace/unknown characters.
+  $string = trim($string, $replace);
+  // Collapse multiple consecutive replacement characters.
+  $replace_regex = strlen($replace) ? "([$replace])[$replace]+|" : '';
+  $string = preg_replace("/{$replace_regex}(_)_+|(\\.)\\.+|(-)-+/", '$1$2$3$4$5', $string);
+
+  // Set maxlength.
+  if ($options['maxlength']) {
+    $string = substr($string, 0, $options['maxlength']);
+  }
+
+  return $string;
+}
+
