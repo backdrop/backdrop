@@ -7,7 +7,7 @@
  */
 
 /**
- * Output a list of pages that are managed.
+ * Output a list of layouts that are managed.
  */
 function layout_list_page() {
   $layouts = layout_load_all();
@@ -94,7 +94,34 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
+  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
+  $help_items = array();
+  $help_items[] = array(
+    'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.'),
+    'children' => array(
+      t('Each path may have one or more layouts available. These are listed beneath the path.'),
+      array(
+        'data' => t('The top available layout for each path is is evaluated for matching visibility conditions first, followed by the second, etc.'),
+        'children' => array(t('Available layouts can be reordered to adjust priority.')),
+      ),
+      t('The first layout to match all conditions will be selected.'),
+    ),
+  );
+  $help_items[] = t('If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.');
+  $help .= theme('item_list', array('items' => $help_items));
+  $help .= '<p>' . t('Note: Paths used by the layout system are <em>menu router paths</em>, not normal paths or !link. For the default About page, <code>node/%</code> is the menu router path, <code>node/2</code> is the normal path, and <code>about</code> is the URL alias.', array('!link' => l(t('URL aliases'), 'admin/config/urls/path'))) . '</p>';
+  $help .= '<p class="align-right">' . t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.') . '</p>';
+
   $page = array();
+  $page['help'] = array(
+    '#type' => 'details',
+    '#summary' => t('How layouts work'),
+    '#details' => $help,
+    '#attributes' => array(
+      'class' => array('description'),
+    ),
+  );
+
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $page['table'] = array(
     '#theme' => 'table',
@@ -281,23 +308,83 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     }
   }
 
-  $items = array(
+  // Path entry field with dynamic information about the entered path and
+  // toggleable placeholder examples.
+  $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
+  $is_new = isset($layout->is_new) && $layout->is_new;
+  $has_placeholder = strpos($path, '%') !== FALSE;
+  if (empty($path)) {
+    $path_matches_text = t('Please enter a path.');
+  }
+  else {
+    if (_layout_menu_router_path_exists($path)) {
+      if ($has_placeholder) {
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern.');
+        }
+      }
+      else {
+        if ($is_new) {
+          $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+        }
+        else {
+          $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern.');
+        }
+      }
+    }
+    else {
+      if ($has_placeholder) {
+        if ($is_new) {
+          $path_matches_text = t('This path will create pages whose paths match this pattern.');
+        }
+        else {
+          $path_matches_text = t('This path provides pages whose paths match this pattern.');
+        }
+      }
+      else {
+        if ($is_new) {
+          $path_matches_text = t('This path will create a page at this path.');
+        }
+        else {
+          $path_matches_text = t('This path provides a page at this path.');
+        }
+      }
+    }
+  }
+  $form['path_matches_text'] = array(
+    '#type' => 'value',
+    '#value' => $path_matches_text,
+  );
+  $path_matches = array(
+    '#type' => 'container',
+    '#access' => !$layout->isDefault(),
+    '#attributes' => array(
+      'id' => array('layout-path-matches'),
+    ),
+    'path_matches_text' => array('#markup' => $path_matches_text),
+  );
+  $path_matches_description = backdrop_render($path_matches);
+  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+  $description_items = array(
     t('Content: <code>node/%</code>'),
     t('User accounts: <code>user/%</code>'),
     t('Taxonomy terms: <code>taxonomy/term/%</code>'),
     t('Comments: <code>comment/%</code>'),
   );
-  $description_list = theme('item_list', array('items' => $items));
-
+  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => '<p>' . t('Use the percent symbol ("%") to indicate a placeholder in the path. Some common examples include:') . '</p>' . $description_list,
     '#access' => !$layout->isDefault(),
+    '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
   );
+
   $form['path_update'] = array(
     '#type' => 'submit',
     '#value' => t('Check path'),
@@ -323,12 +410,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Get all contexts except those provided by relationships.
   $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
+  $context_description = t('Contexts provide additional information to blocks displayed within the layout. Most placeholders in the path will automatically create context(s).');
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most placeholders in the path will be associated with a context automatically.'),
-    // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
@@ -337,7 +423,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'container',
     '#parents' => array('context'),
   );
-
+  $form['context_wrapper']['context']['description'] = array(
+    '#markup' => '',
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
+  );
   $form['context_wrapper']['context']['links'] = array(
     '#theme' => 'layout_action_links',
   );
@@ -372,7 +462,9 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
         'callback' => 'layout_ajax_form_open_dialog',
       ),
     );
+    $context_description .= ' ' . t('Relationships create contexts from data provided by existing contexts.');
   }
+  $form['context_wrapper']['context']['description']['#markup'] = $context_description;
 
   $all_context_info = _layout_get_all_info('layout_context');
   $context_options = array();
@@ -519,9 +611,13 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['conditions'] = array(
     '#title' => t('Visibility conditions'),
     '#type' => 'item',
-    '#description' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same placeholder path.'),
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
+  );
+  $form['conditions']['description'] = array(
+    '#markup' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same path.'),
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
   );
   $form['conditions']['links'] = array(
     '#theme' => 'layout_action_links',
@@ -539,6 +635,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+
   $form['conditions']['active'] = array(
     '#type' => 'container',
     '#theme' => 'layout_conditions',
@@ -616,6 +713,20 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 }
 
 /**
+ * Helper function to determine whether a layout path is an existing menu router
+ * path.
+ */
+function _layout_menu_router_path_exists($path) {
+  $path_matches = db_query('
+    SELECT path, page_callback
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchAll();
+  return !empty($path_matches);
+}
+
+/**
  * Validates layout_settings_form(), ensuring a valid path.
  */
 function layout_settings_form_validate(&$form, &$form_state) {
@@ -667,18 +778,23 @@ function layout_settings_form_validate(&$form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_settings_form() that updates available contexts.
+ * Submit handler for layout_settings_form().
+ *
+ * Updates available contexts and information about path matching.
  */
 function layout_settings_form_path_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
 /**
- * AJAX handler for layout_settings_form() the returns updated contexts.
+ * AJAX handler for layout_settings_form().
+ *
+ * Returns updated contexts and information about path matching.
  */
 function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+  $commands[] = ajax_command_html('#layout-path-matches', $form['path_matches_text']['#value']);
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
   return array(
     '#type' => 'ajax',
@@ -3159,7 +3275,8 @@ function layout_block_list() {
   );
 
   $page['description_container']['description'] = array(
-    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'.") . '<p>',
+    '#type' => 'help',
+    '#markup' => t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'."),
   );
 
   $page['table'] = array(

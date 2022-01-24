@@ -87,11 +87,18 @@ function book_autoload_info() {
  */
 function book_node_view_link(Node $node, $view_mode) {
   $links = array();
+  $config = config('book.settings');
+  $link_options = $config->get('book_links');
 
   if (isset($node->book['depth'])) {
     if ($view_mode == 'full' && node_is_page($node)) {
-      $child_type = config_get('book.settings', 'book_child_type');
-      if ((user_access('add content to books') || user_access('administer book outlines')) && node_access('create', $child_type) && $node->status == 1 && $node->book['depth'] < MENU_MAX_DEPTH) {
+      $child_type = $config->get('book_child_type');
+      $admin_access = user_access('add content to books') || user_access('administer book outlines');
+      $link_options = $config->get('book_links');
+      $create_access = node_access('create', $child_type);
+      $depth_allowed = $node->book['depth'] < MENU_MAX_DEPTH;
+      $show_add_child_link = in_array('book_add_child', $link_options, TRUE);
+      if ($admin_access && $create_access && $node->status == 1 && $depth_allowed && $show_add_child_link) {
         $links['book_add_child'] = array(
           'title' => t('Add child page'),
           'href' => 'node/add/' . str_replace('_', '-', $child_type),
@@ -850,7 +857,7 @@ function book_node_load($nodes, $types) {
  */
 function book_node_view(Node $node, $view_mode) {
   if ($view_mode == 'full') {
-    if (!empty($node->book['bid']) && empty($node->in_preview)) {
+    if (!empty($node->book['bid']) && empty($node->in_preview) && config_get('book.settings', 'book_navigation')) {
       $node->content['book_navigation'] = array(
         '#markup' => theme('book_navigation', array('book_link' => $node->book)),
         '#weight' => 100,
@@ -1007,7 +1014,8 @@ function book_form_node_delete_confirm_alter(&$form, $form_state) {
 
   if (isset($node->book) && $node->book['has_children']) {
     $form['book_warning'] = array(
-      '#markup' => '<p>' . t('%title is part of a book outline, and has associated child pages. If you proceed with deletion, the child pages will be relocated automatically.', array('%title' => $node->title)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('%title is part of a book outline, and has associated child pages. If you proceed with deletion, the child pages will be relocated automatically.', array('%title' => $node->title)),
       '#weight' => -10,
     );
   }

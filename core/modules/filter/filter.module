@@ -574,10 +574,10 @@ function filter_format_allowed_html($format) {
     }
   }
 
-  // Simplification: if we have both a (intersected) whitelist and a (unioned)
-  // blacklist, then remove any tags from the whitelist that also exist in the
-  // blacklist. Now the whitelist alone expresses all tag-level restrictions,
-  // and we can delete the blacklist.
+  // Simplification: if we have both a (intersected) allowlist and a (unioned)
+  // denylist, then remove any tags from the allowlist that also exist in the
+  // denylist. Now the allowlist alone expresses all tag-level restrictions,
+  // and we can delete the denylist.
   if (isset($restrictions['allowed']) && isset($restrictions['forbidden'])) {
     foreach ($restrictions['forbidden'] as $tag) {
       if (isset($restrictions['allowed'][$tag])) {
@@ -588,8 +588,8 @@ function filter_format_allowed_html($format) {
   }
 
   // Simplification: if the only remaining allowed tag is the asterisk (which
-  // contains attribute restrictions that apply to all tags), and only
-  // whitelisting filters were used, then effectively nothing is allowed.
+  // contains attribute restrictions that apply to all tags), and only allow
+  // filters were used, then effectively nothing is allowed.
   if (isset($restrictions['allowed'])) {
     if (count($restrictions['allowed']) === 1 && array_key_exists('*', $restrictions['allowed']) && !isset($restrictions['forbidden'])) {
       $restrictions['allowed'] = array();
@@ -1251,7 +1251,7 @@ function filter_process_format($element) {
 
   // Ensure that children appear as subkeys of this element.
   $element['#tree'] = TRUE;
-  $blacklist = array(
+  $denylist = array(
     // Make form_builder() regenerate child properties.
     '#parents',
     '#id',
@@ -1273,7 +1273,7 @@ function filter_process_format($element) {
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {
-    if (!in_array($key, $blacklist)) {
+    if (!in_array($key, $denylist)) {
       $element['value'][$key] = $element[$key];
     }
   }
