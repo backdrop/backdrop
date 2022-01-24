@@ -25,7 +25,7 @@ class views_handler_field_node_link extends views_handler_field_entity {
       '#type' => 'checkbox',
       '#title' => t('Output URL as text'),
       '#default_value' => $this->options['url'],
-      '#description' => t('Enable this option to output just the URL (i.e. not a clickable link).'),
+      '#description' => t('The resulting URL will be plain text and not a clickable link.'),
     );
     $form['text'] = array(
       '#type' => 'textfield',
@@ -39,9 +39,8 @@ class views_handler_field_node_link extends views_handler_field_entity {
     );
     $form['absolute'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use absolute link (begins with "http(s)://")'),
+      '#title' => t('Output an absolute link starting with "http(s)://"'),
       '#default_value' => $this->options['absolute'],
-      '#description' => t('Enable this option to output an absolute link.'),
     );
     parent::options_form($form, $form_state);
 
