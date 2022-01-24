@@ -129,6 +129,44 @@ function menu_update_1004() {
 }
 
 /**
+ * Clean up duplicate user/login menu item entries.
+ */
+function menu_update_1005() {
+  // Empty for sites that already patched with PR to remove user/login:
+  // @see https://github.com/backdrop/backdrop-issues/issues/5460
+}
+
+/**
+ * Clean up duplicate system menu item entries.
+ */
+function menu_update_1006() {
+  // With MIN() we make sure, we get the lowest mlid, which is the valid one of
+  // duplicates.
+  $query = 'SELECT MIN(mlid) as min_mlid, link_path, menu_name, plid, depth FROM {menu_links}';
+  // Paths appearing more than once, limited to "system" entries.
+  $query .= " WHERE module = 'system' GROUP BY link_path HAVING count(link_path) > 1";
+  $candidates = db_query($query)->fetchAllAssoc('link_path');
+
+  // Sites updating from versions before 1.21.0 won't have duplicates.
+  if (!empty($candidates)) {
+    foreach ($candidates as $path => $values) {
+      // Additionally to "link_path" and "module" columns, we compare more
+      // values to make sure, we really only delete duplicates, not valid
+      // records. We only delete items with an id higher than the lowest one
+      // from the previous query.
+      db_delete('menu_links')
+        ->condition('link_path', $path)
+        ->condition('module', 'system')
+        ->condition('menu_name', $values->menu_name)
+        ->condition('plid', $values->plid)
+        ->condition('depth', $values->depth)
+        ->condition('mlid', $values->min_mlid, '>')
+        ->execute();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

@@ -752,10 +752,12 @@ fieldset .fieldset-wrapper::before {
   left: auto;
   right: .6em;
 }
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
+  /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 .fieldset-legend span.summary:not(:empty):before {
@@ -766,9 +768,11 @@ fieldset .fieldset-wrapper::before {
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed .fieldset-legend a:before {
   left: .8em;
@@ -781,6 +785,27 @@ fieldset .fieldset-wrapper::before {
   right: .8em;
   border-left-color: transparent;
   border-right-color: black;
+}
+
+/**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
 }
 
 /**
@@ -1023,6 +1048,22 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
@@ -1189,7 +1230,8 @@ div.filter-options select {
 .admin-panel .block-content {
   padding: 0 9px 9px;
 }
-.admin-panel .block-title {
+.admin-panel .block-title,
+.admin-panel h3 {
   margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
@@ -1198,7 +1240,8 @@ div.filter-options select {
   background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
   background-size: 23px;
 }
-[dir="rtl"] .admin-panel .block-title {
+[dir="rtl"] .admin-panel .block-title,
+[dir="rtl"] .admin-panel h3 {
   margin-left: 0;
   margin-right: 9px;
   padding: 6px 35px 6px 0;
@@ -1209,13 +1252,18 @@ div.filter-options select {
   .admin-panel .block-content {
     padding: 0 15px 15px;
   }
-  .admin-panel .block-title {
+  .admin-panel .block-title,
+  .admin-panel h3 {
     margin: 15px;
   }
 }
 
 .block-dashboard-welcome h3 {
+  margin: 4px 0;
+  padding: 6px 0;
   font-size: 1.154em;
+  text-transform: none;
+  background: none;
 }
 
 /* Add special icons for admin/config */
@@ -1303,7 +1351,8 @@ div.filter-options select {
   margin: 0;
   background: none;
 }
-#layout-edit-main .l-header:before {
+#layout-edit-main .l-header:before,
+#layout-flexible-edit-main .l-header:before {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1892,4 +1941,22 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+
+/**
+ * Labels & machine names in admin listing tables.
+ */
+table .label {
+  font-weight: bold;
+}
+table .machine-name {
+  color: #666;
+}
+.tabledrag-handles-shown .label,
+.tabledrag-handles-shown .machine-name {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .tabledrag-handles-shown .label,
+[dir="rtl"] .tabledrag-handles-shown .machine-name {
+  padding-right: 28px;
 }

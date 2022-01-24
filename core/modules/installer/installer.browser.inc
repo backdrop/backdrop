@@ -512,7 +512,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
         ),
       ),
     );
-    
+
   }
 
   return backdrop_render($build);
@@ -588,7 +588,7 @@ function installer_browser_add_remove_queue_dialog_link_submit($form, &$form_sta
 function installer_browser_check_zip_loaded() {
   $zip_loaded = array_key_exists('zip', archiver_get_info());
   if (!$zip_loaded) {
-    backdrop_set_message(t('Sorry, it seems that the PHP .zip extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed. Please contact your website administrator.'), 'warning', FALSE);
+    backdrop_set_message(t('The Zip PHP extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed.'), 'warning', FALSE);
   }
   return $zip_loaded;
 }

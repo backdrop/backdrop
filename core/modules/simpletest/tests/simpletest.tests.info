@@ -412,6 +412,12 @@ description = Tests that backdrop_get_query_array() correctly parses query param
 group = Common
 file = common.test
 
+[BlockInterestCohortTest]
+name = Block Interest Cohort
+description = Check Permissions-Policy header to disable Google FLoC.
+group = System
+file = common.test
+
 [FeedIconTest]
 name = Feed icon
 description = Check escaping of theme_feed_icon().
@@ -895,6 +901,12 @@ file = form.test
 [FormsFormStoragePageCacheTestCase]
 name  = Forms using form storage on cached pages
 description  = Tests a form using form storage and makes sure validation and caching works when page caching for anonymous users is turned on.
+group = Form API
+file = form.test
+
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
 group = Form API
 file = form.test
 

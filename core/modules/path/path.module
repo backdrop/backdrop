@@ -593,10 +593,9 @@ function path_config_info() {
  * Get all path information from modules implementing hook_path_info().
  */
 function path_get_info() {
-  $all_info = backdrop_static(__FUNCTION__);
+  $all_info = &backdrop_static(__FUNCTION__, array());
 
-  if (!isset($all_info)) {
-    module_load_include('inc', 'path', 'path.path');
+  if (empty($all_info)) {
     $modules = module_implements('path_info');
     foreach ($modules as $module) {
       $callback = $module . '_path_info';

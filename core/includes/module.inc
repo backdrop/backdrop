@@ -379,15 +379,24 @@ function module_load_all_includes($type, $name = NULL) {
  * - Invoke hook_modules_installed().
  * - Invoke hook_modules_enabled().
  *
- * @param string[] $module_list
+ * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   If TRUE, dependencies will automatically be added and enabled in the
- *   correct order. This incurs a significant performance cost, so use FALSE
- *   if you know $module_list is already complete and in the correct order.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules the
+ *     passed-in module(s) depend on will be automatically added and enabled in
+ *     the correct order. If any dependencies are unavailable, the passed-in
+ *     module(s) will not be enabled. Note that dependency-checking incurs a
+ *     significant performance cost.
+ *   - If FALSE, dependency-checking is bypassed and the passed-in module(s)
+ *     will be enabled regardless of whether or not their dependencies are
+ *     available or listed in the correct order. This could lead to problems,
+ *     and so should only be used if you know $module_list is already complete
+ *     and in the correct order.
  *
  * @return bool
- *   FALSE if one or more dependencies are missing, TRUE otherwise.
+ *   Returns FALSE if $enable_dependencies is TRUE and one or more dependencies
+ *   are missing. Otherwise returns TRUE.
  *
  * @see hook_install()
  * @see hook_enable()
@@ -537,9 +546,15 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   If TRUE, dependent modules will automatically be added and disabled in the
- *   correct order. This incurs a significant performance cost, so use FALSE
- *   if you know $module_list is already complete and in the correct order.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules
+ *     dependent on the passed-in module(s) will be automatically added and
+ *     disabled in the correct order. Note that dependency-checking incurs a
+ *     significant performance cost.
+ *   - If FALSE, dependency-checking is bypassed and dependent modules will not
+ *     be automatically added or disabled. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @see backdrop_uninstall_modules()
  * @see module_enable()
@@ -630,8 +645,8 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * The available hooks to implement are explained here in the Hooks section of
  * the developer documentation. The string "hook" is used as a placeholder for
  * the module name in the hook definitions. For example, if the module file is
- * called example.module, then hook_help() as implemented by that module would
- * be defined as example_help().
+ * called example.module, then hook_menu() as implemented by that module would
+ * be defined as example_menu().
  *
  * The example functions included are not part of the Backdrop core, they are
  * just models that you can modify. Only the hooks implemented within modules

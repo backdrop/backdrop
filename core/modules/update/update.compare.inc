@@ -867,7 +867,7 @@ function update_project_cache($cid) {
  * @see _update_process_info_list()
  */
 function update_filter_project_info($info) {
-  $whitelist = array(
+  $allowlist = array(
     '_info_file_ctime',
     'datestamp',
     'major',
@@ -877,5 +877,5 @@ function update_filter_project_info($info) {
     'project status url',
     'version',
   );
-  return array_intersect_key($info, backdrop_map_assoc($whitelist));
+  return array_intersect_key($info, backdrop_map_assoc($allowlist));
 }

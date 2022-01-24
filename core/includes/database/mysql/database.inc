@@ -282,7 +282,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!$this->pdo->commit()) {
+        if (!$this->doCommit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -305,7 +305,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
             $this->transactionLayers = array();
             // We also have to explain to PDO that the transaction stack has
             // been cleaned-up.
-            $this->pdo->commit();
+            $this->doCommit();
           }
           else {
             throw $e;
@@ -313,6 +313,53 @@ class DatabaseConnection_mysql extends DatabaseConnection {
         }
       }
     }
+  }
+
+  /**
+   * Do the actual commit, including a workaround for PHP 8 behaviour changes.
+   *
+   * @return bool
+   *   Success or otherwise of the commit.
+   */
+  protected function doCommit() {
+    if ($this->pdo->inTransaction()) {
+      return $this->pdo->commit();
+    }
+    else {
+      // In PHP 8.0 a PDOException is thrown when a commit is attempted with no
+      // transaction active. In previous PHP versions this failed silently.
+      return TRUE;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function rollback($savepoint_name = 'backdrop_transaction') {
+    // MySQL will automatically commit transactions when tables are altered or
+    // created (DDL transactions are not supported). Prevent triggering an
+    // exception to ensure that the error that has caused the rollback is
+    // properly reported.
+    if (!$this->pdo->inTransaction()) {
+      // On PHP 7 $this->connection->inTransaction() will return TRUE and
+      // $this->connection->rollback() does not throw an exception; the
+      // following code is unreachable.
+
+      // If \DatabaseConnection::rollback() would throw an
+      // exception then continue to throw an exception.
+      if (!$this->inTransaction()) {
+        throw new DatabaseTransactionNoActiveException();
+      }
+      // A previous rollback to an earlier savepoint may mean that the savepoint
+      // in question has already been accidentally committed.
+      if (!isset($this->transactionLayers[$savepoint_name])) {
+        throw new DatabaseTransactionNoActiveException();
+      }
+
+      trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
+      return;
+    }
+    return parent::rollback($savepoint_name);
   }
 
   public function utf8mb4IsActive() {

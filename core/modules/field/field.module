@@ -562,8 +562,21 @@ function field_config_delete_validate(Config $active_config, $all_changes) {
 function field_config_create(Config $staging_config) {
   $config_name = $staging_config->getName();
   if (strpos($config_name, 'field.field.') === 0) {
+    $field_data_table_exists = FALSE;
+
     $field = $staging_config->get();
-    field_create_field($field);
+    $schema = _field_sql_storage_schema($field);
+
+    foreach ($schema as $name => $table) {
+      if (db_table_exists($name)) {
+        $field_data_table_exists = TRUE;
+        break;
+      }
+    }
+
+    if (!$field_data_table_exists) {
+      field_create_field($field);
+    }
   }
 }
 
