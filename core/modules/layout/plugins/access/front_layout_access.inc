@@ -13,8 +13,8 @@ class FrontLayoutAccess extends LayoutAccessNegatable {
       '#type' => 'radios',
       '#title' => t('Current path is'),
       '#options' => array(
-        0 => t('The front page'),
-        1 => t('Any page except the front page'),
+        0 => t('The home page'),
+        1 => t('Any page except the home page'),
       ),
       '#weight' => 100,
       '#default_value' => (int) $this->settings['negate'],
@@ -37,6 +37,6 @@ class FrontLayoutAccess extends LayoutAccessNegatable {
    * {@inheritdoc}
    */
   function summary() {
-    return $this->settings['negate'] ? t('Is not the front page') : t('Is the front page');
+    return $this->settings['negate'] ? t('Is not the home page') : t('Is the home page');
   }
 }

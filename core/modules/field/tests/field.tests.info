@@ -64,6 +64,12 @@ description = Tests field_get_value().
 group = Field API
 file = field.test
 
+[FieldTokenTestCase]
+name = Token display for Field API
+description = Tests the field in token display mode.
+group = Field API
+file = field.test
+
 [FieldViewsDataTest]
 name = Views integration for Field API
 description = Tests the Field API Views data.

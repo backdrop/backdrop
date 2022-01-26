@@ -29,10 +29,13 @@
  *     entity type's base table.
  *   - static cache: (used by DefaultEntityController) FALSE to disable
  *     static caching of entities during a page request. Defaults to TRUE.
+ *   - entity cache: (used by DefaultEntityController) Set to TRUE to enable
+ *     persistent caching of fully loaded entities. This will be considered to
+ *     be FALSE if there is not a cache table for the entity. Defaults to FALSE.
  *   - field cache: (used by Field API loading and saving of field data) FALSE
- *     to disable Field API's persistent cache of field data. Only recommended
- *     if a higher level persistent cache is available for the entity type.
- *     Defaults to TRUE.
+ *     to disable Field API's persistent cache of field data. Setting this to
+ *     FALSE is recommended if a higher level persistent cache is available for
+ *     the entity type. Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
  *     DefaultEntityController:attachLoad(), for example 'node_load'.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.

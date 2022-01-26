@@ -1,7 +1,7 @@
 {
     "_config_name": "admin_bar.settings",
     "margin_top": 1,
-    "position_fixed": 0,
+    "position_fixed": 1,
     "components": [
         "admin_bar.icon",
         "admin_bar.menu",

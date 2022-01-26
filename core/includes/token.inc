@@ -831,7 +831,7 @@ function token_get_invalid_tokens($type, array $tokens) {
 function token_render_array(array $array, array $options = array()) {
   $rendered = array();
   foreach ($array as $key => $value) {
-    if ($key[0] === '#') {
+    if (substr($key, 0, 1) === '#') {
       continue;
     }
     $rendered[] = is_array($value) ? render($value) : (string) $value;

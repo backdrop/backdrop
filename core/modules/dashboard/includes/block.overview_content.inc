@@ -40,6 +40,10 @@ class DashboardOverviewContentBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Overview of content');
   }
 
@@ -47,6 +51,10 @@ class DashboardOverviewContentBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Displays a summary of content statistics.');
   }
 
@@ -98,7 +106,7 @@ class DashboardOverviewContentBlock extends Block {
       '#theme' => 'item_list',
       '#items' => $items,
     );
-    if (user_access('administer nodes')) {
+    if (user_access('administer nodes') || user_access('access content overview')) {
       $panel['link'] = array(
         '#theme' => 'link',
         '#path' => 'admin/content',
