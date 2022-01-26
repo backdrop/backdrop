@@ -536,10 +536,12 @@ function system_requirements($phase) {
     foreach ($files as $filename => $file) {
       if (isset($file->all_uris) && count($file->all_uris) > 1) {
         $items = array();
+        $last_idx = count($file->all_uris) - 1;
         foreach ($file->all_uris as $i => $uri) {
+          $is_last = ($i == $last_idx);
           $items[] = array(
-            'data' => $uri,
-            'class' => array($i == count($file->all_uris) - 1 ? 'duplicate-module-overriding' : 'duplicate-module-overridden'),
+            'data' => $is_last ? '<strong>' . $uri . '</strong>' : $uri,
+            'class' => array($is_last ? 'module-overriding' : 'module-overridden'),
           );
         }
         $description = $t('The competing module files are listed below. Only the last of the module versions in the list will be loaded.') . theme('item_list', array('items' => $items));
