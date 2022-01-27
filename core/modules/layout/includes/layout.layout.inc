@@ -164,7 +164,7 @@ function layout_layout_access_info() {
     ),
   );
   $info['user_compare'] = array(
-    'title' => t('User: Compare'),
+    'title' => t('User account: Compare'),
     'description' => t('Compare two user accounts (logged-in user account vs user account being viewed, for example)'),
     'class' => 'UserCompareLayoutAccess',
     // Contexts are specified as context key => context type. The key will be
