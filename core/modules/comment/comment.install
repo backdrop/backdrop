@@ -66,6 +66,9 @@ function comment_uninstall() {
   if (db_field_exists('node', 'comment_close_override')) {
     db_drop_field('node', 'comment_close_override');
   }
+  // Flush outdated cache data.
+  cache('cache')->deletePrefix('schema');
+  backdrop_static_reset('_node_types_build');
 
   // Remove default, un-modified view.
   $config = config('views.view.comments_recent');
