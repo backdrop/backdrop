@@ -69,7 +69,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
     parent::form($form, $form_state);
     $form['helptext'] = array(
       '#type' => 'markup',
-      '#value' => '<div>' . t('Compare two user accounts (logged-in account and account being viewed, for example)') . '</div>',
+      '#value' => '<div>' . t('Compare two user accounts (logged-in account and account being viewed, for example).') . '</div>',
     );
     $form['equality'] = array(
       '#type' => 'radios',
