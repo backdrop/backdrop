@@ -144,7 +144,7 @@ function menu_update_1006() {
   // duplicates.
   $query = 'SELECT MIN(mlid) as min_mlid, link_path, menu_name, plid, depth FROM {menu_links}';
   // Paths appearing more than once, limited to "system" entries.
-  $query .= " WHERE module = 'system' GROUP BY link_path HAVING count(link_path) > 1";
+  $query .= " WHERE module = 'system' GROUP BY link_path, menu_name, plid, depth HAVING count(link_path) > 1";
   $candidates = db_query($query)->fetchAllAssoc('link_path');
 
   // Sites updating from versions before 1.21.0 won't have duplicates.
