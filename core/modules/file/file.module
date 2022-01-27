@@ -2019,6 +2019,9 @@ function file_match_mimetypes($needle, $haystack) {
  * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
  */
 function file_fnmatch($pattern, $string) {
+  if (empty($pattern) || empty($string)) {
+    return FALSE;
+  }
   if (!function_exists('fnmatch')) {
     return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
   }
