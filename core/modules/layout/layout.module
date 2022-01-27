@@ -1978,7 +1978,7 @@ function layout_context_required_by_path($path) {
 function layout_current_user_context() {
   $current_user_context = layout_create_context('user', array(
     'name' => 'current_user',
-    'label' => t('Current user account'),
+    'label' => t('Logged-in user account'),
     'locked' => TRUE,
     'usageType' => LayoutContext::USAGE_TYPE_SYSTEM,
   ));

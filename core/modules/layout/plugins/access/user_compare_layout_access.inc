@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Plugin to provide access if two user account contexts are equal.
+ * Plugin to provide access if two user account contexts are the same.
  */
 class UserCompareLayoutAccess extends LayoutAccess {
   /**
@@ -26,18 +26,18 @@ class UserCompareLayoutAccess extends LayoutAccess {
     $labels = array();
     foreach ($this->settings['contexts'] as $key => $source) {
       if ($source == 'current_user') {
-        $labels[$key] = t('Logged in user account');
+        $labels[$key] = t('Logged-in user account');
       }
       elseif (is_numeric($source)) {
         $position = $source +1;
-        $labels[$key] = t('User account in path (position ' . $position . ')');
+        $labels[$key] = t('User account from path (position ' . $position . ')');
       }
       else {
         $labels[$key] = t('Unknown user account');
       }
     }
 
-    $comparison = !empty($this->settings['equality']) ? 'is' : 'is not';
+    $comparison = !empty($this->settings['equality']) ? 'is the same as the' : 'is not the same as the';
     return t('@id1 @comp @id2', array(
       '@comp' => $comparison,
       '@id1' => $labels['user1'],
@@ -68,12 +68,12 @@ class UserCompareLayoutAccess extends LayoutAccess {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $form['helptext'] = array(
-      '#type' => 'markup',
-      '#value' => '<div>' . t('Compare two user accounts (logged-in account and account being viewed, for example).') . '</div>',
+      '#type' => 'help',
+      '#value' => t('Compare two user accounts. For someone viewing their own profile, for example, choose "Logged-in user account" and "User account being viewed" and say "Display if the two are" and "The same user account".'),
     );
     $form['equality'] = array(
       '#type' => 'radios',
-      '#title' => t('Grant access if the two are'),
+      '#title' => t('Display if the two are'),
       '#options' => array(
         1 => t('The same user account'),
         0 => t('Different user accounts'),
