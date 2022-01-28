@@ -421,8 +421,6 @@ function ckeditor_get_version() {
   return $ckeditor_version;
 }
 
-// alert(CKEDITOR.version);
-
 /**
  * Editor JS settings callback; Add CKEditor settings to the page for a format.
  *
