@@ -408,6 +408,19 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Warn if multiple versions of the same module are present.
+ *
+ * If multiple versions of the same module are present (for example, a version
+ * of a module in the /modules directory that has the same name as a /core
+ * module), Backdrop will load only the last module encountered when Backdrop
+ * scans for module files and Backdrop will show a warning on the status report
+ * page. For some multisite configurations, one might wish to intentionally
+ * override a core or contrib module with a different version in the /sites
+ * folder. To disable the status report warning, set this value to FALSE.
+ */
+$settings['multiple_module_version_warnings'] = TRUE;
+
+/**
  * Configuration overrides.
  *
  * These settings allow you to specify values for anything stored in config
