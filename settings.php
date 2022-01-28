@@ -410,13 +410,18 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 /**
  * Warn if multiple versions of the same module are present.
  *
- * If multiple versions of the same module are present (for example, a version
- * of a module in the /modules directory that has the same name as a /core
- * module), Backdrop will load only the last module encountered when Backdrop
- * scans for module files and Backdrop will show a warning on the status report
- * page. For some multisite configurations, one might wish to intentionally
+ * When scanning for module files, if Backdrop encounters multiple instances of
+ * the same module (for example, a version of a module in the /modules directory
+ * that has the same name as a module in /core), then only the last module will
+ * be loaded. In such cases, Backdrop will show a warning on the status report
+ * page.
+ *
+ * Having multiple versions of the same module may be intentional in certain use
+ * cases though, such as in some multisite configurations, when there is need to
  * override a core or contrib module with a different version in the /sites
- * folder. To disable the status report warning, set this value to FALSE.
+ * folder. In such cases, you may want to disable the status report warnings.
+ *
+ * To disable the status report warnings, set this value to FALSE.
  */
 $settings['multiple_module_version_warnings'] = TRUE;
 
