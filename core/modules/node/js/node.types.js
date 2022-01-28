@@ -46,10 +46,10 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-revision').backdropSetSummary(function() {
       var vals = [];
       if ($context.find('input[name="revision_enabled"]:checked').length) {
-        vals.push(Backdrop.t('Revisions enabled'));
+        vals.push(Backdrop.t('Enabled'));
       }
       else {
-        vals.push(Backdrop.t('Revisions disabled'));
+        vals.push(Backdrop.t('Disabled'));
       }
       return vals.join(', ');
     });
