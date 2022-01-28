@@ -196,7 +196,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @see file_uri_target()
  */
 function file_uri_scheme($uri) {
-  $position = strpos($uri, '://');
+  $position = strpos((string) $uri, '://');
   return $position ? substr($uri, 0, $position) : FALSE;
 }
 
@@ -550,7 +550,9 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php5.c>
   php_flag engine off
 </IfModule>
-
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
 EOF;
 
   if ($private) {
@@ -1226,11 +1228,11 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
-    $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
+    $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
 
     // Remove unsafe extensions from the list of allowed extensions. The list is
     // copied from file_save_upload().
-    $whitelist = array_diff($whitelist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
+    $allowlist = array_diff($allowlist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1243,7 +1245,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // of allowed extensions.
     foreach ($filename_parts as $filename_part) {
       $new_filename .= '.' . $filename_part;
-      if (!in_array(strtolower($filename_part), $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
+      if (!in_array(strtolower($filename_part), $allowlist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
         $new_filename .= '_';
       }
     }
@@ -2664,7 +2666,8 @@ function backdrop_tempnam($directory, $prefix) {
  * Gets the path of system-appropriate temporary directory.
  */
 function file_directory_temp() {
-  $temporary_directory = config_get('system.core', 'file_temporary_path');
+  $site_config = config('system.core');
+  $temporary_directory = $site_config->get('file_temporary_path');
 
   if (empty($temporary_directory)) {
     $directories = array();
@@ -2694,7 +2697,7 @@ function file_directory_temp() {
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
-      $temporary_directory = config_get('system.core', 'file_public_path') . '/tmp';
+      $temporary_directory = $site_config->get('file_public_path') . '/tmp';
 
       // Windows accepts paths with either slash (/) or backslash (\), but will
       // not accept a path which contains both a slash and a backslash. Since

@@ -241,11 +241,11 @@ class FormsTestCase extends BackdropWebTestCase {
     $values = backdrop_json_decode($this->backdropPost(NULL, array('required_checkbox' => 1), t('Submit')));
     $expected_values = array(
       'disabled_checkbox_on' => 'disabled_checkbox_on',
-      'disabled_checkbox_off' => '',
+      'disabled_checkbox_off' => 0,
       'checkbox_on' => 'checkbox_on',
-      'checkbox_off' => '',
+      'checkbox_off' => 0,
       'zero_checkbox_on' => '0',
-      'zero_checkbox_off' => '',
+      'zero_checkbox_off' => 0,
     );
     foreach ($expected_values as $widget => $expected_value) {
       $this->assertEqual($values[$widget], $expected_value, format_string('Checkbox %widget returns expected value (expected: %expected, got: %value)', array(
@@ -1445,23 +1445,20 @@ class FormsFormStoragePageCacheTestCase extends BackdropWebTestCase {
 /**
  * Test cache_form.
  */
-class FormsFormCacheTestCase extends DrupalWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Form caching',
-      'description' => 'Tests storage and retrieval of forms from cache.',
-      'group' => 'Form API',
-    );
-  }
+class FormsFormCacheTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * Overrides BackdropWebTestCase::setUp() for upgrade for form cache test.
+   */
+  public function setUp() {
     parent::setUp('form_test');
   }
 
   /**
    * Tests storing and retrieving the form from cache.
    */
-  function testCacheForm() {
+  public function testCacheForm() {
     $form = backdrop_get_form('form_test_cache_form');
     $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
     form_set_cache($form['#build_id'], $form, $form_state);
@@ -1476,16 +1473,18 @@ class FormsFormCacheTestCase extends DrupalWebTestCase {
   /**
    * Tests changing form_cache_expiration.
    */
-  function testCacheFormCustomExpiration() {
+  public function testCacheFormCustomExpiration() {
     config_set('system.core', 'form_cache_expiration', -1 * (24 * 60 * 60));
 
     $form = backdrop_get_form('form_test_cache_form');
     $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
     form_set_cache($form['#build_id'], $form, $form_state);
 
-    // Clear expired entries from cache_form, which should include the entry we
-    // just stored. Without this, the form will still be retrieved from cache.
-    cache_clear_all(NULL, 'cache_form');
+    // Cleanup expired tempstore entries the same way cron would do, but
+    // without actually running cron.
+    db_delete('tempstore')
+      ->condition('expire', REQUEST_TIME, '<')
+      ->execute();
 
     $cached_form_state = array();
     $cached_form = form_get_cache($form['#build_id'], $cached_form_state);
@@ -1657,11 +1656,11 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
     $this->web_user = $this->backdropCreateUser(array('create page content'));
     $this->backdropLogin($this->web_user);
 
-    // Get the form for adding a 'page' node. Submit an "add another item" Ajax
+    // Get the form for adding a 'page' node. Submit an "Add another" Ajax
     // submission and verify it worked by ensuring the updated page has two text
     // field items in the field for which we just added an item.
     $this->backdropGet('node/add/page');
-    $this->backdropPostAJAX(NULL, array(), array('field_ajax_test_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'page-node-form');
+    $this->backdropPostAJAX(NULL, array(), array('field_ajax_test_add_more' => t('Add another')), 'system/ajax', array(), array(), 'page-node-form');
     $this->assert(count($this->xpath('//div[contains(@class, "field-name-field-ajax-test")]//input[@type="text"]')) == 2, 'AJAX submission succeeded.');
 
     // Submit the form with the non-Ajax "Save" button, leaving the title field
@@ -1998,7 +1997,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
       'name' => 'foo',
       'mail' => 'bar@example.com',
     );
-    $this->backdropPost('user/register', $edit, t('Add another item'), array('query' => array('field' => TRUE)));
+    $this->backdropPost('user/register', $edit, t('Add another'), array('query' => array('field' => TRUE)));
     $this->assertText('Test a multiple valued field', 'Form has been rebuilt.');
     $this->assertFieldByName('name', 'foo', 'Entered user name has been kept.');
     $this->assertFieldByName('mail', 'bar@example.com', 'Entered mail address has been kept.');

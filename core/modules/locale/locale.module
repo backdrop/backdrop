@@ -169,7 +169,7 @@ function locale_config_info() {
 function locale_language_selector_form($user) {
   global $language;
   // Get list of enabled languages only.
-  $language_options = language_list(TRUE, TRUE);
+  $language_options = language_list(TRUE, TRUE, TRUE);
 
   // If the user is being created, we set the user language to the page language.
   $user_preferred_language = $user->uid ? user_preferred_language($user) : $language;
@@ -681,7 +681,7 @@ function locale_get_plural($count, $langcode = NULL) {
     // If there is a plural formula for the language, evaluate it for the given
     // $count and statically cache the result for the combination of language
     // and count, since the result will always be identical.
-    if (!empty($plural_formulas[$langcode])) {
+    if (!empty($plural_formulas[$langcode]['formula'])) {
       // $n is used inside the expression in the eval().
       $n = $count;
       $plural_indexes[$langcode][$count] = @eval('return intval(' . $plural_formulas[$langcode]['formula'] . ');');
@@ -1074,7 +1074,7 @@ function locale_config_update($staging_config, $active_config) {
 function _locale_get_config_translatables($config) {
   if ($config->get('_config_translatables') !== NULL) {
     foreach ($config->get('_config_translatables') as $translatable) {
-      $translation = locale($config->get($translatable), $translatable);
+      $translation = locale($config->get($translatable), 'config:' . $config->get('_config_name') . ':' . $translatable);
     }
   }
 }
