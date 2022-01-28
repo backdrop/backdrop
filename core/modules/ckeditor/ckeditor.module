@@ -4,7 +4,13 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.16.2');
+/**
+ * This constant will be deprecated in Backdrop 2.x. Since core version 1.21.2,
+ * the ckeditor_get_version() function should be used instead.
+ * 
+ * @see ckeditor_get_version()
+ */
+define('CKEDITOR_VERSION', '4.17.1');
 
 /**
  * Implements hook_menu().
@@ -381,6 +387,41 @@ function ckeditor_image_plugin_check($format) {
   }
   return FALSE;
 }
+
+/**
+ * Retrieves the version of CKEditor from the ckeditor.js file.
+ *
+ * @return NULL|bool|string
+ *   - NULL if the ckeditor.js file was not found.
+ *   - FALSE if the version string was not found in ckeditor.js.
+ *   - a string of the version found within the ckeditor.js file.
+ *
+ * @since 1.21.2
+ */
+function ckeditor_get_version() {
+  $js_path = BACKDROP_ROOT . '/core/misc/ckeditor/ckeditor.js';
+  $js_file = @file_get_contents($js_path);
+
+  if (!$js_file) {
+    watchdog('ckeditor', '@file file not found', array('@file' => $js_path), WATCHDOG_ERROR);
+    return NULL;
+  }
+
+  $matches = array();
+  if (preg_match('#,version:[\'\\"]{1}(.*?)[\'\\"]{1},#', $js_file, $matches)) {
+    $ckeditor_version = $matches[1];
+  }
+  // Fall back to the hardcoded version specified via the CKEDITOR_VERSION
+  // constant.
+  // @todo: remove this fallback and the constant in 2.x - throw errors instead.
+  elseif (!isset($ckeditor_version) && defined('CKEDITOR_VERSION')) {
+    $ckeditor_version = CKEDITOR_VERSION;
+  }
+
+  return $ckeditor_version;
+}
+
+// alert(CKEDITOR.version);
 
 /**
  * Editor JS settings callback; Add CKEditor settings to the page for a format.
