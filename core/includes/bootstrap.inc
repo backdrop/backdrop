@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.3.2');
+define('BACKDROP_MINIMUM_PHP', '5.6.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
