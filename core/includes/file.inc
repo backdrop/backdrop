@@ -536,6 +536,8 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  */
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
+# This code block is replicated in /core/includes/file.inc>function file_htaccess_lines() and files/.htaccess. 
+# If you update this file then make sure to also update the other location accordingly.
 # Turn off all options we don't need.
 Options -Indexes -ExecCGI -Includes
 
