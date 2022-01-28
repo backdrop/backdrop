@@ -199,7 +199,7 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
   else {
     $entity_info = entity_get_info($entity_type);
     $class = $entity_info['entity class'];
-    $bundle_key = $entity_info['entity keys']['bundle'];
+    $bundle_key = !empty($entity_info['entity keys']['bundle']) ? $entity_info['entity keys']['bundle'] : $entity_type;
     $access = NULL;
 
     // Loop through all bundles of that entity type and check access.
