@@ -462,6 +462,8 @@ function hook_user_password_reject_weak_alter(&$reject_weak, $account) {
  *   The username that has been temporarily blocked.
  *
  * @see user_login_final_validate()
+ *
+ * @since 1.21.2
  */
 function hook_user_flood_control($ip, $username = FALSE) {
   if (!empty($username)) {
