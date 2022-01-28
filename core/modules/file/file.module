@@ -2003,7 +2003,10 @@ function file_match_mimetypes($needle, $haystack) {
 
   foreach ($haystack as $mimetype) {
     foreach ($needle as $search) {
-      if (file_fnmatch($search, $mimetype) || file_fnmatch($mimetype, $search)) {
+      if (is_null($search) || is_null($mimetype)) {
+        continue;
+      }
+      if (fnmatch($search, $mimetype) || fnmatch($mimetype, $search)) {
         return TRUE;
       }
     }
@@ -2015,10 +2018,14 @@ function file_match_mimetypes($needle, $haystack) {
 /**
  * A wrapper function for the PHP function fnmatch().
  *
- * We include this, because Windows servers do not implement fnmatch() until
- * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
+ * Windows servers did not implement fnmatch() until PHP Version 5.3. Now that
+ * Backdrop requires newer PHP versions, the fnmatch() function should be
+ * called directly.
+ *
+ * @deprecated Since 1.22.0
  */
 function file_fnmatch($pattern, $string) {
+  watchdog_deprecated_function('file', __FUNCTION__);
   if (empty($pattern) || empty($string)) {
     return FALSE;
   }

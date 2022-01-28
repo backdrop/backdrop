@@ -671,16 +671,9 @@ abstract class BackdropTestCase {
         E_USER_WARNING => 'User warning',
         E_USER_NOTICE => 'User notice',
         E_RECOVERABLE_ERROR => 'Recoverable error',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User deprecated',
       );
-
-      // PHP 5.3 adds new error logging constants. Add these conditionally for
-      // backwards compatibility with PHP 5.2.
-      if (defined('E_DEPRECATED')) {
-        $error_map += array(
-          E_DEPRECATED => 'Deprecated',
-          E_USER_DEPRECATED => 'User deprecated',
-        );
-      }
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
@@ -2302,14 +2295,7 @@ class BackdropWebTestCase extends BackdropTestCase {
             foreach ($upload as $key => $file) {
               $file = backdrop_realpath($file);
               if ($file && is_file($file)) {
-                // Use the new CurlFile class for file uploads when using PHP
-                // 5.5 or higher.
-                if (class_exists('CurlFile')) {
-                  $post[$key] = curl_file_create($file);
-                }
-                else {
-                  $post[$key] = '@' . $file;
-                }
+                $post[$key] = curl_file_create($file);
               }
             }
           }
