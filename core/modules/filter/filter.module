@@ -274,6 +274,10 @@ function filter_format_load($format_id, $load_if_disabled = FALSE) {
  *     enabled (1) or not (0). Defaults to 1.
  *   - weight: (optional) The weight of the text format, which controls its
  *     placement in text format lists. If omitted, the weight is set to 0.
+ *   - editor: (optional) The machine-readable name of the editor to use for
+ *     this text format (e.g. 'ckeditor'). Defaults to NULL.
+ *   - editor_settings: (optional) An associative array of settings for the
+ *     specified editor. See standard_install() for an example.
  *   - filters: (optional) An associative, multi-dimensional array of filters
  *     assigned to the text format, keyed by the name of each filter and using
  *     the properties:
@@ -340,6 +344,10 @@ function filter_format_build_format($format) {
  *     enabled (1) or not (0). Defaults to 1.
  *   - weight: (optional) The weight of the text format, which controls its
  *     placement in text format lists. If omitted, the weight is set to 0.
+ *   - editor: (optional) The machine-readable name of the editor to use for
+ *     this text format (e.g. 'ckeditor'). Defaults to NULL.
+ *   - editor_settings: (optional) An associative array of settings for the
+ *     specified editor. See standard_install() for an example.
  *   - filters: (optional) An associative, multi-dimensional array of filters
  *     assigned to the text format, keyed by the name of each filter and using
  *     the properties:
