@@ -196,15 +196,30 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
   if (!empty($entity)) {
     return $entity->access($op, $account);
   }
-  elseif ($op == 'create') {
+  else {
     $entity_info = entity_get_info($entity_type);
-
     $class = $entity_info['entity class'];
-    $bundle = NULL;
-    if ($entity !== NULL) {
-      $bundle = $entity->bundle();
+    $bundle_key = $entity_info['entity keys']['bundle'];
+    $access = NULL;
+
+    // Loop through all bundles of that entity type and check access.
+    foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
+      if ($op == 'create') {
+        $access = $class::createAccess($bundle, $account);
+      }
+      else {
+        // For operation view, update and delete we need a dummy entity.
+        $dummy_entity = entity_create($entity_type, array($bundle_key => $bundle));
+        $access = $dummy_entity->access($op, $account);
+      }
+
+      // Stop with the first bundle, the given user has no access.
+      if ($access === FALSE) {
+        return $access;
+      }
     }
-    return $class::createAccess($bundle, $account);
+
+    return $access;
   }
 }
 
