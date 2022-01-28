@@ -285,7 +285,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
         // by retrieving the maximum thread level.
         $max = db_query('SELECT MAX(thread) FROM {comment} WHERE nid = :nid', array(':nid' => $comment->nid))->fetchField();
         // Strip the "/" from the end of the thread.
-        $max = rtrim($max, '/');
+        $max = rtrim((string) $max, '/');
         // We need to get the value at the correct depth.
         $parts = explode('.', $max);
         $firstsegment = $parts[0];

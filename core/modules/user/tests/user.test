@@ -1096,7 +1096,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
         ->set('user_picture_file_size', $test_size)
         ->save();
 
-      $pic_path = $this->saveUserPicture($image);
+      $pic_path = (string) $this->saveUserPicture($image);
 
       // Test that the upload failed and that the correct reason was cited.
       $text = t('The specified file %filename could not be uploaded.', array('%filename' => $image->filename));
