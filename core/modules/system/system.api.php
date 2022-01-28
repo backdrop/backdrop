@@ -203,11 +203,9 @@ function callback_queue_worker($queue_item_data) {
  * Allows modules to declare their own Form API element types and specify their
  * default values.
  *
- * This hook allows modules to declare their own form element types and to
- * specify their default values. The values returned by this hook will be
- * merged with the elements returned by hook_form() implementations and so
- * can return defaults for any Form APIs keys in addition to those explicitly
- * mentioned below.
+ * The values returned by this hook will be merged with the elements returned by
+ * hook_form() implementations and so can return defaults for any Form APIs keys
+ * in addition to those explicitly mentioned below.
  *
  * Each of the form element types defined by this hook is assumed to have
  * a matching theme function, e.g. theme_elementtype(), which should be
@@ -1374,7 +1372,7 @@ function hook_boot() {
  * @see hook_boot()
  */
 function hook_init() {
-  // Since this file should only be loaded on the front page, it cannot be
+  // Since this file should only be loaded on the home page, it cannot be
   // declared in the info file.
   if (backdrop_is_front_page()) {
     backdrop_add_css(backdrop_get_path('module', 'foo') . '/foo.css');
@@ -2520,7 +2518,7 @@ function hook_requirements($phase) {
     }
     else {
       $requirements['cron'] = array(
-        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'http://drupal.org/cron')),
+        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'https://backdropcms.org/cron')),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Never run'),
       );
@@ -2801,9 +2799,9 @@ function hook_install() {
  * - mymodule_update_1100(): This is the first update to get the database ready
  *   to run mymodule 1.x-1.*.
  * - mymodule_update_1200(): This is the first update to get the database ready
- *   to run mymodule 7.x-2.*. Users can directly update from 1.x-2.* to 2.x-2.*
- *   and they get all 10xx and 12xx updates, but not 11xx updates, because
- *   those reside in the 1.x-1.x branch only.
+ *   to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
+ *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
+ *   11xx updates, because those reside in the 1.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
@@ -3498,11 +3496,11 @@ function hook_system_themes_page_alter(&$theme_groups) {
  * Alters inbound URL requests.
  *
  * @param $path
- *   The path being constructed, which, if a path alias, has been resolved to a
+ *   The path being constructed, which, if a URL alias, has been resolved to a
  *   Backdrop path by the database, and which also may have been altered by
  *   other modules before this one.
  * @param $original_path
- *   The original path, before being checked for path aliases or altered by any
+ *   The original path, before being checked for URL aliases or altered by any
  *   modules.
  * @param $path_language
  *   The language of the path.
@@ -3521,8 +3519,8 @@ function hook_url_inbound_alter(&$path, $original_path, $path_language) {
  * Alters outbound URLs.
  *
  * @param $path
- *   The outbound path to alter, not adjusted for path aliases yet. It won't be
- *   adjusted for path aliases until all modules are finished altering it, thus
+ *   The outbound path to alter, not adjusted for URL aliases yet. It won't be
+ *   adjusted for URL aliases until all modules are finished altering it, thus
  *   being consistent with hook_url_inbound_alter(), which adjusts for all path
  *   aliases before allowing modules to alter it. This may have been altered by
  *   other modules before this one.
