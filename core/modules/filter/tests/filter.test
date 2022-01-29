@@ -254,9 +254,10 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('Enable'), 'A disabled text format is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
-    // enabled/configured...
+    // enabled/configured/deleted...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/delete');
     // ...but no link for it to be disabled.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
 
@@ -268,17 +269,33 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // disabled/configured...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
-    // ...but no link for it to be enabled.
+    // ...but no links for it to be enabled/deleted.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
+    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/delete');
 
     // Attempt to create a format of the same machine name as the disabled
-    // format, but with a different human readable na
+    // format, but with a different human readable name.
     $edit = array(
       'format' => $format_id,
       'name' => 'New format',
     );
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertText('The machine-readable name is already in use. It must be unique.');
+
+    // Disable the text format again.
+    $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
+    $this->backdropPost(NULL, array(), t('Disable'));
+
+    // Delete the text format.
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/delete');
+    $this->backdropGet('admin/config/content/formats/' . $format_id . '/delete');
+    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->assertRaw(t('Deleted text format %name.', array('%name' => $name)), 'Text format has been deleted.');
+
+    // Verify that the text format has been deleted. There is no link to
+    // configure it, and it is not listed in the page.
+    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertNoRaw($name, 'Text format has been deleted.');
   }
 
   /**

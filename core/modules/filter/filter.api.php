@@ -591,6 +591,7 @@ function hook_editor_EDITOR_js_settings($format, $filters, $existing_settings) {
  *
  * @see hook_filter_format_update()
  * @see hook_filter_format_disable()
+ * @see hook_filter_format_delete()
  */
 function hook_filter_format_insert($format) {
   mymodule_cache_rebuild();
@@ -608,6 +609,7 @@ function hook_filter_format_insert($format) {
  *
  * @see hook_filter_format_insert()
  * @see hook_filter_format_disable()
+ * @see hook_filter_format_delete()
  */
 function hook_filter_format_update($format) {
   mymodule_cache_rebuild();
@@ -621,8 +623,23 @@ function hook_filter_format_update($format) {
  *
  * @see hook_filter_format_insert()
  * @see hook_filter_format_update()
+ * @see hook_filter_format_delete()
  */
 function hook_filter_format_disable($format) {
+  mymodule_cache_rebuild();
+}
+
+/**
+ * Perform actions when a text format has been deleted.
+ *
+ * @param $format
+ *   The format object of the format being deleted.
+ *
+ * @see hook_filter_format_insert()
+ * @see hook_filter_format_update()
+ * @see hook_filter_format_disable()
+ */
+function hook_filter_format_delete($format) {
   mymodule_cache_rebuild();
 }
 

@@ -81,6 +81,14 @@ function filter_admin_overview($form) {
           ),
           'weight' => -10,
         );
+        $links['delete'] = array(
+          'title' => t('Delete'),
+          'href' => 'admin/config/content/formats/' . $id . '/delete',
+          'query' => array(
+            'token' => backdrop_get_token('format-' . $format->format)
+          ),
+          'weight' => 11,
+        );
       }
       $label = theme('label_machine_name__filter', array(
         'label' => $format->name,
@@ -744,7 +752,7 @@ function filter_admin_enable($format = NULL) {
 }
 
 /**
- * Form constructor for the text format deletion confirmation form.
+ * Form constructor for the text format disable confirmation form.
  *
  * @param $format
  *   An object representing a text format.
@@ -772,6 +780,38 @@ function filter_admin_disable_submit($form, &$form_state) {
 
   filter_format_disable($format);
   backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
+  $form_state['redirect'] = 'admin/config/content/formats';
+}
+
+/**
+ * Form constructor for the text format deletion confirmation form.
+ *
+ * @param $format
+ *   An object representing a text format.
+ *
+ * @see filter_menu()
+ * @see filter_admin_delete_submit()
+ * @ingroup forms
+ */
+function filter_admin_delete($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
+  return confirm_form($form,
+    t('Are you sure you want to delete the text format %format?', array('%format' => $format->name)),
+    'admin/config/content/formats',
+    t('Any content stored with that format will not be rendered. This action cannot be undone.'),
+    t('Delete')
+  );
+}
+
+/**
+ * Form submission handler for filter_admin_delete().
+ */
+function filter_admin_delete_submit($form, &$form_state) {
+  $format = $form_state['format'];
+
+  filter_format_delete($format);
+  backdrop_set_message(t('Deleted text format %format.', array('%format' => $format->name)));
   $form_state['redirect'] = 'admin/config/content/formats';
 }
 
