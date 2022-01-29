@@ -2290,20 +2290,65 @@ function layout_reorder_form($form, &$form_state) {
   if (!isset($form_state['layouts'])) {
     $reorder_path = isset($_GET['path']) ? $_GET['path'] : '';
 
+    // Provide a list of layout paths to select from (if no path was provided,
+    // or if no layouts exist in the path that was provided).
+    $header = array(
+      t('Layout path'),
+      t('Layouts available in the path'),
+      t('Operations'),
+    );
+
+    $rows = array();
+    foreach ($layout_path_groups as $layout_path => $available_layouts) {
+      $layouts_at_path = array();
+      // Only add a layout path if it has more than one layout; otherwise
+      // there is nothing to reorder.
+      if (count($available_layouts) > 1) {
+        foreach ($available_layouts as $layout_name => $available_layout) {
+          $layouts_at_path[] = $available_layout->title;
+        }
+        $layouts_at_path = theme('item_list', array('items' => $layouts_at_path));
+
+        $reorder_operation = array(
+          'data' => array(
+            '#type' => 'operations',
+            '#links' => array(
+              'reorder' => array(
+                'title' => t('Reorder layouts'),
+                'href' => 'admin/structure/layouts/reorder',
+                'query' => array('path' => $layout_path),
+              ),
+            ),
+          ),
+        );
+
+        $rows[] = array($layout_path, $layouts_at_path, $reorder_operation);
+      }
+    }
+
+    $form_layout_paths = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+      '#empty' => t('This file is not currently used.'),
+    );
+
     if (empty($reorder_path)) {
-      backdrop_set_message(t('No layout path provided.'), 'warning');
+      backdrop_set_message(t('No layout path was provided. You may select a path from the list below.'), 'warning');
+      $form['layout_paths'] = $form_layout_paths;
     }
     else {
       backdrop_set_title(t('Reorder layouts at path %path', array('%path' => $reorder_path)), PASS_THROUGH);
 
       if (!isset($layout_path_groups[$reorder_path])) {
-        backdrop_set_message(t('There are no reorderable layouts specified for the path %path.', array('%path' => $reorder_path)), 'warning');
+        backdrop_set_message(t('There are no layouts with path %path. You may select another path from the list below.', array('%path' => $reorder_path)), 'warning');
+        $form['layout_paths'] = $form_layout_paths;
       }
       else {
         $layouts = $layout_path_groups[$reorder_path];
 
         if (count($layouts) == 1) {
-          backdrop_set_message(t('Only one layout exists at path %path. Nothing to reorder.', array('%path' => $reorder_path)), 'info');
+          backdrop_set_message(t('There is nothing to reorder, because there is only one layout with path %path.', array('%path' => $reorder_path)), 'warning');
         }
       }
     }
@@ -2318,7 +2363,7 @@ function layout_reorder_form($form, &$form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Layouts at the same path are selected based on the first layout that matches its conditions. Reorder the layouts on this page to affect the layout that will be used first.'),
+    '#markup' => t('When there are multiple layouts available for the same path, the first one that satisfies its visibility conditions is selected. Reorder the layouts on this path to affect which layout will be preferred.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
