@@ -2323,7 +2323,6 @@ function layout_reorder_form($form, &$form_state) {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => t('This file is not currently used.'),
     );
 
     if (empty($reorder_path)) {
