@@ -1,6 +1,6 @@
-# This code block is replicated in the file_htaccess_lines() function 
-# and files/.htaccess. If you update this file then make sure to also update
-# the other location accordingly.
+# This code block is replicated in the file_htaccess_lines() function in
+# /core/includes/file.inc and files/.htaccess. If you update this file then 
+# make sure to also update the other location accordingly.
 Options -Indexes -ExecCGI -Includes
 
 # Set the catch-all handler to prevent scripts from being executed.
