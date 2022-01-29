@@ -215,7 +215,7 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
 
       // Stop with the first bundle, the given user has no access.
       if ($access === FALSE) {
-        return $access;
+        break;
       }
     }
 
