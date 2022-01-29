@@ -2309,20 +2309,13 @@ function layout_reorder_form($form, &$form_state) {
         }
         $layouts_at_path = theme('item_list', array('items' => $layouts_at_path));
 
+        $layout_group_operations = _layout_get_group_operations($layout_path, $available_layouts);
         $reorder_operation = array(
-          'data' => array(
-            '#type' => 'operations',
-            '#links' => array(
-              'reorder' => array(
-                'title' => t('Reorder layouts'),
-                'href' => 'admin/structure/layouts/reorder',
-                'query' => array('path' => $layout_path),
-              ),
-            ),
-          ),
+          '#type' => 'dropbutton',
+          '#links' => array($layout_group_operations['reorder']),
         );
 
-        $rows[] = array($layout_path, $layouts_at_path, $reorder_operation);
+        $rows[] = array($layout_path, $layouts_at_path, backdrop_render($reorder_operation));
       }
     }
 
