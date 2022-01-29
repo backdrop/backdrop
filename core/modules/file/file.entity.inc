@@ -142,6 +142,18 @@ class File extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('create files', $account);
+  }
+
+  /**
    * Overrides Entity::access().
    *
    * The "view" operation is not supported on the File Entity itself because it
