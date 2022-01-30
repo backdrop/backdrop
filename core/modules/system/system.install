@@ -530,7 +530,7 @@ function system_requirements($phase) {
     }
   }
 
-  if ($phase == 'runtime' && settings_get('multiple_module_version_warnings')) {
+  if ($phase == 'runtime' && !settings_get('disable_multiple_modules_warnings')) {
     // Check for multiple versions of the same module.
     $files = system_rebuild_module_data();
     foreach ($files as $filename => $file) {
