@@ -115,6 +115,105 @@ class EntityAPITestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests that entity_access returns same values as the individual access checks.
+ */
+class EntityAccessTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    // Basic setup for the "testing" profile.
+    config_set('system.core', 'site_frontpage', 'node');
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content'));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content'));
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+  }
+
+  /**
+   * Test that entity_access returns same results as node_access.
+   */
+  public function testNodeEntityAccess() {
+    $users = array(
+      'anonymous' => user_load(0),
+      'unprivileged' => $this->backdropCreateUser(array(
+        'create post content',
+      )),
+      'privileged' => $this->backdropCreateUser(array(
+        'create post content',
+        'create page content',
+        'edit any post content',
+        'edit any page content',
+      )),
+      'admin' => $this->backdropCreateUser(array(
+        'bypass node access',
+      )),
+    );
+
+    $nodes = array(
+      'page' => $this->backdropCreateNode(array('type' => 'page')),
+      'post' => $this->backdropCreateNode(array('type' => 'post')),
+    );
+
+    $node_checks = array(
+      'page' => array(
+        'create',
+        'view',
+        'update',
+        'delete',
+      ),
+      'post' => array(
+        'create',
+        'view',
+        'update',
+        'delete',
+      ),
+    );
+
+    // When a node entity is provided, the access results must be the same.
+    foreach ($users as $privilege => $account) {
+      foreach ($node_checks as $type => $operations) {
+        foreach ($operations as $op) {
+          $node_access = node_access($op, $nodes[$type], $account);
+          $entity_access = entity_access($op, 'node', $nodes[$type], $account);
+          $this->assertEqual($entity_access, $node_access, format_string('Same result for @priv user when node entity provided: @op @type -> @result', array(
+            '@priv' => $privilege,
+            '@op' => $op,
+            '@type' => $type,
+            '@result' => $entity_access ? 'true' : 'false',
+          )));
+        }
+      }
+    }
+
+    // When no node entity is available, things are trickier, because the
+    // entity module has to do its check in an abstract way. In Function
+    // node_access the entity is not optional, in function entity_access it is.
+    foreach ($users as $privilege => $account) {
+      foreach ($node_checks as $type => $operations) {
+        foreach ($operations as $op) {
+          // We can not run node_access without node or node type. To simulate
+          // an abstract check, we run it on both nodes.
+          $node_access = node_access($op, $nodes['page'], $account) && node_access($op, $nodes['post'], $account);
+          $entity_access = entity_access($op, 'node', NULL, $account);
+          $this->assertEqual($entity_access, $node_access, format_string('Same result for @priv user when no node provided: @op @type -> @result', array(
+            '@priv' => $privilege,
+            '@op' => $op,
+            '@type' => $type,
+            '@result' => $entity_access ? 'true' : 'false',
+          )));
+        }
+      }
+    }
+  }
+
+}
+
+/**
  * Tests Entity API base functionality.
  */
 class EntityAPIInfoTestCase extends BackdropWebTestCase  {

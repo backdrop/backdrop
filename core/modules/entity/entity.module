@@ -209,7 +209,13 @@ function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $
       }
       else {
         // For operation view, update and delete we need a dummy entity.
-        $dummy_entity = entity_create($entity_type, array($bundle_key => $bundle));
+        $data = array($bundle_key => $bundle);
+        if ($entity_type == 'node') {
+          // Essential for the 'view' operation.
+          $data['status'] = NODE_PUBLISHED;
+          $data['nid'] = -1;
+        }
+        $dummy_entity = entity_create($entity_type, $data);
         $access = $dummy_entity->access($op, $account);
       }
 
