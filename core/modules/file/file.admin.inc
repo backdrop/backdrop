@@ -173,6 +173,7 @@ function file_type_form($form, &$form_state, $type = NULL) {
     '#description' => t('This is the human readable name of the file type.'),
     '#required' => TRUE,
     '#default_value' => $type->name,
+    '#size' => 30,
   );
 
   $form['type'] = array(
@@ -197,7 +198,7 @@ function file_type_form($form, &$form_state, $type = NULL) {
   $form['mimetypes'] = array(
     '#type' => 'textarea',
     '#title' => t('Media types'),
-    '#description' => t("This is the list of media types (MIME types) which will be aassociated with this file type. When files with these media types are uploaded, Backdrop will identify the file type based on its media type. You should not use the same media types in more than one file type. Enter one media type per line. <br/><a href='@media_types_info'>More information about media types</a>.", array('@media_types_info' => 'https://en.wikipedia.org/wiki/Media_type')),
+    '#description' => t("This is the list of media types (MIME types) which will be associated with this file type. When files with these media types are uploaded, Backdrop will identify the file type based on its media type. If multiple file types have the same media type, you'll be prompted to select one manually. Enter one media type per line. <br/><a href='@media_types_info'>More information about media types</a>.", array('@media_types_info' => 'https://en.wikipedia.org/wiki/Media_type')),
     '#default_value' => implode("\n", $type->mimetypes),
   );
 
