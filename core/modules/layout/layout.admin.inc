@@ -3057,7 +3057,6 @@ function layout_settings_page($form, &$form_state) {
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $form['templates'] = array(
     '#type' => 'tableselect',
-    '#js_select' => FALSE,
     '#header' => $header,
     '#options' => $rows,
     '#empty' => t('There are no layout templates.'),
