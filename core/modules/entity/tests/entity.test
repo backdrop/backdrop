@@ -159,27 +159,19 @@ class EntityAccessTestCase extends BackdropWebTestCase {
       'post' => $this->backdropCreateNode(array('type' => 'post')),
     );
 
-    $node_checks = array(
-      'page' => array(
-        'create',
-        'view',
-        'update',
-        'delete',
-      ),
-      'post' => array(
-        'create',
-        'view',
-        'update',
-        'delete',
-      ),
+    $operations = array(
+      'create',
+      'view',
+      'update',
+      'delete',
     );
 
     // When a node entity is provided, the access results must be the same.
     foreach ($users as $privilege => $account) {
-      foreach ($node_checks as $type => $operations) {
+      foreach ($nodes as $type => $node) {
         foreach ($operations as $op) {
-          $node_access = node_access($op, $nodes[$type], $account);
-          $entity_access = entity_access($op, 'node', $nodes[$type], $account);
+          $node_access = node_access($op, $node, $account);
+          $entity_access = entity_access($op, 'node', $node, $account);
           $this->assertEqual($entity_access, $node_access, format_string('Same result for @priv user when node entity provided: @op @type -> @result', array(
             '@priv' => $privilege,
             '@op' => $op,
@@ -194,7 +186,7 @@ class EntityAccessTestCase extends BackdropWebTestCase {
     // entity module has to do its check in an abstract way. In Function
     // node_access the entity is not optional, in function entity_access it is.
     foreach ($users as $privilege => $account) {
-      foreach ($node_checks as $type => $operations) {
+      foreach ($nodes as $type => $node) {
         foreach ($operations as $op) {
           // We can not run node_access without node or node type. To simulate
           // an abstract check, we run it on both nodes.
