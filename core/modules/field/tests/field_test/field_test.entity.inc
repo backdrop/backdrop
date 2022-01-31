@@ -27,7 +27,8 @@ function field_test_entity_info() {
       'field cache' => FALSE,
       'base table' => 'test_entity',
       'revision table' => 'test_entity_revision',
-      'class' => 'TestEntity',
+      'entity class' => 'TestEntity',
+      'controller class' => 'EntityDatabaseStorageController',
       'entity keys' => array(
         'id' => 'ftid',
         'revision' => 'ftvid',
@@ -208,8 +209,8 @@ function field_test_delete_bundle($bundle) {
 /**
  * Creates a basic test_entity entity.
  */
-function field_test_create_stub_entity($id = 1, $vid = 1, $bundle = 'test_bundle', $label = '') {
-  $entity = new stdClass();
+function field_test_create_entity($id = 1, $vid = 1, $bundle = 'test_bundle', $label = '') {
+  $entity = entity_create('test_entity', array());
   // Only set id and vid properties if they don't come as NULL (creation form).
   if (isset($id)) {
     $entity->ftid = $id;
@@ -253,6 +254,10 @@ function field_test_entity_test_load($ftid, $ftvid = NULL) {
   }
 
   $entities = $query->execute()->fetchAllAssoc('ftid');
+  foreach ($entities as $key => $entity) {
+    $entities[$key] = entity_create('test_entity', (array) $entity);
+  }
+    
 
   // Attach fields.
   if ($ftvid) {
@@ -320,7 +325,7 @@ function field_test_entity_save(&$entity) {
  */
 function field_test_entity_add($fttype) {
   $fttype = str_replace('-', '_', $fttype);
-  $entity = (object)array('fttype' => $fttype);
+  $entity = entity_create('test_entity', array('fttype' => $fttype));
   backdrop_set_title(t('Create test_entity @bundle', array('@bundle' => $fttype)), PASS_THROUGH);
   return backdrop_get_form('field_test_entity_form', $entity, TRUE);
 }
@@ -454,10 +459,10 @@ function field_test_entity_nested_form($form, &$form_state, $entity_1, $entity_2
  * Validate handler for field_test_entity_nested_form().
  */
 function field_test_entity_nested_form_validate($form, &$form_state) {
-  $entity_1 = (object) $form_state['values'];
+  $entity_1 = entity_create('test_entity', $form_state['values']);
   field_attach_form_validate('test_entity', $entity_1, $form, $form_state);
 
-  $entity_2 = (object) $form_state['values']['entity_2'];
+  $entity_2 = entity_create('test_entity', $form_state['values']['entity_2']);
   field_attach_form_validate('test_entity', $entity_2, $form['entity_2'], $form_state);
 }
 
@@ -465,11 +470,11 @@ function field_test_entity_nested_form_validate($form, &$form_state) {
  * Submit handler for field_test_entity_nested_form().
  */
 function field_test_entity_nested_form_submit($form, &$form_state) {
-  $entity_1 = (object) $form_state['values'];
+  $entity_1 = entity_create('test_entity', $form_state['values']);
   field_attach_submit('test_entity', $entity_1, $form, $form_state);
   field_test_entity_save($entity_1);
 
-  $entity_2 = (object) $form_state['values']['entity_2'];
+  $entity_2 = entity_create('test_entity', $form_state['values']['entity_2']);
   field_attach_submit('test_entity', $entity_2, $form['entity_2'], $form_state);
   field_test_entity_save($entity_2);
 
