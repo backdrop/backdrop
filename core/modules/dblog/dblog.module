@@ -22,6 +22,14 @@ function dblog_menu() {
     'weight' => -1,
     'file' => 'dblog.admin.inc',
   );
+  $items['admin/reports/dblog/clear'] = array(
+    'title' => 'Clear',
+    'description' => 'Clear all events that have been logged.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('dblog_clear_log_confirm'),
+    'access arguments' => array('access site reports'),
+    'file' => 'dblog.admin.inc',
+  );
   $items['admin/reports/page-not-found'] = array(
     'title' => "Top 'page not found' errors",
     'description' => "View 'page not found' errors (404s).",
