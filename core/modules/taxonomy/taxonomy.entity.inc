@@ -120,7 +120,12 @@ class TaxonomyTerm extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    return user_access('administer taxonomy', $account) || user_access("create terms in $this->vocabulary", $account);
+    if (empty($bundle)) {
+      return user_access('administer taxonomy', $account);
+    }
+    else {
+      return user_access("create terms in $bundle", $account);
+    }
   }
 
   /**
