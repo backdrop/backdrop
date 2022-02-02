@@ -42,6 +42,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -87,6 +88,7 @@ class LanguageListTest extends BackdropWebTestCase {
     $name = $this->randomName(16);
     $edit = array(
       'name' => $name,
+      'native' => $name,
     );
     $this->backdropPost('admin/config/regional/language/edit/' . $langcode, $edit, t('Save language'));
     $this->assertRaw($name, t('The language has been updated.'));
@@ -147,6 +149,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));

@@ -26,7 +26,8 @@ class ViewsHandlerFieldDateTest extends ViewsSqlTest {
         'table' => 'views_test',
         'field' => 'created',
         'relationship' => 'none',
-        // c is iso 8601 date format @see http://php.net/manual/en/function.date.php
+        // c is the ISO 8601 date format (yyyy-mm-ddThh:mm:ss±hh:mm).
+        // @see https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters
         'custom_date_format' => 'c',
       ),
     ));

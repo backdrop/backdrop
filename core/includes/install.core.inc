@@ -1585,10 +1585,11 @@ function install_import_translations(&$install_state) {
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
-    // our best guess. The user will be able to edit afterwards.
+    // our best guess. If required, this can be edited post-installation.
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);
@@ -1711,7 +1712,7 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
