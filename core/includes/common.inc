@@ -5334,6 +5334,16 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *   ),
  * @endcode
  *
+ * To specify what a value should NOT be, use '!value':
+ * @code
+ *   '#states' => array(
+ *     // Show the settings if 'bar' has NOT been selected for 'foo'.
+ *     'visible' => array(
+ *       ':input[name="foo"]' => array('!value' => 'bar'),
+ *     ),
+ *   ),
+ * @endcode
+ *
  * @param $elements
  *   A renderable array element having a #states property as described above.
  *
@@ -8701,7 +8711,7 @@ function backdrop_parse_dependency($dependency) {
 
         if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
           if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
-            // See comments above about "x" in minor. 
+            // See comments above about "x" in minor.
             // Same principle applies to patch in relation to minor.
             if ($op == '>' || $op == '<=') {
               $matches['minor']++;
