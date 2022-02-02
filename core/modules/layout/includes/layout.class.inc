@@ -789,8 +789,8 @@ class Layout {
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
     $contexts_cache = &backdrop_static(__FUNCTION__, array());
-    if (!empty($contexts_cache)) {
-      return $this->getContextsByType($contexts_cache, $include_types);
+    if (!empty($contexts_cache[$this->name])) {
+      return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
 
     // Initialize a list of contexts if not defined.
@@ -819,7 +819,7 @@ class Layout {
     }
 
     // Load contexts from relationships.
-    if (empty($contexts_cache) || $include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
+    if (empty($contexts_cache[$this->name]) || $include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
       $this->contexts += $this->getContextsFromRelationships();
     }
 
@@ -836,7 +836,7 @@ class Layout {
       ));
     }
 
-    $contexts_cache = $this->contexts;
+    $contexts_cache[$this->name] = $this->contexts;
 
     return $this->getContextsByType($this->contexts, $include_types);
   }
