@@ -1351,6 +1351,11 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
         }
       }
     }
+
+    // Call getContexts() again to pick up relationships requiring the newly
+    // set context data.
+    $layout->getContexts();
+
     if (!$layout->disabled && $layout->checkAccess()) {
       $selected_layout = $layout;
       break;

@@ -15,19 +15,19 @@ class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
    *   The additional context added once this relationship is joined.
    */
   function getContext(LayoutContext $source_context) {
-    $account = NULL;
-    if (isset($source_context->data->uid)) {
+    if (!is_null($source_context->data) && isset($source_context->data->uid)) {
       // Load the user that is the author of the node.
       $uid = $source_context->data->uid;
       $account = user_load($uid);
-    }
-    $user_context = layout_create_context('user', array(
-      'position' => $source_context->position,
-      'label' => $this->getAdminSummary(),
-    ));
-    $user_context->setData($account);
+      $user_context = layout_create_context('user', array(
+        'position' => $source_context->position,
+        'label' => $this->getAdminSummary(),
+      ));
+      $user_context->setData($account);
 
-    return $user_context;
+      return $user_context;
+    }
+    return FALSE;
   }
 
   /**

@@ -940,7 +940,10 @@ class Layout {
             if ($plugin_array[1] != 'child') {
               $relationship_data->childDelta = $plugin_array[1];
             }
-            $contexts_from_relationships_list[$key] = $this->getContextFromRelationship($relationship_data, $context);
+            $relationship_context = $this->getContextFromRelationship($relationship_data, $context);
+            if ($relationship_context) {
+              $contexts_from_relationships_list[$key] = $relationship_context;
+            }
           }
         }
       }
