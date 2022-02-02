@@ -789,7 +789,7 @@ class Layout {
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
     $contexts_cache = &backdrop_static(__FUNCTION__, array());
-    if (!empty($contexts_cache[$this->name])) {
+    if (isset($contexts_cache[$this->name])) {
       return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
 
@@ -842,9 +842,15 @@ class Layout {
   }
 
   /**
-   * Get context by requested type.
+   * Return an array of contexts filtered by types specified.
+   *
+   * @param array $contexts
+   *   The array of contexts to be filtered.
+   * @var int $include_types
+   *   Include a specific list of contexts based on how they are used.
+   * @return LayoutContext[]
    */
-  function getContextsByType($contexts, $include_types = LayoutContext::USAGE_TYPE_ALL) {
+  private function getContextsByType($contexts, $include_types = LayoutContext::USAGE_TYPE_ALL) {
     // Return all contexts if requested.
     if ($include_types === LayoutContext::USAGE_TYPE_ALL) {
       return $contexts;
