@@ -539,6 +539,7 @@ function file_htaccess_lines($private = TRUE) {
 # This code block is replicated in the file_htaccess_lines() function in
 # /core/includes/file.inc and files/.htaccess. If you update this file, then
 # make sure to also update the other location accordingly.
+
 # Turn off all options we don't need.
 Options -Indexes -ExecCGI -Includes
 
