@@ -257,6 +257,11 @@ function node_form($form, &$form_state, Node $node) {
     '#default_value' => !empty($node->log) ? $node->log : '',
     '#description' => t('Briefly describe the changes you have made.'),
   );
+  if ($node_type->settings['revision_required']) {
+    $form['revision_information']['log']['#states']['required'] = array(
+      'input[name="revision"]' => array('checked' => TRUE),
+    );
+  }
 
   // Node author information for administrators
   $form['author'] = array(

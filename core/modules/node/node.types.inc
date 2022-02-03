@@ -299,6 +299,23 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#title' => t('Create new revision by default'),
     '#default_value' => $type->settings['revision_default'],
     '#parents' => array('revision_default'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['revision']['revision']['revision_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Require log message to be entered'),
+    '#default_value' => $type->settings['revision_required'],
+    '#parents' => array('revision_required'),
+    '#description' => t('Prevent revisions being created without an accompanying log message.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Menu settings.
@@ -621,6 +638,7 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
+      'revision_required' => FALSE,
       'node_preview' => TRUE,
 
       // Submitted information.

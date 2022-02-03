@@ -986,6 +986,14 @@ function node_validate($node, $form, &$form_state) {
     }
   }
 
+  // Validate the "Revision log message" field.
+  if ($node->revision && empty($node->log)) {
+    $node_type = node_type_get_type($node->type);
+    if ($node_type->settings['revision_required']) {
+      form_set_error('log', t('You must enter a revision log message.'));
+    }
+  }
+
   // Invoke hook_validate() for node type specific validation and
   // hook_node_validate() for miscellaneous validation needed by modules. Can't
   // use node_invoke() or module_invoke_all(), because $form_state must be
