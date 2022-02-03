@@ -395,12 +395,12 @@ details.more-less-toggle summary::-webkit-details-marker {
   display: none;
 }
 
-/* Specifically trigger open/close of the details via the more/less toggle. */
 details.more-less-toggle summary span.more-less-toggle-label {
+  padding: 0 3px;
+  /* Specifically trigger open/close of the details via the more/less toggle. */
   pointer-events: auto;
   /* Prevent the more/less text from being split from the toggle icon. */
   white-space: nowrap;
-  padding: 0 3px;
 }
 /* Allow any links within the summary text to be clickable. */
 details.more-less-toggle summary a {
