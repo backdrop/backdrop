@@ -22,11 +22,6 @@ fi
 # are in /usr/local/php/.
 CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
 
-# Debug:
-echo DEBUG:
-php -m
-cat /etc/php/5.6/fpm/php.ini
-
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
 # child processes. This is done in all config files, sed is fast.
