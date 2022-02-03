@@ -16,14 +16,16 @@ OLDPHP=$(echo "$1 < 7" | bc -l)
 if [ $OLDPHP -eq 1 ]; then
   sudo a2dismod mpm_event
   sudo a2enmod mpm_prefork
-  CONFPATHS=$(ls /usr/local/php/*/etc/php-fpm.conf)
-else
-  CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
 fi
+
+# Ini files for php 5.6+ are in /etc/php/, for php versions prior to 5.6 files
+# are in /usr/local/php/.
 CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
-# Debug: @todo remove.
-echo $CONFPATHS
-ls -l /usr/local/php/*/etc/php-fpm.conf
+
+# Debug:
+echo DEBUG:
+php -m
+cat /etc/php/5.6/fpm/php.ini
 
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
