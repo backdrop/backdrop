@@ -20,6 +20,10 @@ if [ $OLDPHP -eq 1 ]; then
 else
   CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
 fi
+CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
+# Debug: @todo remove.
+echo $CONFPATHS
+ls -l /usr/local/php/*/etc/php-fpm.conf
 
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
