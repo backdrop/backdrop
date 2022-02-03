@@ -701,17 +701,27 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         // module within a project needs to be hidden, and submodules enabled
         // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
         if (empty($modules[$project['name']]->info['hidden'])) {
+          $module_label = $modules[$project['name']]->info['name'];
+          $module_version = $modules[$project['name']]->info['version'];
           if ($dependency_check) {
+            $module_label = array(
+              '#type' => 'head_tag',
+              '#tag' => 'label',
+              '#value' => $module_label,
+              '#attributes' => array(
+                'for' => 'edit-modules-' . backdrop_html_class($modules[$project['name']]->name),
+              ),
+            );
             $options[$project['name']] = array(
-              array('data' => $modules[$project['name']]->info['name']),
-              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => backdrop_render($module_label)),
+              array('data' => $module_version),
               array('data' => implode(', ', $dependencies)),
             );
           }
           else {
             $missing[$project['name']] = array(
-              array('data' => $modules[$project['name']]->info['name']),
-              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => $module_label),
+              array('data' => $module_version),
               array('data' => implode(', ', $dependencies)),
             );
           }
@@ -735,7 +745,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
 
   if (!empty($all_options)) {
     $form['module_instructions'] = array(
-      '#type' => 'item',
+      '#type' => 'help',
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     $form['modules'] = array(
