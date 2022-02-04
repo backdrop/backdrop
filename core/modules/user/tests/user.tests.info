@@ -2,7 +2,7 @@
 name = User registration
 description = Test registration of user under different configurations.
 group = User
-file = user.test
+file = foobar/user.test
 
 [UserValidationTestCase]
 name = Username/email validation
