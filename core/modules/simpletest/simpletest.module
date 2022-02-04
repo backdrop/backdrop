@@ -379,7 +379,7 @@ function simpletest_test_get_all() {
           // informative error.
           foreach ($classes as $class => $info) {
             if (!is_array($info) || empty($info)) {
-              $error = format_string('File %uri contains a definition for %class that is not an array of testing class fields.', array('%class' => $class));
+              $error = t('File %uri contains a definition for %class that is not an array of testing class fields.', array('%class' => $class));
               continue;
             }
             else {
@@ -401,7 +401,7 @@ function simpletest_test_get_all() {
               $info['file path'] = dirname($file->uri);
               $test_file_full = BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
               if (!file_exists($test_file_full)) {
-                $error = format_string('File %uri specifies a non-existent file %test_file_full. Please verify that the test file exists in the location specified in %uri.', array('%test_file_full' => $test_file_full));
+                $error = t('File %uri specifies a non-existent file %test_file_full. Please verify that the test file exists in the location specified in %uri.', array('%test_file_full' => $test_file_full));
                 continue;
               }
             }
@@ -420,8 +420,16 @@ function simpletest_test_get_all() {
           }
         }
         if (!empty($error)) {
-          watchdog('simpletest', $error, array('%uri' => $file->uri), WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
-          continue;
+          if (backdrop_is_cli()) {
+            // If running in CLI, then we're probably about to run some
+            // automated tests, so we need a hard fail.
+            throw new Exception(t($error, array('%uri' => $file->uri)));
+          }
+          else {
+            backdrop_set_message(t($error, array('%uri' => $file->uri)), 'error');
+            watchdog('simpletest', $error, array('%uri' => $file->uri), WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
+            continue;
+          }
         }
       }
 
