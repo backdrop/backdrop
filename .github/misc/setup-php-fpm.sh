@@ -7,16 +7,6 @@ if [ $# -lt 1 ]; then
   echo 'Fatal: Parameter missing'
   exit 1
 fi
-# This script handles one required numeric parameter - the PHP version.
-OLDPHP=$(echo "$1 < 7" | bc -l)
-
-# Apache mpm_event refuses to work with older PHP versions, we have to switch to
-# mpm_prefork for 5.x. The paths to config files differ for 5.x as set up by
-# shivammathur/setup-php@v2
-if [ $OLDPHP -eq 1 ]; then
-  sudo a2dismod mpm_event
-  sudo a2enmod mpm_prefork
-fi
 
 # Ini files for php 5.6+ are in /etc/php/, for php versions prior to 5.6 files
 # are in /usr/local/php/.
