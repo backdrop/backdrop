@@ -8,10 +8,6 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
-# Ini files for php 5.6+ are in /etc/php/, for php versions prior to 5.6 files
-# are in /usr/local/php/.
-CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
-
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
 # child processes. This is done in all config files, sed is fast.
@@ -21,7 +17,7 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
   -e 's/pm.start_servers = 2/pm.start_servers = 4/' \
   -e 's/pm.min_spare_servers = 1/pm.min_spare_servers = 2/' \
   -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
-  $CONFPATHS
+  ls /etc/php/*/fpm/pool.d/www.conf
 
 # Let above changes take effect and setup Apache to work with php-fpm.
 sudo systemctl restart php${1}-fpm.service
