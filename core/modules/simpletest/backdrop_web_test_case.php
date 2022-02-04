@@ -78,6 +78,15 @@ abstract class BackdropTestCase {
   );
 
   /**
+   * String to flag any early errors found when setting up to test.
+   *
+   * @see simpletest_test_get_all()
+   *
+   * @var string
+   */
+  public static $early_error = '';
+
+  /**
    * Assertions thrown in that test case.
    *
    * @var array
@@ -1670,6 +1679,12 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $language_url, $conf;
+
+    // Check for any early errors.
+    if (!empty($this->early_error)) {
+      fail($this->early_error);
+    }
+
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
 
