@@ -20,13 +20,7 @@ fi
 
 # Ini files for php 5.6+ are in /etc/php/, for php versions prior to 5.6 files
 # are in /usr/local/php/.
-INIPATH_ETC=$(echo "$1 > 5.3" | bc -l)
-
-if [ $INIPATH_ETC -eq 1 ]; then
-  CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
-else
-  CONFPATHS=$(ls /usr/local/php/*/etc/php-fpm.conf)
-fi
+CONFPATHS=$(ls /etc/php/*/fpm/pool.d/www.conf)
 
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
