@@ -523,7 +523,10 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
- *
+ * 
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
+ * 
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
@@ -536,10 +539,6 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  */
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
-# This code block is replicated in the file_htaccess_lines() function in
-# /core/includes/file.inc and files/.htaccess. If you update this file, then
-# make sure to also update the other location accordingly.
-
 # Turn off all options we don't need.
 Options -Indexes -ExecCGI -Includes
 
