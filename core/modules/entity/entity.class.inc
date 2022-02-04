@@ -250,6 +250,15 @@ abstract class Entity extends stdClass implements EntityInterface {
   public $is_active_revision = TRUE;
 
   /**
+   * Stores the original Entity object before changes during update operations.
+   *
+   * Outside of updates, this property is usually NULL.
+   *
+   * @var Entity
+   */
+  public $original;
+
+  /**
    * Constructs a new entity object.
    */
   public function __construct(array $values = array()) {
