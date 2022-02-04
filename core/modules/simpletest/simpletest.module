@@ -372,11 +372,11 @@ function simpletest_test_get_all() {
           $error = 'File %uri contains no testing classes.';
         }
         else {
+          // If the .tests.info file is malformed, it puts a slew of
+          // hard-to-diagnose errors into the watchdog log when the testing page
+          // is loaded. So we'll check for various malformalities and put a more
+          // informative error.
           foreach ($classes as $class => $info) {
-            // If the .tests.info file is malformed, it puts a slew of
-            // hard-to-diagnose errors into the watchdog log when the testing page
-            // is loaded. So we'll check for various malformalities and put a more
-            // informative error.
             if (!is_array($info) || empty($info)) {
               $error = format_string('File %uri contains a definition for %class that is not an array of testing class fields.', array('%class' => $class));
               continue;
@@ -394,9 +394,18 @@ function simpletest_test_get_all() {
                 continue;
               }
             }
+            // Verify that the test file is present in the same directory as
+            // specified in the .tests.info file.
+            if (empty($error)) {
+              $info['file path'] = dirname($file->uri);
+              $test_file_full = BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
+              if (!file_exists($test_file_full)) {
+                $error = format_string('File %uri specifies a non-existent file %test_file_full. Please verify that the test file exists in the location specified in %uri.', array('%test_file_full' => $test_file_full));
+                continue;
+              }
+            }
             if (empty($error)) {
             // If the format passed, build the rest of the groups information.
-              $info['file path'] = dirname($file->uri);
               // If this test class requires a non-existing module, skip it.
               if (!empty($info['dependencies'])) {
                 foreach ($info['dependencies'] as $module) {
