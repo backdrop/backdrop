@@ -3855,7 +3855,7 @@ function backdrop_pre_render_styles($elements) {
   // URL changed.
   $query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
-  // Defaults for LINK and STYLE elements.
+  // Defaults for LINK elements.
   $link_element_defaults = array(
     '#type' => 'head_tag',
     '#tag' => 'link',
@@ -3863,9 +3863,11 @@ function backdrop_pre_render_styles($elements) {
       'rel' => 'stylesheet',
     ),
   );
+  // Defaults for STYLE elements.
   $style_element_defaults = array(
     '#type' => 'head_tag',
     '#tag' => 'style',
+    '#attributes' => array(),
   );
 
   // Loop through each group.
