@@ -150,7 +150,7 @@ class File extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    return user_access('create files', $account);
+    return user_access('create files', $account) || user_access('bypass file access', $account);
   }
 
   /**
