@@ -420,11 +420,10 @@ function simpletest_test_get_all() {
           }
         }
         if (!empty($error)) {
-          BackdropTestCase::$early_error = t($error, array('%uri' => $file->uri));
           if (backdrop_is_cli()) {
             // If running in CLI, then we're probably about to run some
             // automated tests, so we need a hard fail.
-//            throw new Exception(t($error, array('%uri' => $file->uri)));
+            throw new Exception(t($error, array('%uri' => $file->uri)));
           }
           else {
             backdrop_set_message(t($error, array('%uri' => $file->uri)), 'error');
