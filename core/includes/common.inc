@@ -3987,7 +3987,7 @@ function backdrop_pre_render_styles($elements) {
             // attempting to merge with the element's attributes.
             $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
             $element['#attributes'] += $item['attributes'];
-            $element['#attributes'] = $group['attributes'] + $element['attributes'];
+            $element['#attributes'] = $group['attributes'] + $element['#attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
