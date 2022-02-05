@@ -3870,6 +3870,10 @@ function backdrop_pre_render_styles($elements) {
 
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
+    // Ensure the group's attributes setting is an array before attempting to
+    // merge with the element's attributes.
+    $group['attributes'] = isset($group['attributes']) ? $group['attributes'] : array();
+
     switch ($group['type']) {
       // For file items, there are three possibilites.
       // - The group has been aggregated: in this case, output a LINK tag for
@@ -3887,6 +3891,7 @@ function backdrop_pre_render_styles($elements) {
         // for the aggregate file.
         if (isset($group['data'])) {
           $element = $link_element_defaults;
+          $element['#attributes'] = $group['attributes'] + $element['#attributes'];
           $element['#attributes']['href'] = file_create_url($group['data']);
           $element['#attributes']['media'] = $group['media'];
           $element['#browsers'] = $group['browsers'];
@@ -3927,6 +3932,7 @@ function backdrop_pre_render_styles($elements) {
             // This means that we can use ^ and $ on one line at a time, and not
             // worry about style tags since they'll never match the regex.
             $element['#value'] = "\n" . implode("\n", $import_batch) . "\n";
+            $element['#attributes'] = $group['attributes'] + $element['#attributes'];
             $element['#attributes']['media'] = $group['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3948,9 +3954,10 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
-            if (isset($item['attributes'])) {
-              $element['#attributes'] += $item['attributes'];
-            }
+            // Ensure the item's attributes setting is an array before
+            // attempting to merge with the element's attributes.
+            $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3965,6 +3972,7 @@ function backdrop_pre_render_styles($elements) {
         if (isset($group['data'])) {
           $element = $style_element_defaults;
           $element['#value'] = $group['data'];
+          $element['#attributes'] = $group['attributes'] + $element['#attributes'];
           $element['#attributes']['media'] = $group['media'];
           $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
@@ -3973,9 +3981,11 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
-            if (isset($item['attributes'])) {
-              $element['#attributes'] += $item['attributes'];
-            }
+            // Ensure the item's attributes setting is an array before
+            // attempting to merge with the element's attributes.
+            $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+            $element['#attributes'] += $item['attributes'];
+            $element['#attributes'] = $group['attributes'] + $element['attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3987,9 +3997,10 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
-          if (isset($item['attributes'])) {
-            $element['#attributes'] += $item['attributes'];
-          }
+          // Ensure the item's attributes setting is an array before attempting
+          // to merge with the element's attributes.
+          $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+          $element['#attributes'] += $item['attributes'];
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
@@ -4676,26 +4687,16 @@ function backdrop_add_js($data = NULL, $options = NULL) {
             array('pathPrefix' => empty($prefix) ? '' : $prefix),
           ),
           'type' => 'setting',
-          'scope' => 'header',
           'group' => JS_SETTING,
           'every_page' => TRUE,
-          'weight' => 0,
-          'browsers' => array(),
-        ),
+        ) + backdrop_js_defaults(),
         'core/misc/backdrop.js' => array(
           'data' => 'core/misc/backdrop.js',
-          'type' => 'file',
-          'scope' => 'header',
           'group' => JS_LIBRARY,
           'every_page' => TRUE,
           'weight' => -1,
-          'preprocess' => TRUE,
-          'cache' => TRUE,
-          'defer' => FALSE,
-          'attributes' => array(),
-          'browsers' => array(),
           'version' => BACKDROP_VERSION,
-        ),
+        ) + backdrop_js_defaults(),
       );
       // Backwards-compatibility for JavaScript.
       if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
