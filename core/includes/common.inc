@@ -3398,8 +3398,8 @@ function backdrop_css_defaults($data = NULL) {
  *
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
- * preprocessed files are added unconditionally on every page, even if the
- * files do not happen to be needed on a page. This is normally done by calling
+ * preprocessed files are added unconditionally on every page, even if the files
+ * do not happen to be needed on a page. This is normally done by calling
  * backdrop_add_css() in a hook_init() implementation.
  *
  * Non-preprocessed files should only be added to the page when they are
@@ -3476,7 +3476,7 @@ function backdrop_css_defaults($data = NULL) {
  *       which backdrop_add_css() happened earlier in the page request.
  *   - 'media': The media type for the stylesheet, e.g., all, print, screen.
  *     Defaults to 'all'.
- *   - attributes: An associative array of attributes for the <link> tag. This
+ *   - 'attributes': An associative array of attributes for the LINK tag. This
  *     may be used to add 'integrity' or custom attributes. Note that setting
  *     any attributes will disable preprocessing as though the 'preprocess'
  *     option was set to FALSE.
@@ -3557,8 +3557,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
 /**
  * Returns a themed representation of all stylesheets to attach to the page.
  *
- * It loads the CSS in order, with 'module' first, then 'theme' afterwards.
- * This ensures proper cascading of styles so themes can override module styles
+ * It loads the CSS in order, with 'module' first, then 'theme' afterwards. This
+ * ensures proper cascading of styles so themes can override module styles
  * through CSS selectors.
  *
  * Themes may replace module-defined CSS files by adding a stylesheet with the
@@ -3675,8 +3675,8 @@ function backdrop_group_css($css) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
-  // item, we can determine if it can be put into the current group, or if a
-  // new group needs to be made for it.
+  // item, we can determine if it can be put into the current group, or if a new
+  // group needs to be made for it.
   $current_group_keys = NULL;
   // When creating a new group, we pre-increment $i, so by initializing it to
   // -1, the first group will have index 0.
@@ -3850,12 +3850,11 @@ function backdrop_pre_render_styles($elements) {
   }
 
   // A dummy query-string is added to filenames, to gain control over
-  // browser-caching. The string changes on every update or full cache
-  // flush, forcing browsers to load a new copy of the files, as the
-  // URL changed.
+  // browser-caching. The string changes on every update or full cache flush,
+  // forcing browsers to load a new copy of the files, as the URL changed.
   $query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
-  // Defaults for LINK and STYLE elements.
+  // Defaults for LINK elements.
   $link_element_defaults = array(
     '#type' => 'head_tag',
     '#tag' => 'link',
@@ -3863,13 +3862,19 @@ function backdrop_pre_render_styles($elements) {
       'rel' => 'stylesheet',
     ),
   );
+  // Defaults for STYLE elements.
   $style_element_defaults = array(
     '#type' => 'head_tag',
     '#tag' => 'style',
+    '#attributes' => array(),
   );
 
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
+    // Ensure the group's attributes setting is an array before attempting to
+    // merge with the element's attributes.
+    $group['attributes'] = isset($group['attributes']) ? $group['attributes'] : array();
+
     switch ($group['type']) {
       // For file items, there are three possibilites.
       // - The group has been aggregated: in this case, output a LINK tag for
@@ -3887,6 +3892,7 @@ function backdrop_pre_render_styles($elements) {
         // for the aggregate file.
         if (isset($group['data'])) {
           $element = $link_element_defaults;
+          $element['#attributes'] = $group['attributes'] + $element['#attributes'];
           $element['#attributes']['href'] = file_create_url($group['data']);
           $element['#attributes']['media'] = $group['media'];
           $element['#browsers'] = $group['browsers'];
@@ -3925,8 +3931,9 @@ function backdrop_pre_render_styles($elements) {
             // This simplifies the JavaScript regex, allowing each line
             // (separated by \n) to be treated as a completely different string.
             // This means that we can use ^ and $ on one line at a time, and not
-            // worry about style tags since they'll never match the regex.
+            // worry about style tags, since they'll never match the regex.
             $element['#value'] = "\n" . implode("\n", $import_batch) . "\n";
+            $element['#attributes'] = $group['attributes'] + $element['#attributes'];
             $element['#attributes']['media'] = $group['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3948,9 +3955,10 @@ function backdrop_pre_render_styles($elements) {
             // The dummy query string needs to be added to the URL to control
             // browser-caching.
             $query_string_separator = (strpos($item['data'], '?') !== FALSE) ? '&' : '?';
-            if (isset($item['attributes'])) {
-              $element['#attributes'] += $item['attributes'];
-            }
+            // Ensure the item's attributes setting is an array before
+            // attempting to merge with the element's attributes.
+            $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+            $element['#attributes'] += $item['attributes'];
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
@@ -3965,6 +3973,7 @@ function backdrop_pre_render_styles($elements) {
         if (isset($group['data'])) {
           $element = $style_element_defaults;
           $element['#value'] = $group['data'];
+          $element['#attributes'] = $group['attributes'] + $element['#attributes'];
           $element['#attributes']['media'] = $group['media'];
           $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
@@ -3973,9 +3982,11 @@ function backdrop_pre_render_styles($elements) {
           foreach ($group['items'] as $item) {
             $element = $style_element_defaults;
             $element['#value'] = $item['data'];
-            if (isset($item['attributes'])) {
-              $element['#attributes'] += $item['attributes'];
-            }
+            // Ensure the item's attributes setting is an array before
+            // attempting to merge with the element's attributes.
+            $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+            $element['#attributes'] += $item['attributes'];
+            $element['#attributes'] = $group['attributes'] + $element['#attributes'];
             $element['#attributes']['media'] = $item['media'];
             $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
@@ -3987,9 +3998,10 @@ function backdrop_pre_render_styles($elements) {
       case 'external':
         foreach ($group['items'] as $item) {
           $element = $link_element_defaults;
-          if (isset($item['attributes'])) {
-            $element['#attributes'] += $item['attributes'];
-          }
+          // Ensure the item's attributes setting is an array before attempting
+          // to merge with the element's attributes.
+          $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
+          $element['#attributes'] += $item['attributes'];
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
           $element['#browsers'] = $group['browsers'];
@@ -4052,14 +4064,15 @@ function backdrop_build_css_cache($css) {
         $css_base_url = file_create_url($stylesheet['data']);
         // Move to the parent.
         $css_base_url = substr($css_base_url, 0, strrpos($css_base_url, '/'));
-        // Simplify to a relative URL if the stylesheet URL starts with the
-        // base URL of the website.
+        // Simplify to a relative URL if the stylesheet URL starts with the base
+        // URL of the website.
         if (substr($css_base_url, 0, strlen($GLOBALS['base_root'])) == $GLOBALS['base_root']) {
           $css_base_url = substr($css_base_url, strlen($GLOBALS['base_root']));
         }
 
         _backdrop_build_css_path(NULL, $css_base_url . '/');
-        // Anchor all paths in the CSS with its base URL, ignoring external and absolute paths.
+        // Anchor all paths in the CSS with its base URL, ignoring external and
+        // absolute paths.
         $data .= preg_replace_callback('/url\(\s*[\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\s*\)/i', '_backdrop_build_css_path', $contents);
       }
     }
@@ -4527,9 +4540,9 @@ function backdrop_region_class($region) {
  *
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
- * preprocessed files are added unconditionally on every page, even if the
- * files are not needed on a page. This is normally done by calling
- * backdrop_add_js() in a hook_init() implementation.
+ * preprocessed files are added unconditionally on every page, even if the files
+ * are not needed on a page. This is normally done by calling backdrop_add_js()
+ * in a hook_init() implementation.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -4553,8 +4566,7 @@ function backdrop_region_class($region) {
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
  *   - type: The type of JavaScript that is to be added to the page. Allowed
- *     values are 'file', 'inline', 'external' or 'setting'. Defaults
- *     to 'file'.
+ *     values are 'file', 'inline', 'external' or 'setting'. Defaults to 'file'.
  *   - key: Applies to the 'setting' and 'inline' types only. A string that
  *     identifies data that should only be added once per page. If omitted,
  *     multiple settings within the same namespace will be merged together
@@ -4596,12 +4608,12 @@ function backdrop_region_class($region) {
  *     and 'every_page' value. In some cases, the order in which the JavaScript
  *     is presented on the page is very important. jQuery, for example, must be
  *     added to the page before any jQuery code is run, so jquery.js uses the
- *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library backdrop.js
- *     depends on) uses the JS_LIBRARY group and a weight of -19, backdrop.js uses
- *     the JS_LIBRARY group and a weight of -1, other libraries use the
- *     JS_LIBRARY group and a weight of 0 or higher, and all other scripts use
- *     one of the other group constants. The exact ordering of JavaScript is as
- *     follows:
+ *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library
+ *     backdrop.js depends on) uses the JS_LIBRARY group and a weight of -19,
+ *     backdrop.js uses the JS_LIBRARY group and a weight of -1, other libraries
+ *     use the JS_LIBRARY group and a weight of 0 or higher, and all other
+ *     scripts use one of the other group constants. The exact ordering of
+ *     JavaScript is as follows:
  *     - First by scope, with 'header' first, 'footer' last, and any other
  *       scopes provided by a custom theme coming in between, as determined by
  *       the theme.
@@ -4609,16 +4621,16 @@ function backdrop_region_class($region) {
  *     - Then by the 'every_page' flag, with TRUE coming before FALSE.
  *     - Then by weight.
  *     - Then by the order in which the JavaScript was added. For example, all
- *       else being the same, JavaScript added by a call to backdrop_add_js() that
- *       happened later in the page request gets added to the page after one for
- *       which backdrop_add_js() happened earlier in the page request.
- *   - defer: If set to TRUE, the defer attribute is set on the <script>
- *     tag. Defaults to FALSE. Note that setting this to TRUE will disable
+ *       else being the same, JavaScript added by a call to backdrop_add_js()
+ *       that happened later in the page request gets added to the page after
+ *       one for which backdrop_add_js() happened earlier in the page request.
+ *   - defer: If set to TRUE, the defer attribute is set on the SCRIPT tag.
+ *     Defaults to FALSE. Note that setting this to TRUE will disable
  *     preprocessing as though the 'preprocess' option was set to FALSE.
- *   - attributes: An associative array of attributes for the <script> tag.
- *     This may be used to add 'async' or custom attributes. Note that
- *     setting any attributes will disable preprocessing as though the
- *     'preprocess' option was set to FALSE.
+ *   - attributes: An associative array of attributes for the SCRIPT tag. This
+ *     may be used to add 'async' or custom attributes. Note that setting any
+ *     attributes will disable preprocessing as though the 'preprocess' option
+ *     was set to FALSE.
  *   - cache: If set to FALSE, the JavaScript file is loaded anew on every page
  *     call; in other words, it is not cached. Used only when 'type' references
  *     a JavaScript file. Defaults to TRUE.
@@ -4649,20 +4661,20 @@ function backdrop_add_js($data = NULL, $options = NULL) {
   }
   $options += backdrop_js_defaults($data);
 
-  // Preprocess can only be set if caching is enabled and no attributes
-  // nor defer tag are set.
+  // Preprocess can only be set if caching is enabled and no attributes nor
+  // defer tag are set.
   $options['preprocess'] = $options['cache'] && empty($options['attributes']) && empty($options['defer']) ? $options['preprocess'] : FALSE;
 
-  // Tweak the weight so that files of the same weight are included in the
-  // order of the calls to backdrop_add_js().
+  // Tweak the weight so that files of the same weight are included in the order
+  // of the calls to backdrop_add_js().
   $options['weight'] += count($javascript) / 1000;
 
   // Add an every page weight for sorting.
   $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
 
   if (isset($data)) {
-    // Add jquery.js and backdrop.js, as well as the basePath setting, the
-    // first time a JavaScript file is added.
+    // Add jquery.js and backdrop.js, as well as the basePath setting, the first
+    // time a JavaScript file is added.
     if (empty($javascript)) {
       // url() generates the prefix using hook_url_outbound_alter(). Instead of
       // running the hook_url_outbound_alter() again here, extract the prefix
@@ -4676,26 +4688,16 @@ function backdrop_add_js($data = NULL, $options = NULL) {
             array('pathPrefix' => empty($prefix) ? '' : $prefix),
           ),
           'type' => 'setting',
-          'scope' => 'header',
           'group' => JS_SETTING,
           'every_page' => TRUE,
-          'weight' => 0,
-          'browsers' => array(),
-        ),
+        ) + backdrop_js_defaults(),
         'core/misc/backdrop.js' => array(
           'data' => 'core/misc/backdrop.js',
-          'type' => 'file',
-          'scope' => 'header',
           'group' => JS_LIBRARY,
           'every_page' => TRUE,
           'weight' => -1,
-          'preprocess' => TRUE,
-          'cache' => TRUE,
-          'defer' => FALSE,
-          'attributes' => array(),
-          'browsers' => array(),
           'version' => BACKDROP_VERSION,
-        ),
+        ) + backdrop_js_defaults(),
       );
       // Backwards-compatibility for JavaScript.
       if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
@@ -4710,8 +4712,8 @@ function backdrop_add_js($data = NULL, $options = NULL) {
 
     switch ($options['type']) {
       case 'setting':
-        // All JavaScript settings are placed in the header of the page with
-        // the library weight so that inline scripts appear afterwards.
+        // All JavaScript settings are placed in the header of the page with the
+        // library weight so that inline scripts appear afterwards.
         if (isset($options['key'])) {
           $javascript['settings']['data'][$options['key']] = $data;
         }
@@ -4729,9 +4731,10 @@ function backdrop_add_js($data = NULL, $options = NULL) {
         }
         break;
 
-      default: // 'file' and 'external'
-        // Local and external files must keep their name as the associative key
-        // so the same JavaScript file is not added twice.
+      default:
+        // Local ('file') and external ('external') files must keep their name
+        // as the associative key, so that the same JavaScript file is not added
+        // twice.
         $javascript[$options['data']] = $options;
     }
   }
@@ -4771,15 +4774,15 @@ function backdrop_js_defaults($data = NULL) {
  * Returns a themed presentation of all JavaScript code for the current page.
  *
  * References to JavaScript files are placed in a certain order: first, all
- * 'core' files, then all 'module' and finally all 'theme' JavaScript files
- * are added to the page. Then, all settings are output, followed by 'inline'
+ * 'core' files, then all 'module' and finally all 'theme' JavaScript files are
+ * added to the page. Then, all settings are output, followed by 'inline'
  * JavaScript code. If running update.php, all preprocessing is disabled.
  *
- * Note that hook_js_alter(&$javascript) is called during this function call
- * to allow alterations of the JavaScript during its presentation. Calls to
+ * Note that hook_js_alter(&$javascript) is called during this function call to
+ * allow alterations of the JavaScript during its presentation. Calls to
  * backdrop_add_js() from hook_js_alter() will not be added to the output
- * presentation. The correct way to add JavaScript during hook_js_alter()
- * is to add another element to the $javascript array, deriving from
+ * presentation. The correct way to add JavaScript during hook_js_alter() is to
+ * add another element to the $javascript array, deriving from
  * backdrop_js_defaults(). See locale_js_alter() for an example of this.
  *
  * @param $scope
@@ -4838,11 +4841,12 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   backdrop_add_js($setting, 'setting');
 
   // If we're outputting the header scope, then this might be the final time
-  // that backdrop_get_js() is running, so add the setting to this output as well
-  // as to the backdrop_add_js() cache. If $items['settings'] doesn't exist, it's
-  // because backdrop_get_js() was intentionally passed a $javascript argument
-  // stripped of settings, potentially in order to override how settings get
-  // output, so in this case, do not add the setting to this output.
+  // that backdrop_get_js() is running, so add the setting to this output as
+  // well as to the backdrop_add_js() cache. If $items['settings'] doesn't
+  // exist, it's because backdrop_get_js() was intentionally passed a
+  // $javascript argument stripped of settings, potentially in order to override
+  // how settings get output, so in this case, do not add the setting to this
+  // output.
   if ($scope == 'header' && isset($items['settings'])) {
     $items['settings']['data'][] = $setting;
   }
@@ -4857,23 +4861,23 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
 }
 
 /**
- * #pre_render callback to add the elements needed for JavaScript tags to be rendered.
+ * #pre_render callback to add the elements needed for JS tags to be rendered.
  *
  * This function evaluates the aggregation enabled/disabled condition on a group
  * by group basis by testing whether an aggregate file has been made for the
  * group rather than by testing the site-wide aggregation setting. This allows
- * this function to work correctly even if modules have implemented custom
- * logic for grouping and aggregating files.
+ * this function to work correctly even if modules have implemented custom logic
+ * for grouping and aggregating files.
  *
  * @param $element
  *   A render array containing:
- *   - #items: The JavaScript items as returned by backdrop_add_js() and
- *     altered by backdrop_get_js().
- *   - #group_callback: A function to call to group #items. Following
- *     this function, #aggregate_callback is called to aggregate items within
- *     the same group into a single file.
- *   - #aggregate_callback: A function to call to aggregate the items within
- *     the groups arranged by the #group_callback function.
+ *   - #items: The JavaScript items as returned by backdrop_add_js() and altered
+ *     by backdrop_get_js().
+ *   - #group_callback: A function to call to group #items. Following this
+ *     function, #aggregate_callback is called to aggregate items within the
+ *     same group into a single file.
+ *   - #aggregate_callback: A function to call to aggregate the items within the
+ *     groups arranged by the #group_callback function.
  *
  * @return
  *   A render array that will render to a string of JavaScript tags.
@@ -4890,11 +4894,10 @@ function backdrop_pre_render_scripts($elements) {
   }
 
   // A dummy query-string is added to filenames, to gain control over
-  // browser-caching. The string changes on every update or full cache
-  // flush, forcing browsers to load a new copy of the files, as the
-  // URL changed. Files that should not be cached (see backdrop_add_js())
-  // get REQUEST_TIME as query-string instead, to enforce reload on every
-  // page request.
+  // browser-caching. The string changes on every update or full cache flush,
+  // forcing browsers to load a new copy of the files, as the URL changed. Files
+  // that should not be cached (see backdrop_add_js()) get REQUEST_TIME as
+  // query-string instead, to enforce reload on every page request.
   $default_query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
   // Defaults for each SCRIPT element.
@@ -4949,6 +4952,9 @@ function backdrop_pre_render_scripts($elements) {
 
         // Attributes may only be set if this script is output independently.
         if (!empty($element['#attributes']['src']) && !empty($item['attributes'])) {
+          // Ensure the item's attributes setting is an array before attempting
+          // to merge with the element's attributes.
+          $item['attributes'] = isset($item['attributes']) ? $item['attributes'] : array();
           $element['#attributes'] += $item['attributes'];
         }
 
@@ -4975,8 +4981,7 @@ function backdrop_pre_render_scripts($elements) {
  *
  * This function also ensures that the process of grouping items does not change
  * their relative order. This requirement may result in multiple groups for the
- * same type and browsers, if needed to accommodate other items in
- * between.
+ * same type and browsers, if needed to accommodate other items in between.
  *
  * @param $javascript
  *   An array of JavaScript items, as returned by backdrop_add_js(), but after
@@ -4995,8 +5000,8 @@ function backdrop_group_js($javascript) {
   $groups = array();
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
-  // item, we can determine if it can be put into the current group, or if a
-  // new group needs to be made for it.
+  // item, we can determine if it can be put into the current group, or if a new
+  // group needs to be made for it.
   $group_keys = NULL;
   $current_group_keys = NULL;
   $index = -1;
