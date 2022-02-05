@@ -127,6 +127,15 @@ class User extends Entity implements UserInterface {
   public $roles = array();
 
   /**
+   * Stores the original User object before changes during update operations.
+   *
+   * Outside of updates, this property is usually NULL.
+   *
+   * @var User
+   */
+  public $original;
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {

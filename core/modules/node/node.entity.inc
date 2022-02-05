@@ -165,6 +165,14 @@ class Node extends Entity {
    */
   public $in_preview;
 
+  /**
+   * Stores the original Node object before changes during update operations.
+   *
+   * Outside of updates, this property is usually NULL.
+   *
+   * @var Node
+   */
+  public $original;
 
   /**
    * Create a new Node instance.

@@ -87,6 +87,15 @@ class File extends Entity {
   public $timestamp;
 
   /**
+   * Stores the original File object before changes during update operations.
+   *
+   * Outside of updates, this property is usually NULL.
+   *
+   * @var File
+   */
+  public $original;
+
+  /**
    * Constructor for file entities.
    */
   public function __construct(array $values = array()) {
