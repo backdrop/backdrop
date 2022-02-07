@@ -1970,7 +1970,7 @@ function system_update_1018() {
   // Migrate variables to config.
   $config = config('system.authorize');
   $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
-  $settings = db_query("SELECT name, value FROM variable WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
+  $settings = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
   foreach ($settings as $row)  {
     $row = unserialize($row);
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
