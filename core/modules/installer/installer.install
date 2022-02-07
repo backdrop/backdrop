@@ -12,3 +12,12 @@ function installer_update_1000() {
   $config->set('core_update', FALSE);
   $config->save();
 }
+
+/**
+* Set a default value for the download location for multisites.
+*/
+function installer_update_1001() {
+ $config = config('installer.settings');
+ $config->set('download_location', 'root');
+ $config->save();
+}

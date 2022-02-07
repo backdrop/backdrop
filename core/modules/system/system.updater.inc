@@ -71,16 +71,26 @@ class ModuleUpdater extends Updater {
    * found on your system, and if there was a copy in top-level, we'd see it.
    */
   public function getInstallDirectory() {
-    if ($relative_path = backdrop_get_path('module', $this->name)) {
-      $relative_path = dirname($relative_path);
-    }
-    elseif (file_exists(BACKDROP_ROOT . '/modules/contrib')) {
-      $relative_path = 'modules/contrib';
+    if ($module_path = backdrop_get_path('module', $this->name)) {
+      $path = dirname($module_path);
     }
     else {
-      $relative_path = 'modules';
+      if (config_get('installer.settings', 'download_location') == 'multisite') {
+        $path = conf_path();
+      }
+      else {
+        $path = BACKDROP_ROOT;
+      }
+
+      if (file_exists($path . '/modules/contrib')) {
+        $path .= '/modules/contrib';
+      }
+      else {
+        $path .= '/modules';
+      }
     }
-    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
+
+    return realpath($path);
   }
 
   public function isInstalled() {
@@ -140,16 +150,26 @@ class ThemeUpdater extends Updater {
    * found on your system, and if there was a copy in top-level, we'd see it.
    */
   public function getInstallDirectory() {
-    if ($relative_path = backdrop_get_path('theme', $this->name)) {
-      $relative_path = dirname($relative_path);
-    }
-    elseif (file_exists(BACKDROP_ROOT . '/themes/contrib')) {
-      $relative_path = 'themes/contrib';
+    if ($theme_path = backdrop_get_path('theme', $this->name)) {
+      $path = dirname($theme_path);
     }
     else {
-      $relative_path = 'themes';
+      if (config_get('installer.settings', 'download_location') == 'multisite') {
+        $path = conf_path();
+      }
+      else {
+        $path = BACKDROP_ROOT;
+      }
+
+      if (file_exists($path . '/themes/contrib')) {
+        $path .= '/themes/contrib';
+      }
+      else {
+        $path .= '/themes';
+      }
     }
-    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
+
+    return realpath($path);
   }
 
   public function isInstalled() {
@@ -196,16 +216,26 @@ class LayoutUpdater extends Updater {
    * found on your system, and if there was a copy in top-level, we'd see it.
    */
   public function getInstallDirectory() {
-    if ($relative_path = backdrop_get_path('layout', $this->name)) {
-      $relative_path = dirname($relative_path);
-    }
-    elseif (file_exists(BACKDROP_ROOT . '/layouts/contrib')) {
-      $relative_path = 'layouts/contrib';
+    if ($layout_path = backdrop_get_path('layout', $this->name)) {
+      $path = dirname($layout_path);
     }
     else {
-      $relative_path = 'layouts';
+      if (config_get('installer.settings', 'download_location') == 'multisite') {
+        $path = conf_path();
+      }
+      else {
+        $path = BACKDROP_ROOT;
+      }
+
+      if (file_exists($path . '/layouts/contrib')) {
+        $path .= '/layouts/contrib';
+      }
+      else {
+        $path .= '/layouts';
+      }
     }
-    return realpath(BACKDROP_ROOT) . '/' . $relative_path;
+
+    return realpath($path);
   }
 
   public function isInstalled() {
