@@ -754,6 +754,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       // Load the stored entity, if any.
       if (!$entity->isNew() && !isset($entity->original)) {
         $entity->original = entity_load_unchanged($this->entityType, $entity->id());
+        unset($entity->original->original);
       }
 
       $this->preSave($entity);
