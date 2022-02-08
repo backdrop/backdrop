@@ -193,7 +193,7 @@ function user_install() {
 /**
  * Implements hook_update_dependencies().
  */
-function system_update_dependencies() {
+function user_update_dependencies() {
   // Ensure layouts have been converted before renaming our user roles.
   $dependencies['user'][1007] = array(
     'system' => 1025,
