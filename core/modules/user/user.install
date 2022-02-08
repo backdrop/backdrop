@@ -198,6 +198,10 @@ function system_update_dependencies() {
   $dependencies['user'][1007] = array(
     'system' => 1025,
   );
+  // Ensure the 'auto' column already exists in url_alias table.
+  $dependencies['user'][1021] = array(
+    'system' => 1039,
+  );
   return $dependencies;
 }
 
