@@ -3400,7 +3400,7 @@ function backdrop_css_defaults($data = NULL) {
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
  * files do not happen to be needed on a page. However, it is preferred that
- * modules do not implement this hook, but declare CSS files intended for all
+ * modules do not use this function, but declare CSS files intended for all
  * pages in their .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
@@ -4530,7 +4530,7 @@ function backdrop_region_class($region) {
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
  * files are not needed on a page. However, it is preferred that modules do not
- * implement this hook, but declare JS files intended for all pages in their
+ * use this function, but declare JS files intended for all pages in their
  * .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
