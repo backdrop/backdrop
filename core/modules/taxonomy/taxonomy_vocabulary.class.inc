@@ -29,15 +29,6 @@ class TaxonomyVocabulary {
   public $description;
 
   /**
-   * Stores the original TaxonomyVocabulary object before changes during update operations.
-   *
-   * Outside of updates, this property is usually NULL.
-   *
-   * @var TaxonomyVocabulary
-   */
-  public $original;
-
-  /**
    * The type of hierarchy allowed within the vocabulary.
    *
    * Possible values:
