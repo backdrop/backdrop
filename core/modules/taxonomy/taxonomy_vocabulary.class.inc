@@ -84,7 +84,6 @@ class TaxonomyVocabulary {
     if (!$is_new) {
       $data = $config->get();
       $original = new TaxonomyVocabulary($data);
-      unset($original->original);
       $this->original = $original;
     }
 
