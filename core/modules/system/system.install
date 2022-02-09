@@ -530,60 +530,56 @@ function system_requirements($phase) {
     }
   }
 
-  if ($phase == 'runtime') {
-    // Check for a duplicate CKEditor project.
-    $path = backdrop_get_path('module', 'ckeditor');
-    if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
-      $requirements['ckeditor_replaced'] = array(
-        'title' => $t('CKEditor'),
-        'value' => $t('Duplicate module detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
-      );
-    }
+  if ($phase == 'runtime' && !settings_get('disable_multiple_modules_warnings')) {
+    // Check for multiple versions of the same module.
+    $files = system_rebuild_module_data();
+    foreach ($files as $filename => $file) {
+      if (isset($file->all_uris) && count($file->all_uris) > 1) {
+        $uris = array_reverse($file->all_uris);
+        $items = array();
+        foreach ($uris as $i => $uri) {
+          $items[] = array(
+            'data' => !$i ? '<strong>' . $uri . '</strong>' : $uri,
+            'class' => array(!$i ? 'module-overriding' : 'module-overridden'),
+          );
+        }
+        $description = $t('The competing module files are listed below. Only the first of the module versions in the list will be loaded.') . theme('item_list', array('items' => $items));
 
-    // Check for a duplicate Email project.
-    $path = backdrop_get_path('module', 'email');
-    if ($path && strpos($path, 'core/modules/email') === FALSE) {
-      $requirements['email_replaced'] = array(
-        'title' => $t('Email'),
-        'value' => $t('Duplicate module detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
-      );
-    }
+        // For certain core modules, we add some additional explanation.
+        $path = substr($file->uri, 0, strlen($file->uri) - strlen($file->name) - 8);
+        $change_notice = 0;
+        switch ($file->name) {
+          case 'ckeditor':
+            $change_notice = 42827;
+            break;
 
-    // Check for a duplicate Link project.
-    $path = backdrop_get_path('module', 'link');
-    if ($path && strpos($path, 'core/modules/link') === FALSE) {
-      $requirements['link_replaced'] = array(
-        'title' => $t('Link'),
-        'value' => $t('Duplicate module detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
-      );
-    }
+          case 'email':
+            $change_notice = 42928;
+            break;
 
-    // Check for a duplicate Date project.
-    $path = backdrop_get_path('module', 'date');
-    if ($path && strpos($path, 'core/modules/date') === FALSE) {
-      $requirements['date_replaced'] = array(
-        'title' => $t('Date'),
-        'value' => $t('Duplicate module detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
-      );
-    }
+          case 'link':
+            $change_notice = 42930;
+            break;
 
-    // Check for a duplicate redirect project.
-    $path = backdrop_get_path('module', 'redirect');
-    if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
-      $requirements['redirect_replaced'] = array(
-        'title' => $t('Redirect'),
-        'value' => $t('Duplicate module detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
-      );
+          case 'date':
+            $change_notice = 43066;
+            break;
+
+          case 'redirect':
+            $change_notice = 43994;
+            break;
+        }
+        if ($change_notice) {
+          $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array('@name' => $file->info['name'], '%path' => $path, '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
+        }
+
+        $requirements['multiple_' . $file->name] = array(
+          'title' => $file->info['name'],
+          'value' => $t('There are multiple versions of module %name in the installation.', array('%name' => $file->info['name'])),
+          'severity' => REQUIREMENT_WARNING,
+          'description' => $description,
+        );
+      }
     }
   }
 
