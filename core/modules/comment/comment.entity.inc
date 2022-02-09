@@ -96,15 +96,6 @@ class Comment extends Entity {
   public $thread;
 
   /**
-   * Stores the original Comment object before changes during update operations.
-   *
-   * Outside of updates, this property is usually NULL.
-   *
-   * @var Comment
-   */
-  public $original;
-
-  /**
    * Implements EntityInterface::id().
    */
   public function id() {

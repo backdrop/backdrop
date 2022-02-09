@@ -74,15 +74,6 @@ class TaxonomyTerm extends Entity {
   public $parent;
 
   /**
-   * Stores the original TaxonomyTerm object before changes during update operations.
-   *
-   * Outside of updates, this property is usually NULL.
-   *
-   * @var TaxonomyTerm
-   */
-  public $original;
-
-  /**
    * Implements EntityInterface::id().
    */
   public function id() {
