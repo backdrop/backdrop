@@ -196,7 +196,7 @@ function views_theme($existing, $type, $theme, $path) {
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
-  $regex = '/' . '\.tpl\.php' . '$' . '/';
+  $regex = '/\.tpl\.php$/';
 
   // Because backdrop_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
@@ -859,8 +859,21 @@ function views_access() {
  * permissions. If the $account argument is omitted, the current user
  * is used.
  */
-function views_check_perm($perm, $account = NULL) {
-  return user_access($perm, $account) || user_access('access all views', $account);
+function views_check_perm($perms, $account = NULL) {
+  // Backward compatibility to ensure also a single permission string is
+  // properly processed.
+  $perms = is_array($perms) ? $perms : array($perms);
+  if (user_access('access all views', $account)) {
+    return TRUE;
+  }
+  // Perms are handled as OR; as soon one permission allows access, TRUE is
+  // returned.
+  foreach ($perms as $perm) {
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -1000,10 +1013,6 @@ function views_add_css($file) {
  * Include views .js files.
  */
 function views_add_js($file) {
-  // If javascript has been disabled by the user, never add js files.
-  if (config_get('views.settings', 'no_javascript')) {
-    return;
-  }
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
@@ -1150,7 +1159,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
  *   Either 'display', 'style' or 'row'
  * @param $key
  *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
+ *   'summary', 'feed' or others based on the needs of the display.
  * @param $base
  *   An array of possible base tables.
  *
@@ -1193,6 +1202,26 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
   if (!empty($definition)) {
     return _views_create_handler($definition, $type);
   }
+}
+
+/**
+ * Load the current enabled localization plugin.
+ *
+ * @return string
+ *   The name of the localization plugin.
+ */
+function views_get_localization_plugin() {
+  $plugin = config_get('views.settings', 'views_localization_plugin');
+  // Provide sane default values for the localization plugin.
+  if (empty($plugin)) {
+    if (module_exists('locale')) {
+      $plugin = 'core';
+    }
+    else {
+      $plugin = 'none';
+    }
+  }
+  return $plugin;
 }
 
 // -----------------------------------------------------------------------
@@ -1856,10 +1885,40 @@ function _views_query_tag_alter_condition(QueryAlterableInterface $query, &$cond
         views_query_views_alter($condition['value']);
       }
       elseif (isset($condition['value'])) {
-        $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        // Arrays need to be handled differently to strings as they could be
+        // nested.
+        if (is_array($condition['value'])) {
+          // Use the callback to walk through the value, performing the search-
+          // replace operation recursively.
+          array_walk_recursive($condition['value'], '_views_str_replace_recursive', array(
+            array_keys($substitutions),
+            array_values($substitutions),
+          ));
+        }
+        // Simple strings can simply use str_replace().
+        else {
+          $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        }
       }
     }
   }
+}
+
+/**
+ * Callback for performing a string replacement via array_walk_recursive().
+ *
+ * @param string $item
+ *   A leaf from the original array.
+ * @param int $key
+ *   The key for the current array item.
+ * @param array $args
+ *   Element 0 is the items to search for, element 1 is the replacements.
+ *
+ * @see _views_query_tag_alter_condition()
+ */
+function _views_str_replace_recursive(&$item, $key, $args) {
+  list($search, $replace) = $args;
+  $item = str_replace($search, $replace, $item);
 }
 
 /**
@@ -2157,6 +2216,9 @@ function views_autoload_info() {
     'views_plugin_exposed_form_basic' => 'plugins/views_plugin_exposed_form_basic.inc',
     'views_plugin_exposed_form' => 'plugins/views_plugin_exposed_form.inc',
     'views_plugin_exposed_form_input_required' => 'plugins/views_plugin_exposed_form_input_required.inc',
+    'views_plugin_localization_core' => 'plugins/views_plugin_localization_core.inc',
+    'views_plugin_localization' => 'plugins/views_plugin_localization.inc',
+    'views_plugin_localization_none' => 'plugins/views_plugin_localization_none.inc',
     'views_plugin_pager' => 'plugins/views_plugin_pager.inc',
     'views_plugin_pager_full' => 'plugins/views_plugin_pager_full.inc',
     'views_plugin_pager_mini' => 'plugins/views_plugin_pager_mini.inc',
