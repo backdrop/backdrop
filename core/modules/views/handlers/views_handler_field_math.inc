@@ -26,7 +26,7 @@ class views_handler_field_math extends views_handler_field_numeric {
     $form['expression'] = array(
       '#type' => 'textarea',
       '#title' => t('Expression'),
-      '#description' => t('Enter mathematical expressions such as 2 + 2 or sqrt(5). You may assign variables and create mathematical functions and evaluate them. Use the ; to separate these. For example: f(x) = x + 2; f(2).'),
+      '#description' => t("Enter mathematical expressions such as <code>2 + 2</code> or <code>sqrt(5)</code>. You may assign variables and create mathematical functions and evaluate them. Use the <code>;</code> to separate these. For example: <code>f(x) = x + 2; f(2)</code>. The result of the mathematical expression of the previous row can be accessed by using the <code>[expression]</code> token itself."),
       '#default_value' => $this->options['expression'],
     );
 

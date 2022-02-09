@@ -28,6 +28,19 @@ input[type=color] {
   margin-top: .5em;
   margin-bottom: .5em;
   clear: both;
+}
+
+/**
+ * Prevent color input labels from being crumbed up together, when there are
+ * some that wrap into multiple lines.
+ */
+#system-theme-settings .form-type-color {
+  display: table;
+}
+
+/* Properly align color labels with the color input, when they are long. */
+#system-theme-settings .form-type-color label {
+  display: table-cell;
   vertical-align: middle;
 }
 
@@ -38,6 +51,8 @@ input[type=color] {
   width: 35px;
   padding: 0px;
   cursor: pointer;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 /* Styles to control the color inputs in Firefox. */
