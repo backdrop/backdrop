@@ -2907,8 +2907,17 @@ function system_get_info($type, $name = NULL) {
  *   An associative array of module information.
  */
 function _system_rebuild_module_data() {
-  // Find modules
-  $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
+  // Find module files, recording multiples if they exist.
+  $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'uri', 0);
+  $modules = array();
+  foreach ($files as $file) {
+    if (!isset($modules[$file->name])) {
+      $modules[$file->name] = $file;
+    }
+    // Modules found later in the search take precedence, but record all found.
+    $modules[$file->name]->uri = $file->uri;
+    $modules[$file->name]->all_uris[] = $file->uri;
+  }
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
