@@ -325,13 +325,15 @@ function installer_browser_installation_select_versions_form($form, &$form_state
   if (strpos(conf_path(), '/sites/') !== FALSE) {
     $form['download_location'] = array(
       '#type' => 'radios',
-      '#title' => t('Download projects to the appropriate folder in the:'),
+      '#title' => t('Download project(s) to the appropriate folder in the'),
       '#options' => array(
-        'root' => t('Root directory'),
-        'multisite' => t('Site directory'),
+        'root' => t('Root/shared directory'),
+        'multisite' => t('Site-specific directory'),
       ),
       '#default_value' => config_get('installer.settings', 'download_location'),
     );
+    $form['download_location']['root']['#description'] = realpath(BACKDROP_ROOT) . '/...';
+    $form['download_location']['multisite']['#description'] = realpath(conf_path()) . '/...';
   }
 
   $form['maintenance_mode'] = array(
