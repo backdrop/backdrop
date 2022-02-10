@@ -416,12 +416,15 @@ function dblog_filter_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function dblog_clear_log_form($form) {
+  $form['dblog_clear']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This action will permanently delete the log messages from the database.'),
+  );
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
     '#submit' => array('dblog_clear_log_submit'),
     '#attributes' => array('class' => array('button-danger')),
-    '#prefix' => '<p>' . t('This action will permanently delete the log messages from the database.') . '</p>',
   );
 
   return $form;
