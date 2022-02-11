@@ -3399,8 +3399,9 @@ function backdrop_css_defaults($data = NULL) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files do not happen to be needed on a page. This is normally done by calling
- * backdrop_add_css() in a hook_init() implementation.
+ * files do not happen to be needed on a page. However, it is preferred that
+ * modules do not use this function, but declare CSS files intended for all
+ * pages in their .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -4528,8 +4529,9 @@ function backdrop_region_class($region) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files are not needed on a page. This is normally done by calling
- * backdrop_add_js() in a hook_init() implementation.
+ * files are not needed on a page. However, it is preferred that modules do not
+ * use this function, but declare JS files intended for all pages in their
+ * .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -8701,7 +8703,7 @@ function backdrop_parse_dependency($dependency) {
 
         if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
           if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
-            // See comments above about "x" in minor. 
+            // See comments above about "x" in minor.
             // Same principle applies to patch in relation to minor.
             if ($op == '>' || $op == '<=') {
               $matches['minor']++;
