@@ -2397,7 +2397,17 @@ function layout_delete_form($form, &$form_state, $layout) {
 
   if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
     $question = t('Delete layout @title?', array('@title' => $layout->title));
-    $text = t('Are you sure you want to delete this layout? Deleting a layout cannot be undone.');
+
+    // Check whether this is the last layout for the specified path.
+    $path = $layout->getPath();
+    $router_item = menu_get_item($path);
+    $is_layout_page = $router_item['page_callback'] == 'layout_page_callback';
+    if ($is_layout_page && count(layout_load_multiple_by_router_item($router_item)) == 1) {
+      $text = t('Are you sure you want to delete this layout? This will completely remove the page at /%path. Deleting a layout cannot be undone.', array('%path' => $path));
+    }
+    else {
+      $text = t('Are you sure you want to delete this layout? Deleting a layout cannot be undone.');
+    }
     $button_text = t('Delete layout');
   }
   else {
