@@ -2521,7 +2521,7 @@ function layout_delete_form($form, &$form_state, $layout) {
     // layout-created page.
     $path = $layout->getPath();
     $router_item = menu_get_item($path);
-    $is_layout_page = $router_item['page_callback'] == 'layout_page_callback';
+    $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
     if ($is_layout_page) {
       if (!isset($router_item['map'])) {
         // This needs to exist but isn't always set by menu_get_item().
