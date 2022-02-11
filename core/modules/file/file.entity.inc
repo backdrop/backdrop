@@ -150,6 +150,8 @@ class File extends Entity {
    *
    * @param string $op
    *   The operation to be performed on the file. Possible values are:
+   *   - view
+   *   - download
    *   - create
    *   - update
    *   - delete
@@ -161,10 +163,14 @@ class File extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
+    $rights = &backdrop_static(__METHOD__, array());
+
     if ($op == 'create') {
-      return self::createAccess(NULL, $account);
+      // @todo Override!
+      // @todo Does this actually work?
+      return self::createAccess($this->type, $account);
     }
-    elseif (!in_array($op, array('update', 'delete'), TRUE)) {
+    elseif (!in_array($op, array('view', 'download', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -174,14 +180,30 @@ class File extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    if ($op == 'update') {
-      return user_access('manage files', $account);
-    }
-    elseif ($op == 'delete') {
-      return user_access('delete files', $account);
+    $cache_id = $this->fid;
+
+    // If we've already checked access for this file, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cache_id][$op])) {
+      return $rights[$account->uid][$cache_id][$op];
     }
 
-    return FALSE;
+    if (user_access('bypass file access', $account)) {
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    }
+
+    // We grant access to the file if both of the following conditions are met:
+    // - No modules say to deny access.
+    // - At least one module says to grant access.
+    $access = module_invoke_all('file_access', $op, $this, $account);
+    if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
+      return $rights[$account->uid][$cache_id][$op] = FALSE;
+    }
+    elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    }
+
+    return $rights[$account->uid][$cache_id][$op] = FALSE;
   }
 
 }

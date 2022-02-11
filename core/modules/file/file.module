@@ -2806,54 +2806,12 @@ function file_get_type($file) {
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_access($op, $file = NULL, $account = NULL) {
-  $rights = &backdrop_static(__FUNCTION__, array());
-
-  if (!$file && !in_array($op, array('view', 'download', 'update', 'delete', 'create'), TRUE)) {
-    // If there was no file to check against, and the $op was not one of the
-    // supported ones, we return access denied.
+  if (!$file) {
+    // @todo Tricky! How to deal with the optional $file in this function.
     return FALSE;
   }
 
-  // If no user object is supplied, the access check is for the current user.
-  if (empty($account)) {
-    $account = $GLOBALS['user'];
-  }
-
-  // $file may be either an object or a file type. Since file types cannot be
-  // an integer, use either fid or type as the static cache id.
-  $cache_id = NULL;
-  if (!empty($file->id)) {
-    $cache_id = $file->id;
-  }
-  elseif (is_string($file) && $op == 'create') {
-    $cache_id = $file;
-  }
-  else {
-    $cache_id = backdrop_hash_base64(serialize($file));
-  }
-
-  // If we've already checked access for this file, user and op, return from
-  // cache.
-  if (isset($rights[$account->uid][$cache_id][$op])) {
-    return $rights[$account->uid][$cache_id][$op];
-  }
-
-  if (user_access('bypass file access', $account)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
-  }
-
-  // We grant access to the file if both of the following conditions are met:
-  // - No modules say to deny access.
-  // - At least one module says to grant access.
-  $access = module_invoke_all('file_access', $op, $file, $account);
-  if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = FALSE;
-  }
-  elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
-  }
-
-  return FALSE;
+  return $file->access($op, $account);
 }
 
 /**
@@ -2907,6 +2865,7 @@ function file_file_access($op, $file, $account) {
   }
 
   if ($op == 'create') {
+    // @todo!!
     if (user_access('create files', $account)) {
       return FILE_ACCESS_ALLOW;
     }
