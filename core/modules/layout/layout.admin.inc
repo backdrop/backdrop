@@ -2517,20 +2517,25 @@ function layout_delete_form($form, &$form_state, $layout) {
   if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
     $question = t('Delete layout @title?', array('@title' => $layout->title));
 
-    // Check whether this is the last layout for the specified path and it's a
-    // layout-created page.
+    // Check whether this is the last existing layout for the specified path and
+    // it's a layout-created page.
     $path = $layout->getPath();
     $router_item = menu_get_item($path);
-    $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
-    if ($is_layout_page) {
-      if (!isset($router_item['map'])) {
-        // This needs to exist but isn't always set by menu_get_item().
-        $router_item['map'] = array();
-      }
-      $deletion_warning = count(layout_load_multiple_by_router_item($router_item)) == 1;
+    if ($router_item == FALSE) {
+      $deletion_warning = FALSE;
     }
     else {
-      $deletion_warning = FALSE;
+      $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
+      if ($is_layout_page) {
+        if (!isset($router_item['map'])) {
+          // This needs to exist but isn't always set by menu_get_item().
+          $router_item['map'] = array();
+        }
+        $deletion_warning = count(layout_load_multiple_by_router_item($router_item)) == 1;
+      }
+      else {
+        $deletion_warning = FALSE;
+      }
     }
     if ($deletion_warning) {
       $text = t('Are you sure you want to delete this layout? This will completely remove the page at /%path. Deleting a layout cannot be undone.', array('%path' => $path));
