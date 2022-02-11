@@ -312,6 +312,24 @@ function update_fix_requirements() {
       update_variable_del('drupal_private_key');
     }
 
+    // Get list of enabled modules.
+    $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+    // Load their .install files.
+    foreach ($result as $module) {
+      module_load_install($module->name);
+    }
+    // Get list of modules to be enabled.
+    $migrate_required_modules = module_invoke_all('migrate_required_modules_info');
+    $modules_to_enable = array();
+    foreach ($migrate_required_modules as $migrate_required_module) {
+      $module_files = backdrop_system_listing('/^' . $migrate_required_module . '\.module$/', 'modules', 'name', 0);
+      // If a module is not present in the modules folder
+      // the update script will stop the process later and throw an error.
+      // $module_files can be empty at this point without any harm.
+      $modules_to_enable = array_merge($modules_to_enable, array_keys($module_files));
+    }
+    update_module_enable($modules_to_enable);
+
     // Enable the Views module if necessary.
     if (!db_query("SELECT name FROM {system} WHERE name = 'views' AND type = 'module' AND status = 1")->fetchField()) {
       $schema_cache_views = backdrop_get_schema_unprocessed('system', 'cache');
