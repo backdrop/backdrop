@@ -3441,7 +3441,10 @@ class LayoutPathTest extends BackdropWebTestCase {
     $layouts = layout_load_multiple_by_path('');
     $default_layout = $layouts['default'];
     $path = $default_layout->getPath(); // this will be NULL
+    $this->assertTrue(is_null($path), 'Default layout path is NULL.');
+
     $result = path_is_admin($path); // This should throw a deprecation warning in PHP 8.1
     $this->assertFalse($result, 'Default layout is not an admin path.');
+    backdrop_match_path($path, "foo\nbar");
   }
 }
