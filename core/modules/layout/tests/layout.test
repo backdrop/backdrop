@@ -3414,3 +3414,34 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   }
 
 }
+
+/**
+ * Tests that default layout paths are handled properly.
+ */
+class LayoutPathTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer layouts',
+      'access user profiles',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the correct renderer is used
+   */
+  function testLayoutPath() {
+    $layouts = layout_load_multiple_by_path('');
+    $default_layout = $layouts['default'];
+    $path = $default_layout->getPath(); // this will be NULL
+    $result = path_is_admin($path); // This should throw a deprecation warning in PHP 8.1
+    $this->assertFalse($result, 'Default layout is not an admin path.');
+  }
+}
