@@ -298,7 +298,8 @@ function backdrop_match_path($path, $patterns) {
 
   if (!isset($regexps[$patterns])) {
     // Convert path settings to a regular expression.
-    // Therefore replace newlines with a logical or, /* with asterisks and the <front> with the frontpage.
+    // Therefore replace newlines with a logical or, /* with asterisks and the
+    // <front> with the frontpage.
     $to_replace = array(
       '/(\r\n?|\n)/', // newlines
       '/\\\\\*/',     // asterisks
