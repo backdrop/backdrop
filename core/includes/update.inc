@@ -315,20 +315,21 @@ function update_fix_requirements() {
     // Get list of enabled modules.
     $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
     // Load their .install files.
-    foreach ($result as $module) {
-      module_load_install($module->name);
+    $enabled_modules = array_keys($result->fetchAllAssoc('name'));
+    foreach ($enabled_modules as $module_name) {
+      module_load_install($module_name);
     }
     // Get list of modules to be enabled.
     $migrate_required_modules = module_invoke_all('migrate_required_modules_info');
     $modules_to_enable = array();
     foreach ($migrate_required_modules as $migrate_required_module) {
       $module_files = backdrop_system_listing('/^' . $migrate_required_module . '\.module$/', 'modules', 'name', 0);
-      // If a module is not present in the modules folder
-      // the update script will stop the process later and throw an error.
-      // $module_files can be empty at this point without any harm.
+      // If a module is not present in the modules folder, the update script
+      // will stop the process later. No need to catch that here.
       $modules_to_enable = array_merge($modules_to_enable, array_keys($module_files));
     }
-    update_module_enable($modules_to_enable);
+    // Only enable those modules that are not already enabled.
+    update_module_enable(array_diff(array_unique($modules_to_enable), $enabled_modules));
 
     // Enable the Views module if necessary.
     if (!db_query("SELECT name FROM {system} WHERE name = 'views' AND type = 'module' AND status = 1")->fetchField()) {
