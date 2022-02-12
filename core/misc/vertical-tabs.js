@@ -37,7 +37,6 @@ Backdrop.behaviors.verticalTabs = {
         // required fields (for when they are collapsed/not-selected and it is
         // not directly obvious that they contain required fields).
         if ($(this).find('.form-required').length > 0) {
-          // console.log(vertical_tab.fieldset);
           vertical_tab.item.find('.vertical-tab-link strong').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This tab contains required fields.') + '">*</abbr>');
           vertical_tab.fieldset.find('.vertical-tab-link span.fieldset-legend').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This fieldset contains required fields.') + '">*</abbr>');
         }
