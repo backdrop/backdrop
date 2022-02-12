@@ -534,6 +534,8 @@ if (update_access_allowed()) {
   $skip_warnings = !empty($_GET['continue']);
   update_check_requirements($skip_warnings);
 
+  update_migration_enable_dependencies();
+
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
   switch ($op) {
     // update.php ops.
