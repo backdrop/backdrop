@@ -1,15 +1,13 @@
 (function ($) {
 
 /**
- * This script transforms a set of fieldsets into a stack of vertical
- * tabs. Another tab pane can be selected by clicking on the respective
- * tab.
+ * This script transforms a set of fieldsets into a stack of vertical tabs.
+ * Another tab pane can be selected by clicking on the respective tab.
  *
- * Each tab may have a summary which can be updated by another
- * script. For that to work, each fieldset has an associated
- * 'verticalTabCallback' (with jQuery.data() attached to the fieldset),
- * which is called every time the user performs an update to a form
- * element inside the tab pane.
+ * Each tab may have a summary, which can be updated by another script. For that
+ * to work, each fieldset has an associated 'verticalTabCallback' (with
+ * jQuery.data() attached to the fieldset), which is called every time the user
+ * performs an update to a form element inside the tab pane.
  */
 Backdrop.behaviors.verticalTabs = {
   attach: function (context) {
@@ -17,7 +15,8 @@ Backdrop.behaviors.verticalTabs = {
       var focusID = $(':hidden.vertical-tabs-active-tab', this).val();
       var tab_focus;
 
-      // Check if there are some fieldsets that can be converted to vertical-tabs
+      // Check if there are some fieldsets that can be converted to vertical
+      // tabs.
       var $fieldsets = $('> fieldset', this);
       if ($fieldsets.length == 0) {
         return;
@@ -33,6 +32,16 @@ Backdrop.behaviors.verticalTabs = {
           title: $('> legend', this).text(),
           fieldset: $(this),
         });
+
+        // Add "required" indicators to any fieldsets or vertical tabs with
+        // required fields (for when they are collapsed/not-selected and it is
+        // not directly obvious that they contain required fields).
+        if ($(this).find('.form-required').length > 0) {
+          // console.log(vertical_tab.fieldset);
+          vertical_tab.item.find('.vertical-tab-link strong').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This tab contains required fields.') + '">*</abbr>');
+          vertical_tab.fieldset.find('.vertical-tab-link span.fieldset-legend').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This fieldset contains required fields.') + '">*</abbr>');
+        }
+
         tab_list.append(vertical_tab.item);
         $(this)
           .removeClass('collapsible collapsed')
@@ -113,13 +122,13 @@ Backdrop.verticalTab.prototype = {
    * Displays the tab's content pane.
    */
   focus: function () {
-    // Update tab control for desktop
+    // Update tab control for desktop.
     this.item.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
     this.item
       .addClass('vertical-tab-selected')
       .siblings(':hidden.vertical-tabs-active-tab')
         .val(this.fieldset.attr('id'));
-    // Update classes on previous active and new active pane
+    // Update classes on previous active and new active pane.
     this.fieldset.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
     this.fieldset.addClass('vertical-tab-selected');
     // Mark the active tab for screen readers.
@@ -143,9 +152,9 @@ Backdrop.verticalTab.prototype = {
     // Show the tab.
     this.item.show();
 
-    // Update .first marker for items. We need recurse from parent to retain the
-    // actual DOM element order as jQuery implements sortOrder, but not as public
-    // method.
+    // Update .first marker for items. We need to recurse from parent to retain
+    // the actual DOM element order as jQuery implements sortOrder, but not as
+    // public method.
     var $allTabs = this.item.parent().children('.vertical-tab-item');
     $allTabs.removeClass('first').filter(':visible:first').addClass('first');
 
@@ -167,9 +176,9 @@ Backdrop.verticalTab.prototype = {
     // Hide the tab.
     this.item.hide();
 
-    // Update .first marker for items. We need recurse from parent to retain the
-    // actual DOM element order as jQuery implements sortOrder, but not as public
-    // method.
+    // Update .first marker for items. We need to recurse from parent to retain
+    // the actual DOM element order as jQuery implements sortOrder, but not as
+    // public method.
     this.item.parent().children('.vertical-tab-item').removeClass('first')
       .filter(':visible:first').addClass('first');
 
@@ -193,14 +202,14 @@ Backdrop.verticalTab.prototype = {
  *   - title: The name of the tab.
  * @return
  *   This function has to return an object with at least these keys:
- *   - item: The root tab jQuery element
+ *   - item: The root tab jQuery element.
  *   - link: The anchor tag that acts as the clickable area of the tab
- *       (jQuery version)
- *   - summary: The jQuery element that contains the tab summary
+ *       (jQuery version).
+ *   - summary: The jQuery element that contains the tab summary.
  */
 Backdrop.theme.prototype.verticalTab = function (settings) {
   var tab = {};
-  // Calculating height in em so CSS has a chance to update height
+  // Calculating height in em, so CSS has a chance to update the height.
   tab.item = $('<li class="vertical-tab-item" tabindex="-1"></li>')
     .append(tab.link = $('<a href="#" class="vertical-tab-link"></a>')
       .append(tab.title = $('<strong></strong>').text(settings.title))
