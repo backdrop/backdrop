@@ -2904,7 +2904,7 @@ function file_file_access($op, $file, $account) {
         }
         // Public non-temporary files.
         elseif ($file->status == FILE_STATUS_PERMANENT) {
-          if (user_access('view files', $account) || ($file->uid == $account->uid && user_access('view own files', $account))) {
+          if (user_access('view files', $account) || ($account->uid && $file->uid == $account->uid && user_access('view own files', $account))) {
             return FILE_ACCESS_ALLOW;
           }
         }
