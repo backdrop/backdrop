@@ -24,7 +24,7 @@ function field_group_config_info() {
  * Given a bundle config file, display a unique label.
  */
 function field_group_config_label($config, $config_name) {
-  list($group_name, $entity_type_name, $bundle, $mode) = explode('.', str_replace('field_group.field_group.', '', $config_name));
+  list($entity_type_name, $bundle, $mode, $group_name) = explode('.', str_replace('field_group.field_group.', '', $config_name));
   $entity_type = entity_get_info($entity_type_name);
   $entity_label = $entity_type['label'];
   $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
