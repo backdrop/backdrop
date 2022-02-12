@@ -240,27 +240,45 @@ function node_form($form, &$form_state, Node $node) {
     '#default_value' => $node->revision,
     '#access' => user_access('administer nodes'),
   );
-  // Check the revision log checkbox when the log textarea is filled in.
-  // This must not happen if "Create new revision" is enabled by default, since
-  // the state would auto-disable the checkbox otherwise.
-  if (!$node->revision) {
-    $form['revision_information']['revision']['#states'] = array(
-      'checked' => array(
-        'textarea[name="log"]' => array('empty' => FALSE),
-      ),
-    );
-  }
   $form['revision_information']['log'] = array(
     '#type' => 'textarea',
     '#title' => t('Revision log message'),
     '#rows' => 4,
     '#default_value' => !empty($node->log) ? $node->log : '',
     '#description' => t('Briefly describe the changes you have made.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="revision"]' => array('checked' => TRUE),
+      ),
+    ),
   );
   if ($node_type->settings['revision_required']) {
     $form['revision_information']['log']['#states']['required'] = array(
       'input[name="revision"]' => array('checked' => TRUE),
     );
+  }
+
+  // If the revision log message is set to be required for this content type,
+  // add the required indicator (red asterisk) to the "Revision log message".
+  if ($node_type->settings['revision_required']) {
+    // This only handles the cosmetic/visual aspect, as #states cannot not
+    // actually handle and enforce the "required" property. The actual
+    // validation needs to happen manually in node_validate().
+    // This is actually useful in this situation, because if we added the
+    // required indicator via the '#required' property, the form validation
+    // would prevent submission if the user selected to not create a revision
+    // (the required field would be visually hidden if the checkbox was
+    // unticked, but it would still be present on the form).
+    $form['revision_information']['log']['#states']['required'] = array(
+      'input[name="revision"]' => array('checked' => TRUE),
+    );
+    // If the user does not have the "Administer content" permission, the
+    // "Create new revision" checkbox won't be present on the form, so we cannot
+    // use #states to show/hide the required indicator. In that case, we set the
+    // required indicator via the '#required' property.
+    if (!user_access('administer nodes')) {
+      $form['revision_information']['log']['#required'] = TRUE;
+    }
   }
 
   // Node author information for administrators
