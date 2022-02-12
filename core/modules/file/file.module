@@ -2790,11 +2790,11 @@ function file_get_type($file) {
  *
  * @param $op
  *   The operation to be performed on the file. Possible values are:
+ *   - "create"
  *   - "view"
  *   - "download"
  *   - "update"
  *   - "delete"
- *   - "create"
  * @param $file
  *   The file object on which the operation is to be performed, or file type
  *   (e.g. 'image') for "create" operation.
@@ -2806,12 +2806,27 @@ function file_get_type($file) {
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_access($op, $file = NULL, $account = NULL) {
-  if (!$file) {
-    // @todo Tricky! How to deal with the optional $file in this function.
+  if (!in_array($op, array('create', 'view', 'download', 'update', 'delete'), TRUE)) {
     return FALSE;
   }
 
-  return $file->access($op, $account);
+  // If neither a file object nor a file type are given, we make sure that the
+  // account has access regardless of bundle.
+  if (!$file) {
+    $bypass_access = user_access('bypass file access', $account);
+
+    if ($op == 'create') {
+      return user_access('create files', $account) || $bypass_access;
+    }
+
+    return $bypass_access;
+  }
+
+  if ($file instanceof File) {
+    return $file->access($op, $account);
+  }
+
+  return FALSE;
 }
 
 /**
@@ -2856,19 +2871,18 @@ function file_stream_wrappers_alter(&$wrappers) {
  * Implements hook_file_access().
  */
 function file_file_access($op, $file, $account) {
-  // If the file URI is invalid, deny access.
-  if (is_object($file) && isset($file->uri) && !file_valid_uri($file->uri)) {
-    if(isset($file->is_new) && $file->is_new == true && user_access('create files', $account)) {
-      return FILE_ACCESS_ALLOW;
-    }
-    return FILE_ACCESS_DENY;
-  }
 
   if ($op == 'create') {
-    // @todo!!
+    // @todo File::createAccess?
     if (user_access('create files', $account)) {
       return FILE_ACCESS_ALLOW;
     }
+  }
+
+  // If the file is not new ('create' got handled above) and its URI is invalid,
+  // we deny access.
+  if (is_object($file) && isset($file->uri) && !file_valid_uri($file->uri)) {
+    return FILE_ACCESS_DENY;
   }
 
   if (!empty($file)) {

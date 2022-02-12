@@ -144,15 +144,11 @@ class File extends Entity {
   /**
    * Overrides Entity::access().
    *
-   * The "view" operation is not supported on the File Entity itself because it
-   * has no page callback (yet), but there is separately file_download_access()
-   * to check if a file is downloadable.
-   *
    * @param string $op
    *   The operation to be performed on the file. Possible values are:
+   *   - create
    *   - view
    *   - download
-   *   - create
    *   - update
    *   - delete
    * @param User|AnonymousUser|object $account
@@ -163,15 +159,13 @@ class File extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
-    $rights = &backdrop_static(__METHOD__, array());
+    // The static cache has moved here from function file_access(), but we keep
+    // the same name to not break existing reset implementations.
+    // @todo Could it be safe at some point to switch to __METHOD__?
+    $rights = &backdrop_static('file_access', array());
 
-    if ($op == 'create') {
-      // @todo Override!
-      // @todo Does this actually work?
-      return self::createAccess($this->type, $account);
-    }
-    elseif (!in_array($op, array('view', 'download', 'update', 'delete'), TRUE)) {
-      // If the $op was not one of the supported ones, we return access denied.
+    if (!in_array($op, array('create', 'view', 'download', 'update', 'delete'), TRUE)) {
+      // For unsupported operations we return access denied.
       return FALSE;
     }
 
