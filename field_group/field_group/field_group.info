@@ -4,5 +4,3 @@ package = Fields
 backdrop = 1.x
 type = module
 dependencies[] = field
-files[] = tests/field_group.ui.test
-files[] = tests/field_group.display.test

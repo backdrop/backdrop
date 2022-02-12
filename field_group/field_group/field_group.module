@@ -236,7 +236,7 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
   if (isset($list[$entity_type], $list[$entity_type][$bundle])) {
     foreach ($list[$entity_type][$bundle] as $group_mode => $groups) {
       foreach ($groups as $group) {
-        $config = config('field_group.field_group.' . $entity_type . '.' . $bundle_name . '.' . $mode . '.' . $group_name);
+        $config = config('field_group.field_group.' . $entity_type . '.' . $bundle . '.' . $group_mode . '.' . $group->group_name);
         $config->delete();
       }
     }
@@ -1315,7 +1315,6 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
 function field_group_field_group_format_summary($group) {
 
   $group_form = module_invoke_all('field_group_format_settings', $group);
-
   $output = '';
   if (isset($group->format_settings['formatter'])) {
     $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';
@@ -1332,7 +1331,7 @@ function field_group_field_group_format_summary($group) {
 
       if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
         if (is_array($value)) {
-          $value = implode(array_filter($value), ', ');
+          $value = implode(', ', array_filter($value));
         }
         else {
           $value = $group_form['instance_settings'][$key]['#options'][$value];
