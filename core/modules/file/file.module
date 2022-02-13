@@ -2914,19 +2914,28 @@ function file_file_access($op, $file, $account) {
     }
 
     if ($op == 'download') {
-      if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+      if (user_access("download any $type files", $account)) {
+        return FILE_ACCESS_ALLOW;
+      }
+      if ($account->uid && $account->uid == $file->uid && user_access("download own $type files", $account)) {
         return FILE_ACCESS_ALLOW;
       }
     }
 
     if ($op == 'update') {
-      if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+      if (user_access('manage files', $account) || user_access("edit any $type files", $account)) {
+        return FILE_ACCESS_ALLOW;
+      }
+      if ($account->uid && $account->uid == $file->uid && user_access("edit own $type files", $account)) {
         return FILE_ACCESS_ALLOW;
       }
     }
 
     if ($op == 'delete') {
-      if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+      if (user_access('delete files', $account) || user_access("delete any $type files", $account)) {
+        return FILE_ACCESS_ALLOW;
+      }
+      if ($account->uid && $account->uid == $file->uid && user_access("delete own $type files", $account)) {
         return FILE_ACCESS_ALLOW;
       }
     }
