@@ -202,16 +202,16 @@ Backdrop.verticalTab.prototype = {
 Backdrop.theme.prototype.verticalTab = function (settings) {
   // Separate the actual tab title text from any other elements that may have
   // been added to the fieldset legend (such as "required" indicators).
-  var tab_title_children = settings.title.children();
+  var title_children = settings.title.children();
   settings.title.children().remove();
-  var tab_title = settings.title.text();
+  var title_text = settings.title.text();
 
   var tab = {};
   // Calculating height in em, so CSS has a chance to update the height.
   tab.item = $('<li class="vertical-tab-item" tabindex="-1"></li>')
     .append(tab.link = $('<a href="#" class="vertical-tab-link"></a>')
-      .append(tab.title = $('<strong></strong>').text(tab_title))
-      .append(tab.title_children = tab_title_children)
+      .append(tab.title = $('<strong></strong>').text(title_text))
+      .append(tab.title_children = title_children)
       .append(tab.summary = $('<span class="summary"></span>')
     )
   );
