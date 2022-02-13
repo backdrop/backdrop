@@ -3687,7 +3687,7 @@ function theme_details($variables) {
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary><span>' . $element['#summary'];
-  // If the fieldset contains any required fields in it, add a "required"
+  // If the details element contains any required fields in it, add a "required"
   // indicator in the legend.
   $output .= _element_has_required_children($element) ? ' <abbr class="form-required" title="' . t('This details element contains required fields.') . '">*</abbr>' : '';
   $output .= '</span></summary>';

@@ -25,21 +25,12 @@ Backdrop.behaviors.verticalTabs = {
       // Create the tab column.
       var tab_list = $('<ul class="vertical-tabs-list"></ul>');
       $(this).wrap('<div class="vertical-tabs clearfix"></div>').before(tab_list);
-
       // Transform each fieldset into a tab.
       $fieldsets.each(function () {
         var vertical_tab = new Backdrop.verticalTab({
-          title: $('> legend', this).text(),
+          title: $('> legend > span', this),
           fieldset: $(this),
         });
-
-        // Add "required" indicators to any fieldsets or vertical tabs with
-        // required fields (for when they are collapsed/not-selected and it is
-        // not directly obvious that they contain required fields).
-        if ($(this).find('.form-required').length > 0) {
-          vertical_tab.item.find('.vertical-tab-link strong').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This tab contains required fields.') + '">*</abbr>');
-          vertical_tab.fieldset.find('.vertical-tab-link span.fieldset-legend').addClass('required').append(' <abbr class="form-required" title="' + Backdrop.t('This fieldset contains required fields.') + '">*</abbr>');
-        }
 
         tab_list.append(vertical_tab.item);
         $(this)
@@ -104,7 +95,7 @@ Backdrop.verticalTab = function (settings) {
     }
   });
 
-  // Add summary to legend which is seen on smaller breakpoints
+  // Add summary to legend which is seen on smaller breakpoints.
   var $legend = this.fieldset.children('legend');
   $legend.append(this.legendSummary = $('<span class="summary"></span>'));
   $legend.addClass('vertical-tab-link');
@@ -199,6 +190,8 @@ Backdrop.verticalTab.prototype = {
  * @param settings
  *   An object with the following keys:
  *   - title: The name of the tab.
+ *   - fieldset: The fieldset corresponding to the tab.
+ *
  * @return
  *   This function has to return an object with at least these keys:
  *   - item: The root tab jQuery element.
@@ -207,11 +200,18 @@ Backdrop.verticalTab.prototype = {
  *   - summary: The jQuery element that contains the tab summary.
  */
 Backdrop.theme.prototype.verticalTab = function (settings) {
+  // Separate the actual tab title text from any other elements that may have
+  // been added to the fieldset legend (such as "required" indicators).
+  var tab_title_children = settings.title.children();
+  settings.title.children().remove();
+  var tab_title = settings.title.text();
+
   var tab = {};
   // Calculating height in em, so CSS has a chance to update the height.
   tab.item = $('<li class="vertical-tab-item" tabindex="-1"></li>')
     .append(tab.link = $('<a href="#" class="vertical-tab-link"></a>')
-      .append(tab.title = $('<strong></strong>').text(settings.title))
+      .append(tab.title = $('<strong></strong>').text(tab_title))
+      .append(tab.title_children = tab_title_children)
       .append(tab.summary = $('<span class="summary"></span>')
     )
   );
