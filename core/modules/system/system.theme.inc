@@ -806,11 +806,17 @@ function system_preprocess_page_components(&$variables) {
  *   An associative array containing:
  *   - label: The human-readable label.
  *   - machine_name: (optional) The machine-safe name.
+ *   - required: (optional) Adds a "required" indicator (red asterisk) after the
+ *       label.
  *
  * @ingroup themeable
  */
 function theme_label_machine_name($variables) {
-  $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
+  $label = check_plain($variables['label']);
+  if (!empty($variables['required'])) {
+    $label .= ' <abbr class="form-required" title="' . t('Required.') . '">*</abbr>';
+  }
+  $output = '<div class="label">' . $label . '</div>';
 
   if (!empty($variables['machine_name'])) {
     $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
