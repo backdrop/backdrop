@@ -2882,54 +2882,52 @@ function file_file_access($op, $file, $account) {
 
   // If the file is not new ('create' got handled above) and its URI is invalid,
   // we deny access.
-  if (is_object($file) && isset($file->uri) && !file_valid_uri($file->uri)) {
+  if (!file_valid_uri($file->uri)) {
     return FILE_ACCESS_DENY;
   }
 
-  if (!empty($file)) {
-    $type = is_string($file) ? $file : $file->type;
+  $type = $file->type;
 
-    if (in_array($type, file_permissions_get_configured_types())) {
-      if ($op == 'view') {
-        $scheme = file_uri_scheme($file->uri);
-        $wrapper = file_get_stream_wrapper($scheme);
+  if (in_array($type, file_permissions_get_configured_types())) {
+    if ($op == 'view') {
+      $scheme = file_uri_scheme($file->uri);
+      $wrapper = file_get_stream_wrapper($scheme);
 
-        // Private files.
-        if (!empty($wrapper['private'])) {
-          if (user_access('view private files', $account)) {
-            return FILE_ACCESS_ALLOW;
-          }
-          if ($account->uid && $file->uid == $account->uid && user_access('view own private files', $account)) {
-            return FILE_ACCESS_ALLOW;
-          }
+      // Private files.
+      if (!empty($wrapper['private'])) {
+        if (user_access('view private files', $account)) {
+          return FILE_ACCESS_ALLOW;
         }
-        // Public non-temporary files.
-        elseif ($file->status == FILE_STATUS_PERMANENT) {
-          if (user_access('view files', $account)) {
-            return FILE_ACCESS_ALLOW;
-          }
-          if ($account->uid && $file->uid == $account->uid && user_access('view own files', $account)) {
-            return FILE_ACCESS_ALLOW;
-          }
-        }
-      }
-
-      if ($op == 'download') {
-        if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+        if ($account->uid && $file->uid == $account->uid && user_access('view own private files', $account)) {
           return FILE_ACCESS_ALLOW;
         }
       }
-
-      if ($op == 'update') {
-        if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+      // Public non-temporary files.
+      elseif ($file->status == FILE_STATUS_PERMANENT) {
+        if (user_access('view files', $account)) {
+          return FILE_ACCESS_ALLOW;
+        }
+        if ($account->uid && $file->uid == $account->uid && user_access('view own files', $account)) {
           return FILE_ACCESS_ALLOW;
         }
       }
+    }
 
-      if ($op == 'delete') {
-        if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
-          return FILE_ACCESS_ALLOW;
-        }
+    if ($op == 'download') {
+      if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+        return FILE_ACCESS_ALLOW;
+      }
+    }
+
+    if ($op == 'update') {
+      if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        return FILE_ACCESS_ALLOW;
+      }
+    }
+
+    if ($op == 'delete') {
+      if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        return FILE_ACCESS_ALLOW;
       }
     }
   }
