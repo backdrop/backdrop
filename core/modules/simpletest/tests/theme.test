@@ -664,6 +664,83 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
         ),
         'expected' => '<details open="open"><summary><span>The summary</span></summary><div class="details-child-wrapper">foobar</div></details>',
       ),
+      // Collapsed 'details' with a required child element.
+      array(
+        'name' => "Details with required child",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#open' => FALSE,
+          'child' => array(
+            '#markup' => 'foobar',
+            '#required' => TRUE,
+          ),
+        ),
+        'expected' => '<details><summary><span>The summary <abbr class="form-required" title="This details element contains required fields.">*</abbr></span></summary><div class="details-child-wrapper">foobar</div></details>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
+   * Tests Form API #type 'fieldset'.
+   */
+  public function testFieldset() {
+    $elements = array(
+      // Basic 'fieldset' element.
+      array(
+        'name' => "Basic 'fieldset'",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('The legend'),
+          // '#details' => t('Detailed content'),
+        ),
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>',
+      ),
+      // Basic 'fieldset' with custom id and class attributes.
+      array(
+        'name' => "Basic 'fieldset' with custom attributes",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('The legend'),
+          // '#details' => t('Detailed content'),
+          '#attributes' => array(
+            'id' => 'foobar-id',
+            'class' => array('fooclass'),
+          ),
+        ),
+        'expected' => '<fieldset id="foobar-id" class="fooclass form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>',
+      ),
+      // Expanded 'fieldset' with child element.
+      array(
+        'name' => "Fieldset with child",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('The legend'),
+          '#collapsible' => TRUE,
+          '#collapsed' => FALSE,
+          'child' => array(
+            '#markup' => 'foobar',
+          ),
+        ),
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+      ),
+      // Collapsed 'fieldset' with a required child element.
+      array(
+        'name' => "Fieldset with required child",
+        'value' => array(
+          '#type' => 'fieldset',
+          '#title' => t('The legend'),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+          'child' => array(
+            '#markup' => 'foobar',
+            '#required' => TRUE,
+          ),
+        ),
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend <abbr class="form-required" title="This fieldset contains required fields.">*</abbr></span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+      ),
     );
 
     $this->assertElements($elements);
