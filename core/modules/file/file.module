@@ -2806,20 +2806,21 @@ function file_get_type($file) {
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_access($op, $file = NULL, $account = NULL) {
+  // Filter out unsupported operations.
   if (!in_array($op, array('create', 'view', 'download', 'update', 'delete'), TRUE)) {
     return FALSE;
   }
 
-  // If neither a file object nor a file type are given, we make sure that the
-  // account has access regardless of bundle.
-  if (!$file) {
-    $bypass_access = user_access('bypass file access', $account);
-
-    if ($op == 'create') {
-      return user_access('create files', $account) || $bypass_access;
+  // If no $file is given or it's only the file type.
+  if (!$file || is_string($file)) {
+    // Filter out unsupported file types.
+    if (is_string($file) && !in_array($file, file_permissions_get_configured_types())) {
+      return FALSE;
     }
-
-    return $bypass_access;
+    if ($op == 'create') {
+      return user_access('create files', $account) || user_access('bypass file access', $account);
+    }
+    return user_access('bypass file access', $account);
   }
 
   if ($file instanceof File) {
