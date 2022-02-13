@@ -2879,10 +2879,9 @@ function file_file_access($op, $file, $account) {
       return FILE_ACCESS_ALLOW;
     }
   }
-
   // If the file is not new ('create' got handled above) and its URI is invalid,
   // we deny access.
-  if (!file_valid_uri($file->uri)) {
+  elseif (!file_valid_uri($file->uri)) {
     return FILE_ACCESS_DENY;
   }
 
