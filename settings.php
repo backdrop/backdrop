@@ -408,6 +408,24 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Suppress warnings of multiple versions of the same module being found.
+ *
+ * When scanning for module files, if Backdrop encounters multiple instances of
+ * the same module (for example, a version of a module in the /modules directory
+ * that has the same name as a module in /core), then only the last module will
+ * be loaded. In such cases, Backdrop will show a warning on the status report
+ * page.
+ *
+ * Having multiple versions of the same module may be intentional in certain use
+ * cases though, such as in some multisite configurations, when there is need to
+ * override a core or contrib module with a different version in the /sites
+ * folder. In such cases, you may want to disable the status report warnings.
+ *
+ * Uncomment the line below to disable the warnings.
+ */
+// $settings['disable_multiple_modules_warnings'] = TRUE;
+
+/**
  * Configuration overrides.
  *
  * These settings allow you to specify values for anything stored in config
@@ -423,6 +441,19 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  */
 //$config['system.core']['site_name'] = 'My Backdrop site';
 //$config['system.core']['file_temporary_path'] = '/tmp';
+
+/**
+ * Add Permissions-Policy header to disable Google FLoC.
+ *
+ * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
+ * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
+ * which was introduced in Chrome v89. For more information about FLoC, see:
+ * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ *
+ * If you don't wish to disable FLoC in Chrome, you can uncomment the following
+ * setting, and make sure its value is set to "FALSE".
+ */
+//$config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
  * Include a local settings file, if available.
