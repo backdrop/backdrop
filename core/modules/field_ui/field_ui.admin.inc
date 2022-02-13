@@ -397,7 +397,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'label' => array(
         '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
           'label' => $extra_field['label'],
-          'required' => $extra_field['required'],
+          'required' => isset($extra_field['required']) ? $extra_field['required'] : FALSE,
         )),
       ),
       'weight' => array(
