@@ -694,9 +694,8 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
         'value' => array(
           '#type' => 'fieldset',
           '#title' => t('The legend'),
-          // '#details' => t('Detailed content'),
         ),
-        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>',
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>' . "\n",
       ),
       // Basic 'fieldset' with custom id and class attributes.
       array(
@@ -704,13 +703,12 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
         'value' => array(
           '#type' => 'fieldset',
           '#title' => t('The legend'),
-          // '#details' => t('Detailed content'),
           '#attributes' => array(
             'id' => 'foobar-id',
             'class' => array('fooclass'),
           ),
         ),
-        'expected' => '<fieldset id="foobar-id" class="fooclass form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>',
+        'expected' => '<fieldset id="foobar-id" class="fooclass form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper"></div></fieldset>' . "\n",
       ),
       // Expanded 'fieldset' with child element.
       array(
@@ -724,7 +722,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             '#markup' => 'foobar',
           ),
         ),
-        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend</span></legend><div class="fieldset-wrapper">foobar</div></fieldset>' . "\n",
       ),
       // Collapsed 'fieldset' with a required child element.
       array(
@@ -739,7 +737,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
             '#required' => TRUE,
           ),
         ),
-        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend <abbr class="form-required" title="This fieldset contains required fields.">*</abbr></span></legend><div class="fieldset-wrapper">foobar</div></fieldset>',
+        'expected' => '<fieldset class="form-wrapper"><legend><span class="fieldset-legend">The legend <abbr class="form-required" title="This fieldset contains required fields.">*</abbr></span></legend><div class="fieldset-wrapper">foobar</div></fieldset>' . "\n",
       ),
     );
 
