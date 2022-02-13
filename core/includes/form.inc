@@ -3682,9 +3682,6 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-wrapper'));
-
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary><span>' . $element['#summary'];
   // If the details element contains any required fields in it, add a "required"
@@ -3748,7 +3745,7 @@ function _element_has_required_children($element) {
   $children = element_children($element);
   // Check whether the element contains any required fields in it.
   foreach ($children as $child) {
-    if ($element[$child]['#required']) {
+    if (isset($element[$child]['#required']) && $element[$child]['#required']) {
       $contains_required = TRUE;
       // If we find even one required field, set the $contains_required flag and
       // bail early from the loop.

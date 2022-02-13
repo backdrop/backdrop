@@ -15,7 +15,7 @@ Backdrop.behaviors.verticalTabs = {
       var focusID = $(':hidden.vertical-tabs-active-tab', this).val();
       var tab_focus;
 
-      // Check if there are some fieldsets that can be converted to vertical
+      // Check if there are any fieldsets that can be converted to vertical
       // tabs.
       var $fieldsets = $('> fieldset', this);
       if ($fieldsets.length == 0) {
@@ -25,13 +25,13 @@ Backdrop.behaviors.verticalTabs = {
       // Create the tab column.
       var tab_list = $('<ul class="vertical-tabs-list"></ul>');
       $(this).wrap('<div class="vertical-tabs clearfix"></div>').before(tab_list);
+
       // Transform each fieldset into a tab.
       $fieldsets.each(function () {
         var vertical_tab = new Backdrop.verticalTab({
-          title: $('> legend > span', this),
+          title: $('> legend > span.fieldset-legend', this),
           fieldset: $(this),
         });
-
         tab_list.append(vertical_tab.item);
         $(this)
           .removeClass('collapsible collapsed')
