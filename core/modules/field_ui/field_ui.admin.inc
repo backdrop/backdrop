@@ -61,7 +61,7 @@ function field_ui_fields_list() {
           $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
           $field_label = l($field_label, $field_configure_link);
         }
-        // Add required indicator to required field instances.
+        // Add a "required" indicator to required field instances.
         if ($instances[$entity_type][$bundle][$field_name]['required']) {
           $field_label .= ' <abbr class="form-required" title="' . t('This field instance is required.') . '">*</abbr>';
         }
