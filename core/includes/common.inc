@@ -8972,7 +8972,7 @@ function backdrop_load_file($project_type, $project_name, $filename) {
   }
 
   if (function_exists('backdrop_get_path')) {
-    $file = BACKDROP_ROOT . '/' . backdrop_get_path($project_type, $project_name) . "/$filename";
+    $file = BACKDROP_ROOT . '/' . backdrop_get_path($project_type, $project_name) . '/' . $filename;
     if (is_file($file)) {
       require_once $file;
       $files[$project_name][$filename] = $file;
