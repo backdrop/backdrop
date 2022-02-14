@@ -2788,21 +2788,21 @@ function file_get_type($file) {
 /**
  * Determines if a user may perform the given operation on the specified file.
  *
- * @param $op
+ * @param string $op
  *   The operation to be performed on the file. Possible values are:
  *   - "create"
  *   - "view"
  *   - "download"
  *   - "update"
  *   - "delete"
- * @param $file
+ * @param object|string|NULL $file
  *   The file object on which the operation is to be performed, or file type
- *   (e.g. 'image') for "create" operation.
- * @param $account
+ *   (e.g. 'image').
+ * @param object $account
  *   Optional, a user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_access($op, $file = NULL, $account = NULL) {
@@ -2817,10 +2817,33 @@ function file_access($op, $file = NULL, $account = NULL) {
     if (is_string($file) && !in_array($file, file_permissions_get_configured_types())) {
       return FALSE;
     }
-    if ($op == 'create') {
-      return user_access('create files', $account) || user_access('bypass file access', $account);
+
+    // No restrictions for this account.
+    if (user_access('bypass file access', $account)) {
+      return TRUE;
     }
-    return user_access('bypass file access', $account);
+
+    // Permission checks that work without a file instance.
+    switch ($op) {
+      case 'create':
+        return user_access('create files', $account);
+
+      case 'view':
+        // Without instance we can not know if a file might be public or
+        // private, so we require both permissions.
+        return user_access('view files', $account) && user_access('view private files', $account);
+
+      case 'update':
+        return user_access('manage files', $account);
+
+      case 'delete':
+        return user_access('delete files', $account);
+
+      default:
+        // This does not mean that no potential file is accessible, but that not
+        // all potential files are accessible - an important difference.
+        return FALSE;
+    }
   }
 
   if ($file instanceof File) {
