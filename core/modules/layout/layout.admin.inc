@@ -196,7 +196,7 @@ function layout_list_page() {
    );
    $page['override'] = array(
     '#type' => 'help',
-    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site. Without the layouts, these pages would use other layouts.'),
+    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site. Without these layout overrides, these pages would use other layouts.'),
     '#weight' => 2,
    );
    $page['override_table'] = array(
