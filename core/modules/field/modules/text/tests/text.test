@@ -453,14 +453,15 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $edit = array('field[cardinality]' => -1);
     $this->backdropPost('admin/structure/types/manage/post/fields/body', $edit, t('Save settings'));
     $this->backdropGet('node/add/post');
-    $this->assertFieldByXPath("//input[@name='body_add_more']", t('Add another item'), 'Body field cardinality set to multiple.');
+    $this->assertFieldByXPath("//input[@name='body_add_more']", t('Add another'), 'Body field cardinality set to multiple.');
 
     $body = array(
       $this->randomName(),
       $this->randomName(),
     );
 
-    // Create an post with the first body input format set to "Full HTML".
+    // Create an post with the first body input format set to "Raw HTML"
+    // (full_html).
     $title = $this->randomName();
     $edit = array(
       'title' => $title,
@@ -469,8 +470,8 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($title);
 
-    // Populate the body field: the first item gets the "Full HTML" input
-    // format, the second one "Filtered HTML".
+    // Populate the body field: the first item gets the "Raw HTML" (full_html)
+    // input format, the second one "Filtered HTML".
     $formats = array('full_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {

@@ -241,4 +241,87 @@ class FileStorageController extends EntityDatabaseStorageController {
       ->execute();
   }
 
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $file, $view_mode = 'full', $langcode = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    // Remove previously built content, if exists.
+    $file->content = array();
+
+    // In case of a multiple view, file_view_multiple() already ran the
+    // 'prepare_view' step. An internal flag prevents the operation from running
+    // twice.
+    // Allow modules to change the view mode.
+    $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $view_mode, $langcode));
+    field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
+    entity_prepare_view('file', array($file->fid => $file), $langcode);
+
+    // Build the actual file display.
+    $file->content['file'] = file_view_file($file, $view_mode, $langcode);
+
+    // Build fields content.
+    $file->content += field_attach_view('file', $file, $view_mode, $langcode);
+
+    $links = array();
+    $file->content['links'] = array(
+      '#theme' => 'links__file',
+      '#pre_render' => array('backdrop_pre_render_links'),
+      '#attributes' => array('class' => array('links', 'inline')),
+    );
+    $file->content['links']['file'] = array(
+      '#theme' => 'links__file__file',
+      '#links' => $links,
+      '#attributes' => array('class' => array('links', 'inline')),
+    );
+
+    // Allow modules to make their own additions to the file.
+    module_invoke_all('file_view', $file, $view_mode, $langcode);
+    module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
+  }
+
+  /**
+   * Overrides DefaultEntityController::view().
+   */
+  public function view($files, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    $view = array();
+    foreach ($files as $file) {
+      /* @var File $file */
+      // Populate $file->content with a render() array.
+      $this->buildContent($file, $view_mode, $langcode);
+
+      $build = $file->content;
+      // We don't need duplicate rendering info in $file->content.
+      unset($file->content);
+
+      $build += array(
+        '#theme' => 'file_entity',
+        '#file' => $file,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+
+      // Add contextual links for this file, except when the file is already
+      // being displayed on its own page. Modules may alter this behavior (for
+      // example, to restrict contextual links to certain view modes) by
+      // implementing hook_file_view_alter().
+      if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
+        $build['#contextual_links']['file'] = array('file', array($file->fid));
+      }
+
+      // Allow modules to modify the structured file.
+      $type = 'file';
+      backdrop_alter(array('file_view', 'entity_view'), $build, $type);
+      $view[$type][$file->id()] = $build;
+    }
+
+    return $view;
+  }
+
 }

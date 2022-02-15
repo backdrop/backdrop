@@ -7,7 +7,7 @@
     "max_length": 100,
     "max_component_length": 100,
     "update_action": 2,
-    "transliterate": false,
+    "transliterate": true,
     "reduce_ascii": false,
     "ignore_words": "",
     "punctuation_double_quotes": 0,
