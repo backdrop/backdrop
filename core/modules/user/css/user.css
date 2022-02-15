@@ -24,6 +24,9 @@
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
 }
+.permissions-matrix {
+  overflow-x: auto;
+}
 
 /**
  * Password toggle.

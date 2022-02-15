@@ -1,6 +1,5 @@
 # Turn off all options we don't need.
-Options None
-Options +SymLinksIfOwnerMatch
+Options -Indexes -ExecCGI -Includes
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -11,5 +10,8 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 
 # If we know how to do it safely, disable the PHP engine entirely.
 <IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
   php_flag engine off
 </IfModule>
