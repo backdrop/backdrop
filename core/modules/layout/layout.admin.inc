@@ -2328,11 +2328,11 @@ function layout_toggle_enabled(Layout $layout, $status) {
 
   if ($status) {
     $layout->enable();
-    backdrop_set_message(t('Layout "@title" enabled.', array('@title' => $layout->title)));
+    backdrop_set_message(t('Layout %title has been enabled.', array('%title' => $layout->title)));
   }
   else {
     $layout->disable();
-    backdrop_set_message(t('Layout "@title" disabled.', array('@title' => $layout->title)));
+    backdrop_set_message(t('Layout %title has been disabled.', array('%title' => $layout->title)));
   }
   backdrop_goto('admin/structure/layouts');
 }
@@ -2546,24 +2546,24 @@ function layout_clone_form_submit($form, &$form_state) {
 }
 
 /**
- * Form callback; Delete a layout.
+ * Form callback. Delete, revert, or disable a layout.
  *
  * @ingroup forms
  */
 function layout_delete_form($form, &$form_state, $layout) {
   $form_state['layout'] = $layout;
 
-  if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
+  $disable_actions = FALSE;
+  $delete_layout = ($layout->storage === LAYOUT_STORAGE_NORMAL);
+  if ($delete_layout) {
     $question = t('Delete layout @title?', array('@title' => $layout->title));
 
     // Check whether this is the last existing layout for the specified path and
     // it's a layout-created page.
+    $deletion_warning = FALSE;
     $path = $layout->getPath();
     $router_item = menu_get_item($path);
-    if ($router_item == FALSE) {
-      $deletion_warning = FALSE;
-    }
-    else {
+    if ($router_item != FALSE) {
       $is_layout_page = ($router_item['page_callback'] == 'layout_page_callback');
       if ($is_layout_page) {
         if (!isset($router_item['map'])) {
@@ -2572,15 +2572,32 @@ function layout_delete_form($form, &$form_state, $layout) {
         }
         $deletion_warning = count(layout_load_multiple_by_router_item($router_item)) == 1;
       }
-      else {
-        $deletion_warning = FALSE;
-      }
     }
     if ($deletion_warning) {
-      $text = t('Are you sure you want to delete this layout? This will completely remove the page at /%path. Deleting a layout cannot be undone.', array('%path' => $path));
+      // Check whether this layout-created page was used on any site information page.
+      $site_config = config('system.core');
+      if ($path == $site_config->get('site_frontpage')) {
+        $url = url('admin/config/system/site-information') . '#edit-front-page';
+        $text = t('This layout creates a page at %path that is used as the home page of the site. Before deleting this layout, which will entirely remove that page, you must change the home page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $disable_actions = TRUE;
+      }
+      elseif ($path == $site_config->get('site_403')) {
+        $url = url('admin/config/system/site-information') . '#edit-error-page';
+        $text = t('This layout creates a page at %path that is used as the default 403 (access denied) page of the site. Before deleting this layout, which will entirely remove that page, you must change the 403 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $disable_actions = TRUE;
+      }
+      elseif ($path == $site_config->get('site_404')) {
+        $url = url('admin/config/system/site-information') . '#edit-error-page';
+        $text = t('This layout creates a page at %path that is used as the default 404 (not found) page of the site. Before deleting this layout, which will entirely remove that page, you must change the 404 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $disable_actions = TRUE;
+      }
+      else {
+        $text = t('Are you sure you want to delete this layout? This will completely remove the page at %path. This action cannot be undone. If you are unsure, consider disabling the layout instead.', array('%path' => $path));
+      }
     }
     else {
-      $text = t('Are you sure you want to delete this layout? Deleting a layout cannot be undone.');
+      // We're deleting the layout, but there will still be a page at its path.
+      $text = t('Are you sure you want to delete this layout? This action cannot be undone. if you are unsure, consider disabling the layout instead.');
     }
     $button_text = t('Delete layout');
   }
@@ -2590,23 +2607,51 @@ function layout_delete_form($form, &$form_state, $layout) {
     $button_text = t('Revert layout');
   }
 
-  return confirm_form($form, $question, 'admin/structure/layouts', $text, $button_text);
+  $form = confirm_form($form, $question, 'admin/structure/layouts', $text, $button_text);
+
+  if ($delete_layout) {
+    // Add a disable layout button to the standard confirmation form.
+    $cancel = array_pop($form['actions']);
+    $form['actions']['disable'] = array(
+      '#type' => 'submit',
+      '#value' => t('Disable layout'),
+    );
+    $form['actions']['cancel'] = $cancel;
+  }
+
+  if ($disable_actions) {
+    $form['actions']['submit']['#disabled'] = TRUE;
+    if ($delete_layout) {
+      $form['actions']['disable']['#disabled'] = TRUE;
+    }
+  }
+
+  return $form;
 }
 
 /**
- * Submit handler for layout_delete_form(). Deletes a layout.
+ * Submit handler for layout_delete_form(). Delete, revert, or disable a layout.
  */
 function layout_delete_form_submit(&$form, &$form_state) {
   /* @var Layout $layout */
   $layout = $form_state['layout'];
+  $title = $layout->title;
 
-  if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
-    $layout->delete();
-    backdrop_set_message(t('The layout has been deleted.'));
-  }
-  else {
-    $layout->revert();
-    backdrop_set_message(t('The layout has been reverted.'));
+  switch($form_state['clicked_button']['#value']) {
+    case t('Delete layout'):
+      $layout->delete();
+      backdrop_set_message(t('Layout %title has been deleted.', array('%title' => $title)));
+      break;
+
+    case t('Disable layout'):
+      $layout->disable();
+      backdrop_set_message(t('Layout %title has been disabled.', array('%title' => $title)));
+      break;
+
+    case t('Revert layout'):
+      $layout->revert();
+      backdrop_set_message(t('Layout %title has been reverted.', array('%title' => $title)));
+      break;
   }
   $form_state['redirect'] = 'admin/structure/layouts';
 }
