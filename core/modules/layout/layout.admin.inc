@@ -191,7 +191,7 @@ function layout_list_page() {
     '#header' => $header,
     '#rows' => $stand_alone_rows,
      '#attributes' => array('class' =>   array('layout-list')),
-     '#empty' => t('No layouts have been created yet.'),
+     '#empty' => t('No layout pages have been created yet.'),
      '#weight' => 1,
    );
    $page['override'] = array(
