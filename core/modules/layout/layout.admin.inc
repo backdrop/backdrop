@@ -204,7 +204,7 @@ function layout_list_page() {
     '#header' => $header,
     '#rows' => $override_rows,
     '#attributes' => array('class' =>   array('layout-list')),
-    '#empty' => t('No layout overridess have been created yet.'),
+    '#empty' => t('No layout overrides have been created yet.'),
     '#weight' => 3,
   );
   return $page;
