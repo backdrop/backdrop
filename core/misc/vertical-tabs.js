@@ -1,15 +1,13 @@
 (function ($) {
 
 /**
- * This script transforms a set of fieldsets into a stack of vertical
- * tabs. Another tab pane can be selected by clicking on the respective
- * tab.
+ * This script transforms a set of fieldsets into a stack of vertical tabs.
+ * Another tab pane can be selected by clicking on the respective tab.
  *
- * Each tab may have a summary which can be updated by another
- * script. For that to work, each fieldset has an associated
- * 'verticalTabCallback' (with jQuery.data() attached to the fieldset),
- * which is called every time the user performs an update to a form
- * element inside the tab pane.
+ * Each tab may have a summary which can be updated by another script. For that
+ * to work, each fieldset has an associated 'verticalTabCallback' (with
+ * jQuery.data() attached to the fieldset), which is called every time the user
+ * performs an update to a form element inside the tab pane.
  */
 Backdrop.behaviors.verticalTabs = {
   attach: function (context) {
@@ -17,7 +15,8 @@ Backdrop.behaviors.verticalTabs = {
       var focusID = $(':hidden.vertical-tabs-active-tab', this).val();
       var tab_focus;
 
-      // Check if there are some fieldsets that can be converted to vertical-tabs
+      // Check if there are some fieldsets that can be converted to vertical
+      // tabs.
       var $fieldsets = $('> fieldset', this);
       if ($fieldsets.length == 0) {
         return;
@@ -47,13 +46,24 @@ Backdrop.behaviors.verticalTabs = {
       $('> li:last', tab_list).addClass('last');
 
       if (!tab_focus) {
-        // If the current URL has a fragment and one of the tabs contains an
-        // element that matches the URL fragment, activate that tab.
-        if (window.location.hash && $(this).find(window.location.hash).length) {
-          tab_focus = $(this).find(window.location.hash).closest('.vertical-tabs-pane');
+        // Find any invalid form element within the set of vertical tabs.
+        if ($(this).find('.required.error').length) {
+          // Focus the vertical tab containing the first of the invalid form
+          // elements.
+          tab_focus = $(this).find('.required.error').first().closest('.vertical-tabs-pane');
         }
+        // If there are no invalid form elements within the vertical tabs.
         else {
-          tab_focus = $fieldsets.first();
+          // Check if the current URL has a fragment and one of the tabs
+          // contains an element that matches the URL fragment. If so, then
+          // focus that vertical tab.
+          if (window.location.hash && $(this).find(window.location.hash).length) {
+            tab_focus = $(this).find(window.location.hash).closest('.vertical-tabs-pane');
+          }
+          else {
+            // If there is no URL fragment, then focus the first vertical tab.
+              tab_focus = $fieldsets.first();
+          }
         }
       }
       if (tab_focus.length) {
@@ -96,7 +106,7 @@ Backdrop.verticalTab = function (settings) {
     }
   });
 
-  // Add summary to legend which is seen on smaller breakpoints
+  // Add summary to legend which is seen on smaller breakpoints.
   var $legend = this.fieldset.children('legend');
   $legend.append(this.legendSummary = $('<span class="summary"></span>'));
   $legend.addClass('vertical-tab-link');
@@ -113,13 +123,13 @@ Backdrop.verticalTab.prototype = {
    * Displays the tab's content pane.
    */
   focus: function () {
-    // Update tab control for desktop
+    // Update tab control for desktop.
     this.item.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
     this.item
       .addClass('vertical-tab-selected')
       .siblings(':hidden.vertical-tabs-active-tab')
         .val(this.fieldset.attr('id'));
-    // Update classes on previous active and new active pane
+    // Update classes on previous active and new active pane.
     this.fieldset.siblings('.vertical-tab-selected').removeClass('vertical-tab-selected');
     this.fieldset.addClass('vertical-tab-selected');
     // Mark the active tab for screen readers.
@@ -143,9 +153,9 @@ Backdrop.verticalTab.prototype = {
     // Show the tab.
     this.item.show();
 
-    // Update .first marker for items. We need recurse from parent to retain the
-    // actual DOM element order as jQuery implements sortOrder, but not as public
-    // method.
+    // Update .first marker for items. We need to recurse from parent to retain
+    // the actual DOM element order as jQuery implements sortOrder, but not as
+    // public method.
     var $allTabs = this.item.parent().children('.vertical-tab-item');
     $allTabs.removeClass('first').filter(':visible:first').addClass('first');
 
@@ -167,9 +177,9 @@ Backdrop.verticalTab.prototype = {
     // Hide the tab.
     this.item.hide();
 
-    // Update .first marker for items. We need recurse from parent to retain the
-    // actual DOM element order as jQuery implements sortOrder, but not as public
-    // method.
+    // Update .first marker for items. We need to recurse from parent to retain
+    // the actual DOM element order as jQuery implements sortOrder, but not as
+    // public method.
     this.item.parent().children('.vertical-tab-item').removeClass('first')
       .filter(':visible:first').addClass('first');
 
@@ -191,12 +201,14 @@ Backdrop.verticalTab.prototype = {
  * @param settings
  *   An object with the following keys:
  *   - title: The name of the tab.
+ *   - fieldset: The fieldset corresponding to the tab.
+ *
  * @return
  *   This function has to return an object with at least these keys:
- *   - item: The root tab jQuery element
+ *   - item: The root tab jQuery element.
  *   - link: The anchor tag that acts as the clickable area of the tab
- *       (jQuery version)
- *   - summary: The jQuery element that contains the tab summary
+ *       (jQuery version).
+ *   - summary: The jQuery element that contains the tab summary.
  */
 Backdrop.theme.prototype.verticalTab = function (settings) {
   var tab = {};
