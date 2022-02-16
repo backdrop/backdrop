@@ -966,11 +966,16 @@ function views_module_include($api, $reset = FALSE) {
   $included_modules = array();
   foreach ($api_cache as $module => $api_info) {
     if (isset($api_info['path'])) {
-      $path = './' . $api_info['path'] . '/' . $api_info['module'] . '.' . $api . '.inc';
-      if (is_file($path)) {
-        $included_modules[$module] = $api_info;
-        include_once($path);
-      }
+      // Custom location for MODULE.views.inc file.
+      $include_path = $api_info['path'];
+    }
+    else {
+      $include_path = backdrop_get_path('module', $module);
+    }
+    $path = './' . $include_path . '/' . $api_info['module'] . '.' . $api . '.inc';
+    if (is_file($path)) {
+      $included_modules[$module] = $api_info;
+      include_once($path);
     }
   }
   return $included_modules;
