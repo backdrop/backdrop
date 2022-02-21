@@ -323,6 +323,9 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
+  if ($modules_to_enable = update_migration_check_dependencies()) {
+    $output .= $modules_to_enable;
+  }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
@@ -534,14 +537,13 @@ if (update_access_allowed()) {
   $skip_warnings = !empty($_GET['continue']);
   update_check_requirements($skip_warnings);
 
-  update_migration_enable_dependencies();
-
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
   switch ($op) {
     // update.php ops.
 
     case 'selection':
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
+        update_migration_enable_dependencies();
         $output = update_selection_page();
         break;
       }

@@ -294,46 +294,69 @@ function update_module_add_to_system($modules = array()) {
   }
 }
 
-function update_migration_enable_dependencies() {
-  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_migration_dependencies', FALSE)) {
+function update_migration_check_dependencies() {
+  $status_report = '';
+  if (backdrop_get_installed_schema_version('system') > 7000) {
+    $modules_to_enable = update_migration_modules_to_enable();
     
-    // Get list of enabled modules. 
-    $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
-    
-    // Get list of modules to be enabled.
-    $enabled_modules = array_keys($result->fetchAllAssoc('name'));
-    // Get information about all modules available
-    $files = system_rebuild_module_data();
-
-    $modules_to_enable = array();
-    foreach ($enabled_modules as $enabled_module) {
-      if (!empty($files[$enabled_module]->requires)) {
-        $required_modules = array_keys($files[$enabled_module]->requires);
-        // Add required modules that are not enabled.
-        $modules_to_enable = array_merge($modules_to_enable, array_diff($required_modules, $enabled_modules));
-      }
+    if (empty($modules_to_enable)) {
+      return;
     }
-    // Remove duplicates.
-    $modules_to_enable = array_unique($modules_to_enable);
-    if (!empty($modules_to_enable)) {
-      module_enable($modules_to_enable);
-      $modules_string = implode(', ', $modules_to_enable);
 
-      state_set('update_migration_dependencies', TRUE);
-      $requirements['enable_modules_on_migrate'] = array(
-        'title' => t('Modules enabled automatically for migration.'),
-        'description' => t('The followig Backdrop modules needed to be enabled in order for the site to be migrated successully: %modules.', array('%modules' => $modules_string)),
-        'severity' => REQUIREMENT_WARNING,
-      );
-      backdrop_set_title('Requirements status');
-      $status_report = theme('status_report', array('requirements' => $requirements));
-      $task_list = update_task_list('requirements');
-      $status_report .=  '<a href="' . check_url(backdrop_requirements_url(REQUIREMENT_OK)) . '">Click here to continue</a>.';
-      print theme('update_page', array('content' => $status_report));
-      exit();
+    $files = system_rebuild_module_data();
+    $module_list = '';
+    foreach ($modules_to_enable as $module_to_enable => $dependents) {
+      $module_list .= '<strong>' . $files[$module_to_enable]->info['name'] . '. ' . t('Required by:') . '</strong>';
+      $module_list .= theme('item_list', array('items' => $dependents));
+    }
+    $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
+    $status_report .= t('The following Backdrop modules need to be enabled in order for the site to be migrated successfully:') . '</p>';
+    $status_report .= $module_list;
+  }
+  return $status_report;
+}
+
+
+function update_migration_enable_dependencies() {
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_migration_enable_dependencies', FALSE)) {
+    $modules_to_enable = update_migration_modules_to_enable();
+    if (!empty($modules_to_enable)) {
+      module_enable(array_keys($modules_to_enable));
+      state_set('update_migration_enable_dependencies', TRUE);
     }
   }
 }
+
+/** 
+ * Find out which modules need to be enabled.
+ * 
+ * @return array
+ *    An array keyed by the machine names of module names needed to be enabled,
+ *    whose values are arrays of the modules that depend on them.  
+ */
+function update_migration_modules_to_enable() {
+  // Get list of enabled modules. 
+  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+    
+  // Get list of modules to be enabled.
+  $enabled_modules = array_keys($result->fetchAllAssoc('name'));
+  // Get information about all modules available
+  $files = system_rebuild_module_data();
+
+  $modules_to_enable = array();
+  foreach ($enabled_modules as $enabled_module) {
+    if (!empty($files[$enabled_module]->requires)) {
+      $required_modules = array_keys($files[$enabled_module]->requires);
+      // Add required modules that are not enabled.
+      $modules_not_enabled = array_diff($required_modules, $enabled_modules);
+      foreach ($modules_not_enabled as $module_not_enabled) {
+        $modules_to_enable[$module_not_enabled][] = $files[$enabled_module]->info['name'];
+      }
+    }
+  }
+  return $modules_to_enable;
+}
+
 /**
  * Perform Drupal 7.x to Backdrop 1.x updates that are required for update.php
  * to function properly.
