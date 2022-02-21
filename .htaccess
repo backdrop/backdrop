@@ -117,7 +117,7 @@ DirectoryIndex index.php index.html index.htm
   RewriteCond %{REQUEST_URI} ^(.*)?/(install.php) [OR]
   RewriteCond %{REQUEST_URI} ^(.*)?/(cron.php)
   RewriteCond %{REQUEST_URI} !core
-  RewriteCond %{REQUEST_URI} !civicrm
+  RewriteCond %{REQUEST_URI} !modules
   RewriteRule ^ %1/core/%2 [L,QSA,R=301]
 
   # Pass all requests not referring directly to files in the filesystem to
