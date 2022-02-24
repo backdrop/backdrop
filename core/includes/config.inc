@@ -296,6 +296,7 @@ function config_install_default_config($module, $config_name = NULL) {
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
           $config->setData($data);
+          module_invoke_all('config_create', $config);
           $config->save();
         }
       }
@@ -697,7 +698,7 @@ class Config {
    */
   public function getOverride($key) {
     $value = NULL;
-    $parts = explode('.', $key);
+    $parts = explode('.', (string) $key);
     $popped_parts = array();
     while ($parts) {
       $assembled_key = implode('.', $parts);

@@ -670,7 +670,7 @@ function field_info_bundles($entity_type = NULL) {
  */
 function field_info_field_map() {
   // Read from the "static" cache.
-  $field_info_cache = backdrop_static(__FUNCTION__, array());
+  $field_info_cache = &backdrop_static(__FUNCTION__, array());
 
   if (!empty($field_info_cache)) {
     return $field_info_cache;

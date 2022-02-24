@@ -1202,6 +1202,9 @@ function user_update_1015() {
 function user_update_1016() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store User entity records.";
+  if (db_table_exists('cache_entity_user')) {
+    db_drop_table('cache_entity_user');
+  }
   db_create_table('cache_entity_user', $table);
 }
 
@@ -1227,6 +1230,79 @@ function user_update_1018() {
   $config->set('user_password_reject_weak', FALSE);
   $config->set('user_password_strength_threshold', 50);
   $config->save();
+}
+
+/**
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  if ($config->get('user_admin_role') == NULL) {
+    $config->set('user_admin_role', 0);
+    $config->save();
+  }
+}
+
+/**
+ * Make sure that all config translatables are set for user mails.
+ */
+function user_update_1020() {
+  $mail_config = config('user.mail');
+  $available = $mail_config->get('_config_translatables');
+  if ($available === NULL || count($available) < 18 ) {
+    // @see core/modules/user/config/user.mail.json
+    $mail_translatables = array(
+      'cancel_confirm_body',
+      'cancel_confirm_subject',
+      'password_reset_body',
+      'password_reset_subject',
+      'register_admin_created_body',
+      'register_admin_created_subject',
+      'register_no_approval_required_body',
+      'register_no_approval_required_subject',
+      'register_pending_approval_body',
+      'register_pending_approval_subject',
+      'register_pending_approval_admin_body',
+      'register_pending_approval_admin_subject',
+      'status_activated_body',
+      'status_activated_subject',
+      'status_blocked_body',
+      'status_blocked_subject',
+      'status_canceled_body',
+      'status_canceled_subject',
+    );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $mail_translatables = array_merge($available, $mail_translatables);
+      $mail_translatables = array_values(array_unique($mail_translatables));
+    }
+    $mail_config->set('_config_translatables', $mail_translatables);
+    $mail_config->save();
+  }
+}
+
+/**
+ * Make sure that generation of automatic path alias is enabled for user 1.
+ */
+function user_update_1021() {
+  if (module_exists('path') && config_get('path.settings', 'user_pattern')) {
+    $admin_user = user_load(1);
+    if ($admin_user->path['auto'] == FALSE) {
+      $admin_user->path['auto'] = TRUE;
+      user_save($admin_user);
+    }
+  }
+}
+
+/**
+ * Moves the "log_user_flood_control" variable to config.
+ */
+function user_update_1022() {
+  $config = config('user.flood');
+  $config->set('flood_log_failed_attempts', update_variable_get('log_user_flood_control', TRUE));
+  $config->save();
+
+  update_variable_del('log_user_flood_control');
 }
 
 /**

@@ -242,7 +242,7 @@ function field_test_field_storage_delete_revision($entity_type, $entity, $fields
 /**
  * Implements hook_field_storage_query().
  */
-function field_test_field_storage_query($field_name, $conditions, $count, &$cursor = NULL, $age) {
+function field_test_field_storage_query($field_name, $conditions, $count, &$cursor, $age) {
   $data = _field_test_storage_data();
 
   $load_current = $age == FIELD_LOAD_CURRENT;

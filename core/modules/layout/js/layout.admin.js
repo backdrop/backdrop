@@ -33,6 +33,22 @@ Backdrop.behaviors.layoutList = {
  */
 Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
+
+    /**
+     * Toggle handler for the placeholder examples.
+     */
+    function examples_toggle_handler(e) {
+      var $examples = $(this).next().toggle();
+      if ($examples.is(':visible')) {
+        $(this).text(Backdrop.t('Hide examples')).append('<span class="arrow close"></span>');
+      }
+      else {
+        $(this).text(Backdrop.t('Show examples')).append('<span class="arrow"></span>');
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     var $form = $('.layout-settings-form').once('layout-settings');
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
@@ -43,6 +59,10 @@ Backdrop.behaviors.layoutConfigure = {
           ajax.cleanUp(ajax.currentRequests[n]);
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
+
+      // (Re)install placeholder examples toggle handler.
+      $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
+
       };
       // Update contexts after a slight typing delay.
       var timer = 0;
@@ -51,6 +71,12 @@ Backdrop.behaviors.layoutConfigure = {
         timer = setTimeout(updateContexts, 200);
       });
     }
+
+    // Hide the placeholder examples.
+    $form.find('.layout-placeholder-examples').hide();
+
+    // Handle toggling the placeholder examples.
+    $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');
@@ -89,6 +115,156 @@ Backdrop.behaviors.layoutDisplayEditor = {
         placeholder: 'layout-editor-placeholder layout-editor-block',
         forcePlaceholderSize: true
       });
+
+      // Allow keyboard navigation
+      // Get the list of droppables, that is regions where we can drop blocks.
+      var droppables = $.map($('.layout-editor-region'), function (item) {return $(item).attr('id')});
+
+      // Find the next region.
+      var findNextDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if (index >= 0 && index < arr.length - 1) {
+          return arr[index + 1]
+        }
+        return false;
+      }
+
+      // Find the previous region.
+      var findPreviousDroppable = function (current, arr) {
+        var index = arr.indexOf(current);
+        if (index > 0 && index <= arr.length - 1) {
+          return arr[index - 1]
+        }
+        return false;
+      }
+
+      // Check if an element is in the viewport.
+      $.fn.isInViewport = function () {
+        let elementTop = $(this).offset().top;
+        let elementBottom = elementTop + $(this).outerHeight();
+
+        let viewportTop = $(window).scrollTop();
+        let viewportBottom = viewportTop + $(window).height();
+
+        return elementBottom > viewportTop && elementTop < viewportBottom;
+      }
+
+      // Scroll to a droppable if it's not visible.
+      var scrollIfNotVisible = function (nextDroppableId) {
+        if ($('#' + nextDroppableId).isInViewport() === false) {
+          var $nextDroppable = $('#' + nextDroppableId);
+          var _offset = $nextDroppable.offset();
+          $('html, body').animate({
+            scrollTop: _offset.top,
+            scrollLeft: _offset.left
+          });
+        }
+      }
+
+      $('#layout-edit-main').on('keydown', '.layout-editor-block', function(event) {
+        var currentDroppable = $(this).closest('.layout-editor-region');
+        var currentDroppableId = currentDroppable.attr('id');
+        var that = $(this);
+
+        // Announce on block movement.
+        var announceBlock = function (changedRegion, newDroppable) {
+          var blockTitle = that.find('span.text').html();
+          var regionTitle = newDroppable.find('h2.label').html();
+          var newDroppableId = newDroppable.attr('id');
+          var countBlocks = $('#' + newDroppableId + ' .layout-editor-block').length;
+          var blockPosition = that.index() + 1;
+          var announceMessage = '';
+          if (changedRegion) {
+            announceMessage = Backdrop.t('Block moved to region !region_title', {
+              '!region_title': regionTitle
+            });
+          }
+          else {
+            announceMessage = Backdrop.t('Block moved.');
+          }
+          announceMessage += Backdrop.t('Now in position !block_position of !count_blocks', {
+            '!block_position': blockPosition,
+            '!count_blocks': countBlocks,
+          });
+          Backdrop.announce(announceMessage);
+        }
+
+        // Press right arrow to move block to next region.
+        if (event.which == 39) {
+          var nextDroppableId = findNextDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppableId) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId);
+
+          var droppableParentId = '#' + nextDroppableId;
+          var droppable = $(droppableParentId + ' .layout-editor-region-content');
+          droppable.append($(this));
+          $(this).focus();
+          announceBlock(true, $(droppableParentId));
+        }
+
+        // Press left arrow to move block to previous region.
+        if (event.which == 37) {
+          var nextDroppableId = findPreviousDroppable(currentDroppableId, droppables);
+
+          if (!nextDroppableId) {
+            return;
+          }
+
+          scrollIfNotVisible(nextDroppableId);
+
+          var droppableParentId = '#' + nextDroppableId;
+          var droppable = $(droppableParentId + ' .layout-editor-region-content');
+          droppable.append($(this));
+          $(this).focus();
+          announceBlock(true, $(droppableParentId));
+        }
+
+        // Press up to move block up by one position.
+        if (event.which == 38) {
+          $(this).insertBefore($(this).prev());
+          $(this).focus();
+          announceBlock(false, currentDroppable);
+        }
+        // Press down to move block down by one position.
+        if (event.which == 40) {
+          $(this).insertAfter($(this).next());
+          $(this).focus();
+          announceBlock(false, currentDroppable);
+        }
+        // Press t or "page up" to move block to top of region.
+        if (event.which == 84 || event.which == 33) {
+          $(this).parent().prepend($(this));
+          $(this).focus();
+          announceBlock(false, currentDroppable);
+        }
+        // Press b or "page down" to move block to bottom of region.
+        if (event.which == 66 || event.which == 34) {
+          $(this).parent().append($(this));
+          $(this).focus();
+          announceBlock(false, currentDroppable);
+        }
+
+        var region = $(this).closest('.layout-editor-region');
+        updateLayoutOnKeyInput(region);
+
+        if (currentDroppable) {
+          updateLayoutOnKeyInput(currentDroppable);
+        }
+      });
+
+      // Update block list on hidden input element.
+      var updateLayoutOnKeyInput = function (region) {
+        var regionName = region.data('regionName');
+        var blockList = [];
+        region.find('.layout-editor-block').each(function(index) {
+          blockList.push($(this).data('blockId'));
+        });
+        $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+      }
 
       // Open a dialog if editing a particular block.
       var blockUuid = window.location.hash.replace(/#configure-block:/, '');

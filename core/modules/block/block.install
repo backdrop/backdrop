@@ -69,10 +69,7 @@ function block_update_1002() {
 
   // Set the system weight back to 0, previously it was -5, but this weight is
   // no longer necessary as Block is no longer responsible for page layout.
-  db_update('system')
-    ->fields(array('weight' => 0))
-    ->condition('name', 'block')
-    ->execute();
+  module_set_weight('block', 0);
 }
 
 /**

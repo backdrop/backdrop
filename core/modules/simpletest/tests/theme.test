@@ -19,7 +19,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
    * Test function theme_get_suggestions() for SA-CORE-2009-003.
    */
   function testThemeSuggestions() {
-    // Set the front page as something random otherwise the CLI
+    // Set the home page as something random otherwise the CLI
     // test runner fails.
     config_set('system.core', 'site_frontpage', 'nobody-home');
     $args = array('node', '1', 'edit');
@@ -59,18 +59,18 @@ class ThemeUnitTest extends BackdropWebTestCase {
   }
 
   /**
-   * Ensure page-front template suggestion is added when on front page.
+   * Ensure page-front template suggestion is added when on home page.
    */
   function testFrontPageThemeSuggestion() {
     $q = $_GET['q'];
     // Set $_GET['q'] to node because theme_get_suggestions() will query it to
-    // see if we are on the front page.
+    // see if we are on the home page.
     config_set('system.core', 'site_frontpage', 'node');
     $_GET['q'] = 'node';
     $suggestions = theme_get_suggestions(explode('/', $_GET['q']), 'page');
     // Set it back to not annoy the batch runner.
     $_GET['q'] = $q;
-    $this->assertTrue(in_array('page__front', $suggestions), 'Front page template was suggested.');
+    $this->assertTrue(in_array('page__front', $suggestions), 'Home page template was suggested.');
   }
 
   /**
@@ -221,6 +221,28 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
     $this->assertNoRaw('class="odd"', 'Odd/even classes were not added because $no_striping = TRUE.');
     $this->assertNoRaw('no_striping', 'No invalid no_striping HTML attribute was printed.');
   }
+
+  /**
+   * Tests that the 'footer' option works correctly.
+   */
+  function testThemeTableFooter() {
+    $footer = array(
+      array(
+        'data' => array(1),
+      ),
+      array('Foo'),
+    );
+
+    $table = array(
+      'rows' => array(),
+      'footer' => $footer,
+    );
+
+    $this->content = theme('table', $table);
+    $this->content = preg_replace('@>\s+<@', '><', $this->content);
+    $this->assertRaw('<tfoot><tr><td>1</td></tr><tr><td>Foo</td></tr></tfoot>', 'Table footer found.');
+  }
+
 }
 
 /**
@@ -233,15 +255,27 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    * Tests theme_item_list().
    */
   function testItemList() {
-    // Verify that empty variables produce no output.
+    // Verify that empty items produce no output.
     $variables = array();
     $expected = '';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates no output.');
-
+    // Verify that empty items with title produce no output.
     $variables = array();
     $variables['title'] = 'Some title';
     $expected = '';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback with title generates no output.');
+
+    // Verify that empty items produce the empty string.
+    $variables = array();
+    $variables['empty'] = 'No items found.';
+    $expected = '<div class="item-list">No items found.</div>';
+    $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates empty string.');
+    // Verify that empty items produce the empty string with title.
+    $variables = array();
+    $variables['title'] = 'Some title';
+    $variables['empty'] = 'No items found.';
+    $expected = '<div class="item-list"><h3>Some title</h3>No items found.</div>';
+    $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates empty string with title.');
 
     // Verify nested item lists.
     $variables = array();
@@ -301,7 +335,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected = '';
     $this->assertThemeOutput('links', $variables, $expected, 'Empty %callback with heading generates no output.');
 
-    // Set the current path to the front page path.
+    // Set the current path to the home page path.
     // Required to verify the "active" class in expected links below, and
     // because the current path is different when running tests manually via
     // simpletest.module ('batch') and via the testing framework ('').
@@ -319,7 +353,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'title' => 'Plain "text"',
       ),
       'front page' => array(
-        'title' => 'Front page',
+        'title' => 'Home page',
         'href' => '<front>',
       ),
     );
@@ -328,7 +362,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected_links .= '<ul id="somelinks">';
     $expected_links .= '<li class="a-link odd first"><a href="' . url('a/link') . '">' . check_plain('A <link>') . '</a></li>';
     $expected_links .= '<li class="plain-text even"><span>' . check_plain('Plain "text"') . '</span></li>';
-    $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active">' . check_plain('Front page') . '</a></li>';
+    $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active">' . check_plain('Home page') . '</a></li>';
     $expected_links .= '</ul>';
 
     // Verify that passing a string as heading works.
@@ -554,7 +588,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests system #type 'container'.
+   * Tests Form API #type 'container'.
    */
   function testContainer() {
     $elements = array(
@@ -582,6 +616,53 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           ),
         ),
         'expected' => '<div class="bar">foo</div>',
+      ),
+    );
+
+    $this->assertElements($elements);
+  }
+
+  /**
+   * Tests Form API #type 'details'.
+   */
+  public function testDetails() {
+    $elements = array(
+      // Basic 'details' element.
+      array(
+        'name' => "Basic 'details'",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#details' => t('Detailed content'),
+        ),
+        'expected' => '<details><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+      ),
+      // Basic 'details' with custom id and class attributes.
+      array(
+        'name' => "Basic 'details' with custom attributes",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#details' => t('Detailed content'),
+          '#attributes' => array(
+            'id' => 'foobar-id',
+            'class' => array('fooclass'),
+          ),
+        ),
+        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+      ),
+      // Expanded 'details' with child element.
+      array(
+        'name' => "Details with child",
+        'value' => array(
+          '#type' => 'details',
+          '#summary' => t('The summary'),
+          '#open' => TRUE,
+          'child' => array(
+            '#markup' => 'foobar',
+          ),
+        ),
+        'expected' => '<details open="open"><summary><span>The summary</span></summary><div class="details-child-wrapper">foobar</div></details>',
       ),
     );
 
@@ -697,46 +778,46 @@ class ThemeDatetime extends BackdropWebTestCase {
    */
   function testThemeDatetime() {
     // Create timestamp and formatted date for testing.
-    $timestamp = 280281600;
+    $timestamp = 1421394600;
     $date = format_date($timestamp);
 
     // Test with timestamp.
     $variables = array(
       'timestamp' => $timestamp,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">' . $date . '</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">' . $date . '</time>', theme('datetime', $variables));
 
     // Test with text and timestamp.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with datetime attribute.
     $variables = array(
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">1978-11-19</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">2015-01-16</time>', theme('datetime', $variables));
 
     // Test with text and datetime attribute.
     $variables = array(
-      'text' => "Dries' birthday",
+      'text' => "Backdrop's birthday",
       'attributes' => array(
-        'datetime' => '1978-11-19',
+        'datetime' => '2015-01-16',
       ),
     );
-    $this->assertEqual('<time datetime="1978-11-19">Dries&#039; birthday</time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16">Backdrop&#039;s birthday</time>', theme('datetime', $variables));
 
     // Test with HTML text.
     $variables = array(
       'timestamp' => $timestamp,
-      'text' => "<span>Dries' birthday</span>",
+      'text' => "<span>Backdrop's birthday</span>",
       'html' => TRUE,
     );
-    $this->assertEqual('<time datetime="1978-11-19T00:00:00+0000"><span>Dries\' birthday</span></time>', theme('datetime', $variables));
+    $this->assertEqual('<time datetime="2015-01-16T07:50:00+0000"><span>Backdrop\'s birthday</span></time>', theme('datetime', $variables));
   }
 }
 
