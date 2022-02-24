@@ -50,7 +50,7 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', '一個簡單的句子', 'yigejiandandejuzi'),
 
       // Bulgarian characters.
-      array('bg', 'първа статия', 'pyrva statija'),
+      array('bg', 'първа статия', 'parva statiya'),
     );
 
     include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';

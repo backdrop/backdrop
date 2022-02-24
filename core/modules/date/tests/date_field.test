@@ -349,3 +349,82 @@ class DateFieldTestCase extends DateFieldBasic {
     $this->assertText($should_be, "Found the correct date for a $field_type field using the $widget_type widget displayed using the long date format.");
   }
 }
+
+class DateFieldTokenTestCase extends DateFieldBasic {
+
+  /**
+   * Tests that date field tokens function properly.
+   */
+  public function testDateFieldToken() {
+    $timestamp = REQUEST_TIME;
+    $timestamp_end = $timestamp + 7200; // Two hours later.
+    $timestamp2 = 692955971;
+    $timestamp2_end = 819186371;
+
+    $this->createDateField(array(
+      'field_name' => 'field_date_single',
+      'widget_type' => 'date_text',
+      'increment' => 1,
+    ));
+    $this->createMultiDateField(array(
+      'field_name' => 'field_date_multiple',
+      'widget_type' => 'date_text',
+      'increment' => 1,
+      'todate' => 'required',
+      'cardinality' => 2,
+    ));
+
+    // Create a dummy node.
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['field_date_single[und][0][value][date]'] = format_date($timestamp, 'custom', 'm/d/Y - h:ia','UTC');
+
+    $edit['field_date_multiple[und][0][value][date]'] = format_date($timestamp, 'custom', 'm/d/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][0][value2][date]'] = format_date($timestamp_end, 'custom', 'm/d/Y - h:ia','UTC');
+
+    $edit['field_date_multiple[und][1][value][date]'] = format_date($timestamp2, 'custom', 'm/d/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][1][value2][date]'] = format_date($timestamp2_end, 'custom', 'm/d/Y - h:ia','UTC');
+
+    $this->backdropPost('node/add/story', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($edit['title']);  
+
+    // Ceate several tokens.
+    $tokens = array(
+      'field_date_single:long' => format_date($timestamp, 'long'),
+      'field_date_single:medium' => format_date($timestamp, 'medium'),
+      'field_date_single:short' => format_date($timestamp, 'short'),
+      'field_date_single:date:short' => format_date($timestamp, 'short'),
+      'field_date_single:0:date:short' => format_date($timestamp, 'short'),
+      'field_date_single:custom:Y-m-d' => format_date($timestamp, 'custom', 'Y-m-d'),
+      'field_date_single:2:short' => NULL,
+
+      'field_date_multiple:date:short' => format_date($timestamp, 'short'), // Defaults to delta = 0.
+      'field_date_multiple:0:date:long' => format_date($timestamp, 'long'),
+      'field_date_multiple:0:end-date:medium' => format_date($timestamp_end, 'medium'),
+      'field_date_multiple:1:end-date:custom:l, F j, Y' => format_date($timestamp2_end, 'custom', 'l, F j, Y'),
+      'field_date_multiple:2:date:long' => NULL,
+    );
+
+    $input = $this->mapTokenNames('node', array_keys($tokens));
+    $replacements = token_generate('node', $input, array('node' => $node));
+    foreach ($tokens as $name => $expected) {
+      $token = $input[$name];
+      if (!isset($expected)) {
+        $this->assertTrue(!isset($values[$token]), t("Token value for @token was not generated.", array('@token' => $token)));
+      } else {
+        $this->assertIdentical($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", array('@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+      }
+    }
+  }
+
+  /**
+   * Helper function that creates a properly formatted token map. 
+   */
+  function mapTokenNames($type, array $tokens = array()) {
+    $return = array();
+    foreach ($tokens as $token) {
+      $return[$token] = "[$type:$token]";
+    }
+    return $return;
+  }
+}
