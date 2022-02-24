@@ -23,7 +23,7 @@ function installer_permission() {
 function installer_menu() {
   $items = array();
 
-  // Add the tabs for install and update on modules, themes, and layouts.
+  // Add the tabs for installing modules, themes, and layout templates.
   $paths = array(
     'module' => 'admin/modules',
     'theme' => 'admin/appearance',
@@ -38,25 +38,27 @@ function installer_menu() {
       'type' => MENU_LOCAL_TASK,
       'file' => 'installer.pages.inc',
     );
+    // @deprecated: Remove these backwards-compatibility redirects in 2.0.
     $items[$path . '/update'] = array(
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('installer_manager_update_form', $context),
-      'access callback' => 'installer_update_access',
-      'weight' => 10,
-      'type' => MENU_LOCAL_TASK,
-      'file' => 'installer.manager.inc',
+      'page callback' => 'system_redirect_deprecated_page',
+      'page arguments' => array('admin/config/system/updates'),
+      'access arguments' => array('installer_update_access'),
+      'type' => MENU_CALLBACK,
     );
   }
-
   // Add menu titles with += for the translation extractor.
   $items['admin/modules/install'] += array('title' => 'Install new modules');
-  $items['admin/modules/update'] += array('title' => 'Update modules');
-
   $items['admin/appearance/install'] += array('title' => 'Install new themes');
-  $items['admin/appearance/update'] += array('title' => 'Update themes');
-
   $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
-  $items['admin/structure/layouts/update'] += array('title' => 'Update layouts');
+
+  $items['admin/config/system/updates'] = array(
+    'title' => 'System updates',
+    'description' => 'Review and install updates for Backdrop core, modules, themes, and layouts..',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('installer_manager_update_form'),
+    'access callback' => 'installer_update_access',
+    'file' => 'installer.manager.inc',
+  );
 
   $items['admin/installer/manual'] = array(
     'page callback' => 'backdrop_get_form',

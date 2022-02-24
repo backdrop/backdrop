@@ -234,10 +234,6 @@ span.admin-missing {
     white-space: nowrap;
   }
 }
-.system-status-report .report-error .status-summary {
-  color: #EC351C;
-}
-
 
 /**
  * Theme settings.
