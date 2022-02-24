@@ -58,6 +58,7 @@
 
 .drop-lounging {
   position: relative;
+  /* To make Drop larger/smaller, adjust the width below. */
   width: 7em;
 }
 

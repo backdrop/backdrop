@@ -6,6 +6,7 @@
  *
  * Available variables:
  * - $author: Comment author. Can be link or plain text.
+ * - $bundle: The bundle the comment belongs to, e.g. 'comment_node_post'.
  * - $content: An array of comment items. Use render($content) to print them
  *   all, or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
@@ -44,6 +45,7 @@
  * - $title_suffix (array): An array containing additional output populated by
  *   modules, intended to be displayed after the main title tag that appears in
  *   the template.
+ * - $view_mode: Display mode, e.g. 'full', or 'default'.
  *
  * These two variables are provided for context:
  * - $comment: Full comment object.

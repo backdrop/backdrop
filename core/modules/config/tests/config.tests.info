@@ -15,3 +15,9 @@ name = Configuration UI
 description = Tests the UI for syncing, diffing, importing, and exporting configuration.
 group = Configuration
 file = config.test
+
+[ConfigurationSyncTest]
+name = Configuration sync
+description = Tests that hook_config_create() is run during configuration sync.
+group = Configuration
+file = config.test
