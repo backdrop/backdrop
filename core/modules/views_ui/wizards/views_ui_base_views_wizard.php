@@ -153,7 +153,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#min' => 0,
       '#step' => 1,
     );
-    $form['displays']['page']['options']['pagerz'] = array(
+    $form['displays']['page']['options']['pager'] = array(
       '#title' => t('Use a pager'),
       '#type' => 'checkbox',
       '#default_value' => TRUE,

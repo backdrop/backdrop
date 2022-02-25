@@ -11,7 +11,6 @@ services:
         - a2enmod rewrite
         # Link the document root to the expected path.
         - ln -snf $TUGBOAT_ROOT $DOCROOT
-      update:
         # Use the Tugboat-specific Backdrop settings.
         - cp $TUGBOAT_ROOT/.tugboat/settings.local.php $TUGBOAT_ROOT/settings.local.php
         # Generate a unique hash_salt to secure the site.
@@ -20,6 +19,7 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config
         - mkdir $TUGBOAT_ROOT/files/config/active
         - mkdir $TUGBOAT_ROOT/files/config/staging
+      update:
         # Set appropriate file permissions/ownership.
         - chown -R www-data:www-data $TUGBOAT_ROOT
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;

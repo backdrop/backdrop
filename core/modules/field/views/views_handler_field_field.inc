@@ -258,7 +258,7 @@ class views_handler_field_field extends views_handler_field {
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
         if (config_get('locale.settings', 'field_language_fallback')) {
-          require_once BACKDROP_ROOT . '/includes/language.inc';
+          require_once BACKDROP_ROOT . '/core/includes/language.inc';
           $language_fallback_candidates = array_merge($language_fallback_candidates, language_fallback_get_candidates());
         }
         else {

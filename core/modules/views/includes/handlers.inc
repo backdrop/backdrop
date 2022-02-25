@@ -785,11 +785,18 @@ class views_many_to_one_helper {
       $field = $this->handler->relationship . '_' . $this->handler->table . '.' . $this->handler->field;
       if ($this->handler->operator == 'or' && empty($this->handler->options['reduce_duplicates'])) {
         if (empty($this->handler->options['add_table']) && empty($this->handler->view->many_to_one_tables[$field])) {
-          // query optimization, INNER joins are slightly faster, so use them
-          // when we know we can.
           $join = $this->get_join();
           if (isset($join)) {
-            $join->type = 'INNER';
+            $join->type = 'LEFT';
+            // INNER joins are slightly faster; use them when we know it's safe.
+            $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
+            $group_type = $this->handler->query->where[$group]['type'];
+            $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
+            // @todo Figure out why taxonomy_index_tid is being special-cased here.
+            // See: https://github.com/backdrop/backdrop-issues/issues/5225
+            if ($group === FALSE || $group_type == 'AND' && $plugin_id && $plugin_id != 'taxonomy_index_tid') {
+              $join->type = 'INNER';
+            }
           }
           $this->handler->table_alias = $this->handler->query->ensure_table($this->handler->table, $this->handler->relationship, $join);
           $this->handler->view->many_to_one_tables[$field] = $this->handler->value;
