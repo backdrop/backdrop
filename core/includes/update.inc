@@ -329,11 +329,11 @@ function update_upgrade_check_dependencies() {
  */
 function update_upgrade_enable_dependencies() {
   if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_upgrade_enable_dependencies', FALSE)) {
-    // When upgrading a D7 site we need to light-enable entity.module at this point
-    // since the function 'module_enable()' below calls some entity functions.
-    // In a non-upgrade situation, entity.module is enabled later,
+    // When upgrading a D7 site we need to enable entity.module at this point
+    // since the calls to 'module_enable()' below need some of entity's functions.
+    // In a non-upgrade situation, entity.module will be enabled later,
     // inside the hook implementation system_update_1000(). 
-    update_module_enable(array('entity'));
+    module_enable(array('entity'));
 
     $modules_to_enable = update_upgrade_modules_to_enable();
     if (!empty($modules_to_enable)) {
