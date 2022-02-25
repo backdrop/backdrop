@@ -1,0 +1,209 @@
+<?php
+
+/**
+ * @file
+ * Tests for menu.module.
+ */
+
+/**
+ * Functional tests for multilingual menu items.
+ */
+class MenuLanguageTestCase extends BackdropWebTestCase {
+  /**
+   * Profile name.
+   *
+   * @var string
+   */
+  protected $profile = 'testing';
+
+  /**
+   * Backdrop user object.
+   *
+   * @var object
+   */
+  protected $adminUser;
+
+  /**
+   * Array of language codes.
+   *
+   * @var array
+   */
+  protected $langcodes = array();
+
+  /**
+   * Verify that the items provided in the select list are usable as parents.
+   *
+   * @param array $current_options
+   *   The parent options contained in the select list.
+   * @param string $langcode
+   *   The langage code of the current item, could be menu item or node.
+   * @param string $skip_title
+   *   Optional, the menu item title to exclude from result.
+   *
+   * @return bool
+   *   Whether the array matches the database result for that language code.
+   */
+  protected function validateParentOptions(array $current_options, $langcode, $skip_title = NULL) {
+    if ($langcode == LANGUAGE_NONE) {
+      $langcodes = $this->langcodes;
+    }
+    else {
+      $langcodes = array($langcode, LANGUAGE_NONE);
+    }
+
+    // Get all items from database, that should be available.
+    $query = db_select('menu_links', 'ml')
+      ->fields('ml', array('mlid', 'link_title'))
+      ->condition('menu_name', 'main-menu')
+      ->condition('langcode', $langcodes, 'IN');
+    if (!empty($skip_title)) {
+      $query->condition('link_title', $skip_title, '!=');
+    }
+    $result = $query->execute()->fetchAllAssoc('mlid');
+    $valid_mlids = array_keys($result);
+    sort($valid_mlids);
+    sort($current_options);
+
+    if ($current_options == $valid_mlids) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Set up test environment.
+   */
+  public function setUp() {
+    parent::setUp('menu', 'language', 'locale');
+
+    // Add languages.
+    $this->langcodes = array('es');
+    foreach ($this->langcodes as $langcode) {
+      $new_lang = (object) array(
+        'langcode' => $langcode,
+      );
+      language_save($new_lang);
+    }
+    $this->langcodes[] = 'en';
+    $this->langcodes[] = LANGUAGE_NONE;
+
+    // First remove all existing menu links.
+    db_truncate('menu_links')->execute();
+
+    // Add some (unnested) items to main menu.
+    foreach ($this->langcodes as $langcode) {
+      $item = array(
+        'menu_name' => 'main-menu',
+        'link_path' => '<front>',
+        'link_title' => 'Menu item ' . strtoupper($langcode),
+        'langcode' => $langcode,
+      );
+      $this->items[] = menu_link_save($item);
+    }
+
+    // Create and log in admin user.
+    $this->adminUser = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer menu',
+      'administer nodes',
+      'bypass node access',
+    ));
+    $this->backdropLogin($this->adminUser);
+  }
+
+  /**
+   * Test menu item parents on form menu_edit_item.
+   */
+  public function testMenuParentLanguage() {
+
+    foreach ($this->langcodes as $langcode) {
+      $options = array(
+        'query' => array('langcode' => $langcode),
+      );
+      if ($langcode == 'en') {
+        // Make sure that the interface language does not match the langcode.
+        $options['language'] = language_load('es');
+      }
+      $this->backdropGet('admin/structure/menu/manage/main-menu/add', $options);
+      $item_langcodes = $this->xpath('//select[@id="edit-langcode"]//option[@selected]/@value');
+      // The url parameter also sets the menu item language.
+      $this->assertTrue((string) $item_langcodes[0] == $langcode, 'The item langcode list has the right value selected');
+
+      // We do not need the menus (top level).
+      $top_level = array('main-menu:0', 'management:0', 'user-menu:0');
+      $option_values = $this->xpath('//select[@id="edit-parent"]//option/@value');
+
+      $available_mlids = array();
+      foreach ($option_values as $value) {
+        $string = (string) $value;
+        if (in_array($string, $top_level)) {
+          continue;
+        }
+        $available_mlids[] = str_replace('main-menu:', '', $string);
+      }
+
+      $valid = $this->validateParentOptions($available_mlids, $langcode);
+      $this->assertTrue($valid, format_string('The parent options contain all valid parents for this menu item (langcode %langcode)', array(
+        '%langcode' => $langcode,
+      )));
+    }
+  }
+
+  /**
+   * Test that the available parent menu items match on the node form.
+   */
+  public function testMenuParentLanguageNode() {
+
+    // Create basic content type.
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+
+    // Function backdropCreateContentType is not able to set these values, so we
+    // set them via config.
+    $config = config('node.type.page');
+    $config->set('settings.language', 1);
+    $config->set('settings.menu_options', array('main-menu' => 'main-menu'));
+    $config->set('settings.menu_parent', 'main-menu:0');
+    $config->save();
+
+    foreach ($this->langcodes as $langcode) {
+      $title = 'Node title ' . strtoupper($langcode);
+      $edit = array(
+        'title' => $title,
+        'langcode' => $langcode,
+        'menu[enabled]' => TRUE,
+        'menu[link_title]' => $title,
+      );
+      $this->backdropPost('node/add/page', $edit, t('Save'));
+      $node = $this->backdropGetNodeByTitle($title);
+      $options = array();
+      if ($langcode == 'en') {
+        // Make sure that the interface language does not match the langcode.
+        $options['language'] = language_load('es');
+      }
+      $this->backdropGet('node/' . $node->nid . '/edit', $options);
+
+      // The available parents must match the node langcode, not the interface
+      // language.
+      $available_mlids = array();
+      $option_values = $this->xpath('//select[@id="edit-menu-parent"]//option/@value');
+      foreach ($option_values as $value) {
+        $string = (string) $value;
+        // We do not need the menu itself.
+        if ($string == 'main-menu:0') {
+          continue;
+        }
+        $available_mlids[] = str_replace('main-menu:', '', $string);
+      }
+
+      $valid = $this->validateParentOptions($available_mlids, $langcode, $title);
+      $this->assertTrue($valid, format_string('The parent options contain all valid parents for node %node_title (langcode %langcode)', array(
+        '%node_title' => $title,
+        '%langcode' => $langcode,
+      )));
+    }
+  }
+
+}

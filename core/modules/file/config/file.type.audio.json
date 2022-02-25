@@ -1,0 +1,13 @@
+{
+    "_config_name": "file.type.audio",
+    "_module": "file",
+    "type": "audio",
+    "name": "Audio",
+    "description": "An audio file is a sound recording.",
+    "mimetypes": [
+        "audio/*"
+    ],
+    "disabled": false,
+    "storage": 4,
+    "module": "file"
+}

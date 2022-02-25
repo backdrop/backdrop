@@ -107,3 +107,35 @@ function dblog_update_1001() {
   $short = system_date_format_load('short');
   config_set('system.core', 'log_date_format', $short['pattern']);
 }
+
+/**
+ * Convert the format for dates in the database log.
+ */
+function dblog_update_1002() {
+  // Removed. See https://github.com/backdrop/backdrop-issues/issues/4614
+}
+
+/**
+ * Restore the format for dates in the database log.
+ */
+function dblog_update_1003() {
+  // The "log_date_format" value may be a pattern or a named format.
+  $core_config = config('system.core');
+  $log_format = $core_config->get('log_date_format');
+
+  $date_format_config = config('system.date');
+  $date_formats = $date_format_config->get('formats');
+
+  // If a named pattern is in use, store its pattern directly.
+  if (isset($date_formats[$log_format])) {
+    $core_config->set('log_date_format', $date_formats[$log_format]['pattern']);
+    $core_config->save();
+  }
+
+  // Remove the previously created named format for logging.
+  if (isset($date_formats['dblog_date_format'])) {
+    unset($date_formats['dblog_date_format']);
+    $date_format_config->set('formats', $date_formats);
+    $date_format_config->save();
+  }
+}

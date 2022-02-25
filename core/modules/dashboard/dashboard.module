@@ -17,7 +17,7 @@ function dashboard_menu() {
     $items['admin/dashboard/overview'] = array(
       'title' => 'Overview',
       'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -100
+      'weight' => -100,
     );
     $items['admin/dashboard/settings'] = array(
       'title' => 'Settings',
@@ -77,6 +77,12 @@ function dashboard_block_info() {
   $blocks = array();
 
   // Dashboard blocks.
+  $blocks['welcome'] = array(
+    'info' => t('Dashboard - Welcome to Backdrop CMS!'),
+    'description' => t('Provides a welcome message, and links to get people started using Backdrop'),
+    'class' => 'DashboardWelcomeBlock',
+    'required contexts' => array('dashboard'),
+  );
   $blocks['create'] = array(
     'info' => t('Dashboard - Create content'),
     'description' => t('Provides links to create new content'),
@@ -93,6 +99,12 @@ function dashboard_block_info() {
     'info' => t('Dashboard - Content types'),
     'description' => t('Provides links to manage content types'),
     'class' => 'DashboardContentTypesBlock',
+    'required contexts' => array('dashboard'),
+  );
+  $blocks['news'] = array(
+    'info' => t('Backdrop News'),
+    'description' => t('Displays a news feed from BackdropCMS.org.'),
+    'class' => 'DashboardNewsBlock',
     'required contexts' => array('dashboard'),
   );
   $blocks['overview_content'] = array(
@@ -131,6 +143,7 @@ function dashboard_block_info() {
  */
 function dashboard_autoload_info() {
   return array(
+    'DashboardWelcomeBlock' => 'includes/block.welcome.inc',
     'DashboardCreateBlock' => 'includes/block.create.inc',
     'DashboardMenuBlock' => 'includes/block.menus.inc',
     'DashboardContentTypesBlock' => 'includes/block.node_types.inc',
@@ -139,6 +152,7 @@ function dashboard_autoload_info() {
     'DashboardTaxonomyBlock' => 'includes/block.taxonomy.inc',
     'DashboardUpdateBlock' => 'includes/block.update.inc',
     'DashboardLayoutContext' => 'includes/dashboard_layout_context.inc',
+    'DashboardNewsBlock' => 'includes/block.news.inc',
   );
 }
 
@@ -186,7 +200,8 @@ function dashboard_user_login(&$edit, $account) {
   }
 
   // Check access to any dashboard layouts, and redirect.
-  $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
+  $router_item = menu_get_item('admin/dashboard');
+  $dashboard_layouts = layout_load_multiple_by_router_item($router_item);
   foreach ($dashboard_layouts as $dashboard_layout) {
     if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
       $_GET['destination'] = 'admin/dashboard';
@@ -201,7 +216,7 @@ function dashboard_user_login(&$edit, $account) {
 function dashboard_preprocess_layout(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     // Include a dashboard-specific style sheet.
     $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
     backdrop_add_css($css_path);
@@ -215,7 +230,7 @@ function dashboard_preprocess_layout(&$variables) {
 function dashboard_preprocess_block(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     $block = $variables['block'];
     $region_name = $layout->getBlockPosition($block->uuid);
     if (!in_array($region_name, array('header', 'footer'))) {
@@ -227,7 +242,7 @@ function dashboard_preprocess_block(&$variables) {
 }
 
 /**
- * Implements hook_theme()
+ * Implements hook_theme().
  */
 function dashboard_theme() {
   return array(
@@ -236,6 +251,18 @@ function dashboard_theme() {
       'template' => 'templates/dashboard-panel',
     ),
   );
+}
+
+/**
+ * Implements hook_cron().
+ */
+function dashboard_cron() {
+  $last_news_fetch = state_get('dashboard_news_timestamp');
+  $fetch_interval = 21600; // 6 hours.
+  if (REQUEST_TIME - $last_news_fetch > $fetch_interval) {
+    DashboardNewsBlock::refreshNewsFeed();
+    state_set('dashboard_news_timestamp', REQUEST_TIME);
+  }
 }
 
 /**
