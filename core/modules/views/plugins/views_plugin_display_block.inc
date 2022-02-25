@@ -21,8 +21,13 @@ class views_plugin_display_block extends views_plugin_display {
     $options = parent::option_definition();
 
     $description = '';
-    if (isset($this->view) && isset($this->display)) {
-      $description = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+    if (isset($this->view)) {
+      if ($this->display->display_title == $this->definition['title']) {
+        $description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+      }
+      else {
+        $description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      }
     }
 
     $options['block_description'] = array('default' => $description, 'translatable' => TRUE);
@@ -82,7 +87,7 @@ class views_plugin_display_block extends views_plugin_display {
         $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
       }
       else {
-        $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
     return array(
@@ -131,7 +136,12 @@ class views_plugin_display_block extends views_plugin_display {
 
     $block_description = strip_tags($this->get_option('block_description'));
     if (empty($block_description)) {
-      $block_description = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      if ($this->display->display_title == $this->definition['title']) {
+        $block_description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+      }
+      else {
+        $block_description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      }
     }
 
     $options['block_description'] = array(
