@@ -903,7 +903,7 @@ function file_update_1005() {
     'audio' => array(
       'type' => 'audio',
       'name' => 'Audio',
-      'description' => 'An Audio file is a sound recording.',
+      'description' => 'An audio file is a sound recording.',
       'mimetypes' => array(
         'audio/*'
       ),
@@ -946,7 +946,7 @@ function file_update_1005() {
     'video' => array(
       'type' => 'video',
       'name' => 'Video',
-      'description' => 'A Video file is a moving visual recording.',
+      'description' => 'A video file is a moving visual recording.',
       'mimetypes' => array(
           'video/*',
       ),
@@ -1194,5 +1194,8 @@ function file_update_1007() {
 function file_update_1008() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store File entity records.";
+  if (db_table_exists('cache_entity_file')) {
+    db_drop_table('cache_entity_file');
+  }
   db_create_table('cache_entity_file', $table);
 }

@@ -18,7 +18,8 @@ function taxonomy_uninstall() {
 
   // Remove default, un-modified view.
   $config = config('views.view.taxonomy_term');
-  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+  // Only update if view isn't overridden (VIEWS_STORAGE_OVERRIDE).
+  if ($config->get('storage') != 2) {
     $config->delete();
   }
 }
@@ -360,12 +361,46 @@ function taxonomy_update_1007() {
 }
 
 /**
- * Creates the table to enable caching of Comment entities.
+ * Creates the table to enable caching of Taxonomy Term entities.
  */
 function taxonomy_update_1008() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store Taxonomy Term entity records.";
+  if (db_table_exists('cache_entity_taxonomy_term')) {
+    db_drop_table('cache_entity_taxonomy_term');
+  }
   db_create_table('cache_entity_taxonomy_term', $table);
+}
+
+/**
+ * Add new "create terms" permission to editor and admin roles.
+ */
+function taxonomy_update_1009() {
+  $config_vocab_names = config_get_names_with_prefix('taxonomy.vocabulary.');
+  $new_permissions = array();
+  foreach ($config_vocab_names as $config_vocab_name) {
+    $vocab = str_replace('taxonomy.vocabulary.', '', $config_vocab_name);
+    $new_permissions[] = "create terms in $vocab";
+  }
+
+  $admin_role = config_get('system.core', 'user_admin_role');
+  
+  foreach (array($admin_role, 'editor') as $role_name) { 
+    $config = config('user.role.' . $role_name);
+    $permissions = $config->get('permissions');
+    if ($permissions) {
+      // Permissions for each taxonomy.
+      foreach ($new_permissions as $new_permission) {
+        if (!in_array($new_permission, $permissions)) {
+          $permissions[] = $new_permission;
+        }
+      }
+
+      // Save the role.
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
 }
 
 /**

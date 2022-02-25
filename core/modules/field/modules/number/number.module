@@ -347,7 +347,10 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   // Set the step for floating point and decimal numbers.
   switch ($field['type']) {
     case 'number_decimal':
-      $element['#step'] = pow(0.1, $field['settings']['scale']);
+      // Avoid small float as base in function pow() for better results
+      // regarding floating point precision.
+      $scale = (int) $field['settings']['scale'];
+      $element['#step'] = 1 / pow(10, $scale);
       break;
 
     case 'number_float':

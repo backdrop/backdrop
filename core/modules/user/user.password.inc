@@ -31,16 +31,30 @@ function user_password_reject_weak($username) {
  * @see user_account_form()
  */
 function _user_password_policy_help() {
-  $help = array();
-  $help[] = t('The password cannot be the same as the username or e-mail address.');
-  $help[] = t('The password must be sufficiently long or complex.');
-  $variables = array(
-    'items' => $help,
-    'title' => '',
-    'type' => 'ul',
-    'attributes' => array(),
-  );
-  return theme_item_list($variables);
+  // Label the threshold for the password description.
+  $strength_threshold = config_get('system.core', 'user_password_strength_threshold');
+
+  if ($strength_threshold < USER_PASSWORD_STRENGTH_FAIR) {
+    $threshold_label = array('weak' => t('weak'));
+  }
+  elseif ($strength_threshold < USER_PASSWORD_STRENGTH_GOOD) {
+    $threshold_label = array('fair' => t('fair'));
+  }
+  elseif ($strength_threshold < USER_PASSWORD_STRENGTH_STRONG) {
+    $threshold_label = array('good' => t('good'));
+  }
+  else {
+    $threshold_label = array('strong' => t('excellent'));
+  }
+
+  $criteria = array();
+  $criteria[] = t('The password cannot be the same as the username or e-mail address.');
+  $criteria[] = t('The password must be sufficiently long or complex.');
+
+  $help = '<div class="password-strength-help-text ' . key($threshold_label) . '">' . t('The password strength indicator must be %threshold or better.', array('%threshold' => current($threshold_label)));
+  $help .= ' ' . t('The following criteria must be met:') . '</div>' . theme('item_list', array('items' => $criteria, 'type' => 'ul'));
+
+  return $help;
 }
 
 /**
@@ -71,6 +85,10 @@ function _user_password_evaluate_strength($password, $username, $email) {
   // its length.
   $length = backdrop_strlen($password);
   $strength = (log($cardinality) / log(2)) * $length + 1;
+
+  // Adjust the strength so that we hit our desired password length for each
+  // threshold. As computers improve, the recommended minimum length increases.
+  $strength = $strength * USER_PASSWORD_STRENGTH_MODIFIER;
 
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;
