@@ -2175,7 +2175,7 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
 }
 
 /**
- * Given a path alias, return the internal path it represents.
+ * Given a URL alias, return the internal path it represents.
  *
  * @deprecated since 1.0.0
  * @see backdrop_get_normal_path()
@@ -2186,7 +2186,7 @@ function drupal_get_normal_path($path, $langcode = NULL) {
 }
 
 /**
- * Check if the current page is the front page.
+ * Check if the current page is the home page.
  *
  * @deprecated since 1.0.0
  * @see backdrop_is_front_page()
@@ -2208,13 +2208,23 @@ function drupal_match_path($path, $patterns) {
 }
 
 /**
- * Rebuild the path alias white list.
+ * Rebuild the URL alias allowlist.
  *
  * @deprecated since 1.0.0
  */
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
+}
+
+/**
+ * Rebuild the path alias allowlist.
+ *
+ * @deprecated since 1.21.0
+ */
+function drupal_path_alias_allowlist_rebuild($source = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  return drupal_path_alias_whitelist_rebuild();
 }
 
 /**
@@ -2490,6 +2500,36 @@ function drupal_var_export($var, $prefix = '') {
 }
 
 /**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_integer_positive() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
+ * This function has been removed with the inclusion of support for HTML5 number
+ * elements. See https://api.backdropcms.org/node/43955
+ *
+ * @deprecated since 1.0.0
+ */
+function element_validate_number() {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Drupal-compatible wrapper for clearing caches.
  *
  * Backdrop no longer needs to "rebuild" its node types, which previously
@@ -2536,6 +2576,17 @@ function system_get_date_types($type = NULL) {
   }
 
   return $formats;
+}
+
+/**
+ * Drupal-compatible wrapper for creating safe CSS identifiers.
+ *
+ * @deprecated since 1.0.0
+ * @since 1.13.1 Function added.
+ */
+function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  backdrop_clean_css_identifier($identifier, $filter);
 }
 
 /**

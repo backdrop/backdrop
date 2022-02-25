@@ -660,6 +660,18 @@ class views_handler_field extends views_handler {
       '#weight' => 100,
     );
 
+    $defaults_changed = FALSE;
+    if ($this->options['alter']['alter_text'] ||
+        $this->options['alter']['make_link'] ||
+        $this->options['alter']['trim'] ||
+        $this->options['alter']['strip_tags'] ||
+        $this->options['alter']['nl2br']) {
+      $defaults_changed = TRUE;
+    }
+    if ($defaults_changed) {
+      $form['alter']['#collapsed'] = FALSE;
+    }
+
     if ($this->allow_advanced_render()) {
       $form['alter']['#tree'] = TRUE;
       $form['alter']['alter_text'] = array(

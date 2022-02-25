@@ -247,7 +247,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   }
 
   /**
-   * Checks the messages on update manager pages when missing a security update.
+   * Checks the messages on Update Manager pages when missing a security update.
    */
   function testUpdateManagerCoreSecurityUpdateMessages() {
     $config = config('update.settings');
@@ -262,29 +262,23 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
     // Initialize the update status.
     $this->backdropGet('admin/reports/updates');
 
-    // Now, make sure none of the Update manager pages have duplicate messages
+    // Now, make sure none of the Update Manager pages have duplicate messages
     // about core missing a security update.
-
-    $this->backdropGet('admin/installer/manual');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/modules/update');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/appearance/install');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/appearance/update');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/reports/updates/install');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/reports/updates/update');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/update/ready');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
+    $update_pages = array(
+      'admin/config/system/updates',
+      'admin/installer/manual',
+      'admin/appearance/install',
+      'admin/modules/install',
+      'admin/structure/layouts/install',
+      'admin/reports/updates/install',
+      'admin/reports/updates/update',
+      'admin/update/ready',
+    );
+    $update_message = t('There is a security update available for your version of Backdrop.');
+    foreach ($update_pages as $page) {
+      $this->backdropGet($page);
+      $this->assertNoText($update_message);
+    }
   }
 
 }

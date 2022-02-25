@@ -20,7 +20,7 @@
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
- *   - entity class: A class that the controller will use for instantiating 
+ *   - entity class: A class that the controller will use for instantiating
  *     entities. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
@@ -29,10 +29,13 @@
  *     entity type's base table.
  *   - static cache: (used by DefaultEntityController) FALSE to disable
  *     static caching of entities during a page request. Defaults to TRUE.
+ *   - entity cache: (used by DefaultEntityController) Set to TRUE to enable
+ *     persistent caching of fully loaded entities. This will be considered to
+ *     be FALSE if there is not a cache table for the entity. Defaults to FALSE.
  *   - field cache: (used by Field API loading and saving of field data) FALSE
- *     to disable Field API's persistent cache of field data. Only recommended
- *     if a higher level persistent cache is available for the entity type.
- *     Defaults to TRUE.
+ *     to disable Field API's persistent cache of field data. Setting this to
+ *     FALSE is recommended if a higher level persistent cache is available for
+ *     the entity type. Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
  *     DefaultEntityController:attachLoad(), for example 'node_load'.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.
@@ -422,7 +425,7 @@ function hook_entity_view_alter(&$build, $type) {
  *   The type of entities being loaded (i.e. node, user, comment).
  */
 function hook_entity_prepare_view($entities, $type) {
-  // Load a specific node into the user object for later theming.
+  // Load a specific node into the user object to theme later.
   if ($type == 'user') {
     $nodes = mymodule_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {

@@ -120,7 +120,7 @@ function token_scan($text) {
     :              # : - separator
     ([^\[\]]*)     # match $name not containing [ or ]
     \]             # ] - pattern end
-    /x', $text, $matches);
+    /x', (string) $text, $matches);
 
   $types = $matches[1];
   $tokens = $matches[2];
@@ -479,7 +479,7 @@ function token_type_load($token_type) {
 }
 
 /**
- * Build a tree array of tokens used for theming or information.
+ * Build a tree array of tokens, commonly used for rendering the token browser.
  *
  * @param string $token_type
  *   The token type.
@@ -831,7 +831,7 @@ function token_get_invalid_tokens($type, array $tokens) {
 function token_render_array(array $array, array $options = array()) {
   $rendered = array();
   foreach ($array as $key => $value) {
-    if ($key[0] === '#') {
+    if (substr($key, 0, 1) === '#') {
       continue;
     }
     $rendered[] = is_array($value) ? render($value) : (string) $value;
