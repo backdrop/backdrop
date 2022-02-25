@@ -241,7 +241,7 @@ class SchemaTestCase extends BackdropWebTestCase {
     foreach (array(1, 5, 10, 40, 65) as $precision) {
       foreach (array(0, 2, 10, 30) as $scale) {
         if ($precision <= $scale) {
-          // Precision must be smaller then scale.
+          // Precision must be smaller than scale.
           continue;
         }
 
@@ -328,7 +328,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   protected function assertFieldCharacteristics($table_name, $field_name, $field_spec) {
     // Check that the initial value has been registered.
     if (isset($field_spec['initial'])) {
-      // There should be no row with a value different then $field_spec['initial'].
+      // There should be no row with a value different than $field_spec['initial'].
       $count = db_select($table_name)
         ->fields($table_name, array('serial_column'))
         ->condition($field_name, $field_spec['initial'], '<>')
