@@ -39,7 +39,7 @@ function dblog_menu() {
     'file' => 'dblog.admin.inc',
   );
   $items['admin/reports/event/%'] = array(
-    'title' => 'Log message details (#@id)',
+    'title' => 'Log message #@id',
     'title arguments' => array('@id' => 3),
     'page callback' => 'dblog_event',
     'page arguments' => array(3),
