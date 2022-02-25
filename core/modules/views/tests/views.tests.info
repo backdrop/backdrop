@@ -327,3 +327,9 @@ name = Test the view class
 description = Tests some  functionality of the view class.
 group = Views
 file = views_view.test
+
+[ViewsTranslatableTest]
+name = 'Views Translatable Test'
+description = 'Tests the pluggable translations'
+group = Views
+file = views_translatable.test

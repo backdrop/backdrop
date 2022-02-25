@@ -52,15 +52,15 @@ description = Uploads a test to a private node and checks access.
 group = File
 file = file.test
 
-[FileUploadWizardTestCase]
-name = File upload wizard
-description = Upload a file using the multi-step wizard.
+[FileFieldAnonymousSubmission]
+name = File field anonymous submission
+description = Test anonymous file field submission.
 group = File
 file = file.test
 
-[FileAdminTestCase]
-name = File administration
-description = Test file administration page functionality.
+[FileUploadWizardTestCase]
+name = File upload wizard
+description = Upload a file using the multi-step wizard.
 group = File
 file = file.test
 
@@ -91,12 +91,6 @@ file = file.test
 [FileEditTestCase]
 name = File edit
 description = Create a file and test file edit functionality.
-group = File
-file = file.test
-
-[FileAdminTestCase]
-name = File administration
-description = Test file administration page functionality.
 group = File
 file = file.test
 

@@ -3,12 +3,45 @@
 /**
  * @file
  * Class that holds information relating to a layouts context.
- *
- * This class does not extend the LayoutHandler class because contexts are not
- * stored directly within configuration. Instead contexts are determined based
- * on the Layout's path
  */
-abstract class LayoutContext {
+abstract class LayoutContext extends LayoutHandler {
+
+  /**
+   * Declares a LayoutContext to be a manually specified custom context.
+   */
+  const USAGE_TYPE_CUSTOM = 1;
+
+  /**
+   * Declares a LayoutContext to be provided based on a menu item or path.
+   */
+  const USAGE_TYPE_MENU = 2;
+
+  /**
+   * Declares a LayoutContext to be a system-wide context
+   *
+   * Examples include the "current_user" context and "overrides_path" context.
+   */
+  const USAGE_TYPE_SYSTEM = 4;
+
+  /**
+   * Declares a LayoutContext is provided by a relationship to another context.
+   */
+  const USAGE_TYPE_RELATIONSHIP = 8;
+
+  /**
+   * All possible context types.
+   *
+   * This is equivalent to the following bitwise addition of all the above:
+   *
+   * @code
+   *   self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM | self::USAGE_TYPE_RELATIONSHIP
+   * @endcode
+   *
+   * PHP 5.6 and higher is required to do this math in a constant however, so
+   * it is defined here as the equivalent integer value.
+   */
+  const USAGE_TYPE_ALL = 15;
+
   /**
    * The name of the plugin that provides this context.
    *
@@ -30,7 +63,7 @@ abstract class LayoutContext {
   /**
    * Indicator as to whether this context is required and cannot be removed.
    *
-   * Required contexts typically are those provided by a menu path wildcard.
+   * Required contexts typically are those provided by a menu path placeholder.
    * While these contexts are required to exist, they can be changed to a
    * different type of context. e.g. A layout at path "foo/%" could have a
    * required context at position 1 with either a "node" or "string" plugin. The
@@ -105,9 +138,41 @@ abstract class LayoutContext {
   var $restrictions = array();
 
   /**
+   * The storage state of the context.
+   *
+   * This represents whether this context is stored in configuration (TRUE) or
+   * if its generated on the fly (FALSE).
+   *
+   * @var bool
+   */
+  var $storage = FALSE;
+
+  /**
+   * Declares how this context is used by a Layout.
+   *
+   * For example a "user" context might be available in a Layout through
+   * multiple sources. If the layout overrides the path "user/%" one user
+   * context would have the $usageType LayoutContext::USAGE_TYPE_MENU.
+   *
+   * If the author of a node is added to a Layout through a relationship,
+   * a second context would be available with the $usageType
+   * LayoutContext::USAGE_TYPE_RELATIONSHIP.
+   *
+   * Checking a context's $usageType can help determine where and how a context
+   * was added to a Layout object.
+   *
+   * This value must be one of the USAGE_TYPE_* constants defined in the
+   * LayoutContext class.
+   *
+   * @var int
+   */
+  var $usageType = self::USAGE_TYPE_CUSTOM;
+
+  /**
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {
+    parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
     $properties = array(
       'required',
@@ -115,6 +180,8 @@ abstract class LayoutContext {
       'position',
       'name',
       'label',
+      'storage',
+      'usageType',
     );
     foreach ($properties as $property) {
       if (isset($config[$property])) {
@@ -173,6 +240,35 @@ abstract class LayoutContext {
   function isA($plugin) {
     return $plugin === $this->plugin || in_array($plugin, $this->aliases);
   }
+
+  /**
+   * Settings form for configuring this context item.
+   */
+  function form(&$form, &$form_state) {
+  }
+
+  /**
+   * Validate handler for the settings form for this context item.
+   */
+  function formValidate($form, &$form_state) {
+
+  }
+
+  /**
+   * Submit handler for the settings form for this context item.
+   */
+  function formSubmit($form, &$form_state) {
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
+    $settings = array_diff_key($form_state['values'], $excluded);
+    $this->settings = array_merge($this->settings, $settings);
+  }
+
+  /**
+   * Return a summary for this context.
+   *
+   * The summary is displayed in the context table on Layout settings pages.
+   */
+  function getAdminSummary() {}
 }
 
 /**
@@ -191,6 +287,7 @@ class LayoutContextBroken extends LayoutContext {
  * Pass-through context used when an unknown argument is encountered.
  */
 class LayoutOverridesPathContext extends LayoutContext {
+  var $usageType = LayoutContext::USAGE_TYPE_SYSTEM;
   function type() {
     return 'overrides_path';
   }
@@ -208,5 +305,14 @@ class LayoutStringContext extends LayoutContext {
   }
   function label() {
     return t('String pass-through');
+  }
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary($path = NULL) {
+      $argument_parts = explode('/', $path);
+      $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
+
+      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
   }
 }
