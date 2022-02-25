@@ -294,10 +294,18 @@ function update_module_add_to_system($modules = array()) {
   }
 }
 
-function update_migration_check_dependencies() {
+/** 
+ * Checks for disabled dependencies during a Drupal 7 upgrade.
+ * 
+ * @return string
+ *    A themed message that lists modules that will be enabled,
+ *    to be displayed in the 'info' page of the update process. 
+ */
+
+function update_upgrade_check_dependencies() {
   $status_report = '';
   if (backdrop_get_installed_schema_version('system') > 7000) {
-    $modules_to_enable = update_migration_modules_to_enable();
+    $modules_to_enable = update_upgrade_modules_to_enable();
     
     if (empty($modules_to_enable)) {
       return;
@@ -310,19 +318,30 @@ function update_migration_check_dependencies() {
       $module_list .= theme('item_list', array('items' => $dependents));
     }
     $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
-    $status_report .= t('The following Backdrop modules need to be enabled in order for the site to be migrated successfully:') . '</p>';
+    $status_report .= t('The following Backdrop modules will be enabled in order for the site to be upgraded successfully:') . '</p>';
     $status_report .= $module_list;
   }
   return $status_report;
 }
 
+/**
+ * Enables needed dependencies.
+ */
+function update_upgrade_enable_dependencies() {
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_upgrade_enable_dependencies', FALSE)) {
+    // When upgrading a D7 site we need to light-enable entity.module at this point
+    // since the function 'module_enable()' below calls some entity functions.
+    // In a non-upgrade situation, entity.module is enabled later,
+    // inside the hook implementation system_update_1000(). 
+    update_module_enable(array('entity'));
 
-function update_migration_enable_dependencies() {
-  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_migration_enable_dependencies', FALSE)) {
-    $modules_to_enable = update_migration_modules_to_enable();
+    $modules_to_enable = update_upgrade_modules_to_enable();
     if (!empty($modules_to_enable)) {
+      // We can't use the "lighter" update_module_enable() function
+      // as some of the modules that are being enabled need to create
+      // tables and/or config files.  
       module_enable(array_keys($modules_to_enable));
-      state_set('update_migration_enable_dependencies', TRUE);
+      state_set('update_upgrade_enable_dependencies', TRUE);
     }
   }
 }
@@ -334,7 +353,7 @@ function update_migration_enable_dependencies() {
  *    An array keyed by the machine names of module names needed to be enabled,
  *    whose values are arrays of the modules that depend on them.  
  */
-function update_migration_modules_to_enable() {
+function update_upgrade_modules_to_enable() {
   // Get list of enabled modules. 
   $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
     

@@ -323,7 +323,7 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
-  if ($modules_to_enable = update_migration_check_dependencies()) {
+  if ($modules_to_enable = update_upgrade_check_dependencies()) {
     $output .= $modules_to_enable;
   }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
@@ -543,12 +543,12 @@ if (update_access_allowed()) {
 
     case 'selection':
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
-        update_migration_enable_dependencies();
         $output = update_selection_page();
         break;
       }
 
     case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
