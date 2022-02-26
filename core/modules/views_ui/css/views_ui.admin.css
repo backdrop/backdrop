@@ -367,6 +367,10 @@
   float: right;
 }
 
+#views-page-path {
+  word-break: break-all;
+}
+
 /* @end */
 
 /* @group Filter Settings form */

@@ -26,9 +26,8 @@ Options:
 --account-pass                            UID 1 pass. Defaults to a randomly generated password.
 --clean-url                               Defaults to 1
 --db-prefix                               An optional table prefix to use for initial install.
---db-url=<mysql://root:pass@127.0.0.1/db  A database URL. Only required for initial install - not re-install.
-
---locale=<en-GB>                          A short language code. Sets the default site language. Language files must already be present.
+--db-url=mysql://root:pass@127.0.0.1/db   A database URL. Only required for initial install - not re-install.
+--langcode=en                             A short language code. Sets the default site language. Language files must already be present.
 --site-mail                               From: for system mailings. Defaults to admin@example.com
 --site-name                               Defaults to Backdrop
 
@@ -56,7 +55,7 @@ $options = array(
   'clean-url' => '1',
   'db-prefix' => '',
   'db-url' => '',
-  'locale' => 'en',
+  'langcode' => 'en',
   'site-mail' => 'admin@example.com',
   'site-name' => 'Backdrop',
   'root' => '',
@@ -147,7 +146,7 @@ $db_spec = array(
 $settings = array(
   'parameters' => array(
     'profile' => $profile,
-    'locale' => $options['locale'],
+    'langcode' => $options['langcode'],
   ),
   'forms' => array(
     'install_settings_form' => array(

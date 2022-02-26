@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administration functions for locale.module.
+ * Admin page callbacks for the Locale module.
  */
 
 include_once BACKDROP_ROOT . '/core/includes/language.inc';

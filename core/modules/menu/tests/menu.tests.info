@@ -9,3 +9,9 @@ name = Menu settings for nodes
 description = Add, edit, and delete a node with menu link.
 group = Menu
 file = menu.test
+
+[MenuLanguageTestCase]
+name = Menu item languages
+description = Test menu item creation and parent availability with language support
+group = Menu
+file = menu_language.test
