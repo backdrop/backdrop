@@ -198,7 +198,7 @@ function field_test_dummy_field_storage_query(EntityFieldQuery $query) {
   // Return dummy values that will be checked by the test.
   return array(
     'user' => array(
-      1 => entity_create_stub_entity('user', array(1, NULL, NULL)),
+      1 => (object) array('entity_id' => 1, 'revision_id' => NULL, 'bundle' => NULL),
     ),
   );
 }
@@ -253,6 +253,7 @@ function field_test_field_widget_form_alter(&$element, &$form_state, $context) {
 function field_test_autoload_info() {
   return array(
     'TestFieldEntity' => 'field_test.class.inc',
+    'TestEntity' => 'field_test.class.inc',
     'TestEntityBundleController' => 'field_test.controller.inc',
   );
 }
@@ -283,7 +284,11 @@ function field_test_query_store_global_test_query_alter($query) {
  * Implements hook_field_formatter_settings_form_alter().
  */
 function field_test_field_formatter_settings_form_alter(&$element, &$form_state, $context) {
-  $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+  $settings = array();
+  if (!empty($context)) {
+    $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+  }
+
   $element['field_test_formatter_settings_form_alter'] = array(
     '#type' => 'textfield',
     '#title' => t('Formatter settings form alter'),

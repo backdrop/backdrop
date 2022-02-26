@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the Database Logging module.
+ * Admin page callbacks for the Database Logging module.
  */
 
 /**

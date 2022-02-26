@@ -89,8 +89,15 @@ function update_prepare_bootstrap() {
   $active_config = config_get_config_storage('active');
   $staging_config = config_get_config_storage('staging');
 
-  if (!$settings_exist || !$active_config->isInitialized() || !$staging_config->isInitialized()) {
+  if (!$settings_exist || !$active_config->isInitialized()) {
     backdrop_install_config_directories();
+  }
+
+  // Check for a staging directory.
+  if (!$staging_config->isInitialized()) {
+    $t = get_t();
+    backdrop_set_message($t('The staging configuration directory (%directory) could not be found. Please make sure it exists and is properly referenced in settings.php.',
+      array('%directory' => config_get_config_directory('staging'))), 'warning', FALSE);
   }
 
   // If any of the required settings needs to be written, then settings.php
