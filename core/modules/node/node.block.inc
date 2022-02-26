@@ -90,8 +90,8 @@ class NodeBlock extends Block {
     // Add author and date information settings.
     $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
-    // Add theme hook suggestion.
-    $content['#theme'] = 'node__block_' . $this->settings['nid'];
+    // Add theme hook suggestions.
+    $content['#theme'] .= '__node_block';
 
     return $content;
   }

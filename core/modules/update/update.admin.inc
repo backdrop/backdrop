@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Code required only for the update status settings form.
+ * Admin page callbacks for the Update Manager module.
  */
 
 /**
