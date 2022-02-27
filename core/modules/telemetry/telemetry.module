@@ -1,0 +1,151 @@
+<?php
+/**
+ * @file
+ * Collects usage information to help improve Backdrop CMS.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function telemetry_menu() {
+  $items['admin/reports/telemetry'] = array(
+    'title' => 'Telemetry',
+    'page callback' => 'telemetry_report',
+    'access arguments' => array('access site reports'),
+    'file' => 'telemetry.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function telemetry_hook_info() {
+  $hooks['telemetry_info'] = array(
+    'group' => 'telemetry',
+  );
+  $hooks['telemetry_info_alter'] = array(
+    'group' => 'telemetry',
+  );
+  $hooks['telemetry_data'] = array(
+    'group' => 'telemetry',
+  );
+
+  return $hooks;
+}
+
+/**
+ * @return array
+ *   A list of all items collected by all modules. Keyed by a unique identifier,
+ *   each Telemetry item includes the following keys:
+ *   - label: A short, translated label of the data being collected.
+ *   - description: A longer, translated description of the data.
+ *   - module: The name of the module providing the item.
+ */
+function telemetry_get_info() {
+  $telemetry_info = array();
+
+  foreach (module_implements('telemetry_info') as $module_name) {
+    $module_info = module_invoke($module_name, 'telemetry_info');
+    // Add in the module name to each tracked item.
+    foreach ($module_info as $key => $item) {
+      $project_name = $item['project'];
+      $item['module'] = $module_name;
+      $telemetry_info[$project_name][$key] = $item;
+    }
+  }
+
+  backdrop_alter('telemetry_info', $telemetry_info);
+  return $telemetry_info;
+}
+
+/**
+ * Retrieve the Telemetry data values from modules.
+ */
+function telemetry_get_data() {
+  $telemetry_values = &backdrop_static(__FUNCTION__, array());
+  if (!empty($telemetry_values)) {
+    return $telemetry_values;
+  }
+
+  // Get any new values that have not yet been retrieved this request.
+  $telemetry_info = telemetry_get_info();
+  foreach ($telemetry_info as $project => $project_data) {
+    if ($project === 'backdrop') {
+      $telemetry_values[$project]['version'] = BACKDROP_VERSION;
+    }
+    else {
+      $first_data = reset($project_data);
+      $module_info = system_get_info('module', $first_data['module']);
+      if (isset($module_info['version'])) {
+        $telemetry_values[$project]['version'] = $module_info['version'];
+      }
+      else {
+        $telemetry_values[$project]['version'] = 'unknown';
+      }
+    }
+
+    foreach ($project_data as $item_key => $item) {
+      $value = module_invoke($item['module'], 'telemetry_data', $item_key);
+      $telemetry_values[$project][$item_key] = (string) $value;
+    }
+  }
+  backdrop_alter('telemetry_data', $telemetry_values);
+
+  return $telemetry_values;
+}
+
+/**
+ * Implements hook_cron().
+ */
+function telemetry_cron() {
+  if (settings_get('telemetry_enabled', TRUE)) {
+    $last_run = state_get('telemetry_cron');
+    $interval = 86400; // One day in seconds.
+    if (REQUEST_TIME - $last_run > $interval) {
+      $telemetry_data = telemetry_get_data();
+      $destination_url = config_get('telemetry.settings', 'destination');
+      $response = backdrop_http_request($destination_url, array(
+        'method' => 'POST',
+        'data' => backdrop_json_encode($telemetry_data),
+        'headers' => array(
+          'Content-Type' => 'application/json',
+          'X-Site-Key' => _telemetry_site_key(),
+        ),
+      ));
+    }
+  }
+}
+
+/**
+ * Returns the hostname of the destination server for Telemetry data.
+ *
+ * On most installations this should be "backdropcms.org".
+ *
+ * @return string
+ */
+function _telemetry_destination_server_name() {
+  return parse_url(config_get('telemetry.settings', 'destination'), PHP_URL_HOST);
+}
+
+/**
+ * Get an anonymous, unique identifier for this site.
+ */
+function _telemetry_site_key() {
+  // The private key is used here so that different environments of
+  // the same site should all only count as a single installation.
+  return backdrop_hmac_base64('telemetry_site_key', backdrop_get_private_key());
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function telemetry_config_info() {
+  $prefixes['telemetry.settings'] = array(
+    'label' => t('Telemetry settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
