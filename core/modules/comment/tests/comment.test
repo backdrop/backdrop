@@ -398,6 +398,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
     $this->assertText($subject_text, 'Individual comment-reply subject found.');
     $this->assertText($comment_text, 'Individual comment-reply body found.');
+    $this->assertUniqueText($comment_text, 'Comment-reply body found only once.');
     $reply = $this->postComment(NULL, $this->randomName(), '', TRUE);
     $reply_loaded = comment_load($reply->id);
     $this->assertTrue($this->commentExists($reply, TRUE), 'Reply found.');
@@ -517,6 +518,10 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->clickLink(t('1 new comment'));
     $this->assertRaw('<a id="new"></a>', 'Found "new" marker.');
     $this->assertTrue($this->xpath('//a[@id=:new]/following-sibling::a[1][@id=:comment_id]', array(':new' => 'new', ':comment_id' => 'comment-1')), 'The "new" anchor is positioned at the right comment.');
+
+    // Updates to the history table are done in background processing from the
+    // previous request. Wait a short time to make sure the record is written. 
+    sleep(1);
 
     // Test if "new comment" link is correctly removed.
     $this->backdropGet('node');
@@ -1186,7 +1191,7 @@ class CommentAnonymous extends CommentHelperCase {
     $this->setCommentSubject(TRUE);
 
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
-    $this->assertText(t('The name you used belongs to a registered user.'));
+    $this->assertText(t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
 
     // Require contact info.
     $this->backdropLogin($this->admin_user);
@@ -1972,28 +1977,6 @@ class CommentActionsTestCase extends CommentHelperCase {
 
     comment_publish_action($comment);
     $this->assertEqual(comment_load($comment->cid)->status, COMMENT_PUBLISHED, 'Comment was published');
-  }
-
-  /**
-   * Verifies that a watchdog message has been entered.
-   *
-   * @param $watchdog_message
-   *   The watchdog message.
-   * @param $variables
-   *   The array of variables passed to watchdog().
-   * @param $message
-   *   The assertion message.
-   */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
-    return $this->assert($status, format_string('@message', array('@message' => $message)));
-  }
-
-  /**
-   * Clears watchdog.
-   */
-  function clearWatchdog() {
-    db_truncate('watchdog')->execute();
   }
 }
 

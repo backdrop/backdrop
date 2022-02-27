@@ -111,12 +111,17 @@ function language_save($language) {
   $config = config('language.settings');
   $language->is_new = !$config->get('languages.' . $language->langcode);
 
-  // If name was not set, we add a predefined language.
-  if (!isset($language->name)) {
+  if (!isset($language->name) || !isset($language->native)) {
     include_once BACKDROP_ROOT . '/core/includes/standard.inc';
     $predefined = standard_language_list();
-    $language->name = $predefined[$language->langcode][0];
-    $language->direction = isset($predefined[$language->langcode][2]) ? $predefined[$language->langcode][2] : LANGUAGE_LTR;
+    // If name was not set, we add a predefined language.
+    if (!isset($language->name)) {
+      $language->name = $predefined[$language->langcode][0];
+      $language->direction = isset($predefined[$language->langcode][2]) ? $predefined[$language->langcode][2] : LANGUAGE_LTR;
+    }
+    if (!isset($language->native)) {
+      $language->native = isset($predefined[$language->langcode][1]) ? $predefined[$language->langcode][1] : $language->name;
+    }
   }
 
   // Set to enabled for the default language and unless specified otherwise.
@@ -134,6 +139,7 @@ function language_save($language) {
   $defaults = array(
     'langcode' => '',
     'name' => '',
+    'native' => '',
     'direction' => 0,
     'enabled' => TRUE,
     'weight' => 0,

@@ -44,10 +44,16 @@ class views_handler_field_custom extends views_handler_field {
  * Prerender function to move the textarea to the top.
  */
 function views_handler_field_custom_pre_render_move_text($form) {
+  // Move the text area to the top of the form.
   $form['text'] = $form['alter']['text'];
   $form['help'] = $form['alter']['help'];
   unset($form['alter']['text']);
   unset($form['alter']['help']);
+
+  // Give the elements new IDs to make them unique from previous elements that
+  // may have had #states set on them.
+  $form['text']['#id'] = 'edit-options-custom-text';
+  $form['help']['#id'] = 'edit-options-custom-help';
 
   return $form;
 }

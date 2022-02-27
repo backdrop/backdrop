@@ -32,25 +32,22 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     switch ($row_plugin) {
       case 'full_posts':
       case 'teasers':
+        $style_form['row_options']['title'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Display title'),
+          '#description' => t('The title will display as a link to each item.'),
+          '#default_value' => TRUE,
+        );
         $style_form['row_options']['links'] = array(
-          '#type' => 'select',
-          '#title_display' => 'invisible',
-          '#title' => t('Should links be displayed below each node'),
-          '#options' => array(
-            1 => t('with links (allow users to add comments, etc.)'),
-            0 => t('without links'),
-          ),
-          '#default_value' => 1,
+          '#type' => 'checkbox',
+          '#title' => t('Display links'),
+          '#description' => t("e.g. 'Read more', 'Add comment', etc."),
+          '#default_value' => TRUE,
         );
         $style_form['row_options']['comments'] = array(
-          '#type' => 'select',
-          '#title_display' => 'invisible',
-          '#title' => t('Should comments be displayed below each node'),
-          '#options' => array(
-            1 => t('with comments'),
-            0 => t('without comments'),
-          ),
-          '#default_value' => 0,
+          '#type' => 'checkbox',
+          '#title' => t('Display comments'),
+          '#default_value' => FALSE,
         );
         break;
     }
@@ -115,12 +112,14 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
       case 'full_posts':
         $display_options['row_plugin'] = 'node';
         $display_options['row_options']['build_mode'] = 'full';
+        $display_options['row_options']['title'] = !empty($row_options['title']);
         $display_options['row_options']['links'] = !empty($row_options['links']);
         $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
       case 'teasers':
         $display_options['row_plugin'] = 'node';
         $display_options['row_options']['build_mode'] = 'teaser';
+        $display_options['row_options']['title'] = !empty($row_options['title']);
         $display_options['row_options']['links'] = !empty($row_options['links']);
         $display_options['row_options']['comments'] = !empty($row_options['comments']);
         break;
