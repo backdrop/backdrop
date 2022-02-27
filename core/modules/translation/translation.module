@@ -289,7 +289,7 @@ function translation_node_view(Node $node, $view_mode) {
         else {
           $links[$key] = array(
             'href' => "node/{$translation->nid}",
-            'title' => $language->name,
+            'title' => isset($language->native) ? $language->native : $language->name,
             'language' => $language,
           );
         }
@@ -347,7 +347,11 @@ function translation_node_prepare(Node $node) {
     if (!empty($source_node->tnid)) {
       $translations = translation_node_get_translations($source_node->tnid);
       if (isset($translations[$langcode])) {
-        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
+        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array(
+          '%title' => $source_node->title,
+          '%language' => isset($language_list[$langcode]->native) ? $language_list[$langcode]->native : $language_list[$langcode]->name,
+          '%type' => $node->type,
+        )), 'error');
         return;
       }
     }

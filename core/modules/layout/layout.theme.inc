@@ -54,16 +54,16 @@ function theme_layout_info($variables) {
   $preview_img = theme('image', array('path' => $preview_path));
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
-  // Create a link to the settings page
-  $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout', array(
+    'label' => $layout->title,
+    'machine_name' => $layout->name,
+  ));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  $output = '<div class="layout-info">';
   $output .= $preview;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Template: </span>!title', array('!title' => $template)) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
@@ -131,13 +131,16 @@ function theme_layout_template_info($variables) {
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  // Get the label and machine name.
+  $label = theme('label_machine_name__layout_template', array(
+    'label' => $template_info['title'],
+    'machine_name' => $template_info['name'],
+  ));
+
+  $output = '<div class="layout-info">';
   $output .= $preview_img;
-  $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($template_info['title']) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Machine name: </span>!title', array('!title' => $template_info['name'])) . '</div>';
-  $output .= '</div></div>';
+  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '</div>';
 
   return $output;
 }
@@ -226,6 +229,22 @@ function theme_layout_settings_context_table($variables) {
     'empty' => t('No contexts'),
   ));
 }
+
+/**
+ * Output a list of action links for layouts.
+ */
+function theme_layout_action_links($variables) {
+  $element = $variables['element'];
+  $attributes = array('class' => array('action-links', 'layout-action-links'));
+
+  $output = '<ul ' . backdrop_attributes($attributes) . '>';
+  foreach (element_children($element) as $key) {
+    $output .= '<li>' . backdrop_render($element[$key]) . '</li>';
+  }
+  $output .= '</ul>';
+  return $output;
+}
+
 
 /**
  * Output the list of visibility conditions for layouts.
@@ -330,14 +349,21 @@ function layout_preprocess_layout(&$variables) {
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
       if ($row['contains'] == 'region_12') {
-        if (!empty($row['region_names']['region_name_0'])) {
-          $region_name = $row['region_names']['region_name_0'];
+        $region_classes = '';
+        if (!empty($row['region_names']['region_0'])) {
+          $region_name = $row['region_names']['region_0']['label'];
+          $class_name = isset($row['region_names']['region_0']['name']) ? $row['region_names']['region_0']['name'] : backdrop_html_class($row['region_names']['region_0']['label']);
+          $region_classes .= 'l-region--' . $class_name;
+          $custom_classes = !empty($row['region_names']['region_0']['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_0']['classes']) : '';
+          $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? $custom_classes : '';
         }
         else {
           $region_name = $name;
+          $region_classes .= 'l-region--' . backdrop_html_class($name);
         }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
@@ -345,15 +371,22 @@ function layout_preprocess_layout(&$variables) {
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
-          if (!empty($row['region_names']['region_name_' . $i])) {
-            $region_name = $row['region_names']['region_name_' . $i];
+          $region_classes = '';
+          if (!empty($row['region_names']['region_' . $i])) {
+            $region_name = $row['region_names']['region_' . $i]['label'];
+            $class_name = isset($row['region_names']['region_' . $i]['name']) ? $row['region_names']['region_' . $i]['name'] : backdrop_html_class($row['region_names']['region_' . $i]['label']);
+            $region_classes .= 'l-region--' . $class_name;
+            $custom_classes = !empty($row['region_names']['region_' . $i]['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_' . $i]['classes']) : '';
+            $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $custom_classes : '';
           }
           else {
             $region_name = $name . ' ' . $i;
+            $region_classes .= 'l-region--' . backdrop_html_class($name . ' ' . $i);
           }
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
+            'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;
