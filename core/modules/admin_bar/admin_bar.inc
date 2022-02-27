@@ -644,13 +644,14 @@ function admin_bar_links_search() {
   $search['search']['search'] = array(
     '#type' => 'search',
     '#title' => t('Admin search'),
-    '#title_display' => 'attribute',
+    '#title_display' => 'invisible',
     '#attributes' => array(
       'placeholder' => t('Menu search'),
       'autocomplete' => 'off',
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
 }
