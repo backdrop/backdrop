@@ -76,6 +76,14 @@ function contact_site_form($form, &$form_state) {
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
+  $phone = $config->get('phone');
+  if (!empty($phone)) {
+    $form['phone'] = array(
+      '#type' => 'tel',
+      '#title' => t('Your phone number'),
+      '#required' => $phone == 'required',
+    );
+  }
   $form['subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
@@ -219,6 +227,14 @@ function contact_personal_form($form, &$form_state, $recipient) {
     '#default_value' => $user->uid ? $user->mail : '',
     '#required' => TRUE,
   );
+  $phone = $config->get('phone');
+  if (!empty($phone)) {
+    $form['phone'] = array(
+      '#type' => 'tel',
+      '#title' => t('Your phone number'),
+      '#required' => $phone == 'required',
+    );
+  }
   $form['to'] = array(
     '#type' => 'item',
     '#title' => t('To'),

@@ -10,23 +10,26 @@
   border: 1px solid #bbbbbb;
   background: #ffffff;
 }
- @media (min-width: 48em) {
+@media (min-width: 48em) {
   .vertical-tabs {
     padding: 0 0 0 15em; /* LTR */
   }
-   [dir="rtl"] .vertical-tabs {
-     padding-left: 0;
-     padding-right: 15em;
+  [dir="rtl"] .vertical-tabs {
+    padding: 0 15em 0 0;
   }
   .vertical-tabs:before {
     content: '';
     position: absolute;
-    left: 0;
+    left: 0; /* LTR */
     top: 0;
     z-index: 0;
     width: 15em;
     height: 100%;
     background: #bbbbbb;
+  }
+  [dir="rtl"] .vertical-tabs:before {
+    left: auto;
+    right: 0;
   }
 }
 .vertical-tabs-list {
