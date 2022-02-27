@@ -426,17 +426,17 @@ function standard_install() {
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
   $cards = array(
-    'kelly-sikkema-jr61khawkek-unsplash.jpg' => array(
+    'card1-organize.png' => array(
       'title' => st('Organize your content'),
-      'body' => st('<p><p>Backdrop CMS includes 3 pre-defined types of content: Pages, Posts, and Cards. Any number of custom <a href="https://docs.backdropcms.org/documentation/content-types">content types</a> can also be added.</p>'),
+      'body' => st('<p>Backdrop CMS includes three pre-defined types of content: Pages, Posts, and Cards. Custom content types can also be added.</p><p><a href="https://docs.backdropcms.org/documentation/content-types">Learn more about content types</a></p>'),
     ),
-    'rich-smith-l8lqr8i_uug-unsplash.jpg' => array(
+    'card2-card.png' => array(
       'title' => st('What is a Card?'),
-      'body' => st('<p>Cards are one of the three content types provided by default. Cards will not be visible to site visitors at their own path, they only appear as part of another page. A Card can be added to any page by placing it directly into a layout as an <em>Existing Content</em> block.</p>'),
+      'body' => st('<p>A Card is a flexible content item. Cards can be put on any page by placing them into a layout as "Existing content" blocks.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about content types</a></p>'),
     ),
-    'kelly-sikkema-io0zlybu31s-unsplash.jpg' => array(
+    'card3-layout.png' => array(
       'title' => st('The home page layout'),
-      'body' => st('<p>This home page was built using a <a href="https://docs.backdropcms.org/documentation/layouts-and-templates">layout</a>. <a href="https://docs.backdropcms.org/documentation/blocks">Blocks</a> can be added or removed from this layout to determine what appears here. This Card was added to the Home Page layout as a block that contains a <a href="https://docs.backdropcms.org/documentation/views">view</a> of 3 promoted Cards.</p>'),
+      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about content types</a></p>'),
     ),
   );
 
