@@ -432,11 +432,11 @@ function standard_install() {
     ),
     'card2-card.png' => array(
       'title' => st('What is a Card?'),
-      'body' => st('<p>A Card is a flexible content item. Cards can be put on any page by placing them into a layout as "Existing content" blocks.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about cards</a></p>'),
+      'body' => st('<p>A Card is a flexible content item. Cards can be put on any page by placing them into a layout as "Existing content" blocks.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about Cards</a></p>'),
     ),
     'card3-layout.png' => array(
-      'title' => st('The home page layout'),
-      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about views</a></p>'),
+      'title' => st('The Home page layout'),
+      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about Views</a></p>'),
     ),
   );
 
