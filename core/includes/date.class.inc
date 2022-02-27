@@ -197,6 +197,7 @@ class BackdropDateTime extends DateTime {
    * @return DateTime
    *   This object with the timezone updated.
    */
+  #[\ReturnTypeWillChange]
   public function setTimezone($timezone, $force = FALSE) {
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
@@ -228,6 +229,7 @@ class BackdropDateTime extends DateTime {
    * @return string|false
    *   Returns the formatted date string on success or FALSE on failure.
    */
+  #[\ReturnTypeWillChange]
   public function format($format, $force = FALSE) {
     // If there are errors, formatting will likely not succeed. Return FALSE.
     if (!empty($this->errors)) {
