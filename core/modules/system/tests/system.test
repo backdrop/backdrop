@@ -561,7 +561,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
    */
   function testModuleVersions() {
     $dependencies = array(
-      // All comparisons are done against 1.x-2.4-beta3.
+      // All comparisons are done against 1.x-2.4.5-beta3.
       'common_test' => TRUE,
       // Branch incompatibility.
       'common_test (1.x)' => FALSE,
@@ -576,27 +576,27 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // Another branch compatibility.
       'common_test (>=2.x)' => TRUE,
       // Higher rc version. Incompatible.
-      'common_test (>=1.x-2.4-rc1)' => FALSE,
+      'common_test (>=1.x-2.4.5-rc1)' => FALSE,
       // Higher beta version. Incompatible.
-      'common_test (>=1.x-2.4-beta4)' => FALSE,
+      'common_test (>=1.x-2.4.5-beta4)' => FALSE,
       // Lower beta version. Compatible.
-      'common_test (>=1.x-2.4-beta2)' => TRUE,
+      'common_test (>=1.x-2.4.5-beta2)' => TRUE,
       // Lower alpha version. Compatible.
-      'common_test (>=1.x-2.4-alpha8)' => TRUE,
+      'common_test (>=1.x-2.4.5-alpha8)' => TRUE,
       // Nonsense, misses a dash. Incompatible with everything.
-      'common_test (=1.x2.x, >=2.4)' => FALSE,
+      'common_test (=1.x2.x.5, >=2.4.5)' => FALSE,
       // Core version is optional. Compatible.
-      'common_test (=1.x-2.x, >=2.4-alpha2)' => TRUE,
+      'common_test (=1.x-2.x, >=2.4.5-alpha2)' => TRUE,
       // Test !=, explicitly incompatible.
-      'common_test (=2.x, !=2.4-beta3)' => FALSE,
+      'common_test (=2.x, !=2.4.5-beta3)' => FALSE,
       // Three operations. Compatible.
-      'common_test (=2.x, !=2.3, <2.5)' => TRUE,
+      'common_test (=2.x, !=2.3.4, <2.5.0)' => TRUE,
       // Testing extra version. Incompatible.
-      'common_test (<=2.4-beta2)' => FALSE,
+      'common_test (<=2.4.5-beta2)' => FALSE,
       // Testing extra version. Compatible.
-      'common_test (>2.4-beta2)' => TRUE,
+      'common_test (>2.4.5-beta2)' => TRUE,
       // Testing extra version. Incompatible.
-      'common_test (>2.4-rc0)' => FALSE,
+      'common_test (>2.4.5-rc0)' => FALSE,
     );
     foreach ($dependencies as $version_string => $compatible) {
       // Each request, one dependency is shifted off the front and added to
@@ -608,7 +608,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
     }
 
     $dev_dependencies = array(
-      // Compare again against a the dev version 1.x-2.x-dev.
+      // Compare again against a dev version 1.x-2.x-dev.
       'common_test' => TRUE,
       // Branch incompatibility.
       'common_test (1.x)' => FALSE,

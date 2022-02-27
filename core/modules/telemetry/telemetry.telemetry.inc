@@ -23,6 +23,11 @@ function telemetry_telemetry_info() {
     'description' => t('The operating system of your server, such as RedHat Linux, Debian, Windows, etc.'),
     'project' => 'backdrop',
   );
+  $info['web_server'] = array(
+    'label' => t('Web server'),
+    'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -37,5 +42,15 @@ function telemetry_telemetry_data($key) {
       return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
     case 'server_os':
       return PHP_OS;
+    case 'web_server':
+      if (backdrop_is_apache()) {
+        return 'Apache';
+      }
+      elseif (backdrop_is_nginx()) {
+        return 'nginx';
+      }
+      else {
+        return 'Other';
+      }
   }
 }
