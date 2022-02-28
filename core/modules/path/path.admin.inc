@@ -157,7 +157,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
       '#empty_option' => t('- None -'),
       '#default_value' => $path['langcode'],
       '#weight' => -10,
-      '#description' => t('A path alias set for a specific language will always be used when displaying this page in that language, and takes precedence over path aliases set as <em>- None -</em>.'),
+      '#description' => t('A URL alias set for a specific language will always be used when displaying this page in that language, and takes precedence over URL aliases set as <em>- None -</em>.'),
     );
   }
   else {
@@ -258,7 +258,7 @@ function path_admin_form_submit($form, &$form_state) {
  * Form constructor for the path deletion form.
  *
  * @param $path
- *   The path alias that will be deleted.
+ *   The URL alias that will be deleted.
  *
  * @see path_admin_delete_confirm_submit()
  */
@@ -267,7 +267,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
     $form_state['path'] = $path;
     return confirm_form(
       $form,
-      t('Are you sure you want to delete path alias %title?',
+      t('Are you sure you want to delete URL alias %title?',
       array('%title' => $path['alias'])),
       'admin/config/urls/path'
     );
@@ -611,7 +611,7 @@ function path_patterns_settings_form_validate($form, &$form_state) {
 }
 
 /**
- * Form builder; Bulk path alias update form.
+ * Form builder; Bulk URL alias update form.
  *
  * @see path_bulk_update_form_submit()
  * @ingroup forms
@@ -729,7 +729,7 @@ function theme_path_bulk_update_form($variables) {
 }
 
 /**
- * Form submit handler for path alias bulk update form.
+ * Form submit handler for URL alias bulk update form.
  *
  * @see path_bulk_update_form()
  * @see path_admin_bulk_delete_confirm()
@@ -751,7 +751,7 @@ function path_bulk_update_form_rebuild_submit($form, &$form_state) {
 }
 
 /**
- * Validate handler for path alias bulk generate form.
+ * Validate handler for URL alias bulk generate form.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_generate_submit()
@@ -774,7 +774,7 @@ function path_bulk_update_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for path alias bulk generate form.
+ * Submit handler for URL alias bulk generate form.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
@@ -858,13 +858,12 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
     }
   }
   else {
-    $error_operation = reset($operations);
-    backdrop_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    backdrop_set_message(t('An error occurred while generating the URL aliases.'), 'error');
   }
 }
 
 /**
- * Confirm form for path alias bulk deletion.
+ * Confirm form for URL alias bulk deletion.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
@@ -930,7 +929,7 @@ function path_bulk_update_form_bulk_delete_submit($form, &$form_state) {
     if ($count_base === count($all_path_info)) {
       db_delete('url_alias')
         ->execute();
-      backdrop_set_message(t('All of your path aliases have been deleted.'));
+      backdrop_set_message(t('All of your URL aliases have been deleted.'));
     }
     else {
       foreach ($values as $key => $value) {

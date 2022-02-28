@@ -422,7 +422,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     }
   }
   // Require a link if we have a title.
-  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : NULL) > 0 && strlen(trim($item['url'])) == 0) {
+  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : '') > 0 && strlen(trim($item['url'])) == 0) {
     $errors[$field['field_name']][$langcode][$delta][] = array(
       'error' => 'link_required',
       'message' => t('You cannot enter a title without a link url.'),
