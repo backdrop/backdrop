@@ -750,6 +750,10 @@ function node_row_node_view_preprocess_node(&$variables) {
     $node->comment = FALSE;
   }
 
+  if (!$options['title']) {
+    unset($variables['title']);
+  }
+
   if (!$options['links']) {
     unset($variables['content']['links']);
   }

@@ -168,6 +168,9 @@ CKEDITOR.plugins.add('backdropimagecaption', {
             var figure = new CKEDITOR.htmlParser.element('figure');
             caption = new CKEDITOR.htmlParser.fragment.fromHtml(caption, 'figcaption');
 
+            var captionFilter = new CKEDITOR.filter(widgetDefinition.editables.caption.allowedContent);
+            captionFilter.applyTo(caption);
+
             // Use Backdrop's data-placeholder attribute to insert a CSS-based,
             // translation-ready placeholder for empty captions. Note that it
             // also must to be done for new instances (see

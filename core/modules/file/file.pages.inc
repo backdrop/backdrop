@@ -357,6 +357,11 @@ function file_add_form_submit($form, &$form_state) {
       entity_form_submit_build_entity('file', $file, $form, $form_state);
 
       file_save($file);
+      // Record that the module (in this case, the File module) is using the
+      // file. Without the call to file_usage_add, file_managed_file_validate()
+      // produces an error upon saving the form, saying that the uploaded file
+      // may not be referenced.
+      file_usage_add($file, 'file', 'file', $file->fid);
       $form_state['file'] = $file;
       backdrop_set_message(t('@type %name was uploaded.', array('@type' => file_type_get_name($file), '%name' => $file->filename)));
     }
@@ -1018,7 +1023,17 @@ function file_usage_page($file) {
 
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
-          $entity_label = l($label, $entity_uri['path']);
+          // Unlike Node or Term entities File entities have a stream wrapper
+          // to the file set as their path, but the path to the entities' page
+          // is "path/[fid]".
+          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
+          if ($entity_type == 'file') {
+            $uri = 'file/' . $entity_id;
+          }
+          else {
+            $uri = $entity_uri['path'];
+          }
+          $entity_label = l($label, $uri);
         }
         else {
           $entity_label = check_plain($label);
