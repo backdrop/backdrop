@@ -1,0 +1,34 @@
+{
+    "_config_name": "field.instance.node.post.field_config_test",
+    "field_name": "field_config_test",
+    "entity_type": "node",
+    "bundle": "post",
+    "label": "Config Test",
+    "widget": {
+        "weight": "2",
+        "type": "text_textfield",
+        "module": "text",
+        "active": 1,
+        "settings": {
+            "size": "60"
+        }
+    },
+    "description": "",
+    "required": 0,
+    "deleted": 0,
+    "default_value": null,
+    "default_value_function": null,
+    "settings": {
+        "text_processing": "0",
+        "user_register_form": false
+    },
+    "display": {
+        "default": {
+            "label": "hidden",
+            "type": "text_default",
+            "settings": [],
+            "module": "text",
+            "weight": 1
+        }
+    }
+}

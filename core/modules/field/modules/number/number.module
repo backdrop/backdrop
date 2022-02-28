@@ -116,7 +116,7 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
   $max = $element['max'];
   $min = $element['min'];
 
-  if ($max['#value'] < $min['#value']) {
+  if (!empty($max['#value']) && $max['#value'] < $min['#value']) {
     form_error($max, t('%max must be greater than, or equal to, %min.', array(
       '%max' => $max['#title'],
       '%min' => $min['#title'],
@@ -347,7 +347,10 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   // Set the step for floating point and decimal numbers.
   switch ($field['type']) {
     case 'number_decimal':
-      $element['#step'] = pow(0.1, $field['settings']['scale']);
+      // Avoid small float as base in function pow() for better results
+      // regarding floating point precision.
+      $scale = (int) $field['settings']['scale'];
+      $element['#step'] = 1 / pow(10, $scale);
       break;
 
     case 'number_float':
