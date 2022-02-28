@@ -859,7 +859,7 @@ function hook_node_view_alter(&$build) {
  */
 function hook_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
-  $config = config_get('my_module.settings');
+  $config = config('my_module.settings');
   if ($config->get('vote_node_enabled')) {
     return array(
       'vote_average' => array(
