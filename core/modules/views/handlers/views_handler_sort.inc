@@ -96,7 +96,7 @@ class views_handler_sort extends views_handler {
     // so it can replace the button.
     $form['expose_button']['checkbox'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
       '#title' => t('Expose this sort to visitors, to allow them to change it'),
@@ -113,6 +113,9 @@ class views_handler_sort extends views_handler {
         '#type' => 'submit',
         '#value' => t('Expose sort'),
         '#submit' => array('views_ui_config_item_form_expose'),
+        '#ajax' => array(
+          'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
+        ),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }

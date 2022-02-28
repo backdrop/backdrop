@@ -79,6 +79,17 @@ function contact_update_1001() {
 }
 
 /**
+ * Set default value for new 'Phone' field setting.
+ */
+function contact_update_1002() {
+  $config = config('contact.settings');
+  if ($config->get('phone') === NULL) {
+    $config->set('phone', '');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
