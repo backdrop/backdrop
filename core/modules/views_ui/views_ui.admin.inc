@@ -4501,20 +4501,24 @@ function views_ui_admin_settings_basic() {
     }
   }
 
-  // This is not currently a fieldset but we may want it to be later, so this
-  // will make it easier to change if we do.
-  $form['basic'] = array();
-
-  $form['basic']['wizard_default_display'] = array(
+  $form['wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("'Add view' wizard"),
+  );
+  $form['wizard']['wizard_default_display'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Which display(s) to create by default'),
-    '#description' => t('When adding a view (at <code>/admin/structure/views/add</code>), which display(s) should be enabled by default?'),
+    '#title' => t('Default displays'),
+    '#description' => t('These displays will be <em>enabled</em> by default, but can still be enabled/disabled by the user before creating a view.'),
     '#options' => array(
       'page' => t('Page'),
       'block' => t('Block'),
     ),
     '#default_value' => $config->get('wizard_default_display'),
   );
+
+  // This is not currently a fieldset but we may want it to be later, so this
+  // will make it easier to change if we do.
+  $form['basic'] = array();
 
   $form['basic']['show_master_display'] = array(
     '#type' => 'checkbox',
