@@ -41,6 +41,9 @@
               <div class="layout-editor-block-title clearfix">
                 <span class="handle"></span>
                 <span class="text"><?php print t('Row'); ?></span>
+                <?php if (array_key_exists($row['container'], $row_widths)): ?>
+                  <small><?php print $row_widths[$row['container']] ?></small>
+                <?php endif; ?>
                 <span class="buttons">
                   <?php print $region_buttons[$name]; ?>
                 </span>
