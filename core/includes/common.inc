@@ -8495,25 +8495,81 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
 /**
  * Returns a list of severity levels, as defined in RFC 3164.
  *
- * @return
- *   Array of the possible severity levels for log messages.
+ * @param string $return
+ *   The type of data to return. Can be one of:
+ *   - all: The full array.
+ *   - machine: The untranslated machine names.
+ *   - human: The translated human-readable names.
+ *   - description: The level descriptions.
+ *   For backwards-compatibility, this defaults to 'human'.
  *
+ * @return array
+ *   An array of the possible severity levels for log messages. The array keys
+ *   are the named constants, while the values depend on the value of $return.
+ *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.ietf.org/rfc/rfc3164.txt
  * @see watchdog()
  * @ingroup logging_severity_levels
  */
-function watchdog_severity_levels() {
-  return array(
-    WATCHDOG_EMERGENCY   => t('emergency'),
-    WATCHDOG_ALERT   => t('alert'),
-    WATCHDOG_CRITICAL    => t('critical'),
-    WATCHDOG_ERROR     => t('error'),
-    WATCHDOG_WARNING => t('warning'),
-    WATCHDOG_NOTICE  => t('notice'),
-    WATCHDOG_INFO    => t('info'),
-    WATCHDOG_DEBUG   => t('debug'),
-    WATCHDOG_DEPRECATED => t('deprecated'),
+function watchdog_severity_levels($return = 'human') {
+  $levels = array(
+    WATCHDOG_EMERGENCY => array(
+      'machine' => 'emergency',
+      'human' => t('Emergency'),
+      'description' => t('System is unusable'),
+    ),
+    WATCHDOG_ALERT => array(
+      'machine' => 'alert',
+      'human' => t('Alert'),
+      'description' => t('Action must be taken immediately'),
+    ),
+    WATCHDOG_CRITICAL => array(
+      'machine' => 'critical',
+      'human' => t('Critical'),
+      'description' => t('Critical conditions'),
+    ),
+    WATCHDOG_ERROR => array(
+      'machine' => 'error',
+      'human' => t('Error'),
+      'description' => t('Error conditions'),
+    ),
+    WATCHDOG_WARNING => array(
+      'machine' => 'warning',
+      'human' => t('Warning'),
+      'description' => t('Warning conditions'),
+    ),
+    WATCHDOG_NOTICE => array(
+      'machine' => 'notice',
+      'human' => t('Notice'),
+      'description' => t('Normal but significant conditions'),
+    ),
+    WATCHDOG_INFO => array(
+      'machine' => 'info',
+      'human' => t('Info'),
+      'description' => t('Informational messages'),
+    ),
+    WATCHDOG_DEBUG => array(
+      'machine' => 'debug',
+      'human' => t('Debug'),
+      'description' => t('Debug-level messages'),
+    ),
+    WATCHDOG_DEPRECATED => array(
+      'machine' => 'deprecated',
+      'human' => t('Deprecated'),
+      'description' => t('Deprecated function/feature notices'),
+    ),
   );
+
+  switch ($return) {
+    case 'machine':
+    case 'human':
+    case 'description':
+      return array_combine(array_keys($levels), array_column($levels, $return));
+    case 'all':
+    default:
+      return $levels;
+  }
 }
 
 

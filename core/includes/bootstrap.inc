@@ -63,6 +63,7 @@ define('CACHE_TEMPORARY', -1);
  * comment, "And it's also not a bug, as Windows just have less log levels,"
  * and "So the behavior you're seeing is perfectly normal."
  *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.faqs.org/rfcs/rfc3164.html
  * @see http://bugs.php.net/bug.php?id=18090
  * @see http://php.net/manual/function.syslog.php
@@ -97,7 +98,7 @@ define('WATCHDOG_ERROR', 3);
 define('WATCHDOG_WARNING', 4);
 
 /**
- * Log message severity -- Normal but significant conditions.
+ * Log message severity -- Notice: normal but significant conditions.
  */
 define('WATCHDOG_NOTICE', 5);
 
@@ -112,7 +113,7 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
- * Log message severity -- Deprecated function / feature notices.
+ * Log message severity -- Deprecated function/feature notices.
  */
 define('WATCHDOG_DEPRECATED', 8);
 
@@ -2244,6 +2245,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
+    // See watchdog_severity_levels() for possible values.
     $enabled_severity_levels = array(
       WATCHDOG_EMERGENCY,
       WATCHDOG_ALERT,
@@ -2252,8 +2254,6 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
       WATCHDOG_WARNING,
       WATCHDOG_NOTICE,
       WATCHDOG_INFO,
-      // WATCHDOG_DEBUG,
-      // WATCHDOG_DEPRECATED,
     );
   }
 
@@ -2278,17 +2278,8 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
  *   NULL if message is already translated or not possible to
  *   translate.
  * @param $severity
- *   The severity of the message; one of the following values as defined in
- *   @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
- *   - WATCHDOG_EMERGENCY: Emergency, system is unusable.
- *   - WATCHDOG_ALERT: Alert, action must be taken immediately.
- *   - WATCHDOG_CRITICAL: Critical conditions.
- *   - WATCHDOG_ERROR: Error conditions.
- *   - WATCHDOG_WARNING: Warning conditions.
- *   - WATCHDOG_NOTICE: (default) Normal but significant conditions.
- *   - WATCHDOG_INFO: Informational messages.
- *   - WATCHDOG_DEBUG: Debug-level messages.
- *   - WATCHDOG_DEPRECATED: Use of deprecated functions or features.
+ *   The severity of the message; see watchdog_severity_levels() for
+ *   possible values.
  * @param $link
  *   A link to associate with the message.
  *
