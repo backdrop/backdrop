@@ -4501,7 +4501,7 @@ function views_ui_admin_settings_basic() {
   $form['wizard']['wizard_default_display'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Default displays'),
-    '#description' => t('These displays will be <em>enabled</em> by default, but can still be enabled/disabled by the user before creating a view.'),
+    '#description' => t('Which display options to enable by default. Note that these options can still be manually enabled/disabled before creating the view.'),
     '#options' => array(
       'page' => t('Page'),
       'block' => t('Block'),
