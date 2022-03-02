@@ -4151,7 +4151,7 @@ function path_autocomplete($string = '') {
       ->execute();
     foreach ($results as $result) {
       $path = backdrop_get_path_alias('node/' . $result->nid);
-      $match = '<span class="autocomplete-suggestion">' . $result->title . '</span>';
+      $match = '<span class="autocomplete-suggestion">' . check_plain($result->title) . '</span>';
       $match_description = t('Content: %type', array('%type' => node_type_get_name($result->type)));
       $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
       $match_count++;
@@ -4172,7 +4172,7 @@ function path_autocomplete($string = '') {
         $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
         $url = file_create_url($result->uri);
         $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-        $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->filename) . '</span>';
         $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
         $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
@@ -4196,7 +4196,7 @@ function path_autocomplete($string = '') {
         $users = user_load_multiple($uids);
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
-          $match = '<span class="autocomplete-suggestion">' . user_format_name($user) . '</span>';
+          $match = '<span class="autocomplete-suggestion">' . check_plain(user_format_name($user)) . '</span>';
           $match_description = t('User account');
           $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
@@ -4215,7 +4215,7 @@ function path_autocomplete($string = '') {
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-        $match = '<span class="autocomplete-suggestion">' . $result->name . '</span>';
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->name) . '</span>';
         $match_description = t('Taxonomy term: %vocabulary', array('%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name));
         $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
@@ -4230,6 +4230,7 @@ function path_autocomplete($string = '') {
           if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
             $path = backdrop_get_path_alias($display->display_options['path']);
             if (!path_is_admin($path)) {
+              $view_title = '';
               $found_match = FALSE;
               // Display title.
               if (!empty($display->display_options['title']) && stripos($display->display_options['title'], $string) !== FALSE) {
@@ -4247,7 +4248,7 @@ function path_autocomplete($string = '') {
                 $view_title = $view->human_name;
               }
               if ($found_match) {
-                $match = '<span class="autocomplete-suggestion">' . $view_title . '</span>';
+                $match = '<span class="autocomplete-suggestion">' . check_plain($view_title) . '</span>';
                 $match_description = t('View: %human - %display', array('%human' => $view->human_name, '%display' => $display->display_title));
                 $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
@@ -4266,6 +4267,7 @@ function path_autocomplete($string = '') {
       $menu_items = layout_get_all_configs('menu_item');
       foreach ($menu_items as $menu_item) {
         if ($match_count < $range) {
+          $layout_title = '';
           $found_match = FALSE;
           if (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
             $found_match = TRUE;
@@ -4276,7 +4278,7 @@ function path_autocomplete($string = '') {
             $layout_title = $menu_item['name'];
           }
           if ($found_match) {
-            $match = '<span class="autocomplete-suggestion">' . $layout_title . '</span>';
+            $match = '<span class="autocomplete-suggestion">' . check_plain($layout_title) . '</span>';
             $match_description = t('Layout: %display', array('%display' => $menu_item['name']));
             $matches[$menu_item['path']] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
             $match_count++;
@@ -4296,7 +4298,7 @@ function path_autocomplete($string = '') {
       foreach ($results as $result) {
         $path = backdrop_get_path_alias($result->link_path);
         if (!isset($matches[$path]) && !path_is_admin($path)) {
-          $match = '<span class="autocomplete-suggestion">' . $result->link_title . '</span>';
+          $match = '<span class="autocomplete-suggestion">' . check_plain($result->link_title) . '</span>';
           $match_description = t('Menu item: %path', array('%path' => $path));
           $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
