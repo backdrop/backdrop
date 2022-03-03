@@ -527,7 +527,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
-  array_unshift($roles, t('disabled'));
+  $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
