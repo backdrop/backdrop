@@ -619,7 +619,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    */
   protected function getSeverityConstant($class) {
     // Reversed array from dblog_overview().
-    $levels = watchdog_severity_levels('machine');
+    $levels = watchdog_severity_levels('name');
     foreach (array_reverse($levels, TRUE) as $key => $value) {
       $map['dblog-' . $value] = $key;
     }

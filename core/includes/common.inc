@@ -8498,10 +8498,10 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
  * @param string $return
  *   The type of data to return. Can be one of:
  *   - all: The full array.
- *   - machine: The untranslated machine names.
- *   - human: The translated human-readable names.
+ *   - name: The untranslated machine names.
+ *   - label: The translated human-readable names/labels.
  *   - description: The level descriptions.
- *   For backwards-compatibility, this defaults to 'human'.
+ *   For backwards-compatibility, this defaults to 'label'.
  *
  * @return array
  *   An array of the possible severity levels for log messages. The array keys
@@ -8512,7 +8512,7 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
  * @see watchdog()
  * @ingroup logging_severity_levels
  */
-function watchdog_severity_levels($return = 'human') {
+function watchdog_severity_levels($return = 'label') {
   $levels = array(
     WATCHDOG_EMERGENCY => array(
       'machine' => 'emergency',
@@ -8562,8 +8562,8 @@ function watchdog_severity_levels($return = 'human') {
   );
 
   switch ($return) {
-    case 'machine':
-    case 'human':
+    case 'name':
+    case 'label':
     case 'description':
       return array_combine(array_keys($levels), array_column($levels, $return));
     case 'all':

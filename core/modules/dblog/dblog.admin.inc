@@ -18,7 +18,7 @@
 function dblog_overview() {
   $filter = dblog_build_filter_query();
   $rows = array();
-  $classes = watchdog_severity_levels('machine');
+  $classes = watchdog_severity_levels('name');
   foreach ($classes as $key => $value) {
     $classes[$key] = 'dblog-' . $value;
   }
