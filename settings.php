@@ -59,6 +59,24 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 $settings['update_free_access'] = FALSE;
 
 /**
+ * Fall back to HTTP for Update Manager.
+ *
+ * If your Backdrop site fails to connect to updates.backdropcms.org using HTTPS
+ * to fetch the update status of Backdrop core and/or contrib projects, you may
+ * uncomment this setting (and make sure it is set to "TRUE"), to allow an
+ * insecure fallback to HTTP.
+ *
+ * SECURITY WARNING: Enabling this setting will open your site up to potential
+ * man-in-the-middle attacks! You should instead attempt to resolve the issues,
+ * and only use this option as a last resort.
+ *
+ * @see https://docs.backdropcms.org/documentation/system-requirements#php
+ * @see https://en.wikipedia.org/wiki/Man-in-the-middle_attack
+ * @see _update_build_fetch_url()
+ */
+# $settings['update_fetch_with_http_fallback'] = TRUE;
+
+/**
  * Salt for one-time login links and cancel links, form tokens, etc.
  *
  * This variable will be set to a random value by the installer. All one-time

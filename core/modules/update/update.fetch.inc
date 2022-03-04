@@ -332,6 +332,13 @@ function _update_build_fetch_url($project, $site_key = '') {
     $url .= '&list=';
     $url .= rawurlencode(implode(',', $list));
   }
+
+  // Fall back to the less secure HTTP version of the URL (if the respective
+  // setting in settings.php has been enabled).
+  if (settings_get('update_fetch_with_http_fallback', FALSE)) {
+    $url = str_replace('https://', 'http://', $url);
+  }
+
   return $url;
 }
 
