@@ -73,10 +73,11 @@ $settings['update_free_access'] = FALSE;
  *     contributed projects, you may uncomment this setting (and make sure it is
  *     set to "TRUE"), to allow an insecure connection without SSL verification.
  *
- * SECURITY WARNING!: Enabling any of these two settings will open your site up
- * to potential man-in-the-middle attacks! It is strongly advised that you
- * instead attempt to resolve underlying SSL issues, and only use this option as
- * a last resort.
+ * SECURITY WARNING!: These settings are meant to be used as temporary
+ * workarounds. Enabling any of these two settings will open your site up to
+ * potential man-in-the-middle attacks! It is strongly advised that you instead
+ * attempt to resolve any underlying SSL issues, and only use these as a last
+ * resort.
  *
  * @see https://docs.backdropcms.org/documentation/system-requirements#php
  * @see https://en.wikipedia.org/wiki/Man-in-the-middle_attack
