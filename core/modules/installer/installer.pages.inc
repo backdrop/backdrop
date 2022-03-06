@@ -92,23 +92,14 @@ function installer_browser_page($type) {
     $list[] = $project;
   }
 
-  // Add the pager.
-  $total = $results['total'];
-  $items_per_page = 20;
-  $page = pager_default_initialize($total, $items_per_page);
-  $offset = $items_per_page * $page;
-  $start = ($total) ? $offset + 1 : 0;
-  $finish = $offset + $items_per_page;
-  if ($finish > $total) {
-    $finish = $total;
-  }
-
   $filter_form = backdrop_get_form('installer_browser_filters_form', $type);
   $sort_options = installer_browser_get_sort_options();
   $current_order = isset($_SESSION['installer_browser_order_filter_' . $type]) ? $_SESSION['installer_browser_order_filter_' . $type] : 'score';
   $current_sort = isset($_SESSION['installer_browser_sort_filter_' . $type]) ? $_SESSION['installer_browser_sort_filter_' . $type] : 'desc';;
 
   $build = array();
+  // Add the search form, sort filters, and the project list and installation
+  // queue block.
   $build['content'] = array(
     'installer_browser_filter' => array(
       '#markup' => backdrop_render($filter_form),
@@ -120,22 +111,35 @@ function installer_browser_page($type) {
       '#wrapper_attributes' => array('class' => array('installer-browser-sort')),
       '#markup' => installer_browser_get_sort_widget($sort_options, $current_order, $current_sort),
     ),
-    'installer_browser_header' => array(
-      '#type' => 'item',
-      '#weight' => 5,
-      '#wrapper_attributes' => array('class' => array('installer-browser-page-number')),
-      '#markup' => t('Showing @start to @finish of @total.', array(
-        '@start' => $start, '@finish' => $finish, '@total' => $total)),
-    ),
     'installer_browser_list' => array(
       '#markup' => theme('installer_browser_list', array('projects_list' => $list, 'type' => $type)),
       '#weight' => 10,
     ),
-    'pager' => array(
+  );
+
+  // Add the results summary and the pager (if there are results).
+  $total = $results['total'];
+  if ($total != 0) {
+    $items_per_page = 20;
+    $page = pager_default_initialize($total, $items_per_page);
+    $offset = $items_per_page * $page;
+    $start = ($total) ? $offset + 1 : 0;
+    $finish = $offset + $items_per_page;
+    if ($finish > $total) {
+      $finish = $total;
+    }
+    $build['content']['installer_browser_header'] = array(
+      '#type' => 'item',
+      '#weight' => 5,
+      '#wrapper_attributes' => array('class' => array('installer-browser-page-number')),
+      '#markup' => t('Showing @start to @finish of @total', array(
+        '@start' => $start, '@finish' => $finish, '@total' => $total)),
+    );
+    $build['content']['pager'] = array(
       '#theme' => 'pager',
       '#weight' => 99,
-    ),
-  );
+    );
+  }
 
   return $build;
 }
