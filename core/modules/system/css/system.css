@@ -26,7 +26,6 @@
   color: #000;
   cursor: default;
   white-space: pre;
-  zoom: 1; /* IE7 */
 }
 /* Animated throbber */
 .js input.form-autocomplete {
@@ -34,14 +33,14 @@
   background-position: 100% center; /* LTR */
   background-repeat: no-repeat;
 }
-[dir="rtl"] .js input.form-autocomplete {
+[dir="rtl"].js input.form-autocomplete {
   background-position: 1% center;
 }
 .js input.throbbing {
   background-image: url(../../../misc/throbber-active.gif);
   background-position: 100% center; /* LTR */
 }
-[dir="rtl"] .js input.throbbing {
+[dir="rtl"].js input.throbbing {
   background-position: 1% center;
 }
 
@@ -54,6 +53,7 @@
 .js .js-show {
   display: block;
 }
+.js a.js-show,
 .js span.js-show {
   display: inline;
 }

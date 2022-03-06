@@ -63,6 +63,20 @@ function translation_update_1001() {
 }
 
 /**
+ * Add "Show content translation links" setting to each content type.
+ */
+function translation_update_1002() {
+  $types = config_get_names_with_prefix('node.type.');
+  foreach ($types as $config_name) {
+    $config = config($config_name);
+    if ($config->get('settings.translation_show_links') === NULL) {
+      $config->set('settings.translation_show_links', TRUE);
+      $config->save();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

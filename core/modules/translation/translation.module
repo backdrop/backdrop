@@ -126,6 +126,7 @@ function translation_autoload_info() {
  * Implements hook_form_FORM_ID_alter() for node_type_form().
  */
 function translation_form_node_type_form_alter(&$form, &$form_state) {
+  $node_type = $form['#node_type'];
   // Add translation option to content type form.
   $form['multilingual']['language']['#type'] = 'radios';
   $form['multilingual']['language']['#options'] = array(
@@ -138,6 +139,28 @@ function translation_form_node_type_form_alter(&$form, &$form_state) {
   $form['multilingual']['language'][TRANSLATION_ENABLED]['#description'] = t('Content may be translated into any of the <a href="@languages">enabled languages</a>.', array('@languages' => url('admin/config/regional/language')));
   // Description based on text from node.module.
   $form['multilingual']['language']['#description'] = t('Existing content will not be affected by changing this option.');
+  $form['multilingual']['translation_show_links'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show content translation links'),
+    '#description' => t('Show the links to translations in content body and teasers. If you uncheck this option, switching language will only be available from the language switcher block.'),
+    '#default_value' => (bool) $node_type->settings['translation_show_links'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="language"]' => array('value' => TRANSLATION_ENABLED),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_node_type_load().
+ */
+function translation_node_type_load(&$types) {
+  foreach ($types as $type_name => $type) {
+    $types[$type_name]->settings += array(
+      'translation_show_links' => TRUE,
+    );
+  }
 }
 
 /**
@@ -238,7 +261,9 @@ function translation_form_node_form_alter(&$form, &$form_state) {
 function translation_node_view(Node $node, $view_mode) {
   // If the site has no translations or is not multilingual we have no content
   // translation links to display.
-  if (isset($node->tnid) && language_multilingual() && $translations = translation_node_get_translations($node->tnid)) {
+  // Also, don't display links if setting is disabled.
+  $translation_show_links = config_get('node.type.' . $node->type, 'settings.translation_show_links');
+  if ($translation_show_links && isset($node->tnid) && language_multilingual() && $translations = translation_node_get_translations($node->tnid)) {
     $languages = language_list(TRUE);
 
     // There might be a language provider enabled defining custom language
@@ -264,7 +289,7 @@ function translation_node_view(Node $node, $view_mode) {
         else {
           $links[$key] = array(
             'href' => "node/{$translation->nid}",
-            'title' => $language->name,
+            'title' => isset($language->native) ? $language->native : $language->name,
             'language' => $language,
           );
         }
@@ -322,7 +347,11 @@ function translation_node_prepare(Node $node) {
     if (!empty($source_node->tnid)) {
       $translations = translation_node_get_translations($source_node->tnid);
       if (isset($translations[$langcode])) {
-        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array('%title' => $source_node->title, '%language' => $language_list[$langcode]->name, '%type' => $node->type)), 'error');
+        backdrop_set_message(t('A translation of %title in %language already exists, a new %type will be created instead of a translation.', array(
+          '%title' => $source_node->title,
+          '%language' => isset($language_list[$langcode]->native) ? $language_list[$langcode]->native : $language_list[$langcode]->name,
+          '%type' => $node->type,
+        )), 'error');
         return;
       }
     }
