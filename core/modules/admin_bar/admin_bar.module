@@ -187,8 +187,10 @@ function admin_bar_preprocess_page(&$variables) {
 
   $options = array('every_page' => TRUE);
 
-  backdrop_add_css($path . '/css/admin_bar.css', $options);
   backdrop_add_js($path . '/js/admin_bar.js', $options);
+  backdrop_add_css($path . '/css/admin_bar.css', $options);
+  $options['media'] = 'print';
+  backdrop_add_css($path . '/css/admin_bar-print.css', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);

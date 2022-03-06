@@ -8,6 +8,24 @@
  * List tests arranged in groups that can be selected and run.
  */
 function simpletest_test_form($form) {
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('simpletest-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the test name or description to filter.'),
+    ),
+  );
+
   $form['tests'] = array(
     '#type' => 'fieldset',
     '#title' => t('Tests'),
@@ -348,6 +366,7 @@ function simpletest_settings_form($form, &$form_state) {
   $form['httpauth']['simpletest_httpauth_password'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
+    '#password_toggle' => TRUE,
   );
   if ($password) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');

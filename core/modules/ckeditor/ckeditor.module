@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.14.0');
+define('CKEDITOR_VERSION', '4.16.2');
 
 /**
  * Implements hook_menu().
@@ -517,7 +517,7 @@ function ckeditor_get_settings($format, $existing_settings) {
     'coreStyles_strike' => array('element' => 'del'),
     'coreStyles_underline' => array('element' => 'span', 'attributes' => array('class' => 'underline')),
     //'format_tags' => implode(';', $format->editor_settings['format_list']),
-    'language' => isset($language->language) ? $language->language : '',
+    'language' => $language->langcode,
     'resize_dir' => 'vertical',
     'disableNativeSpellChecker' => FALSE,
   );
@@ -711,7 +711,7 @@ function ckeditor_get_acf_settings($format) {
         return $value === FALSE;
       });
       if (count($disallowed_attributes)) {
-        // No need to blacklist the 'class' or 'style' attributes; CKEditor
+        // No need to disallow the 'class' or 'style' attributes; CKEditor
         // handles them separately (if no specific class or style attribute
         // values are allowed, then those attributes are disallowed).
         if (isset($disallowed_attributes['class'])) {

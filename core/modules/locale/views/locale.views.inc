@@ -64,23 +64,6 @@ function locale_views_data() {
     ),
   );
 
-  // Group field
-  $data['locales_source']['textgroup'] = array(
-    'group' => t('Locale source'),
-    'title' => t('Group'),
-    'help' => t('The group the translation is in.'),
-    'field' => array(
-      'handler' => 'views_handler_field_locale_group',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_locale_group',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_locale_group',
-    ),
-  );
-
   // Source field
   $data['locales_source']['source'] = array(
     'group' => t('Locale source'),

@@ -271,7 +271,9 @@ class DashboardTest extends BackdropWebTestCase {
 
     // Check that the dashboard is not accessible once the layout is disabled.
     $this->backdropGet('admin/structure/layouts');
-    $disable_link = $this->xpath('//a[starts-with(@href, "/admin/structure/layouts/manage/dashboard/disable")]');
+    $disable_link = $this->xpath('//a[starts-with(@href,:path)]', array(
+      ':path' => base_path() . 'admin/structure/layouts/manage/dashboard/disable',
+    ));
     $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
     $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
 
@@ -280,7 +282,9 @@ class DashboardTest extends BackdropWebTestCase {
 
     // Check that the dashboard is accessible once the layout is enabled again.
     $this->backdropGet('admin/structure/layouts');
-    $enable_link = $this->xpath('//a[starts-with(@href, "/admin/structure/layouts/manage/dashboard/enable")]');
+    $enable_link = $this->xpath('//a[starts-with(@href,:path)]', array(
+      ':path' => base_path() . 'admin/structure/layouts/manage/dashboard/enable',
+    ));
     $enable_url_parts = backdrop_parse_url($enable_link[0]['href']);
     $this->backdropGet($enable_url_parts['path'], $enable_url_parts);
 

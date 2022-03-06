@@ -16,7 +16,7 @@ class BackdropMatchPathTestCase extends BackdropWebTestCase {
     // Set up the database and testing environment.
     parent::setUp();
 
-    // Set up a random site front page to test the '<front>' placeholder.
+    // Set up a random site home page to test the '<front>' placeholder.
     $this->front = $this->randomName();
     config_set('system.core', 'site_frontpage', $this->front);
     // Refresh our static variables from the database.
@@ -332,7 +332,7 @@ class PathSaveTest extends BackdropWebTestCase {
     // Test to see if the original alias is available to modules during
     // hook_path_update().
     $results = state_get('path_test_results', array());
-    $this->assertIdentical($results['hook_path_update']['original']['alias'], $path_original['alias'], 'Old path alias available to modules during hook_path_update.');
-    $this->assertIdentical($results['hook_path_update']['original']['source'], $path_original['source'], 'Old path alias available to modules during hook_path_update.');
+    $this->assertIdentical($results['hook_path_update']['original']['alias'], $path_original['alias'], 'Old URL alias available to modules during hook_path_update.');
+    $this->assertIdentical($results['hook_path_update']['original']['source'], $path_original['source'], 'Old URL alias available to modules during hook_path_update.');
   }
 }
