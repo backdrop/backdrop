@@ -1,10 +1,12 @@
-Layouts divide pages on your site into different regions where content can be placed. You can use layouts contributed by others or create your own.
+Layouts divide pages on your site into different regions where content can be
+placed. You can use layouts contributed by others or create your own.
 
 What to place in this directory?
 --------------------------------
 
 Placing downloaded and custom layouts in this directory separates them from
-Backdrop core's layouts. This allows Backdrop core to be updated without overwriting these files.
+Backdrop core's layouts. This allows Backdrop core to be updated without
+overwriting these files.
 
 Download additional layouts
 ---------------------------
