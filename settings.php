@@ -77,6 +77,23 @@ $settings['update_free_access'] = FALSE;
 # $settings['update_fetch_with_http'] = TRUE;
 
 /**
+ * Disable SSL verification for the Project Installer.
+ *
+ * If your Backdrop site fails to connect to projects.backdropcms.org to fetch
+ * a list of contrib projects, you may uncomment this setting (and make sure it
+ * is set to "TRUE"), to allow an insecure connection without SSL verification.
+ *
+ * SECURITY WARNING: Enabling this setting will open your site up to potential
+ * man-in-the-middle attacks! You should instead attempt to resolve the issues,
+ * and only use this option as a last resort.
+ *
+ * @see https://docs.backdropcms.org/documentation/system-requirements#php
+ * @see https://en.wikipedia.org/wiki/Man-in-the-middle_attack
+ * @see installer_browser_fetch_results()
+ */
+# $settings['installer_disable_ssl_verification'] = TRUE;
+
+/**
  * Salt for one-time login links and cancel links, form tokens, etc.
  *
  * This variable will be set to a random value by the installer. All one-time
