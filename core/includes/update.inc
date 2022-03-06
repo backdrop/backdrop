@@ -308,7 +308,7 @@ function update_upgrade_check_dependencies() {
     $modules_to_enable = update_upgrade_modules_to_enable();
     
     if (empty($modules_to_enable)) {
-      return;
+      return '';
     }
 
     $files = system_rebuild_module_data();

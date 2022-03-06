@@ -323,8 +323,9 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
-  if ($modules_to_enable = update_upgrade_check_dependencies()) {
-    $output .= $modules_to_enable;
+  $module_status_report = update_upgrade_check_dependencies();
+	if (!empty($module_status_report)) {
+    $output .= $module_status_report;
   }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
