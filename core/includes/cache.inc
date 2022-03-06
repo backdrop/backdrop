@@ -169,9 +169,7 @@ function cache_flush($bin) {
 function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
   // Default value cache flush.
   if (!isset($cid) && !isset($bin)) {
-    if (module_exists('layout')) {
-      cache('layout_path')->flush();
-    }
+    cache('layout_path')->flush();
     cache('page')->flush();
     return;
   }

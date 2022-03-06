@@ -99,10 +99,12 @@ Backdrop.tableDrag = function (table, tableSettings) {
   $(table).before($('<a href="#" class="tabledrag-toggle-weight"></a>')
     .attr('title', Backdrop.t('Re-order rows by numerical weight instead of dragging.'))
     .click(function () {
-      if ($.cookie('Backdrop.tableDrag.showWeight') == 1) {
+      if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
+        localStorage.removeItem('Backdrop.tableDrag.showWeight');
         self.hideColumns();
       }
       else {
+        localStorage.setItem('Backdrop.tableDrag.showWeight', '1');
         self.showColumns();
       }
       return false;
@@ -131,7 +133,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
  *
  * Identify and mark each cell with a CSS class so we can toggle show/hide it.
  * Finally, hide columns if user does not have a 'Backdrop.tableDrag.showWeight'
- * cookie.
+ * in localStorage.
  */
 Backdrop.tableDrag.prototype.initColumns = function () {
   var $table = $(this.table), hidden, cell, columnIndex;
@@ -158,25 +160,32 @@ Backdrop.tableDrag.prototype.initColumns = function () {
     }
   }
 
-  // Now hide cells and reduce colspans unless cookie indicates previous choice.
-  // Set a cookie if it is not already present.
-  if ($.cookie('Backdrop.tableDrag.showWeight') === null) {
-    $.cookie('Backdrop.tableDrag.showWeight', 0, {
-      path: Backdrop.settings.basePath,
-      // The cookie expires in one year.
-      expires: 365
-    });
+  // Now hide cells and reduce colspans unless localStorage indicates previous
+  // choice.
+  if (localStorage.getItem('Backdrop.tableDrag.showWeight') === null) {
     this.hideColumns();
   }
-  // Check cookie value and show/hide weight columns accordingly.
+  // Check localStorage value and show/hide weight columns accordingly.
   else {
-    if ($.cookie('Backdrop.tableDrag.showWeight') == 1) {
+    if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
       this.showColumns();
     }
     else {
       this.hideColumns();
     }
   }
+
+  // Add event listener to storage events in other windows on the same domain.
+  window.addEventListener('storage', function (event) {
+    if (event.key === 'Backdrop.tableDrag.showWeight') {
+      if (event.newValue === '1') {
+        Backdrop.tableDrag.prototype.showColumns();
+      }
+      else {
+        Backdrop.tableDrag.prototype.hideColumns();
+      }
+    }
+  });
 };
 
 /**
@@ -216,6 +225,7 @@ Backdrop.tableDrag.prototype.addColspanClass = function(columnIndex) {
 Backdrop.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
+  $('table.tabledrag-processed').addClass('tabledrag-handles-shown');
   // Show TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
   // Reduce the colspan of any effected multi-span columns.
@@ -224,12 +234,6 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
   });
   // Change link text.
   $('.tabledrag-toggle-weight').text(Backdrop.t('Show row weights'));
-  // Change cookie.
-  $.cookie('Backdrop.tableDrag.showWeight', 0, {
-    path: Backdrop.settings.basePath,
-    // The cookie expires in one year.
-    expires: 365
-  });
   // Trigger an event to allow other scripts to react to this display change.
   $('table.tabledrag-processed').trigger('columnschange', 'hide');
 };
@@ -241,6 +245,7 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
 Backdrop.tableDrag.prototype.showColumns = function () {
   // Show weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
+  $('table.tabledrag-processed').removeClass('tabledrag-handles-shown');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
   // Increase the colspan for any columns where it was previously reduced.
@@ -249,12 +254,6 @@ Backdrop.tableDrag.prototype.showColumns = function () {
   });
   // Change link text.
   $('.tabledrag-toggle-weight').text(Backdrop.t('Hide row weights'));
-  // Change cookie.
-  $.cookie('Backdrop.tableDrag.showWeight', 1, {
-    path: Backdrop.settings.basePath,
-    // The cookie expires in one year.
-    expires: 365
-  });
   // Trigger an event to allow other scripts to react to this display change.
   $('table.tabledrag-processed').trigger('columnschange', 'show');
 };
