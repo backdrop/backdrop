@@ -670,11 +670,9 @@ function system_requirements($phase) {
       $insecure_settings[] = 'update_fetch_with_http';
     }
     if (!empty($insecure_settings)) {
-      $security_warning = format_plural(
-        count($insecure_settings),
-        $t('This setting is meant to be used as a temporary workaround. Keeping this setting enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable this setting in settings.php.'),
-        $t('These settings are meant to be used as temporary workarounds. Keeping any of these two settings enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable these settings in settings.php.'),
-      );
+      $singular_warning = $t('This setting is meant to be used as a temporary workaround. Keeping this setting enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable this setting in settings.php.');
+      $plural_warning = $t('These settings are meant to be used as temporary workarounds. Keeping any of these two settings enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable these settings in settings.php.')
+      $security_warning = format_plural(count($insecure_settings), $singular_warning, $plural_warning);
       $requirements['insecure_connection_settings'] = array(
         'title' => $t('Insecure connection settings'),
         'value' => $t('Insecure connection settings detected in settings.php'),
