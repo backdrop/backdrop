@@ -4500,8 +4500,8 @@ function views_ui_admin_settings_basic() {
   );
   $form['wizard']['wizard_default_display'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Default displays'),
-    '#description' => t("Which display options to enable by default in the '!add_view' wizard.", array('!add_view' => l(t('Add View'), 'admin/structure/views/add'))),
+    '#title' => t('Display types to include by default'),
+    '#description' => t("These display types will be selected by default when a new view is created using the '!add_view' wizard.", array('!add_view' => l(t('Add View'), 'admin/structure/views/add'))),
     '#options' => array(
       'page' => t('Page'),
       'block' => t('Block'),
