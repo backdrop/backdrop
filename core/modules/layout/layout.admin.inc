@@ -2558,7 +2558,6 @@ function layout_clone_form_submit($form, &$form_state) {
 function layout_delete_form($form, &$form_state, $layout) {
   $form_state['layout'] = $layout;
 
-  $form['warn_page_removal'] = FALSE;
   $delete_layout = ($layout->storage === LAYOUT_STORAGE_NORMAL);
   if ($delete_layout) {
     $question = t('Delete layout @title?', array('@title' => $layout->title));
@@ -2569,17 +2568,14 @@ function layout_delete_form($form, &$form_state, $layout) {
       if ($path == $site_config->get('site_frontpage')) {
         $url = url('admin/config/system/site-information') . '#edit-front-page';
         $text = t('This layout creates a page at path %path that is used as the home page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the home page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
-        $form['warn_page_removal'] = TRUE;
       }
       elseif ($path == $site_config->get('site_403')) {
         $url = url('admin/config/system/site-information') . '#edit-error-page';
         $text = t('This layout creates a page at path %path that is used as the default 403 (access denied) page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the 403 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
-        $form['warn_page_removal'] = TRUE;
       }
       elseif ($path == $site_config->get('site_404')) {
         $url = url('admin/config/system/site-information') . '#edit-error-page';
         $text = t('This layout creates a page at path %path that is used as the default 404 (not found) page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the 404 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
-        $form['warn_page_removal'] = TRUE;
       }
       else {
         $text = t('Are you sure you want to delete this layout? This will completely remove the page at %path. This action cannot be undone. If you are unsure, consider disabling the layout instead.', array('%path' => $path));
