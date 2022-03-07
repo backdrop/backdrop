@@ -144,7 +144,7 @@ function theme_system_themes_page($variables) {
 function theme_system_modules_fieldset($variables) {
   $form = $variables['form'];
 
-  $modules_data = system_rebuild_module_data();
+  $module_data = system_rebuild_module_data();
 
   // Individual table headers.
   $rows = array();
