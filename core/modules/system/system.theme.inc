@@ -181,7 +181,7 @@ function theme_system_modules_fieldset($variables) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
     }
     if ($modules_data[$key]->info['project'] !== 'backdrop') {
-      $requirements .= '<div class="admin-requirements">' . t('Links:') . ' ' . l(t("module's detail page"), 'https://backdropcms.org/project/' . $key) . ', ' . l(t("module's repository"), 'https://github.com/backdrop-contrib/' . $key) . '</div>';
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("project information"), 'https://backdropcms.org/project/' . $key) . ', ' . l(t("GitHub repository"), 'https://github.com/backdrop-contrib/' . $key) . '</div>';
     }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
