@@ -9,6 +9,7 @@
 #permissions td.permission .permission-warning-description {
   font-size: 0.9em;
   color: #444;
+  margin-top: 0.5em;
 }
 [dir="rtl"] #permissions td.permission {
   padding-left: 0;
