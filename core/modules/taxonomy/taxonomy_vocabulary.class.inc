@@ -69,10 +69,17 @@ class TaxonomyVocabulary {
    *   vocabulary was updated.
    */
   function save() {
-    module_invoke_all('taxonomy_vocabulary_presave', $this);
-
     $config = config('taxonomy.vocabulary.' . $this->machine_name);
     $is_new = $config->isNew();
+
+    if (!$is_new) {
+      $data = $config->get();
+      $original = new TaxonomyVocabulary($data);
+      $this->original = $original;
+    }
+
+    module_invoke_all('taxonomy_vocabulary_presave', $this);
+
     $config->set('name', $this->name);
     $config->set('machine_name', $this->machine_name);
     $config->set('description', $this->description);

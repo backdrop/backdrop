@@ -171,6 +171,8 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
  * @see image_crop()
  */
 function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = NULL) {
+  $width = (int) $width;
+  $height = (int) $height;
   $res = image_gd_create_tmp($image, $width, $height);
 
   // Convert the hexadecimal background value to a color index value.

@@ -681,6 +681,10 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
   foreach ($style as $chunk) {
     if ($is_color) {
       $chunk = backdrop_strtolower($chunk);
+      // Convert short hex codes to their long equivalents.
+      if (backdrop_strlen($chunk) == 4) {
+        $chunk = '#' . $chunk[1] . $chunk[1] . $chunk[2] . $chunk[2] . $chunk[3] . $chunk[3];
+      }
       // Check if this is one of the colors in the default palette.
       if ($key = array_search($chunk, $default)) {
         $chunk = $conversion[$key];
@@ -887,7 +891,7 @@ function _color_unpack($hex, $normalize = FALSE) {
 function _color_pack($rgb, $normalize = FALSE) {
   $out = 0;
   foreach ($rgb as $k => $v) {
-    $out |= (($v * ($normalize ? 255 : 1)) << (16 - $k * 8));
+    $out |= (((int) $v * ($normalize ? 255 : 1)) << (16 - $k * 8));
   }
 
   return '#' . str_pad(dechex($out), 6, 0, STR_PAD_LEFT);

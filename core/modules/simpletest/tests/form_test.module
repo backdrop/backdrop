@@ -1470,7 +1470,7 @@ function form_test_number($form, &$form_state, $element = 'number') {
   $form['float_step_hard_no_error'] = $base + array(
     '#title' => 'Float test hard',
     '#default_value' => 0.9411764729088,
-    '#step' => 0.00392156863712,
+    '#step' => 0.0392156863712,
   );
   $form['float_step_hard_error'] = $base + array(
     '#title' => 'Float test hard, #step_error',

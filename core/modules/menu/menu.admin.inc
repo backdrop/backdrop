@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for menu module.
+ * Admin page callbacks for the Menu module.
  */
 
 /**
@@ -10,11 +10,15 @@
 function menu_overview_page() {
   $menus = menu_load_all();
   backdrop_sort($menus, array('title' => SORT_STRING));
-  $header = array(t('Title'), t('Operations'));
+  $header = array(t('Title'), t('Description'), t('Operations'));
   $rows = array();
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $row[] = theme('label_machine_name__menu', array(
+      'label' => $menu['title'],
+      'machine_name' => $menu['menu_name'],
+    ));
+    $row[] = filter_xss_admin($menu['description']);
     $links = array();
     $links['list'] = array(
       'title' => t('Manage links'),
@@ -339,7 +343,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#title' => t('Path'),
       '#maxlength' => 255,
       '#default_value' => (!empty($path)) ? $path_alias : $path,
-      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
+      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the home page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
       '#required' => TRUE,
       '#autocomplete_path' => 'path-autocomplete',
     );
@@ -367,7 +371,11 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
-      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.')
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
+      '#ajax' => array(
+        'callback' => 'menu_update_parent_options_ajax',
+        'wrapper' => 'menu-parent-select-wrapper',
+      ),
     );
   }
   else {
@@ -411,6 +419,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
+    '#prefix' => '<div id="menu-parent-select-wrapper">',
+    '#suffix' => '</div>',
   );
   $form['weight'] = array(
     '#type' => 'weight',

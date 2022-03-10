@@ -360,7 +360,7 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
  */
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
-  $language_list = language_list(TRUE, TRUE);
+  $language_list = language_list(TRUE, TRUE, TRUE);
   $links = array();
 
   foreach ($language_list as $langcode => $label) {
@@ -385,7 +385,7 @@ function locale_language_switcher_session($type, $path) {
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
-  $language_list = language_list(TRUE, TRUE);
+  $language_list = language_list(TRUE, TRUE, TRUE);
   $links = array();
 
   $query = $_GET;

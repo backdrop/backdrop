@@ -36,6 +36,7 @@ function _config_sync_start($config_statuses, &$context) {
 
 /**
  * Batch API callback. Validate the changes before attempting to sync.
+ * Reports all discovered issues in a message.
  */
 function _config_sync_validate(&$context) {
   if (!isset($context['sandbox']['batch_size'])) {
@@ -45,16 +46,14 @@ function _config_sync_validate(&$context) {
   }
 
   $config_files = array_slice($context['results']['pending_changes'], $context['sandbox']['current_index'], $context['sandbox']['batch_size']);
-  try {
-    foreach ($config_files as $config_file => $config_change_type) {
+  foreach ($config_files as $config_file => $config_change_type) {
+    try {
       config_sync_validate_file($config_file, $config_change_type, $context['results']['all_configs']);
-      $context['sandbox']['current_index']++;
     }
-  }
-  catch (ConfigValidateException $e) {
-    $context['results']['errors'][] = $e->getMessage();
-    $context['finished'] = 1;
-    return;
+    catch (ConfigValidateException $e) {
+      $context['results']['errors'][] = $e->getMessage();
+    }
+    $context['sandbox']['current_index']++;
   }
 
   $context['finished'] = $context['sandbox']['total_size'] ? $context['sandbox']['current_index'] / $context['sandbox']['total_size'] : 1;
@@ -106,7 +105,6 @@ function _config_sync_finished($status, $results, $operations) {
       $config_storage->deleteAll();
     }
   }
-
   backdrop_flush_all_caches();
   state_del('config_sync');
 }

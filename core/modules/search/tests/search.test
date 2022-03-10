@@ -568,7 +568,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     $layout->addBlock('search', 'form', 'content');
     $layout->save();
 
-    // Test a normal search via the block form, from the front page.
+    // Test a normal search via the block form, from the home page.
     $terms = array('search_block_form' => 'test');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
@@ -587,7 +587,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
       'Redirected to correct url.'
     );
 
-    // Test an empty search via the block form, from the front page.
+    // Test an empty search via the block form, from the home page.
     $terms = array('search_block_form' => '');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Please enter some keywords');

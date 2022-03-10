@@ -307,7 +307,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $form['default_langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#description' => 'If assigned a language, options will be shown to translate this block into other langauges.',
+      '#description' => 'If assigned a language, options will be shown to translate this block into other languages.',
       '#options' => $language_options,
       '#default_value' => $edit['default_langcode'],
     );
