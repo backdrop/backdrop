@@ -401,7 +401,7 @@ function comment_permission() {
   return array(
     'administer comment settings' => array(
       'title' => t('Administer comment settings'),
-      'description' => t('Edit comment settings per content type.'),
+      'description' => t('Configure comment settings per content type.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
