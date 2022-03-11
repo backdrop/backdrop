@@ -4692,43 +4692,6 @@ function system_emit_cache_max_age($max_age) {
 }
 
 /**
- * Backwards compatible version of system_invalidate_cache_tags().
- * This will automatically be used when the core patch to implement end of
- * transaction callbacks is missing.
- * @param $tags
- */
-function system_OLD_invalidate_cache_tags($tags) {
-  $tag_cache = &backdrop_static('cache_tag_cache', array());
-  $invalidated_tags = &backdrop_static('invalidated_cache_tags', array());
-
-  foreach ($tags as $tag) {
-    // Only invalidate tags once per request unless they are written again.
-    if (isset($invalidated_tags[$tag])) {
-      continue;
-    }
-
-    $invalidated_tags[$tag] = TRUE;
-    unset($tag_cache[$tag]);
-    db_merge('invalidated_cache_tags')
-      ->key(array('tag' => $tag))
-      ->fields(array('invalidations' => 1))
-      ->expression('invalidations', 'invalidations + 1')
-      ->execute();
-    _system_cache_tags_invalidate_cache($tag);
-  }
-}
-
-/**
- * Check whether the database connection supports root transaction end callbacks.
- * @param DatabaseConnection $connection
- *
- * @return bool
- */
-function _system_has_transaction_callbacks($connection) {
-  return method_exists($connection, 'addRootTransactionEndCallback');
-}
-
-/**
  * Implements hook_invalidate_cache_tags().
  */
 function system_invalidate_cache_tags($tags) {
@@ -4738,13 +4701,6 @@ function system_invalidate_cache_tags($tags) {
   $deferred_tags = &backdrop_static('deferred_cache_tags', array());
 
   $connection = Database::getConnection();
-  if (!isset($use_transaction_callback)) {
-    $use_transaction_callback = _system_has_transaction_callbacks($connection);
-  }
-  if (!$use_transaction_callback) {
-    // Core support missing, use the old (deadlock-prone) invalidation code.
-    return system_OLD_invalidate_cache_tags($tags);
-  }
   if ($connection->inTransaction()) {
     // We are inside a transaction, we must defer until the end of the transaction.
     foreach ($tags as $tag) {

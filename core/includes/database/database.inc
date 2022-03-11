@@ -229,6 +229,13 @@ abstract class DatabaseConnection {
   protected $transactionLayers = array();
 
   /**
+   * Tracks callbacks to call after the current root transaction is processed.
+   *
+   * @var array
+   */
+  protected $rootTransactionEndCallbacks = array();
+
+  /**
    * Index of what driver-specific class to use for various operations.
    *
    * @var array
@@ -1126,6 +1133,7 @@ abstract class DatabaseConnection {
       }
     }
     $this->pdo->rollBack();
+    $this->executeRootTransactionEndCallbacks(FALSE);
     if ($rolled_back_other_active_savepoints) {
       throw new DatabaseTransactionOutOfOrderException();
     }
@@ -1204,13 +1212,42 @@ abstract class DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!$this->pdo->commit()) {
+        $commit_result = $this->pdo->commit();
+        $this->executeRootTransactionEndCallbacks($commit_result);
+        if (!$commit_result) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
       else {
         $this->query('RELEASE SAVEPOINT ' . $name);
       }
+    }
+  }
+
+   /**
+   * Add a callback to run after commit or rollback of the current root
+   * transaction.
+   *
+   * @param callable $func
+   *
+   * @throws \DatabaseTransactionNoActiveException
+   */
+  public function addRootTransactionEndCallback(callable $func) {
+    if (!$this->inTransaction()) {
+      throw new DatabaseTransactionNoActiveException();
+    }
+    $this->rootTransactionEndCallbacks[] = $func;
+  }
+
+  /**
+   * Execute callbacks registered while the root transaction has been open.
+   * @param $committed bool Whether the transaction was committed or rolled back.
+   */
+  protected function executeRootTransactionEndCallbacks($committed) {
+    $callbacks = $this->rootTransactionEndCallbacks;
+    $this->rootTransactionEndCallbacks = array();
+    foreach ($callbacks as $func) {
+      call_user_func($func, $committed);
     }
   }
 
