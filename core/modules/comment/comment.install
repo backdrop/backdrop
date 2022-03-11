@@ -455,10 +455,15 @@ function comment_update_1006() {
  * Give access to the new 'Administer comment settings' permission as needed.
  */
 function comment_update_1007() {
-  $roles = user_roles(FALSE, 'administer comments', TRUE);
-  foreach ($roles as $role) {
-    $role->permissions[] = 'administer comment settings';
-    user_role_save($role);
+  $names = config_get_names_with_prefix('user.role.');
+  foreach ($names as $config_name) {
+    $config = config($config_name);
+    $permissions = $config->get('permissions');
+    if (in_array('administer comments', $permissions)) {
+      $permissions[] = 'administer comment settings';
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
   }
 }
 
