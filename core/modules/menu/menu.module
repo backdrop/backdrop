@@ -961,18 +961,6 @@ function menu_menu_link_delete($link) {
   backdrop_invalidate_cache_tags(_menu_menu_link_get_cache_tags($link));
 }
 
-/* -----------------------------------------------------------------------
- * Contrib hooks
- */
-
-/* -----------------------------------------------------------------------
- * Public API
- */
-
-/* -----------------------------------------------------------------------
- * Helper functions
- */
-
 /**
  * Get cache tags for menu link.
  */

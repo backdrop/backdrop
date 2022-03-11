@@ -8613,13 +8613,18 @@ function _backdrop_flush_css_js() {
 }
 
 /**
+ * @defgroup cache_tags
+ * @{
+ * Functions for modules to interact with Cache Tags and Cache Max Age.
+ */
+
+/**
  * Add custom cache tags to the current context.
  *
  * @param array $tags
  *   Tags to add.
  */
 function backdrop_add_cache_tags(array $tags) {
-//  dpm($tags);
   // Process the data as attachment if we have an active attachments
   // collector.
   if (function_exists('backdrop_has_attachments_collector') && backdrop_has_attachments_collector()) {
@@ -8808,80 +8813,58 @@ function backdrop_emit_cache_max_age() {
 }
 
 /**
- * @file
- * Attachment Collector functions for the D8 caching system backport.
+ * Adds attachments in a way that they can be collected for render caching.
+ *
+ * This allows collecting attachments that are added out-of-band within a
+ * local scope to store them into #attached for render caching.
+ * If you want to call this from a legacy function that both works when
+ * called via #attached and when called directly, ensure to check
+ * backdrop_has_attachments_collector() first as not doing so can lead to
+ * an endless recursion.
+ * This is essentially a short wrapper around backdrop_process_attached().
+ *
+ * @param string $key
+ *   The key within #attached, like 'js', 'css' to add to.
+ * @param mixed $value
+ *   The value to store as attachment.
+ * @param bool $dependency_check
+ *   This parameter is passed on to backdrop_process_attached() and can be used
+ *   for checking dependency chains for backdrop_add_library().
+ *
+ * @return bool
+ *   FALSE if there were any missing library dependencies; TRUE if all library
+ *   dependencies were met.
+ *
+ * @see backdrop_process_attached()
  */
-
-/* -----------------------------------------------------------------------
- * Public API
- */
-
-if (!function_exists('backdrop_add_attachment')) {
-
-  /**
-   * Adds attachments in a way that they can be collected for render caching.
-   *
-   * This allows collecting attachments that are added out-of-band within a
-   * local scope to store them into #attached for render caching.
-   * If you want to call this from a legacy function that both works when
-   * called via #attached and when called directly, ensure to check
-   * backdrop_has_attachments_collector() first as not doing so can lead to
-   * an endless recursion.
-   * This is essentially a short wrapper around backdrop_process_attached().
-   *
-   * @param string $key
-   *   The key within #attached, like 'js', 'css' to add to.
-   * @param mixed $value
-   *   The value to store as attachment.
-   * @param bool $dependency_check
-   *   This parameter is passed on to backdrop_process_attached() and can be used
-   *   for checking dependency chains for backdrop_add_library().
-   *
-   * @return bool
-   *   FALSE if there were any missing library dependencies; TRUE if all library
-   *   dependencies were met.
-   *
-   * @see backdrop_process_attached()
-   */
-  function backdrop_add_attachment($key, $value, $dependency_check = FALSE) {
-    $elements = array();
-    $elements['#attached'] = array();
-    $elements['#attached'][$key][] = $value;
-    return _backdrop_process_attached_supplement($elements, JS_DEFAULT, $dependency_check);
-  }
-
+function backdrop_add_attachment($key, $value, $dependency_check = FALSE) {
+  $elements = array();
+  $elements['#attached'] = array();
+  $elements['#attached'][$key][] = $value;
+  return _backdrop_process_attached_supplement($elements, JS_DEFAULT, $dependency_check);
 }
 
-if (!function_exists('backdrop_has_attachments_collector')) {
+/**
+ * Returns whether there is an active attachments collector.
+ *
+ * @return bool
+ *   TRUE if Backdrop is collecting attachments, FALSE otherwise.
+ */
+function backdrop_has_attachments_collector() {
+  static $backdrop_static_fast;
 
-  /**
-   * Returns whether there is an active attachments collector.
-   *
-   * @return bool
-   *   TRUE if Backdrop is collecting attachments, FALSE otherwise.
-   */
-  function backdrop_has_attachments_collector() {
-    static $backdrop_static_fast;
-
-    if (!isset($backdrop_static_fast)) {
-      $backdrop_static_fast = array();
-      $backdrop_static_fast['render_listeners'] = &backdrop_static('backdrop_render:render_listeners', array());
-      $backdrop_static_fast['collect_attachments'] = &backdrop_static('backdrop_process_attached:collect_attachments', TRUE);
-    }
-
-    if ($backdrop_static_fast['collect_attachments'] !== FALSE && !empty($backdrop_static_fast['render_listeners'])) {
-      return TRUE;
-    }
-
-    return FALSE;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast = array();
+    $backdrop_static_fast['render_listeners'] = &backdrop_static('backdrop_render:render_listeners', array());
+    $backdrop_static_fast['collect_attachments'] = &backdrop_static('backdrop_process_attached:collect_attachments', TRUE);
   }
 
+  if ($backdrop_static_fast['collect_attachments'] !== FALSE && !empty($backdrop_static_fast['render_listeners'])) {
+    return TRUE;
+  }
+
+  return FALSE;
 }
-
-
-/* -----------------------------------------------------------------------
- * Helper functions
- */
 
 /**
  * Overrides backdrop_process_attached().
@@ -8931,6 +8914,10 @@ function _backdrop_process_attached_supplement($elements, $group = JS_DEFAULT, $
 
   return TRUE;
 }
+
+/**
+ * @} End of "defgroup cache_tags".
+ */
 
 /**
  * Outputs debug information.

@@ -3283,6 +3283,16 @@ function system_update_1080() {
 }
 
 /**
+ * Creates the {invalidated_cache_tags} table if it does not exist.
+ */
+function system_update_1081() {
+  if (!db_table_exists('invalidated_cache_tags')) {
+    $schema = system_schema();
+    db_create_table('invalidated_cache_tags', $schema['invalidated_cache_tags']);
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
