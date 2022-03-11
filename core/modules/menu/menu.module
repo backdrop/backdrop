@@ -933,14 +933,6 @@ function menu_preprocess_links(&$variables) {
 }
 
 /**
- * Implements hook_menu_link_alter().
- */
-function menu_menu_link_alter(&$item) {
-  // @todo This needs an upgrade path for existing menu items.
-  $item['options']['#menu_name'] = $item['menu_name'];
-}
-
-/**
  * Implements hook_menu_link_insert().
  */
 function menu_menu_link_insert($link) {
