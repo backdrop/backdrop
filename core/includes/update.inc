@@ -298,8 +298,8 @@ function update_module_add_to_system($modules = array()) {
  * Checks for disabled dependencies during a Drupal 7 upgrade.
  * 
  * @return string
- *    A themed message that lists modules that will be enabled,
- *    to be displayed in the 'info' page of the update process. 
+ *   A themed message that lists modules that will be enabled, to be displayed
+ *   in the 'info' page of the update process. 
  */
 
 function update_upgrade_check_dependencies() {
