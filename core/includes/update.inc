@@ -359,7 +359,7 @@ function update_upgrade_modules_to_enable() {
     
   // Get list of modules to be enabled.
   $enabled_modules = array_keys($result->fetchAllAssoc('name'));
-  // Get information about all modules available
+  // Get information about all modules available.
   $files = system_rebuild_module_data();
 
   $modules_to_enable = array();
