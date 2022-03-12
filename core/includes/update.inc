@@ -350,8 +350,8 @@ function update_upgrade_enable_dependencies() {
  * Find out which modules need to be enabled.
  * 
  * @return array
- *    An array keyed by the machine names of module names needed to be enabled,
- *    whose values are arrays of the modules that depend on them.  
+ *   An array keyed by the machine names of module names needed to be enabled,
+ *   whose values are arrays of the modules that depend on them.
  */
 function update_upgrade_modules_to_enable() {
   // Get list of enabled modules. 
