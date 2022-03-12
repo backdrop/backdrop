@@ -125,12 +125,12 @@ function image_field_instance_settings_form($field, $instance) {
   $min_dimensions[1] = empty($min_dimensions[1]) ? NULL : $min_dimensions[1];
   $form['min_dimensions'] = array(
     '#type' => 'item',
-    '#title' => t('Minimum image dimensions'),
+    '#title' => t('Minimum image dimensions (width x height)'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
