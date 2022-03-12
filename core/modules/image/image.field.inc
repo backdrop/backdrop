@@ -94,12 +94,12 @@ function image_field_instance_settings_form($field, $instance) {
   $max_dimensions[1] = empty($max_dimensions[1]) ? NULL : $max_dimensions[1];
   $form['max_dimensions'] = array(
     '#type' => 'item',
-    '#title' => t('Maximum image dimensions'),
+    '#title' => t('Maximum image dimensions (width x height)'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
