@@ -968,6 +968,7 @@ a.button {
   text-align: center;
   text-transform: uppercase;
   color: #444b53;
+  cursor: pointer;
   background: #e5e5e6;
   letter-spacing: 0.4px;
   line-height: 43px;
