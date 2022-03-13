@@ -3117,6 +3117,10 @@ function _backdrop_bootstrap_page_cache() {
       if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
       }
+      // Flushing for LiteSpeed servers.
+      elseif (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
+      }
       // Flushing for Apache mod_php installations.
       else {
         flush();
