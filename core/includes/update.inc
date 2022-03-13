@@ -318,7 +318,7 @@ function update_upgrade_check_dependencies() {
       $module_list .= theme('item_list', array('items' => $dependents));
     }
     $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
-    $status_report .= t('The following Backdrop modules will be enabled in order for the site to be upgraded successfully:') . '</p>';
+    $status_report .= '<p>The following Backdrop modules will be enabled in order for the site to be upgraded successfully:</p>';
     $status_report .= $module_list;
   }
   return $status_report;
