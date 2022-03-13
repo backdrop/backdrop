@@ -231,20 +231,20 @@ function file_requirements($phase) {
 
   // Check the server's ability to indicate upload progress.
   if ($phase == 'runtime') {
-    $description = NULL;
     $implementation = file_progress_implementation();
     $server_software = $_SERVER['SERVER_SOFTWARE'];
 
     // Test the web server identity.
     $is_nginx = backdrop_is_nginx();
     $is_apache = backdrop_is_apache();
+    $is_litespeed = backdrop_is_litespeed();
     $fastcgi = FALSE;
     if ($is_apache) {
       $fastcgi = strpos($server_software, 'mod_fastcgi') !== FALSE || strpos($server_software, 'mod_fcgi') !== FALSE;
     }
 
     $description = NULL;
-    if (!$is_apache && !$is_nginx) {
+    if (!$is_apache && !$is_nginx && !$is_litespeed) {
       $value = t('Not enabled');
       $description = t('Your server is not capable of displaying file upload progress. File upload progress requires an Apache server running PHP with mod_php or Nginx with PHP-FPM.');
       $severity = REQUIREMENT_INFO;
