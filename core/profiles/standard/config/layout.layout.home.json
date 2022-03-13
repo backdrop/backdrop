@@ -4,6 +4,7 @@
     "name": "home",
     "title": "Home page",
     "description": null,
+    "renderer_name": "standard",
     "module": "standard",
     "weight": 0,
     "storage": 4,
@@ -21,6 +22,7 @@
         ],
         "top": [
             "094cbc03-d088-4b3c-8361-977733540ae8",
+            "6a46fd7b-646b-4c91-9d03-034e630a2135",
             "fe8c7715-c7e9-46d0-8b09-09afb78b2891"
         ],
         "content": [
@@ -33,6 +35,7 @@
         "title": []
     },
     "contexts": [],
+    "relationships": [],
     "content": {
         "9bd5a524-3670-4922-8b12-18b00a2858b9": {
             "plugin": "system:header",
@@ -116,6 +119,34 @@
                 }
             }
         },
+        "6a46fd7b-646b-4c91-9d03-034e630a2135": {
+            "plugin": "system:page_components:messages",
+            "data": {
+                "module": "system",
+                "delta": "page_components",
+                "settings": {
+                    "title_display": "none",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "title_tag": "h1",
+                    "title_classes": "page-title",
+                    "tab_type": "both",
+                    "admin_label": "",
+                    "admin_description": ""
+                },
+                "uuid": "6a46fd7b-646b-4c91-9d03-034e630a2135",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": "container"
+                        }
+                    }
+                }
+            }
+        },
         "fe8c7715-c7e9-46d0-8b09-09afb78b2891": {
             "plugin": "views:card_grid-block",
             "data": {
@@ -132,7 +163,7 @@
                     "fields_override": null,
                     "title_display": "none",
                     "title": "",
-                    "style": "dynamic",
+                    "style": "default",
                     "block_settings": [],
                     "contexts": [],
                     "allowed": [],
@@ -143,15 +174,10 @@
                 },
                 "uuid": "fe8c7715-c7e9-46d0-8b09-09afb78b2891",
                 "style": {
-                    "plugin": "dynamic",
+                    "plugin": "default",
                     "data": {
                         "settings": {
-                            "classes": "",
-                            "wrapper_tag": "div",
-                            "title_tag": "h2",
-                            "title_classes": "block-title",
-                            "content_tag": "div",
-                            "content_classes": "container card-design"
+                            "classes": "container"
                         }
                     }
                 }
@@ -163,11 +189,21 @@
                 "module": "views",
                 "delta": "promoted-block",
                 "settings": {
+                    "link_to_view": null,
+                    "more_link": false,
+                    "use_pager": true,
+                    "pager_id": 0,
+                    "items_per_page": 10,
+                    "offset": 0,
+                    "path": "rss.xml",
+                    "fields_override": null,
                     "title_display": "default",
                     "title": "",
                     "style": "default",
                     "block_settings": [],
-                    "contexts": []
+                    "contexts": [],
+                    "allowed": [],
+                    "path_override": false
                 },
                 "uuid": "578243cf-a4c8-46ad-9504-04aaf4ec9ccc",
                 "style": {

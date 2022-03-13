@@ -63,7 +63,7 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
-  // Changed display name from Full HTML to Raw HTML but keeping machine name 
+  // Changed display name from Full HTML to Raw HTML but keeping machine name
   // for backward compatibility.
   $full_html_format = array(
     'format' => 'full_html',
@@ -439,7 +439,7 @@ function standard_install() {
   );
 
   foreach ($cards as $image_filename => $info) {
-    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename; 
+    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename;
     $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
 
     $file = entity_create('file', array(
@@ -480,6 +480,17 @@ function standard_install() {
 
     $card->save();
   }
+
+  // Modify the default promoted view to exclude cards.
+  $promoted_view = views_get_view('promoted');
+  $promoted_view->display['default']->display_options['filters']['type'] = array(
+    'id' => 'type',
+    'table' => 'node',
+    'field' => 'type',
+    'operator' => 'not in',
+    'value' => array('card' => 'card'),
+  );
+  $promoted_view->save();
 
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
