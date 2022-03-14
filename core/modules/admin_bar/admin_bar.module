@@ -187,8 +187,10 @@ function admin_bar_preprocess_page(&$variables) {
 
   $options = array('every_page' => TRUE);
 
-  backdrop_add_css($path . '/css/admin_bar.css', $options);
   backdrop_add_js($path . '/js/admin_bar.js', $options);
+  backdrop_add_css($path . '/css/admin_bar.css', $options);
+  $options['media'] = 'print';
+  backdrop_add_css($path . '/css/admin_bar-print.css', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
@@ -480,6 +482,11 @@ function admin_bar_admin_bar_output_build(&$content) {
         $content['menu']['menu'] += $links;
       }
     }
+  }
+  // Move file/add under the "Content" item.
+  if (isset($content['menu']['menu']['file/add']) && isset($content['menu']['menu']['admin/content'])) {
+    $content['menu']['menu']['admin/content']['file/add'] = $content['menu']['menu']['file/add'];
+    unset($content['menu']['menu']['file/add']);
   }
 }
 
