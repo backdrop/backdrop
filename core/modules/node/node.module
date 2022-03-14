@@ -1201,14 +1201,17 @@ function node_permission() {
       'title' => t('Bypass content access control'),
       'description' => t('View, edit and delete all content regardless of permission restrictions.'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people full access to content, regardless of other node permissions defined here.'),
     ),
     'administer content types' => array(
       'title' => t('Administer content types'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people to define custom content types and delete existing ones.'),
     ),
     'administer nodes' => array(
       'title' => t('Administer content'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people to edit or delete any content.'),
     ),
     'access content overview' => array(
       'title' => t('Access the content overview page'),

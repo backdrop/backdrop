@@ -114,6 +114,7 @@ function locale_permission() {
     'translate interface' => array(
       'title' => t('Translate interface texts'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people to display any text on the site.'),
     ),
   );
 }

@@ -48,6 +48,8 @@ function simpletest_permission() {
     'administer unit tests' => array(
       'title' => t('Administer tests'),
       'restrict access' => TRUE,
+      // TODO: What security implications?
+      'warning' => t('TBA'),
     ),
   );
 }
