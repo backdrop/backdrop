@@ -278,7 +278,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
       $query = db_insert('taxonomy_term_hierarchy')
         ->fields(array('tid', 'parent'));
 
-      foreach ($entity->parent as $parent) {
+      foreach ((array) $entity->parent as $parent) {
         $query->values(array(
           'tid' => $entity->tid,
           'parent' => $parent
