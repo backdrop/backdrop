@@ -2480,10 +2480,6 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['regional_language']['regional_heading'] = array(
-    '#markup' => '<h4>' . t('Regional settings') . '</h4>',
-    '#weight' => 1,
-  );
   $form['regional_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),

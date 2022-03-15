@@ -895,6 +895,14 @@ function user_account_form(&$form, &$form_state) {
   }
   $form['account']['pass']['#description'] = $description;
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'user') . '/js/user.admin.js'),
+    ),
+  );
+
   $form['account_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
@@ -937,62 +945,57 @@ function user_account_form(&$form, &$form_state) {
     '#access' => $register && $admin_users,
   );
 
-  $form['additional_settings'] = array(
-    '#type' => 'vertical_tabs',
-    '#weight' => 99,
-  );
-
   $form['personalization'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Personalization settings'),
-    '#weight' => 1,
+    '#title' => t('Personalization'),
+    '#weight' => 2,
     '#access' => (!$register && ($site_config->get('user_signatures') || $site_config->get('user_pictures'))),
     '#group' => 'additional_settings',
   );
   // Signature.
-  $form['personalization']['signature_heading'] = array(
-    '#markup' => '<h4>' . t('Signature settings') . '</h4>',
-  );
-  $form['personalization']['signature'] = array(
-    '#type' => 'text_format',
-    '#title' => t('Signature'),
-    '#default_value' => isset($account->signature) ? $account->signature : '',
-    '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
-    '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
-  );
+  if ($site_config->get('user_signatures')) {
+    $form['personalization']['signature'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Signature'),
+      '#default_value' => isset($account->signature) ? $account->signature : '',
+      '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
+      '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
+    );
+  }
   // Picture/avatar.
-  $form['personalization']['picture_heading'] = array(
-    '#markup' => '<h4>' . t('Picture') . '</h4>',
-  );
-  $form['personalization']['picture'] = array(
-    '#type' => 'value',
-    '#value' => isset($account->picture) ? $account->picture : NULL,
-  );
-  $form['personalization']['picture_current'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
-  );
-  $form['personalization']['picture_delete'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Delete picture'),
-    '#access' => !empty($account->picture->fid),
-    '#description' => t('Check this box to delete your current picture.'),
-  );
-  $form['personalization']['picture_upload'] = array(
-    '#type' => 'file',
-    '#title' => t('Upload picture'),
-    '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
-  );
-  $form['#validate'][] = 'user_validate_picture';
+  if ($site_config->get('user_pictures')) {
+    $form['personalization']['picture'] = array(
+      '#type' => 'value',
+      '#value' => isset($account->picture) ? $account->picture : NULL,
+    );
+    $form['personalization']['picture_current'] = array(
+      '#markup' => theme('user_picture', array('account' => $account)),
+    );
+    $form['personalization']['picture_delete'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete picture'),
+      '#access' => !empty($account->picture->fid),
+      '#description' => t('Check this box to delete your current picture.'),
+    );
+    $form['personalization']['picture_upload'] = array(
+      '#type' => 'file',
+      '#title' => t('Upload picture'),
+      '#size' => 48,
+      '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
+    );
+    $form['#validate'][] = 'user_validate_picture';
+  }
 
   $form['regional_language'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Regional and language settings'),
-    '#weight' => 2,
+    '#title' => t('Region and language'),
+    '#weight' => 3,
     '#collapsible' => TRUE,
     '#access' => (config_get('system.date', 'user_configurable_timezones') || language_multilingual()),
     '#group' => 'additional_settings',
   );
+  // See system_user_timezone() and locale_language_selector_form() for the form
+  // items displayed here.
 }
 
 /**

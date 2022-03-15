@@ -174,10 +174,6 @@ function locale_language_selector_form(&$form) {
 
   // Get language negotiation settings.
   $mode = language_negotiation_get(LANGUAGE_TYPE_INTERFACE) != LANGUAGE_NEGOTIATION_DEFAULT;
-  $form['regional_language']['language_heading'] = array(
-    '#markup' => '<h4>' . t('Language settings') . '</h4>',
-    '#weight' => 5,
-  );
   $form['regional_language']['language'] = array(
     '#type' => (count($language_options) <= 5 ? 'radios' : 'select'),
     '#title' => t('Language'),

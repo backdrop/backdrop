@@ -1,0 +1,91 @@
+/**
+ * @file
+ * Attaches behaviors for the User module.
+ */
+(function ($) {
+
+Backdrop.behaviors.userFieldsetSummaries = {
+  // Provide the vertical tab summaries.
+  attach: function (context) {
+    var $context = $(context);
+
+    // Account settings.
+    $context.find('fieldset#edit-account-settings').backdropSetSummary(function() {
+      var vals = [];
+
+      // Status.
+      var status = $context.find('input[name="status"]:checked').parent().find('label').text();
+      vals.push($.trim(status));
+
+      // Roles.
+      var roles = [];
+      var checkedRoles = $context.find('input[name^="roles"]:not([disabled]):checked');
+      checkedRoles.each(function() {
+        roles.push($.trim($(this).parent().find('label').text()));
+      });
+      if (roles.length) {
+        var rolesText = Backdrop.t('Roles:') + ' ' + roles.join(', ');
+      }
+      else {
+        var rolesText = Backdrop.t('No roles');
+      }
+      vals.push(rolesText);
+
+      return Backdrop.checkPlain(vals.join(', '));
+    });
+
+    // Personalization.
+    $context.find('fieldset#edit-personalization').backdropSetSummary(function() {
+      var vals = [];
+
+      // Signature.
+      var signature = $context.find('textarea[name="signature[value]"]');
+      if (signature.length && signature.val().length) {
+        vals.push(Backdrop.t('Signature'));
+      }
+
+      // Picture.
+      var picture = $context.find('input[name="files[picture_upload]"]');
+      if (picture.length && picture.val().length) {
+        vals.push(Backdrop.t('Picture'));
+      }
+
+      return Backdrop.checkPlain(vals.join(', '));
+    });
+
+    // Region and language.
+    $context.find('fieldset#edit-regional-language').backdropSetSummary(function() {
+      var vals = [];
+
+      // Timezone.
+      var timezone = $context.find('select[name="timezone"]');
+      if (timezone.length && timezone.val().length) {
+        vals.push($.trim(timezone.val()));
+      }
+
+      // Language.
+      var language = $context.find('input[name="language"]:checked');
+      if (language.length) {
+        vals.push($.trim(language.parent().find('label').text()));
+      }
+
+      return Backdrop.checkPlain(vals.join(', '));
+    });
+
+    // Contact form.
+    $context.find('fieldset#edit-contact').backdropSetSummary(function() {
+      var vals = [];
+
+      if ($context.find('input[name="contact"]:checked').length) {
+        vals.push(Backdrop.t('Enabled'));
+      }
+      else {
+        vals.push(Backdrop.t('Disabled'));
+      }
+
+      return Backdrop.checkPlain(vals.join(', '));
+    });
+  }
+};
+
+})(jQuery);

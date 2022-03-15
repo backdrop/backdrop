@@ -301,7 +301,7 @@ function contact_form_user_profile_form_alter(&$form, &$form_state) {
   $config = config('contact.settings');
   $form['contact'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Contact settings'),
+    '#title' => t('Contact form'),
     '#weight' => 5,
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
