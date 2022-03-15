@@ -8,17 +8,32 @@
     "user_empty_timezone_message": 0,
     "formats": {
         "long": {
-            "label": "Long date",
-            "pattern": "l, F j, Y - g:ia",
+            "label": "Long",
+            "pattern": "l, j F, Y - g:ia",
             "module": "system"
         },
         "medium": {
-            "label": "Medium date",
-            "pattern": "D, m/d/Y - g:ia",
+            "label": "Medium",
+            "pattern": "D, d/m/Y - g:ia",
             "module": "system"
         },
         "short": {
-            "label": "Short date",
+            "label": "Short",
+            "pattern": "d/m/Y - g:ia",
+            "module": "system"
+        },
+        "long_usa": {
+            "label": "Long (USA)",
+            "pattern": "l, F j, Y - g:ia",
+            "module": "system"
+        },
+        "medium_usa": {
+            "label": "Medium (USA)",
+            "pattern": "D, m/d/Y - g:ia",
+            "module": "system"
+        },
+        "short_usa": {
+            "label": "Short (USA)",
             "pattern": "m/d/Y - g:ia",
             "module": "system"
         },
