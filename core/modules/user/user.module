@@ -398,6 +398,25 @@ function user_validate_name($name) {
 }
 
 /**
+ * Legacy wrapper function preserved for backwards-compatibility. This function
+ * is no longer required. Email fields in Backdrop are using the HTML5 #email
+ * element now, so there is no need for a special validator for user forms.
+ *
+ * If an email needs to be validated outside the Form API, it is advised to use
+ * native PHP functions, such as filter_var() instead:
+ * @code
+ *   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+ *     // Invalid email address.
+ *   }
+ * @endcode
+ *
+ * @deprecated since 1.0.0
+ */
+function user_validate_mail($mail) {
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Function <code>user_validate_mail()</code> has been removed'), 'https://docs.backdropcms.org/change-records/function-user_validate_mail-has-been-removed', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Validates an image uploaded by a user.
  *
  * @see user_account_form()
