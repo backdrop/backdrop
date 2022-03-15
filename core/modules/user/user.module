@@ -403,12 +403,7 @@ function user_validate_name($name) {
  * element now, so there is no need for a special validator for user forms.
  *
  * If an email needs to be validated outside the Form API, it is advised to use
- * native PHP functions, such as filter_var() instead:
- * @code
- *   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
- *     // Invalid email address.
- *   }
- * @endcode
+ * valid_email_address() instead.
  *
  * @deprecated since 1.0.0
  */
