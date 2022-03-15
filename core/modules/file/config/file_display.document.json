@@ -1,0 +1,21 @@
+{
+    "_config_name": "file_display.document",
+    "_module": "file",
+    "type": "document",
+    "default": {
+        "formatter": "file_field_file_download_link",
+        "settings": {
+            "file_field_file_download_link": {
+                "text": "Download [file:name]"
+            }
+        }
+    },
+    "preview": {
+        "formatter": "file_field_file_download_link",
+        "settings": {
+            "file_field_file_download_link": {
+                "text": "Download [file:name]"
+            }
+        }
+    }
+}
