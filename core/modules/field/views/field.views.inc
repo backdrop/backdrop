@@ -113,6 +113,10 @@ function field_views_field_default_views_data($field) {
   // Build the relationships between the field table and the entity tables.
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
+    if (empty($entity_info)) {
+      continue;
+    }
+
     $groups[$entity] = $entity_info['label'];
 
     // Override Node to Content.
@@ -200,6 +204,9 @@ function field_views_field_default_views_data($field) {
     $aliases = array();
     $also_known = array();
     foreach ($all_labels as $entity_name => $labels) {
+      if (empty($groups[$entity_name])) {
+        continue;
+      }
       foreach ($labels as $label_name => $true) {
         if ($type == FIELD_LOAD_CURRENT) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
@@ -309,6 +316,9 @@ function field_views_field_default_views_data($field) {
       $aliases = array();
       $also_known = array();
       foreach ($all_labels as $entity_name => $labels) {
+        if (empty($groups[$entity_name])) {
+          continue;
+        }
         foreach ($labels as $label_name => $true) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
             if (count($field['columns']) == 1 || $column == 'value') {
