@@ -8,8 +8,8 @@
  * - $html_attributes: An array of attributes for use in the HTML tag.
  * - $head_title: A modified version of the page title, for use in the TITLE
  *   tag.
- * - $head_title_array: (array) An associative array containing the string parts
- *   that were used to generate the $head_title variable, already prepared to be
+ * - $head_title_array: An associative array containing the string parts that
+ *   were used to generate the $head_title variable, already prepared to be
  *   output as TITLE tag. The key/value pairs may contain one or more of the
  *   following, depending on conditions:
  *   - title: The title of the current page, if any.
@@ -20,8 +20,8 @@
  * - $page_bottom: Final closing markup from any modules that have altered the
  *   page. This variable should always be output last, after all other dynamic
  *   content.
- * - $classes: Array of classes that can be used to style contextually through
- *   CSS.
+ * - $classes: An array of classes that can be used to style contextually
+ *   through CSS.
  *
  * @see template_preprocess()
  * @see template_preprocess_page()
