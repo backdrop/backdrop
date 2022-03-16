@@ -679,6 +679,24 @@ ul.tips {
   background: none;
 }
 
+/* ----- Main Menu Heirarchical Tree ----- */
+
+.menu-tree .has-children > ul {
+  position: absolute;
+  background-color: white;
+  z-index: 1;
+  min-width: 80px;
+}
+
+.menu-tree .has-children > ul li {
+  display: block;
+}
+
+.menu-tree .has-children > ul li a {
+  white-space: nowrap;
+}
+
+
 /* ------------------- Main ------------------- */
 
 .l-container {
