@@ -313,7 +313,7 @@ abstract class FileTransfer {
     $parts = explode('/', $path);
     $chroot = '';
     while (count($parts)) {
-      $check = implode($parts, '/');
+      $check = implode('/', $parts);
       if ($this->isFile($check . '/' . backdrop_basename(__FILE__))) {
         // Remove the trailing slash.
         return substr($chroot, 0, -1);
@@ -347,6 +347,7 @@ abstract class FileTransfer {
       '#type' => 'password',
       '#title' => t('Password'),
       '#description' => t('Your password is not saved in the database and is only used to establish a connection.'),
+      '#password_toggle' => TRUE,
     );
     $form['advanced'] = array(
       '#type' => 'fieldset',
@@ -376,7 +377,7 @@ class FileTransferException extends Exception {
   public $arguments;
 
   function __construct($message, $code = 0, $arguments = array()) {
-    parent::__construct($message, $code);
+    parent::__construct($message, (int) $code);
     $this->arguments = $arguments;
   }
 }
@@ -421,11 +422,13 @@ class SkipDotsRecursiveDirectoryIterator extends RecursiveDirectoryIterator {
     $this->skipdots();
   }
 
+  #[\ReturnTypeWillChange]
   function rewind() {
     parent::rewind();
     $this->skipdots();
   }
 
+  #[\ReturnTypeWillChange]
   function next() {
     parent::next();
     $this->skipdots();

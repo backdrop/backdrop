@@ -12,6 +12,7 @@
 .form-type-file label,
 .form-type-password label,
 .form-type-select label,
+.form-type-tel label,
 .form-type-textarea label,
 .form-type-textfield label {
   display: block;
@@ -25,7 +26,7 @@ abbr.ajax-changed {
 }
 
 .form-required {
-  color: #ff0000;
+  color: #e60000;
 }
 
 .form-item-radios label,
@@ -110,6 +111,13 @@ td.checkbox .form-item input {
   border-left: 0.25em solid #bbbbbb;
   margin: 0.6875em 0 2.5em;
   padding: 0.5em 0.8em;
+}
+
+[dir=rtl] .form-item .description,
+[dir=rtl] .password-strength,
+[dir=rtl] .password-match {
+  border-left: none;
+  border-right: 0.25em solid #bbbbbb;
 }
 
 .form-item-radios .description,
