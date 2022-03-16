@@ -176,6 +176,29 @@ function language_update_1002() {
 }
 
 /**
+ * Add the native name to all enabled languages.
+ */
+function language_update_1003() {
+  require_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  $predefined = standard_language_list();
+  $config = config('language.settings');
+  $languages = $config->get('languages');
+
+  foreach ($languages as $langcode => $lang) {
+    if (!empty($lang['native'])) {
+      continue;
+    }
+    if (isset($predefined[$langcode][1])) {
+      $config->set('languages.' . $langcode . '.native', $predefined[$langcode][1]);
+    }
+    else {
+      $config->set('languages.' . $langcode . '.native', $lang['name']);
+    }
+  }
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

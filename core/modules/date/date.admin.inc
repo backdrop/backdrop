@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Date administration code.
+ * Admin page callbacks for the Date module.
  */
 
 /**

@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administrative page callbacks for the Filter module.
+ * Admin page callbacks for the Filter module.
  */
 
 /**
@@ -43,13 +42,23 @@ function filter_admin_overview($form) {
       );
     }
 
-    // Add status so we can sort by enabled/disabled.
+    // Add status so we can group by enabled/disabled. If disabled, add 100
+    // to weight to push it down to the bottom of the list.
     $form['formats'][$id]['#status'] = $format->status;
+    $form['formats'][$id]['#weight'] = $format->weight;
+    if (!$format->status) {
+      $form['formats'][$id]['#weight'] += 100;
+    }
+
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
@@ -73,7 +82,11 @@ function filter_admin_overview($form) {
           'weight' => -10,
         );
       }
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);
@@ -99,7 +112,8 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
-  backdrop_sort($form['formats'], array('#status'), SORT_DESC);
+  backdrop_sort($form['formats'], array('#weight'));
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;
