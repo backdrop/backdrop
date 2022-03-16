@@ -312,7 +312,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
-  $has_placeholder = strpos($path, '%') !== FALSE;
+  $has_placeholder = strpos((string) $path, '%') !== FALSE;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
   }
@@ -598,13 +598,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
-  if ($router_item && $router_item['path'] !== $layout_path && substr_count($router_item['path'], '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item['path'])) {
-    $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
-    if (backdrop_is_ajax()) {
-      backdrop_set_message($message, 'warning');
-    }
-    else {
-      $form['messages']['#messages']['warning'][] = $message;
+  if ($router_item && $layout_path) {
+    $router_item_path = (string) $router_item['path'];
+    if ($router_item_path !== $layout_path && substr_count($router_item_path, '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item_path)) {
+      $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
+      if (backdrop_is_ajax()) {
+        backdrop_set_message($message, 'warning');
+      }
+      else {
+        $form['messages']['#messages']['warning'][] = $message;
+      }
     }
   }
 

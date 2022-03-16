@@ -115,10 +115,10 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     return $term;
   }
 
-  function assertEntityPattern($entity_type, $bundle, $language = LANGUAGE_NONE, $expected) {
+  function assertEntityPattern($entity_type, $bundle, $langcode, $expected) {
     backdrop_static_reset('path_get_pattern_by_entity_type');
     $this->refreshVariables();
-    $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $language);
+    $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
     $this->assertIdentical($expected, $pattern);
   }
 
