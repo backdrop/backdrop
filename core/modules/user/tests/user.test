@@ -9,6 +9,10 @@ include_once(BACKDROP_ROOT . '/core/modules/simpletest/tests/system_config_test.
 class UserLoginTestBase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
+  function setUp() {
+    parent::setUp('dblog', 'user_flood_test');
+  }
+
   /**
    * Make an unsuccessful login attempt.
    *
@@ -33,12 +37,19 @@ class UserLoginTestBase extends BackdropWebTestCase {
     $this->backdropPost('user', $edit, t('Log in'));
     $this->assertNoFieldByXPath("//input[@name='pass' and @value!='']", NULL, 'Password value attribute is blank.');
     if (isset($flood_trigger)) {
+      $this->assertResponse(403);
+      $user_log = db_query_range('SELECT message FROM {watchdog} WHERE type = :type ORDER BY wid DESC', 0, 1, array(':type' => 'user'))->fetchField();
+      $user_flood_test_log = db_query_range('SELECT message FROM {watchdog} WHERE type = :type ORDER BY wid DESC', 0, 1, array(':type' => 'user_flood_test'))->fetchField();
       if ($flood_trigger == 'user') {
-        $this->assertRaw(format_plural(config_get('user.flood', 'flood_user_limit'), 'Sorry, there has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', 'Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
+        $this->assertRaw(t('Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'), '@count' => config_get('user.flood', 'flood_user_limit'))));
+        $this->assertEqual('Flood control blocked login attempt for %user from %ip.', $user_log, 'A watchdog message was logged for the login attempt blocked by flood control per user');
+        $this->assertEqual('hook_user_flood_control was passed username %username and IP %ip.', $user_flood_test_log, 'hook_user_flood_control was invoked by flood control per user');
       }
       else {
-        // No uid, so the limit is IP-based.
+        // No UID, so the limit is IP-based.
         $this->assertRaw(t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
+        $this->assertEqual('Flood control blocked login attempt from %ip.', $user_log, 'A watchdog message was logged for the login attempt blocked by flood control per IP');
+        $this->assertEqual('hook_user_flood_control was passed IP %ip.', $user_flood_test_log, 'hook_user_flood_control was invoked by flood control per IP');
       }
     }
     elseif ($incorrect_pass) {
@@ -297,8 +308,8 @@ class UserRegistrationTestCase extends UserLoginTestBase {
         $this->backdropPostAJAX(NULL, $edit, 'test_user_field_add_more');
       }
       else {
-        $this->backdropPost(NULL, $edit, t('Add another item'));
-        $this->backdropPost(NULL, $edit, t('Add another item'));
+        $this->backdropPost(NULL, $edit, t('Add another'));
+        $this->backdropPost(NULL, $edit, t('Add another'));
       }
       // Submit with three values.
       $edit['test_user_field[und][1][value]'] = $value + 1;
@@ -412,6 +423,10 @@ class UserValidationTestCase extends BackdropUnitTestCase {
  */
 class UserLoginTestCase extends UserLoginTestBase {
   protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('user_session_test');
+  }
 
   /**
    * Test that login credentials work (or not) in different login modes.
@@ -555,6 +570,17 @@ class UserLoginTestCase extends UserLoginTestBase {
   }
 
   /**
+   * Test logging in when an anon session already exists.
+   */
+  function testLoginWithAnonSession() {
+    // Visit the callback to generate a session for this anon user.
+    $this->backdropGet('user_session_test_anon_session');
+    // Now login.
+    $account = $this->backdropCreateUser(array());
+    $this->backdropLogin($account);
+  }
+
+  /**
    * Attempt to login with an unregistered username.
    */
   function testAccountNotFound() {
@@ -564,6 +590,32 @@ class UserLoginTestCase extends UserLoginTestBase {
     );
     $this->backdropPost('user', $edit, t('Log in'));
     $this->assertText(t('Sorry, unrecognized username.'));
+  }
+
+  /**
+   * Attempt to login with an invalid array users and passwords.
+   */
+  function testArrayLoginValues() {
+    $edit = array(
+      'pass' => $this->randomName(8),
+    );
+    $extra_post = '&' . http_build_query(array(
+      'name[0]' => $this->randomName(8),
+      'name[1]' => $this->randomName(8),
+    ));
+    $this->backdropPost('user', $edit, t('Log in'), array(), array(), NULL, $extra_post);
+    $this->assertText(t('Sorry, unrecognized username.'));
+
+    $account = $this->backdropCreateUser(array());
+    $edit = array(
+      'name' => $account->name,
+    );
+    $extra_post = '&' . http_build_query(array(
+      'pass[0]' => $this->randomName(8),
+      'pass[1]' => $this->randomName(8),
+    ));
+    $this->backdropPost('user', $edit, t('Log in'), array(), array(), NULL, $extra_post);
+    $this->assertText(t('Sorry, incorrect password.'));
   }
 }
 
@@ -1055,7 +1107,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
         ->set('user_picture_file_size', $test_size)
         ->save();
 
-      $pic_path = $this->saveUserPicture($image);
+      $pic_path = (string) $this->saveUserPicture($image);
 
       // Test that the upload failed and that the correct reason was cited.
       $text = t('The specified file %filename could not be uploaded.', array('%filename' => $image->filename));
@@ -1847,7 +1899,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("The password is too weak. Please consider making your password longer or more complex"));
 
-    $edit['pass'] = '123abcdefghijklmnop';
+    $edit['pass'] = '123abcdefghijklmnopqrstuvwx';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
 
@@ -2053,8 +2105,8 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     preg_match('/#comment-([0-9]+)/', $this->getURL(), $match);
     $comment_id = $match[1];
 
-    // Log in as an administrator and edit the comment to use Full HTML, so
-    // that the comment text itself is not filtered at all.
+    // Log in as an administrator and edit the comment to use Raw HTML
+    // (full_html), so that the comment text itself is not filtered at all.
     $this->backdropLogin($this->admin_user);
     $edit['comment_body[' . $langcode . '][0][format]'] = $this->full_html_format->format;
     $this->backdropPost('comment/' . $comment_id . '/edit', $edit, t('Save'));
@@ -2138,38 +2190,75 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   function testRoleAdministration() {
     $this->backdropLogin($this->admin_user);
 
-    // Test adding a role.
-    $role_name = '123';
-    $edit = array('name' => $role_name, 'label' => $role_name);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
+    // Visit the main roles administration page.
+    $this->backdropGet('admin/config/people/roles');
+
+    // Ensure both submit buttons exist in the "Add role" form.
+    $this->clickLink(t('Add role'));
+    $this->assertUrl('admin/config/people/roles/add', array(), 'Redirected to correct URL after clicking the "+ Add role" link.');
+    $this->assertTitle(t('Add role | Backdrop CMS'), 'The page title on the form page is "Add role".');
+    $this->assertRaw(t('Save and set permissions'), '"Save and set permissions" button found on "Add role" form.');
+    $this->assertRaw(t('Save role'), '"Save role" button found on "Add role" form.');
+    $this->clickLink(t('Cancel'));
+    $this->assertRaw(t('Add role'), 'Redirected to the main roles listing page.');
+
+    // Test adding a role using the 'Save role' button.
+    $role1_name = '123';
+    $edit = array('name' => $role1_name, 'label' => $role1_name);
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
+    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the "Save role" button.');
     backdrop_static_reset('user_roles');
-    $role = user_role_load($role_name);
-    $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
+    $role1 = user_role_load($role1_name);
+    $this->assertTrue(is_object($role1), 'The role was successfully loaded from config.');
+
+    // Ensure only one submit button exists in the "Edit role" form.
+    $this->clickLink(t('Configure role'), 3);
+    $this->assertUrl('admin/config/people/roles/configure/' . $role1_name, array(), 'Redirected to correct URL after clicking the "Configure role" operation.');
+    $this->assertTitle(t('Configure role | Backdrop CMS'), 'The page title on the form is "Configure role".');
+    $this->assertNoRaw(t('Save and set permissions'), '"Save and set permissions" button not found on "Configure role" form.');
+    $this->assertRaw(t('Save role'), '"Save role" button found on "Configure role" form.');
+    $this->clickLink(t('Cancel'));
+    $this->assertRaw(t('Add role'), 'Redirected to the main roles listing page.');
+
+    // Test adding a role using the 'Save and set permissions' button.
+    $role2_name = '456';
+    $edit = array('name' => $role2_name, 'label' => $role2_name);
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save and set permissions'));
+    $this->assertText(t('The 456 role has been added.'), 'The role has been added.');
+    $this->assertUrl('admin/config/people/permissions', array(), 'Redirected to correct URL after clicking the "Save and set permissions" button.');
+    backdrop_static_reset('user_roles');
+    $role2 = user_role_load($role2_name);
+    $this->assertTrue(is_object($role2), 'The role was successfully loaded from config.');
 
     // Try adding a duplicate role.
-    $this->backdropPost(NULL, $edit, t('Add role'));
-    $this->assertRaw(t('The machine-readable name is already in use. It must be unique.'), 'Duplicate role warning displayed.');
+    $duplicate_role_warning = t('The machine-readable name is already in use. It must be unique.');
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save and set permissions'));
+    $this->assertRaw($duplicate_role_warning, 'Duplicate role warning displayed.');
+    $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
+    $this->assertRaw($duplicate_role_warning, 'Duplicate role warning displayed.');
 
-    // Test renaming a role.
-    $old_label = $role->label;
-    $new_label = '456';
+    // Test renaming an existing role.
+    $old_label = $role1->label;
+    $new_label = '789';
     $edit = array('label' => $new_label);
-    $this->backdropPost("admin/config/people/roles/edit/$role_name", $edit, t('Save role'));
-    $this->assertText(t('The 123 role has been renamed to 456.'), 'The role has been renamed.');
+    $this->backdropPost("admin/config/people/roles/configure/$role1_name", $edit, t('Save role'));
+    $this->assertText(t('The 123 role has been renamed to 789.'), 'The role has been renamed.');
+    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the renaming the role.');
     backdrop_static_reset('user_roles');
-    $role = user_role_load($role_name);
-    $this->assertFalse($role->label === $old_label, 'The role has had its label changed.');
-    $this->assertTrue($role->label === $new_label, 'The role has the new label.');
+    $role1 = user_role_load($role1_name);
+    $this->assertFalse($role1->label === $old_label, 'The role has had its label changed.');
+    $this->assertTrue($role1->label === $new_label, 'The role has the new label.');
 
     // Make sure that the system-defined roles can still be edited, to adjust
     // their labels.
-    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_ANONYMOUS_ROLE);
+    $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
-    $this->backdropGet('admin/config/people/roles/edit/' . BACKDROP_AUTHENTICATED_ROLE);
+    $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_AUTHENTICATED_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
 
-    // Create a default role for site administrators, with all available permissions assigned.
+    // Create a default role for site administrators, with all available
+    // permissions assigned.
     $admin_role = new stdClass();
     $admin_role->name = 'administrator';
     $admin_role->label = st('Administrator');
@@ -2179,23 +2268,27 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Set this as the administrator role.
     config_set('system.core', 'user_admin_role', $admin_role->name);
 
-    // Test cancel deleting a role.
-    $role_name = 'administrator';
-    $this->backdropGet("admin/config/people/roles/delete/$role_name");
-    $this->clickLink(t('Cancel'));
-    $this->assertResponse(200);
-    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after cancel.');
-
-    // Test deleting the default administrator role.
     $role_name = 'administrator';
     $role = user_role_load($role_name);
+
+    // Test canceling the various actions that can be performed on user roles.
+    $actions = array('configure', 'delete');
+    foreach ($actions as $action) {
+      $this->backdropGet("admin/config/people/roles/$action/$role_name");
+      $this->clickLink(t('Cancel'));
+      $this->assertResponse(200);
+      $this->assertUrl('admin/config/people/roles', array(), "Redirected to correct URL after canceling $action role.");
+    }
+
+    // Test deleting the default administrator role.
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
     $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
-    $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
+    $this->assertNoLinkByHref("admin/config/people/roles/configure/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
-    // Make sure this role is no longer configured as the administrator role.
-    $this->assertNull(config_get('system.core', 'user_admin_role'), 'The administrator role is no longer configured as the administrator role.');
+    // Since the administrator role that was previously set as admin has been
+    // deleted, no role should be set as admin now.
+    $this->assertFalse(config_get('system.core', 'user_admin_role'), 'No role is configured as the administrator role.');
   }
 
   /**

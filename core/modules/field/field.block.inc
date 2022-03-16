@@ -40,11 +40,15 @@ class FieldBlock extends Block {
 
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     $field = field_info_field($field_name);
-    $formatter = field_info_formatter_types($this->settings['formatter']);
-    $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
-    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+    $formatter_name = $this->settings['formatter'];
+    $formatter = field_info_formatter_types($formatter_name);
+    $default_formatter_settings = $formatter['settings'];
+    $formatter_settings = array_merge($default_formatter_settings, $this->settings['formatter_settings']);
+    $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
+
+    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
+    $preview = '<p>' . t('Displays values of the %field field.', array('%field' => $field_name)) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
@@ -76,9 +80,26 @@ class FieldBlock extends Block {
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
 
-    // Do not render if the entity is not found on this layout.
-    if (empty($entity)) {
-      return NULL;
+    // If the entity is not an EntityInterface object, try to get one.
+    if (!is_a($entity, 'EntityInterface')) {
+      $info = entity_get_info($entity_type);
+      $id_key = $info['entity keys']['id'];
+
+      // Unable to load an entity without an id property value.
+      if (!isset($entity->{$id_key})) {
+        return NULL;
+      }
+
+      $entity = $info['load hook']($entity->{$id_key});
+
+      // Either there is a problem with this entity type definition,
+      //  or the entity does not exist or is failing to load for some reason.
+      if (!is_a($entity, 'EntityInterface')) {
+        return NULL;
+      }
+
+      // Save the EntityInterface object for future use.
+      $this->contexts[$entity_type]->setData($entity);
     }
 
     // Load the entity type's information for this field.

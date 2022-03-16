@@ -3,7 +3,7 @@
     "_module": "file",
     "type": "video",
     "name": "Video",
-    "description": "A Video file is a moving visual recording.",
+    "description": "A video file is a moving visual recording.",
     "mimetypes": [
         "video/*"
     ],

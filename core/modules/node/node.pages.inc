@@ -186,7 +186,14 @@ function node_form($form, &$form_state, Node $node) {
   $form['#node'] = $node;
 
   if ($node_type->settings['language'] && module_exists('language')) {
-    $language_options = language_list(TRUE, TRUE);
+    $language_options = array();
+    foreach (language_list(TRUE) as $langcode => $language) {
+      $option_label = $language->name;
+      if (isset($language->native)) {
+        $option_label .= ' (' . $language->native . ')';
+      }
+      $language_options[$langcode] = $option_label;
+    }
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -310,7 +317,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['options'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('administer nodes'),
-    '#title' => t('Publishing options'),
+    '#title' => $node->nid ? t('Publishing options') : t('Publishing actions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -328,18 +335,21 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['options']['status'] = array(
     '#type' => 'radios',
+    '#title' => $node->nid ? t('Published state') : t('Publish action'),
     '#options' => array(
       NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Draft'),
-      NODE_SCHEDULED => t('Schedule for later'),
+      NODE_NOT_PUBLISHED => $node->nid ? t('Draft') : t('Save as draft'),
+      NODE_SCHEDULED => $node->nid ? t('Scheduled for later') : t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
   );
+  $form['options']['status'][NODE_PUBLISHED]['#description'] = t('Site visitors will be able to access this content.');
+  $form['options']['status'][NODE_NOT_PUBLISHED]['#description'] = t('Only the content creator or site administrators will be able to access this content.');
+  $form['options']['status'][NODE_SCHEDULED]['#description'] = t('The content is saved as draft, and will be automatically published on the date and time selected.');
+
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
-    $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
 
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
@@ -375,18 +385,33 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
+  $form['options']['additional'] = array(
+    // @todo candidate for conversion to '#type' => 'html_tag'.
+    // See: https://github.com/backdrop/backdrop-issues/issues/5223
+    '#type' => 'markup',
+    '#prefix' => '<label id="promote-sticky-label">',
+    '#markup' => $node->nid ? t('Additional options') : t('Additional actions'),
+    '#suffix' => '</label>',
+    '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
+  );
 
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Promoted'),
+    '#title' => $node->nid ? t('Promoted') : t('Promote'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-sticky-label'),
+    ),
   );
   $form['options']['sticky'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Sticky at top of lists'),
+    '#title' => $node->nid ? t('Sticky at top of lists') : t('Make sticky at top of lists'),
     '#default_value' => $node->sticky,
     '#access' => $node_type->settings['sticky_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-sticky-label'),
+    ),
   );
 
   // Prepare cancel link.
@@ -544,7 +569,7 @@ function node_form_submit($form, &$form_state) {
   else {
     // In the unlikely case something went wrong on save, the node will be
     // rebuilt and node form redisplayed.
-    backdrop_set_message(t('The post could not be saved.'), 'error');
+    backdrop_set_message(t('The content could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
 }
@@ -560,7 +585,7 @@ function node_form_submit($form, &$form_state) {
  * @return
  *   An HTML-formatted string of a node preview.
  *
- * @see node_form_build_preview()
+ * @see node_form_preview()
  *
  * @since 1.11.0
  */
@@ -663,12 +688,6 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
-
-  // We render this message here instead of in node_form_preview() in order to
-  // make it persistent across page refreshes while still in preview mode, and
-  // also while switching to different display modes.
-  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
 
   $form['node'] = array(
     '#type' => 'value',
