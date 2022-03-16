@@ -307,7 +307,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $form['default_langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#description' => 'If assigned a language, options will be shown to translate this block into other langauges.',
+      '#description' => 'If assigned a language, options will be shown to translate this block into other languages.',
       '#options' => $language_options,
       '#default_value' => $edit['default_langcode'],
     );
@@ -419,7 +419,7 @@ function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
   $fids = filter_parse_file_fids($edit['body']['value']);
   $files = file_load_multiple($fids);
   foreach ($files as $fid => $file) {
-    if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+    if ((int) ($file && $file->status) !== FILE_STATUS_PERMANENT) {
       // This makes the file "self-referencing", so it will never be deleted.
       file_usage_add($file, 'file', 'file', $file->fid);
     }

@@ -774,7 +774,7 @@ function file_field_widget_uri($field, $instance, $data = array()) {
  *
  * This function is assigned as a #value callback in file_field_widget_form().
  */
-function file_field_widget_value($element, $input = FALSE, $form_state) {
+function file_field_widget_value($element, $input, $form_state) {
   if ($input) {
     // Checkboxes lose their value when empty.
     // If the display field is present make sure its unchecked value is saved.
@@ -853,7 +853,7 @@ function file_field_widget_process($element, &$form_state, $form) {
     $field_element = backdrop_array_get_nested_value($form, $parents);
     $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
     foreach (element_children($element) as $key) {
-      if (isset($element[$key]['#ajax'])) {
+      if (isset($element[$key]['#ajax']['path'])) {
         $element[$key]['#ajax']['path'] = $new_path;
         $element[$key]['#ajax']['wrapper'] = $new_wrapper;
       }
