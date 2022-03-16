@@ -688,14 +688,9 @@ ul.tips {
   min-width: 80px;
 }
 
-.menu-tree .has-children > ul li {
-  display: block;
-}
-
 .menu-tree .has-children > ul li a {
   white-space: nowrap;
 }
-
 
 /* ------------------- Main ------------------- */
 
