@@ -273,8 +273,7 @@ function field_permission() {
         '@url' => '#module-node',
       )),
       'restrict access' => TRUE,
-      // TODO: What security implications?
-      'warning' => t('TBA'),
+      'warning' => t('Allows people to delete fields, causing potential data loss.'),
     ),
   );
 }

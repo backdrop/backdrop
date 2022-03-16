@@ -48,8 +48,7 @@ function simpletest_permission() {
     'administer unit tests' => array(
       'title' => t('Administer tests'),
       'restrict access' => TRUE,
-      // TODO: What security implications?
-      'warning' => t('TBA'),
+      'warning' => t('Allows people to run tests which can consume a large amount of CPU processing.'),
     ),
   );
 }
