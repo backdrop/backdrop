@@ -786,7 +786,8 @@ function _system_modules_build_row($info, $extra) {
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
   $form['#required_by_distribution'] = $extra['required_by_distribution'];
-
+  $form['#core'] = $extra['core'];
+  
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
