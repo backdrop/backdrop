@@ -3263,6 +3263,17 @@ function system_update_1080() {
 }
 
 /**
+ * Remove RSS publishing settings (these are controlled by a view now).
+ */
+function system_update_1081() {
+  $config = config('system.core');
+  $config->clear('rss_description');
+  $config->clear('rss_limit');
+  $config->clear('rss_viewmode');
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
