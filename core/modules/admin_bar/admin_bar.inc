@@ -712,7 +712,8 @@ function admin_bar_links_page() {
   }
 
   // Don't display an empty menu.
-  if (empty(element_children($links['page']))) {
+  $page_links = element_children($links['page']);
+  if (empty($page_links)) {
     return array();
   }
 
