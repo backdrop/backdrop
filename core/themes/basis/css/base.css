@@ -253,3 +253,7 @@ details summary:focus:not(:focus-visible) {
   display: table;
   clear: both;
 }
+
+a:hover {
+    text-decoration: underline;	
+}
