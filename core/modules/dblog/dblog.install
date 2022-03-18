@@ -139,3 +139,10 @@ function dblog_update_1003() {
     $date_format_config->save();
   }
 }
+
+/**
+ * Set the message length for the database log.
+ */
+function dblog_update_1004() {
+  config_set('system.core', 'log_max_length', 56);
+}
