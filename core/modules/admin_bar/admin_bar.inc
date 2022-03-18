@@ -719,7 +719,7 @@ function admin_bar_theme_settings() {
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
     '#options' => array(
-      'admin_bar.icon' => t('Icon menu'),
+      'admin_bar.icon' => t('Home menu'),
       'admin_bar.menu' => t('Management menu'),
       'admin_bar.search' => t('Search bar'),
       'admin_bar.users' => t('User counts'),
