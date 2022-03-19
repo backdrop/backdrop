@@ -354,6 +354,7 @@ function layout_preprocess_layout(&$variables) {
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
