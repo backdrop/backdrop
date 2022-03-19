@@ -10,8 +10,7 @@
 function block_permission() {
   $permissions['administer blocks'] = array(
     'title' => t('Administer custom blocks'),
-    'description' => t('Administer custom blocks and access the custom block listing page'),
-  );
+    );
   return $permissions;
 }
 
