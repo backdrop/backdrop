@@ -1093,7 +1093,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check the weights of the layout to ensure they have the correct defaults,
     // then rearrange and check the paths again.
-    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('layouts' => array('node_post', 'node'))));
+    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('path' => $layout_path)));
     $this->assertFieldByXPath('//select[@name="layouts[' . $clone_layout_name . '][weight]"]', '-1');
     $this->assertFieldByXPath('//select[@name="layouts[' . $layout_name . '][weight]"]', '0');
 

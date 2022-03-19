@@ -9,28 +9,45 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
+  $layouts = $element['#layouts'];
   $rows = array();
 
-  // Assemble the data for a table from everything in $form['handlers']
+  // Assemble the data for a table from everything in $form['handlers'].
   foreach (element_children($element) as $layout_name) {
     if (isset($element[$layout_name]['title'])) {
       $row = array();
-      $row[] = array(
-        'data' => render($element[$layout_name]['title']),
-        'class' => array('layout-name'),
-      );
-      $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
-      $row[] = render($element[$layout_name]['weight']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+      $row_classes = array();
+
+      $row[] = theme('label_machine_name__reorder_layouts', array(
+        'label' => render($element[$layout_name]['title']),
+        'machine_name' => $layout_name,
+      ));
+
+      // Add the "Weight" column and prepare for tabledrag, but only if more
+      // than one layouts exist at the same path.
+      if (count($layouts) !== 1) {
+        $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
+        $row[] = render($element[$layout_name]['weight']);
+        $row_classes[] = 'draggable';
+      }
+      // Allow rows of disabled layouts to be styled differently.
+      if ($layouts[$layout_name]->disabled) {
+        $row_classes[] = 'disabled';
+      }
+
+      $rows[] = array('data' => $row, 'class' => $row_classes);
     }
   }
 
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-name')),
-    t('Weight'),
   );
 
-  backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
+  // Don't add tabledrag/weight if there's only one layout.
+  if (count($rows) !== 1) {
+    $header[] = t('Weight');
+    backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
+  }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'layout-reorder')));
   $output .= backdrop_render_children($element);
