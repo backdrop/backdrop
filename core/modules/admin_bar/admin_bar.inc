@@ -720,20 +720,14 @@ function admin_bar_theme_settings() {
     '#title' => t('Enabled components'),
     '#options' => array(
       'admin_bar.icon' => t('Home menu'),
-      'admin_bar.menu' => t('Administration menu'),
-      'admin_bar.search' => t('Menu search'),
-      'admin_bar.users' => t('Visitor count'),
+      'admin_bar.menu' => t('Management menu'),
+      'admin_bar.search' => t('Search bar'),
+      'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
-
-  $form['components']['admin_bar.icon']['#description'] = t('Provides a convenient link to the home page of the site, as well as quick links that allow you to clear the various caches, run cron, and run updates.');
-  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
-  $form['components']['admin_bar.search']['#description'] = t('Provides a search option to quickly find specific items in the administrative menu.');
-  $form['components']['admin_bar.users']['#description'] = t('Displays the number of visitors currently logged into the site.');
-  $form['components']['admin_bar.account']['#description'] = t('Provides a link to the current visitors profile page a quick link to logout.');
 
   $form['actions'] = array(
     '#type' => 'actions',
