@@ -10,7 +10,7 @@
 function block_permission() {
   $permissions['administer blocks'] = array(
     'title' => t('Administer custom blocks'),
-    );
+  );
   return $permissions;
 }
 
