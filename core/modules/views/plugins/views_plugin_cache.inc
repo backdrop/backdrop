@@ -325,11 +325,11 @@ class views_plugin_cache extends views_plugin {
 
     $key_data += array(
       'roles' => array_keys($user->roles),
-      'super-user' => $user->uid == 1,
-    // special caching for super user.
+      'super-user' => $user->uid == 1, // Special caching for super user.
       'language' => $GLOBALS['language']->langcode,
       'language_content' => $GLOBALS['language_content']->langcode,
       'base_url' => $GLOBALS['base_url'],
+      'display_options' => $this->display->display_options,
     );
 
     if (empty($key_data['build_info'])) {
