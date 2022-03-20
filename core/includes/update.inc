@@ -329,18 +329,9 @@ function update_upgrade_check_dependencies() {
  */
 function update_upgrade_enable_dependencies() {
   if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_upgrade_enable_dependencies', FALSE)) {
-    // When upgrading a D7 site we need to enable entity.module at this point
-    // since the calls to 'module_enable()' below need some of entity's functions.
-    // In a non-upgrade situation, entity.module will be enabled later,
-    // inside the hook implementation system_update_1000(). 
-    module_enable(array('entity'));
-
     $modules_to_enable = update_upgrade_modules_to_enable();
     if (!empty($modules_to_enable)) {
-      // We can't use the "lighter" update_module_enable() function
-      // as some of the modules that are being enabled need to create
-      // tables and/or config files.  
-      module_enable(array_keys($modules_to_enable));
+      update_module_enable(array_keys($modules_to_enable));
       state_set('update_upgrade_enable_dependencies', TRUE);
     }
   }
@@ -359,6 +350,11 @@ function update_upgrade_modules_to_enable() {
     
   // Get list of modules to be enabled.
   $enabled_modules = array_keys($result->fetchAllAssoc('name'));
+  
+  // Do not include any core module required by the Standard or Minimal
+  // installations. Any needed modules from those will be taken care of later.
+  $enabled_modules = array_diff($enabled_modules, array('standard', 'minimal'));
+
   // Get information about all modules available.
   $files = system_rebuild_module_data();
 
