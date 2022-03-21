@@ -2675,57 +2675,31 @@ function hook_schema_alter(&$schema) {
  * @ingroup schemaapi
  */
 function hook_schema_0() {
-  $schema['node'] = array(
-    // Example (partial) specification for table "node".
-    'description' => 'The base table for nodes.',
+  $schema['mymodule'] = array(
+    'description' => 'The base table for mymodule.',
     'fields' => array(
-      'nid' => array(
-        'description' => 'The primary identifier for a node.',
+      'mymodule_id' => array(
+        'description' => 'The primary identifier for mymodule.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'vid' => array(
-        'description' => 'The current {node_field_revision}.vid version identifier.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'type' => array(
-        'description' => 'The type of this node.',
+      'title' => array(
+        'description' => 'The title column of mymodule.',
         'type' => 'varchar',
-        'length' => 32,
+        'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
-      'title' => array(
-        'description' => 'The title of this node, always treated as non-markup plain text.',
+      'description' => array(
+        'description' => 'The description column of mymodule.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
     ),
-    'indexes' => array(
-      'node_changed'        => array('changed'),
-      'node_created'        => array('created'),
-    ),
-    'unique keys' => array(
-      'nid_vid' => array('nid', 'vid'),
-      'vid'     => array('vid'),
-    ),
-    'foreign keys' => array(
-      'node_revision' => array(
-        'table' => 'node_field_revision',
-        'columns' => array('vid' => 'vid'),
-      ),
-      'node_author' => array(
-        'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
-    ),
-    'primary key' => array('nid'),
+    'primary key' => array('mymodule_id'),
   );
   return $schema;
 }
