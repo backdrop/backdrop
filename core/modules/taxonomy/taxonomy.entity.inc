@@ -65,8 +65,8 @@ class TaxonomyTerm extends Entity {
    * This property is not loaded, but may be used to modify the term parents via
    * TaxonomyTerm::save().
    *
-   * The property can be set to an array of term IDs. An entry of 0 means this
-   * term does not have any parents. When omitting this variable during an
+   * The property can be set to an array of term IDs. An entry of array(0) means
+   * this term does not have any parents. When omitting this variable during an
    * update, the existing hierarchy for the term remains unchanged.
    *
    * @var array
