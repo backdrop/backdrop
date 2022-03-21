@@ -722,17 +722,18 @@ function admin_bar_theme_settings() {
       'admin_bar.icon' => t('Home menu'),
       'admin_bar.menu' => t('Administration menu'),
       'admin_bar.search' => t('Menu search'),
-      'admin_bar.users' => t('Visitor count'),
-      'admin_bar.account' => t('Account links'),
+      'admin_bar.users' => t('Online'),
+      'admin_bar.account' => t('User account links'),
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
 
-  $form['components']['admin_bar.icon']['#description'] = t('Provides a convenient link to the home page of the site, as well as quick links that allow you to clear the various caches, run cron, and run updates.');
-  $form['components']['admin_bar.menu']['#description'] = t('Provides a search option to quickly find specific items in the administrative menu.');
-  $form['components']['admin_bar.search']['#description'] = t('Displays the number of visitors currently logged into the site.');
-  $form['components']['admin_bar.users']['#description'] = t('Provides a link to the current visitors profile page a quick link to logout.');
+  $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['admin_bar.search']['#description'] = t('A drop-down version of the top-level links in the Administration Menu.');
+  $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['admin_bar.account']['#description'] = t(' Links to view and log out of the current user account.');
 
   $form['actions'] = array(
     '#type' => 'actions',
