@@ -733,7 +733,7 @@ function admin_bar_theme_settings() {
   $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
   $form['components']['admin_bar.search']['#description'] = t('A drop-down version of the top-level links in the Administration Menu.');
   $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
-  $form['components']['admin_bar.account']['#description'] = t(' Links to view and log out of the current user account.');
+  $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
 
   $form['actions'] = array(
     '#type' => 'actions',
