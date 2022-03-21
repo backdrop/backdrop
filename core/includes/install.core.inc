@@ -1941,14 +1941,25 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
+  $timezone_country = _install_get_timezone_country($form_state['values']['date_default_timezone']);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
     ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->set('default_country', $timezone_country)
     ->save();
+
+  // Update the default date/time formats for the US.
+  if ($timezone_country == 'US') {
+    config('system.date')
+      ->set('formats.long.pattern', 'l, F j, Y - g:ia')
+      ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
+      ->set('formats.short.pattern', 'm/d/Y - g:ia')
+      ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
