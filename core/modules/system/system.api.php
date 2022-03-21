@@ -2651,6 +2651,86 @@ function hook_schema_alter(&$schema) {
 }
 
 /**
+ * Define the database schema to use when a module is installed during updates.
+ *
+ * This hook is called when installing a module during the update or upgrade 
+ * process. If creates the database schema for the newly installed module
+ * before any of its update hooks are called.
+ * 
+ * Unlike hook_schema(), when modules are installed during the update process,
+ * all hook_update_N for the module will be invoked after the database table(s)
+ * defined by this hook are created. This means that the schema definition
+ * provided here may be modified later by hook_update_N.
+ * 
+ * See hook_schema() for details on the schema definition structure.
+ *
+ * @return array
+ *   A schema definition structure array. For each element of the
+ *   array, the key is a table name and the value is a table structure
+ *   definition.
+ *
+ * @see hook_schema()
+ * @see hook_schema_alter()
+ *
+ * @ingroup schemaapi
+ */
+function hook_schema_0() {
+  $schema['node'] = array(
+    // Example (partial) specification for table "node".
+    'description' => 'The base table for nodes.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a node.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vid' => array(
+        'description' => 'The current {node_field_revision}.vid version identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => 'The type of this node.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => 'The title of this node, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'node_changed'        => array('changed'),
+      'node_created'        => array('created'),
+    ),
+    'unique keys' => array(
+      'nid_vid' => array('nid', 'vid'),
+      'vid'     => array('vid'),
+    ),
+    'foreign keys' => array(
+      'node_revision' => array(
+        'table' => 'node_field_revision',
+        'columns' => array('vid' => 'vid'),
+      ),
+      'node_author' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+  return $schema;
+}
+
+/**
  * Perform alterations to a structured query.
  *
  * Structured (aka dynamic) queries that have tags associated may be altered by any module
