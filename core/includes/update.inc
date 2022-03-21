@@ -338,7 +338,7 @@ function update_upgrade_enable_dependencies() {
 }
 
 /** 
- * Find out which modules need to be enabled.
+ * Finds out which modules need to be enabled.
  * 
  * @return array
  *   An array keyed by the machine names of module names needed to be enabled,
