@@ -1941,23 +1941,31 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
-  $timezone_country = _install_get_timezone_country($form_state['values']['date_default_timezone']);
+  $timezone = $form_state['values']['date_default_timezone'];
+  $timezone_country = _install_get_timezone_country($timezone);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
+    ->set('default_timezone', $timezone)
     ->set('default_country', $timezone_country)
     ->save();
 
-  // Update the default date/time formats for the US.
+  // Update the default date/time formats for different regions.
   if ($timezone_country == 'US') {
     config('system.date')
       ->set('formats.long.pattern', 'l, F j, Y - g:ia')
       ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
       ->set('formats.short.pattern', 'm/d/Y - g:ia')
       ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
+  elseif (strpos($timezone, 'Europe') === 0) {
+    config('system.date')
+      ->set('formats.medium.pattern', 'D, d.m.Y - g:ia')
+      ->set('formats.short.pattern', 'd.m.Y - g:ia')
+      ->set('formats.date_only.pattern', 'd.m.Y')
       ->save();
   }
 
@@ -1978,7 +1986,7 @@ function install_configure_form_submit($form, &$form_state) {
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();
   $account->status = 1;
-  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->timezone = $timezone;
   $account->pass = $form_state['values']['account']['pass'];
   $account->name = $form_state['values']['account']['name'];
   $account->save();
