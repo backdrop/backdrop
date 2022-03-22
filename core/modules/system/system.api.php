@@ -2654,8 +2654,8 @@ function hook_schema_alter(&$schema) {
  * Define the database schema to use when a module is installed during updates.
  *
  * This hook is called when installing a module during the update or upgrade 
- * process. If creates the database schema for the newly installed module
- * before any of its update hooks are called.
+ * process. It creates the initial database schema for the newly installed
+ * module before any of its update hooks are called.
  * 
  * Unlike hook_schema(), when modules are installed during the update process,
  * all hook_update_N for the module will be invoked after the database table(s)
