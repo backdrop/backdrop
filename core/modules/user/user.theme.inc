@@ -311,8 +311,7 @@ function template_preprocess_username(&$variables) {
  * @see user-profile.tpl.php
  */
 function template_preprocess_user_profile(&$variables) {
-  $view_mode = $variables['elements']['#view_mode'];
-  $bundle = $variables['elements']['#bundle'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.

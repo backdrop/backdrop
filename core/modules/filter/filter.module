@@ -274,6 +274,10 @@ function filter_format_load($format_id, $load_if_disabled = FALSE) {
  *     enabled (1) or not (0). Defaults to 1.
  *   - weight: (optional) The weight of the text format, which controls its
  *     placement in text format lists. If omitted, the weight is set to 0.
+ *   - editor: (optional) The machine-readable name of the editor to use for
+ *     this text format (e.g. 'ckeditor'). Defaults to NULL.
+ *   - editor_settings: (optional) An associative array of settings for the
+ *     specified editor. See standard_install() for an example.
  *   - filters: (optional) An associative, multi-dimensional array of filters
  *     assigned to the text format, keyed by the name of each filter and using
  *     the properties:
@@ -302,7 +306,7 @@ function filter_format_build_format($format) {
     $format->editor = NULL;
   }
 
-  // Programmatic saves may not contain any filters.
+  // Programmatic saves might not contain any filters.
   if (!isset($format->filters)) {
     $format->filters = array();
   }
@@ -340,6 +344,10 @@ function filter_format_build_format($format) {
  *     enabled (1) or not (0). Defaults to 1.
  *   - weight: (optional) The weight of the text format, which controls its
  *     placement in text format lists. If omitted, the weight is set to 0.
+ *   - editor: (optional) The machine-readable name of the editor to use for
+ *     this text format (e.g. 'ckeditor'). Defaults to NULL.
+ *   - editor_settings: (optional) An associative array of settings for the
+ *     specified editor. See standard_install() for an example.
  *   - filters: (optional) An associative, multi-dimensional array of filters
  *     assigned to the text format, keyed by the name of each filter and using
  *     the properties:
@@ -1185,7 +1193,7 @@ function check_markup($text, $format_id = NULL, $langcode = '', $cache = FALSE) 
 
   // Convert all Windows and Mac newlines to a single newline, so filters only
   // need to deal with one possibility.
-  $text = str_replace(array("\r\n", "\r"), "\n", $text);
+  $text = str_replace(array("\r\n", "\r"), "\n", (string) $text);
 
   // Get a complete list of filters, ordered properly.
   $filters = $format->filters;
@@ -2393,7 +2401,7 @@ function _filter_url_trim($text, $length = NULL) {
   }
 
   // Use +3 for '...' string length.
-  if ($_length && strlen($text) > $_length + 3) {
+  if ($_length && strlen((string) $text) > $_length + 3) {
     $text = substr($text, 0, $_length) . '...';
   }
 

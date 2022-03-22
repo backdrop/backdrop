@@ -392,6 +392,13 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['flood_log_failed_attempts'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log excessive failed login attempts.'),
+    '#default_value' => $flood_config->get('flood_log_failed_attempts'),
+    '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -520,7 +527,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
-  array_unshift($roles, t('disabled'));
+  $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),

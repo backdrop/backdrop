@@ -196,7 +196,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @see file_uri_target()
  */
 function file_uri_scheme($uri) {
-  $position = strpos($uri, '://');
+  $position = strpos((string) $uri, '://');
   return $position ? substr($uri, 0, $position) : FALSE;
 }
 
@@ -523,6 +523,9 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
+ *
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
  *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and

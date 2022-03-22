@@ -2796,10 +2796,10 @@ function hook_install() {
  * Examples:
  * - mymodule_update_1000(): This is the required update for mymodule to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
- * - mymodule_update_1100(): This is the first update to get the database ready
- *   to run mymodule 1.x-1.*.
- * - mymodule_update_1200(): This is the first update to get the database ready
- *   to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
+ * - mymodule_update_1100(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-1.*.
+ * - mymodule_update_1200(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
  *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
  *   11xx updates, because those reside in the 1.x-1.x branch only.
  *
@@ -2854,11 +2854,24 @@ function hook_install() {
 function hook_update_N(&$sandbox) {
   // For non-multipass updates the signature can be `function hook_update_N() {`
 
-  // For most updates, the following is sufficient.
+  // Convert Drupal 7 variables to Backdrop config. Make sure these new config
+  // settings and their default values exist in `config/mymodule.settings.json`.
+  $config = config('mymodule.settings');
+  $config->set('one', update_variable_get('mymodule_one', '1.11'));
+  $config->set('two', update_variable_get('mymodule_two', '2.22'));
+  $config->save();
+  update_variable_del('mymodule_one');
+  update_variable_del('mymodule_two');
+
+  // Update existing config with a new setting. Make sure the new setting and
+  // its default value exists in `config/mymodule.settings.json`.
+  config_set('mymodule.settings', 'three', '3.33');
+
+  // For most database updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
-  // However, for more complex operations that may take a long time,
-  // you may hook into Batch API as in the following example.
+  // However, for more complex operations that may take a long time, you may
+  // hook into Batch API as in the following example.
 
   // Update 3 users at a time to have an exclamation point after their names.
   // (They're really happy that we can do batch API in this hook!)

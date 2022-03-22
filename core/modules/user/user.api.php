@@ -450,5 +450,37 @@ function hook_user_password_reject_weak_alter(&$reject_weak, $account) {
 }
 
 /**
+ * Respond to user flood control events.
+ *
+ * This hook allows you to act when an unsuccessful user login has triggered
+ * flood control. This means that either an IP address or a specific user
+ * account has been temporarily blocked from logging in.
+ *
+ * @param $ip
+ *   The IP address that triggered flood control.
+ * @param $username
+ *   The username that has been temporarily blocked.
+ *
+ * @see user_login_final_validate()
+ *
+ * @since 1.21.2
+ */
+function hook_user_flood_control($ip, $username = FALSE) {
+  if (!empty($username)) {
+    // Do something with the blocked $username and $ip. For example, send an
+    // e-mail to the user and/or site administrator.
+
+    // Backdrop core uses this hook to log the event:
+    watchdog('user', 'Flood control blocked login attempt for %user from %ip.', array('%user' => $username, '%ip' => $ip));
+  }
+  else {
+    // Do something with the blocked $ip. For example, add it to a block-list.
+
+    // Backdrop core uses this hook to log the event:
+    watchdog('user', 'Flood control blocked login attempt from %ip.', array('%ip' => $ip));
+  }
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
