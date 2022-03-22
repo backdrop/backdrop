@@ -2641,7 +2641,12 @@ function system_php_date_time_codes_table() {
   }
 
   return theme('table', array(
-    'header' => array(t('Code'), t('Type'), t('Description'), t('Example')),
+    'header' => array(
+      array('data' => t('Code')),
+      array('data' => t('Type'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+      array('data' => t('Description')),
+      array('data' => t('Example'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    ),
     'rows' => $rows,
   ));
 }
