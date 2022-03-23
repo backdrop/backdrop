@@ -2447,7 +2447,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See below for available options.'),
+    '#description' => t('A date format using PHP date and time codes. See the <em>PHP date/time codes</em> below for available options.'),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
@@ -2463,24 +2463,20 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     ),
   );
 
-  $form['php_codes'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('PHP date/time codes'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#weight' => 99,
-  );
-  $form['php_codes']['intro'] = array(
-    '#markup' => '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Format string</em> above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>',
-  );
-  $form['php_codes']['codes'] = array(
-    '#markup' => system_php_date_time_codes_table(),
-  );
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => (!empty($format['name']) ? t('Save format') : t('Add format')),
+  );
+
+  $php_codes_details = '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Format string</em> field above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>';
+  $php_codes_details .= system_php_date_time_codes_table();
+  $form['php_codes'] = array(
+    '#type' => 'details',
+    '#summary' => t('PHP date/time codes'),
+    '#details' => $php_codes_details,
+    '#open' => TRUE,
+    '#weight' => 999,
   );
 
   return $form;

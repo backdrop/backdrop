@@ -331,7 +331,7 @@ function locale_date_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <em>PHP date/time codes</em> below for available options.'),
   );
 
   $form['locales']['default'] = array(
@@ -375,6 +375,16 @@ function locale_date_format_form($form, &$form_state, $format) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
+  );
+
+  $php_codes_details = '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Format</em> field(s) above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>';
+  $php_codes_details .= system_php_date_time_codes_table();
+  $form['php_codes'] = array(
+    '#type' => 'details',
+    '#summary' => t('PHP date/time codes'),
+    '#details' => $php_codes_details,
+    '#open' => TRUE,
+    '#weight' => 999,
   );
 
   return $form;
