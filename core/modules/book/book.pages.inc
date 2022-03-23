@@ -63,6 +63,14 @@ function book_outline_form($form, &$form_state, Node $node) {
   if (!isset($node->book['parent_depth_limit'])) {
     $node->book['parent_depth_limit'] = _book_parent_depth_limit($node->book);
   }
+
+  if ($node->book['bid'] != 0) {
+    $form['html'] = array(
+     '#type' => 'markup',
+     '#markup' => '<p>To <a href="/admin/content/book/' . $node->book['bid'] . '">manage the outline</a> of this book.</p>',
+    );
+  }
+
   $form['#node'] = $node;
   $form['#id'] = 'book-outline';
   _book_add_form_elements($form, $form_state, $node);
