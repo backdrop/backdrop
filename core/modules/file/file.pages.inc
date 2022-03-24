@@ -575,7 +575,7 @@ function file_manage_form($form, &$form_state, File $file) {
     $form['destination']['url'] = array(
       '#type' => 'item',
       '#title' => t('File URL'),
-      '#markup' => url($filepath, array('absolute' => TRUE)),
+      '#markup' => url(check_plain($filepath), array('absolute' => TRUE)),
     );
   }
 
