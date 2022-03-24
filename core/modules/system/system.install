@@ -1946,8 +1946,10 @@ function system_update_1017() {
   switch ((int) update_variable_get('error_level', '2')) {
     case 0:
       $error_level = 'hide';
+      break;
     case 1:
       $error_level = 'some';
+      break;
     default:
       $error_level = 'all';
   }
