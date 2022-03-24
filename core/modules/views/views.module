@@ -2272,13 +2272,14 @@ function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
       else {
         // Tokens that are replaced should be additionally sanitized, such
         // as replacing underscores with hyphens.
-        // To avoid unexpected replacement at the start of this substring, we prefix two hyphens and remove them again.
-        $substring = substr(backdrop_clean_css_identifier("--".$tokenized),2);
+        // To avoid unexpected replacement at the start of this substring, we
+        // prefix two hyphens and remove them again.
+        $substring = substr(backdrop_clean_css_identifier('--' . $tokenized), 2);
       }
     }
-    // Merge strings into class identifier
+    // Merge strings into class identifier.
     $class = implode('', $substrings);
-    // Returned cleaned identifier, all valid CSS characters allowed
+    // Return cleaned identifier, all valid CSS characters allowed.
     return backdrop_clean_css_identifier($class, array());
   }
 }
