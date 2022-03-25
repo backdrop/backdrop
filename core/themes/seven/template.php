@@ -66,7 +66,6 @@ function seven_node_add_list($variables) {
  */
 function seven_admin_block_content($variables) {
   $content = $variables['content'];
-  backdrop_sort($content, array('link_title' => SORT_STRING));
   $output = '';
   if (!empty($content)) {
     $output = '<ul class="admin-list">';
