@@ -21,9 +21,10 @@ function config_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
   );
-  $items['admin/config/development/configuration/sync/diff'] = array(
+  $items['admin/config/development/configuration/sync/diff/%'] = array(
     'title' => 'Configuration diff',
     'page callback' => 'config_diff_page',
+    'page arguments' => array(6),
     'access arguments' => array('synchronize configuration'),
     'file' => 'config.admin.inc',
     'type' => MENU_LOCAL_TASK,
