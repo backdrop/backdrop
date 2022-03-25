@@ -395,3 +395,25 @@
 [dir="rtl"] .edit-layout-top .dropbutton-wrapper {
   float: left;
 }
+
+details summary {
+  list-style-type: none;
+}
+details[open] summary span::before, details summary span::before {
+  content: "";
+  position: relative;
+  left: -.3em;
+  top: -.2em;
+  width: 0;
+  height: 0;
+  border: .32em solid transparent;
+  border-top-color: #000;
+  border-bottom: 0;
+}
+details summary span::before {
+  left: -.2em;
+  top: .0em;
+  border: .32em solid transparent;
+  border-left-color: #000;
+  display: inline-block;
+}
