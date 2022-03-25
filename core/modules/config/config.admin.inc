@@ -133,11 +133,7 @@ function config_sync_form_submit(array &$form, array &$form_state) {
  * @return string
  *   Table showing a two-way diff between the active and staged configuration.
  */
-function config_diff_page($config_file = '') {
-  if (empty($config_file)) {
-    backdrop_goto('admin/config/development/configuration/sync');
-  }
-
+function config_diff_page($config_file) {
   $diff = config_diff($config_file);
 
   $build = array();
