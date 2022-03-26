@@ -404,8 +404,6 @@ details[open] summary span::before, details summary span::before {
   position: relative;
   left: -.3em;
   top: -.2em;
-  width: 0;
-  height: 0;
   border: .32em solid transparent;
   border-top-color: #000;
   border-bottom: 0;
