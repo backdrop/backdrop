@@ -1963,8 +1963,9 @@ function install_configure_form_submit($form, &$form_state) {
   }
   elseif (strpos($timezone, 'Europe') === 0) {
     config('system.date')
-      ->set('formats.medium.pattern', 'D, d.m.Y - g:ia')
-      ->set('formats.short.pattern', 'd.m.Y - g:ia')
+      ->set('formats.long.pattern', 'l, j F, Y - H:i')
+      ->set('formats.medium.pattern', 'D, d.m.Y - H:i')
+      ->set('formats.short.pattern', 'd.m.Y - H:i')
       ->set('formats.date_only.pattern', 'd.m.Y')
       ->save();
   }
