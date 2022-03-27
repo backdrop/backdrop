@@ -1961,14 +1961,6 @@ function install_configure_form_submit($form, &$form_state) {
       ->set('formats.date_only.pattern', 'm/d/Y')
       ->save();
   }
-  elseif (strpos($timezone, 'Europe') === 0) {
-    config('system.date')
-      ->set('formats.long.pattern', 'l, j F, Y - H:i')
-      ->set('formats.medium.pattern', 'D, d.m.Y - H:i')
-      ->set('formats.short.pattern', 'd.m.Y - H:i')
-      ->set('formats.date_only.pattern', 'd.m.Y')
-      ->save();
-  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
