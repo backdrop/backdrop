@@ -752,11 +752,11 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
-  $components = $form_state['values']['components'];
+  $components = &$form_state['values']['components'];
 
   // Disable the search bar if the management menu is also disabled.
   if (!$components['admin_bar.menu']) {
-    $form_state['values']['components']['admin_bar.search'] = FALSE;
+    $components['admin_bar.search'] = FALSE;
   }
 
   // Save the list of components as a simple array, rather than key/value pair.
