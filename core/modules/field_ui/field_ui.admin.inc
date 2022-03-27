@@ -808,7 +808,6 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
       field_create_field($field);
       field_create_instance($instance);
 
-      $destinations[] = $admin_path . '/fields/' . $field['field_name'] . '/field-settings';
       $destinations[] = $admin_path . '/fields/' . $field['field_name'];
 
       // Store new field information for any additional submit handlers.
