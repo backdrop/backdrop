@@ -344,7 +344,7 @@
 .views-ui-dialog .views-messages {
   max-height: 200px;
   overflow: auto;
-  padding: 10px 15px 0 15px;
+  padding: 10px 15px 0;
 }
 
 .views-ui-dialog input,

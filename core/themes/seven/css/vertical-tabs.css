@@ -4,8 +4,8 @@
 .vertical-tabs {
   position: relative;
   margin: 1em 0;
-  border: 1px solid #ccc;
-  background: #fff;
+  border: 1px solid #cccccc;
+  background: #ffffff;
 }
 @media (min-width: 750px) {
   .vertical-tabs {
@@ -22,7 +22,7 @@
     z-index: 0;
     width: 15em;
     height: 100%;
-    background: #ccc;
+    background: #cccccc;
   }
   [dir="rtl"] .vertical-tabs:before {
     right: 0;
@@ -33,7 +33,7 @@
   z-index: 1;
   display: none;
   width: 15em;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
   padding: 0;
 }
 @media (min-width: 750px) {
@@ -56,7 +56,7 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cccccc;
   border-radius: 0;
 }
 .vertical-tabs-pane:nth-last-child(2) {
@@ -98,12 +98,12 @@
 }
 /* Layout of each tab. */
 .vertical-tab-item {
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   border-left-width: 0; /* LTR */
   border-top-width: 0;
   padding: 0;
   margin: 0;
-  background: #eee;
+  background: #eeeeee;
 }
 [dir="rtl"] .vertical-tab-item {
   border-left-width: 1px;
@@ -150,11 +150,11 @@
 .vertical-tab-link .summary {
   font-size: 0.846em;
   text-transform: none;
-  color: #666;
+  color: #666666;
   word-wrap: break-word;
 }
 .vertical-tab-selected.vertical-tab-item {
-  background-color: #fff;
+  background-color: #ffffff;
   border-right-width: 0; /* LTR */
   border-left-width: 1px;
   box-shadow: 0 5px 5px -5px hsla(0,0%,0%,0.3);
@@ -166,7 +166,7 @@
   border-right-width: 1px;
 }
 .vertical-tab-selected .vertical-tab-link {
-  background: #fff;
+  background: #ffffff;
   border-left: 4px solid #0074bd;
 }
 [dir="rtl"] .vertical-tab-selected .vertical-tab-link {
@@ -175,7 +175,7 @@
 }
 .vertical-tab-selected strong,
 .vertical-tab-selected .fieldset-legend {
-  color: #000;
+  color: #000000;
 }
 .vertical-tabs .vertical-tabs .vertical-tabs-list .summary {
   line-height: normal;
@@ -187,13 +187,13 @@
   box-sizing: border-box;
   padding-left: 1em;
   padding-right: 1em;
-  background: #eee;
+  background: #eeeeee;
 }
 .vertical-tabs-pane.vertical-tab-selected > .vertical-tab-link {
   padding-top: 0.7em;
   padding-bottom: 0.7em;
   background: transparent;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eeeeee;
 }
 .vertical-tabs-pane.vertical-tab-selected > .vertical-tab-link .summary {
   display: none;

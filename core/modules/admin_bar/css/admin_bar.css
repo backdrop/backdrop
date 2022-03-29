@@ -67,7 +67,7 @@
   width: auto;
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
-  text-shadow: #333 0 1px 0;
+  text-shadow: #333333 0 1px 0;
   background-color: #9F9F9F;
 }
 
@@ -230,7 +230,7 @@
 #admin-bar li > span {
   background: transparent none;
   border: none;
-  color: #EEE;
+  color: #EEEEEE;
   font-weight: normal;
   text-align: left; /* LTR */
   text-decoration: none;
@@ -333,9 +333,9 @@
   background-position: 5px center;
 }
 #admin-bar .dropdown li li a.expanded-trail {
-  background-color: #111;
-  border-color: #444;
-  color: #EEE;
+  background-color: #111111;
+  border-color: #444444;
+  color: #EEEEEE;
 }
 
 /* Icon menu */
@@ -379,7 +379,7 @@
   padding: 6px 0 0;
 }
 #admin-bar .admin-bar-search input {
-  background: #fff url(../images/search--gray--64.png) center right no-repeat;
+  background: #ffffff url(../images/search--gray--64.png) center right no-repeat;
   background-position: right 5px center; /* LTR */
   background-size: 12px;
   border: none;

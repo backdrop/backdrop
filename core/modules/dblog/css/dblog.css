@@ -41,7 +41,7 @@
   width: 32px;
   height: 32px;
   border-radius: 16px;
-  background: #ccc url(../../../misc/message-32-ok.png) no-repeat center center;
+  background: #cccccc url(../../../misc/message-32-ok.png) no-repeat center center;
   background-size: 25px;
 }
 .admin-dblog .dblog-info .icon:before {

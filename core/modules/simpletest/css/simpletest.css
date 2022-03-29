@@ -49,7 +49,7 @@
   margin: 1em 0;
   padding: 7px 13px;
   border-radius: 4px;
-  background-color: #fff;
+  background-color: #ffffff;
   border: 2px solid #EAEAEA;
 }
 
@@ -82,10 +82,10 @@ tr.simpletest-exception.even {
   background-color: #f5e742;
 }
 tr.simpletest-debug.odd {
-  background-color: #eee;
+  background-color: #eeeeee;
 }
 tr.simpletest-debug.even {
-  background-color: #fff;
+  background-color: #ffffff;
 }
 
 a.simpletest-collapse {
@@ -97,7 +97,7 @@ a.simpletest-collapse {
 a.simpletest-collapse:focus,
 a.simpletest-collapse:hover {
   font-size: 80%;
-  top: 0px;
+  top: 0;
   height: auto;
   width: auto;
   overflow: visible;

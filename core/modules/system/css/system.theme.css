@@ -28,7 +28,7 @@ hr {
   height: 1px;
 }
 th {
-  border-bottom: 3px solid #ccc;
+  border-bottom: 3px solid #cccccc;
   padding: 0 1em;
   text-align: left; /* LTR */
 }
@@ -37,8 +37,8 @@ th {
 }
 tr.even,
 tr.odd {
-  background-color: #eee;
-  border-bottom: 1px solid #ccc;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #cccccc;
   padding: 0.1em 0.6em;
 }
 
@@ -59,7 +59,7 @@ th.active img {
   display: inline;
 }
 td.active {
-  background-color: #ddd;
+  background-color: #dddddd;
 }
 
 /**
@@ -69,7 +69,7 @@ td.active {
   font-weight: bold;
 }
 .item-list ul {
-  margin: 0 0 0.75em 0;
+  margin: 0 0 0.75em;
   padding: 0;
 }
 .item-list li {
@@ -216,7 +216,7 @@ abbr.ajax-changed {
 /* Suggestion list */
 #autocomplete li.selected {
   background: #0072b9;
-  color: #fff;
+  color: #ffffff;
 }
 
 /**
@@ -261,7 +261,7 @@ tr.drag {
   background-color: #fffff0;
 }
 tr.drag-previous {
-  background-color: #ffd;
+  background-color: #ffffdd;
 }
 .tabledrag-toggle-weight {
   font-size: 0.9em;
@@ -276,7 +276,7 @@ body div.tabledrag-changed-warning {
  * @see tableselect.js
 */
 tr.selected td {
-  background: #ffc;
+  background: #ffffcc;
 }
 td.checkbox,
 th.checkbox {
@@ -338,10 +338,10 @@ th.checkbox {
   padding: 0.2em 0 0 0.5em;
 }
 .menu-tree li a.active {
-  color: #000;
+  color: #000000;
 }
 td.menu-disabled {
-  background: #ccc;
+  background: #cccccc;
 }
 
 /**
@@ -407,14 +407,14 @@ ul.primary li a {
   text-decoration: none;
 }
 ul.primary li.active a {
-  background-color: #fff;
-  border: 1px solid #bbb;
+  background-color: #ffffff;
+  border: 1px solid #bbbbbb;
   border-bottom: none;
 }
 ul.primary li a:hover {
-  background-color: #eee;
-  border-color: #ccc;
-  border-bottom-color: #eee;
+  background-color: #eeeeee;
+  border-color: #cccccc;
+  border-bottom-color: #eeeeee;
 }
 ul.secondary {
   padding: 0.5em 1em .5em 0;
@@ -530,16 +530,16 @@ img.align-right {
 .caption > * {
   display: block;
   max-width: 100%;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
 }
 .caption > figcaption {
   display: table-caption;
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
-  border: 1px solid #CCC;
+  border: 1px solid #CCCCCC;
   border-top: none;
-  background-color: #eee;
+  background-color: #eeeeee;
 }
 
 /**

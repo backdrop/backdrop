@@ -13,7 +13,7 @@
   padding-left: 24px;
 }
 .layout-list tr.disabled td {
-  color: #999;
+  color: #999999;
 }
 .layout-list td:last-child {
   min-width: 160px;
@@ -156,14 +156,14 @@
 }
 .layout-block-add-row.form-item {
   padding: 5px;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid #CCCCCC;
   margin: 0;
 }
 .layout-block-add-row.odd {
   background-color: #F3F4EE;
 }
 .layout-block-list-wrapper {
-  border: 1px solid #CCC;
+  border: 1px solid #CCCCCC;
   border-bottom: none;
 }
 
@@ -178,14 +178,14 @@
   width: 100%;
   min-height: 70px;
   margin: 0 0 15px;
-  padding: 8px 8px 16px 8px;
-  border: 1px dashed #CCC;
+  padding: 8px 8px 16px;
+  border: 1px dashed #CCCCCC;
   background: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 .layout-editor-region-title {
-  padding: 0 0 10px 0;
+  padding: 0 0 10px;
 }
 .layout-editor-region-title .label {
   float: left; /* LTR */
@@ -237,7 +237,7 @@
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
-  background: #FFF;
+  background: #FFFFFF;
   border-radius: 4px;
   -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
   -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
@@ -320,7 +320,7 @@
   margin: 0 12px 0 0;
 }
 .layout-editor-placeholder {
-  background-color: #bdf;
+  background-color: #bbddff;
   border-radius: 4px;
 }
 
@@ -354,8 +354,8 @@
   padding: 0;
 }
 .layout-access-list ul li {
-  background: #eee;
-  border-bottom: 1px solid #ccc;
+  background: #eeeeee;
+  border-bottom: 1px solid #cccccc;
   padding: 0.1em 0.6em;
 }
 .layout-access-list .layout-condition .layout-operations {
@@ -381,7 +381,7 @@
 }
 
 .edit-layout-top {
-  padding: 0.5em 0.5em;
+  padding: 0.5em;
   background: #e9e8e8;
   border-radius: 4px 4px 0 0;
   border-bottom-left-radius: 0;

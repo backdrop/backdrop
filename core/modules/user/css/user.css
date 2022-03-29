@@ -78,7 +78,7 @@
   padding-right: 5px;
 }
 .password-indicator {
-  background-color: #EEE;
+  background-color: #EEEEEE;
   height: 3px;
   width: 100%;
   display: block;
@@ -156,15 +156,15 @@ form:not(.user-admin-settings) .password-strength-help-text.strong em {
   margin: 0 0 1em 1em;
 }
 .profile h2 {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cccccc;
 }
 .profile dl {
-  margin: 0 0 1.5em 0;
+  margin: 0 0 1.5em;
 }
 .profile dt {
-  margin: 0 0 0.2em 0;
+  margin: 0 0 0.2em;
   font-weight: bold;
 }
 .profile dd {
-  margin: 0 0 1em 0;
+  margin: 0 0 1em;
 }

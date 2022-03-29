@@ -1,6 +1,6 @@
 .vertical-tabs {
   margin: 1em 0;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
 }
 @media (min-width: 750px) {
   .vertical-tabs {
@@ -14,7 +14,7 @@
 .vertical-tabs-list {
   display: none;
   width: 15em;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
   padding: 0;
 }
 @media (min-width: 750px) {
@@ -36,7 +36,7 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #cccccc;
 }
 .vertical-tabs-pane .fieldset-wrapper {
   display: none;
@@ -65,8 +65,8 @@
 }
 /* Layout of each tab */
 .vertical-tab-item {
-  background: #eee;
-  border: 1px solid #ccc;
+  background: #eeeeee;
+  border: 1px solid #cccccc;
   border-top: 0;
   padding: 0;
   margin: 0;
@@ -96,7 +96,7 @@
   outline: 1px dotted;
 }
 .vertical-tab-selected.vertical-tab-item {
-  background-color: #fff;
+  background-color: #ffffff;
   border-right-width: 0; /* LTR */
 }
 [dir="rtl"] .vertical-tab-selected.vertical-tab-item {
@@ -105,7 +105,7 @@
 }
 .vertical-tab-selected strong,
 .vertical-tab-selected .fieldset-legend {
-  color: #000;
+  color: #000000;
 }
 .vertical-tabs .vertical-tabs .vertical-tabs-list .summary {
   line-height: normal;
@@ -117,11 +117,11 @@
   width: 100%;
   padding-left: 1em;
   padding-right: 1em;
-  background: #eee;
+  background: #eeeeee;
 }
 .vertical-tabs-pane.vertical-tab-selected > .vertical-tab-link {
   background: transparent;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eeeeee;
 }
 .vertical-tabs-pane.vertical-tab-selected > .vertical-tab-link .summary {
   display: none;

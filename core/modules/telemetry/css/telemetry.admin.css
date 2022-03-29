@@ -9,7 +9,7 @@
 }
 .telemetry-report .telemetry-item-project {
   font-size: 0.9em;
-  color: #444;
+  color: #444444;
 }
 .telemetry-report .telemetry-item-project::before {
   content: '(';
@@ -18,5 +18,5 @@
   content: ')';
 }
 .telemetry-report .telemetry-item-description {
-  color: #444;
+  color: #444444;
 }

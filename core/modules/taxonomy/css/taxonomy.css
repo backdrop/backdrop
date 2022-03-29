@@ -7,13 +7,13 @@
  * Taxonomy term form.
  */
 .taxonomy-term-preview {
-  background-color: #eee;
+  background-color: #eeeeee;
 }
 .taxonomy-term-divider-top {
   border-bottom: none;
 }
 .taxonomy-term-divider-bottom {
-  border-top: 1px dotted #ccc;
+  border-top: 1px dotted #cccccc;
 }
 .taxonomy-term-description {
   margin: 5px 0 20px;

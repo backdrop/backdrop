@@ -9,7 +9,7 @@
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
-  color: #000;
+  color: #000000;
 }
 [dir="rtl"] .layout-flexible-region-top .label {
   padding: 4px 0 4px 12px;
@@ -61,13 +61,13 @@
 }
 
 .flexible-icon {
-  border: 2px solid #999;
+  border: 2px solid #999999;
   border-radius: 3px;
   padding: 1px;
 }
 .flexible-icon-region {
-  background-color: #ccc;
-  color: #fff;
+  background-color: #cccccc;
+  color: #ffffff;
   background-clip: content-box;
   text-align: center;
 }

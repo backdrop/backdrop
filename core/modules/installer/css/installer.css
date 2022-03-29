@@ -75,7 +75,7 @@
 }
 
 .installer-browser-sort-list li.sort-active a {
-  color: #000;
+  color: #000000;
 }
 
 .installer-browser-sort-list li.sort-header {
@@ -148,7 +148,7 @@
 }
 
 .screenshot {
-  margin: 0 0 5px 0;
+  margin: 0 0 5px;
   overflow: hidden;
 }
 .screenshot img {
@@ -175,7 +175,7 @@
 }
 
 .screenshot .placeholder {
-  color: #fff;
+  color: #ffffff;
   background-color: #c5c5c3;
   display: inline-block;
   text-align: center;
@@ -294,7 +294,7 @@
 
 .installer-browser .installer-browser-block {
   margin-bottom: 20px;
-  background-color: #fff;
+  background-color: #ffffff;
 }
 
 .installer-browser .installer-browser-region .installer-browser-block {
@@ -318,7 +318,7 @@
 
 .project-dialog-description {
   margin-top: 1em;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #cccccc;
   margin-bottom: 1em;
 }
 

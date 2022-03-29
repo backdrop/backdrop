@@ -6,7 +6,7 @@
 }
 #preview {
   min-width: 640px;
-  background-color: #fff;
+  background-color: #ffffff;
   font-family: Georgia, "Times New Roman", Times, serif;
   font-size: 14px;
   line-height: 1.5;
@@ -42,10 +42,10 @@
   padding: 0;
 }
 #preview-main-menu-links a {
-  color: #333;
-  background: #ccc;
+  color: #333333;
+  background: #cccccc;
   background: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px #eee;
+  text-shadow: 0 1px #eeeeee;
   -moz-border-radius-topleft: 8px;
   border-top-left-radius: 8px;
   -moz-border-radius-topright: 8px;
@@ -53,7 +53,7 @@
 }
 #preview-main-menu-links a:hover,
 #preview-main-menu-links a:focus {
-  background: #fff;
+  background: #ffffff;
   background: rgba(255, 255, 255, 0.95);
 }
 #preview-main-menu-links a:active {
@@ -94,7 +94,7 @@
   line-height: 1.2;
   margin: 0 0 0.5em;
   padding-bottom: 5px;
-  text-shadow: 0 1px 0 #fff;
+  text-shadow: 0 1px 0 #ffffff;
 }
 #preview .preview-block .preview-content {
   margin-top: 1em;
@@ -138,7 +138,7 @@
   width: 220px;
 }
 #preview-footer-wrapper .preview-block {
-  border: 1px solid #444;
+  border: 1px solid #444444;
   border-color: rgba(255, 255, 255, 0.1);
   margin: 20px 0;
   padding: 10px;
@@ -149,7 +149,7 @@
   padding: 0;
 }
 #preview-footer-columns h2 {
-  border-bottom: 1px solid #555;
+  border-bottom: 1px solid #555555;
   border-color: rgba(255, 255, 255, 0.15);
   font-size: 1em;
   margin-bottom: 0;
@@ -170,7 +170,7 @@
   padding: 0;
 }
 #preview-footer-columns .preview-content li a {
-  border-bottom: 1px solid #555;
+  border-bottom: 1px solid #555555;
   border-color: rgba(255, 255, 255, 0.15);
   display: block;
   line-height: 1.2;

@@ -8,7 +8,6 @@
 .locale-translation-filter-form .form-item-translation,
 .locale-translation-filter-form .form-item-group {
   float: left; /* LTR */
-  margin-right: .8em; /* LTR */
   margin: 0.1em;
   /**
    * In Opera 9, DOM elements with the property of "overflow: auto"

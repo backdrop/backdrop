@@ -80,14 +80,6 @@ fieldset.date-combo .container-inline-date > .form-item {
   padding: 0;
 }
 
-/* formatting for start/end dates in nodes and views */
-span.date-display-single {
-}
-span.date-display-start {
-}
-span.date-display-end {
-}
-
 .date-prefix-inline {
   display: inline-block;
 }
@@ -113,11 +105,11 @@ span.date-display-end {
 /* Calendar day css */
 div.date-calendar-day {
   background: #F3F3F3;
-  border-top: 1px solid #EEE;
-  border-left: 1px solid #EEE;
-  border-right: 1px solid #BBB;
-  border-bottom: 1px solid #BBB;
-  color: #999;
+  border-top: 1px solid #EEEEEE;
+  border-left: 1px solid #EEEEEE;
+  border-right: 1px solid #BBBBBB;
+  border-bottom: 1px solid #BBBBBB;
+  color: #999999;
   float: left;
   line-height: 1;
   margin: 6px 10px 0 0;
