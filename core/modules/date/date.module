@@ -63,47 +63,48 @@ function date_menu() {
  * Form callback for date views pager title format settings.
  */
 function date_views_settings($form, &$form_state) {
+  $date_views_config = config('date_views.settings');
   $form['#config'] = 'date_views.settings';
   $form['date_views_month_format_with_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views month format with year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_month_format_with_year'),
+    '#default_value' => $date_views_config->get('date_views_month_format_with_year'),
     '#description' => t('Date views month format with year, default value : F Y'),
   );
   $form['date_views_month_format_without_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views month format without year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_month_format_without_year'),
+    '#default_value' => $date_views_config->get('date_views_month_format_without_year'),
     '#description' => t('Date views month format without year, default value : F'),
   );
   $form['date_views_day_format_with_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views day format with year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_day_format_with_year'),
+    '#default_value' => $date_views_config->get('date_views_day_format_with_year'),
     '#description' => t('Date views day format with year, default value : l, F j, Y'),
   );
   $form['date_views_day_format_without_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views day format without year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_day_format_without_year'),
+    '#default_value' => $date_views_config->get('date_views_day_format_without_year'),
     '#description' => t('Date views day format without year, default value : l, F j'),
   );
   $form['date_views_week_format_with_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views week format with year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_week_format_with_year'),
+    '#default_value' => $date_views_config->get('date_views_week_format_with_year'),
     '#description' => t('Date views week format with year, default value : F j, Y'),
   );
   $form['date_views_week_format_without_year'] = array(
     '#type' => 'textfield',
     '#title' => t('Date views week format without year'),
     '#size' => 10,
-    '#default_value' => config_get('date_views.settings', 'date_views_week_format_without_year'),
+    '#default_value' => $date_views_config->get('date_views_week_format_without_year'),
     '#description' => t('Date views week format without year, default value : F j'),
   );
   return system_settings_form($form);

@@ -49,11 +49,15 @@ function backdrop_error_levels() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler_real($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler_real($error_level, $message, $filename, $line) {
   if ($error_level & error_reporting()) {
     $types = backdrop_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
     $caller = _backdrop_get_last_caller(debug_backtrace());
+
+    if (empty($caller)) {
+      return FALSE;
+    }
 
     if (!function_exists('filter_xss_admin')) {
       require_once BACKDROP_ROOT . '/core/includes/common.inc';
@@ -266,10 +270,10 @@ function _backdrop_log_error($error, $fatal = FALSE) {
  */
 function _backdrop_get_last_caller($backtrace) {
   // Errors that occur inside PHP internal functions do not generate
-  // information about file and line. Ignore black listed functions.
-  $blacklist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
+  // information about file and line. Ignore disallowed functions.
+  $denylist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
   while (($backtrace && !isset($backtrace[0]['line'])) ||
-         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $blacklist))) {
+         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $denylist))) {
     array_shift($backtrace);
   }
 

@@ -85,7 +85,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Attempt to submit a duplicate translation by visiting the node/add page
     // with identical query string.
     $this->backdropGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => 'es')));
-    $this->assertRaw(t('A translation of %title in %language already exists', array('%title' => $node_title, '%language' => $languages['es']->name)), 'Message regarding attempted duplicate translation is displayed.');
+    $this->assertRaw(t('A translation of %title in %language already exists', array('%title' => $node_title, '%language' => $languages['es']->native)), 'Message regarding attempted duplicate translation is displayed.');
 
     // Attempt a resubmission of the form - this emulates using the back button
     // to return to the page then resubmitting the form without a refresh.
@@ -417,6 +417,8 @@ class TranslationTestCase extends BackdropWebTestCase {
    *   TRUE if the language switch links are found, FALSE if not.
    */
   function assertLanguageSwitchLinks($node, $translation, $find = TRUE, $types = NULL) {
+    $language_default = config_get('system.core', 'language_default');
+
     if (empty($types)) {
       $types = array('node', 'block-locale');
     }
@@ -426,8 +428,8 @@ class TranslationTestCase extends BackdropWebTestCase {
 
     $result = TRUE;
     $languages = language_list();
-    $node_langcode = $node->langcode === LANGUAGE_NONE ? config_get('system.core', 'language_default') : $node->langcode;
-    $translation_langcode = $translation->langcode === LANGUAGE_NONE ? config_get('system.core', 'language_default') : $translation->langcode;
+    $node_langcode = $node->langcode === LANGUAGE_NONE ? $language_default : $node->langcode;
+    $translation_langcode = $translation->langcode === LANGUAGE_NONE ? $language_default : $translation->langcode;
     $page_language = $languages[$node_langcode];
     $translation_language = $languages[$translation_langcode];
     $url = url("node/$translation->nid", array('language' => $translation_language));
@@ -435,7 +437,11 @@ class TranslationTestCase extends BackdropWebTestCase {
     $this->backdropGet("node/$node->nid", array('language' => $page_language));
 
     foreach ($types as $type) {
-      $args = array('%translation_language' => $translation_language->name, '%page_language' => $page_language->name, '%type' => $type);
+      $args = array(
+        '%translation_language' => $translation_language->native,
+        '%page_language' => $page_language->native,
+        '%type' => $type,
+      );
       if ($find) {
         $message = format_string('[%page_language] Language switch item found for %translation_language language in the %type page area.', $args);
       }
@@ -462,7 +468,7 @@ class TranslationTestCase extends BackdropWebTestCase {
         }
       }
 
-      $found = $this->findContentByXPath($xpath, array(':type' => $type, ':url' => $url), $translation_language->name);
+      $found = $this->findContentByXPath($xpath, array(':type' => $type, ':url' => $url), $translation_language->native);
       $result = $this->assertTrue($found == $find, $message) && $result;
     }
 
