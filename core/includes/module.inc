@@ -324,16 +324,16 @@ function module_load_install($module) {
  *
  * @deprecated since 1.22.0
  *
- * @see backdrop_load_file()
+ * @see backdrop_include_file()
  */
 function module_load_include($type, $module, $name = NULL) {
   if (!isset($name)) {
     $name = $module;
   }
 
-  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_load_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
 
-  backdrop_load_file('module', $module, $name . '.' . $type);
+  backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**

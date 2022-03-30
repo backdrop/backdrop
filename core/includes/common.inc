@@ -8932,18 +8932,18 @@ function backdrop_get_filetransfer_info() {
 }
 
 /**
- * Loads a file.
+ * Includes a file.
  *
  * Examples:
  * @code
- *   // Load node.admin.inc from the Node module.
- *   backdrop_load_file('module', 'node', 'node.admin.inc');
+ *   // Include node.admin.inc from the Node module.
+ *   backdrop_include_file('module', 'node', 'node.admin.inc');
  *
- *   // Load template.php from the Basis theme.
- *   backdrop_load_file('theme', 'basis', 'template.php');
+ *   // Include template.php from the Basis theme.
+ *   backdrop_include_file('theme', 'basis', 'template.php');
  * @endcode
  *
- * Do not use this function to load an install file. Instead use:
+ * Do not use this function to include an install file. Instead use:
  * @code
  *   module_load_install()
  * @endcode
@@ -8954,17 +8954,20 @@ function backdrop_get_filetransfer_info() {
  * @endcode
  *
  * @param string $project_type
- *   The type of project to load the file from (module, theme, layout, profile).
+ *   The type of project to include the file from (module, theme, layout,
+ *   profile).
  * @param string $project_name
- *   The name of the project to load the file from (e.g. admin_bar).
+ *   The name of the project to include the file from (e.g. admin_bar).
  * @param string $filename
- *   The name of the file to load. Specify the full filename, including the
+ *   The name of the file to include. Specify the full filename, including the
  *   extension (e.g. admin_bar.theme.inc).
  *
  * @return string|bool
- *   The full path to the loaded file, if successful. FALSE otherwise.
+ *   The full path to the included file, if successful. FALSE otherwise.
+ *
+ * @since 1.22.0
  */
-function backdrop_load_file($project_type, $project_name, $filename) {
+function backdrop_include_file($project_type, $project_name, $filename) {
   static $files = array();
 
   if (isset($files[$project_name][$filename])) {
