@@ -821,6 +821,19 @@ function backdrop_is_nginx() {
 }
 
 /**
+ * Checks whether Backdrop is running under LiteSpeed.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under LiteSpeed, FALSE if not.
+ *
+ * @since 1.21.4
+ */
+function backdrop_is_litespeed() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/litespeed/i", $server_software);
+}
+
+/**
  * Sets the base URL, cookie domain, and session name from configuration.
  */
 function backdrop_settings_initialize() {
@@ -3107,6 +3120,10 @@ function _backdrop_bootstrap_page_cache() {
       // Flushing for PHP-FPM based installations.
       if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
+      }
+      // Flushing for LiteSpeed servers.
+      elseif (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
       }
       // Flushing for Apache mod_php installations.
       else {
