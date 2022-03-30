@@ -49,6 +49,9 @@ function telemetry_telemetry_data($key) {
       elseif (backdrop_is_nginx()) {
         return 'nginx';
       }
+      elseif (backdrop_is_litespeed()) {
+        return 'LiteSpeed';
+      }
       else {
         return 'Other';
       }
