@@ -1046,7 +1046,8 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   // processed_keys is used to coordinate keyword passing between other forms
   // that hook into the basic search form.
   $form['basic']['processed_keys'] = array('#type' => 'value', '#value' => '');
-  $form['basic']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
+  $form['basic']['actions'] = array('#type' => 'actions');
+  $form['basic']['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
 
   return $form;
 }

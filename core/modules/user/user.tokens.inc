@@ -73,15 +73,21 @@ function user_token_info() {
     'description' => t('The URL of the account edit page.'),
     'type' => 'url',
   );
+
+  // This token is replaced only when an Account Cancellation email is sent.
+  // @see user_mail_tokens()
   $user['cancel-url'] = array(
     'name' => t('Account cancellation URL'),
-    'description' => t('The URL of the confirm delete page for the user account.'),
+    'description' => t('The URL of the confirm delete page for the user account. This token is only available when an Account Cancellation email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
   );
+
+  // This token is replaced only when a Password Recovery email is sent.
+  // @see user_mail_tokens()
   $user['one-time-login-url'] = array(
     'name' => t('One-time login URL'),
-    'description' => t('The URL of the one-time login page for the user account.'),
+    'description' => t('The URL of the one-time login page for the user account. This token is only available when a Password Recovery email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
   );
