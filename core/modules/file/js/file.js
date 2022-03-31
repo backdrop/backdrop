@@ -20,7 +20,10 @@ Backdrop.behaviors.fileUploadChange = {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
   },
-  detach: function (context, settings) {
+  detach: function (context, settings, trigger) {
+    if (trigger === 'serialize') {
+      return;
+    }
     $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
     $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
