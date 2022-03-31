@@ -175,7 +175,7 @@ function locale_translation_filters() {
 
   $filters['string'] = array(
     'title' => t('String contains'),
-    'description' => t('Leave blank to show all strings. The search is case sensitive.'),
+    'description' => t('Leave blank to show all strings.'),
   );
 
   $filters['language'] = array(

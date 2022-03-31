@@ -503,7 +503,7 @@ function path_entity_update(Entity $entity) {
     );
 
     // Trim whitespace and slashes from alias start and end.
-    $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
+    $path['alias'] = trim((string) $path['alias'], " \t\n\r\0\x0B/");
 
     // Save an automatic alias if specified.
     if ($path['auto']) {
@@ -593,10 +593,9 @@ function path_config_info() {
  * Get all path information from modules implementing hook_path_info().
  */
 function path_get_info() {
-  $all_info = backdrop_static(__FUNCTION__);
+  $all_info = &backdrop_static(__FUNCTION__, array());
 
-  if (!isset($all_info)) {
-    module_load_include('inc', 'path', 'path.path');
+  if (empty($all_info)) {
     $modules = module_implements('path_info');
     foreach ($modules as $module) {
       $callback = $module . '_path_info';
@@ -642,7 +641,7 @@ function path_get_pattern_by_entity_type($entity_type, $bundle = '', $langcode =
     $variables[] = "{$entity_type}_pattern";
 
     foreach ($variables as $variable) {
-      if ($pattern = trim($config->get($variable))) {
+      if ($pattern = trim((string) $config->get($variable))) {
         break;
       }
     }

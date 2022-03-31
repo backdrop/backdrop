@@ -14,7 +14,7 @@
  *
  * Field UI's "Manage fields" and "Manage displays" pages let users re-order
  * fields, but also non-field components. For nodes, these include the title,
- * path aliases, and other elements exposed by modules through hook_form() or
+ * URL aliases, and other elements exposed by modules through hook_form() or
  * hook_form_alter().
  *
  * Fieldable entities or modules that want to have their components supported

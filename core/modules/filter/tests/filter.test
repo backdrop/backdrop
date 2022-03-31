@@ -1142,7 +1142,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss("<img o\0nfocus\0=alert(0)>", array('img'));
     $this->assertNoNormalized($f, 'focus', 'HTML filter attributes removal evasion -- breaking with nulls.');
 
-    // Only whitelisted scheme names allowed in attributes.
+    // Only allowed scheme names allowed in attributes.
     $f = filter_xss('<img src="javascript:alert(0)">', array('img'));
     $this->assertNoNormalized($f, 'javascript', 'HTML scheme clearing -- no evasion.');
 
@@ -1242,7 +1242,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *   makes HTML filter completely ineffective.
    *
    * @todo Class, id, name and xmlns should be added to disallowed attributes,
-   *   or better a whitelist approach should be used for that too.
+   *   or better, an allowed attributes approach should be used for that too.
    */
   function testHtmlFilter() {
     // Set up dummy filter object.

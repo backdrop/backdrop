@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.19.x-dev');
+define('BACKDROP_VERSION', '1.22.x-dev');
 
 /**
  * Core API compatibility.
@@ -373,6 +373,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetExists().
    */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     return $this->offsetGet($offset) !== NULL;
   }
@@ -380,6 +381,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetGet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     if (isset($this->storage[$offset]) || array_key_exists($offset, $this->storage)) {
       return $this->storage[$offset];
@@ -392,6 +394,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetSet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetSet($offset, $value) {
     $this->storage[$offset] = $value;
   }
@@ -399,6 +402,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetUnset().
    */
+  #[\ReturnTypeWillChange]
   public function offsetUnset($offset) {
     unset($this->storage[$offset]);
   }
@@ -813,6 +817,19 @@ function backdrop_is_apache() {
 function backdrop_is_nginx() {
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/nginx/i", $server_software);
+}
+
+/**
+ * Checks whether Backdrop is running under LiteSpeed.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under LiteSpeed, FALSE if not.
+ *
+ * @since 1.21.4
+ */
+function backdrop_is_litespeed() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/litespeed/i", $server_software);
 }
 
 /**
@@ -1742,9 +1759,16 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-  if ($if_modified_since && $if_none_match
-      && $if_none_match == $etag // etag must match
-      && $if_modified_since == $cache->created) {  // if-modified-since must match
+  // Handle an exact match based on Etag. The If-None-Match header takes full
+  // precedence over If-Modified-Since header.
+  if ($if_none_match == $etag) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+    backdrop_send_headers($default_headers);
+    return;
+  }
+
+  // Handle a loose match based on date only, if no Etag was provided.
+  if (!$if_none_match && $if_modified_since && $if_modified_since >= $cache->created) {
     header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
     backdrop_send_headers($default_headers);
     return;
@@ -2051,7 +2075,7 @@ function format_string($string, array $args = array()) {
  * @ingroup sanitization
  */
 function check_plain($text) {
-  return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+  return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -2079,7 +2103,7 @@ function check_plain($text) {
  *   TRUE if the text is valid UTF-8, FALSE if not.
  */
 function backdrop_validate_utf8($text) {
-  if (strlen($text) == 0) {
+  if (strlen((string) $text) == 0) {
     return TRUE;
   }
   // With the PCRE_UTF8 modifier 'u', preg_match() fails silently on strings
@@ -2296,7 +2320,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
-  if (!$in_error_state && function_exists('module_implements')) {
+  if (!$in_error_state && function_exists('module_invoke_all')) {
     $in_error_state = TRUE;
 
     // The user object may not exist in all conditions, so 0 is substituted if needed.
@@ -2319,9 +2343,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     );
 
     // Call the logging hooks to log/process the message
-    foreach (module_implements('watchdog') as $module) {
-      module_invoke($module, 'watchdog', $log_entry);
-    }
+    module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
     // watchdog() call (not outside the loop), to prevent recursive execution.
@@ -2548,7 +2570,7 @@ function backdrop_random_bytes($count)  {
   // $random_state does not use backdrop_static as it stores random bytes.
   static $random_state, $bytes, $has_openssl;
 
-  $missing_bytes = $count - strlen($bytes);
+  $missing_bytes = $count - strlen((string) $bytes);
 
   if ($missing_bytes > 0) {
     // PHP versions prior 5.3.4 experienced openssl_random_pseudo_bytes()
@@ -2941,9 +2963,9 @@ function backdrop_get_user_timezone() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler($error_level, $message, $filename, $line) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-  _backdrop_error_handler_real($error_level, $message, $filename, $line, $context);
+  _backdrop_error_handler_real($error_level, $message, $filename, $line);
 }
 
 /**
@@ -3108,6 +3130,10 @@ function _backdrop_bootstrap_page_cache() {
       if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
       }
+      // Flushing for LiteSpeed servers.
+      elseif (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
+      }
       // Flushing for Apache mod_php installations.
       else {
         flush();
@@ -3219,26 +3245,30 @@ function _backdrop_bootstrap_page_header() {
  */
 function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
-  $whitelist = settings_get('sanitize_input_whitelist', array());
+  $allowlist = settings_get('sanitize_input_allowlist', array());
+  if (empty($allowlist)) {
+    // Backwards compatible setting support. @todo Remove in 2.x.
+    $allowlist = settings_get('sanitize_input_whitelist', array());
+  }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
 
   // Process query string parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from query string parameters (GET): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request body parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from request body parameters (POST): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process cookie parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from cookie parameters (COOKIE): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request global. No need to log; already logged in $_GET and $_POST.
-  _backdrop_bootstrap_sanitize_input($_REQUEST, $whitelist);
+  _backdrop_bootstrap_sanitize_input($_REQUEST, $allowlist);
 
   // Sanitize the destination parameter (which is often used for redirects) to
   // prevent open redirect attacks leading to other domains. Sanitize both
@@ -3264,7 +3294,7 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     if (!empty($destination_parts['query'])) {
-      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
+      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $allowlist);
     }
 
     if ($sanitized_keys) {
@@ -3282,23 +3312,23 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param mixed $input
  *   The input data array from a request to be sanitized.
- * @param string[] $whitelist
- *   Whitelist of input keys that are considered acceptable.
+ * @param string[] $allowlist
+ *   Allowed list of input keys that are considered acceptable.
  *
  * @return string[]
  *   The list of any input keys have been filtered out, if any.
  */
-function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
+function _backdrop_bootstrap_sanitize_input(&$input, $allowlist = array()) {
   $sanitized_keys = array();
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $allowlist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
       elseif (is_array($input[$key])) {
-        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $whitelist));
+        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $allowlist));
       }
     }
   }
@@ -3697,7 +3727,7 @@ function language_default() {
  * - http://example.com/node/306 returns "node/306".
  * - http://example.com/backdropfolder/node/306 returns "node/306" while
  *   base_path() returns "/backdropfolder/".
- * - http://example.com/path/alias (which is a path alias for node/306) returns
+ * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.

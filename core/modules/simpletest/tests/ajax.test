@@ -438,7 +438,7 @@ class AJAXMultiFormTestCase extends AJAXTestCase {
       'page-node-form--2' => '//form[@id="page-node-form--2"]//div[contains(@class, "field-name-field-ajax-test")]',
     );
     $button_name = $field_name . '_add_more';
-    $button_value = t('Add another item');
+    $button_value = t('Add another');
     $button_xpath_suffix = '//input[@name="' . $button_name . '"]';
     $field_items_xpath_suffix = '//input[@type="text"]';
 

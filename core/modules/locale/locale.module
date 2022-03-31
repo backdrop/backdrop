@@ -137,12 +137,9 @@ function locale_autoload_info() {
     'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
     'views_handler_field_term_language' => 'views/views_handler_field_term_language.inc',
     'views_handler_filter_term_language' => 'views/views_handler_filter_term_language.inc',
-    'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
     'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
-    'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
     'views_handler_field_locale_language' => 'views/views_handler_field_locale_language.inc',
     'views_handler_field_locale_link_edit' => 'views/views_handler_field_locale_link_edit.inc',
-    'views_handler_filter_locale_group' => 'views/views_handler_filter_locale_group.inc',
     'views_handler_filter_locale_language' => 'views/views_handler_filter_locale_language.inc',
     'views_handler_filter_locale_version' => 'views/views_handler_filter_locale_version.inc',
   );
@@ -681,7 +678,7 @@ function locale_get_plural($count, $langcode = NULL) {
     // If there is a plural formula for the language, evaluate it for the given
     // $count and statically cache the result for the combination of language
     // and count, since the result will always be identical.
-    if (!empty($plural_formulas[$langcode])) {
+    if (!empty($plural_formulas[$langcode]['formula'])) {
       // $n is used inside the expression in the eval().
       $n = $count;
       $plural_indexes[$langcode][$count] = @eval('return intval(' . $plural_formulas[$langcode]['formula'] . ');');
