@@ -310,9 +310,15 @@
 #admin-bar .dropdown li li.expandable ul {
   margin: -32px 0 0 160px; /* LTR */
 }
+#admin-bar .dropdown li li.expandable.outside-right ul {
+  margin-left: -160px; /* LTR */
+}
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
   margin-right: 160px;
   margin-left: 0;
+}
+[dir="rtl"] #admin-bar .dropdown li li.expandable.outside-left ul {
+  margin-right: -160px;
 }
 
 /* Lists nested under hovered list items */
