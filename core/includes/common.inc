@@ -8519,48 +8519,48 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
 function watchdog_severity_levels($return = 'label') {
   $levels = array(
     WATCHDOG_EMERGENCY => array(
-      'machine' => 'emergency',
-      'human' => t('Emergency'),
+      'name' => 'emergency',
+      'label' => t('Emergency'),
       'description' => t('System is unusable'),
     ),
     WATCHDOG_ALERT => array(
-      'machine' => 'alert',
-      'human' => t('Alert'),
+      'name' => 'alert',
+      'label' => t('Alert'),
       'description' => t('Action must be taken immediately'),
     ),
     WATCHDOG_CRITICAL => array(
-      'machine' => 'critical',
-      'human' => t('Critical'),
+      'name' => 'critical',
+      'label' => t('Critical'),
       'description' => t('Critical conditions'),
     ),
     WATCHDOG_ERROR => array(
-      'machine' => 'error',
-      'human' => t('Error'),
+      'name' => 'error',
+      'label' => t('Error'),
       'description' => t('Error conditions'),
     ),
     WATCHDOG_WARNING => array(
-      'machine' => 'warning',
-      'human' => t('Warning'),
+      'name' => 'warning',
+      'label' => t('Warning'),
       'description' => t('Warning conditions'),
     ),
     WATCHDOG_NOTICE => array(
-      'machine' => 'notice',
-      'human' => t('Notice'),
+      'name' => 'notice',
+      'label' => t('Notice'),
       'description' => t('Normal but significant conditions'),
     ),
     WATCHDOG_INFO => array(
-      'machine' => 'info',
-      'human' => t('Info'),
+      'name' => 'info',
+      'label' => t('Info'),
       'description' => t('Informational messages'),
     ),
     WATCHDOG_DEBUG => array(
-      'machine' => 'debug',
-      'human' => t('Debug'),
+      'name' => 'debug',
+      'label' => t('Debug'),
       'description' => t('Debug-level messages'),
     ),
     WATCHDOG_DEPRECATED => array(
-      'machine' => 'deprecated',
-      'human' => t('Deprecated'),
+      'name' => 'deprecated',
+      'label' => t('Deprecated'),
       'description' => t('Deprecated function/feature notices'),
     ),
   );
