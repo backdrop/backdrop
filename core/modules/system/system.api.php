@@ -2564,6 +2564,7 @@ function hook_requirements($phase) {
  *   definition.
  *
  * @see hook_schema_alter()
+ * @see hook_schema_0()
  *
  * @ingroup schemaapi
  */
