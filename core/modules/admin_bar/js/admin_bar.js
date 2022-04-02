@@ -288,15 +288,36 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
     $childList.parent().siblings('li')
       .find('ul.expanded').removeClass('expanded').end()
       .find('.expanded-trail').removeClass('expanded-trail');
+
+    // Check if child is outside viewport.
+    var $outside = outsideViewport($childList[0]);
+    if ($outside.right) {
+      $(this).addClass('outside-right');
+    }
+    if ($outside.left) {
+      $(this).addClass('outside-left');
+    }
   }
   function closeChild(e) {
     // Start the timer.
     var $uls = $(this).find('> ul');
     var $link = $(this).find('> a, > span');
+    var $li = $(this);
     this.sfTimer = setTimeout(function () {
       $uls.removeClass('expanded');
       $link.removeClass('expanded-trail');
+      $li.removeClass('outside-right');
+      $li.removeClass('outside-left');
     }, 400);
+  }
+  function outsideViewport(e) {
+    var $rect = e.getBoundingClientRect();
+
+    var $out = {};
+    $out.left = $rect.left < 0;
+    $out.right = $rect.right > (window.innerWidth || document.documentElement.clientWidth);
+
+    return $out;
   }
 };
 
