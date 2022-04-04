@@ -1114,9 +1114,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   if (empty($view->changed)) {
     $form['actions']['save']['#attributes'] = array(
-      'class' => array(
-        'js-hide',
-      ),
+      'class' => array('js-hide'),
     );
   }
 
