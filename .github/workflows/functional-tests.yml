@@ -6,6 +6,7 @@ jobs:
   simpletest:
     name: Simpletest batches
     runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, '[skip tests]')"
     timeout-minutes: 20
     strategy:
       fail-fast: false
