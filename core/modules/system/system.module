@@ -186,6 +186,10 @@ function system_permission() {
       'title' => t('Flush caches'),
       'description' => t('Provides access to manually flush caches.'),
     ),
+    'clear logs' => array(
+      'title' => t('Clear logs'),
+      'description' => t('Provides access to manually clear logs.'),
+    ),
   );
 }
 
