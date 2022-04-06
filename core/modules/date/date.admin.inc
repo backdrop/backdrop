@@ -394,27 +394,25 @@ function _date_field_widget_settings_form($field, $instance) {
     '#fieldset' => 'date_format',
     '#weight' => 9,
   );
-  if (in_array($widget['type'], array('date_select'))) {
-    $options = array(
-      'above' => t('Above'),
-      'within' => t('Within'),
-      'none' => t('None'),
-    );
+  
+  $options = array(
+    'above' => t('Above'),
+    'none' => t('Hidden'),
+  ); 
+  $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
+  if ($widget['type'] == 'date_select') {
+    $options['within'] = t('Within');
+    $options['none'] = t('None');
     $description = t("The location of date part labels, like 'Year', 'Month', or 'Day'. 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
-  }
-  else {
-    $options = array(
-      'above' => t('Above'),
-      'none' => t('Hidden'),
-    );
-    $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
   }
   $form['advanced']['label_position'] = array(
     '#type' => 'radios',
     '#options' => $options,
     '#default_value' => $settings['label_position'],
     '#title' => t('Position of date part labels'),
+    '#description' => $description,
   );
+
   $form['advanced']['label_position']['above']['#description'] = t("Displays the label as individual titles above each date part (like 'Year', 'Month', or 'Day').");
   $form['advanced']['label_position']['within']['#description'] = t("Inserts the label as the first option in the select list and in blank textfields.");
   $form['advanced']['label_position']['none']['#description'] = t("Doesn't visually label any of the date parts.");
