@@ -5,7 +5,7 @@
  */
 
 // Get 'expires' date/time.
-$expires_date = date_create('+6 months', timezone_open('UTC'));
+$expires_date = date_create('+2 months', timezone_open('UTC'));
 $expires = $expires_date->format('c');
 
 // Set 'expires' date/time via Tugboat API.
