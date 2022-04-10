@@ -979,7 +979,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $alterMetaData = array();
+  public $alterMetaData = array();
 
   /**
    * The FOR UPDATE status
