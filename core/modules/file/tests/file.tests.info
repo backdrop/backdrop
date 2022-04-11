@@ -129,3 +129,9 @@ name = File attribute override
 description = Test overriding file entity attributes.
 group = File
 file = file.test
+
+[FileAccessFunctionsAlignedTestCase]
+name = File access functions aligned
+description = Test that file access functions return consistent values.
+group = File
+file = file.test

@@ -3328,3 +3328,107 @@ class FileAttributeOverrideTestCase extends FileTestHelper {
     }
   }
 }
+
+/**
+ * Tests that file_access and File::access are in sync with what they return.
+ */
+class FileAccessFunctionsAlignedTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array(
+      'create files',
+      'view own files',
+    ));
+  }
+
+  /**
+   * Verify that both, file_access() and File::access() return the same value.
+   */
+  public function testFileAccessFunctions() {
+    $users = array(
+      'anonymous' => user_load(0),
+      'unprivileged' => $this->backdropCreateUser(array(
+        'download own document files',
+      )),
+      'privileged' => $this->backdropCreateUser(array(
+        'view files',
+        'download any document files',
+        'edit own document files',
+        'delete own document files',
+        'view own private files',
+      )),
+      'manager' => $this->backdropCreateUser(array(
+        'view files',
+        'download any document files',
+        'manage files',
+        'delete files',
+      )),
+      'admin' => $this->backdropCreateUser(array(
+        'bypass file access',
+      )),
+    );
+
+    // Some files and their authors.
+    $samples = array(
+      'public-1.txt' => $users['unprivileged']->uid,
+      'public-2.txt' => $users['privileged']->uid,
+      'public-3.txt' => $users['manager']->uid,
+      'private-1.txt' => $users['privileged']->uid,
+      'private-2.txt' => $users['admin']->uid,
+    );
+
+    $files = array();
+    foreach ($samples as $filename => $uid) {
+      $public = (substr($filename, 0, 6) == 'public') ? TRUE : FALSE;
+      $files[] = $this->createExampleFile($filename, $uid, $public);
+    }
+
+    // Loop through all of them and compare values.
+    $operations = array('create', 'view', 'download', 'update', 'delete');
+    foreach ($files as $file) {
+      foreach ($users as $index => $account) {
+        foreach ($operations as $op) {
+          $method_access = $file->access($op, $account);
+          $message = format_string('Both return %bool for operation %op and %user user on file %file', array(
+            '%bool' => ($method_access) ? 'true' : 'false',
+            '%op' => $op,
+            '%user' => $index,
+            '%file' => $file->filename,
+          ));
+          $this->assertEqual(file_access($op, $file, $account), $method_access, $message);
+        }
+      }
+    }
+  }
+
+  /**
+   * Helper function to create some files.
+   */
+  protected function createExampleFile($filename, $owner_uid, $public) {
+    if ($public) {
+      $filepath = 'public://' . $filename;
+    }
+    else {
+      $filepath = 'private://' . $filename;
+    }
+    file_put_contents($filepath, $this->randomName(15));
+
+    $file = new File();
+    $file->uri = $filepath;
+    $file->filename = $filename;
+    $file->filemime = 'text/plain';
+    $file->uid = $owner_uid;
+    $file->timestamp = REQUEST_TIME;
+    $file->filesize = filesize($file->uri);
+    $file->status = 1;
+    $file->type = 'document';
+    backdrop_write_record('file_managed', $file);
+
+    return entity_create('file', (array) $file);
+  }
+}
