@@ -2040,10 +2040,10 @@ class LayoutBlockTest extends BackdropWebTestCase {
       'type' => 'page',
       'title' => "Test node title",
     ));
+
+    // Remove the Page Title Combo block.
     $this->backdropGet('admin/structure/layouts/manage/default');
     $this->clickLink(t('Remove'), 3);
-
-    // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check page title exists.
