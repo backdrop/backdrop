@@ -115,6 +115,10 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'data-block-id' => $block->uuid,
     );
 
+    if (!empty($block->settings['disabled'])) {
+      $attributes['class'][] = 'layout-editor-block-disabled';
+    }
+
     $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
     $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
@@ -251,6 +255,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
       'attributes' => array(
         'class' => array('remove-block', 'use-ajax'),
+      ),
+    );
+
+    $links['disable'] = array(
+      'title' => empty($block->settings['disabled']) ? t('Disable') : t('Enable'),
+      'href' => $this->getUrl('disable-block', $block->uuid),
+      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+      'attributes' => array(
+        'class' => array('disable-block', 'use-ajax'),
       ),
     );
 
