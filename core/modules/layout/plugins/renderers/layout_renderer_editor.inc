@@ -115,7 +115,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'data-block-id' => $block->uuid,
     );
 
-    if (!empty($block->settings['disabled'])) {
+    if (!$block->status) {
       $attributes['class'][] = 'layout-editor-block-disabled';
     }
 
@@ -259,7 +259,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     );
 
     $links['disable'] = array(
-      'title' => empty($block->settings['disabled']) ? t('Disable') : t('Enable'),
+      'title' => $block->status ? t('Disable') : t('Enable'),
       'href' => $this->getUrl('disable-block', $block->uuid),
       'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
       'attributes' => array(

@@ -6,6 +6,13 @@
 class Block extends LayoutHandler {
 
   /**
+   * If this block is disabled.
+   *
+   * @var bool
+   */
+  var $status = 1;
+
+  /**
    * The module that provides this block.
    *
    * @var string
@@ -86,10 +93,11 @@ class Block extends LayoutHandler {
       'contexts' => array(),
     );
 
-    // Initialize basics, module, delta, UUID, and childDelta.
+    // Initialize basics, module, delta, UUID, status, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
+    $this->status = isset($data['status']) ? $data['status'] : 1;
     $parts = explode(':', $this->plugin, 3);
     $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
@@ -319,6 +327,7 @@ class Block extends LayoutHandler {
    */
   function toArray() {
     $array = array(
+      'status' => $this->status,
       'module' => $this->module,
       'delta' => $this->delta,
       'settings' => $this->settings,

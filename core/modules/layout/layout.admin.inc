@@ -1864,8 +1864,7 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
   }
 
   $uuid = $block->uuid;
-  $disabled = empty($block->settings['disabled']) ? TRUE : FALSE;
-  $layout->content[$uuid]->settings['disabled'] = $disabled;
+  $layout->content[$uuid]->status = $block->status ? 0 : 1;
   layout_set_layout_tempstore($layout);
 
   $renderer = layout_create_renderer($renderer_name, $layout);
