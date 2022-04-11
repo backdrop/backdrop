@@ -434,7 +434,7 @@ function standard_install() {
     ),
     'card3-layout.png' => array(
       'title' => st('The Home page layout'),
-      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/views">Learn more about Views</a></p>'),
+      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
     ),
   );
 
