@@ -115,13 +115,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'data-block-id' => $block->uuid,
     );
 
+    $block_admin_title = $block->getAdminTitle();
     if (!$block->status) {
       $attributes['class'][] = 'layout-editor-block-disabled';
+      $block_admin_title .= t(' (Disabled)');
     }
 
     $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block_admin_title . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
