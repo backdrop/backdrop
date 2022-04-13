@@ -226,6 +226,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   protected function getBlockLinks($block) {
     $links = array();
 
+    if (!$block->status) {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('enable-block', 'use-ajax'),
+        ),
+      );
+    }
+
     // Only render the "Configure" link if the block is not broken.
     if (!is_a($block, 'BlockBroken')) {
       $links['configure'] = array(
@@ -260,14 +271,16 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       ),
     );
 
-    $links['disable'] = array(
-      'title' => $block->status ? t('Disable') : t('Enable'),
-      'href' => $this->getUrl('disable-block', $block->uuid),
-      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-      'attributes' => array(
-        'class' => array('disable-block', 'use-ajax'),
-      ),
-    );
+    if ($block->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('disable-block', 'use-ajax'),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',

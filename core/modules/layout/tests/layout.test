@@ -473,7 +473,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Disable the block.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
-    $disable_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"disable-block")]', array(
+    $disable_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"toggle-block-status")]', array(
       ':uuid' => $block_uuid,
     ));
     $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);

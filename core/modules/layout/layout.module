@@ -295,7 +295,7 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   ) + $base;
 
-  $items['admin/structure/layouts/manage/%layout_tempstore/disable-block/%/%layout_tempstore_block'] = array(
+  $items['admin/structure/layouts/manage/%layout_tempstore/toggle-block-status/%/%layout_tempstore_block'] = array(
     'title' => 'Disable block',
     'load arguments' => array(4),
     'page callback' => 'layout_block_disable_page',

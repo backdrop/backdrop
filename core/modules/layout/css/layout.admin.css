@@ -397,5 +397,5 @@
 }
 
 .layout-editor-block-disabled {
-  opacity: 0.3;
+  color: #ddd;
 }
