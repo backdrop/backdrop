@@ -25,7 +25,7 @@
             "type": "text_default",
             "settings": [],
             "module": "text",
-            "weight": 0
+            "weight": -2
         },
         "teaser": {
             "label": "hidden",

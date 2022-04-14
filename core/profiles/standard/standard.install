@@ -170,6 +170,7 @@ function standard_install() {
         'sticky_default' => FALSE,
         'revision_enabled' => TRUE,
         'revision_default' => FALSE,
+        'scheduling_enabled' => FALSE,
         'show_submitted_info' => TRUE,
         'comment_default' => COMMENT_NODE_CLOSED,
         'node_submitted' => FALSE,
@@ -190,7 +191,7 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
-    ->set('node_card_pattern', 'card/[node:title]')
+    ->set('node_card_pattern', 'cards/[node:title]')
     ->save();
 
   cache_clear_all();
@@ -348,16 +349,16 @@ function standard_install() {
       'default' => array(
         'label' => 'hidden',
         'type' => 'image',
-        'settings' => array('image_style' => 'large', 'image_link' => ''),
-        'weight' => -1,
+        'settings' => array('image_style' => 'large_cropped', 'image_link' => ''),
+        'weight' => 0,
       ),
       'teaser' => array(
         'label' => 'hidden',
         'type' => 'image',
         'settings' => array(
           'image_style' => 'medium',
-          'image_link' => 'content',
-          'image_float' => 'right',
+          'image_link' => '',
+          'image_float' => '',
         ),
         'weight' => -1,
       ),
