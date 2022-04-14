@@ -26,7 +26,7 @@ class FieldUITestCase extends BackdropWebTestCase {
     parent::setUp($modules);
 
     // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields', 'administer view modes'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields', 'administer view modes', 'administer account settings'));
     $this->backdropLogin($admin_user);
 
     // Create content type, with underscores.
@@ -139,6 +139,34 @@ class FieldUITestCase extends BackdropWebTestCase {
     // Check that the field does not appear in the overview form.
     $this->assertNoFieldByXPath('//table[@id="field-overview"]//span[@class="label-field"]', $label, 'Field does not appear in the overview page.');
   }
+
+  /**
+   * Deletes a field instance with the Delete field button.
+   *
+   * @param $bundle_path
+   *   Admin path of the bundle that the field instance is to be deleted from.
+   * @param $field_name
+   *   The name of the field.
+   * @param $label
+   *   The label of the field.
+   * @param $bundle_label
+   *   The label of the bundle.
+   */
+  function fieldUIDeleteFieldWithDeleteButton($bundle_path, $field_name, $label, $bundle_label) {
+    // Click the Delete Field button in the field configuration page.
+    $this->backdropPost("$bundle_path/fields/$field_name", array(), 'Delete field');
+
+    // Check that we are at the delete confirmation form.
+    $this->assertRaw(t('Are you sure you want to delete the field %label', array('%label' => $label)), 'Delete confirmation was found.');
+ 
+    // Submit confirmation form.
+    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->assertRaw(t('The field %label has been deleted from the %type content type.', array('%label' => $label, '%type' => $bundle_label)), 'Delete message was found.');
+ 
+    // Check that the field does not appear in the overview form.
+    $this->assertNoFieldByXPath('//table[@id="field-overview"]//span[@class="label-field"]', $label, 'Field does not appear in the overview page.');
+ 
+ }
 }
 
 /**
@@ -441,6 +469,15 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     );
     $this->fieldUIAddExistingField($bundle_path2, $edit2);
 
+    // Add an instance to the user entity.
+    $user_fields_path = 'admin/config/people/manage';
+    $edit3 = array(
+      'fields[_add_existing_field][label]' => $this->field_label,
+      'fields[_add_existing_field][field_name]' => $this->field_name,
+    );
+    $this->fieldUIAddExistingField($user_fields_path, $edit3);
+
+
     // Delete the first instance.
     $this->fieldUIDeleteField($bundle_path1, $this->field_name, $this->field_label, $this->type);
 
@@ -458,6 +495,15 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     _field_info_collate_fields_reset();
     // Check that the field instance was deleted.
     $this->assertNull(field_info_instance('node', $this->field_name, $type_name2), 'Field instance was deleted.');
+
+    // Delete instance attached to user entity with the Delete field button.
+    $this->fieldUIDeleteFieldWithDeleteButton($user_fields_path, $this->field_name, $this->field_label, 'User account');
+
+    // Reset the fields info.
+    _field_info_collate_fields_reset();
+    // Check that the field instance was deleted.
+    $this->assertNull(field_info_instance('user', $this->field_name, $type_name2), 'Field instance was deleted.');
+
     // Check that the field was deleted too.
     $this->assertNull(field_info_field($this->field_name), 'Field was deleted.');
   }
