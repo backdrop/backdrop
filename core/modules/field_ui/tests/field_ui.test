@@ -447,12 +447,16 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->assertNotNull(field_info_field($this->field_name), 'Field was not deleted.');
 
     // "Click" the Delete field button for the instance in the user entity and 
-    // check for correct response.
+    // check for correct server response.
     $this->backdropPost("$user_config_path/fields/{$this->field_name}", array(), 'Delete field');
     $this->assertResponse(200);
 
-    // Delete instance in the user entity.
-    $this->fieldUIDeleteField($user_config_path, $this->field_name, $this->field_label, 'User account');
+    // Submit confirmation form.
+    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->assertRaw(t('The field %label has been deleted from the %type content type.', array('%label' => $this->field_label, '%type' => 'User account')), 'Delete message was found.');
+
+    // Check that the field does not appear in the overview form.
+    $this->assertNoFieldByXPath('//table[@id="field-overview"]//span[@class="label-field"]', $this->field_label, 'Field does not appear in the overview page.');
 
     // Reset the fields info.
     _field_info_collate_fields_reset();
