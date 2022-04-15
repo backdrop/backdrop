@@ -10,9 +10,9 @@
             "data": {
                 "width": "800",
                 "height": "533",
-                "anchor": "top-center"
+                "anchor": "center-top"
             },
-            "weight": 1
+            "weight": "1"
         }
     ]
 }

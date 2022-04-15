@@ -5,7 +5,7 @@
     "bundle": "card",
     "label": "Body",
     "widget": {
-        "weight": -4,
+        "weight": 2,
         "type": "text_textarea_with_summary",
         "module": "text",
         "active": 1,
@@ -16,7 +16,7 @@
     },
     "settings": {
         "text_processing": "1",
-        "display_summary": 1,
+        "display_summary": 0,
         "user_register_form": false
     },
     "display": {
@@ -25,16 +25,14 @@
             "type": "text_default",
             "settings": [],
             "module": "text",
-            "weight": -2
+            "weight": 0
         },
         "teaser": {
             "label": "hidden",
-            "type": "text_summary_or_trimmed",
-            "settings": {
-                "trim_length": 600
-            },
-            "module": "text",
-            "weight": 0
+            "type": "text_default",
+            "weight": "0",
+            "settings": [],
+            "module": "text"
         }
     },
     "description": "Cards usually work best with a relatively short body field.",

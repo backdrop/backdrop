@@ -148,10 +148,10 @@
             }
         },
         "fe8c7715-c7e9-46d0-8b09-09afb78b2891": {
-            "plugin": "views:card_grid-block",
+            "plugin": "views:promoted_cards-block",
             "data": {
                 "module": "views",
-                "delta": "card_grid-block",
+                "delta": "promoted_cards-block",
                 "settings": {
                     "link_to_view": 0,
                     "more_link": false,

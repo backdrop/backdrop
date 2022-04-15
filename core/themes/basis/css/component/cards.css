@@ -3,48 +3,48 @@
  * Card listing view on the default home page.
  */
 
-.l-top .block-views-card-grid-block {
+.l-top .block-views-promoted-cards-block {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
-.block-views-card-grid-block {
+.block-views-promoted-cards-block {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
 
-.block-views-card-grid-block .views-view-grid-cols-3 {
+.block-views-promoted-cards-block .views-view-grid-cols-3 {
   grid-template-columns: repeat(1, 1fr);
 }
-.view-card-grid .views-grid-box {
+.view-promoted-cards .views-grid-box {
   border: none;
 }
 
-.view-card-grid .views-grid-box {
+.view-promoted-cards .views-grid-box {
   border-radius: 0.25rem;
   margin: 1rem 0;
   padding: 0 0 1rem 0;
   background-color: #ffffff;
 }
-.view-card-grid h2 {
+.view-promoted-cards h2 {
   font-size: 1.25rem;
   font-weight: bold;
 }
-.view-card-grid .views-field {
+.view-promoted-cards .views-field {
   padding: 0 1rem;
 }
-.view-card-grid .views-field-field-image {
+.view-promoted-cards .views-field-field-image {
   padding: 0;
 }
 @media (min-width: 48em) {
-  .block-views-card-grid-block .views-view-grid-cols-3 {
+  .block-views-promoted-cards-block .views-view-grid-cols-3 {
     grid-template-columns: repeat(3, 1fr);
   }
-  .view-card-grid .views-grid-box-1 {
+  .view-promoted-cards .views-grid-box-1 {
     margin: 1rem 1rem 1rem 0;
   }
-  .view-card-grid .views-grid-box-2 {
+  .view-promoted-cards .views-grid-box-2 {
     margin: 1rem 0.5rem;
   }
-  .view-card-grid .views-grid-box-3 {
+  .view-promoted-cards .views-grid-box-3 {
     margin: 1rem 0 1rem 1rem;
   }
 }

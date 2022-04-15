@@ -1,11 +1,11 @@
 {
-    "_config_name": "views.view.card_grid",
-    "name": "card_grid",
+    "_config_name": "views.view.promoted_cards",
+    "name": "promoted_cards",
     "description": "Provides a block of 3 promoted Cards. Used by default on the home page.",
     "tag": "default",
     "disabled": false,
     "base_table": "node",
-    "human_name": "Card grid",
+    "human_name": "Promoted cards",
     "core": "1.20.3",
     "display": {
         "default": {
@@ -393,7 +393,7 @@
                         "relationship": "none",
                         "group_type": "group",
                         "ui_name": "",
-                        "order": "ASC",
+                        "order": "DESC",
                         "exposed": false,
                         "expose": {
                             "label": ""
