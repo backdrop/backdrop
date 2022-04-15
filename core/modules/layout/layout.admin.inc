@@ -1871,6 +1871,12 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
   $replace_block = $renderer->renderBlock($block);
 
   if (backdrop_is_ajax()) {
+    if ($message = layout_locked_message($layout, 'layout')) {
+      backdrop_set_message($message, 'warning');
+      $commands[] = ajax_command_remove('#messages');
+      $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+    }
+
     $commands[] = ajax_command_replace('#layout-editor-block-' . $block->uuid, $replace_block);
     return array(
       '#type' => 'ajax',
