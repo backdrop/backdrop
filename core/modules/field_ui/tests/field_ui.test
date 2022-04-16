@@ -429,6 +429,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
 
     // Add an instance to the user entity.
     $bundle_path2 = 'admin/config/people/manage';
+    $type_name2 = 'user';
     $edit2 = array(
       'fields[_add_existing_field][label]' => $this->field_label,
       'fields[_add_existing_field][field_name]' => $this->field_name,
@@ -454,12 +455,12 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->assertResponse(200);
 
     // Delete the second instance.
-    $this->fieldUIDeleteField($bundle_path2, $this->field_name, $this->field_label, $this->type);
+    $this->fieldUIDeleteField($bundle_path2, $this->field_name, $this->field_label, $type_name2);
 
     // Reset the fields info.
     _field_info_collate_fields_reset();
     // Check that the field instance was deleted.
-    $this->assertNull(field_info_instance('user', $this->field_name, $this->type), 'Field instance was deleted.');
+    $this->assertNull(field_info_instance('user', $this->field_name, $type_name2), 'Field instance was deleted.');
     // Check that the field was deleted too.
     $this->assertNull(field_info_field($this->field_name), 'Field was deleted.');
   }
