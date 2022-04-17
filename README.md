@@ -9,7 +9,7 @@ Backdrop aims to provide:
 
 Requirements
 ------------
-- PHP 5.3.2 or higher. Even if Backdrop can run on older versions of PHP, we
+- PHP 5.6.0 or higher. Even if Backdrop can run on older versions of PHP, we
   strongly recommend that you use a
   [supported version of PHP](https://secure.php.net/supported-versions.php).
 - MySQL 5.0.15 or higher with PDO enabled
