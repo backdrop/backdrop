@@ -625,7 +625,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // The style should now have 2 effect, the original scale provided by core
     // and the desaturate effect we added in the override.
     $effects = array_values($style['effects']);
-    $this->assertEqual($effects[0]['name'], 'image_scale', 'The default effect still exists in the overridden style.');
+    $this->assertEqual($effects[0]['name'], 'image_scale_and_crop', 'The default effect still exists in the overridden style.');
     $this->assertEqual($effects[1]['name'], 'image_desaturate', 'The added effect exists in the overridden style.');
 
     // Check that we are able to rename an overridden style.
@@ -644,7 +644,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
 
     // The style should now have the single effect for scale.
     $effects = array_values($style['effects']);
-    $this->assertEqual($effects[0]['name'], 'image_scale', 'The default effect still exists in the reverted style.');
+    $this->assertEqual($effects[0]['name'], 'image_scale_and_crop', 'The default effect still exists in the reverted style.');
     $this->assertFalse(array_key_exists(1, $effects), 'The added effect has been removed in the reverted style.');
   }
 
@@ -799,7 +799,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet(image_style_url('thumbnail', $image_uri));
     $image_info['uri'] = image_style_path('thumbnail', $image_uri);
     $image_info['width'] = 100;
-    $image_info['height'] = 50;
+    $image_info['height'] = 100;
     unset($image_info['attributes']['loading']);
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
