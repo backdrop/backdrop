@@ -153,6 +153,7 @@ function layout_list_page() {
   );
 
   $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
+  $help_items = array();
   $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
   $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
   $help .= theme('item_list', array('items' => $help_items));
