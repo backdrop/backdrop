@@ -759,7 +759,7 @@ function layout_permission() {
   return array(
     'administer layouts' => array(
       'title' => t('Administer Layouts'),
-      'description' => t('Add and modify layouts on pages.'),
+      'description' => t('Create and modify layouts and blocks.'),
       'restrict access' => TRUE,
     ),
     'administer flexible templates' => array(

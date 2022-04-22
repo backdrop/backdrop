@@ -596,7 +596,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
                 $strings[$field][$key][$string] = $table_data['table'][$string];
               }
               else {
-                if ($string != 'base' && $string != 'base') {
+                if ($string != 'base') {
                   $strings[$field][$key][$string] = t("Error: missing @component", array('@component' => $string));
                 }
               }

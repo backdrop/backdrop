@@ -110,7 +110,7 @@ class BackdropDateTime extends DateTime {
       }
     }
     if (!$successfully_parsed && is_string($time)) {
-      // PHP < 5.3 doesn't like the GMT- notation for parsing timezones.
+      // Remove superfluous "GMT" from offsets in timezones.
       $time = str_replace("GMT-", "-", $time);
       $time = str_replace("GMT+", "+", $time);
       // We are going to let the parent DateTime object do a best effort attempt
