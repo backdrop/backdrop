@@ -152,7 +152,11 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
+  $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
+  $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
+  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
+  $help .= theme('item_list', array('items' => $help_items));
+  $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
   $help_items[] = array(
     'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.'),
@@ -183,7 +187,7 @@ function layout_list_page() {
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $page['stand_alone'] = array(
     '#type' => 'help',
-    '#markup' => '<h2>' . t('Layout pages') . '</h2>' . t('These layouts will create new stand-alone pages on the site. Without the layouts, these pages would not exist.'),
+    '#markup' => '<h2>' . t('Layout pages') . '</h2>' . t('These layouts will create new stand-alone pages on the site.'),
     '#weight' => 0,
   );
   $page['stand_alone_table'] = array(
@@ -196,7 +200,7 @@ function layout_list_page() {
    );
    $page['override'] = array(
     '#type' => 'help',
-    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site. Without these layout overrides, these pages would use other layouts.'),
+    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site.'),
     '#weight' => 2,
    );
    $page['override_table'] = array(
