@@ -2564,6 +2564,7 @@ function hook_requirements($phase) {
  *   definition.
  *
  * @see hook_schema_alter()
+ * @see hook_schema_0()
  *
  * @ingroup schemaapi
  */
@@ -2648,6 +2649,60 @@ function hook_schema_alter(&$schema) {
     'default' => 0,
     'description' => 'Per-user timezone configuration.',
   );
+}
+
+/**
+ * Define the database schema to use when a module is installed during updates.
+ *
+ * This hook is called when installing a module during the update or upgrade 
+ * process. It creates the initial database schema for the newly installed
+ * module before any of its update hooks are called.
+ * 
+ * Unlike hook_schema(), when modules are installed during the update process,
+ * all hook_update_N for the module will be invoked after the database table(s)
+ * defined by this hook are created. This means that the schema definition
+ * provided here may be modified later by hook_update_N.
+ * 
+ * See hook_schema() for details on the schema definition structure.
+ *
+ * @return array
+ *   A schema definition structure array. For each element of the
+ *   array, the key is a table name and the value is a table structure
+ *   definition.
+ *
+ * @see hook_schema()
+ * @see hook_schema_alter()
+ *
+ * @ingroup schemaapi
+ */
+function hook_schema_0() {
+  $schema['mymodule'] = array(
+    'description' => 'The base table for mymodule.',
+    'fields' => array(
+      'mymodule_id' => array(
+        'description' => 'The primary identifier for mymodule.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'The description column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('mymodule_id'),
+  );
+  return $schema;
 }
 
 /**
