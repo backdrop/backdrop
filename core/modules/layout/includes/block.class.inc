@@ -6,11 +6,15 @@
 class Block extends LayoutHandler {
 
   /**
-   * If this block is disabled.
+   * The block disabled status indicator.
    *
-   * @var bool
+   * Disabled blocks are not visible at the layout path, but remain on the
+   * layout block add page.
+   * The value is either BLOCK_ENABLED or BLOCK_DISABLED.
+   *
+   * @var integer
    */
-  var $status = 1;
+  var $status;
 
   /**
    * The module that provides this block.
@@ -97,7 +101,7 @@ class Block extends LayoutHandler {
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
-    $this->status = isset($data['status']) ? $data['status'] : 1;
+    $this->status = isset($data['status']) ? $data['status'] : BLOCK_ENABLED;
     $parts = explode(':', $this->plugin, 3);
     $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
