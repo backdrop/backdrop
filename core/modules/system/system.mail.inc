@@ -42,8 +42,7 @@ class DefaultMailSystem implements MailSystemInterface {
   public function mail(array $message) {
     // If 'Return-Path' isn't already set in php.ini, we pass it separately
     // as an additional parameter instead of in the header.
-    // However, if PHP's 'safe_mode' is on, this is not allowed.
-    if (isset($message['headers']['Return-Path']) && !ini_get('safe_mode')) {
+    if (isset($message['headers']['Return-Path'])) {
       $return_path_set = strpos(ini_get('sendmail_path'), ' -f');
       if (!$return_path_set) {
         $message['Return-Path'] = $message['headers']['Return-Path'];
@@ -72,30 +71,21 @@ class DefaultMailSystem implements MailSystemInterface {
     if (!isset($_SERVER['WINDIR']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Win32') === FALSE) {
       // We validate the return path, unless it is equal to the site mail, which
       // we assume to be safe.
-      if (isset($message['Return-Path']) && !ini_get('safe_mode') && (config_get('system.core', 'site_mail') === $message['Return-Path'] || self::_isShellSafe($message['Return-Path']))) {
-
+      $additional_params = NULL;
+      if (isset($message['Return-Path']) && (config_get('system.core', 'site_mail') === $message['Return-Path'] || self::_isShellSafe($message['Return-Path']))) {
         // On most non-Windows systems, the "-f" option to the sendmail command
         // is used to set the Return-Path. There is no space between -f and
         // the value of the return path.
-        $mail_result = @mail(
-          $message['to'],
-          $mail_subject,
-          $mail_body,
-          $mail_headers,
-          '-f' . $message['Return-Path']
-        );
+        $additional_params = '-f' . $message['Return-Path'];
       }
-      else {
-        // The optional $additional_parameters argument to mail() is not
-        // allowed if safe_mode is enabled. Passing any value throws a PHP
-        // warning and makes mail() return FALSE.
-        $mail_result = @mail(
-          $message['to'],
-          $mail_subject,
-          $mail_body,
-          $mail_headers
-        );
-      }
+
+      $mail_result = @mail(
+        $message['to'],
+        $mail_subject,
+        $mail_body,
+        $mail_headers,
+        $additional_params
+      );
     }
     else {
       // On Windows, PHP will use the value of sendmail_from for the
