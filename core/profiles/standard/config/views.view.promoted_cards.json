@@ -195,7 +195,7 @@
                         "click_sort_column": "fid",
                         "type": "image",
                         "settings": {
-                            "image_style": "large_cropped",
+                            "image_style": "large",
                             "image_link": "",
                             "image_float": "",
                             "image_load": "auto"

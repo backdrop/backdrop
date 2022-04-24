@@ -160,7 +160,7 @@ function standard_install() {
     array(
       'type' => 'card',
       'name' => st('Card'),
-      'description' => st('Add a piece of content to be used for blocks and views. A card does not have a public path (hide path display). Example use-case: Place card content as "Existing content" block in a Layout.'),
+      'description' => st('Add a card for use on an existing page. Display as a block or in a view.'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'node_preview' => TRUE,
@@ -171,10 +171,10 @@ function standard_install() {
         'revision_enabled' => TRUE,
         'revision_default' => FALSE,
         'scheduling_enabled' => FALSE,
-        'show_submitted_info' => TRUE,
+        'show_submitted_info' => FALSE,
         'comment_default' => COMMENT_NODE_CLOSED,
         'node_submitted' => FALSE,
-        'node_user_picture' => TRUE,
+        'node_user_picture' => FALSE,
         'hidden_path' => TRUE,
       ),
       'is_new' => TRUE,
@@ -191,7 +191,6 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
-    ->set('node_card_pattern', 'cards/[node:title]')
     ->save();
 
   cache_clear_all();
@@ -349,7 +348,7 @@ function standard_install() {
       'default' => array(
         'label' => 'hidden',
         'type' => 'image',
-        'settings' => array('image_style' => 'large_cropped', 'image_link' => ''),
+        'settings' => array('image_style' => 'large', 'image_link' => ''),
         'weight' => 0,
       ),
       'teaser' => array(
@@ -415,11 +414,8 @@ function standard_install() {
   menu_link_save($item);
 
   // Creating three default Card nodes.
+  // Images provided by @olafgrabienski
 
-  // Credits for images.
-  // --- @TODO
-  // --- @TODO
-  // --- @TODO
 
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
@@ -431,11 +427,11 @@ function standard_install() {
     ),
     'card2-card.png' => array(
       'title' => st('What is a Card?'),
-      'body' => st('<p>A Card is a flexible content item. Cards can be put on any page by placing them into a layout as "Existing content" blocks.</p><p><a href="https://docs.backdropcms.org/documentation/blocks">Learn more about blocks</a></p>'),
+      'body' => st('<p>A Card can only be seen as part of another page. Place them individually as "Existing content" Blocks, or grouped as in a View.</p><p><a href="https://docs.backdropcms.org/documentation/creating-and-editing-content">Learn more about Cards</a></p>'),
     ),
     'card3-layout.png' => array(
       'title' => st('The Home page layout'),
-      'body' => st('<p>These Cards on the Home page were added to its layout through a block display from the "Card grid" view.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
+      'body' => st('<p>Use the home page layout to specifically customize this page. These Cards only appear on this layout.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
     ),
   );
 

@@ -3,8 +3,9 @@
  * Card listing view on the default home page.
  */
 
+/* @todo compensates for a bug in Basis. */
 .l-top .block-views-promoted-cards-block {
-  margin-top: -2rem;/* Negative top margin collapses spacing under header */
+  margin-top: -2rem; /* Negative top margin collapses spacing under header */
 }
 .block-views-promoted-cards-block {
   padding-top: 2rem;
