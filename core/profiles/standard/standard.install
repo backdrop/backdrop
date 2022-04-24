@@ -191,6 +191,7 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
+    ->set('node_post_pattern', 'cards/[node:title]')
     ->save();
 
   cache_clear_all();
@@ -414,7 +415,7 @@ function standard_install() {
   menu_link_save($item);
 
   // Creating three default Card nodes.
-  // Images provided by @olafgrabienski
+  // Special thanks to @indigoxela for providing the icons.
 
 
   $field_image_dir = 'public://field/image';
