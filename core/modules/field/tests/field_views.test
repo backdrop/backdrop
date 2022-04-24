@@ -34,7 +34,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
    */
   public $instances;
 
-  protected function createUser($extra_edit = array()) {
+  protected function CreateUser($extra_edit = array()) {
     $permissions = array('access comments', 'access content', 'post comments', 'skip comment approval');
     // Create a role with the given permission set.
     if (!($rid = $this->backdropCreateRole($permissions))) {
@@ -156,7 +156,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
         'field_name_1' => array($langcode => array((array('value' => $this->randomName())))),
         'field_name_2' => array($langcode => array((array('value' => $this->randomName())))),
       );
-      $this->users[] = $this->createUser($edit);
+      $this->users[] = $this->CreateUser($edit);
     }
 
     // Reset views data cache.
