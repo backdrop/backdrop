@@ -1160,7 +1160,7 @@ textarea.form-textarea:focus {
   color: #000;
   border-color: #43afe4;
 }
-input[type=color] {
+input.form-color {
   border-radius: 100%;
   height: 35px;
   width: 35px;
@@ -1169,16 +1169,16 @@ input[type=color] {
   vertical-align: middle;
 }
 /* Styles to control the color inputs in Firefox. */
-input[type=color]::-moz-color-swatch {
+input.form-color::-moz-color-swatch {
   border: none;
   border-radius: 100%;
 }
 /* Styles to control the color inputs in Chrome. */
-input[type=color]::-webkit-color-swatch {
+input.form-color::-webkit-color-swatch {
   border: none;
   border-radius: 100%;
 }
-input[type=color]::-webkit-color-swatch-wrapper {
+input.form-color::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 ul.action-links {
