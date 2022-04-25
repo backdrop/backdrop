@@ -191,7 +191,7 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
-    ->set('node_post_pattern', 'cards/[node:title]')
+    ->set('node_card_pattern', 'cards/[node:title]')
     ->save();
 
   cache_clear_all();
