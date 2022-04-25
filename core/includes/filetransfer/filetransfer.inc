@@ -226,7 +226,9 @@ abstract class FileTransfer {
       $destination = $destination . '/' . backdrop_basename($source);
     }
     $this->createDirectory($destination);
-    foreach (new RecursiveIteratorIterator(new SkipDotsRecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST) as $filename => $file) {
+    $directory_iterator = new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS);
+    $recursive_iterator = new RecursiveIteratorIterator($directory_iterator, RecursiveIteratorIterator::SELF_FIRST);
+    foreach ($recursive_iterator as $filename => $file) {
       $relative_path = substr($filename, strlen($source));
       if ($file->isDir()) {
         $this->createDirectory($destination . $relative_path);
@@ -377,7 +379,7 @@ class FileTransferException extends Exception {
   public $arguments;
 
   function __construct($message, $code = 0, $arguments = array()) {
-    parent::__construct($message, $code);
+    parent::__construct($message, (int) $code);
     $this->arguments = $arguments;
   }
 }
@@ -404,11 +406,13 @@ interface FileTransferChmodInterface {
 /**
  * Provides an interface for iterating recursively over filesystem directories.
  *
- * Manually skips '.' and '..' directories, since no existing method is
- * available in PHP 5.2.
+ * Manually skips '.' and '..' directories, since no existing method existed in
+ * PHP versions prior to 5.3.
  *
- * @todo Depreciate in favor of RecursiveDirectoryIterator::SKIP_DOTS once PHP
- *   5.3 or later is required.
+ * Instead of using this class, use RecursiveDirectoryIterator directly and
+ * pass the FilesystemIterator::SKIP_DOTS option.
+ *
+ * @deprecated since 1.22.0
  */
 class SkipDotsRecursiveDirectoryIterator extends RecursiveDirectoryIterator {
   /**
@@ -418,15 +422,18 @@ class SkipDotsRecursiveDirectoryIterator extends RecursiveDirectoryIterator {
    *   The path of the directory to be iterated over.
    */
   function __construct($path) {
+    watchdog_deprecated_function('filetransfer', __METHOD__);
     parent::__construct($path);
     $this->skipdots();
   }
 
+  #[\ReturnTypeWillChange]
   function rewind() {
     parent::rewind();
     $this->skipdots();
   }
 
+  #[\ReturnTypeWillChange]
   function next() {
     parent::next();
     $this->skipdots();

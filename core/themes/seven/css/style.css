@@ -1048,6 +1048,22 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
@@ -1159,6 +1175,27 @@ textarea.form-textarea:focus {
   outline: 0;
   color: #000;
   border-color: #43afe4;
+}
+input.form-color {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input.form-color::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input.form-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input.form-color::-webkit-color-swatch-wrapper {
+  padding: 0;
 }
 ul.action-links {
   margin: 1em 0;

@@ -2564,6 +2564,7 @@ function hook_requirements($phase) {
  *   definition.
  *
  * @see hook_schema_alter()
+ * @see hook_schema_0()
  *
  * @ingroup schemaapi
  */
@@ -2648,6 +2649,60 @@ function hook_schema_alter(&$schema) {
     'default' => 0,
     'description' => 'Per-user timezone configuration.',
   );
+}
+
+/**
+ * Define the database schema to use when a module is installed during updates.
+ *
+ * This hook is called when installing a module during the update or upgrade 
+ * process. It creates the initial database schema for the newly installed
+ * module before any of its update hooks are called.
+ * 
+ * Unlike hook_schema(), when modules are installed during the update process,
+ * all hook_update_N for the module will be invoked after the database table(s)
+ * defined by this hook are created. This means that the schema definition
+ * provided here may be modified later by hook_update_N.
+ * 
+ * See hook_schema() for details on the schema definition structure.
+ *
+ * @return array
+ *   A schema definition structure array. For each element of the
+ *   array, the key is a table name and the value is a table structure
+ *   definition.
+ *
+ * @see hook_schema()
+ * @see hook_schema_alter()
+ *
+ * @ingroup schemaapi
+ */
+function hook_schema_0() {
+  $schema['mymodule'] = array(
+    'description' => 'The base table for mymodule.',
+    'fields' => array(
+      'mymodule_id' => array(
+        'description' => 'The primary identifier for mymodule.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'The description column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('mymodule_id'),
+  );
+  return $schema;
 }
 
 /**
@@ -2796,10 +2851,10 @@ function hook_install() {
  * Examples:
  * - mymodule_update_1000(): This is the required update for mymodule to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
- * - mymodule_update_1100(): This is the first update to get the database ready
- *   to run mymodule 1.x-1.*.
- * - mymodule_update_1200(): This is the first update to get the database ready
- *   to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
+ * - mymodule_update_1100(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-1.*.
+ * - mymodule_update_1200(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
  *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
  *   11xx updates, because those reside in the 1.x-1.x branch only.
  *
@@ -2854,11 +2909,24 @@ function hook_install() {
 function hook_update_N(&$sandbox) {
   // For non-multipass updates the signature can be `function hook_update_N() {`
 
-  // For most updates, the following is sufficient.
+  // Convert Drupal 7 variables to Backdrop config. Make sure these new config
+  // settings and their default values exist in `config/mymodule.settings.json`.
+  $config = config('mymodule.settings');
+  $config->set('one', update_variable_get('mymodule_one', '1.11'));
+  $config->set('two', update_variable_get('mymodule_two', '2.22'));
+  $config->save();
+  update_variable_del('mymodule_one');
+  update_variable_del('mymodule_two');
+
+  // Update existing config with a new setting. Make sure the new setting and
+  // its default value exists in `config/mymodule.settings.json`.
+  config_set('mymodule.settings', 'three', '3.33');
+
+  // For most database updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
-  // However, for more complex operations that may take a long time,
-  // you may hook into Batch API as in the following example.
+  // However, for more complex operations that may take a long time, you may
+  // hook into Batch API as in the following example.
 
   // Update 3 users at a time to have an exclamation point after their names.
   // (They're really happy that we can do batch API in this hook!)
@@ -3496,11 +3564,11 @@ function hook_system_themes_page_alter(&$theme_groups) {
  * Alters inbound URL requests.
  *
  * @param $path
- *   The path being constructed, which, if a path alias, has been resolved to a
+ *   The path being constructed, which, if a URL alias, has been resolved to a
  *   Backdrop path by the database, and which also may have been altered by
  *   other modules before this one.
  * @param $original_path
- *   The original path, before being checked for path aliases or altered by any
+ *   The original path, before being checked for URL aliases or altered by any
  *   modules.
  * @param $path_language
  *   The language of the path.
@@ -3519,8 +3587,8 @@ function hook_url_inbound_alter(&$path, $original_path, $path_language) {
  * Alters outbound URLs.
  *
  * @param $path
- *   The outbound path to alter, not adjusted for path aliases yet. It won't be
- *   adjusted for path aliases until all modules are finished altering it, thus
+ *   The outbound path to alter, not adjusted for URL aliases yet. It won't be
+ *   adjusted for URL aliases until all modules are finished altering it, thus
  *   being consistent with hook_url_inbound_alter(), which adjusts for all path
  *   aliases before allowing modules to alter it. This may have been altered by
  *   other modules before this one.

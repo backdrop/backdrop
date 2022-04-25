@@ -119,7 +119,7 @@ input.form-radio {
   vertical-align: middle;
 }
 .form-required {
-  color: #f00;
+  color: #e60000;
 }
 .marker{
   font-size: 0.9em;

@@ -186,7 +186,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
       // Log errors.
       if (!$message['result']) {
         watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
-        backdrop_set_message(t('Unable to send e-mail. Contact the site administrator if the problem persists.'), 'error');
+        backdrop_set_message(t('Unable to send e-mail.'), 'error');
       }
     }
   }
@@ -264,18 +264,18 @@ function backdrop_mail_system($module, $key) {
 
   $id = $module . '_' . $key;
 
-  $configuration = config_get('system.mail');
+  $config = config('system.mail');
 
   // Look for overrides for the default class, starting from the most specific
   // id, and falling back to the module name.
-  if (isset($configuration[$id])) {
-    $class = $configuration[$id];
+  if ($config->get($id) !== NULL) {
+    $class = $config->get($id);
   }
-  elseif (isset($configuration[$module])) {
-    $class = $configuration[$module];
+  elseif ($config->get($module) !== NULL) {
+    $class = $config->get($module);
   }
-  elseif (isset($configuration['default-system'])) {
-    $class = $configuration['default-system'];
+  elseif ($config->get('default-system') !== NULL) {
+    $class = $config->get('default-system');
   }
   else {
     $class = 'DefaultMailSystem';
