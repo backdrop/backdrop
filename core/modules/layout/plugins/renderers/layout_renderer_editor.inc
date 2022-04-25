@@ -118,7 +118,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $block_admin_title = $block->getAdminTitle();
     if (!$block->status) {
       $attributes['class'][] = 'layout-editor-block-disabled';
-      $block_admin_title .= t(' (Disabled)');
+      $block_admin_title = t('!title (Disabled)', array('!title' => $block_admin_title);
     }
 
     $output = '<div ' . backdrop_attributes($attributes) . '>';
