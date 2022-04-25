@@ -408,3 +408,7 @@
 [dir="rtl"] .edit-layout-top .dropbutton-wrapper {
   float: left;
 }
+
+.layout-editor-block-disabled {
+  color: #999;
+}
