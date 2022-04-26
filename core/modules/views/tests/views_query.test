@@ -124,8 +124,12 @@ abstract class ViewsTestCase extends BackdropWebTestCase {
 }
 
 abstract class ViewsSqlTest extends ViewsTestCase {
-  protected function setUp() {
-    parent::setUp('views', 'views_ui');
+  protected function setUp(array $modules = array()) {
+    parent::setUp(array_merge(array('views', 'views_ui'), $modules));
+
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
 
     // Define the schema and views data variable before enabling the test module.
     state_set('views_test_schema', $this->schemaDefinition());

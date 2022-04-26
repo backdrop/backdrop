@@ -400,6 +400,9 @@ fieldset .fieldset-legend {
   }
 }
 
+.front .l-top {
+  background-color: #f2f2f2;
+}
 
 /**
  * Footer styles

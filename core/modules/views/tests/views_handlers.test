@@ -11,10 +11,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests abstract handlers of views.
  */
 class ViewsHandlersTest extends ViewsSqlTest {
-  protected function setUp() {
-    parent::setUp('views', 'views_ui');
-    module_enable(array('views_ui'));
-  }
 
   function testFilterInOperatorUi() {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));

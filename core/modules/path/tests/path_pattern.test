@@ -454,6 +454,14 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   protected $profile = 'standard';
 
+  function setUp(array $modules = array()) {
+    parent::setUp($modules);
+
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
+  }
+
   /**
    * Create a new content type with new path pattern.
    */
@@ -610,9 +618,9 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     $edit = array(
       'action' => 'path_node_update_action',
-      'bulk_form[1]' => TRUE,
+      'bulk_form[0]' => TRUE,
     );
-    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'type', 'sort' => 'asc')));
+    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'title', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item', array('%action' => 'Update content URL alias')));
 
     $this->assertEntityAlias('node', $node1, 'content/' . $node1->title);

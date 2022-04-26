@@ -2416,6 +2416,8 @@ class FileUploadWizardTestCase extends FileTestHelper {
  * Test file administration page functionality.
  */
 class FileAdminTestCase extends FileTestHelper {
+  protected $profile = 'minimal';
+
   function setUp() {
     parent::setUp();
 

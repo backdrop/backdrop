@@ -2196,9 +2196,9 @@ class FilterFileUsageTest extends BackdropWebTestCase {
       ),
       'log' => 'First revision.',
     ));
-    debug($node);
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '1'))), file_usage_list($image), 'The image has 1 usage.');
+    $nid = $node->nid;
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '1'))), file_usage_list($image), 'The image has 1 usage.');
 
     // Test filter_entity_update(): increment, twice, by creating new revisions.
     $node->vid = NULL;
@@ -2208,7 +2208,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $node->vid = NULL;
     $node->log = 'Third revision.';
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test hook_entity_update(): decrement, by modifying the last revision:
     // remove the data- attribute from the body field.
@@ -2216,17 +2216,17 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $new_value = str_replace('data-file-id', 'data-file-id-modified', $original_value);
     $node->body[LANGUAGE_NONE][0]['value'] = $new_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test hook_entity_update(): increment, by modifying the last revision:
     // read the data- attribute to the body field.
     $node->body[LANGUAGE_NONE][0]['value'] = $original_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test filter_node_revision_delete(): decrement, by deleting a revision.
     node_revision_delete($second_revision_id);
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test filter_entity_delete().
     $node->delete();
