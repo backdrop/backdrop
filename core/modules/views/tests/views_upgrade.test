@@ -184,13 +184,13 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
       $handler->display->display_options["fields"]["subject"]["field"] = "subject";
       $handler->display->display_options["fields"]["subject"]["label"] = "";
       $handler->display->display_options["fields"]["subject"]["link_to_comment"] = 1;
-      /* Field: Comment: Post date */
+      /* Field: Comment: Created date */
       $handler->display->display_options["fields"]["timestamp"]["id"] = "timestamp";
       $handler->display->display_options["fields"]["timestamp"]["table"] = "comments";
       $handler->display->display_options["fields"]["timestamp"]["field"] = "timestamp";
       $handler->display->display_options["fields"]["timestamp"]["label"] = "";
       $handler->display->display_options["fields"]["timestamp"]["date_format"] = "time ago";
-      /* Sort criterion: Comment: Post date */
+      /* Sort criterion: Comment: Created date */
       $handler->display->display_options["sorts"]["timestamp"]["id"] = "timestamp";
       $handler->display->display_options["sorts"]["timestamp"]["table"] = "comments";
       $handler->display->display_options["sorts"]["timestamp"]["field"] = "timestamp";
@@ -225,7 +225,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
       $handler->display->display_options["fields"]["title"]["relationship"] = "nid";
       $handler->display->display_options["fields"]["title"]["label"] = "Reply to";
       $handler->display->display_options["fields"]["title"]["link_to_node"] = 1;
-      /* Field: Comment: Post date */
+      /* Field: Comment: Created date */
       $handler->display->display_options["fields"]["timestamp"]["id"] = "timestamp";
       $handler->display->display_options["fields"]["timestamp"]["table"] = "comments";
       $handler->display->display_options["fields"]["timestamp"]["field"] = "timestamp";
