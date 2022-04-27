@@ -161,6 +161,7 @@ function system_permission() {
     'administer site configuration' => array(
       'title' => t('Administer site configuration'),
       'restrict access' => TRUE,
+      'warning' => t('Provides access to a variety of settings/functionality that should generally be restricted to site administrators.'),
     ),
     'administer themes' => array(
       'title' => t('Administer themes'),
@@ -168,6 +169,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
+      'warning' => t('Run database updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
