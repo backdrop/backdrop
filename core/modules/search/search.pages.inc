@@ -87,5 +87,11 @@ function search_form_validate($form, &$form_state) {
  * Process a search form submission.
  */
 function search_form_submit($form, &$form_state) {
-  $form_state['redirect'] = $form_state['action'] . '/' . $form_state['values']['processed_keys'];
+  $keys = $form_state['values']['processed_keys'];
+  if ($keys == '') {
+    form_set_error('keys', t('Please enter some keywords.'));
+    // Fall through to the form redirect.
+  }
+
+  $form_state['redirect'] = $form_state['action'] . '/' . $keys;
 }

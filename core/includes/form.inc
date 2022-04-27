@@ -563,7 +563,7 @@ function form_get_cache($form_build_id, &$form_state) {
  */
 function form_set_cache($form_build_id, $form, $form_state) {
   $site_config = config('system.core');
-  
+
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
@@ -1469,11 +1469,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       $is_empty_value = ($elements['#value'] === 0);
       $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
-        // Flag this element as #required_but_empty to allow #element_validate
+        // Flag this element as #required_value_missing to allow #element_validate
         // handlers to set a custom required error message, but without having
         // to re-implement the complex logic to figure out whether the field
         // value is empty.
-        $elements['#required_but_empty'] = TRUE;
+        $elements['#required_value_missing'] = TRUE;
       }
     }
 
@@ -1489,13 +1489,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       }
     }
 
-    // Ensure that a #required form error is thrown, regardless of whether
-    // #element_validate handlers changed any properties. If $is_empty_value
-    // is defined, then above #required validation code ran, so the other
-    // variables are also known to be defined and we can test them again.
-    if (isset($is_empty_value) && ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null)) {
-      if (isset($elements['#required_error'])) {
-        form_error($elements, $elements['#required_error']);
+    // Using the #required_value_missing property set above, display an error
+    // message for empty required fields.
+    if (isset($elements['#required_value_missing']) && $elements['#required_value_missing'] == TRUE) {
+      if (isset($elements['#required_message'])) {
+        form_error($elements, $elements['#required_message']);
       }
       // A #title is not mandatory for form elements, but without it we cannot
       // set a form error message. So when a visible title is undesirable, form

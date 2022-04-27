@@ -1025,8 +1025,7 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Verify that comment count display toggles properly on comment status of
-   * node.
+   * Verify comment counts display correctly based on comment status of node.
    */
   function testSearchCommentCountToggle() {
     // Search for the nodes by string in the node body.

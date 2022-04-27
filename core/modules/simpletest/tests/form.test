@@ -147,11 +147,11 @@ class FormsTestCase extends BackdropWebTestCase {
     // messages for each field.
     $expected = array();
     foreach (array('textfield', 'checkboxes', 'select', 'radios') as $key) {
-      if (isset($form[$key]['#required_error'])) {
-        $expected[] = $form[$key]['#required_error'];
+      if (isset($form[$key]['#required_message'])) {
+        $expected[] = $form[$key]['#required_message'];
       }
-      elseif (isset($form[$key]['#form_test_required_error'])) {
-        $expected[] = $form[$key]['#form_test_required_error'];
+      elseif (isset($form[$key]['#form_test_required_message'])) {
+        $expected[] = $form[$key]['#form_test_required_message'];
       }
       else {
         $expected[] = t('!name field is required.', array('!name' => $form[$key]['#title']));
@@ -815,7 +815,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
    *
    * @see form_test_validate_required_form()
    */
-  function testCustomRequiredError() {
+  function testCustomRequiredMessage() {
     $form = $form_state = array();
     $form = form_test_validate_required_form($form, $form_state);
 
@@ -824,13 +824,13 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost('form-test/validate-required', $edit, 'Submit');
 
     foreach (element_children($form) as $key) {
-      if (isset($form[$key]['#required_error'])) {
+      if (isset($form[$key]['#required_message'])) {
         $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
-        $this->assertText($form[$key]['#required_error']);
+        $this->assertText($form[$key]['#required_message']);
       }
-      elseif (isset($form[$key]['#form_test_required_error'])) {
+      elseif (isset($form[$key]['#form_test_required_message'])) {
         $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
-        $this->assertText($form[$key]['#form_test_required_error']);
+        $this->assertText($form[$key]['#form_test_required_message']);
       }
     }
     $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
@@ -844,13 +844,13 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost('form-test/validate-required', $edit, 'Submit');
 
     foreach (element_children($form) as $key) {
-      if (isset($form[$key]['#required_error'])) {
+      if (isset($form[$key]['#required_message'])) {
         $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
-        $this->assertNoText($form[$key]['#required_error']);
+        $this->assertNoText($form[$key]['#required_message']);
       }
-      elseif (isset($form[$key]['#form_test_required_error'])) {
+      elseif (isset($form[$key]['#form_test_required_message'])) {
         $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
-        $this->assertNoText($form[$key]['#form_test_required_error']);
+        $this->assertNoText($form[$key]['#form_test_required_message']);
       }
     }
     $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
