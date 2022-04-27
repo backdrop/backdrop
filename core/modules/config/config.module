@@ -88,6 +88,7 @@ function config_permission() {
   $permissions['synchronize configuration'] = array(
     'title' => t('Synchronize, import, and export configuration'),
     'restrict access' => TRUE,
+    'warning' => t('Importing and synchronizing config allows access to, and manipulation of, all settings on the site.'),
   );
   return $permissions;
 }

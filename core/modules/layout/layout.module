@@ -779,11 +779,13 @@ function layout_permission() {
       'title' => t('Administer Layouts'),
       'description' => t('Create and modify layouts and blocks.'),
       'restrict access' => TRUE,
+      'warning' => t('Change the access/visibility of menu items, layouts and blocks.'),
     ),
     'administer flexible templates' => array(
       'title' => t('Administer Flexible Templates'),
       'description' => t('Create, configure and delete flexible layout templates.'),
       'restrict access' => TRUE,
+      'warning' => t('Manage all aspects of flexible layout templates, including deleting them.'),
     ),
   );
 }

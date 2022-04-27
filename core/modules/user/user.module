@@ -567,19 +567,23 @@ function user_permission() {
     'administer permissions' =>  array(
       'title' => t('Administer permissions'),
       'restrict access' => TRUE,
+      'warning' => t('Grant any permission to any user role.'),
     ),
     'administer users' => array(
       'title' => t('Administer user accounts'),
       'restrict access' => TRUE,
+      'warning' => t('Create, edit and delete user accounts.'),
     ),
     'assign roles' => array(
       'title' => t('Assign user roles'),
       'restrict access' => TRUE,
+      'warning' => t('Assign any user role to any user account.'),
     ),
     'administer account settings' => array(
       'title' => t('Administer user account settings'),
       'description' => t('Manage settings that apply to all user accounts.'),
       'restrict access' => TRUE,
+      'warning' => t('Change the way user account registrations work, potentially avoiding administrator approval.'),
     ),
     'access user profiles' => array(
       'title' => t('View user profiles'),
@@ -594,6 +598,7 @@ function user_permission() {
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people to choose to permanently delete their user account and all content created by them (potential for irreversible data loss).'),
     ),
   );
 }
