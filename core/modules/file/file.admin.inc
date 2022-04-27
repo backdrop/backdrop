@@ -516,10 +516,6 @@ function file_settings_form($form, &$form_state) {
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
   );
-  $form['default_file_directory']['tokens'] = array(
-    '#theme' => 'token_tree',
-    '#dialog' => TRUE,
-  );
 
   $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
