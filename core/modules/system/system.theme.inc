@@ -178,7 +178,7 @@ function theme_system_modules_fieldset($variables) {
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
     }
-    if (!$module['#core']) {
+    if (!$module['#project']) {
       $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $key) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $key) . '</div>';
     }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
