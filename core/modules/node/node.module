@@ -3505,7 +3505,7 @@ function node_requirements($phase) {
     if ($needs_rebuild) {
       $value = t('Access permissions need to be rebuilt.');
     }
-    elseif ($grant_count != 1 || count(module_implements('node_grants')) > 0 || node_access_needs_rebuild()) {
+    elseif ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
       $value = format_plural($grant_count, 'One permission in use', '@count permissions in use', array('@count' => $grant_count));
     }
     else {
