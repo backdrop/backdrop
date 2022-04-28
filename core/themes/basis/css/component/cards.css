@@ -10,6 +10,7 @@
 .block-views-promoted-cards-block {
   padding-top: 2rem;
   padding-bottom: 2rem;
+  background-color: #f2f2f2;
 }
 
 .block-views-promoted-cards-block .views-view-grid-cols-3 {
@@ -38,14 +39,6 @@
 @media (min-width: 48em) {
   .block-views-promoted-cards-block .views-view-grid-cols-3 {
     grid-template-columns: repeat(3, 1fr);
-  }
-  .view-promoted-cards .views-grid-box-1 {
-    margin: 1rem 1rem 1rem 0;
-  }
-  .view-promoted-cards .views-grid-box-2 {
-    margin: 1rem 0.5rem;
-  }
-  .view-promoted-cards .views-grid-box-3 {
-    margin: 1rem 0 1rem 1rem;
+    gap: 2rem;
   }
 }
