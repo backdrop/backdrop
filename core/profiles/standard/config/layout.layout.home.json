@@ -141,7 +141,7 @@
                     "plugin": "default",
                     "data": {
                         "settings": {
-                            "classes": ""
+                            "classes": "container"
                         }
                     }
                 }
@@ -177,7 +177,7 @@
                     "plugin": "default",
                     "data": {
                         "settings": {
-                            "classes": "container"
+                            "classes": ""
                         }
                     }
                 }
