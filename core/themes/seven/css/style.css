@@ -431,8 +431,8 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
-.l-content {
-  margin-bottom: 80px;
+.l-wrapper {
+  padding-bottom: 80px;
 }
 
 /* Administration page listings. */
