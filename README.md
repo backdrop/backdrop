@@ -9,7 +9,7 @@ Backdrop aims to provide:
 
 Requirements
 ------------
-- PHP 5.3.2 or higher. Even if Backdrop can run on older versions of PHP, we
+- PHP 5.6.0 or higher. Even if Backdrop can run on older versions of PHP, we
   strongly recommend that you use a
   [supported version of PHP](https://secure.php.net/supported-versions.php).
 - MySQL 5.0.15 or higher with PDO enabled
@@ -66,21 +66,24 @@ project:
   information.)*
 - [JetBrains](https://www.jetbrains.com/phpstorm) for use of the PHPStorm IDE
   for development. *(Contact info@backdropcms.org for a license.)*
+- [Fastly](https://fastly.com) for CDN services for all backdropcms.org properties.
 - [GitHub](https://github.com) for collaboration and code management tools.
 - [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
 - [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
+- [Linode](https://linode.com) for web hosting.
+- [1Password](https://1password.com) for keeping our passwords safe.
+- [SendGrid](https://sendgrid.com) for getting our emails into your inboxes.
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
+Please see the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
+Please see the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
 
 Code of Conduct
 ---------------
-
 A primary goal of the Backdrop CMS community is to be inclusive to the largest
 number of contributors, with the most varied and diverse backgrounds possible.
 As such, we are committed to providing a friendly, safe and welcoming
@@ -102,7 +105,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2021 by the original authors.
+All Backdrop code is Copyright 2001 - 2022 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

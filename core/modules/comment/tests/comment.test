@@ -6,6 +6,7 @@
 
 class CommentHelperCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $moderator_user;
   protected $web_user;
   protected $node;
   protected $profile = 'testing';
@@ -66,7 +67,8 @@ class CommentHelperCase extends BackdropWebTestCase {
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
 
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comment settings', 'administer comments', 'administer layouts', 'administer fields'));
+    $this->moderator_user = $this->backdropCreateUser(array('administer content types', 'administer comments', 'edit own comments'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
 
@@ -477,6 +479,15 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
     $this->setCommentForm(FALSE);
+
+    // Check that moderator can manage individual comments, but not comment
+    // settings.
+    $this->backdropLogout();
+    $this->backdropLogin($this->moderator_user);
+    $this->backdropGet('admin/structure/types/manage/post');
+    $this->assertNoText(t('Comment settings'));
+    $this->backdropGet('admin/content/comment');
+    $this->assertNoText(t('You are not authorized to access this page.'));
   }
 
   /**
@@ -520,7 +531,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertTrue($this->xpath('//a[@id=:new]/following-sibling::a[1][@id=:comment_id]', array(':new' => 'new', ':comment_id' => 'comment-1')), 'The "new" anchor is positioned at the right comment.');
 
     // Updates to the history table are done in background processing from the
-    // previous request. Wait a short time to make sure the record is written. 
+    // previous request. Wait a short time to make sure the record is written.
     sleep(1);
 
     // Test if "new comment" link is correctly removed.

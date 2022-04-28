@@ -294,6 +294,84 @@ function update_module_add_to_system($modules = array()) {
   }
 }
 
+/** 
+ * Checks for disabled dependencies during a Drupal 7 upgrade.
+ * 
+ * @return string
+ *   A themed message that lists modules that will be enabled, to be displayed
+ *   in the 'info' page of the update process. 
+ */
+
+function update_upgrade_check_dependencies() {
+  $status_report = '';
+  if (backdrop_get_installed_schema_version('system') > 7000) {
+    $modules_to_enable = update_upgrade_modules_to_enable();
+    
+    if (empty($modules_to_enable)) {
+      return '';
+    }
+
+    $files = system_rebuild_module_data();
+    $module_list = '';
+    foreach ($modules_to_enable as $module_to_enable => $dependents) {
+      $module_list .= '<strong>' . $files[$module_to_enable]->info['name'] . '. ' . t('Required by:') . '</strong>';
+      $module_list .= theme('item_list', array('items' => $dependents));
+    }
+    $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
+    $status_report .= '<p>The following Backdrop modules will be enabled in order for the site to be upgraded successfully:</p>';
+    $status_report .= $module_list;
+  }
+  return $status_report;
+}
+
+/**
+ * Enables needed dependencies.
+ */
+function update_upgrade_enable_dependencies() {
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_upgrade_enable_dependencies', FALSE)) {
+    $modules_to_enable = update_upgrade_modules_to_enable();
+    if (!empty($modules_to_enable)) {
+      update_module_enable(array_keys($modules_to_enable));
+      state_set('update_upgrade_enable_dependencies', TRUE);
+    }
+  }
+}
+
+/** 
+ * Finds out which modules need to be enabled.
+ * 
+ * @return array
+ *   An array keyed by the machine names of module names needed to be enabled,
+ *   whose values are arrays of the modules that depend on them.
+ */
+function update_upgrade_modules_to_enable() {
+  // Get list of enabled modules. 
+  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+    
+  // Get list of modules to be enabled.
+  $enabled_modules = array_keys($result->fetchAllAssoc('name'));
+  
+  // Do not include any core module required by the Standard or Minimal
+  // installations. Any needed modules from those will be taken care of later.
+  $enabled_modules = array_diff($enabled_modules, array('standard', 'minimal'));
+
+  // Get information about all modules available.
+  $files = system_rebuild_module_data();
+
+  $modules_to_enable = array();
+  foreach ($enabled_modules as $enabled_module) {
+    if (!empty($files[$enabled_module]->requires)) {
+      $required_modules = array_keys($files[$enabled_module]->requires);
+      // Add required modules that are not enabled.
+      $modules_not_enabled = array_diff($required_modules, $enabled_modules);
+      foreach ($modules_not_enabled as $module_not_enabled) {
+        $modules_to_enable[$module_not_enabled][] = $files[$enabled_module]->info['name'];
+      }
+    }
+  }
+  return $modules_to_enable;
+}
+
 /**
  * Perform Drupal 7.x to Backdrop 1.x updates that are required for update.php
  * to function properly.

@@ -332,6 +332,33 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
     $this->assertNoText('Uninstall Locale module', 'Module Locale has been successfully uninstalled');
   }
 
+
+  /**
+   * Test that uninstalling Comment and then immediately adding a node works.
+   */
+  public function testUninstallCommentAddNode() {
+    $admin_user = $this->backdropCreateUser(array(
+      'administer modules',
+      'bypass node access',
+    ));
+    $this->backdropLogin($admin_user);
+    module_disable(array('comment'), FALSE);
+    $edit = array(
+      'uninstall[comment]' => TRUE,
+    );
+    $this->backdropPost('admin/modules/uninstall', $edit, t('Uninstall'));
+    $this->backdropPost(NULL, array(), t('Uninstall'));
+
+    $node_edit = array(
+      'title' => 'This is a new node',
+    );
+    $this->backdropGet('node/add/post');
+    // This should not cause EXCEPTION: SQLSTATE[42S22]: Column not found: 1054
+    // Unknown column 'comment_close_override' in 'field list'.
+    $this->backdropPost(NULL, $node_edit, t('Save'));
+    $this->assertNoText('SQLSTATE[42S22]: Column not found', 'No sql error when saving node');
+    $this->assertRaw('<h1 class="page-title">This is a new node</h1>', 'Node has been saved after uninstalling the comment module');
+  }
 }
 
 /**

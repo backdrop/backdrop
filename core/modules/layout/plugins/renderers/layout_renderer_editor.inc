@@ -115,9 +115,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       'data-block-id' => $block->uuid,
     );
 
+    $block_admin_title = $block->getAdminTitle();
+    if (!$block->status) {
+      $attributes['class'][] = 'layout-editor-block-disabled';
+      $block_admin_title = t('!title (Disabled)', array('!title' => $block_admin_title));
+    }
+
     $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block_admin_title . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
@@ -220,6 +226,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   protected function getBlockLinks($block) {
     $links = array();
 
+    if (!$block->status) {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('enable-block', 'use-ajax'),
+        ),
+      );
+    }
+
     // Only render the "Configure" link if the block is not broken.
     if (!is_a($block, 'BlockBroken')) {
       $links['configure'] = array(
@@ -253,6 +270,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'class' => array('remove-block', 'use-ajax'),
       ),
     );
+
+    if ($block->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('disable-block', 'use-ajax'),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',
