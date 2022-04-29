@@ -426,7 +426,8 @@
                     "fill_single_line": 1,
                     "caption": "",
                     "summary": ""
-                }
+                },
+                "css_class": "container"
             }
         },
         "block": {
