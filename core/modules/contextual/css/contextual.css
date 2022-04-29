@@ -32,6 +32,9 @@
 .js .contextual-links-wrapper {
   display: block;
 }
+.block-system-messages .contextual-links-wrapper {
+  margin-top: -1.4em;
+}
 .contextual-links-trigger {
   background: transparent url(../images/gear-select.png) no-repeat 2px 0;
   border: 1px solid transparent;
