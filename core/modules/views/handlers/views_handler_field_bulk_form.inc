@@ -100,7 +100,6 @@ class views_handler_field_bulk_form extends views_handler_field_entity {
     foreach ($this->view->result as $row_index => $row) {
       // Store the row index to retrieve the entity from the results.
       $this->view->row_index = $row_index;
-
       // Get the value of the entity real field defined for this handler.
       $id = $this->get_value($row, $this->real_field);
 
@@ -161,7 +160,7 @@ class views_handler_field_bulk_form extends views_handler_field_entity {
       // Filter only selected checkboxes.
       $selected = array_filter($form_state['values'][$this->options['id']]);
       if (!empty($selected)) {
-        $entity_type = $this->entity_type;
+        $entity_type = $this->get_entity_type();
         $entities = entity_load($entity_type, $selected);
         $context = array();
         foreach ($entities as $entity) {
@@ -197,7 +196,7 @@ class views_handler_field_bulk_form extends views_handler_field_entity {
   protected function get_bulk_options($filtered = TRUE) {
     // Get all available actions.
     $actions = actions_get_info();
-    $entity_type = $this->entity_type;
+    $entity_type = $this->get_entity_type();
     $options = array();
     // Filter the action list.
     foreach ($actions as $action_name => $action_info) {
@@ -221,5 +220,12 @@ class views_handler_field_bulk_form extends views_handler_field_entity {
     }
 
     return $options;
+  }
+
+  /**
+   * Retrieves the entity type of the bulk operation field.
+   */
+  protected function get_entity_type() {
+    return isset($this->entity_type) ? $this->entity_type : FALSE;
   }
 }
