@@ -414,7 +414,7 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
           'href' => 'node/' . $node->nid . '/outline-remove',
         );
       }
-      if (!empty($node->book['bid'])) {
+      if (!empty($node->book['bid']) && _book_outline_access($node)) {
         $form['book']['actions']['#links']['reorder'] = array(
           'title' => t('Reorder book pages'),
           'href' => 'admin/content/book/' . $node->book['bid'],
