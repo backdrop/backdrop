@@ -12,7 +12,7 @@
  * types that support bulk operations should extend this class and expose their
  * own implementation via hook_views_data().
  */
-class views_handler_field_bulk_form extends views_handler_field {
+class views_handler_field_bulk_form extends views_handler_field_entity {
 
   /**
    * Overrides views_handler_field::option_definition().
@@ -98,13 +98,19 @@ class views_handler_field_bulk_form extends views_handler_field {
     // Render checkboxes for all rows.
     $form[$this->options['id']]['#tree'] = TRUE;
     foreach ($this->view->result as $row_index => $row) {
+      // Store the row index to retrieve the entity from the results.
+      $this->view->row_index = $row_index;
+
+      // Get the value of the entity real field defined for this handler.
+      $id = $this->get_value($row, $this->real_field);
+
       $form[$this->options['id']][$row_index] = array(
         '#type' => 'checkbox',
         // We are not able to determine a main "title" for each row, so we can
         // only output a generic label.
         '#title' => t('Update this item'),
         '#title_display' => 'invisible',
-        '#return_value' => $row->{$this->field_alias},
+        '#return_value' => $id,
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
         '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
@@ -155,7 +161,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       // Filter only selected checkboxes.
       $selected = array_filter($form_state['values'][$this->options['id']]);
       if (!empty($selected)) {
-        $entity_type = $this->get_entity_type();
+        $entity_type = $this->entity_type;
         $entities = entity_load($entity_type, $selected);
         $context = array();
         foreach ($entities as $entity) {
@@ -191,8 +197,7 @@ class views_handler_field_bulk_form extends views_handler_field {
   protected function get_bulk_options($filtered = TRUE) {
     // Get all available actions.
     $actions = actions_get_info();
-
-    $entity_type = $this->get_entity_type();
+    $entity_type = $this->entity_type;
     $options = array();
     // Filter the action list.
     foreach ($actions as $action_name => $action_info) {
@@ -216,33 +221,5 @@ class views_handler_field_bulk_form extends views_handler_field {
     }
 
     return $options;
-  }
-
-  /**
-   * Determine the base table of the bulk operation field.
-   */
-  protected function get_entity_type() {
-    $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->options['relationship']) && $this->options['relationship'] != 'none') {
-      $relationships = $this->view->display_handler->get_option('relationships');
-      $options = $relationships[$this->options['relationship']];
-      $data = views_fetch_data($options['table']);
-      $base_table = $data[$options['field']]['relationship']['base'];
-    }
-    // The base table is now known, use it to determine the entity type.
-    foreach (entity_get_info() as $entity_type => $info) {
-      if (isset($info['base table']) && $info['base table'] == $base_table) {
-        return $entity_type;
-      }
-      elseif (isset($info['revision table']) && $info['revision table'] == $base_table) {
-        $this->revision = TRUE;
-        return $entity_type;
-      }
-    }
-    return FALSE;
   }
 }
