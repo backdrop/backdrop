@@ -129,7 +129,7 @@ div.messages.info:before {
   display: block;
   height: 15px;
   position: absolute;
-  right: 17px; /* LTR */
+  right: 5px; /* LTR */
   top: 5px;
   width: 15px;
 }
