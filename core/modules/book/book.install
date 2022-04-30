@@ -129,7 +129,12 @@ function book_update_1001() {
 function book_update_1002() {
   $config = config('book.settings');
   $book_links = $config->get('book_links');
-  $book_links['book_reorder'] = 'book_reorder';
+  if (isset($book_links['book_add_child'])) {
+    $book_links['book_reorder'] = 'book_reorder';
+  }
+  else {
+    $book_links[] = 'book_reorder';
+  }
   $config->set('book_links', $book_links);
   $config->save();
 }
