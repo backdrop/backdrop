@@ -153,9 +153,6 @@ class FormsTestCase extends BackdropWebTestCase {
       elseif (isset($form[$key]['#form_test_required_message'])) {
         $expected[] = $form[$key]['#form_test_required_message'];
       }
-      else {
-        $expected[] = t('!name field is required.', array('!name' => $form[$key]['#title']));
-      }
     }
 
     // Check the page for error messages.
@@ -188,6 +185,19 @@ class FormsTestCase extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-radios-optional-bar');
     $this->assertNoFieldChecked('edit-radios-optional-default-value-false-foo');
     $this->assertNoFieldChecked('edit-radios-optional-default-value-false-bar');
+
+    // Verify that the #element_validate handler on the select list did not
+    // fire when the field was left empty.
+    $this->assertNoRaw('Please select the "foo" option.');
+
+    // Submit again with required fields missing but a value in the select
+    // field, which will fire its #element_validate handler while other required
+    // fields are not completed.
+    $edit = array(
+      'select' => 'bar',
+    );
+    $this->backdropPost(NULL, $edit, 'Submit');
+    $this->assertRaw('Please select the "foo" option.');
 
     // Submit again with required fields set and verify that there are no
     // error messages.
@@ -829,7 +839,6 @@ class FormValidationTestCase extends BackdropWebTestCase {
         $this->assertText($form[$key]['#required_message']);
       }
       elseif (isset($form[$key]['#form_test_required_message'])) {
-        $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
         $this->assertText($form[$key]['#form_test_required_message']);
       }
     }
@@ -840,16 +849,15 @@ class FormValidationTestCase extends BackdropWebTestCase {
       'textfield' => $this->randomString(),
       'checkboxes[foo]' => TRUE,
       'select' => 'foo',
+      'radios' => 'foo',
     );
     $this->backdropPost('form-test/validate-required', $edit, 'Submit');
 
     foreach (element_children($form) as $key) {
       if (isset($form[$key]['#required_message'])) {
-        $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
         $this->assertNoText($form[$key]['#required_message']);
       }
       elseif (isset($form[$key]['#form_test_required_message'])) {
-        $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
         $this->assertNoText($form[$key]['#form_test_required_message']);
       }
     }
