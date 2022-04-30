@@ -94,6 +94,7 @@ function book_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('book_links'),
     '#options' => array(
       'book_add_child' => t('Add child page'),
+      'book_reorder' => t('Reorder book'),
     ),
   );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);

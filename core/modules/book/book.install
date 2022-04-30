@@ -124,6 +124,15 @@ function book_update_1001() {
 }
 
 /**
+ * Add option for reorder link.
+ */
+function book_update_1002() {
+  $config = config('book.settings');
+  $config->set('book_links', array('book_reorder'));
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
