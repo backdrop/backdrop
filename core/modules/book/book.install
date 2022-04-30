@@ -128,7 +128,9 @@ function book_update_1001() {
  */
 function book_update_1002() {
   $config = config('book.settings');
-  $config->set('book_links', array('book_reorder'));
+  $book_links = $config->get('book_links');
+  $book_links['book_reorder'] = 'book_reorder';
+  $config->set('book_links', $book_links);
   $config->save();
 }
 
