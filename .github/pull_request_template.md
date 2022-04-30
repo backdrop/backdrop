@@ -1,4 +1,4 @@
-Fixes _URL of issue_.
+Fixes *ISSUE_URL*
 
 _The first line of your PR should begin with the magic word "Fixes", followed by the full URL of the issue it is addressing. Every pull request must be linked to an issue on github.com/backdrop/backdrop-issues, and most of the rationale, discussion, and explanation should take place in the issue, rather than in the PR._
 
