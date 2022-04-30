@@ -415,7 +415,7 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
         '#attributes' => array('class' => array('links', 'inline')),
         '#weight' => 40,
       );
-      if (_book_node_is_removable($node)) {
+      if (_book_outline_remove_access($node)) {
         $form['book']['actions']['#links']['remove'] = array(
           'title' => t('Remove from book outline'),
           'href' => 'node/' . $node->nid . '/outline-remove',
