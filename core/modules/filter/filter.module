@@ -636,6 +636,7 @@ function filter_permission() {
     'title' => t('Administer text formats and filters'),
     'description' => t('Define how text is handled by combining filters into <a href="@url">text formats</a>.', array('@url' => url('admin/config/content/formats'))),
     'restrict access' => TRUE,
+    'warning' => t('Permit any HTML tag in content (e.g.: <code>&lt;script&gt;</code>) and/or allow file uploads of any filetype via CKEditor.'),
   );
 
   $perms['upload editor images'] = array(

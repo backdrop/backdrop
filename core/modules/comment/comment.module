@@ -399,8 +399,13 @@ function _comment_body_field_create($info) {
  */
 function comment_permission() {
   return array(
+    'administer comment settings' => array(
+      'title' => t('Administer comment settings'),
+      'description' => t('Configure comment settings per content type.'),
+    ),
     'administer comments' => array(
-      'title' => t('Administer comments and comment settings'),
+      'title' => t('Administer comments'),
+      'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -1065,6 +1070,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
+      '#access' => user_access('administer comment settings'),
       '#attributes' => array(
         'class' => array('comment-node-type-settings-form'),
       ),
@@ -1169,7 +1175,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
+    '#access' => user_access('administer comment settings'),
     '#title' => t('Comment settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,

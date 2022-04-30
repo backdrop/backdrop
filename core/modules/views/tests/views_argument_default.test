@@ -12,8 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsArgumentDefaultTest extends ViewsSqlTest {
   public function setUp() {
-    parent::setUp('views');
-
+    parent::setUp();
     $this->random = $this->randomString();
   }
 
