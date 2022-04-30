@@ -4,6 +4,6 @@ Fixes *ISSUE_URL*
 
 _Once you have submitted your PR, wait a little bit for the automated tests to run and then check that they have all passed. If not, you should revise your PR until they do._
 
-_Once all of the automated checks have passed, you can mark its issue with the labels "status - has pull request", "PR - needs testing", and "PR - needs code review." This will signify to other Backdrop contributors that it's time to take a look. You can also post comments or queries in the issue comments._
+<!-- Once all of the automated checks have passed, you can mark its issue with the labels "status - has pull request", "PR - needs testing", and "PR - needs code review." This will signify to other Backdrop contributors that it's time to take a look. You can also post comments or queries in the issue comments. -->
 
 _You can delete all of this instructional text when you submit your PR. All you need in the PR is the first line. That links the PR to the issue, so that when the PR is merged, the issue will be automatically closed._
