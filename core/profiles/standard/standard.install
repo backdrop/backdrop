@@ -422,17 +422,17 @@ function standard_install() {
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
   $cards = array(
-    'card1-organize.png' => array(
-      'title' => st('Organize your content'),
-      'body' => st('<p>Backdrop CMS includes three pre-defined types of content: Pages, Posts, and Cards. Custom content types can also be added.</p><p><a href="https://docs.backdropcms.org/documentation/content-types">Learn more about content types</a></p>'),
+    'card1-layout.png' => array(
+      'title' => st('The Home page layout'),
+      'body' => st('<p>Use the home page layout to specifically customize this page. These Cards only appear on this layout.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
     ),
     'card2-card.png' => array(
       'title' => st('What is a Card?'),
       'body' => st('<p>A Card can only be seen as part of another page. Place them individually as "Existing content" Blocks, or grouped as in a View.</p><p><a href="https://docs.backdropcms.org/documentation/creating-and-editing-content">Learn more about Cards</a></p>'),
     ),
-    'card3-layout.png' => array(
-      'title' => st('The Home page layout'),
-      'body' => st('<p>Use the home page layout to specifically customize this page. These Cards only appear on this layout.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
+    'card3-organize.png' => array(
+      'title' => st('Organize your content'),
+      'body' => st('<p>Backdrop CMS includes three pre-defined types of content: Pages, Posts, and Cards. Custom content types can also be added.</p><p><a href="https://docs.backdropcms.org/documentation/content-types">Learn more about content types</a></p>'),
     ),
   );
 
