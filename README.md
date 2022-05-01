@@ -55,8 +55,9 @@ join Backdrop's developer community by
 
 You can submit changes to Backdrop by creating a pull request that references an
 issue in the [issue tracker](https://github.com/backdrop/backdrop-issues/issues).
-Details about how to do this are in the [Contribute to Backdrop Core](https://docs.backdropcms.org/documentation/contribute-to-backdrop
--core) documentation.
+Details about how to do this are in the
+[Contribute to Backdrop Core](https://docs.backdropcms.org/documentation/contribute-to-backdrop-core)
+documentation.
 
 Thanks to the following companies for providing sponsorship through services and
 products which may be used by Backdrop contributors to build and improve the
