@@ -1062,14 +1062,14 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
  * @see search_box_form_submit()
  */
 function search_box($form, &$form_state, $form_id) {
+  // This field is not required so that the user is taken to the search page
+  // before any error is shown.
   $form[$form_id] = array(
     '#type' => 'search',
     '#title' => t('Search'),
     '#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => '',
-    '#required' => TRUE,
-    '#required_message' => t('Please enter some keywords in the search field.'),
     '#attributes' => array('title' => t('Enter the keywords you wish to search for.')),
   );
   $form['actions'] = array('#type' => 'actions');
@@ -1089,6 +1089,14 @@ function search_box_form_submit($form, &$form_state) {
   // (see http://drupal.org/node/292565).
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
+  }
+
+  // Check to see if the form was submitted empty.
+  // If it is empty, display an error message.
+  // This method is used instead of the #required property so that the user
+  // will be taken to the search page before the error is shown.
+  if ($form_state['values']['search_block_form'] == '') {
+    form_set_error('keys', t('Please enter some keywords.'));
   }
 
   $form_id = $form['form_id']['#value'];

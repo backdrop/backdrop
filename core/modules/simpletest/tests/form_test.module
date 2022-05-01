@@ -444,7 +444,8 @@ function form_test_validate_required_form($form, &$form_state) {
     '#required_message' => 'Please enter a name.',
     // The following is not a real Form API property, it is only used in the
     // test validation to check the expected message.
-    // See FormValidationTestCase::testCustomRequiredMessage().
+    // See FormValidationTestCase::testCustomRequiredMessage() and
+    // FormValidationTestCase::testCustomRequiredMessage().
     '#form_test_expected_message' => 'Please enter a name.',
   );
   $form['checkboxes'] = array(

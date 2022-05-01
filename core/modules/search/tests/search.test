@@ -563,8 +563,6 @@ class SearchBlockTestCase extends BackdropWebTestCase {
    * Test that the search block form works correctly.
    */
   function testBlock() {
-    $user = $this->loggedInUser;
-
     // Add the search block to the default layout.
     $layout = layout_load('default');
     $layout->addBlock('search', 'form', 'content');
@@ -572,12 +570,8 @@ class SearchBlockTestCase extends BackdropWebTestCase {
 
     // Test a normal search via the block form, from the /user page.
     $terms = array('search_block_form' => 'test');
-    $expected_redirect = url('search/node/' . $terms['search_block_form'], array('absolute' => TRUE));
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
-
-    // Confirm that the user is redirected to the search page.
-    $this->assertEqual($this->getUrl(), $expected_redirect, 'Redirected to correct url.');
 
     // Test a search from the block on a 404 page.
     $this->backdropGet('foo');
@@ -587,15 +581,23 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     $this->assertText('Your search yielded no results');
 
     // Confirm that the user is redirected to the search page.
-    $this->assertEqual($this->getUrl(), $expected_redirect, 'Redirected to correct url.');
+    $this->assertEqual(
+      $this->getUrl(),
+      url('search/node/' . $terms['search_block_form'], array('absolute' => TRUE)),
+      'Redirected to correct url.'
+    );
 
     // Test an empty search via the block form, from the /user page.
     $terms = array('search_block_form' => '');
     $this->backdropPost('user', $terms, t('Search'));
-    $this->assertText('Please enter some keywords in the search field.');
-    // Confirm that the user is NOT redirected to the search page.
-    $expected_redirect = url($user->path['alias'], array('absolute' => TRUE));
-    $this->assertEqual($this->getUrl(), $expected_redirect, 'Not redirected when no search keywords have been entered.');
+    $this->assertText('Please enter some keywords');
+
+    // Confirm that the user is redirected to the search page, when form is submitted empty.
+    $this->assertEqual(
+      $this->getUrl(),
+      url('search/node/', array('absolute' => TRUE)),
+      'Redirected to correct url.'
+    );
 
     // Test that after entering a too-short keyword in the form, you can then
     // search again with a longer keyword. First test using the block form.
@@ -606,7 +608,10 @@ class SearchBlockTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $terms, t('Search'));
     $this->assertNoText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
     $this->assertText('Your search yielded no results');
-    // Same test again, using the search page form instead of the block form.
+
+    // Same test again, using the search page form for the second search this time.
+    $terms = array('search_block_form' => 'a');
+    $this->backdropPost('user', $terms, t('Search'));
     $terms = array('keys' => 'foo');
     $this->backdropPost(NULL, $terms, t('Search'));
     $this->assertNoText('You must include at least one keyword to match in the content. Keywords must be at least 3 characters, and punctuation is ignored.');
