@@ -239,6 +239,8 @@ function installer_authorize_update_batch_finished($success, $results) {
     $updates = backdrop_get_schema_versions($module);
     if ($updates !== FALSE) {
       $current_schema = backdrop_get_installed_schema_version($module);
+      // If current schema is greater than 7000, bring it down to 999
+      $current_schema = $current_schema > 7000 ? 999 : $current_schema;
       $latest_schema = end($updates);
       if ($current_schema < $latest_schema) {
         $updates_needed = TRUE;
