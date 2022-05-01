@@ -53,9 +53,11 @@ value ease of use and speed of learning over architectural flexibility. You can
 join Backdrop's developer community by
 [forking Backdrop](https://github.com/backdrop/backdrop) on GitHub.
 
-When submitting a pull request, please make sure there is an open issue in the
-[issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
-reference it in the description on the pull request.
+You can submit changes to Backdrop by creating a pull request that references an
+issue in the [issue tracker](https://github.com/backdrop/backdrop-issues/issues).
+Details about how to do this are in the
+[Contribute to Backdrop Core](https://docs.backdropcms.org/documentation/contribute-to-backdrop-core)
+documentation.
 
 Thanks to the following companies for providing sponsorship through services and
 products which may be used by Backdrop contributors to build and improve the
