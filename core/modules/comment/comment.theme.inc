@@ -88,7 +88,6 @@ function template_preprocess_comment(&$variables) {
   $variables['author'] = theme('username', array('account' => $comment));
   $variables['user_picture'] = '';
   $variables['created'] = format_date($comment->created);
-  $variables['title_classes']  = array();
   // Avoid calling format_date() twice on the same timestamp.
   if ($comment->changed == $comment->created) {
     $variables['changed'] = $variables['created'];
@@ -101,17 +100,18 @@ function template_preprocess_comment(&$variables) {
   if ($node_type->settings['comment_user_picture']) {
     $variables['user_picture'] = theme('user_picture', array('account' => $comment));
   }
-  if ($node_type->settings['comment_subject_hide']) {
-    // Don't display the comment title.
-    $variables['title_classes'][] = 'element-invisible';
-  }
   $variables['signature'] = $comment->signature;
 
   $uri = $comment->uri();
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
-
-  $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
+  
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
+  // Check to see if title should be hidden
+  if ($node_type->settings['comment_subject_options'] == 2) {
+    $uri['options']['attributes']['class'][] = 'hide_comment_title';
+  }
+  $variables['subject_options'] = $node_type->settings['comment_subject_options'];
+  $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
   // Preprocess fields.

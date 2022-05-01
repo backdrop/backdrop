@@ -49,8 +49,7 @@ function comment_uninstall() {
       'comment_per_page',
       'comment_form_location',
       'comment_preview',
-      'comment_subject_field',
-      'comment_subject_hide',
+      'comment_subject_options',
       'comment_user_picture',
       'comment_close_enabled',
       'comment_close_days'
@@ -468,6 +467,26 @@ function comment_update_1007() {
       $config->set('permissions', $permissions);
       $config->save();
     }
+  }
+}
+
+/**
+ * New setting for comment titles. Replacing comment_subject_field
+ * with comment_subject_options.
+ */
+function comment_update_1008() {
+  foreach (config_get_names_with_prefix('node.type.') as $config_name) {
+    $config = config($config_name);
+    $comment_subject = $config->get('settings.comment_subject_field');
+    if ($comment_subject == "0") {
+      // auto generated titles
+      $config->set('settings.comment_subject_options', 1);
+    } else {
+      // custom titles
+      $config->set('settings.comment_subject_options', 0);
+    }
+    $config->clear('settings.comment_subject_field');
+    $config->save();
   }
 }
 

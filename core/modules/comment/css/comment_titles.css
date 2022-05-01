@@ -1,0 +1,11 @@
+.hide_comment_title {
+  display: block;
+  text-indent: -99999px;
+  line-height: 0;
+}
+.hide_comment_title:after {
+  display: block;
+  content: "Permalink";
+  text-indent: 0;
+  line-height: initial;
+}
