@@ -1369,6 +1369,16 @@ class views_plugin_query_default extends views_plugin_query {
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
+    if (!$get_count) {
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large
+        // limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
+      }
+    }
+
     return $query;
   }
 
@@ -1473,15 +1483,7 @@ class views_plugin_query_default extends views_plugin_query {
           $this->pager->execute_count_query($count_query);
         }
 
-        // Let the pager modify the query to add limits.
         $this->pager->pre_execute($query);
-
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
 
         $result = $query->execute();
 
