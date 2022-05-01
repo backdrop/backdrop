@@ -4401,7 +4401,7 @@ function system_admin_paths() {
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
- *     '#default_setting' => $settings_config->get('first_setting'),
+ *     '#default_value' => $primary_config->get('first_setting'),
  *   ),
  *   'second_setting' => array( ... ),
  *
@@ -4415,7 +4415,7 @@ function system_admin_paths() {
  *
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
- *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#default_value' => $tertiary_config->get('bonus_three'),
  *       '#config' => 'mymodule.third',
  *     ),
  *   ),
