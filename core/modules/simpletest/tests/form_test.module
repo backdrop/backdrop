@@ -442,7 +442,10 @@ function form_test_validate_required_form($form, &$form_state) {
     '#title' => 'Name',
     '#required' => TRUE,
     '#required_message' => 'Please enter a name.',
-    '#form_test_required_message' => 'Please enter a name.',
+    // The following is not a real Form API property, it is only used in the
+    // test validation to check the expected message.
+    // See FormValidationTestCase::testCustomRequiredMessage().
+    '#form_test_expected_message' => 'Please enter a name.',
   );
   $form['checkboxes'] = array(
     '#type' => 'checkboxes',
@@ -450,14 +453,14 @@ function form_test_validate_required_form($form, &$form_state) {
     '#options' => $options,
     '#required' => TRUE,
     '#required_message' => 'Please choose at least one option.',
-    '#form_test_required_message' => 'Please choose at least one option.',
+    '#form_test_expected_message' => 'Please choose at least one option.',
   );
   $form['select'] = array(
     '#type' => 'select',
     '#title' => 'Select',
     '#options' => $options,
     '#required' => TRUE,
-    '#form_test_required_message' => 'Select field is required.',
+    '#form_test_expected_message' => 'Select field is required.',
     '#element_validate' => array('form_test_validate_select_element_validate'),
   );
   $form['radios'] = array(
@@ -465,7 +468,7 @@ function form_test_validate_required_form($form, &$form_state) {
     '#title' => 'Radios',
     '#options' => $options,
     '#required' => TRUE,
-    '#form_test_required_message' => 'Radios field is required.',
+    '#form_test_expected_message' => 'Radios field is required.',
   );
   $form['radios_optional'] = array(
     '#type' => 'radios',

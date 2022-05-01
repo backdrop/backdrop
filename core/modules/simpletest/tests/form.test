@@ -150,8 +150,8 @@ class FormsTestCase extends BackdropWebTestCase {
       if (isset($form[$key]['#required_message'])) {
         $expected[] = $form[$key]['#required_message'];
       }
-      elseif (isset($form[$key]['#form_test_required_message'])) {
-        $expected[] = $form[$key]['#form_test_required_message'];
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $expected[] = $form[$key]['#form_test_expected_message'];
       }
     }
 
@@ -838,8 +838,8 @@ class FormValidationTestCase extends BackdropWebTestCase {
         $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
         $this->assertText($form[$key]['#required_message']);
       }
-      elseif (isset($form[$key]['#form_test_required_message'])) {
-        $this->assertText($form[$key]['#form_test_required_message']);
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $this->assertText($form[$key]['#form_test_expected_message']);
       }
     }
     $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
@@ -857,8 +857,8 @@ class FormValidationTestCase extends BackdropWebTestCase {
       if (isset($form[$key]['#required_message'])) {
         $this->assertNoText($form[$key]['#required_message']);
       }
-      elseif (isset($form[$key]['#form_test_required_message'])) {
-        $this->assertNoText($form[$key]['#form_test_required_message']);
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $this->assertNoText($form[$key]['#form_test_expected_message']);
       }
     }
     $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
