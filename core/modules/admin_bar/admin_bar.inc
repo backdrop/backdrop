@@ -727,6 +727,13 @@ function admin_bar_theme_settings() {
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    'admin_bar.search' => array(
+      '#states' => array(
+        'visible' => array(
+          ':input[name="components[admin_bar.menu]"]' => array('checked' => TRUE),
+        ),
+      ),
+    ),
   );
 
   $form['actions'] = array(
@@ -745,8 +752,15 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
+  $components = &$form_state['values']['components'];
+
+  // Disable the search bar if the management menu is also disabled.
+  if (!$components['admin_bar.menu']) {
+    $components['admin_bar.search'] = FALSE;
+  }
+
   // Save the list of components as a simple array, rather than key/value pair.
-  $form_state['values']['components'] = array_keys(array_filter($form_state['values']['components']));
+  $form_state['values']['components'] = array_keys(array_filter($components));
 }
 
 /**
