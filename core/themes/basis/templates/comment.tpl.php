@@ -43,6 +43,8 @@
  * - $title_suffix (array): An array containing additional output populated by
  *   modules, intended to be displayed after the main title tag that appears in
  *   the template.
+ * - $title_classes: Array of classes of the main title tag that can be used to
+ *   style contextually through CSS.
  *
  * These two variables are provided for context:
  * - $comment: Full comment object.
@@ -68,7 +70,7 @@
 
     <div class="comment-title">
       <?php print render($title_prefix); ?>
-      <h3><?php print $title; ?></h3>
+      <h3 class="<?php print implode(' ', $title_classes); ?>"><?php print $title; ?></h3>
       <?php print render($title_suffix); ?>
       <?php if ($new): ?>
         <span class="marker"><?php print $new; ?></span>
