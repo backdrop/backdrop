@@ -407,7 +407,7 @@
                         "relationship": "none",
                         "group_type": "group",
                         "ui_name": "",
-                        "order": "ASC",
+                        "order": "DESC",
                         "exposed": false,
                         "expose": {
                             "label": ""
