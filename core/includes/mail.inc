@@ -264,18 +264,18 @@ function backdrop_mail_system($module, $key) {
 
   $id = $module . '_' . $key;
 
-  $configuration = config_get('system.mail');
+  $config = config('system.mail');
 
   // Look for overrides for the default class, starting from the most specific
   // id, and falling back to the module name.
-  if (isset($configuration[$id])) {
-    $class = $configuration[$id];
+  if ($config->get($id) !== NULL) {
+    $class = $config->get($id);
   }
-  elseif (isset($configuration[$module])) {
-    $class = $configuration[$module];
+  elseif ($config->get($module) !== NULL) {
+    $class = $config->get($module);
   }
-  elseif (isset($configuration['default-system'])) {
-    $class = $configuration['default-system'];
+  elseif ($config->get('default-system') !== NULL) {
+    $class = $config->get('default-system');
   }
   else {
     $class = 'DefaultMailSystem';

@@ -511,14 +511,10 @@ function file_settings_form($form, &$form_state) {
   $form['default_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Default file directory'),
-    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.'),
+    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.') . ' ' . theme('token_tree_link'),
     '#default_value' => $config->get('default_file_directory'),
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
-  );
-  $form['default_file_directory']['tokens'] = array(
-    '#theme' => 'token_tree',
-    '#dialog' => TRUE,
   );
 
   $form['default_allowed_extensions'] = array(
