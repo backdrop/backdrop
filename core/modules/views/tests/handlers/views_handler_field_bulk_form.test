@@ -206,6 +206,10 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
    * performed on the correct custom entity.   
    */
   public function testNodeAndCustomEntityBulkForm() {
+
+    // Enable the test module that defines the views_test entity.
+    module_enable(array('views_test_entity'));
+
     // Add a relationship field to views_test entity.
     $this->view->add_item('default', 'relationship', 'node', 'views_test', array(
       'id' => 'uid',
