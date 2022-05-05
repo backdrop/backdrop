@@ -35,6 +35,8 @@ function views_test_autoload_info() {
     'views_test_plugin_access_test_dynamic' => 'test_plugins/views_test_plugin_access_test_dynamic.inc',
     'views_test_plugin_access_test_static' => 'test_plugins/views_test_plugin_access_test_static.inc',
     'views_test_plugin_style_test_mapping' => 'test_plugins/views_test_plugin_style_test_mapping.inc',
+    'BulkTestEntity' => 'views_test.entity.inc',
+
   );
 }
 
@@ -129,4 +131,23 @@ function template_preprocess_views_view_mapping_test(&$variables) {
  */
 function theme_views_view_mapping_test($variables) {
   return backdrop_render($variables['element']);
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function views_test_entity_info() {
+  $return = array(
+    'views_test' => array(
+      'label' => t('Bulk test entity'),
+      'entity class' => 'BulkTestEntity',
+      'controller class' => 'EntityDatabaseStorageController',
+      'base table' => 'views_test',
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'id',
+      ),
+    ),
+  );
+  return $return;
 }

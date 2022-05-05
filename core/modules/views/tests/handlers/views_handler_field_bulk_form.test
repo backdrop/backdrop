@@ -1,0 +1,243 @@
+<?php
+
+/**
+ * @file
+ * Definition of ViewsHandlerFieldBulkFormTest.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
+
+  public $view;
+
+  function setUp() {
+    parent::setUp();
+
+    $view = new view();
+    $view->name = 'test_bulk_form';
+    $display = $view->add_display('default');
+    $view->base_table = 'node';
+    $display = $view->new_display('default', 'Master', 'default');
+    $display->override_option('fields', array(
+      'nid' => array(
+        'id' => 'nid',
+        'table' => 'node',
+        'field' => 'nid',
+        'relationship' => 'none',
+      ),
+    ));
+    $display = $view->new_display();
+    $display->override_option('path','test-bulk-form');
+    $view->save();
+
+    $this->view = $view;
+    $this->view->set_display('default');
+
+    // Create and log in a user with administer views permission.
+    $views_admin = $this->backdropCreateUser(array('administer views', 'bypass node access'));
+    $this->backdropLogin($views_admin);
+  }
+
+  /** 
+   * Defines bulk form handler for custom entity views_test.
+   */
+  function viewsData() {
+    $data = parent::viewsData();
+
+    // This is needed for views_handler_field_entity, used by the bulk form.
+    $data['views_test']['table']['entity type'] = 'views_test';
+
+    // Define a bulk form for views_test entities.
+    $data['views_test']['bulk_form'] = array(
+      'title' => 'Bulk form',
+      'field' => array(
+        'handler' => 'views_handler_field_bulk_form',
+        'real field' => 'id',
+      ),
+    );
+
+    // Define a relationship field to join node to views_test entities.
+    $data['node']['views_test'] = array(
+      'title' => 'views_test entity',
+      'relationship' => array(
+        'base' => 'views_test',
+        'base field' => 'nid',
+        'real field' => 'nid',
+        'field' => 'nid',
+        'handler' => 'views_handler_relationship',
+      ),
+    );
+
+    return $data;
+  }
+
+  /**
+   * Overrides the schema definition of the views_test table to add nid.
+   */
+  protected function schemaDefinition() {
+    $schema = parent::schemaDefinition();
+
+    $schema['views_test']['fields']['nid'] = array(
+      'description' => "The nid of the related node",
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    );
+    return $schema;
+  } 
+
+  /**
+   * Overrides the dataset for views_test to insert nids for each of the 5 rows.
+   * 
+   * The field `nid` is used for the relationship to the node entities.
+   */
+  protected function dataSet() {
+    $dataset = parent::dataSet();
+    $dataset[0]['nid'] = 1; // nid 1
+    $dataset[1]['nid'] = 2; // nid 2
+    $dataset[2]['nid'] = 1; // nid 1
+    $dataset[3]['nid'] = 2; // nid 2
+    $dataset[4]['nid'] = 2; // nid 2
+    return $dataset;
+  }
+
+  /** 
+   * Assert that the form checkbox values match the entity ids.
+   */
+  function assertCorrectBulkFormEntityIds($id_field, $entity_type) {
+    // Generate a preview of the view in order to populate the field aliases.
+    $this->view->preview();
+    $field_alias = $this->view->field[$id_field]->field_alias;
+
+    // Get the view so that we access the Bulk Form.
+    $this->backdropGet('test-bulk-form');
+
+    // Iterate through the results to check that the entity id matches the
+    // value of the bulk form checkbox.
+    foreach ($this->view->result as $row_index => $row) {
+      $xpath = $this->buildXPathQuery('//input[@id=:id]', array(':id' => 'edit-bulk-form-'.$row_index));
+      $this->assertFieldByXPath($xpath, $row->$field_alias, "Bulk form checkbox value in row $row_index matches the value ({$row->$field_alias}) for field '$id_field' of the $entity_type entity.");
+    }
+  }
+
+  /**
+   * Test Bulk Forms for nodes.
+   */
+  public function testNodeFieldBulkForm() {
+    // Create the basic view.
+    $this->view->add_item('default', 'field', 'node', 'bulk_form', array(
+        'id' => 'bulk_form',
+        'table' => 'node',
+        'field' => 'bulk_form',
+        'relationship' => 'none',
+    ));
+    $this->view->save();
+    $this->backdropGet('test-bulk-form');
+
+    // Verify that the action select field exists in the view.
+    $this->assertFieldByName('action');
+
+    // Verify that the select field contains a node-related action.
+    $this->assertOption('edit-action', 'node_delete_action');
+
+    // Verify that the view contains bulk form checboxes with values that match   
+    // the ids of the correct entity (in this case, nid).
+    $this->assertCorrectBulkFormEntityIds('nid', 'node');
+
+    // Verify that the available actions in the bulk form configuration form
+    // belong to node entities by checking that the node_delete_action eixists. 
+    $this->backdropGet('admin/structure/views/nojs/config-item/test_bulk_form/page_1/field/bulk_form');
+    $this->assertFieldByName('options[selected_actions][node_delete_action]', 'node_delete_action', 'Found a checkbox for node_delete_action in the Bulk configuration form.');
+  }
+
+  /** 
+   * Test Bulk Forms for user entities joined to nodes by uid.
+   * 
+   * User entities are accessed through a relationship to node entities. 
+   */
+  public function testNodeAndUserBulkForm() {
+    // Add a relationship field to author (user).
+    $this->view->add_item('default', 'relationship', 'node', 'uid', array(
+      'id' => 'uid',
+      'table' => 'node',
+      'field' => 'uid',
+      'relationship' => 'none',
+      'label' => 'author',
+    ));
+
+    // Add the field uid from the user entity.
+    $this->view->add_item('default', 'field', 'users', 'uid', array(
+      'id' => 'uid',
+      'table' => 'users',
+      'field' => 'uid',
+      'relationship' => 'uid',
+    ));
+
+    // Add the bulk_form field from the user entity.
+    $this->view->add_item('default', 'field', 'users', 'bulk_form', array(
+      'id' => 'bulk_form',
+      'table' => 'users',
+      'field' => 'bulk_form',
+      'relationship' => 'uid',
+    ));
+
+    $this->view->save();
+    $this->backdropGet('test-bulk-form');
+
+    // Verify that the view contains bulk form checboxes with values that match 
+    // the ids of the correct entity (in this case, uid).
+    $this->assertCorrectBulkFormEntityIds('uid', 'user');
+
+    // Verify that the available actions belong to the user entity by checking
+    // that the checkbox for user_block_user_action exists in the form.
+    $this->backdropGet('admin/structure/views/nojs/config-item/test_bulk_form/page_1/field/bulk_form');
+    $this->assertFieldByName('options[selected_actions][user_block_user_action]', 'user_block_user_action', 'Found a checkbox for user_block_user_action in the Bulk configuration form.');
+  } 
+
+  /** 
+   * Test Bulk Forms for a custom entity joined to nodes by nid.
+   * 
+   * The custom entities are accessed through a relationship to node entities.
+   * Importantly, the 'real field' for the custom entity's Bulk Form is not nid, 
+   * but rather 'id'. This tests verifies that the Bulk Form checkboxes match
+   * the 'id' value, rather than the 'nid', so that the bulk operation is
+   * performed on the correct custom entity.   
+   */
+  public function testNodeAndCustomEntityBulkForm() {
+    // Add a relationship field to views_test entity.
+    $this->view->add_item('default', 'relationship', 'node', 'views_test', array(
+      'id' => 'uid',
+      'table' => 'node',
+      'field' => 'views_test',
+      'relationship' => 'none',
+      'label' => 'views_test',
+    ));
+
+    // Add the field id from the views_test entity.
+    $this->view->add_item('default', 'field', 'views_test', 'id', array(
+      'id' => 'id',
+      'table' => 'views_test',
+      'field' => 'id',
+      'relationship' => 'views_test',
+    ));
+
+    // Add the bulk_form field from the views_test entity.
+    $this->view->add_item('default', 'field', 'views_test', 'bulk_form', array(
+      'id' => 'bulk_form',
+      'table' => 'views_test',
+      'field' => 'bulk_form',
+      'relationship' => 'views_test',
+    ));
+
+    $this->view->save();
+
+    $this->backdropGet('test-bulk-form');
+
+    // Verify that the view contains bulk form checboxes with values that match 
+    // the ids of the views_test entities.
+    $this->assertCorrectBulkFormEntityIds('id', 'views_test');
+
+  }
+}
