@@ -11,7 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsAjaxTest extends ViewsSqlTest {
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Delete all default content.

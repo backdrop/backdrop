@@ -59,7 +59,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
    * Returns a new term with random properties.
    *
    * @param TaxonomyVocabulary $vocabulary
-   *   Vocabulary name to create term in.
+   *   Vocabulary to create term in.
    *
    * @return TaxonomyTrem
    *   Term with random properties.
@@ -78,7 +78,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * {@inheritdoc}
    */
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Create boolean field.

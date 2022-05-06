@@ -105,7 +105,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   var $fields;
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     $langcode = LANGUAGE_NONE;
@@ -270,7 +270,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
 class FieldViewsFieldTest extends FieldViewsTestHelper {
   public $nodes;
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Setup basic fields. When field render is tested in these tests with

@@ -11,7 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Basic test for pluggable access.
  */
 class ViewsAccessTest extends ViewsSqlTest {
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     $this->admin_user = $this->backdropCreateUser(array('access all views'));
