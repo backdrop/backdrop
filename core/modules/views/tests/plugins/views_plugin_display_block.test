@@ -15,8 +15,8 @@ class ViewsPluginDisplayBlockTestCase extends ViewsSqlTest {
   protected $admin_user;
   protected $test_content = array();
 
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Create a content type and content.
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
