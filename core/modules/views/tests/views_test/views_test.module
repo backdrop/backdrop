@@ -35,6 +35,7 @@ function views_test_autoload_info() {
     'views_test_plugin_access_test_dynamic' => 'test_plugins/views_test_plugin_access_test_dynamic.inc',
     'views_test_plugin_access_test_static' => 'test_plugins/views_test_plugin_access_test_static.inc',
     'views_test_plugin_style_test_mapping' => 'test_plugins/views_test_plugin_style_test_mapping.inc',
+
   );
 }
 
