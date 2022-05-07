@@ -237,7 +237,8 @@ class views_handler_field_bulk_form extends views_handler_field {
       $options = $relationships[$this->options['relationship']];
       $data = views_fetch_data($options['table']);
       $base_table = $data[$options['field']]['relationship']['base'];
-    } else {
+    }
+    else {
       // Else use the handler definition's table to determine the entity type.
       $base_table = $this->table;
     }
