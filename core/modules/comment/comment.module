@@ -1186,7 +1186,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
     );
     $form['comment']['comment_subject_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is added to comment forms to allow for custom titles.');
-    $form['comment']['comment_subject_options'][COMMENT_TITLE_AUTO]['#description'] = t('No title field is shown, comment titles are automatically generated from the comment body.');
+    $form['comment']['comment_subject_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
     $form['comment']['comment_subject_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Comment titles are not displayed at all.');
   }
 }
