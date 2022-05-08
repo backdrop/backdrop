@@ -107,7 +107,7 @@ function template_preprocess_comment(&$variables) {
   
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   // Check to see if title should be hidden
-  if ($node_type->settings['comment_subject_options'] == 2) {
+  if ($node_type->settings['comment_subject_options'] == COMMENT_TITLE_HIDDEN) {
     $uri['options']['attributes']['class'][] = 'hide_comment_title';
   }
   $variables['subject_options'] = $node_type->settings['comment_subject_options'];

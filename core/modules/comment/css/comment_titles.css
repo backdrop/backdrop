@@ -1,10 +1,20 @@
+/* 
+ * @TODO - Remove this note
+ * Temporarily adding a new css file to deal with contrib themes
+ * that have already overwritten the primmary comments.css file.
+ * This strategy is still up for discussion.
+ */
+
 .hide_comment_title {
   display: block;
+  /* Looking for a better idea here. */
   text-indent: -99999px;
   line-height: 0;
 }
+
 .hide_comment_title:after {
   display: block;
+  /* Looking for a better idea here. */
   content: "Permalink";
   text-indent: 0;
   line-height: initial;
