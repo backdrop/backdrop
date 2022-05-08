@@ -14,8 +14,9 @@
 
 .hide_comment_title:after {
   display: block;
-  /* Looking for a better idea here. */
+  /* Looking for a better/translatable idea here. */
   content: "Permalink";
   text-indent: 0;
   line-height: initial;
+  font-size: 70%;
 }
