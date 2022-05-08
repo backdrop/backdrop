@@ -49,7 +49,7 @@ function comment_uninstall() {
       'comment_per_page',
       'comment_form_location',
       'comment_preview',
-      'comment_subject_options',
+      'comment_title_options',
       'comment_user_picture',
       'comment_close_enabled',
       'comment_close_days'
@@ -362,7 +362,7 @@ function comment_update_1001() {
       'comment_per_page' => update_variable_get('comment_default_per_page_' . $node_type->type, 50),
       'comment_mode' => update_variable_get('comment_default_mode_' . $node_type->type, 1), // COMMENT_MODE_THREADED
       'comment_anonymous' => update_variable_get('comment_anonymous_' . $node_type->type, 0), // COMMENT_ANONYMOUS_MAYNOT_CONTACT
-      'comment_subject_field' => update_variable_get('comment_subject_field_' . $node_type->type, 0), // COMMENT_ANONYMOUS_MAYNOT_CONTACT
+      'comment_title_field' => update_variable_get('comment_title_field_' . $node_type->type, 0), // COMMENT_ANONYMOUS_MAYNOT_CONTACT
       'comment_user_picture' => update_variable_get('comment_user_picture_' . $node_type->type, 1),
       'comment_form_location' => update_variable_get('comment_form_location_' . $node_type->type, 1), // COMMENT_FORM_BELOW
       'comment_preview' => update_variable_get('comment_preview_' . $node_type->type, BACKDROP_OPTIONAL),
@@ -375,7 +375,7 @@ function comment_update_1001() {
     update_variable_del('comment_default_per_page_' . $node_type->type);
     update_variable_del('comment_default_mode_' . $node_type->type);
     update_variable_del('comment_anonymous_' . $node_type->type);
-    update_variable_del('comment_subject_field_' . $node_type->type);
+    update_variable_del('comment_title_field_' . $node_type->type);
     update_variable_del('comment_user_picture_' . $node_type->type);
     update_variable_del('comment_form_location_' . $node_type->type);
     update_variable_del('comment_preview_' . $node_type->type);
@@ -471,19 +471,19 @@ function comment_update_1007() {
 }
 
 /**
- * New setting for comment titles. Replacing comment_subject_field
+ * New setting for comment titles. Replacing comment_title_field
  * with comment_subject_options.
  */
 function comment_update_1008() {
   foreach (config_get_names_with_prefix('node.type.') as $config_name) {
     $config = config($config_name);
-    $comment_subject = $config->get('settings.comment_subject_field');
-    if ($comment_subject == COMMENT_TITLE_CUSTOM) {
+    $comment_title = $config->get('settings.comment_subject_field');
+    if ($comment_title == COMMENT_TITLE_AUTO) {
       // auto generated titles
-      $config->set('settings.comment_subject_options', COMMENT_TITLE_AUTO);
+      $config->set('settings.comment_title_options', COMMENT_TITLE_AUTO);
     } else {
       // custom titles
-      $config->set('settings.comment_subject_options', COMMENT_TITLE_CUSTOM);
+      $config->set('settings.comment_title_options', COMMENT_TITLE_CUSTOM);
     }
     $config->clear('settings.comment_subject_field');
     $config->save();
