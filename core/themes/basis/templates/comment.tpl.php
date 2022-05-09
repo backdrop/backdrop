@@ -78,9 +78,9 @@
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
       <?php if ($title_options == COMMENT_TITLE_HIDDEN):  ?>
-        <a class="comment-permalink" href="/<?php print $permalink_path; ?>">
-        <img src="/core/modules/comment/images/link_icon.png"></a>
+        <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
+
     </div>
 
     <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
