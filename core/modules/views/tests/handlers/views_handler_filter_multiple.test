@@ -15,9 +15,9 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(array $modules = array()) {
     // The Views and Views UI modules will be enabled with this.
-    parent::setUp();
+    parent::setUp($modules);
 
     // Assign vocabulary 'tags' to user entity.
     $field_definition = field_read_field('field_tags');
