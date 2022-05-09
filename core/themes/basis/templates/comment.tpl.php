@@ -67,13 +67,20 @@
   <div class="comment-text">
 
     <div class="comment-title">
+      <?php dpm($variables); ?>
       <?php print render($title_prefix); ?>
-      <h3><?php print $title; ?></h3>
+      <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
+        <h3><?php print $title; ?></h3>
+      <?php endif; ?>
       <?php print render($title_suffix); ?>
       <?php if ($new): ?>
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
+      <?php if ($title_options == COMMENT_TITLE_HIDDEN):  ?>
+        <a class="comment-permalink" href="/<?php print $permalink_path; ?>">
+        <img src="/core/modules/comment/images/link_icon.png"></a>
+      <?php endif; ?>
     </div>
 
     <div class="content"<?php print backdrop_attributes($content_attributes); ?>>

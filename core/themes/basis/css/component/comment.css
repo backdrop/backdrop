@@ -163,3 +163,13 @@
 [dir="rtl"] .comment-footer {
   float: left;
 }
+
+.comment-permalink img {
+  height: 0.7em;
+  filter: invert(32%) sepia(80%) saturate(4550%) hue-rotate(187deg) brightness(89%) contrast(100%);
+  margin-left: 0.5em;
+}
+
+.comment-permalink img:hover {
+  filter: unset;
+}

@@ -12,4 +12,3 @@ dependencies[] = entity
 configure = admin/content/comment
 
 stylesheets[all][] = css/comment.css
-stylesheets[all][] = css/comment_titles.css
