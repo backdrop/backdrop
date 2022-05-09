@@ -72,9 +72,11 @@
       <span class="new"><?php print $new; ?></span>
     <?php endif; ?>
 
-    <?php print render($title_prefix); ?>
-    <h3><?php print $title; ?></h3>
-    <?php print render($title_suffix); ?>
+    <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
+      <?php print render($title_prefix); ?>
+      <h3><?php print $title; ?></h3>
+      <?php print render($title_suffix); ?>
+    <?php endif; ?>
 
     <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
       <?php

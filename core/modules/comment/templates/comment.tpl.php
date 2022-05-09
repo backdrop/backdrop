@@ -64,8 +64,10 @@
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
-  <h3><?php print $title; ?></h3>
-  <?php print render($title_suffix); ?>
+  <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
+    <h3><?php print $title; ?></h3>
+    <?php print render($title_suffix); ?>
+  <?php endif; ?>
 
   <footer>
     <?php print $user_picture; ?>

@@ -108,11 +108,9 @@ function template_preprocess_comment(&$variables) {
 
 
 
-
+  $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $permanlink_path = $uri['path'] . "#" . $uri['options']['fragment'];
   $variables['permalink_path'] = $permanlink_path;
-  // $variables['permalink_icon'] = l(img src="/core/modules/comment/images/link_icon.png", $uri['path'], $uri['options']);
-  $variables['permalink_options'] = $uri['options'];
   // Check to see if title should be hidden
   if ($node_type->settings['comment_title_options'] == COMMENT_TITLE_HIDDEN) {
     $uri['options']['attributes']['class'][] = 'hide-comment-title';
