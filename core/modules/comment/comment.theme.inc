@@ -105,9 +105,6 @@ function template_preprocess_comment(&$variables) {
   $uri = $comment->uri();
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
   
-
-
-
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $permanlink_path = $uri['path'] . "#" . $uri['options']['fragment'];
   $variables['permalink_path'] = $permanlink_path;
