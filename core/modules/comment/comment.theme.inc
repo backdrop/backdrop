@@ -106,10 +106,6 @@ function template_preprocess_comment(&$variables) {
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
   
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
-  // Check to see if title should be hidden
-  if ($node_type->settings['comment_title_options'] == COMMENT_TITLE_HIDDEN) {
-    $uri['options']['attributes']['class'][] = 'hide-comment-title';
-  }
   $variables['title_options'] = $node_type->settings['comment_title_options'];
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
@@ -149,6 +145,10 @@ function template_preprocess_comment(&$variables) {
     if ($comment->uid == $variables['user']->uid) {
       $variables['classes'][] = 'comment-by-viewer';
     }
+  }
+  // Check to see if title should be hidden
+  if ($node_type->settings['comment_title_options'] == COMMENT_TITLE_HIDDEN) {
+    $variables['classes'][] = 'hide-comment-title';
   }
 }
 

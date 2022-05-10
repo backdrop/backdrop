@@ -5,18 +5,26 @@
  * This strategy is still up for discussion.
  */
 
-.hide-comment-title {
-  display: block;
-  /* Looking for a better idea here. */
+.hide-comment-title h3 .permalink {
+  display: inline-block;
+  content: "Permalink";
+  font-size:  80%;
   text-indent: -99999px;
-  line-height: 0;
+  line-height: initial;
+  width: 1em;
+  height: 1em;
+  margin: 0 5px -2px 0;
+  padding: 1px;
+  background-color: currentColor;
+  overflow: hidden;
+  -webkit-mask-image: url("/core/modules/comment/images/link-icon.svg");
+  mask-image: url("/core/modules/comment/images/link-icon.svg");
+  -webkit-mask-size: cover;
+  mask-size: cover;
 }
 
-.hide-comment-title:after {
-  display: block;
-  /* Looking for a better/translatable idea here. */
-  content: "Permalink";
-  text-indent: 0;
-  line-height: initial;
-  font-size: 70%;
+.hide-comment-title .comment-title h3 {
+  display: inline-block;
 }
+
+
