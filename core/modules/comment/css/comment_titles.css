@@ -1,8 +1,5 @@
 /* 
- * @TODO - Remove this note
- * Temporarily adding a new css file to deal with contrib themes
- * that have already overwritten the primmary comments.css file.
- * This strategy is still up for discussion.
+ * CSS specifically for the hide titles option on comments. 
  */
 
 .hide-comment-title h3 .permalink {
@@ -26,5 +23,3 @@
 .hide-comment-title .comment-title h3 {
   display: inline-block;
 }
-
-
