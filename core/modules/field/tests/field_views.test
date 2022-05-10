@@ -105,8 +105,8 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   var $fields;
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $langcode = LANGUAGE_NONE;
     $field_names = $this->setUpFields();
@@ -270,8 +270,8 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
 class FieldViewsFieldTest extends FieldViewsTestHelper {
   public $nodes;
 
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Setup basic fields. When field render is tested in these tests with
     // $view->style_plugin->get_field() the loop counter will need to be

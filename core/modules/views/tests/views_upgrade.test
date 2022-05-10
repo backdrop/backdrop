@@ -14,7 +14,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsUpgradeTestCase extends ViewsSqlTest {
   protected function setUp(array $modules = array()) {
-//     // To import a view the user needs use PHP for settings rights, so enable php module.
     parent::setUp($modules);
   }
 

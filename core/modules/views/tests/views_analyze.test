@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the views analyze system.
  */
 class ViewsAnalyzeTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Add an admin user will full rights;
     $this->admin = $this->backdropCreateUser(array('administer views'));
