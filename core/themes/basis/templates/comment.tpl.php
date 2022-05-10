@@ -67,7 +67,6 @@
   <div class="comment-text">
 
     <div class="comment-title">
-      <?php dpm($variables); ?>
       <?php print render($title_prefix); ?>
       <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
         <h3><?php print $title; ?></h3>
