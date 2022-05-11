@@ -3526,7 +3526,6 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
         'class' => array('warning-on-change'),
       ),
       '#title_display' => 'before',
-      // '#title_display' => 'invisible',
     );
 
     $form['remove_groups'][$id] = array(); // to prevent a notice
