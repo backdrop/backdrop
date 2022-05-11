@@ -516,7 +516,6 @@ td.group-title {
 }
 #views-rearrange-filters td.group-operator {
   border-right: 1px solid #ccc;
-  /* padding-left: 60px; */
   vertical-align: middle;
 }
 
