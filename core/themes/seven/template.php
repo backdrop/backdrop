@@ -156,7 +156,7 @@ function seven_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav class="breadcrumb" aria-label="Website Orientation">';
+    $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
     $output .= '<ol>';
     // IE8 does not support :first-child and :last-child selectors, so we need
     // to add classes.

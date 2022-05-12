@@ -124,7 +124,7 @@ function basis_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav class="breadcrumb" aria-label="Website Orientation">';
+    $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
     $output .= '<ol><li>' . implode('</li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
