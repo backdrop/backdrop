@@ -1713,7 +1713,12 @@ function install_finished(&$install_state) {
   backdrop_cron_run();
 
   $message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
-  $message .= st(' If you are new to Backdrop, then <a href="@dashboard">the Dashboard</a> may be a good place to start.', array('@dashboard' => url('admin/dashboard')));
+
+  // Confirming that we are using standard profile with Dashboard. 
+  $profile = backdrop_get_profile();
+  if ($profile == 'standard') {
+    $message .= st(' If you are new to Backdrop, then <a href="@dashboard">the Dashboard</a> may be a good place to start.', array('@dashboard' => url('admin/dashboard')));
+  }
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
