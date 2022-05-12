@@ -98,11 +98,18 @@ function book_node_view_link(Node $node, $view_mode) {
       $create_access = node_access('create', $child_type);
       $depth_allowed = $node->book['depth'] < MENU_MAX_DEPTH;
       $show_add_child_link = in_array('book_add_child', $link_options, TRUE);
+      $show_reorder_link = in_array('book_reorder', $link_options, TRUE);
       if ($admin_access && $create_access && $node->status == 1 && $depth_allowed && $show_add_child_link) {
         $links['book_add_child'] = array(
           'title' => t('Add child page'),
           'href' => 'node/add/' . str_replace('_', '-', $child_type),
           'query' => array('parent' => $node->book['mlid']),
+        );
+      }
+      if (user_access('administer book outlines') && $show_reorder_link) {
+        $links['book_reorder'] = array(
+          'title' => t('Reorder book'),
+          'href' => 'admin/content/book/' . $node->book['bid'],
         );
       }
     }
@@ -122,7 +129,7 @@ function book_node_view_link(Node $node, $view_mode) {
  */
 function book_menu() {
   $items['admin/content/book'] = array(
-    'title' => 'Books',
+    'title' => 'Manage Books',
     'description' => "Manage your site's book outlines.",
     'page callback' => 'book_admin_overview',
     'access arguments' => array('administer book outlines'),
@@ -148,7 +155,6 @@ function book_menu() {
     'page arguments' => array('book_admin_edit', 3),
     'access callback' => '_book_outline_access',
     'access arguments' => array(3),
-    'type' => MENU_CALLBACK,
     'file' => 'book.admin.inc',
   );
   $items['book'] = array(
@@ -158,18 +164,8 @@ function book_menu() {
     'type' => MENU_SUGGESTED_ITEM,
     'file' => 'book.pages.inc',
   );
-  $items['node/%node/outline'] = array(
-    'title' => 'Outline',
-    'page callback' => 'book_outline',
-    'page arguments' => array(1),
-    'access callback' => '_book_outline_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-    'file' => 'book.pages.inc',
-  );
-  $items['node/%node/outline/remove'] = array(
-    'title' => 'Remove from outline',
+  $items['node/%node/outline-remove'] = array(
+    'title' => 'Remove from book outline',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_remove_form', 1),
     'access callback' => '_book_outline_remove_access',
@@ -227,8 +223,7 @@ function _book_node_is_removable($node) {
 function book_admin_paths() {
   if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
-      'node/*/outline' => TRUE,
-      'node/*/outline/remove' => TRUE,
+      'node/*/outline-remove' => TRUE,
     );
     return $paths;
   }
@@ -413,6 +408,26 @@ function book_form_node_form_alter(&$form, &$form_state, $form_id) {
         'css' => array(backdrop_get_path('module', 'book') . '/css/book.admin.css'),
       ),
     );
+    if (!empty($node->nid)) {
+      $form['book']['actions'] = array(
+        '#theme' => 'links',
+        '#links' => array(),
+        '#attributes' => array('class' => array('links', 'inline')),
+        '#weight' => 40,
+      );
+      if (_book_outline_remove_access($node)) {
+        $form['book']['actions']['#links']['remove'] = array(
+          'title' => t('Remove from book outline'),
+          'href' => 'node/' . $node->nid . '/outline-remove',
+        );
+      }
+      if (!empty($node->book['bid']) && _book_outline_access($node)) {
+        $form['book']['actions']['#links']['reorder'] = array(
+          'title' => t('Reorder book pages'),
+          'href' => 'admin/content/book/' . $node->book['bid'],
+        );
+      }
+    }
   }
 }
 
@@ -916,6 +931,10 @@ function book_node_insert(Node $node) {
     $node->book['nid'] = $node->nid;
     $node->book['menu_name'] = book_menu_name($node->book['bid']);
     _book_update_outline($node);
+    $destination = backdrop_get_destination();
+    if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
+      backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
+    }
   }
 }
 
@@ -931,6 +950,10 @@ function book_node_update(Node $node) {
     $node->book['nid'] = $node->nid;
     $node->book['menu_name'] = book_menu_name($node->book['bid']);
     _book_update_outline($node);
+    $destination = backdrop_get_destination();
+    if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
+      backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
+    }
   }
 }
 

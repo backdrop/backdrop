@@ -26,7 +26,7 @@ class FieldUITestCase extends BackdropWebTestCase {
     parent::setUp($modules);
 
     // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields', 'administer view modes'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields', 'administer view modes', 'administer account settings'));
     $this->backdropLogin($admin_user);
 
     // Create content type, with underscores.
@@ -427,19 +427,19 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     );
     $this->fieldUIAddNewField($bundle_path1, $edit1);
 
-    // Create an additional node type.
-    $type_name2 = strtolower($this->randomName(8)) . '_test';
-    $type2 = $this->backdropCreateContentType(array('name' => $type_name2, 'type' => $type_name2));
-    $type_name2 = $type2->type;
-    $hyphen_type2 = str_replace('_', '-', $type_name2);
-
-    // Add an instance to the second node type.
-    $bundle_path2 = 'admin/structure/types/manage/' . $hyphen_type2;
+    // Add an instance to the user entity.
+    $bundle_path2 = 'admin/config/people/manage';
+    $bundle_name2 = 'user';
+    $bundle_label2 = entity_get_info('user')['bundles'][$bundle_name2]['label'];
     $edit2 = array(
       'fields[_add_existing_field][label]' => $this->field_label,
       'fields[_add_existing_field][field_name]' => $this->field_name,
     );
     $this->fieldUIAddExistingField($bundle_path2, $edit2);
+
+    // Make sure the Delete Field button works on the content type.
+    $this->backdropPost($bundle_path1 . '/fields/' . $this->field_name, array(), 'Delete field');
+    $this->assertResponse(200);
 
     // Delete the first instance.
     $this->fieldUIDeleteField($bundle_path1, $this->field_name, $this->field_label, $this->type);
@@ -451,13 +451,17 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     // Check that the field was not deleted
     $this->assertNotNull(field_info_field($this->field_name), 'Field was not deleted.');
 
+    // Make sure the Delete Field button works on the user entity.
+    $this->backdropPost($bundle_path2 . '/fields/' . $this->field_name, array(), 'Delete field');
+    $this->assertResponse(200);
+
     // Delete the second instance.
-    $this->fieldUIDeleteField($bundle_path2, $this->field_name, $this->field_label, $type_name2);
+    $this->fieldUIDeleteField($bundle_path2, $this->field_name, $this->field_label, $bundle_label2);
 
     // Reset the fields info.
     _field_info_collate_fields_reset();
     // Check that the field instance was deleted.
-    $this->assertNull(field_info_instance('node', $this->field_name, $type_name2), 'Field instance was deleted.');
+    $this->assertNull(field_info_instance('user', $this->field_name, $bundle_name2), 'Field instance was deleted.');
     // Check that the field was deleted too.
     $this->assertNull(field_info_field($this->field_name), 'Field was deleted.');
   }

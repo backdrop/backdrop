@@ -63,7 +63,7 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
-  // Changed display name from Full HTML to Raw HTML but keeping machine name 
+  // Changed display name from Full HTML to Raw HTML but keeping machine name
   // for backward compatibility.
   $full_html_format = array(
     'format' => 'full_html',
@@ -157,6 +157,28 @@ function standard_install() {
       ),
       'is_new' => TRUE,
     ),
+    array(
+      'type' => 'card',
+      'name' => st('Card'),
+      'description' => st('Add a card for use on an existing page. Display as a block or in a view.'),
+      'settings' => array(
+        'status_default' => NODE_PUBLISHED,
+        'node_preview' => TRUE,
+        'promote_enabled' => TRUE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'scheduling_enabled' => FALSE,
+        'show_submitted_info' => FALSE,
+        'comment_default' => COMMENT_NODE_CLOSED,
+        'node_submitted' => FALSE,
+        'node_user_picture' => FALSE,
+        'hidden_path' => TRUE,
+      ),
+      'is_new' => TRUE,
+    ),
   );
 
   foreach ($types as $type) {
@@ -169,53 +191,10 @@ function standard_install() {
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
     ->set('node_post_pattern', 'posts/[node:title]')
+    ->set('node_card_pattern', 'node/[node:nid]')
     ->save();
 
-  // Create an initial post to welcome users on install.
-  $post = new Node(
-    array(
-      'title' => st('Your first post!'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is your first post! You may edit or delete it.'),
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 1,
-      'type' => 'post',
-    )
-  );
-  $post->save();
-
-  // Create an "About" page node.
-  $page = new Node(
-    array(
-      'title' => st('About'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'page',
-    )
-  );
-  $page->save();
-
-  // Create an "About" link in the main menu.
-  $item = array(
-    'link_path' => 'node/' . $page->nid,
-    'link_title' => 'About',
-    'weight' => 1,
-  );
-  menu_link_save($item);
+  cache_clear_all();
 
   // Create a default vocabulary named "Tags", enabled for the 'post' content type.
   $description = st('Use tags to group posts on similar topics into categories.');
@@ -339,6 +318,178 @@ function standard_install() {
   );
   field_create_instance($instance);
 
+  $instance = array(
+    'field_name' => 'field_image',
+    'entity_type' => 'node',
+    'label' => 'Image',
+    'bundle' => 'card',
+    'description' => st('Upload an image to go with this card.'),
+    'required' => FALSE,
+
+    'settings' => array(
+      'file_directory' => 'field/image',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => TRUE,
+      'title_field' => '',
+    ),
+
+    'widget' => array(
+      'type' => 'image_image',
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+        'preview_image_style' => 'thumbnail',
+      ),
+      'weight' => -1,
+    ),
+
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array('image_style' => 'large', 'image_link' => ''),
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'type' => 'image',
+        'settings' => array(
+          'image_style' => 'medium',
+          'image_link' => '',
+          'image_float' => '',
+        ),
+        'weight' => -1,
+      ),
+    ),
+  );
+  field_create_instance($instance);
+
+  // Create a default post to display on front page.
+  $post = new Node(
+    array(
+      'title' => st('Your first post!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first post! You may edit or delete it.'),
+            'format' => 'filtered_html'
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('About'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'format' => 'filtered_html',
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
+  // Create an "About" link in the main menu.
+  $item = array(
+    'link_path' => 'node/' . $page->nid,
+    'link_title' => 'About',
+    'weight' => 1,
+  );
+  menu_link_save($item);
+
+  // Creating three default Card nodes.
+  // Special thanks to @indigoxela for providing the icons.
+
+
+  $field_image_dir = 'public://field/image';
+  file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
+
+  $cards = array(
+    'card1-layout.png' => array(
+      'title' => st('The Home page layout'),
+      'body' => st('<p>Use the home page layout to specifically customize this page. These Cards only appear on this layout.</p><p><a href="https://docs.backdropcms.org/documentation/the-home-page">Learn more about the Home page</a></p>'),
+    ),
+    'card2-card.png' => array(
+      'title' => st('What is a Card?'),
+      'body' => st('<p>A Card can only be seen as part of another page. Place them individually as "Existing content" Blocks, or grouped as in a View.</p><p><a href="https://docs.backdropcms.org/documentation/creating-and-editing-content">Learn more about Cards</a></p>'),
+    ),
+    'card3-organize.png' => array(
+      'title' => st('Organize your content'),
+      'body' => st('<p>Backdrop CMS includes three pre-defined types of content: Pages, Posts, and Cards. Custom content types can also be added.</p><p><a href="https://docs.backdropcms.org/documentation/content-types">Learn more about content types</a></p>'),
+    ),
+  );
+
+  foreach ($cards as $image_filename => $info) {
+    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename;
+    $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
+
+    $file = entity_create('file', array(
+      'filename' => $image_filename,
+      'uri' => $moved_file,
+      'uid' => 1,
+    ));
+
+    $file->save();
+    $card = new Node(
+      array(
+        'title' => $info['title'],
+        'body' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'value' => $info['body'],
+              'format' => 'filtered_html',
+            ),
+          ),
+        ),
+        'field_image' => array(
+          LANGUAGE_NONE => array(
+            array(
+              'fid' => $file->fid,
+              'filename' => $image_filename,
+              'uri' => 'public://field/image/' . $image_filename,
+              'filemime' => 'image/jpeg',
+              'status' => 0,
+            ),
+          ),
+        ),
+        'uid' => 1,
+        'status' => 1,
+        'promote' => 1,
+        'type' => 'card',
+      )
+    );
+
+    $card->save();
+  }
+
+  // Modify the default promoted view to exclude cards.
+  $promoted_view = views_get_view('promoted');
+  $promoted_view->display['default']->display_options['filters']['type'] = array(
+    'id' => 'type',
+    'table' => 'node',
+    'field' => 'type',
+    'operator' => 'not in',
+    'value' => array('card' => 'card'),
+  );
+  $promoted_view->save();
+
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   $anonymous_permissions = array(
@@ -381,6 +532,12 @@ function standard_install() {
     'edit any post content',
     'delete own post content',
     'delete any post content',
+    'create card content',
+    'edit own card content',
+    'edit any card content',
+    'delete own card content',
+    'delete any card content',
+    'view hidden paths',
     'access dashboard',
     'view the administration theme',
     'access administration bar',
@@ -388,7 +545,9 @@ function standard_install() {
     'access administration pages',
     'access site in maintenance mode',
     'flush caches',
-    'create terms in tags',
+    'edit terms in tags',
+    'delete terms in tags',
+    'administer taxonomy',
     'administer nodes',
     'search content',
     'use advanced search',

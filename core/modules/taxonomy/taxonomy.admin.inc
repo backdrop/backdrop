@@ -280,7 +280,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
     $perm_item += array(
       'description' => '',
       'restrict access' => FALSE,
-      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+      'warning' => '',
     );
     $options[$perm] = '';
     $parts = explode(': ', $perm_item['title']);

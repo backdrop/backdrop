@@ -431,8 +431,8 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
-main {
-  margin-bottom: 20px;
+.l-wrapper {
+  padding-bottom: 80px;
 }
 
 /* Administration page listings. */
@@ -1175,6 +1175,27 @@ textarea.form-textarea:focus {
   outline: 0;
   color: #000;
   border-color: #43afe4;
+}
+input.form-color {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input.form-color::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input.form-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input.form-color::-webkit-color-swatch-wrapper {
+  padding: 0;
 }
 ul.action-links {
   margin: 1em 0;

@@ -444,7 +444,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
         $perm_item += array(
           'description' => '',
           'restrict access' => FALSE,
-          'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+          'warning' => '',
         );
         $options[$perm] = '';
         $form['permission'][$perm] = array(
@@ -527,7 +527,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
-  array_unshift($roles, t('disabled'));
+  $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
