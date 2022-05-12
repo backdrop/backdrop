@@ -1,7 +1,7 @@
 Fixes ISSUE_URL
 
 <!-- Replace 'ISSUE_URL' above with the URL to the issue that this pull
-request (PR) addresses. Each PR must be linked to an issue on
+request (PR) addresses. **Each PR must be linked to an issue** on
 github.com/backdrop/backdrop-issues, and most of the rationale, discussion,
 and explanation should take place in the linked issue, rather than in this
 PR. -->
