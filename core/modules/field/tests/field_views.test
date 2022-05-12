@@ -105,12 +105,10 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   var $fields;
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $langcode = LANGUAGE_NONE;
-
-
     $field_names = $this->setUpFields();
 
     // The first one will be attached to nodes only.
@@ -172,7 +170,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   function testViewsData() {
     $data = views_fetch_data();
-    
+
     // Check the table and the joins of the first field.
     // Attached to node only.
     $field = $this->fields[0];
@@ -272,8 +270,8 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
 class FieldViewsFieldTest extends FieldViewsTestHelper {
   public $nodes;
 
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Setup basic fields. When field render is tested in these tests with
     // $view->style_plugin->get_field() the loop counter will need to be
@@ -282,13 +280,16 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->setUpFields(3);
 
     // Setup a field with cardinality > 1.
-    $this->fields[3] = $field = field_create_field(array('field_name' => 'field_name_3', 'type' => 'text', 'cardinality' => FIELD_CARDINALITY_UNLIMITED));
+    $this->fields[3] = field_create_field(array('field_name' => 'field_name_3', 'type' => 'text', 'cardinality' => FIELD_CARDINALITY_UNLIMITED));
     // Setup a field that will have no value.
-    $this->fields[4] = $field = field_create_field(array('field_name' => 'field_name_4', 'type' => 'text', 'cardinality' => FIELD_CARDINALITY_UNLIMITED));
+    $this->fields[4] = field_create_field(array('field_name' => 'field_name_4', 'type' => 'text', 'cardinality' => FIELD_CARDINALITY_UNLIMITED));
 
     $this->setUpInstances();
-
     $this->clearViewsCaches();
+
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
 
     // Create some nodes.
     $this->nodes = array();
@@ -322,7 +323,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     for ($i = 0; $i < 3; $i++) {
       for ($key = 0; $key < 2; $key++) {
         $field = $this->fields[$key];
-        $rendered_field = $view->style_plugin->get_field($i+2, $field['field_name']);
+        $rendered_field = $view->style_plugin->get_field($i, $field['field_name']);
         $expected_field = $this->nodes[$i]->{$field['field_name']}[LANGUAGE_NONE][0]['value'];
         $this->assertEqual($rendered_field, $expected_field);
       }
@@ -343,7 +344,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     // Take sure that the formatter works as expected.
     // @TODO: actually there should be a specific formatter.
     for ($i = 0; $i < 2; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[0]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[0]['field_name']);
       $this->assertEqual(strlen($rendered_field), 3);
     }
   }
@@ -357,7 +358,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
       $this->assertNotNull($rendered_field);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
@@ -380,7 +381,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
       $this->assertNotNull($rendered_field);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
@@ -400,7 +401,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
       $this->assertNotNull($rendered_field);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
@@ -421,7 +422,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
       $this->assertNotNull($rendered_field);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
@@ -439,7 +440,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
       $this->assertNotNull($rendered_field);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
@@ -471,6 +472,12 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $handler->display->display_options['pager']['type'] = 'full';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
+    $handler->display->display_options['sorts']['nid'] = array(
+      'id' => 'nid',
+      'table' => 'node',
+      'field' => 'nid',
+      'order' => 'ASC',
+    );
 
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';

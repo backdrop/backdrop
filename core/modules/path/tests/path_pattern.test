@@ -454,6 +454,14 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   protected $profile = 'standard';
 
+  function setUp(array $modules = array()) {
+    parent::setUp($modules);
+
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
+  }
+
   /**
    * Create a new content type with new path pattern.
    */
@@ -610,9 +618,9 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     $edit = array(
       'action' => 'path_node_update_action',
-      'bulk_form[1]' => TRUE,
+      'bulk_form[0]' => TRUE,
     );
-    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'type', 'sort' => 'asc')));
+    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'title', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item', array('%action' => 'Update content URL alias')));
 
     $this->assertEntityAlias('node', $node1, 'content/' . $node1->title);
@@ -709,22 +717,45 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['max_length'] = 'abc';
     $edit['max_component_length'] = 'abc';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be a number.');
-    $this->assertText('Maximum component length must be a number.');
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+    );
+    $this->assertRaw(format_string('The value for %name must be numeric.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+    );
+    $this->assertRaw(format_string('The value for %name must be numeric.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
     $edit['max_component_length'] = '0';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be higher or equal to 1.');
-    $this->assertText('Maximum component length must be higher or equal to 1.');
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+      '%min' => 1,
+    );
+    $this->assertRaw(format_string('The value for %name must be greater than or equal to %min.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+      '%min' => 1,
+    );
+    $this->assertRaw(format_string('The value for %name must be greater than or equal to %min.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
     $edit['max_component_length'] = '999';
     $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
-    $this->assertText('Maximum URL alias length must be below or equal to 255.');
-    $this->assertText('Maximum component length must be below or equal to 255.');
+
+    $placeholders = array(
+      '%name' => 'Maximum URL alias length',
+      '%max' => 255,
+    );
+    $this->assertRaw(format_string('The value for %name must be less than or equal to %max.', $placeholders));
+    $placeholders = array(
+      '%name' => 'Maximum component length',
+      '%max' => 255,
+    );
+    $this->assertRaw(format_string('The value for %name must be less than or equal to %max.', $placeholders));
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';

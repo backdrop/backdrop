@@ -6,6 +6,11 @@
 #permissions td.permission {
   padding-left: 1.5em; /* LTR */
 }
+#permissions td.permission .permission-warning-description {
+  font-size: 0.9em;
+  color: #444;
+  margin-top: 0.5em;
+}
 [dir="rtl"] #permissions td.permission {
   padding-left: 0;
   padding-right: 1.5em;

@@ -4494,31 +4494,43 @@ function views_ui_admin_settings_basic() {
   $form['#attached']['css'] = views_ui_get_admin_css();
   $config = config('views_ui.settings');
 
-  $options = array();
-  foreach (list_themes() as $name => $theme) {
-    if ($theme->status) {
-      $options[$name] = $theme->info['name'];
-    }
-  }
+  $form['wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("'Add view' wizard"),
+  );
+  $form['wizard']['wizard_default_display'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Display types to include by default'),
+    '#description' => t("These display types will be selected by default when a new view is created using the '!add_view' wizard.", array('!add_view' => l(t('Add View'), 'admin/structure/views/add'))),
+    '#options' => array(
+      'page' => t('Page'),
+      'block' => t('Block'),
+    ),
+    '#default_value' => $config->get('wizard_default_display'),
+  );
 
-  // This is not currently a fieldset but we may want it to be later, so this
-  // will make it easier to change if we do.
-  $form['basic'] = array();
-
+  $form['basic'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Views UI settings'),
+  );
   $form['basic']['show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the <em>Master</em> display'),
     '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
     '#default_value' => $config->get('show_master_display'),
   );
-
   $form['basic']['display_embed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
     '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
     '#default_value' => $config->get('display_embed'),
   );
-
+  $options = array();
+  foreach (list_themes() as $name => $theme) {
+    if ($theme->status) {
+      $options[$name] = $theme->info['name'];
+    }
+  }
   $form['basic']['custom_theme'] = array(
     '#type' => 'select',
     '#title' => t('Custom admin theme for the Views UI'),
@@ -4526,7 +4538,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('custom_theme'),
     '#description' => t('In some cases you might want to select a different admin theme for the Views UI.')
   );
-
   $form['basic']['exposed_filter_any_label'] = array(
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
@@ -4538,26 +4549,22 @@ function views_ui_admin_settings_basic() {
     '#type' => 'fieldset',
     '#title' => t('Live preview settings'),
   );
-
   $form['live_preview']['always_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically update preview on changes'),
     '#default_value' => $config->get('always_live_preview'),
   );
-
   $form['live_preview']['show_preview_information'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show information and statistics about the view during live preview'),
     '#default_value' => $config->get('show_preview_information'),
   );
-
   // Set a common variable used for #states on the following elements.
   $preview_checked = array(
     'visible' => array(
       ':input[name="show_preview_information"]' => array('checked' => TRUE),
     ),
   );
-
   $form['live_preview']['show_sql_query_where'] = array(
     '#type' => 'radios',
     '#title' => t('Statistics location'),
@@ -4568,7 +4575,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_sql_query_where'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_sql_query'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the SQL query'),
@@ -4581,7 +4587,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_performance_statistics'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_additional_queries'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),

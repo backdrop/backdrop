@@ -13,6 +13,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * @see views_plugin_cache
  */
 class ViewsCacheTest extends ViewsSqlTest {
+  protected $profile = 'minimal';
+
   /**
    * Build and return a basic view of the views_test table.
    *
@@ -219,7 +221,7 @@ class ViewsCacheTest extends ViewsSqlTest {
     // Check that we have 7 items in RSS feed returned by the first request.
     $xml = simplexml_load_string($first_content);
     $items = $xml->xpath('/rss/channel/item');
-    $this->assertEqual(7, count($items), t('The number of RSS feed items matched.'));
+    $this->assertEqual(5, count($items), t('The number of RSS feed items matched.'));
 
     // Create another node to be sure we get cached results on the second
     // request.
@@ -231,6 +233,71 @@ class ViewsCacheTest extends ViewsSqlTest {
     $this->assertEqual($first_content, $second_content, t('The second result fetched from cache.'));
     $second_content_type = $this->backdropGetHeader('content-type');
     $this->assertEqual($first_content_type, $second_content_type, t('Content types of responses are equal.'));
+  }
+
+  /**
+   * Test caching of different exposed filter values with the same view result.
+   *
+   * Make sure the output is different.
+   */
+  function testExposedFilterSameResultsCaching() {
+    // Create the view with time-based cache with hour lifetimes and add exposed
+    // filter to it with "Starts with" operator.
+    $view = $this->getBasicView();
+    $view->init_display();
+    $view->name = 'test_cache_filter_same_results';
+    $view->display_handler->override_option('cache', array(
+      'type' => 'time',
+      'results_lifespan' => '3600',
+      'output_lifespan' => '3600',
+    ));
+    $view->display_handler->override_option('filters', array(
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+        'operator' => 'starts',
+        'exposed' => TRUE,
+        'expose' => array(
+          'operator_id' => 'name_op',
+          'operator' => 'name_op',
+          'identifier' => 'name',
+        ),
+      ),
+    ));
+
+    // Clone the view before setting exposed input.
+    $clone = $view->clone_view();
+
+    // Pass "Rin" to the exposed filter and check that only one row returned.
+    $view->set_exposed_input(array(
+      'name' => 'Rin',
+    ));
+    $this->executeView($view);
+    $first_result = $view->result;
+    $first_output = $view->render();
+    $this->assertEqual(1, count($first_result), t('The number of rows returned by the first view match.'));
+
+    // Pass full "Ringo" to the exposed filter at the second time and make sure
+    // results are the same.
+    $clone->set_exposed_input(array(
+      'name' => 'Ringo',
+    ));
+    $this->executeView($clone);
+    $second_result = $clone->result;
+    $second_output = $clone->render();
+    $this->assertEqual($first_result, $second_result, t('Results of both views are the same.'));
+
+    // Check that output is not the same and it contains full "Ringo" word in
+    // default value of exposed input.
+    $this->assertNotEqual($first_output, $second_output, t('Output of the second view is different.'));
+
+    $this->backdropSetContent($second_output);
+    $this->assertFieldByXPath('//input[@name="name" and @value="Ringo"]', FALSE, t('Input field of exposed filter has the second value.'));
+
+    $view->destroy();
+    $clone->destroy();
   }
 
 }

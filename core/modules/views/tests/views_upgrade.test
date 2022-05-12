@@ -13,10 +13,11 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * You can find all conversions by searching for "moved to".
  */
 class ViewsUpgradeTestCase extends ViewsSqlTest {
-  protected function setUp() {
-//     // To import a view the user needs use PHP for settings rights, so enable php module.
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
+    // To import a view the user needs use PHP for settings rights, so enable php module.
+    // @TODO The php module does not exist in core in Backdrop!
     module_enable(array('php'));
     $this->resetAll();
   }
