@@ -34,7 +34,7 @@
 }
 
 /**
- * Moves contextual link from blocking the close link on notifications
+ * Moves contextual link from blocking the close link on notifications.
  **/ 
 .block-system-title-combo .contextual-links-wrapper,
 .block-system-messages .contextual-links-wrapper {
