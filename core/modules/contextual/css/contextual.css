@@ -32,10 +32,15 @@
 .js .contextual-links-wrapper {
   display: block;
 }
+
+/**
+ * Moves contextual link from blocking the close link on notifications
+ **/ 
 .block-system-title-combo .contextual-links-wrapper,
 .block-system-messages .contextual-links-wrapper {
   margin-top: -1.4em;
 }
+
 .contextual-links-trigger {
   background: transparent url(../images/gear-select.png) no-repeat 2px 0;
   border: 1px solid transparent;
