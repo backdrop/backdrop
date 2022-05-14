@@ -13,10 +13,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * You can find all conversions by searching for "moved to".
  */
 class ViewsUpgradeTestCase extends ViewsSqlTest {
-  protected function setUp(array $modules = array()) {
-    parent::setUp($modules);
-  }
-
   function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['old_field_1']['moved to'] = array('views_test', 'id');
