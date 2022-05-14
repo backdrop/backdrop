@@ -32,6 +32,7 @@
 .js .contextual-links-wrapper {
   display: block;
 }
+.block-system-title-combo .contextual-links-wrapper,
 .block-system-messages .contextual-links-wrapper {
   margin-top: -1.4em;
 }
