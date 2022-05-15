@@ -1737,6 +1737,12 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       else {
         $class_name = 'BlockLegacy';
       }
+      if ($delta == 'field_block') {
+        list( , , $field_name) = explode(':', $plugin_name);
+        if (empty(field_get_block_list()[$field_name])) {
+          $class_name = 'BlockBroken';
+        }
+      }
     }
     else {
       $class_name = 'BlockBroken';
