@@ -33,12 +33,9 @@
   display: block;
 }
 
-/**
- * Moves contextual link from blocking the close link on notifications.
- **/ 
-.block-system-title-combo .contextual-links-wrapper,
-.block-system-messages .contextual-links-wrapper {
-  margin-top: -1.4em;
+/** Prevents interference with dismiss option on notifications. **/ 
+.layout .l-messages {
+    padding-top: 1em;
 }
 
 .contextual-links-trigger {
