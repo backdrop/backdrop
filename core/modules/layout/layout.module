@@ -1728,7 +1728,8 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
   // Block "plugins" for Layouts are wrappers around the generic block system.
   $broken_class = NULL;
   if ($plugin_type === 'block') {
-    list($module, $delta) = explode(':', $plugin_name);
+    $parts = explode(':', $plugin_name);
+    list($module, $delta) = $parts;
     $info = layout_get_block_info($module, $delta);
     if ($info) {
       if (isset($info['class'])) {
@@ -1737,8 +1738,8 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       else {
         $class_name = 'BlockLegacy';
       }
-      if ($delta == 'field_block') {
-        list( , , $field_name) = explode(':', $plugin_name);
+      if ($delta == 'field_block' && isset($parts[2])) {
+        $field_name = $parts[2];
         if (empty(field_get_block_list()[$field_name])) {
           $class_name = 'BlockBroken';
         }
