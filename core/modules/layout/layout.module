@@ -1740,7 +1740,8 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       }
       if ($delta == 'field_block' && isset($parts[2])) {
         $field_name = $parts[2];
-        if (empty(field_get_block_list()[$field_name])) {
+        $available_fields = field_get_block_list();
+        if (empty($available_fields()[$field_name])) {
           $class_name = 'BlockBroken';
         }
       }
