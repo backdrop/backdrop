@@ -2528,3 +2528,10 @@ function _layout_clean_custom_css($classes = array()) {
 
   return '';
 }
+
+/**
+ * Implements hook_field_delete_instance().
+ */
+function layout_field_delete_instance($instance) {
+  cache('layout_path')->flush();
+}
