@@ -28,7 +28,7 @@ include_once './includes/bootstrap.inc';
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
 // Include the utility backdrop_var_export() function.
-include_once dirname(__FILE__) . '/../includes/utility.inc';
+include_once dirname(__FILE__) . '/../includes/common.inc';
 
 // Output the PHP header.
 $output = <<<ENDOFHEADER
