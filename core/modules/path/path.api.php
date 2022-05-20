@@ -24,9 +24,9 @@
  *
  * 3. path_delete_all_by_source()
  *    At the appropriate time (usually when an item is being deleted), call
- *    path_delete_all_by_source() to remove any aliases that were created for the
- *    content being removed. See the documentation for path_delete_all_by_source() for
- *    more details.
+ *    path_delete_all_by_source() to remove any aliases that were created for
+ *    the content being removed. See the documentation for
+ *    path_delete_all_by_source() for more details.
  *
  * There are other integration points with Path module, namely alter hooks that
  * allow you to change the data used by Path at various points in the
