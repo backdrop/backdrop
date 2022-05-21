@@ -67,7 +67,7 @@
       };
 
       $tid = $this->contexts['taxonomy_term']->data->tid;
-      $depth = $this->GetTermDepth($tid);
+      $depth = $this->getTermDepth($tid);
 
       if ($depth == $this->settings['depth']) {
         return TRUE;
@@ -85,13 +85,14 @@
      * @return int
      *   An integer representing how many levels deep your term is nested.
      */
-    function GetTermDepth($tid) {
+    function getTermDepth($tid) {
       $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", array(':tid' => $tid))->fetchField();
       if ($parent == 0) {
         return 1;
       }
       else {
-        return 1 + $this->GetTermDepth($parent);
+        return 1 + $this->getTermDepth($parent);
       }
     }
   }
+
