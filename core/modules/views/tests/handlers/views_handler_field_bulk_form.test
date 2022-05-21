@@ -11,8 +11,8 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
 
   public $view;
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $view = new view();
     $view->name = 'test_bulk_form';
