@@ -1,0 +1,9 @@
+type = module
+name = Taxonomy Term Reference
+description = Defines the taxonomy term reference field.
+package = Fields
+tags[] = Content
+version = BACKDROP_VERSION
+backdrop = 1.x
+dependencies[] = field
+dependencies[] = taxonomy
