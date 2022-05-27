@@ -351,6 +351,40 @@ function hook_entity_query_alter($query) {
 }
 
 /**
+ * Alter whether a particular item is persistently cached.
+ *
+ * @param $entity
+ *   The entity object.
+ * @param bool $cache_item
+ *   A flag indicating whether to cache the item. Modules can set this to FALSE
+ *   to disable caching. They should not set a FALSE value to TRUE; a FALSE
+ *   value passed in means that another module has already disabled caching of
+ *   this object and that should be respected by all other modules.
+ *
+ * Note that to disable caching for every entity of a given type, you should use
+ * hook_entity_info_alter() and set the 'entity cache' element to FALSE for the
+ * desired entity type. Use this hook to only disable caching for some entities,
+ * for example, only certain content types, or only certain bundles of a given
+ * entity.
+ *
+ * @see DefaultEntityController::load()
+ * @see hook_entity_info()
+ * @see hook_entity_info_alter()
+ */
+function hook_entity_cache_alter($entity, $cache_item) {
+  if (!$cache_item) {
+    // If someone else has already disabled caching, there's no need to do any
+    // further checking or action.
+    return;
+  }
+  // We'll disable caching for Node pages, perhaps because some custom content
+  // depends on whether the user is authenticated or anonymous.
+  if (gettype($entity) == 'Node' && $entity->type == 'page') {
+    $cache_item = FALSE;
+  }
+}
+
+/**
  * Act on entities being assembled before rendering.
  *
  * @param $entity

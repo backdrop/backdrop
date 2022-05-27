@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity API controller classes and interface.
@@ -365,7 +364,12 @@ class DefaultEntityController implements EntityControllerInterface {
         $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
         if (!empty($queried_entities_by_id)) {
           foreach ($queried_entities_by_id as $id => $item) {
-            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            // Allow other modules to disable caching on a per-item basis.
+            $cache_item = TRUE;
+            backdrop_alter('entity_cache', $item, $cache_item);
+            if ($cache_item) {
+              cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            }
           }
         }
       }
