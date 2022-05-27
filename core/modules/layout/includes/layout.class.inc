@@ -819,7 +819,7 @@ class Layout {
     }
 
     // Load contexts from relationships.
-    if (empty($contexts_cache[$this->name]) || $include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
+    if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
       $this->contexts += $this->getContextsFromRelationships();
     }
 

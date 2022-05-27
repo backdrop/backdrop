@@ -54,7 +54,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test the support for contexts within conditions and blocks.
+   * Test the support for context relationships.
    */
   function testRelationships() {
     // Make a new layout that creates a custom path with wildcards.

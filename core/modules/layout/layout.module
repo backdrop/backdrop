@@ -1336,8 +1336,9 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
   $selected_layout = NULL;
   foreach ($layouts as $layout) {
     // Contexts must have their data set before the layout's access may be
-    // checked.
-    $contexts = $layout->getContexts();
+    // checked, but we cannot check relationship contexts till after loading
+    // data for path based contexts.
+    $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
     foreach ($contexts as $context) {
       if (isset($context->position)) {
         // If the menu router set the data for a context object or a client did
@@ -1371,6 +1372,12 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
         }
       }
     }
+
+    // Now that path contexts have their data loaded, we call getContexts()
+    // again to load relationship contexts.
+    backdrop_static_reset('getContexts');
+    $layout->getContexts();
+
     if (!$layout->disabled && $layout->checkAccess()) {
       $selected_layout = $layout;
       break;
