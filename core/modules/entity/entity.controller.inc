@@ -365,7 +365,17 @@ class DefaultEntityController implements EntityControllerInterface {
         $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
         if (!empty($queried_entities_by_id)) {
           foreach ($queried_entities_by_id as $id => $item) {
-            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            if (!empty($this->entityInfo['entity keys']['bundle'])) {
+              $bundle_property = $this->entityInfo['entity keys']['bundle'];
+              $bundle_name = $item->$bundle_property;
+            }
+            else {
+              $bundle_name = $this->entityType;
+            }
+            $no_cache = isset($this->entityInfo['bundles'][$bundle_name]['no cache']) ? $this->entityInfo['bundles'][$bundle_name]['no cache'] : FALSE;
+            if (!$no_cache) {
+              cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            }
           }
         }
       }
