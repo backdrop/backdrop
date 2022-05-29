@@ -90,8 +90,8 @@
  *         no value is provided.
  *       - access arguments: As in hook_menu().
  *     - bundle cache: (used by DefaultEntityController) Set to FALSE to disable
- *       persistent caching of fully loaded entities for this bundle. Has no
- *       effect if 'entity cache' for the entity is FALSE. Defaults to TRUE.
+ *       persistent caching of fully loaded entities for this bundle. Defaults
+ *       to TRUE. Has no effect if 'entity cache' for the entity is FALSE.
  *   - view modes: An array describing the display modes for the entity type.
  *     Display modes let entities be displayed differently depending on the
  *     context. For instance, a node can be displayed differently on its own
