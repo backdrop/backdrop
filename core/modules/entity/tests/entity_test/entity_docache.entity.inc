@@ -5,9 +5,9 @@
  */
 
 /**
- * Test class for the entity_test entity type.
+ * Test class for the entity_docache entity type.
  */
-class TestEntity extends Entity {
+class TestEntityDoCache extends Entity {
   public $id;
 
   /**
@@ -21,7 +21,7 @@ class TestEntity extends Entity {
    * Implements EntityInterface::entityType().
    */
   public function entityType() {
-    return 'entity_test';
+    return 'entity_docache';
   }
 
   /**
@@ -36,7 +36,7 @@ class TestEntity extends Entity {
    */
   public function uri() {
     return array(
-      'path' => 'test/' . $this->id,
+      'path' => 'no-cache/' . $this->id,
     );
   }
 
