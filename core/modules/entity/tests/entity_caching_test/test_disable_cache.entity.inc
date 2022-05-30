@@ -5,9 +5,9 @@
  */
 
 /**
- * Test class for the entity_bundle_nocache entity type.
+ * Test class for the test_cacheable entity type.
  */
-class TestEntityBundleNoCache extends Entity {
+class TestDisableCache extends Entity {
   public $id;
 
   /**
@@ -21,7 +21,7 @@ class TestEntityBundleNoCache extends Entity {
    * Implements EntityInterface::entityType().
    */
   public function entityType() {
-    return 'entity_bundle_nocache';
+    return 'test_disable_cache';
   }
 
   /**
@@ -36,7 +36,7 @@ class TestEntityBundleNoCache extends Entity {
    */
   public function uri() {
     return array(
-      'path' => 'bundle-no-cache/' . $this->id,
+      'path' => 'test_disable_cache/' . $this->id,
     );
   }
 

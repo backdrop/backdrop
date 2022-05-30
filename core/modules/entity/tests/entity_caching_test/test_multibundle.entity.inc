@@ -5,9 +5,9 @@
  */
 
 /**
- * Test class for the entity_docache entity type.
+ * Test class for the test_multibundle entity type.
  */
-class TestEntityDoCache extends Entity {
+class TestMultiBundle extends Entity {
   public $id;
 
   /**
@@ -21,7 +21,7 @@ class TestEntityDoCache extends Entity {
    * Implements EntityInterface::entityType().
    */
   public function entityType() {
-    return 'entity_docache';
+    return 'test_multibundle';
   }
 
   /**
@@ -32,11 +32,18 @@ class TestEntityDoCache extends Entity {
   }
 
   /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
+  }
+
+  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
     return array(
-      'path' => 'no-cache/' . $this->id,
+      'path' => 'test_multibundle/' . $this->id,
     );
   }
 

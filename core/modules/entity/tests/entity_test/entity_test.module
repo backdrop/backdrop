@@ -19,44 +19,8 @@ function entity_test_entity_info() {
         'id' => 'id',
       ),
     ),
-    'entity_docache' => array(
-      'label' => t('Test entity (no cache)'),
-      'entity class' => 'TestEntityDoCache',
-      'controller class' => 'EntityDatabaseStorageController',
-      'base table' => 'entity_docache',
-      'fieldable' => TRUE,
-      'entity keys' => array(
-        'id' => 'id',
-      ),
-    ),
-    'entity_bundle_nocache' => array(
-      'label' => t('Test entity (bundle no cache)'),
-      'entity class' => 'TestEntityBundleNoCache',
-      'controller class' => 'EntityDatabaseStorageController',
-      'base table' => 'entity_bundle_nocache',
-      'fieldable' => TRUE,
-      'entity keys' => array(
-        'id' => 'id',
-      ),
-    ),
   );
   return $return;
-}
-
-/**
- * Implements hook_entity_info_alter().
- */
-function entity_test_entity_info_alter(&$entity_info) {
-  // Disable caching on the 'entity_test' type at the entity level.
-  $entity_info['entity_test']['entity cache'] = FALSE;
-
-  // Enable caching on the 'entity_docache' type at the entity level.
-  $entity_info['entity_docache']['entity cache'] = TRUE;
-
-  // Disable caching on the 'entity_bundle_nocache' type at the bundle level
-  // even though it is set to cache at the entity level.
-  $entity_info['entity_bundle_nocache']['entity cache'] = TRUE;
-  $entity_info['entity_bundle_nocache']['bundles']['entity_bundle_nocache']['bundle cache'] = FALSE;
 }
 
 /**
@@ -65,8 +29,6 @@ function entity_test_entity_info_alter(&$entity_info) {
 function entity_test_autoload_info() {
   return array(
     'TestEntity' => 'entity_test.entity.inc',
-    'TestEntityDoCache' => 'entity_docache.entity.inc',
-    'TestEntityBundleNoCache' => 'entity_bundle_nocache.entity.inc',
   );
 }
 
