@@ -11,6 +11,8 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
 
   public $view;
 
+  protected $profile = 'testing';
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
@@ -37,6 +39,10 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     // Create and log in a user with administer views permission.
     $views_admin = $this->backdropCreateUser(array('administer views', 'bypass node access'));
     $this->backdropLogin($views_admin);
+
+    // Create two nodes for the test.
+    $this->backdropCreateNode();
+    $this->backdropCreateNode();
   }
 
   /** 
