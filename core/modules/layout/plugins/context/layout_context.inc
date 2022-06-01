@@ -269,6 +269,14 @@ abstract class LayoutContext extends LayoutHandler {
    * The summary is displayed in the context table on Layout settings pages.
    */
   function getAdminSummary() {}
+
+   /** 
+   * Set the context data from the router item array.
+   * 
+   * @param array $router_item
+   *   A router item array.
+   */
+  function setDataFromRouterItem($router_item) {}
 }
 
 /**
@@ -314,5 +322,18 @@ class LayoutStringContext extends LayoutContext {
       $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
 
       return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
+  }
+
+  /** 
+   * Set the data from the router item array.
+   * 
+   * @param array $router_item
+   *   A router item array.
+   */
+  function setDataFromRouterItem($router_item) {
+    if (isset($this->position) && !empty($router_item['map'][$this->position])) {
+      $context_data = $router_item['map'][$this->position];
+      $this->setData($context_data);
+    }
   }
 }
