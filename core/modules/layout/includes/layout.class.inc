@@ -815,7 +815,17 @@ class Layout {
       $this->contexts += $this->menu_item->getContexts();
     }
     elseif ($this->path) {
-      $this->contexts += layout_context_required_by_path($this->path);
+      $contexts_required_by_path = layout_context_required_by_path($this->path);
+
+      // Set the contexts' data from the router item if available. When this
+      // method is called from the admin form, there is no router item.
+      if (!empty($this->router_item)) {
+        foreach ($contexts_required_by_path as $context) {
+          $context->setDataFromRouterItem($this->router_item);
+        }
+      }
+      
+      $this->contexts += $contexts_required_by_path;
     }
 
     // Load contexts from relationships.
