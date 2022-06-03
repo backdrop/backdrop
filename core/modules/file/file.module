@@ -2795,10 +2795,10 @@ function file_get_type($file) {
  *   - "download"
  *   - "update"
  *   - "delete"
- * @param object|string|NULL $file
+ * @param File|string|NULL $file
  *   The file object on which the operation is to be performed, or file type
  *   (e.g. 'image').
- * @param object $account
+ * @param User $account
  *   Optional, a user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
