@@ -142,6 +142,18 @@ class File extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('create files', $account) || user_access('bypass file access', $account);
+  }
+
+  /**
    * Overrides Entity::access().
    *
    * @param string $op
@@ -164,7 +176,10 @@ class File extends Entity {
     // @todo Could it be safe at some point to switch to __METHOD__?
     $rights = &backdrop_static('file_access', array());
 
-    if (!in_array($op, array('create', 'view', 'download', 'update', 'delete'), TRUE)) {
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'download', 'update', 'delete'), TRUE)) {
       // For unsupported operations we return access denied.
       return FALSE;
     }

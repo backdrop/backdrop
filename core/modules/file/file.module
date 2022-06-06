@@ -2798,7 +2798,7 @@ function file_get_type($file) {
  * @param File|string|NULL $file
  *   The file object on which the operation is to be performed, or file type
  *   (e.g. 'image').
- * @param User $account
+ * @param User|AnonymousUser|object $account
  *   Optional, a user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
@@ -2897,7 +2897,6 @@ function file_stream_wrappers_alter(&$wrappers) {
 function file_file_access($op, $file, $account) {
 
   if ($op == 'create') {
-    // @todo File::createAccess?
     if (user_access('create files', $account)) {
       return FILE_ACCESS_ALLOW;
     }
