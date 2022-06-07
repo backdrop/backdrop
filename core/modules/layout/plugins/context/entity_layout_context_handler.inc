@@ -100,42 +100,4 @@ class EntityLayoutContext extends LayoutContext {
       return t('@entity ID: @id', array('@id' => $this->settings['id'], '@entity' => $info['label']));
     }
   }
-
-   /** 
-   * Set the context data from the router item array.
-   * 
-   * @param array $router_item
-   *   A router item array.
-   */
-  function setDataFromRouterItem($router_item) {
-    if (isset($this->position) && !empty($router_item['map'][$this->position])) {
-      // If the menu router set the data for a context object or a client did
-      // so via hook_layout_load_by_router_item_alter(), we don't need to do
-      // any setting here. But if $context->data is not an object, then it is
-      // either a raw string that must be converted to an object by a load
-      // callback or it is a string pass-through.
-      if (!is_object($this->data)) {
-        // If clients replaced any layout with one whose placeholders are in a
-        // new position, they need to have altered $context->position so that
-        // it points to the right place in the router item to get the data
-        // object.
-        $context_data = $router_item['map'][$this->position];
-        // If the router item contains the context object in the right
-        // position, then we can just set the data from that.
-        if (is_object($context_data)) {
-          $this->setData($context_data);
-        }
-        else { // TODO: this if/else may not be necessary
-          // If the context data was not an object, then we can try to set
-          // it using the plugin's load callback. If there is no callback,
-          // then it must be a string pass-through, so we leave it as is.
-          $context_info = layout_get_context_info($this->plugin);
-          if (isset($context_info['load callback'])) {
-            $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$this->position]));
-          }
-          $this->setData($context_data);
-        }
-      }
-    }
-  }
 }
