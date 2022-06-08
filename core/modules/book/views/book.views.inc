@@ -49,7 +49,7 @@ function book_views_data() {
   );
 
   $data['book_menu_links']['mlid'] = array(
-    'title' => t('mlid'),
+    'title' => t('Menu link ID'),
     'help' => t('The menu link ID of the book page.'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
