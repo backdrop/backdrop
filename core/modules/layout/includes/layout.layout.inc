@@ -176,8 +176,8 @@ function layout_layout_access_info() {
     ),
     // Optional if needing to clarify between contexts of the same type.
     'required contexts labels' => array(
-      'user1' => t('First user account'),
-      'user2' => t('Second user account'),
+      'user1' => t('The logged-in user account'),
+      'user2' => t('User account to compare to the logged-in user account'),
     ),
   );
   $info['path'] = array(
