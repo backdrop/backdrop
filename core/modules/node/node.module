@@ -2376,6 +2376,12 @@ function node_page_view(Node $node) {
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
 
+  // Show a message if the content type is configured to have a hidden path.
+  if ($type->settings['hidden_path']) {
+    $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
+    backdrop_set_message($message, 'info');
+  }
+
   return node_show($node);
 }
 

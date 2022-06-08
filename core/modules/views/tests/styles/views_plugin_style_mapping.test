@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/styles/views_plugin_styl
  * Tests the default/mapping row style.
  */
 class ViewsPluginStyleMappingTest extends ViewsPluginStyleTestBase {
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Reset the plugin data.
     views_fetch_plugin_data(NULL, NULL, TRUE);

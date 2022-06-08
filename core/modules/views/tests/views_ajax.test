@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsAjaxTest extends ViewsSqlTest {
 
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Delete all default content.
     $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();

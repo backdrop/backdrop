@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests views user argument argument handler.
  */
 class UserViewsArgumentValidate extends ViewsSqlTest {
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
     $this->account = $this->backdropCreateUser();
   }
 

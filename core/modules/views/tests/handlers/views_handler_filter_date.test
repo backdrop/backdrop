@@ -13,8 +13,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   protected $profile = 'testing';
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Add some basic test nodes.
     $this->nodes = array();
