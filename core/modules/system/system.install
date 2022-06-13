@@ -3275,6 +3275,33 @@ function system_update_1081() {
 }
 
 /**
+ * Remove superfluous test files if they are present.
+ */
+function system_update_1082() {
+  // Crufty files that may have been left behind after PR 3911.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5465
+  $base = BACKDROP_ROOT . '/core/modules/system/tests/';
+  $filenames = array(
+    $base . 'cron_queue_test.module',
+    $base . 'system_cron_test.module',
+  );
+  $removed = array();
+  foreach ($filenames as $filename) {
+    if (file_exists($filename)) {
+      if (unlink($filename)) {
+        $removed[] = $filename;
+      }
+      else {
+        watchdog('system', t('Unable to remove file %filename', array('filename' => $filename)), WATCHDOG_ERROR);
+      }
+    }
+  }
+  if (!empty($removed)) {
+    return t('Removed superfluous files @files.', array('@files' => implode(', ', $removed)));
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
