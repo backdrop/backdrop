@@ -313,7 +313,7 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Users may log in using'),
     '#options' => array(
-      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or e-mail address'),
       USER_LOGIN_USERNAME_ONLY => t('Username'),
       USER_LOGIN_EMAIL_ONLY => t('Email address'),
     ),
