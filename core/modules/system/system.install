@@ -3285,19 +3285,12 @@ function system_update_1082() {
     $base . 'cron_queue_test.module',
     $base . 'system_cron_test.module',
   );
-  $removed = array();
   foreach ($filenames as $filename) {
     if (file_exists($filename)) {
-      if (unlink($filename)) {
-        $removed[] = $filename;
-      }
-      else {
-        watchdog('system', t('Unable to remove file %filename', array('filename' => $filename)), WATCHDOG_ERROR);
+      if (!unlink($filename)) {
+        backdrop_set_message(t('Unable to remove file %filename', array('filename' => $filename)), 'error');
       }
     }
-  }
-  if (!empty($removed)) {
-    return t('Removed superfluous files @files.', array('@files' => implode(', ', $removed)));
   }
 }
 
