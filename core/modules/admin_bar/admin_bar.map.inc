@@ -155,7 +155,7 @@ function taxonomy_admin_bar_map() {
  * Implements hook_admin_bar_map() on behalf of Views UI module.
  */
 function views_ui_admin_bar_map() {
-  if (!user_access('administer views')) {
+  if (!module_exists('views') || !user_access('administer views')) {
     return;
   }
   $views = array();
