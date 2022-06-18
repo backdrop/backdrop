@@ -142,10 +142,12 @@ function file_permission() {
       'title' => t('Bypass file access control'),
       'description' => t('View, edit and delete all files regardless of permission restrictions.'),
       'restrict access' => TRUE,
+      'warning' => t('Bypasses all other file permissions.'),
     ),
     'administer file types' => array(
       'title' => t('Administer file types'),
       'restrict access' => TRUE,
+      'warning' => t('Potentially-dangerous filetypes can be allowed on the site (e.g.: <code>.zip</code>, <code>.exe</code>, etc.).'),
     ),
     'create files' => array(
       'title' => t('Add and upload new files'),
@@ -159,6 +161,7 @@ function file_permission() {
     'view private files' => array(
       'title' => t('View private files'),
       'restrict access' => TRUE,
+      'warning' => t('Viewing files not available to the public can lead to a breach of private/sensitive information.'),
     ),
     'view files' => array(
       'title' => t('View files'),
@@ -167,11 +170,13 @@ function file_permission() {
       'title' => t('Manage or replace any file'),
       'description' => t('Allow managing of files from the files overview page.'),
       'restrict access' => TRUE,
+      'warning' => t('Private files can be made publicly-available.'),
     ),
     'delete files' => array(
       'title' => t('Delete any file'),
       'description' => t('Allow deleting files directly from the manage files overview page.'),
       'restrict access' => TRUE,
+      'warning' => t('Deleting files can cause irreversible data loss.'),
     ),
   );
 
@@ -1401,6 +1406,18 @@ function file_managed_file_process($element, &$form_state, $form) {
       '#markup' => theme('file_link', array('file' => $element['#file'])) . ' ',
       '#weight' => -10,
     );
+
+    // Anonymous users who have uploaded a temporary file need a
+    // non-session-based token added so file_managed_file_value() can check
+    // that they have permission to use this file on subsequent submissions of
+    // the same form (for example, after an Ajax upload or form validation
+    // error).
+    if (!$GLOBALS['user']->uid && $element['#file']->status != FILE_STATUS_PERMANENT) {
+      $element['fid_token'] = array(
+        '#type' => 'hidden',
+        '#value' => backdrop_hmac_base64('file-' . $fid, backdrop_get_private_key() . backdrop_get_hash_salt()),
+      );
+    }
   }
 
   // Enable auto-uploading unless requested otherwise.
@@ -1477,13 +1494,24 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
           $force_default = TRUE;
         }
         // Temporary files that belong to other users should never be allowed.
-        // Since file ownership can't be determined for anonymous users, they
-        // are not allowed to reuse temporary files at all.
-        elseif ($file->status != FILE_STATUS_PERMANENT && (!$GLOBALS['user']->uid || $file->uid != $GLOBALS['user']->uid)) {
-          $force_default = TRUE;
+        elseif ($file->status != FILE_STATUS_PERMANENT) {
+          if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
+            $force_default = TRUE;
+          }
+          // Since file ownership can't be determined for anonymous users, they
+          // are not allowed to reuse temporary files at all. But they do need
+          // to be able to reuse their own files from earlier submissions of
+          // the same form, so to allow that, check for the token added by
+          // file_managed_file_process().
+          elseif (!$GLOBALS['user']->uid) {
+            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
+            if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
+              $force_default = TRUE;
+            }
+          }
         }
         // If all checks pass, allow the file to be changed.
-        else {
+        if (!$force_default) {
           $fid = $file->fid;
         }
       }
@@ -1980,7 +2008,10 @@ function file_match_mimetypes($needle, $haystack) {
 
   foreach ($haystack as $mimetype) {
     foreach ($needle as $search) {
-      if (file_fnmatch($search, $mimetype) || file_fnmatch($mimetype, $search)) {
+      if (is_null($search) || is_null($mimetype)) {
+        continue;
+      }
+      if (fnmatch($search, $mimetype) || fnmatch($mimetype, $search)) {
         return TRUE;
       }
     }
@@ -1992,10 +2023,17 @@ function file_match_mimetypes($needle, $haystack) {
 /**
  * A wrapper function for the PHP function fnmatch().
  *
- * We include this, because Windows servers do not implement fnmatch() until
- * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
+ * Windows servers did not implement fnmatch() until PHP version 5.3. Now that
+ * Backdrop requires newer PHP versions, the fnmatch() function should be
+ * called directly.
+ *
+ * @deprecated Since 1.22.0
  */
 function file_fnmatch($pattern, $string) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  if (empty($pattern) || empty($string)) {
+    return FALSE;
+  }
   if (!function_exists('fnmatch')) {
     return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
   }
@@ -2083,7 +2121,7 @@ function file_get_download_token($file) {
  * @see file_file_predelete()
  */
 function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file', $check_access = TRUE) {
-  $references = backdrop_static(__FUNCTION__, array());
+  $references = &backdrop_static(__FUNCTION__, array());
   $fields = isset($field) ? array($field['field_name'] => $field) : field_info_fields();
 
   foreach ($fields as $field_name => $file_field) {
@@ -3270,37 +3308,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  *   An array as expected by backdrop_render().
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Populate $file->content with a render() array.
-  file_build_content($file, $view_mode, $langcode);
-
-  $build = $file->content;
-  // We don't need duplicate rendering info in $file->content.
-  unset($file->content);
-
-  $build += array(
-    '#theme' => 'file_entity',
-    '#file' => $file,
-    '#view_mode' => $view_mode,
-    '#language' => $langcode,
-  );
-
-  // Add contextual links for this file, except when the file is already being
-  // displayed on its own page. Modules may alter this behavior (for example,
-  // to restrict contextual links to certain view modes) by implementing
-  // hook_file_view_alter().
-  if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
-    $build['#contextual_links']['file'] = array('file', array($file->fid));
-  }
-
-  // Allow modules to modify the structured file.
-  $type = 'file';
-  backdrop_alter(array('file_view', 'entity_view'), $build, $type);
-
-  return $build;
+  return $file->view($view_mode, $langcode);
 }
 
 /**
@@ -3315,53 +3323,7 @@ function file_view($file, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->language;
-  }
-
-  // Remove previously built content, if exists.
-  $file->content = array();
-
-  // In case of a multiple view, file_view_multiple() already ran the
-  // 'prepare_view' step. An internal flag prevents the operation from running
-  // twice.
-  // Allow modules to change the view mode.
-  $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $view_mode, $langcode));
-  field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
-  entity_prepare_view('file', array($file->fid => $file), $langcode);
-
-  // Build the actual file display.
-  // @todo Figure out how to clean this crap up.
-  $file->content['file'] = file_view_file($file, $view_mode, $langcode);
-  if (isset($file->content['file'])) {
-    if (isset($file->content['file']['#theme']) && $file->content['file']['#theme'] != 'file_link') {
-      unset($file->content['file']['#file']);
-    }
-    unset($file->content['file']['#view_mode']);
-    unset($file->content['file']['#language']);
-  }
-  else {
-    unset($file->content['file']);
-  }
-
-  // Build fields content.
-  $file->content += field_attach_view('file', $file, $view_mode, $langcode);
-
-  $links = array();
-  $file->content['links'] = array(
-    '#theme' => 'links__file',
-    '#pre_render' => array('backdrop_pre_render_links'),
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-  $file->content['links']['file'] = array(
-    '#theme' => 'links__file__file',
-    '#links' => $links,
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-
-  // Allow modules to make their own additions to the file.
-  module_invoke_all('file_view', $file, $view_mode, $langcode);
-  module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
+  $file->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -3415,7 +3377,7 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
     }
     $display_info = array(
       'type' => $formatter,
-      'settings' => $display['settings'][$formatter],
+      'settings' => isset($display['settings'][$formatter]) ? $display['settings'][$formatter] : array(),
     );
     $element = $function($file, $display_info, $langcode);
   }

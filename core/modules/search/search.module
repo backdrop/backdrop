@@ -120,7 +120,7 @@ function search_block_configure($delta = '', $settings = array()) {
     $search_settings = !empty($settings['search'])? $settings['search'] : array();
     $search_settings += array(
       'label' => '',
-      'label_hide' => TRUE,
+      'label_hide' => FALSE,
       'placeholder' => '',
       'button_text' => 'Search',
     );
@@ -198,6 +198,7 @@ function search_block_view($delta = '', $settings = array(), $contexts = array()
 
     $block['subject'] = t('Search');
     $block['content'] = $form;
+
     return $block;
   }
 }
@@ -615,7 +616,8 @@ function search_invoke_preprocess(&$text) {
  * @ingroup search
  */
 function search_index($sid, $module, $text) {
-  $minimum_word_size = config_get('search.settings', 'search_minimum_word_size');
+  $search_settings_config = config('search.settings');
+  $minimum_word_size = $search_settings_config->get('search_minimum_word_size');
 
   // Link matching
   global $base_url;
@@ -624,7 +626,7 @@ function search_index($sid, $module, $text) {
   // Multipliers for scores of words inside certain HTML tags. The weights are stored
   // in a variable so that modules can overwrite the default weights.
   // Note: 'a' must be included for link ranking to work.
-  $tags = config_get('search.settings', 'search_tag_weights');
+  $tags = $search_settings_config->get('search_tag_weights');
 
   // Strip off all ignored tags to speed up processing, but insert space before/after
   // them to keep word boundaries.
@@ -1044,7 +1046,8 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   // processed_keys is used to coordinate keyword passing between other forms
   // that hook into the basic search form.
   $form['basic']['processed_keys'] = array('#type' => 'value', '#value' => '');
-  $form['basic']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
+  $form['basic']['actions'] = array('#type' => 'actions');
+  $form['basic']['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
 
   return $form;
 }
@@ -1100,6 +1103,19 @@ function search_box_form_submit($form, &$form_state) {
   }
   else {
     form_set_error(NULL, t('Search is currently disabled.'), 'error');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function search_form_layout_block_configure_form_alter(&$form, &$form_state) {
+  // Only alter the search block's configure form.
+  if ($form_state['block']->module == 'search' && $form_state['block']->delta == 'form') {
+    // Only hide the block title when the search block is first added.
+    if ($form_state['block']->is_new == TRUE) {
+      $form['title_display']['title_display']['#default_value'] = 'none';
+    }
   }
 }
 

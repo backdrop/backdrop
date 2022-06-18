@@ -6,6 +6,17 @@
 class Block extends LayoutHandler {
 
   /**
+   * The block disabled status indicator.
+   *
+   * Disabled blocks are not visible at the layout path, but remain on the
+   * layout block add page.
+   * The value is either BLOCK_ENABLED or BLOCK_DISABLED.
+   *
+   * @var integer
+   */
+  var $status;
+
+  /**
    * The module that provides this block.
    *
    * @var string
@@ -86,10 +97,11 @@ class Block extends LayoutHandler {
       'contexts' => array(),
     );
 
-    // Initialize basics, module, delta, UUID, and childDelta.
+    // Initialize basics, module, delta, UUID, status, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
+    $this->status = isset($data['status']) ? $data['status'] : BLOCK_ENABLED;
     $parts = explode(':', $this->plugin, 3);
     $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
@@ -221,8 +233,10 @@ class Block extends LayoutHandler {
    * Build the settings form for editing this block.
    */
   function form(&$form, &$form_state) {
+    /* @var Layout $layout */
     $layout = $form_state['layout'];
     $contexts = $layout->getContexts();
+
     $block_info = $this->getBlockInfo();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
 
@@ -317,6 +331,7 @@ class Block extends LayoutHandler {
    */
   function toArray() {
     $array = array(
+      'status' => $this->status,
       'module' => $this->module,
       'delta' => $this->delta,
       'settings' => $this->settings,

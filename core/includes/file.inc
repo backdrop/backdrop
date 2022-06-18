@@ -196,7 +196,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @see file_uri_target()
  */
 function file_uri_scheme($uri) {
-  $position = strpos($uri, '://');
+  $position = strpos((string) $uri, '://');
   return $position ? substr($uri, 0, $position) : FALSE;
 }
 
@@ -524,6 +524,9 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
  *
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
+ *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
@@ -548,6 +551,9 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 
 # If we know how to do it safely, disable the PHP engine entirely.
 <IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
   php_flag engine off
 </IfModule>
 
@@ -870,9 +876,6 @@ function file_valid_uri($uri) {
  * - If the $source and $destination are equal, the behavior depends on the
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
- * - Works around a PHP 5.3 bug where copy() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1137,9 +1140,6 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
- * - Works around a PHP 5.3 bug where rename() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1226,11 +1226,11 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
-    $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
+    $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
 
     // Remove unsafe extensions from the list of allowed extensions. The list is
     // copied from file_save_upload().
-    $whitelist = array_diff($whitelist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
+    $allowlist = array_diff($allowlist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1243,7 +1243,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // of allowed extensions.
     foreach ($filename_parts as $filename_part) {
       $new_filename .= '.' . $filename_part;
-      if (!in_array(strtolower($filename_part), $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
+      if (!in_array(strtolower($filename_part), $allowlist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
         $new_filename .= '_';
       }
     }
@@ -2526,10 +2526,12 @@ function backdrop_dirname($uri) {
 /**
  * Gets the filename from a given path.
  *
- * PHP's basename() does not properly support streams or filenames beginning
- * with a non-US-ASCII character.
+ * Similar to PHP's basename() with the following differences:
+ *   - Any trailing slashes are automatically trimmed.
+ *   - Is not locale-aware, and works with all UTF-8 characters. Where PHP might
+ *     not process file paths with non-Latin characters unless allowed through
+ *     setlocale(), this function will remove the extensions from any string.
  *
- * @see http://bugs.php.net/bug.php?id=37738
  * @see basename()
  *
  * @ingroup php_wrappers
@@ -2664,7 +2666,8 @@ function backdrop_tempnam($directory, $prefix) {
  * Gets the path of system-appropriate temporary directory.
  */
 function file_directory_temp() {
-  $temporary_directory = config_get('system.core', 'file_temporary_path');
+  $site_config = config('system.core');
+  $temporary_directory = $site_config->get('file_temporary_path');
 
   if (empty($temporary_directory)) {
     $directories = array();
@@ -2694,7 +2697,7 @@ function file_directory_temp() {
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
-      $temporary_directory = config_get('system.core', 'file_public_path') . '/tmp';
+      $temporary_directory = $site_config->get('file_public_path') . '/tmp';
 
       // Windows accepts paths with either slash (/) or backslash (\), but will
       // not accept a path which contains both a slash and a backslash. Since

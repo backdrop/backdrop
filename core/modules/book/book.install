@@ -113,6 +113,33 @@ function book_update_1000() {
 }
 
 /**
+ * Add options for navigation and links.
+ */
+function book_update_1001() {
+  $config = config('book.settings');
+  $config->set('book_navigation', 1);
+  $config->set('book_navigation_options', array('tree', 'pager'));
+  $config->set('book_links', array('book_add_child'));
+  $config->save();
+}
+
+/**
+ * Add option for reorder link.
+ */
+function book_update_1002() {
+  $config = config('book.settings');
+  $book_links = $config->get('book_links');
+  if (isset($book_links['book_add_child'])) {
+    $book_links['book_reorder'] = 'book_reorder';
+  }
+  else {
+    $book_links[] = 'book_reorder';
+  }
+  $config->set('book_links', $book_links);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

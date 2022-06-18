@@ -2099,7 +2099,7 @@ class views_plugin_display extends views_plugin {
       case 'exposed_block':
         $form['#title'] .= t('Put the exposed form in a block');
         $form['description'] = array(
-          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Backdrop block administration system, and the exposed form will appear there. Note that this block must be enabled manually, Views will not enable it for you.') . '</div>',
+          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Backdrop layouts system, and the exposed form will become available there. Note that this block must be placed manually, Views will not place it for you.') . '</div>',
         );
         $form['exposed_block'] = array(
           '#type' => 'radios',

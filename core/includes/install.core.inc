@@ -1585,10 +1585,11 @@ function install_import_translations(&$install_state) {
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
-    // our best guess. The user will be able to edit afterwards.
+    // our best guess. If required, this can be edited post-installation.
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);
@@ -1940,14 +1941,26 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
+  $timezone = $form_state['values']['date_default_timezone'];
+  $timezone_country = _install_get_timezone_country($timezone);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->set('default_timezone', $timezone)
+    ->set('default_country', $timezone_country)
     ->save();
+
+  // Update the default date/time formats for different regions.
+  if ($timezone_country == 'US') {
+    config('system.date')
+      ->set('formats.long.pattern', 'l, F j, Y - g:ia')
+      ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
+      ->set('formats.short.pattern', 'm/d/Y - g:ia')
+      ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
@@ -1966,7 +1979,7 @@ function install_configure_form_submit($form, &$form_state) {
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();
   $account->status = 1;
-  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->timezone = $timezone;
   $account->pass = $form_state['values']['account']['pass'];
   $account->name = $form_state['values']['account']['name'];
   $account->save();

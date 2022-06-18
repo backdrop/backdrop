@@ -6,8 +6,12 @@
 
 /**
  * Display the view name and its machine name.
+ *
+ * @deprecated as of 1.19.4. Labels are now output using the generic
+ * theme_label_machine_name() function.
  */
 function theme_views_ui_view_name($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $view = $variables['view'];
 
   $output = '';

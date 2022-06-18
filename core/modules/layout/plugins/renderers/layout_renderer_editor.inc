@@ -103,17 +103,32 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderBlock($block) {
+    $aria_label = $this->getAriaLabel($block);
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $output = '<div class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $attributes = array(
+      'tabindex' => '0',
+      'aria-label' => $aria_label,
+      'class' => array('layout-editor-block clearfix'),
+      'id' => 'layout-editor-block-' . $block->uuid,
+      'data-block-id' => $block->uuid,
+    );
+
+    $block_admin_title = $block->getAdminTitle();
+    if (!$block->status) {
+      $attributes['class'][] = 'layout-editor-block-disabled';
+      $block_admin_title = t('!title (Disabled)', array('!title' => $block_admin_title));
+    }
+
+    $output = '<div ' . backdrop_attributes($attributes) . '>';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block_admin_title . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
     $output .= '</div>'; // layout-block-title
-    $output .= '<div class="layout-editor-block-content">' . render($content) . '</div>';
+    $output .= '<div tabindex="0" class="layout-editor-block-content">' . render($content) . '</div>';
     $output .= '</div>'; // layout-block
 
     return $output;
@@ -129,6 +144,13 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       $this->rendered['blocks'][$uuid] = $this->renderBlock($block);
     }
     return $this->rendered['blocks'];
+  }
+
+  /**
+   * Returns an aria label for a block.
+   */
+  function getAriaLabel($block) {
+    return t('Draggable block !title', array('!title' => strip_tags($block->getAdminTitle())));
   }
 
   /**
@@ -204,6 +226,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
   protected function getBlockLinks($block) {
     $links = array();
 
+    if (!$block->status) {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('enable-block', 'use-ajax'),
+        ),
+      );
+    }
+
     // Only render the "Configure" link if the block is not broken.
     if (!is_a($block, 'BlockBroken')) {
       $links['configure'] = array(
@@ -237,6 +270,17 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         'class' => array('remove-block', 'use-ajax'),
       ),
     );
+
+    if ($block->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => $this->getUrl('toggle-block-status', $block->uuid),
+        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+        'attributes' => array(
+          'class' => array('disable-block', 'use-ajax'),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',

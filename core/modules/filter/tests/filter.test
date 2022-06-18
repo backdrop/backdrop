@@ -1142,7 +1142,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss("<img o\0nfocus\0=alert(0)>", array('img'));
     $this->assertNoNormalized($f, 'focus', 'HTML filter attributes removal evasion -- breaking with nulls.');
 
-    // Only whitelisted scheme names allowed in attributes.
+    // Only allowed scheme names allowed in attributes.
     $f = filter_xss('<img src="javascript:alert(0)">', array('img'));
     $this->assertNoNormalized($f, 'javascript', 'HTML scheme clearing -- no evasion.');
 
@@ -1242,7 +1242,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *   makes HTML filter completely ineffective.
    *
    * @todo Class, id, name and xmlns should be added to disallowed attributes,
-   *   or better a whitelist approach should be used for that too.
+   *   or better, an allowed attributes approach should be used for that too.
    */
   function testHtmlFilter() {
     // Set up dummy filter object.
@@ -1623,6 +1623,26 @@ www.example.com with a newline in comments -->
         '<li><a href="http://listitem.com">http://listitem.com</a></li>' => TRUE,
         '<li class="odd"><a href="http://www.class.listitem.com">www.class.listitem.com</a></li>' => TRUE,
       ),
+      // 'nolink' class.
+      '
+<p class="nolink">www.no-example.com</p>
+<p class="no-link">www.example.com</p>
+<span class="link nolink button">www.button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">www.divitis.com</div>
+<p class="nolink">me@no-example.com</p>
+<p class="nolink2">me@example.com</p>
+<span class="link nolink button">you@button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">us@divitis.com</div>
+' => array(
+        '<p class="nolink"><a href="http://www.no-example.com">www.no-example.com</a></p>' => FALSE,
+        '<p class="no-link"><a href="http://www.example.com">www.example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="www.button-me.com">www.button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="http://www.divitis.com">www.divitis.com</a></div>' => FALSE,
+        '<p class="nolink"><a href="mailto:me@no-example.com">me@no-example.com</a></p>' => FALSE,
+        '<p class="nolink2"><a href="mailto:me@example.com">me@example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="mailto:you@button-me.com">you@button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="mailto:us@divitis.com">us@divitis.com</a></div>' => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 
@@ -1656,6 +1676,8 @@ www.example.com with a newline in comments -->
    *   ),
    * );
    * @endcode
+   * This means that after passing 'Input string' through the given filter, we
+   * should find '<p>Input string</p>' in the output, but not 'Input string<br'.
    */
   function assertFilteredString($filter, $tests) {
     foreach ($tests as $source => $tasks) {
@@ -2174,9 +2196,9 @@ class FilterFileUsageTest extends BackdropWebTestCase {
       ),
       'log' => 'First revision.',
     ));
-    debug($node);
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '1'))), file_usage_list($image), 'The image has 1 usage.');
+    $nid = $node->nid;
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '1'))), file_usage_list($image), 'The image has 1 usage.');
 
     // Test filter_entity_update(): increment, twice, by creating new revisions.
     $node->vid = NULL;
@@ -2186,7 +2208,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $node->vid = NULL;
     $node->log = 'Third revision.';
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test hook_entity_update(): decrement, by modifying the last revision:
     // remove the data- attribute from the body field.
@@ -2194,17 +2216,17 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $new_value = str_replace('data-file-id', 'data-file-id-modified', $original_value);
     $node->body[LANGUAGE_NONE][0]['value'] = $new_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test hook_entity_update(): increment, by modifying the last revision:
     // read the data- attribute to the body field.
     $node->body[LANGUAGE_NONE][0]['value'] = $original_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test filter_node_revision_delete(): decrement, by deleting a revision.
     node_revision_delete($second_revision_id);
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test filter_entity_delete().
     $node->delete();

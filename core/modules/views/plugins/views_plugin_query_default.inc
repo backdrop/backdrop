@@ -117,7 +117,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid', $options) {
+  function init($base_table, $base_field, $options) {
     parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
@@ -1369,6 +1369,16 @@ class views_plugin_query_default extends views_plugin_query {
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
+    if (!$get_count) {
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large
+        // limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
+      }
+    }
+
     return $query;
   }
 
@@ -1473,15 +1483,7 @@ class views_plugin_query_default extends views_plugin_query {
           $this->pager->execute_count_query($count_query);
         }
 
-        // Let the pager modify the query to add limits.
         $this->pager->pre_execute($query);
-
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
 
         $result = $query->execute();
 

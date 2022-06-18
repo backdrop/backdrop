@@ -360,11 +360,13 @@ function views_permission() {
       'title' => t('Administer views'),
       'description' => t('Access the views administration pages.'),
       'restrict access' => TRUE,
+      'warning' => t('Publicly display any existing content on the site, and manipulate admin user interfaces.'),
     ),
     'access all views' => array(
       'title' => t('Bypass views access control'),
       'description' => t('Bypass access control when accessing views.'),
       'restrict access' => TRUE,
+      'warning' => t('Provides full access to all views, regardless of their defined permissions.'),
     ),
   );
 }
@@ -1885,10 +1887,40 @@ function _views_query_tag_alter_condition(QueryAlterableInterface $query, &$cond
         views_query_views_alter($condition['value']);
       }
       elseif (isset($condition['value'])) {
-        $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        // Arrays need to be handled differently to strings as they could be
+        // nested.
+        if (is_array($condition['value'])) {
+          // Use the callback to walk through the value, performing the search-
+          // replace operation recursively.
+          array_walk_recursive($condition['value'], '_views_str_replace_recursive', array(
+            array_keys($substitutions),
+            array_values($substitutions),
+          ));
+        }
+        // Simple strings can simply use str_replace().
+        else {
+          $condition['value'] = str_replace(array_keys($substitutions), array_values($substitutions), $condition['value']);
+        }
       }
     }
   }
+}
+
+/**
+ * Callback for performing a string replacement via array_walk_recursive().
+ *
+ * @param string $item
+ *   A leaf from the original array.
+ * @param int $key
+ *   The key for the current array item.
+ * @param array $args
+ *   Element 0 is the items to search for, element 1 is the replacements.
+ *
+ * @see _views_query_tag_alter_condition()
+ */
+function _views_str_replace_recursive(&$item, $key, $args) {
+  list($search, $replace) = $args;
+  $item = str_replace($search, $replace, $item);
 }
 
 /**

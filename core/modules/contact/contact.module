@@ -27,7 +27,8 @@ function contact_permission() {
   return array(
     'administer contact forms' => array(
       'title' => t('Administer contact forms and contact form settings'),
-      'restrict access' => TRUE
+      'restrict access' => TRUE,
+      'warning' => t('Adding additional email recipients lets them see all incoming emails.'),
     ),
     'access site-wide contact form' => array(
       'title' => t('Use the site-wide contact form'),
