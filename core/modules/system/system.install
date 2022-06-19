@@ -3288,7 +3288,7 @@ function system_update_1082() {
   foreach ($filenames as $filename) {
     if (file_exists($filename)) {
       if (!unlink($filename)) {
-        backdrop_set_message(t('Unable to remove file %filename', array('filename' => $filename)), 'error');
+        backdrop_set_message(t('Unable to remove file %filename, which is no longer used in its current location. Please remove it from the file system.', array('filename' => $filename)), 'warning');
       }
     }
   }
