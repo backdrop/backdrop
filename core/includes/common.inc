@@ -5324,6 +5324,12 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  * - readwrite
  * - readonly
  *
+ * Note that the 'required' and 'optional' states only affect the display of the
+ * required indicator (i.e. the red asterisk). They *do not* affect validation
+ * in any way. If you need a form element to be required based on the state of
+ * another element, you must implement your own form validation to account for
+ * that.
+ *
  * When referencing select lists and radio buttons in remote conditions, a
  * 'value' condition must be used:
  * @code
