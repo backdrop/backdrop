@@ -55,7 +55,7 @@ function user_unblock_user_action($account, &$context) {
  * @ingroup actions
  */
 function user_cancel_user_action($account, &$context) {
-  // Save the list of user accounts to be deleted in the session. Append to 
+  // Save the list of user accounts to be deleted in the session. Append to
   // the existing list if within the last minute, otherwise start a new list
   // of user accounts.
   $last_action_time = 0;
@@ -105,4 +105,17 @@ function user_remove_role_action($account, &$context) {
     unset($account->roles[$index]);
     $account->save();
   }
+}
+
+/**
+ * Saves a specific user account. This will trigger hook_user_presave()
+ * implementations.
+ *
+ * @param User $account
+ *   The user entity whose account will be saved.
+ *
+ * @ingroup actions
+ */
+function user_save_user_action($account, &$context) {
+  $account->save();
 }
