@@ -277,23 +277,11 @@ abstract class Updater implements BackdropUpdaterInterface {
       }
 
       if (!$this->name) {
-        // This is bad, don't want to delete the install directory.
-        throw new UpdaterException(t('Fatal error in update, cowardly refusing to wipe out the install directory.'));
+        // This is bad, don't want to delete the installation directory.
+        throw new UpdaterException(t('Fatal error in update, cannot replace the root installation directory.'));
       }
 
-      // Make sure the installation parent directory exists and is writable.
-      $this->prepareInstallDirectory($filetransfer, $args['install_dir']);
-
-      // Note: If the project is installed in top-level, it will not be
-      // deleted. It will be installed in the root as that will override
-      // the top-level reference and not break other sites which are using it.
-      if (is_dir($args['install_dir'] . '/' . $this->name)) {
-        // Remove the existing installed file.
-        $filetransfer->removeDirectory($args['install_dir'] . '/' . $this->name);
-      }
-
-      // Copy the directory in place.
-      // Check for core udpate.
+      // Check for core update.
       if ($this->name == 'backdrop') {
         $source = $this->source . '/core';
         $name = 'core';
@@ -302,6 +290,15 @@ abstract class Updater implements BackdropUpdaterInterface {
         $source = $this->source;
         $name = $this->name;
       }
+
+      // Make sure the installation parent directory exists and is writable.
+      $this->prepareInstallDirectory($filetransfer, $args['install_dir']);
+
+      // Remove the existing installed project directory.
+      if (is_dir($args['install_dir'] . '/' . $name)) {
+        $filetransfer->removeDirectory($args['install_dir'] . '/' . $name);
+      }
+
       $filetransfer->copyDirectory($source, $args['install_dir']);
 
       // Make sure what we just installed is readable by the web server.
