@@ -1370,7 +1370,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     // - absolute, mail, partial
     // - characters/encoding, surrounding markup, security
 
-    // Create a email that is too long.
+    // Create an email that is too long.
     $long_email = str_repeat('a', 254) . '@example.com';
     $too_long_email = str_repeat('b', 255) . '@example.com';
     $email_with_plus_sign = 'one+two@example.com';
