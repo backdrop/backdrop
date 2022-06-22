@@ -240,7 +240,7 @@ function _layout_get_operations(Layout $layout) {
       'title' => t('Clone Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export Layout'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -3241,7 +3241,7 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
         'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
