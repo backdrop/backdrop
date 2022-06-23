@@ -2061,7 +2061,7 @@ function drupal_check_module($module) {
 // Functions from mail.inc.
 
 /**
- * Composes and optionally sends an e-mail message.
+ * Composes and optionally sends an email message.
  *
  * @deprecated since 1.0.0
  * @see backdrop_mail()
