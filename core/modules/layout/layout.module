@@ -1337,8 +1337,12 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
   foreach ($layouts as $layout) {
     // Contexts must have their data set before the layout's access may be
     // checked.
-    $layout->router_map = $router_item['map'];
-    $layout->getContexts();
+    $menu_contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_MENU);
+    foreach ($menu_contexts as $menu_context) {
+      $menu_context->setDataFromRouterMap($router_item['map']);
+    }
+    backdrop_static_reset('Layout::getContexts');
+
     if (!$layout->disabled && $layout->checkAccess()) {
       $selected_layout = $layout;
       break;

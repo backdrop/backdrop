@@ -120,17 +120,6 @@ class Layout {
   var $menu_item = NULL;
 
   /**
-   * A router item map array.
-   * 
-   * This value may be empty when configuring a Layout or showing an
-   * administrative preview. It is only populated when loading the Layout
-   * through layout_get_layout_by_path().
-   * 
-   * @var array
-   */
-  var $router_map = array();
-
-  /**
    * All user-specified settings for this layout.
    *
    * @var array
@@ -799,7 +788,7 @@ class Layout {
    * @return LayoutContext[]
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
-    $contexts_cache = &backdrop_static(__FUNCTION__, array());
+    $contexts_cache = &backdrop_static(__METHOD__, array());
     if (isset($contexts_cache[$this->name])) {
       return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
@@ -824,19 +813,12 @@ class Layout {
     // Load contexts from paths or menu items if available.
     if ($this->menu_item || $this->path) {
       if ($this->menu_item) {
-        $contexts = $this->menu_item->getContexts(); 
+        $this->contexts += $this->menu_item->getContexts();
       }
       else {
-        $contexts = layout_context_required_by_path($this->path);
+        $this->contexts += layout_context_required_by_path($this->path);
       }
-      
-      // Set the contexts' data from the router item.
-      foreach ($contexts as $context) {
-        $context->setDataFromRouterMap($this->router_map);
-      }
-      $this->contexts += $contexts;
     }
-    
 
     // Load contexts from relationships.
     if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {

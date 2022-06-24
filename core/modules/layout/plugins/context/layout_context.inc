@@ -218,11 +218,11 @@ abstract class LayoutContext extends LayoutHandler {
     $this->data = $data;
   }
 
-  /** 
+  /**
    * Set the context data from the router item map.
-   * 
-   * @param array $router_item
-   *   A router item array.
+   *
+   * @param array $router_map
+   *   A router item map array.
    */
   function setDataFromRouterMap($router_map) {
     if (isset($this->position) && !empty($router_map[$this->position])) {
@@ -249,8 +249,8 @@ abstract class LayoutContext extends LayoutHandler {
           $context_info = layout_get_context_info($this->plugin);
 
           // CHECK: the following 3 lines don't seem to be needed. By this point
-          // of the page request all context data is already loaded onto 
-          // $router_item['map']. 
+          // of the page request all context data is already loaded onto
+          // $router_item['map'].
           // if (isset($context_info['load callback'])) {
           //   $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$this->position]));
           // }
