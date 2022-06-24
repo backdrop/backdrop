@@ -721,7 +721,7 @@ function _link_escape_domain($url) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']) . $matches['4'];
       }
     }
-    // E-mail links.
+    // Email links.
     elseif (strpos($url, 'mailto:') === 0 && preg_match('/^(mailto:)([^@]+@)(.*)$/', $url, $matches)) {
       if (defined('INTL_IDNA_VARIANT_UTS46')) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
@@ -1044,7 +1044,7 @@ function link_cleanup_url($url, $protocol = 'http') {
 /**
  * Validates a URL.
  *
- * Accepts all URLs following RFC 1738 standard for URL formation and all e-mail
+ * Accepts all URLs following RFC 1738 standard for URL formation and all email
  * addresses following the RFC 2368 standard for mailto address formation.
  *
  * @param string $text

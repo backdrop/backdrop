@@ -314,7 +314,7 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     // Recipients are stored comma-separated, but display with new lines for
     // better human readability.
     '#default_value' => implode("\n", explode(',', $category['recipients'])),
-    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
+    '#description' => t("To specify multiple recipients, separate each email address with a new line, comma, semicolon or space."),
     '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
     '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
@@ -399,7 +399,7 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
   if (!empty($invalid_recipients)) {
-    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid e-mail address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
+    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid email address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
     form_set_error('recipients', $message);
   }
 
