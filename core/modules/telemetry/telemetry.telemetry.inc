@@ -28,6 +28,11 @@ function telemetry_telemetry_info() {
     'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
     'project' => 'backdrop',
   );
+  $info['multisite'] = array(
+    'label' => t('Multisite'),
+    'description' => t('Is this Backdrop installation setup as a multisite?'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -55,5 +60,7 @@ function telemetry_telemetry_data($key) {
       else {
         return 'Other';
       }
+    case 'multisite':
+      return conf_path() == '.' ? 'No' : 'Yes';
   }
 }
