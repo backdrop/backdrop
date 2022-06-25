@@ -26,7 +26,7 @@
  * - $signature: Authors signature.
  * - $status: Comment status. Possible values are:
  *   comment-unpublished, comment-published or comment-preview.
- * - $title: Linked title. 
+ * - $title: Linked title.
  * - $title_options: Auto-generated(0), custom(1) or hidden(2).
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:

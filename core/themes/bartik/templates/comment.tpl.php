@@ -17,7 +17,7 @@
  *   Preprocess functions can reformat it by calling format_date() with the
  *   desired parameters on the $comment->changed variable.
  * - $new: New comment marker.
- * - $permalink: Comment permalink
+ * - $permalink: Comment permalink.
  * - $permalink_path: Available to build your own permalink.
  * - $submitted: Submission information created from $author and $created during
  *   template_preprocess_comment().
