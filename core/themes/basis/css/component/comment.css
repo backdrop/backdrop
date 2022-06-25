@@ -174,5 +174,5 @@ a.comment-permalink  {
   mask-image: url("/core/modules/comment/images/link-icon.svg");
   -webkit-mask-size: cover;
   mask-size: cover;
-  margin: 0 0 -0.1em 0.5em;
+  margin: 0 0 0 0.5em;
 }

@@ -68,7 +68,7 @@
 
     <div class="comment-title">
       <?php print render($title_prefix); ?>
-      <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
+      <?php if ($title_options != '2'): ?>
         <h3><?php print $title; ?></h3>
       <?php endif; ?>
       <?php print render($title_suffix); ?>
@@ -76,7 +76,7 @@
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
-      <?php if ($title_options == COMMENT_TITLE_HIDDEN):  ?>
+      <?php if ($title_options == '2'):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
 

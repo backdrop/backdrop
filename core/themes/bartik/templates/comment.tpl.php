@@ -72,7 +72,7 @@
       <span class="new"><?php print $new; ?></span>
     <?php endif; ?>
 
-    <?php if ($title_options != COMMENT_TITLE_HIDDEN): ?>
+    <?php if ($title_options != '2'): ?>
       <?php print render($title_prefix); ?>
       <h3><?php print $title; ?></h3>
       <?php print render($title_suffix); ?>
