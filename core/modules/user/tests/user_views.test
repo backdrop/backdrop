@@ -16,8 +16,8 @@ class UserViewsTestCase extends ViewsSqlTest {
   var $users = array();
   var $nodes = array();
 
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $this->users[] = $this->backdropCreateUser();
     $this->users[] = user_load(1);

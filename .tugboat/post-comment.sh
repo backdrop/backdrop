@@ -5,11 +5,14 @@
  */
 
 $password = file_get_contents(getenv('TUGBOAT_ROOT') . '/.tugboat/password');
+$expires_date = date_create('+2 months', timezone_open('UTC'));
 $comment = 'Tugboat has finished building a preview for this pull request!
 
 Website: ' . getenv('TUGBOAT_DEFAULT_SERVICE_URL') . '
 Username: admin
-Password: ' . $password;
+Password: ' . $password . '
+
+This preview will automatically expire on the ' . $expires_date->format('jS \of F, Y') . '.';
 
 // Post comment to GitHub.
 $ch = curl_init('https://api.github.com/repos/' . getenv('TUGBOAT_GITHUB_OWNER') . '/' . getenv('TUGBOAT_GITHUB_REPO') . '/issues/' . getenv('TUGBOAT_GITHUB_PR') . '/comments');

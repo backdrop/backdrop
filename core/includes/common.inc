@@ -770,7 +770,7 @@ function backdrop_parse_url($url) {
  *   The encoded path.
  */
 function backdrop_encode_path($path) {
-  return str_replace('%2F', '/', rawurlencode($path));
+  return str_replace('%2F', '/', rawurlencode((string) $path));
 }
 
 /**
@@ -1102,7 +1102,7 @@ function backdrop_http_request($url, array $options = array()) {
   // or PUT request. Some non-standard servers get confused by Content-Length in
   // at least HEAD/GET requests, and Squid always requires Content-Length in
   // POST/PUT requests.
-  $content_length = strlen($options['data']);
+  $content_length = strlen((string) $options['data']);
   if ($content_length > 0 || $options['method'] == 'POST' || $options['method'] == 'PUT') {
     $options['headers']['Content-Length'] = $content_length;
   }
@@ -1178,7 +1178,7 @@ function backdrop_http_request($url, array $options = array()) {
   $result->headers = array();
 
   // Parse the response headers.
-  while ($line = trim(array_shift($response))) {
+  while ($line = trim((string) array_shift($response))) {
     list($name, $value) = explode(':', $line, 2);
     $name = strtolower($name);
     if (isset($result->headers[$name]) && $name == 'set-cookie') {
@@ -1396,12 +1396,12 @@ function fix_gpc_magic() {
  */
 
 /**
- * Verifies the syntax of the given e-mail address.
+ * Verifies the syntax of the given email address.
  *
  * See @link http://tools.ietf.org/html/rfc5321 RFC 5321 @endlink for details.
  *
  * @param $mail
- *   A string containing an e-mail address.
+ *   A string containing an email address.
  *
  * @return
  *   TRUE if the address is in a valid format.
@@ -1825,6 +1825,7 @@ function filter_xss($string, $allowed_tags = NULL) {
   if (!backdrop_validate_utf8($string)) {
     return '';
   }
+  $string = (string) $string;
   // Store the text format.
   _filter_xss_split($allowed_tags, TRUE);
   // Remove NULL characters (ignored by some browsers).
@@ -1834,7 +1835,7 @@ function filter_xss($string, $allowed_tags = NULL) {
 
   // Defuse all HTML entities.
   $string = str_replace('&', '&amp;', $string);
-  // Change back only well-formed entities in our whitelist:
+  // Change back only well-formed entities in our allowlist:
   // Decimal numeric entities.
   $string = preg_replace('/&amp;#([0-9]+;)/', '&#\1', $string);
   // Hexadecimal numeric entities.
@@ -2380,7 +2381,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     $key = explode('|', $key);
     if ($interval >= $value) {
       $output .= ($output ? ' ' : '') . format_plural(floor($interval / $value), $key[0], $key[1], array(), array('langcode' => $langcode));
-      $interval %= $value;
+      $interval = (int) $interval % $value;
       $granularity--;
     }
 
@@ -2544,7 +2545,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  *     arguments for internal paths must be supplied in $options['query'], not
  *     included in $path.
  *   - If you provide an internal path and $options['alias'] is set to TRUE, the
- *     path is assumed already to be the correct path alias, and the alias is
+ *     path is assumed already to be the correct URL alias, and the alias is
  *     not looked up.
  *   - The special string '<front>' generates a link to the site's base URL.
  *   - If your external URL contains a query (e.g. http://example.com/foo?a=b),
@@ -2649,7 +2650,7 @@ function url($path = NULL, array $options = array()) {
   // Strip leading slashes from internal paths to prevent them becoming external
   // URLs without protocol. /example.com should not be turned into
   // //example.com.
-  $path = ltrim($path, '/');
+  $path = ltrim((string) $path, '/');
 
   global $base_url, $base_secure_url, $base_insecure_url;
 
@@ -2678,7 +2679,7 @@ function url($path = NULL, array $options = array()) {
     $langcode = isset($options['language']) && isset($options['language']->langcode) ? $options['language']->langcode : '';
     $alias = backdrop_get_path_alias($original_path, $langcode);
     if ($alias != $original_path) {
-      // Strip leading slashes from internal path aliases to prevent them
+      // Strip leading slashes from internal URL aliases to prevent them
       // becoming external URLs without protocol. /example.com should not be
       // turned into //example.com.
       $path = ltrim($alias, '/');
@@ -2686,7 +2687,7 @@ function url($path = NULL, array $options = array()) {
   }
 
   $base = $options['absolute'] ? $options['base_url'] . '/' : base_path();
-  $prefix = empty($path) ? rtrim($options['prefix'], '/') : $options['prefix'];
+  $prefix = empty($path) ? rtrim((string) $options['prefix'], '/') : $options['prefix'];
 
   // Cache the clean URLs setting, as url() is called very frequently.
   static $backdrop_static_fast;
@@ -2752,6 +2753,7 @@ function url($path = NULL, array $options = array()) {
  *   Boolean TRUE or FALSE, where TRUE indicates an external path.
  */
 function url_is_external($path) {
+  $path = (string) $path;
   $colonpos = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
@@ -2814,7 +2816,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *   // will return an onmouseout attribute with JavaScript code that, when used
  *   // as attribute in a tag, will cause users to be redirected to another site.
  *   //
- *   // In this case, the 'onmouseout' attribute should not be whitelisted --
+ *   // In this case, the 'onmouseout' attribute should not be allowed --
  *   // you don't want users to have the ability to add this attribute or others
  *   // that take JavaScript commands.
  *   backdrop_attributes(array('onmouseout' => 'window.location="http://malicious.com/";')));
@@ -3177,14 +3179,13 @@ function backdrop_page_footer() {
 
   // If we're not already in a background request, flush to the browser.
   if (!backdrop_is_background() && $_SERVER['REQUEST_METHOD'] !== 'HEAD') {
-     // End the request and send the response to the browser. This call has
-     // error suppression on it as some PHP versions may require it (PHP 5.3)
-     // but other PHP versions throw a warning (PHP 5.5).
-     @ob_end_flush();
-
     // Flushing for PHP-FPM based installations.
     if (function_exists('fastcgi_finish_request')) {
       fastcgi_finish_request();
+    }
+    // Flushing for LiteSpeed servers.
+    elseif (function_exists('litespeed_finish_request')) {
+      litespeed_finish_request();
     }
     // Flushing for Apache mod_php installations.
     else {
@@ -3300,7 +3301,8 @@ function backdrop_set_time_limit($time_limit) {
  *   The path to the requested item or an empty string if the item is not found.
  */
 function backdrop_get_path($type, $name) {
-  return dirname(backdrop_get_filename($type, $name));
+  $path = (string) backdrop_get_filename($type, $name);
+  return dirname($path);
 }
 
 /**
@@ -3396,8 +3398,9 @@ function backdrop_css_defaults($data = NULL) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files do not happen to be needed on a page. This is normally done by calling
- * backdrop_add_css() in a hook_init() implementation.
+ * files do not happen to be needed on a page. However, it is preferred that
+ * modules do not use this function, but declare CSS files intended for all
+ * pages in their .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -4525,8 +4528,9 @@ function backdrop_region_class($region) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files are not needed on a page. This is normally done by calling
- * backdrop_add_js() in a hook_init() implementation.
+ * files are not needed on a page. However, it is preferred that modules do not
+ * use this function, but declare JS files intended for all pages in their
+ * .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -5331,6 +5335,16 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *   ),
  * @endcode
  *
+ * To specify what a value should NOT be, use '!value':
+ * @code
+ *   '#states' => array(
+ *     // Show the settings if 'bar' has NOT been selected for 'foo'.
+ *     'visible' => array(
+ *       ':input[name="foo"]' => array('!value' => 'bar'),
+ *     ),
+ *   ),
+ * @endcode
+ *
  * @param $elements
  *   A renderable array element having a #states property as described above.
  *
@@ -5655,6 +5669,9 @@ function backdrop_build_js_cache($files) {
         return FALSE;
       }
     }
+    if (!$map) {
+      $map = array();
+    }
     $map[$key] = $uri;
     state_set('js_cache_files', $map);
   }
@@ -5691,22 +5708,7 @@ function backdrop_clear_js_cache() {
  */
 function backdrop_json_encode($var, $pretty_print = FALSE) {
   if ($pretty_print) {
-    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-      $string = json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-    else {
-      $string = json_encode($var);
-      // PHP 5.3 JSON_PRETTY_PRINT.
-      $string = backdrop_json_format($string);
-      // PHP 5.3 JSON_UNESCAPED_UNICODE.
-      $string = backdrop_json_decode_unicode($string);
-      // PHP 5.3 JSON_UNESCAPED_SLASHES.
-      $string = str_replace('\/', '/', $string);
-    }
-    // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
-    // consistent with PHP 5.4.28+.
-    $string = preg_replace('/\[\n[\s]+\]/m', '[]', $string);
-    return $string;
+    return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
   else {
@@ -5727,12 +5729,18 @@ function backdrop_json_decode($var) {
 /**
  * Format a string of JSON for older versions of PHP.
  *
+ * This function is no longer used directly in core. Use backdrop_json_encode()
+ * to format JSON.
+ *
  * @param $json
  *   A string of JSON text.
  * @return string
  *   A formatted string of JSON text.
+ *
+ * @deprecated since 1.22.0
  */
 function backdrop_json_format($json) {
+  watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
   // https://github.com/GerHobbelt/nicejson-php/blob/master/nicejson.php.
 
@@ -5795,8 +5803,14 @@ function backdrop_json_format($json) {
 
 /**
  * Decode Unicode characters in JSON strings.
+ *
+ * This function is no longer used directly in core. Use backdrop_json_encode()
+ * to format JSON.
+ *
+ * @deprecated since 1.22.0
  */
 function backdrop_json_decode_unicode($json) {
+  watchdog_deprecated_function('common', __FUNCTION__);
   // Convert escaped characters, such as \u00e9 to the unescaped version (é).
   // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
   $decode_callback = function ($match) {
@@ -7814,7 +7828,7 @@ function backdrop_common_theme() {
       'variables' => array('type' => MARK_NEW),
     ),
     'item_list' => array(
-      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array()),
+      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'empty' => NULL),
     ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
@@ -7984,6 +7998,9 @@ function backdrop_common_theme() {
       'render element' => 'element',
     ),
     'container' => array(
+      'render element' => 'element',
+    ),
+    'details' => array(
       'render element' => 'element',
     ),
   );
@@ -8512,6 +8529,9 @@ function watchdog_severity_levels() {
  * @see backdrop_implode_tags()
  */
 function backdrop_explode_tags($tags) {
+  if (empty($tags)) {
+    return array();
+  }
   // This regexp allows the following types of user input:
   // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
@@ -8662,12 +8682,13 @@ function backdrop_parse_dependency($dependency) {
   $p_major = '(?P<major>\d+)';
   // By setting the minor version to x, branches can be matched.
   $p_minor = '(?P<minor>(?:\d+|x)(?:-[A-Za-z]+\d+)?)';
+  $p_patch = '(?P<patch>(?:\d+|x)(?:-[A-Za-z]+\d+)?)?';
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {
     $value['original_version'] = '(' . $parts[1];
     foreach (explode(',', $parts[1]) as $version) {
-      if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor/", $version, $matches)) {
+      if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor\.?$p_patch/", $version, $matches)) {
         $op = !empty($matches['operation']) ? $matches['operation'] : '=';
         if ($matches['minor'] == 'x') {
           // Backdrop considers "2.x" to mean any version that begins with
@@ -8685,7 +8706,23 @@ function backdrop_parse_dependency($dependency) {
             $op = '>=';
           }
         }
-        $value['versions'][] = array('op' => $op, 'version' => $matches['major'] . '.' . $matches['minor']);
+
+        if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
+          if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
+            // See comments above about "x" in minor.
+            // Same principle applies to patch in relation to minor.
+            if ($op == '>' || $op == '<=') {
+              $matches['minor']++;
+            }
+            if ($op == '=' || $op == '==') {
+              $value['versions'][] = array('op' => '<', 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x');
+              $op = '>=';
+            }
+          }
+        }
+        $version = $matches['major'] . '.' . $matches['minor'];
+        $version .= (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) ? '.' . $matches['patch'] : '';
+        $value['versions'][] = array('op' => $op, 'version' => $version);
       }
     }
   }
@@ -8723,12 +8760,18 @@ function backdrop_check_incompatibility(array $dependency_info, $current_version
  * Converts a Backdrop version string into numeric-only version string.
  *
  * @param string $version_string
- *   A version string such as 1.10.0-beta4 or 1.4.x-dev.
+ *   A version string such as 1.x-1.2.3, 1.10.0-beta4, or 1.4.x-dev.
  * @return string
  *   A converted string only containing numbers, for use in PHP's
  *   version_compare() function.
  */
 function _backdrop_version_compare_convert($version_string) {
+  // Remove the "1.x-" prefix (indicating Backdrop core version compatibility).
+  $core_prefix = BACKDROP_CORE_COMPATIBILITY . '-';
+  if (strpos($version_string, $core_prefix) === 0) {
+    $version_string = substr($version_string, strlen($core_prefix));
+  }
+
   // Convert "dev" releases to be the highest possible version number. For
   // example 1.5.x-dev should be considered higher than any other 1.5 release,
   // so we replace .x with 99999.

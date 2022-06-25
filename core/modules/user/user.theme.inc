@@ -127,8 +127,11 @@ function theme_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $role_name) {
     $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
   }
-  $output = '';
+  // Wrap the table in its own class so that we can make it horizontally
+  // scrollable.
+  $output = '<div class="permissions-matrix">';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output .= '</div>';
   $output .= backdrop_render_children($form);
   return $output;
 }
@@ -152,8 +155,12 @@ function theme_user_permission_description($variables) {
   if (!empty($permission_item['description'])) {
     $description[] = $permission_item['description'];
   }
+  if (!empty($permission_item['restrict access'])) {
+    $description[] = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+  }
   if (!empty($permission_item['warning'])) {
-    $description[] = '<em class="permission-warning">' . $permission_item['warning'] . '</em>';
+    $description[] = '<a class="warning-toggle" href="#">more</a>';
+    $description[] = '<div class="permission-warning-description">' . $permission_item['warning'] . '</div>';
   }
   if (!empty($description)) {
     return implode(' ', $description);
@@ -175,13 +182,15 @@ function theme_user_admin_roles($variables) {
   $header = array(t('Name'), t('Weight'), t('Operations'));
   foreach (element_children($form['roles']) as $role_name) {
     $label = $form['roles'][$role_name]['#role']->label;
-    $row = array();
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $row[] = t('@name <em>(required)</em>', array('@name' => $label));
+      $label .= ' ' . t('(required)');
     }
-    else {
-      $row[] = check_plain($label);
-    }
+
+    $row = array();
+    $row[] = theme('label_machine_name__role', array(
+      'label' => $label,
+      'machine_name' => $form['roles'][$role_name]['#role']->name,
+    ));
     $row[] = backdrop_render($form['roles'][$role_name]['weight']);
     $row[] = backdrop_render($form['roles'][$role_name]['operations']);
     $rows[] = array('data' => $row, 'class' => array('draggable'));
@@ -189,7 +198,8 @@ function theme_user_admin_roles($variables) {
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
+  $output = backdrop_render($form['roles_help']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
   $output .= backdrop_render_children($form);
 
   return $output;
@@ -305,8 +315,7 @@ function template_preprocess_username(&$variables) {
  * @see user-profile.tpl.php
  */
 function template_preprocess_user_profile(&$variables) {
-  $view_mode = $variables['elements']['#view_mode'];
-  $bundle = $variables['elements']['#bundle'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.

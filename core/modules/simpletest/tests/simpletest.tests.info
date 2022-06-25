@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -901,6 +901,12 @@ file = form.test
 [FormsFormStoragePageCacheTestCase]
 name  = Forms using form storage on cached pages
 description  = Tests a form using form storage and makes sure validation and caching works when page caching for anonymous users is turned on.
+group = Form API
+file = form.test
+
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
 group = Form API
 file = form.test
 

@@ -13,8 +13,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * @see views_handler_field
  */
 class ViewsHandlerFieldTest extends ViewsSqlTest {
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
     $this->column_map = array(
       'views_test_name' => 'name',
     );

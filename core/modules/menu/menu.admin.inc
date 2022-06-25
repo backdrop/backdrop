@@ -10,11 +10,15 @@
 function menu_overview_page() {
   $menus = menu_load_all();
   backdrop_sort($menus, array('title' => SORT_STRING));
-  $header = array(t('Title'), t('Operations'));
+  $header = array(t('Title'), t('Description'), t('Operations'));
   $rows = array();
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $row[] = theme('label_machine_name__menu', array(
+      'label' => $menu['title'],
+      'machine_name' => $menu['menu_name'],
+    ));
+    $row[] = filter_xss_admin($menu['description']);
     $links = array();
     $links['list'] = array(
       'title' => t('Manage links'),
@@ -399,7 +403,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#type' => 'checkbox',
     '#title' => t('Show as expanded'),
     '#default_value' => $item['expanded'],
-    '#description' => t('If selected and this menu link has children, the menu will always appear expanded.'),
+    '#description' => t("When displayed in a 'hierarchial tree' menu style, children of expanded menu links will always be visible."),
   );
 
   // Generate a list of possible parents (not including this link or descendants).

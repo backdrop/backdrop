@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Helper module for Views Bulk Form tests.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function views_test_entity_entity_info() {
+  $return = array(
+    'views_test' => array(
+      'label' => t('Bulk test entity'),
+      'entity class' => 'BulkTestEntity',
+      'controller class' => 'EntityDatabaseStorageController',
+      'base table' => 'views_test',
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'id',
+      ),
+    ),
+  );
+  return $return;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function views_test_entity_autoload_info() {
+  return array(
+    'BulkTestEntity' => 'views_test_entity.entity.inc',
+  );
+}

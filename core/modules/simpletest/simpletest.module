@@ -48,6 +48,7 @@ function simpletest_permission() {
     'administer unit tests' => array(
       'title' => t('Administer tests'),
       'restrict access' => TRUE,
+      'warning' => t('Tests can use a large amount of CPU resources. Running them can potentially cause performance issues on the site.'),
     ),
   );
 }
@@ -364,20 +365,54 @@ function simpletest_test_get_all() {
     else {
       $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.tests\.info$/', 'modules', 'name', 0);
       $groups = array();
+      $check_keys = array('name', 'description', 'group', 'file');
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
-        foreach ($classes as $class => $info) {
-          $info['file path'] = dirname($file->uri);
-          // If this test class requires a non-existing module, skip it.
-          if (!empty($info['dependencies'])) {
-            foreach ($info['dependencies'] as $module) {
-              if (!backdrop_get_filename('module', $module)) {
-                continue 2;
+        $error = '';
+        if (empty($classes)) {
+          $error = 'File %uri contains no testing classes.';
+        }
+        else {
+          foreach ($classes as $class => $info) {
+            // If the .tests.info file is malformed, it puts a slew of
+            // hard-to-diagnose errors into the watchdog log when the testing page
+            // is loaded. So we'll check for various malformalities and put a more
+            // informative error.
+            if (!is_array($info) || empty($info)) {
+              $error = format_string('File %uri contains a definition for %class that is not an array of testing class fields.', array('%class' => $class));
+              continue;
+            }
+            else {
+              $missing_keys = array();
+              foreach ($check_keys as $key) {
+                if (!isset($info[$key])) {
+                  $missing_keys[] = $key;
+                }
+              }
+              if (!empty($missing_keys)) {
+                $keys = implode(', ', $missing_keys);
+                $error = format_plural(count($missing_keys), 'File %uri contains a definition for %class that is missing field %keys.','File %uri contains a definition for %class that is missing fields %keys.', array('%class' => $class, '%keys' => $keys));
+                continue;
               }
             }
+            if (empty($error)) {
+            // If the format passed, build the rest of the groups information.
+              $info['file path'] = dirname($file->uri);
+              // If this test class requires a non-existing module, skip it.
+              if (!empty($info['dependencies'])) {
+                foreach ($info['dependencies'] as $module) {
+                  if (!backdrop_get_filename('module', $module)) {
+                    continue 2;
+                  }
+                }
+              }
+              $groups[$info['group']][$class] = $info;
+            }
           }
-
-          $groups[$info['group']][$class] = $info;
+        }
+        if (!empty($error)) {
+          watchdog('simpletest', $error, array('%uri' => $file->uri), WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
+          continue;
         }
       }
 

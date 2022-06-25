@@ -58,6 +58,16 @@ define('LAYOUT_TITLE_CUSTOM', 'custom');
 define('LAYOUT_TITLE_BLOCK', 'block');
 
 /**
+ * Denotes that the block is disabled.
+ */
+define('BLOCK_DISABLED', 0);
+
+/**
+ * Denotes that the block is enabled.
+ */
+define('BLOCK_ENABLED', 1);
+
+/**
  * Implements hook_menu().
  */
 function layout_menu() {
@@ -291,6 +301,14 @@ function layout_menu() {
     'title' => 'Remove block',
     'load arguments' => array(4),
     'page callback' => 'layout_block_remove_page',
+    'page arguments' => array(4, 7, 6),
+    'file' => 'layout.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/toggle-block-status/%/%layout_tempstore_block'] = array(
+    'title' => 'Disable block',
+    'load arguments' => array(4),
+    'page callback' => 'layout_block_disable_page',
     'page arguments' => array(4, 7, 6),
     'file' => 'layout.admin.inc',
   ) + $base;
@@ -578,6 +596,30 @@ function layout_page_access() {
 }
 
 /**
+ * Suppress the layout.
+ *
+ * This function should be called from within another module's page callback
+ * when the layout should not be displayed, that is, content only. This can be
+ * useful for modules that implement popup pages or other special pages where
+ * the default layout would be distracting.
+ *
+ * @param bool $suppress
+ *   If set to TRUE, the layout will be supressed.
+ * @return bool
+ *   TRUE if the layout can be suppressed, FALSE otherwise.
+ *
+ * @since 1.21.0 Function added.
+ */
+function layout_suppress($suppress = NULL) {
+  $suppression_static = &backdrop_static(__FUNCTION__, FALSE);
+  if (isset($suppress)) {
+    $suppression_static = $suppress;
+  }
+
+  return $suppression_static;
+}
+
+/**
  * Route handler callback; Execute the current route item or wrap in a layout.
  *
  * @param $router_item
@@ -591,8 +633,9 @@ function layout_page_access() {
 function layout_route_handler($router_item) {
   // If a different delivery callback is specified, we're probably not returning
   // HTML and it definitely should not be wrapped in a layout. Call the default
-  // route handler and return its response directly.
-  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback') {
+  // route handler, and return its response directly. Do the same if requested
+  // by layout_suppress().
+  if (!backdrop_is_html() || !empty($router_item['delivery_callback']) || $router_item['page_callback'] === 'layout_page_callback' || layout_suppress()) {
     return menu_default_route_handler($router_item);
   }
 
@@ -734,13 +777,15 @@ function layout_permission() {
   return array(
     'administer layouts' => array(
       'title' => t('Administer Layouts'),
-      'description' => t('Add and modify layouts on pages.'),
+      'description' => t('Create and modify layouts and blocks.'),
       'restrict access' => TRUE,
+      'warning' => t('Change the access/visibility of menu items, layouts and blocks.'),
     ),
     'administer flexible templates' => array(
       'title' => t('Administer Flexible Templates'),
       'description' => t('Create, configure and delete flexible layout templates.'),
       'restrict access' => TRUE,
+      'warning' => t('Manage all aspects of flexible layout templates, including deleting them.'),
     ),
   );
 }
@@ -2210,8 +2255,8 @@ function layout_layout_info() {
     foreach ($flexible_template->rows as $row_name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {
-        if (!empty($region['region_names']['region_name_' . $i])) {
-          $region_name = $region['region_names']['region_name_' . $i];
+        if (!empty($region['region_names']['region_' . $i]['label'])) {
+          $region_name = $region['region_names']['region_' . $i]['label'];
         }
         else {
           $region_name = $row_name . ' ' . $i;
@@ -2453,4 +2498,26 @@ function layout_flexible_row_styles() {
   );
 
   return $styles;
+}
+
+/**
+ * Utility function to clean CSS for Layout UI.
+ *
+ * @param string $classes
+ *  CSS classes, as entered into the Layout user interface.
+ *
+ * @return string
+ *   String of santized classes separated by spaces.
+ */
+function _layout_clean_custom_css($classes = array()) {
+  if (!empty($classes)) {
+    $new_classes = explode(' ', $classes);
+    foreach ($new_classes as $class) {
+      $clean_classes[] = backdrop_clean_css_identifier($class, array());
+    }
+    $clean_classes = array_filter($clean_classes);
+    return implode(' ', $clean_classes);
+  }
+
+  return '';
 }

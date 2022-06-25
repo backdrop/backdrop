@@ -48,6 +48,18 @@ function book_views_data() {
     ),
   );
 
+  $data['book_menu_links']['mlid'] = array(
+    'title' => t('Menu link ID'),
+    'help' => t('The menu link ID of the book page.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   $data['book_menu_links']['weight'] = array(
     'title' => t('Weight'),
     'help' => t('The weight of the book page.'),

@@ -98,7 +98,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
-      '#default_value' => TRUE,
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.page'),
       '#id' => 'edit-page-create',
     );
 
@@ -153,7 +153,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#min' => 0,
       '#step' => 1,
     );
-    $form['displays']['page']['options']['pagerz'] = array(
+    $form['displays']['page']['options']['pager'] = array(
       '#title' => t('Use a pager'),
       '#type' => 'checkbox',
       '#default_value' => TRUE,
@@ -249,6 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.block'),
       '#id' => 'edit-block-create',
     );
 

@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests for core views_handler_sort_date handler.
  */
 class ViewsHandlerSortDateTest extends ViewsSqlTest {
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // This test requires we be using UTC, otherwise the returned results may
     // change based on timezones when sorting by granularity.
