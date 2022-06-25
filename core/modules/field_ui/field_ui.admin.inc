@@ -2066,7 +2066,11 @@ function field_ui_field_edit_form_delete_submit($form, &$form_state) {
     unset($_GET['destination']);
   }
   $instance = $form['#instance'];
-  $form_state['redirect'] = array('admin/structure/types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'] . '/delete', array('query' => $destination));
+  $entity_type = $instance['entity_type'];
+  $bundle = field_extract_bundle($entity_type, $instance['bundle']);
+  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+  $admin_field_path = $admin_path . '/fields/' . $instance['field_name'] . '/delete';
+  $form_state['redirect'] = array($admin_field_path, array('query' => $destination));
 }
 
 /**

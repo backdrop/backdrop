@@ -20,8 +20,8 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
    */
   var $nodes;
 
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $this->nodes = array();
     $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));
