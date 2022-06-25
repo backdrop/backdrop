@@ -408,6 +408,12 @@ function update_fix_requirements() {
       update_module_enable(array('views'));
     }
 
+    // Enable the File module if necessary, as it is a required module in
+    // Backdrop, but may be off in Drupal.
+    if (!db_query("SELECT name FROM {system} WHERE name = 'file' AND type = 'module' AND status = 1")->fetchField()) {
+      update_module_enable(array('file'));
+    }
+
     // Empty a few basic caches.
     db_truncate('cache')->execute();
     db_truncate('cache_bootstrap')->execute();

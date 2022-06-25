@@ -33,8 +33,8 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     return comment_save($comment);
   }
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Add two users, create a node with the user1 as author and another node with user2 as author.
     // For the second node add a comment from user1.
