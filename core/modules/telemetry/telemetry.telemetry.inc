@@ -28,6 +28,11 @@ function telemetry_telemetry_info() {
     'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
     'project' => 'backdrop',
   );
+  $info['modules_core'] = array(
+    'label' => t('Core modules'),
+    'description' => t('A list of core modules enabled on your site.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -55,5 +60,15 @@ function telemetry_telemetry_data($key) {
       else {
         return 'Other';
       }
+    case 'modules_core':
+      $modules = array();
+      $all_modules = system_rebuild_module_data();
+      foreach (module_list() as $module) {
+        if (strpos($all_modules[$module]->uri, 'core/') === 0) {
+          $modules[] = $module;
+        }
+      }
+      sort($modules);
+      return implode(', ', $modules);
   }
 }
