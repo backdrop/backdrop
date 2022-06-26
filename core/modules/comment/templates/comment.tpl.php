@@ -68,7 +68,7 @@
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
   <?php if ($title_options != '2'): ?>
-    <h3><?php print $title; ?></h3>
+    <h3 class="comment-title"><?php print $title; ?></h3>
     <?php print render($title_suffix); ?>
   <?php endif; ?>
 

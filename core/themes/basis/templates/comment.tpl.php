@@ -70,11 +70,11 @@
   <div class="comment-text">
 
     <div class="comment-title">
-      <?php print render($title_prefix); ?>
       <?php if ($title_options != '2'): ?>
+        <?php print render($title_prefix); ?>
         <h3><?php print $title; ?></h3>
+        <?php print render($title_suffix); ?>
       <?php endif; ?>
-      <?php print render($title_suffix); ?>
       <?php if ($new): ?>
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
@@ -82,7 +82,6 @@
       <?php if ($title_options == '2'):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
-
     </div>
 
     <div class="content"<?php print backdrop_attributes($content_attributes); ?>>

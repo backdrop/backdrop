@@ -149,7 +149,10 @@ function template_preprocess_comment(&$variables) {
     }
   }
   if ($variables['title_options'] == COMMENT_TITLE_HIDDEN) {
-    $variables['classes'][] = 'hide-comment-title';
+    $variables['classes'][] = 'comment-title-hidden';
+  } elseif ($variables['title_options'] == COMMENT_TITLE_AUTO) {
+    $variables['classes'][] = 'comment-title-auto';
+  } else {
+    $variables['classes'][] = 'comment-title-custom';
   }
 }
-
