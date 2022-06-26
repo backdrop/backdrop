@@ -97,7 +97,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $node_type = node_type_get_type('post');
 
     $preview_mode = $node_type->settings['comment_preview'];
-    $subject_mode = $node_type->settings['comment_subject_field'];
+    $subject_mode = $node_type->settings['comment_title_options'];
 
     // Must get the page before we test for fields.
     if ($node !== NULL) {
@@ -190,13 +190,13 @@ class CommentHelperCase extends BackdropWebTestCase {
   }
 
   /**
-   * Sets the value governing whether the subject field should be enabled.
+   * Sets the value governing the comment title field should be enabled.
    *
    * @param boolean $enabled
-   *   Boolean specifying whether the subject field should be enabled.
+   *   Boolean specifying whether the comment title field should be enabled.
    */
   function setCommentSubject($enabled) {
-    $this->setCommentSettings('comment_subject_field', ($enabled ? '1' : '0'), 'Comment subject ' . ($enabled ? 'enabled' : 'disabled') . '.');
+    $this->setCommentSettings('comment_title_options', ($enabled ? '1' : '0'), 'Comment subject ' . ($enabled ? 'enabled' : 'disabled') . '.');
   }
 
   /**
