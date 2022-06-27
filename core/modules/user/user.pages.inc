@@ -80,6 +80,8 @@ function user_pass_validate($form, &$form_state) {
   else {
     form_set_error('name', t('Sorry, %name is not recognized as a user name or an email address.', array('%name' => $name)));
   }
+  // Check if too many password resets attempted.
+  user_login_authenticate_validate($form, $form_state);
 }
 
 /**
@@ -88,6 +90,12 @@ function user_pass_validate($form, &$form_state) {
  * @see user_pass_validate()
  */
 function user_pass_submit($form, &$form_state) {
+  
+  if ($form_state['flood_control_triggered']) {
+    form_set_error('name', t('Sorry, too many reset password attempts from your IP address. This IP address is temporarily blocked. Try again later.'));
+    return;
+  }
+  
   global $language;
 
   $account = $form_state['values']['account'];
