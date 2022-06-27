@@ -79,7 +79,7 @@
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
-      <?php if ($title_display != TRUE):  ?>
+      <?php if ($title_display == FALSE):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
     </div>
