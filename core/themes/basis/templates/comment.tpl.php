@@ -26,7 +26,7 @@
  * - $status: Comment status. Possible values are:
  *   comment-unpublished, comment-published or comment-preview.
  * - $title: Linked title.
- * - $title_options: Auto-generated(0), custom(1) or hidden(2).
+ * - $title_display: Should the title be displayed (TRUE or FALSE).
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
  *   - comment: The current template type, i.e., "theme hook".
@@ -70,7 +70,7 @@
   <div class="comment-text">
 
     <div class="comment-title">
-      <?php if ($title_options != '2'): ?>
+      <?php if ($title_display == TRUE): ?>
         <?php print render($title_prefix); ?>
         <h3><?php print $title; ?></h3>
         <?php print render($title_suffix); ?>
@@ -79,7 +79,7 @@
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
-      <?php if ($title_options == '2'):  ?>
+      <?php if ($title_display != TRUE):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
     </div>

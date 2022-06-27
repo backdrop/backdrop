@@ -108,7 +108,9 @@ function template_preprocess_comment(&$variables) {
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $permanlink_path = $uri['path'] . "#" . $uri['options']['fragment'];
   $variables['permalink_path'] = $permanlink_path;
-  $variables['title_options'] = $node_type->settings['comment_title_options'];
+  if ($node_type->settings['comment_title_options'] != 2) {
+    $variables['title_display'] = TRUE;
+  } 
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
