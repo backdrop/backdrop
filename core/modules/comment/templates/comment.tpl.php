@@ -34,7 +34,7 @@
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
- *   - hide-comment-title: Comment titles should be be hidden.
+ *   - comment-title-hidden: Comment titles should be hidden.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to
  *     administrators.
@@ -63,11 +63,11 @@
 ?>
 <article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
-  <?php print render($title_prefix); ?>
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
   <?php if ($title_options != '2'): ?>
+    <?php print render($title_prefix); ?>
     <h3 class="comment-title"><?php print $title; ?></h3>
     <?php print render($title_suffix); ?>
   <?php endif; ?>

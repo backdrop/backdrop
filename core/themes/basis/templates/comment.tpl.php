@@ -33,7 +33,7 @@
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
- *   - hide-comment-title: Comment titles should be be hidden.
+ *   - comment-title-hidden: Comment titles should be hidden.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
