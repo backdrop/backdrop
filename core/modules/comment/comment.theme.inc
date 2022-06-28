@@ -106,8 +106,7 @@ function template_preprocess_comment(&$variables) {
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
   
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
-  $permanlink_path = $uri['path'] . "#" . $uri['options']['fragment'];
-  $variables['permalink_path'] = $permanlink_path;
+  $variables['permalink_path'] = $uri['path'] . "#" . $uri['options']['fragment'];
   if ($node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN) {
     $variables['title_display'] = TRUE;
   } else {
@@ -154,9 +153,11 @@ function template_preprocess_comment(&$variables) {
   }
   if ($node_type->settings['comment_title_options'] == COMMENT_TITLE_HIDDEN) {
     $variables['classes'][] = 'comment-title-hidden';
-  } elseif ($node_type->settings['comment_title_options'] == COMMENT_TITLE_AUTO) {
+  }
+  elseif ($node_type->settings['comment_title_options'] == COMMENT_TITLE_AUTO) {
     $variables['classes'][] = 'comment-title-auto';
-  } else {
+  }
+  else {
     $variables['classes'][] = 'comment-title-custom';
   }
 }

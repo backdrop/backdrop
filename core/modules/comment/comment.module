@@ -68,17 +68,17 @@ define('COMMENT_NODE_CLOSED', 1);
 define('COMMENT_NODE_OPEN', 2);
 
 /**
- * Auto generate comment titles.
+ * Auto generated comment titles.
  */
 define('COMMENT_TITLE_AUTO', 0);
 
 /**
- * Allow custom titles for comments.
+ * Custom comment titles.
  */
 define('COMMENT_TITLE_CUSTOM', 1);
 
 /**
- * Hide comment titles.
+ * Hidden comment titles.
  */
 define('COMMENT_TITLE_HIDDEN', 2);
 
@@ -1181,13 +1181,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_title_options'],
       '#options' => array(
         COMMENT_TITLE_CUSTOM => t('Custom'),
-        COMMENT_TITLE_AUTO => t('Auto Generated'),
+        COMMENT_TITLE_AUTO => t('Auto generated'),
         COMMENT_TITLE_HIDDEN => t('Hidden'),
       ),
     );
     $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('Comment titles are visible.A title field is added to comment forms to allow for custom titles.');
-    $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are visible. Comment titles are automatically generated from the comment body.');
-    $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Comment titles are hidden (not supported by some contributed themes).');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are visible and are automatically generated from the comment body.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Comment titles are hidden (this option might not be supported by some themes).');
   }
 }
 

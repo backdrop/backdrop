@@ -479,7 +479,7 @@ function comment_update_1008() {
     $config = config($config_name);
     $comment_title = $config->get('settings.comment_subject_field');
     if ($comment_title == COMMENT_TITLE_AUTO) {
-      // auto generated titles
+      // Auto generated titles.
       $config->set('settings.comment_title_options', COMMENT_TITLE_AUTO);
     } else {
       // custom titles

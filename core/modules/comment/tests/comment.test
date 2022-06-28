@@ -190,7 +190,7 @@ class CommentHelperCase extends BackdropWebTestCase {
   }
 
   /**
-   * Sets the value governing the comment title field should be enabled.
+   * Sets the value governing whether the comment title field should be enabled.
    *
    * @param boolean $enabled
    *   Boolean specifying whether the comment title field should be enabled.
