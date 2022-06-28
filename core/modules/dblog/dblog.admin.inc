@@ -19,18 +19,17 @@ function dblog_overview() {
   $filter = dblog_build_filter_query();
   $rows = array();
   $classes = array(
-    WATCHDOG_DEBUG     => 'dblog-debug',
-    WATCHDOG_INFO      => 'dblog-info',
-    WATCHDOG_NOTICE    => 'dblog-notice',
-    WATCHDOG_WARNING   => 'dblog-warning',
-    WATCHDOG_ERROR       => 'dblog-error',
-    WATCHDOG_CRITICAL      => 'dblog-critical',
-    WATCHDOG_ALERT     => 'dblog-alert',
-    WATCHDOG_EMERGENCY     => 'dblog-emergency',
+    WATCHDOG_DEBUG => 'dblog-debug',
+    WATCHDOG_INFO => 'dblog-info',
+    WATCHDOG_NOTICE => 'dblog-notice',
+    WATCHDOG_WARNING => 'dblog-warning',
+    WATCHDOG_ERROR => 'dblog-error',
+    WATCHDOG_CRITICAL => 'dblog-critical',
+    WATCHDOG_ALERT => 'dblog-alert',
+    WATCHDOG_EMERGENCY => 'dblog-emergency',
     WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
   $header = array(
@@ -87,6 +86,8 @@ function dblog_overview() {
     '#empty' => t('No log messages available.'),
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
+
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   return $build;
 }
@@ -415,12 +416,9 @@ function dblog_filter_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function dblog_clear_log_form($form) {
-  $form['dblog_clear'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Clear log messages'),
-    '#description' => t('This action will permanently delete the log messages from the database.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+  $form['dblog_clear']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This action will permanently delete the log messages from the database.'),
   );
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',

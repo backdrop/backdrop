@@ -58,8 +58,8 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * Returns a new term with random properties.
    *
-   * @param string $vocabulary
-   *   Vocabulary name to create term in.
+   * @param TaxonomyVocabulary $vocabulary
+   *   Vocabulary to create term in.
    *
    * @return TaxonomyTrem
    *   Term with random properties.
@@ -78,8 +78,8 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Create boolean field.
     $this->fields[0] = array(
@@ -166,26 +166,9 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $this->clearViewsDataCache();
 
     // Create two tags.
-    $vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+    $vocabulary = taxonomy_vocabulary_load('tags');
     $this->terms[] = $this->createTerm($vocabulary);
     $this->terms[] = $this->createTerm($vocabulary);
-
-    // Create a number new users to get past the number of default nodes. We'll
-    // do all our testing with the third one, or $this->accounts[2].
-    $permissions = array('access content');
-    $nodecount = db_query("SELECT count(nid) from {node}")->fetchField();
-    for ($i = 0; $i <= $nodecount; $i++) {
-      // Each user: field_bool is checked, field_list is '1', and tag is term 2.
-      $account = $this->backdropCreateUser($permissions);
-      $account->{$this->fields[0]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
-      $account->{$this->fields[1]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
-      $account->field_tags[LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
-      user_save($account);
-      $this->accounts[$i] = $account;
-    }
-
-    // Delete the two Backdrop default nodes.
-    node_delete_multiple(array(1, 2));
 
     // Create a node where the field_bool is checked, field_list is '1' and
     // tag is term 2.
@@ -204,6 +187,23 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $node[$this->fields[1]['field_name']] = array();
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
     $this->nodes[1] = $this->backdropCreateNode($node);
+
+    // Create a number new users to get UIDs equal to the highest NID. We'll
+    // do all our testing with the last created account.
+    $permissions = array('access content');
+    $highest_nid = db_query("SELECT MAX(nid) from {node}")->fetchField();
+    for ($i = 0; $i <= $highest_nid; $i++) {
+      // Each user: field_bool is checked, field_list is '1', and tag is term 2.
+      $account = $this->backdropCreateUser($permissions);
+      $account->{$this->fields[0]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
+      $account->{$this->fields[1]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
+      $account->field_tags[LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
+      user_save($account);
+      $this->accounts[$i] = $account;
+      if ($account->uid == $highest_nid) {
+        break;
+      }
+    }
   }
 
   /**
@@ -223,22 +223,20 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $this->assertIdentical($value, 1, 'Second node has been created and tags field references term 1.');
 
     // Assert that user has been created and has expected field values.
-    $value = field_get_items('user', $this->accounts[2], 'field_tags', LANGUAGE_NONE);
+    $last_account = end($this->accounts);
+    $value = field_get_items('user', $last_account, 'field_tags', LANGUAGE_NONE);
     $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
     $this->assertIdentical($value, 1, 'User has been created and tags field references term 1.');
 
-    // Assert that node id with empty field value matches user id so that the
+    // Assert that node ID with empty field value matches user ID so that the
     // node would be excluded from the result, if the joins are missing extras.
-    $this->assertIdentical((int) $this->accounts[2]->uid, (int) $this->nodes[1]->nid, 'Node id of fourth node matches uid of third user.');
+    $this->assertIdentical((int) $last_account->uid, (int) $this->nodes[1]->nid, 'Node ID of second node matches UID of the latest user.');
 
-    // @todo get this test passing.
     // Assert correct result set.
-    // $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
-    // debug('should be 1: ' . $result_count);
-    // $this->assertEqual($result_count, 1, 'View has one result.');
-    // $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
-    // debug('nid should be ' . $this->nodes[1]->nid . ': ' . $nid);
-    // $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'View result has correct node id.');
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'View result has correct node ID.');
   }
 
   /**
@@ -255,14 +253,15 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $this->assertFalse($value, 'Second node has been created and list is empty.');
 
     // Assert that user has been created and has expected field values.
-    $value = field_get_items('user', $this->accounts[2], 'field_list', LANGUAGE_NONE);
+    $last_account = end($this->accounts);
+    $value = field_get_items('user', $last_account, 'field_list', LANGUAGE_NONE);
     $value = isset($value[0]['value']) ? (int) $value[0]['value'] : 0;
     $this->assertIdentical($value, 1, 'User has been created and list field has value 1.');
 
-    // Assert that node id with empty field value matches user id so that the
+    // Assert that node ID with empty field value matches user ID so that the
     // node would be excluded from the result option 1, if the joins are missing
     // extras.
-    $this->assertIdentical((int) $this->accounts[2]->uid, (int) $this->nodes[1]->nid, 'Node id of our second node matches uid of our third user.');
+    $this->assertIdentical((int) $last_account->uid, (int) $this->nodes[1]->nid, 'Node ID of our second node matches UID of the latest user.');
 
     /* Default option: Any. */
     $view = $this->getReducedExposedGroupedOptionsTestView();

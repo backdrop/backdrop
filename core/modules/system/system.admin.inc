@@ -786,7 +786,10 @@ function _system_modules_build_row($info, $extra) {
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
   $form['#required_by_distribution'] = $extra['required_by_distribution'];
-
+  if (!empty($info['project'])) {
+    $form['#project'] = $info['project'];
+  }
+  
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
@@ -1290,9 +1293,9 @@ function system_site_information_settings($form, &$form_state) {
 
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail address'),
+    '#title' => t('Email address'),
     '#default_value' => $site_mail,
-    '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
+    '#description' => t("The <em>From</em> address in automated emails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this email being flagged as spam.)"),
     '#required' => TRUE,
   );
 

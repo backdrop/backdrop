@@ -471,6 +471,70 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     ));
     $this->assertEqual(count($block_element), 1, 'The sample block is only displayed once after moving it.');
 
+    // Disable the block.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $disable_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"disable-block")]', array(
+      ':uuid' => $block_uuid,
+    ));
+    $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
+    $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
+
+    $this->assertText(t('Block "@title" disabled.', array('@title' => $block_new_label)));
+
+    // The block is still present in the UI.
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class)]//span[normalize-space()=:title]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-title',
+      ':title' => $block_new_label . ' (Disabled)',
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block label was found.');
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class) and contains(text(), :description)]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-content',
+      ':description' => $block_new_description,
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block description was changed.');
+
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // But is gone from the layout page.
+    $this->backdropGet($layout_url);
+    $this->assertNoText('Foo subject');
+    $block_element = $this->xpath('//*[contains(@class,:block)]', array(
+      ':block' => 'block-layout-test-foo',
+    ));
+    $this->assertEqual(count($block_element), 0, 'The sample block is not visible on the page.');
+
+    // Re-enable the block.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
+
+    $this->assertText(t('Block "@title" disabled.', array('@title' => $block_new_label)));
+
+    // The block is still present in the UI.
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class)]//span[normalize-space()=:title]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-title',
+      ':title' => $block_new_label,
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block label was found.');
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class) and contains(text(), :description)]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-content',
+      ':description' => $block_new_description,
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block description was changed.');
+
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Block is back on the layout page.
+    $this->backdropGet($layout_url);
+    $this->assertText('Foo subject');
+    $block_element = $this->xpath('//*[contains(@class,:block)]', array(
+      ':block' => 'block-layout-test-foo',
+    ));
+    $this->assertEqual(count($block_element), 1, 'The sample block is again visible on the page.');
+
     // Finally, try removing the block.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(

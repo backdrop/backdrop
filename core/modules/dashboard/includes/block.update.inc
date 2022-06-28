@@ -54,6 +54,13 @@ class DashboardUpdateBlock extends Block {
   /**
    * {@inheritdoc}
    */
+  function checkAccess() {
+    return user_access('access site reports');
+  }
+  
+  /**
+   * {@inheritdoc}
+   */
   function getContent() {
     $panel = array(
       '#theme' => 'dashboard_panel__update',

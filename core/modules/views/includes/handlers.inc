@@ -790,7 +790,7 @@ class views_many_to_one_helper {
             $join->type = 'LEFT';
             // INNER joins are slightly faster; use them when we know it's safe.
             $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
-            $group_type = $this->handler->query->where[$group]['type'];
+            $group_type = !empty($group) ? $this->handler->query->where[$group]['type'] : FALSE;
             $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
             // @todo Figure out why taxonomy_index_tid is being special-cased here.
             // See: https://github.com/backdrop/backdrop-issues/issues/5225

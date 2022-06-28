@@ -11,8 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests basic functions from the Views module.
  */
 class ViewsModuleTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
     backdrop_theme_rebuild();
   }
 

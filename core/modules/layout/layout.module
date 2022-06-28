@@ -58,6 +58,16 @@ define('LAYOUT_TITLE_CUSTOM', 'custom');
 define('LAYOUT_TITLE_BLOCK', 'block');
 
 /**
+ * Denotes that the block is disabled.
+ */
+define('BLOCK_DISABLED', 0);
+
+/**
+ * Denotes that the block is enabled.
+ */
+define('BLOCK_ENABLED', 1);
+
+/**
  * Implements hook_menu().
  */
 function layout_menu() {
@@ -291,6 +301,14 @@ function layout_menu() {
     'title' => 'Remove block',
     'load arguments' => array(4),
     'page callback' => 'layout_block_remove_page',
+    'page arguments' => array(4, 7, 6),
+    'file' => 'layout.admin.inc',
+  ) + $base;
+
+  $items['admin/structure/layouts/manage/%layout_tempstore/toggle-block-status/%/%layout_tempstore_block'] = array(
+    'title' => 'Disable block',
+    'load arguments' => array(4),
+    'page callback' => 'layout_block_disable_page',
     'page arguments' => array(4, 7, 6),
     'file' => 'layout.admin.inc',
   ) + $base;
@@ -759,13 +777,15 @@ function layout_permission() {
   return array(
     'administer layouts' => array(
       'title' => t('Administer Layouts'),
-      'description' => t('Add and modify layouts on pages.'),
+      'description' => t('Create and modify layouts and blocks.'),
       'restrict access' => TRUE,
+      'warning' => t('Change the access/visibility of menu items, layouts and blocks.'),
     ),
     'administer flexible templates' => array(
       'title' => t('Administer Flexible Templates'),
       'description' => t('Create, configure and delete flexible layout templates.'),
       'restrict access' => TRUE,
+      'warning' => t('Manage all aspects of flexible layout templates, including deleting them.'),
     ),
   );
 }
