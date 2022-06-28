@@ -66,7 +66,7 @@
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
-  <?php if ($title_display == TRUE): ?>
+  <?php if ($title_display): ?>
     <?php print render($title_prefix); ?>
     <h3 class="comment-title"><?php print $title; ?></h3>
     <?php print render($title_suffix); ?>
