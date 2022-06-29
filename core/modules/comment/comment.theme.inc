@@ -107,11 +107,7 @@ function template_preprocess_comment(&$variables) {
   
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $variables['permalink_path'] = $uri['path'] . "#" . $uri['options']['fragment'];
-  if ($node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN) {
-    $variables['title_display'] = TRUE;
-  } else {
-    $variables['title_display'] = FALSE; 
-  }
+  $variables['title_display'] = $node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN;
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
@@ -160,4 +156,6 @@ function template_preprocess_comment(&$variables) {
   else {
     $variables['classes'][] = 'comment-title-custom';
   }
+  // Classes specific to comment title.
+  $variables['title_classes'][] = 'comment-title';
 }

@@ -151,7 +151,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if ($type->settings['comment_title_options'] == COMMENT_TITLE_AUTO) {
+    if ($type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -1185,7 +1185,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_TITLE_HIDDEN => t('Hidden'),
       ),
     );
-    $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('Comment titles are visible.A title field is added to comment forms to allow for custom titles.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('Comment titles are visible. A title field is added to comment forms to allow for custom titles.');
     $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are visible and are automatically generated from the comment body.');
     $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Comment titles are hidden (this option might not be supported by some themes).');
   }
@@ -1887,7 +1887,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM,
+    '#access' => $node_type->settings['comment_title_options'] === COMMENT_TITLE_CUSTOM,
     '#weight' => -1,
   );
 

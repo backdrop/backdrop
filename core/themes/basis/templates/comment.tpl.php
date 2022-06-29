@@ -27,6 +27,8 @@
  *   comment-unpublished, comment-published or comment-preview.
  * - $title: Linked title.
  * - $title_display: Should the title be displayed (TRUE or FALSE).
+ * - $title_classes: Specific classes for the title. Default is:
+ *   - comment-title: Title of the specific comment.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
  *   - comment: The current template type, i.e., "theme hook".
@@ -34,6 +36,8 @@
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
  *   - comment-title-hidden: Comment titles should be hidden.
+ *   - comment-title-auto: Comment titles are automatically generated.
+ *   - commet-title-custom: Comment titles are custom for each comment.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
@@ -69,8 +73,8 @@
 
   <div class="comment-text">
 
-    <div class="comment-title">
-      <?php if ($title_display == TRUE): ?>
+    <div class="<?php print implode(' ', $title_classes); ?>">
+      <?php if ($title_display): ?>
         <?php print render($title_prefix); ?>
         <h3><?php print $title; ?></h3>
         <?php print render($title_suffix); ?>
@@ -79,7 +83,7 @@
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
-      <?php if ($title_display == FALSE):  ?>
+      <?php if ($title_display):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
     </div>
