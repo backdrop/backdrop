@@ -40,13 +40,15 @@ Backdrop.behaviors.userFieldsetSummaries = {
 
       // Signature.
       var signature = $context.find('textarea[name="signature[value]"]');
+      console.log(signature);
       if (signature.length && signature.val().length) {
         vals.push(Backdrop.t('Signature'));
       }
 
       // Picture.
-      var picture = $context.find('input[name="files[picture_upload]"]');
-      if (picture.length && picture.val().length) {
+      var pictureNew = $context.find('input[name="files[picture_upload]"]');
+      var pictureExisting = $context.find('.user-picture');
+      if ((pictureNew.length && pictureNew.val().length) || pictureExisting.length) {
         vals.push(Backdrop.t('Picture'));
       }
 
