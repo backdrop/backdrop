@@ -156,6 +156,7 @@ function template_preprocess_comment(&$variables) {
   else {
     $variables['classes'][] = 'comment-title-custom';
   }
-  // Classes specific to comment title.
+  
+  // Gather classes specific to the comment title.
   $variables['title_classes'][] = 'comment-title';
 }
