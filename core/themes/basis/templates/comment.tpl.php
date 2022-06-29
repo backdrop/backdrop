@@ -61,6 +61,7 @@
  */
 ?>
 <article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">
+  <?php dpm($variables); ?>
   <header class="comment-header">
     <div class="attribution">
       <?php print $user_picture; ?>
@@ -83,7 +84,7 @@
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
-      <?php if ($title_display):  ?>
+      <?php if (!$title_display):  ?>
         <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
       <?php endif; ?>
     </div>

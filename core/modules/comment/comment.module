@@ -1887,7 +1887,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_title_options'] === COMMENT_TITLE_CUSTOM,
+    '#access' => $node_type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM,
     '#weight' => -1,
   );
 
