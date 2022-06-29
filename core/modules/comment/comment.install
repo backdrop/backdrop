@@ -488,6 +488,14 @@ function comment_update_1008() {
     }
     $config->clear('settings.comment_subject_field');
     $config->save();
+  
+  // Remove comment_subject_title variable now that it has been replaced.
+  $node_types = node_type_get_types();
+  foreach ($node_types as $type_name => $node_type) {
+    if (isset($node_type->settings['comment_subject_title'])) {
+      unset($node_type->settings['comment_subject_title']);
+    }
+    node_type_save($node_type);
   }
 }
 
