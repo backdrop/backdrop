@@ -944,12 +944,6 @@ function user_account_form(&$form, &$form_state) {
     '#value' => 'authenticated',
   );
 
-  $form['account_settings']['notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin_users,
-  );
-
   $form['personalization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Personalization'),
