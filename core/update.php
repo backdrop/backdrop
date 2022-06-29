@@ -311,7 +311,7 @@ function update_info_page() {
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
   $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
-  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
+  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.</p>';
   $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
   $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
@@ -320,7 +320,6 @@ function update_info_page() {
   $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
   $output .= "</ul>\n";
   $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
