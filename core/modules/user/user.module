@@ -990,7 +990,7 @@ function user_account_form(&$form, &$form_state) {
     '#title' => t('Regional and language'),
     '#weight' => 3,
     '#collapsible' => TRUE,
-    '#access' => (config_get('system.date', 'user_configurable_timezones') || language_multilingual()),
+    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
   );
   // See system_user_timezone() and locale_language_selector_form() for the form
