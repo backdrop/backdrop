@@ -1717,7 +1717,7 @@ function install_finished(&$install_state) {
 
   // Confirming that the Dashboard module is enabled. 
   if (module_exists('dashboard')) {
-    $message .= '<br>' . st('If you are new to Backdrop, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@dashboard' => url('admin/dashboard')));
+    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
   }
 
   if (!backdrop_is_cli()) {
