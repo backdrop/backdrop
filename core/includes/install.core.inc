@@ -1712,7 +1712,8 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $profile = backdrop_install_profile_distribution_name();
+  $message = st('Thank you for installing @profile!', array('@profile' => $profile));
 
   // Confirming that the Dashboard module is enabled. 
   if (module_exists('dashboard')) {
