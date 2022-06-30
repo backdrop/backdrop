@@ -270,8 +270,14 @@ table.screenshot {
   text-align: right;
   border-bottom: 1px solid #cdcdcd;
 }
-.system-themes-cache-buttons p{
+[dir="rtl"] .system-themes-cache-buttons {
   text-align: left;
+}
+.system-themes-cache-buttons p {
+  text-align: left;
+}
+[dir="rtl"] .system-themes-cache-buttons p {
+  text-align: right;
 }
 .system-themes-list {
   margin-bottom: 20px;

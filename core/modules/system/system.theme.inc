@@ -88,7 +88,7 @@ function theme_system_themes_page($variables) {
 
   $output = '<div id="system-themes-page">';
 
-  // @todo make these not dependant on admin_bar?
+  // @todo Remove check for on admin_bar. https://github.com/backdrop/backdrop-issues/issues/5664
   if (module_exists('admin_bar')) {
     // If we have a cached menu for the current user, only output the hash
     // for the client-side HTTP cache callback URL.
@@ -100,7 +100,7 @@ function theme_system_themes_page($variables) {
         'query' => array('token' => $hash, backdrop_get_destination()),
       );
       $output .= '<div class="system-themes-cache-buttons message-info">';
-      $output .= '<p>' . t('Not seeing theme changes? Clear the CSS/JS cache if you\'ve changed existing files. Rebuild the theme registry if you\'ve added new files to your theme.') . '</p>';
+      $output .= '<p>' . t('Not seeing theme changes? Clear the CSS/JS cache if existing files have changed. Rebuild the theme registry if new files or functions have been added to your theme.') . '</p>';
       $output .= l(t('Flush CSS/JS cache'), 'admin_bar/flush-cache/assets', $options);
       $output .= l(t('Rebuild theme registry'), 'admin_bar/flush-cache/theme', $options);
       $output .= '</div>';
