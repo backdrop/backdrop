@@ -339,13 +339,13 @@ class DateFieldTestCase extends DateFieldBasic {
     $this->assertText($should_be, "Found the correct date for a $field_type field using the $widget_type widget displayed using the short date format.");
     // For the long format, do not save anything, and assert that the displayed
     // date uses the expected default value of this format provided by Backdrop
-    // core ('l, F j, Y - H:i').
+    // core ('l, j F, Y - H:i').
     $instance = field_info_instance('node', $field_name, 'story');
     $instance['display']['default']['settings']['format_type'] = 'long';
     field_update_instance($instance);
     $this->backdropPost('node/add/story', $edit, t('Save'));
     $this->assertText($edit['title'], "Node has been created");
-    $should_be = $todate ? 'Thursday, October 7, 2010 - 10:30am to 11:30am' : 'Thursday, October 7, 2010 - 10:30am';
+    $should_be = $todate ? 'Thursday, 7 October, 2010 - 10:30am to 11:30am' : 'Thursday, 7 October, 2010 - 10:30am';
     $this->assertText($should_be, "Found the correct date for a $field_type field using the $widget_type widget displayed using the long date format.");
   }
 }
@@ -377,16 +377,16 @@ class DateFieldTokenTestCase extends DateFieldBasic {
     // Create a dummy node.
     $edit = array();
     $edit['title'] = $this->randomName(8);
-    $edit['field_date_single[und][0][value][date]'] = format_date($timestamp, 'custom', 'm/d/Y - h:ia','UTC');
+    $edit['field_date_single[und][0][value][date]'] = format_date($timestamp, 'custom', 'd/m/Y - h:ia','UTC');
 
-    $edit['field_date_multiple[und][0][value][date]'] = format_date($timestamp, 'custom', 'm/d/Y - h:ia','UTC');
-    $edit['field_date_multiple[und][0][value2][date]'] = format_date($timestamp_end, 'custom', 'm/d/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][0][value][date]'] = format_date($timestamp, 'custom', 'd/m/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][0][value2][date]'] = format_date($timestamp_end, 'custom', 'd/m/Y - h:ia','UTC');
 
-    $edit['field_date_multiple[und][1][value][date]'] = format_date($timestamp2, 'custom', 'm/d/Y - h:ia','UTC');
-    $edit['field_date_multiple[und][1][value2][date]'] = format_date($timestamp2_end, 'custom', 'm/d/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][1][value][date]'] = format_date($timestamp2, 'custom', 'd/m/Y - h:ia','UTC');
+    $edit['field_date_multiple[und][1][value2][date]'] = format_date($timestamp2_end, 'custom', 'd/m/Y - h:ia','UTC');
 
     $this->backdropPost('node/add/story', $edit, t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit['title']);  
+    $node = $this->backdropGetNodeByTitle($edit['title']);
 
     // Ceate several tokens.
     $tokens = array(
@@ -418,7 +418,7 @@ class DateFieldTokenTestCase extends DateFieldBasic {
   }
 
   /**
-   * Helper function that creates a properly formatted token map. 
+   * Helper function that creates a properly formatted token map.
    */
   function mapTokenNames($type, array $tokens = array()) {
     $return = array();

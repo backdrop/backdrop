@@ -47,7 +47,7 @@ define('BACKDROP_REQUIRED', 2);
 define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
- * Maximum length of e-mail fields.
+ * Maximum length of email fields.
  */
 define('EMAIL_MAX_LENGTH', 254);
 
@@ -161,6 +161,7 @@ function system_permission() {
     'administer site configuration' => array(
       'title' => t('Administer site configuration'),
       'restrict access' => TRUE,
+      'warning' => t('Provides access to a variety of settings/functionality that should generally be restricted to site administrators.'),
     ),
     'administer themes' => array(
       'title' => t('Administer themes'),
@@ -168,6 +169,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
+      'warning' => t('Run database updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
@@ -939,7 +941,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default home page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, email address, default home page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -1445,7 +1447,7 @@ function system_library_info() {
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
     'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.2',
+    'version' => '3.7.3',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
@@ -4408,7 +4410,7 @@ function system_admin_paths() {
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
- *     '#default_setting' => $settings_config->get('first_setting'),
+ *     '#default_value' => $primary_config->get('first_setting'),
  *   ),
  *   'second_setting' => array( ... ),
  *
@@ -4422,7 +4424,7 @@ function system_admin_paths() {
  *
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
- *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#default_value' => $tertiary_config->get('bonus_three'),
  *       '#config' => 'mymodule.third',
  *     ),
  *   ),

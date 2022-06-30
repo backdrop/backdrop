@@ -1201,14 +1201,17 @@ function node_permission() {
       'title' => t('Bypass content access control'),
       'description' => t('View, edit and delete all content regardless of permission restrictions.'),
       'restrict access' => TRUE,
+      'warning' => t('Bypass all other node permissions.'),
     ),
     'administer content types' => array(
       'title' => t('Administer content types'),
       'restrict access' => TRUE,
+      'warning' => t('Define custom content types and delete existing ones.'),
     ),
     'administer nodes' => array(
       'title' => t('Administer content'),
       'restrict access' => TRUE,
+      'warning' => t('Edit or delete any content, which may cause irreversible data loss.'),
     ),
     'access content overview' => array(
       'title' => t('Access the content overview page'),
@@ -2373,6 +2376,12 @@ function node_page_view(Node $node) {
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
 
+  // Show a message if the content type is configured to have a hidden path.
+  if ($type->settings['hidden_path']) {
+    $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
+    backdrop_set_message($message, 'info');
+  }
+
   return node_show($node);
 }
 
@@ -3495,23 +3504,41 @@ function node_action_info() {
 function node_requirements($phase) {
   $requirements = array();
   if ($phase === 'runtime') {
-    // Only show rebuild button if there are either 0, or 2 or more, rows
-    // in the {node_access} table, or if there are modules that
-    // implement hook_node_grants().
+    $needs_rebuild = node_access_needs_rebuild();
     $grant_count = db_query('SELECT COUNT(*) FROM {node_access}')->fetchField();
-    if ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
+
+    // Show an error message if permissions need to be rebuilt. Otherwise
+    // show a permission count if there are either 0, or 2 or more, rows in the
+    // {node_access} table, or if there are modules that implement
+    // hook_node_grants().
+    if ($needs_rebuild) {
+      $value = t('Access permissions need to be rebuilt.');
+    }
+    elseif ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
       $value = format_plural($grant_count, 'One permission in use', '@count permissions in use', array('@count' => $grant_count));
     }
     else {
       $value = t('Disabled');
     }
     $value .= ' (' . l(t('Rebuild permissions'), 'admin/reports/status/rebuild') . ')';
-    $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache. Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
+
+    if ($needs_rebuild) {
+      $description = t('Node access permissions need to be rebuilt.');  
+      $severity = REQUIREMENT_ERROR;
+    } 
+    else {
+      $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache.');
+      $severity = REQUIREMENT_OK;
+    }
+
+    // Add further information.
+    $description .= ' ' . t('Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
 
     $requirements['node_access'] = array(
       'title' => t('Node Access Permissions'),
       'value' => $value,
       'description' => $description,
+      'severity' => $severity
     );
   }
   return $requirements;

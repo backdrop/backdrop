@@ -30,8 +30,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '5.6.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -323,6 +323,10 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
+  $module_status_report = update_upgrade_check_dependencies();
+	if (!empty($module_status_report)) {
+    $output .= $module_status_report;
+  }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
@@ -545,6 +549,7 @@ if (update_access_allowed()) {
       }
 
     case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle

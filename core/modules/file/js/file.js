@@ -19,10 +19,6 @@ Backdrop.behaviors.fileUploadChange = {
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
-  },
-  detach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
 };
 
@@ -33,10 +29,6 @@ Backdrop.behaviors.fileButtons = {
   attach: function (context) {
     $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
     $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
-  },
-  detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
   }
 };
 
