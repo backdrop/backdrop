@@ -176,5 +176,5 @@ function update_settings_submit($form, $form_state) {
   config_set('installer.settings', 'core_update', $form_state['values']['core_update']);
 
   // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }

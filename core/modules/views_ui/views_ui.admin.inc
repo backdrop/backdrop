@@ -4624,7 +4624,7 @@ function views_ui_admin_settings_basic_submit($form, $form_state) {
   $config = config('views_ui.settings');
   $config->setData($form_state['values']);
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**
@@ -4737,7 +4737,7 @@ function views_ui_admin_settings_advanced_submit($form, $form_state) {
   $config = config('views.settings');
   $config->setData($form_state['values']);
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

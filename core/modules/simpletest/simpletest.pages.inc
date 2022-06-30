@@ -392,7 +392,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
     ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

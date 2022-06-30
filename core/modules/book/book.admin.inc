@@ -133,7 +133,7 @@ function book_admin_settings_submit($form, &$form_state) {
     ->set('book_navigation_options', $form_state['values']['book_navigation_options'])
     ->set('book_links', $form_state['values']['book_links'])
     ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

@@ -774,7 +774,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
     $vocabulary->hierarchy = $hierarchy;
     taxonomy_vocabulary_save($vocabulary);
   }
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

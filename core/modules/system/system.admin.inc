@@ -254,7 +254,7 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
  * Process system_themes_admin_form form submissions.
  */
 function system_themes_admin_form_submit($form, &$form_state) {
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 
   $themes = list_themes();
   $config = config('system.core');
@@ -477,7 +477,7 @@ function system_theme_settings_submit($form, &$form_state) {
     $config->set($key, $value);
   }
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
   cache_clear_all();
 }
 
@@ -789,7 +789,7 @@ function _system_modules_build_row($info, $extra) {
   if (!empty($info['project'])) {
     $form['#project'] = $info['project'];
   }
-  
+
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
@@ -1034,7 +1034,7 @@ function system_modules_submit($form, &$form_state) {
   $post_install_list = module_list(TRUE);
   if ($pre_install_list != $post_install_list) {
     backdrop_flush_all_caches();
-    backdrop_set_message(t('The configuration options have been saved.'));
+    backdrop_set_message_config_saved();
   }
 
   // Check if a previous search is present and preserve it on redirect.
@@ -1944,7 +1944,7 @@ function system_image_toolkit_settings_submit($form, &$form_state) {
   }
 
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**
@@ -2091,7 +2091,7 @@ function system_regional_settings_submit($form, &$form_state) {
     ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
     ->save();
   // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**
@@ -2140,7 +2140,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
     backdrop_set_message(t('The site is no longer in maintenance mode.'));
   }
   else {
-    backdrop_set_message(t('The configuration options have been saved.'));
+    backdrop_set_message_config_saved();
   }
 }
 

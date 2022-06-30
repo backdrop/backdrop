@@ -1079,5 +1079,5 @@ function user_settings_email_submit($form, &$form_state) {
   $config->set('status_canceled_subject', $values['user_mail_status_canceled_subject']);
   $config->save();
 
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
