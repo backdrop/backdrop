@@ -988,7 +988,7 @@ function user_account_form(&$form, &$form_state) {
   $form['regional_language'] = array(
     '#type' => 'fieldset',
     '#title' => t('Regional and language'),
-    '#weight' => 3,
+    '#weight' => 6,
     '#collapsible' => TRUE,
     '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
