@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the user view row plugin.

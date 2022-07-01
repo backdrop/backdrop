@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Search query extender and helper functions.

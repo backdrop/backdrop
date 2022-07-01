@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests that exercise the validation functions in the link module.

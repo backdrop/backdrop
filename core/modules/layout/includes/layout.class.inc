@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class for loading, modifying, and executing a layout.
