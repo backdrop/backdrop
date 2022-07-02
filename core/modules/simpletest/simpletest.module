@@ -370,7 +370,7 @@ function simpletest_test_get_all() {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
         $error = '';
         if (empty($classes)) {
-          $error = 'File @uri contains no testing classes.';
+          $error = t('File @uri contains no testing classes.');
         }
         else {
           // If the .tests.info file is malformed, it puts a slew of
