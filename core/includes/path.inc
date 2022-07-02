@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions to handle paths in Backdrop, including URL aliasing.

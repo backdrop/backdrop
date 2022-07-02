@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the taxonomy module.
@@ -384,8 +383,8 @@ function taxonomy_update_1009() {
   }
 
   $admin_role = config_get('system.core', 'user_admin_role');
-  
-  foreach (array($admin_role, 'editor') as $role_name) { 
+
+  foreach (array($admin_role, 'editor') as $role_name) {
     $config = config('user.role.' . $role_name);
     $permissions = $config->get('permissions');
     if ($permissions) {

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class file to control the main Layout editor.

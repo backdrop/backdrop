@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines a field type and its formatters and widgets.
