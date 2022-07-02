@@ -4059,11 +4059,11 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
-      // Ensure that the maintenance mode message is displayed only once
-      // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
-      // has been added to the list of excluded paths in order to suppress the
-      // warning on the maintenance mode settings page when clearing caches (see
+      // Ensure that the maintenance mode message is displayed only once and
+      // specifically suppress its display on the batch and maintenance mode
+      // settings pages. 'admin_bar/flush-cache' has been added to the list of
+      // excluded paths in order to suppress the warning on the maintenance mode
+      // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
       $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
