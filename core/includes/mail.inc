@@ -1,43 +1,43 @@
 <?php
 /**
  * @file
- * API functions for processing and sending e-mail.
+ * API functions for processing and sending email.
  */
 
 /**
- * Auto-detect appropriate line endings for e-mails.
+ * Auto-detect appropriate line endings for emails.
  *
  * $settings['mail_line_endings'] will override this setting.
  */
 define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Win32') !== FALSE) ? "\r\n" : "\n");
 
 /**
- * Composes and optionally sends an e-mail message.
+ * Composes and optionally sends an email message.
  *
- * Sending an e-mail works with defining an e-mail template (subject, text
- * and possibly e-mail headers) and the replacement values to use in the
- * appropriate places in the template. Processed e-mail templates are
- * requested from hook_mail() from the module sending the e-mail. Any module
- * can modify the composed e-mail message array using hook_mail_alter().
- * Finally backdrop_mail_system()->mail() sends the e-mail, which can
- * be reused if the exact same composed e-mail is to be sent to multiple
+ * Sending an email works with defining an email template (subject, text
+ * and possibly email headers) and the replacement values to use in the
+ * appropriate places in the template. Processed email templates are
+ * requested from hook_mail() from the module sending the email. Any module
+ * can modify the composed email message array using hook_mail_alter().
+ * Finally backdrop_mail_system()->mail() sends the email, which can
+ * be reused if the exact same composed email is to be sent to multiple
  * recipients.
  *
- * Finding out what language to send the e-mail with needs some consideration.
- * If you send e-mail to a user, her preferred language should be fine, so
+ * Finding out what language to send the email with needs some consideration.
+ * If you send email to a user, her preferred language should be fine, so
  * use user_preferred_language(). If you send email based on form values
  * filled on the page, there are two additional choices if you are not
- * sending the e-mail to a user on the site. You can either use the language
+ * sending the email to a user on the site. You can either use the language
  * used to generate the page ($language global variable) or the site default
- * language. See language_default(). The former is good if sending e-mail to
- * the person filling the form, the later is good if you send e-mail to an
+ * language. See language_default(). The former is good if sending email to
+ * the person filling the form, the later is good if you send email to an
  * address previously set up (like contact addresses in a contact form).
  *
  * Taking care of always using the proper language is even more important
- * when sending e-mails in a row to multiple users. Hook_mail() abstracts
+ * when sending emails in a row to multiple users. Hook_mail() abstracts
  * whether the mail text comes from an administrator setting or is
  * static in the source code. It should also deal with common mail tokens,
- * only receiving $params which are unique to the actual e-mail at hand.
+ * only receiving $params which are unique to the actual email at hand.
  *
  * An example:
  *
@@ -88,21 +88,21 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  *   called to complete the $message structure which will already contain common
  *   defaults.
  * @param $key
- *   A key to identify the e-mail sent. The final e-mail id for e-mail altering
+ *   A key to identify the email sent. The final email id for email altering
  *   will be {$module}_{$key}.
  * @param $to
- *   The e-mail address or addresses where the message will be sent to. The
+ *   The email address or addresses where the message will be sent to. The
  *   formatting of this string must comply with RFC 2822. Some examples are:
  *   - user@example.com
  *   - user@example.com, anotheruser@example.com
  *   - User <user@example.com>
  *   - User <user@example.com>, Another User <anotheruser@example.com>
  * @param $language
- *   Language object to use to compose the e-mail.
+ *   Language object to use to compose the email.
  * @param $params
- *   Optional parameters to build the e-mail.
+ *   Optional parameters to build the email.
  * @param string $reply
- *   Optional e-mail address to be used to answer.
+ *   Optional email address to be used to answer.
  * @param $send
  *   If TRUE, backdrop_mail() will call backdrop_mail_system()->mail() to deliver
  *   the message, and store the result in $message['result']. Modules
@@ -112,7 +112,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  * @return
  *   The $message array structure containing all details of the
  *   message. If already sent ($send = TRUE), then the 'result' element
- *   will contain the success indicator of the e-mail, failure being already
+ *   will contain the success indicator of the email, failure being already
  *   written to the watchdog. (Success means nothing more than the message being
  *   accepted at php-level, which still doesn't guarantee it to be delivered.)
  */
@@ -146,7 +146,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     'X-Mailer'                  => 'Backdrop CMS'
   );
   if ($from) {
-    // To prevent e-mail from looking like spam, the addresses in the Sender and
+    // To prevent email from looking like spam, the addresses in the Sender and
     // Return-Path headers should have a domain authorized to use the originating
     // SMTP server.
     $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $from;
@@ -156,14 +156,14 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
   }
   $message['headers'] = $headers;
 
-  // Build the e-mail (get subject and body, allow additional headers) by
+  // Build the email (get subject and body, allow additional headers) by
   // invoking hook_mail() on this module. We cannot use module_invoke() as
   // we need to have $message by reference in hook_mail().
   if (function_exists($function = $module . '_mail')) {
     $function($key, $message, $params);
   }
 
-  // Invoke hook_mail_alter() to allow all modules to alter the resulting e-mail.
+  // Invoke hook_mail_alter() to allow all modules to alter the resulting email.
   backdrop_alter('mail', $message);
 
   // Retrieve the responsible implementation for this message.
@@ -172,7 +172,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
   // Format the message body.
   $message = $system->format($message);
 
-  // Optionally send e-mail.
+  // Optionally send email.
   if ($send) {
     // The original caller requested sending. Sending was canceled by one or
     // more hook_mail_alter() implementations. We set 'result' to NULL, because
@@ -185,8 +185,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
       $message['result'] = $system->mail($message);
       // Log errors.
       if (!$message['result']) {
-        watchdog('mail', 'Error sending e-mail (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
-        backdrop_set_message(t('Unable to send e-mail.'), 'error');
+        watchdog('mail', 'Error sending email (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
+        backdrop_set_message(t('Unable to send email.'), 'error');
       }
     }
   }
@@ -206,7 +206,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  *   may contain HTML and are converted to plain-text by the DefaultMailSystem
  *   implementation. For example, an alternative implementation could override
  *   the default implementation and additionally sanitize the HTML for usage in
- *   a MIME-encoded e-mail, but still invoking the DefaultMailSystem
+ *   a MIME-encoded email, but still invoking the DefaultMailSystem
  *   implementation to generate an alternate plain-text version for sending.
  * - mail: Sends a message through a custom mail sending engine.
  *   By default, all messages are sent via PHP's mail() function by the
@@ -232,7 +232,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * );
  * @endcode
  *
- * Finally, a different system can be specified for a specific e-mail ID (see
+ * Finally, a different system can be specified for a specific email ID (see
  * the $key param), such as one of the keys used by the contact module:
  *
  * @code
@@ -252,7 +252,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * @param $module
  *   The module name which was used by backdrop_mail() to invoke hook_mail().
  * @param $key
- *   A key to identify the e-mail sent. The final e-mail ID for the e-mail
+ *   A key to identify the email sent. The final email ID for the email
  *   alter hook in backdrop_mail() would have been {$module}_{$key}.
  *
  * @return MailSystemInterface
@@ -313,7 +313,7 @@ interface MailSystemInterface {
    *
    * @param $message
    *   Message array with at least the following elements:
-   *   - id: A unique identifier of the e-mail type. Examples: 'contact_user_copy',
+   *   - id: A unique identifier of the email type. Examples: 'contact_user_copy',
    *     'user_password_reset'.
    *   - to: The mail address or addresses where the message will be sent to.
    *     The formatting of this string must comply with RFC 2822. Some examples:
@@ -321,10 +321,10 @@ interface MailSystemInterface {
    *     - user@example.com, anotheruser@example.com
    *     - User <user@example.com>
    *     - User <user@example.com>, Another User <anotheruser@example.com>
-   *    - subject: Subject of the e-mail to be sent. This must not contain any
+   *    - subject: Subject of the email to be sent. This must not contain any
    *      newline characters, or the mail may not be sent properly.
    *    - body: Message to be sent. Accepts both CRLF and LF line-endings.
-   *      E-mail bodies must be wrapped. You can use backdrop_wrap_mail() for
+   *      Email bodies must be wrapped. You can use backdrop_wrap_mail() for
    *      smart plain text wrapping.
    *    - headers: Associative array containing all additional mail headers not
    *      defined by one of the other parameters.  PHP's mail() looks for Cc

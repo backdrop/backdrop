@@ -34,7 +34,7 @@ function user_pass() {
 
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => t('Username or e-mail address'),
+    '#title' => t('Username or email address'),
     '#size' => 60,
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
@@ -49,7 +49,7 @@ function user_pass() {
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
-      '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the e-mail.', array('%email' => $user->mail)),
+      '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
   }
@@ -78,7 +78,7 @@ function user_pass_validate($form, &$form_state) {
     form_set_value(array('#parents' => array('account')), $account, $form_state);
   }
   else {
-    form_set_error('name', t('Sorry, %name is not recognized as a user name or an e-mail address.', array('%name' => $name)));
+    form_set_error('name', t('Sorry, %name is not recognized as a user name or an email address.', array('%name' => $name)));
   }
 }
 
@@ -95,7 +95,7 @@ function user_pass_submit($form, &$form_state) {
   $mail = _user_mail_notify('password_reset', $account, $language);
   if (!empty($mail)) {
     watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
-    backdrop_set_message(t('Further instructions have been sent to your e-mail address.'));
+    backdrop_set_message(t('Further instructions have been sent to your email address.'));
   }
 
   $form_state['redirect'] = 'user';
@@ -398,10 +398,10 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   $override_access = $admin_access && ($account->uid != $user->uid);
   $form['user_cancel_confirm'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Require e-mail confirmation to cancel account.'),
+    '#title' => t('Require email confirmation to cancel account.'),
     '#default_value' => ($override_access ? FALSE : TRUE),
     '#access' => $override_access,
-    '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
+    '#description' => t('When enabled, the user must confirm the account cancellation via email.'),
   );
   // Also allow to send account canceled notification mail, if enabled.
   $default_notify = config_get('system.core', 'user_mail_status_canceled_notify');
@@ -410,7 +410,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
     '#title' => t('Notify user when account is canceled.'),
     '#default_value' => ($override_access ? FALSE : $default_notify),
     '#access' => $override_access && $default_notify,
-    '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
+    '#description' => t('When enabled, the user will receive an email notification after the account has been cancelled.'),
   );
 
   // Prepare confirmation form page title and description.
@@ -471,7 +471,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
     $account->user_cancel_notify = $form_state['values']['user_cancel_notify'];
     $account->save();
     _user_mail_notify('cancel_confirm', $account);
-    backdrop_set_message(t('A confirmation request to cancel your account has been sent to your e-mail address.'));
+    backdrop_set_message(t('A confirmation request to cancel your account has been sent to your email address.'));
     watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
 
     $form_state['redirect'] = "user/$account->uid";
@@ -530,7 +530,7 @@ function user_cancel_methods() {
 }
 
 /**
- * Menu callback; cancel a user account via e-mail confirmation link.
+ * Menu callback; cancel a user account via email confirmation link.
  *
  * @see user_cancel_confirm_form()
  * @see user_cancel_url()
