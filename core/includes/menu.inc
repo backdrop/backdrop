@@ -512,7 +512,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   $site_config = config('system.core');
-  
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -4069,7 +4069,9 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
+          $message = t('The site is currently in <a href="@maintenance-url">maintenance mode</a>.', array(
+            '@maintenance-url' => url('admin/config/development/maintenance'),
+          ));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }
