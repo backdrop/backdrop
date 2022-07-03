@@ -2822,7 +2822,7 @@ function form_process_select($element) {
 function theme_select($variables) {
   $element = $variables['element'];
   element_set_attributes($element, array('id', 'name', 'size'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-select'));
@@ -3007,7 +3007,7 @@ function theme_radio($variables) {
   if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
     $element['#attributes']['checked'] = 'checked';
   }
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-radio'));
@@ -3204,6 +3204,9 @@ function theme_html_date($variables) {
   $attributes['type'] = 'date';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
+  if (!empty($element['#required'])) {
+    $attributes['required'] = 'required';
+  }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
@@ -3231,6 +3234,9 @@ function theme_html_time($variables) {
     if ($element['#attributes']['step'] == 60) {
       $attributes['step'] = 60;
     }
+  }
+  if (!empty($element['#required'])) {
+    $attributes['required'] = 'required';
   }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
@@ -3424,7 +3430,7 @@ function theme_checkbox($variables) {
   if (!empty($element['#checked'])) {
     $element['#attributes']['checked'] = 'checked';
   }
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-checkbox'));
@@ -4330,7 +4336,7 @@ function theme_textfield($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'text';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-text'));
@@ -4369,7 +4375,7 @@ function theme_email($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'email';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-email'));
@@ -4422,7 +4428,7 @@ function theme_search($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'search';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-search'));
@@ -4461,7 +4467,7 @@ function theme_tel($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'tel';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-tel'));
@@ -4500,7 +4506,7 @@ function theme_url($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'url';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-url'));
@@ -4594,7 +4600,7 @@ function theme_number($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'number';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-number'));
@@ -4710,7 +4716,7 @@ function theme_form($variables) {
 function theme_textarea($variables) {
   $element = $variables['element'];
   element_set_attributes($element, array('id', 'name', 'rows', 'cols', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-textarea'));
@@ -4746,7 +4752,7 @@ function theme_password($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'password';
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-text'));
@@ -4798,7 +4804,7 @@ function theme_file($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'file';
   element_set_attributes($element, array('id', 'name', 'size'));
-  if ($element['#required']) {
+  if (!empty($element['#required'])) {
     $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-file'));
