@@ -43,10 +43,6 @@ function admin_bar_permission() {
       'title' => t('Access administration bar'),
       'description' => t('Display the administration bar at the top of each page.'),
     ),
-    'flush caches' => array(
-      'title' => t('Flush caches'),
-      'description' => t('Access links to flush caches in the administration bar.'),
-    ),
   );
 }
 
@@ -63,6 +59,9 @@ function admin_bar_theme() {
       'render element' => 'elements',
     ) + $base,
     'admin_bar_icon' => array(
+      'variables' => array('src' => NULL, 'alt' => NULL),
+    ) + $base,
+    'admin_bar_icon_page' => array(
       'variables' => array('src' => NULL, 'alt' => NULL),
     ) + $base,
   );
@@ -191,8 +190,10 @@ function admin_bar_preprocess_page(&$variables) {
 
   $options = array('every_page' => TRUE);
 
-  backdrop_add_css($path . '/css/admin_bar.css', $options);
   backdrop_add_js($path . '/js/admin_bar.js', $options);
+  backdrop_add_css($path . '/css/admin_bar.css', $options);
+  $options['media'] = 'print';
+  backdrop_add_css($path . '/css/admin_bar-print.css', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
@@ -379,9 +380,12 @@ function admin_bar_deliver($page_callback_result) {
 
 /**
  * Implements hook_admin_bar_replacements().
+ *
+ * @see admin_bar_links_page()
  */
 function admin_bar_admin_bar_replacements($complete) {
   $items = array();
+
   // If the complete menu is output, then it is uncached and will contain the
   // current counts already.
   if (!$complete) {
@@ -391,7 +395,33 @@ function admin_bar_admin_bar_replacements($complete) {
       // Replace the counters in the cached menu output with current counts.
       $items['.admin-bar-users a'] = $user_count;
     }
+
+    // Check whether the page links component is enabled.
+    if (in_array('admin_bar.page', $components)) {
+      $query = array('query' => array(
+        'destination' => current_path(),
+      ));
+
+      if (user_access('administer layouts')) {
+        $layout = layout_get_layout_by_path();
+        $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name, $query);
+        $items['#admin-bar-page-layout'] .= theme('admin_bar_links', array('elements' => array(
+          array(
+            '#title' => t('Configure'),
+            '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+            '#options' => $query,
+          ),
+        )));
+      }
+      if (user_access('administer themes')) {
+        global $theme;
+        $theme_data = list_themes();
+        $theme_object = $theme_data[$theme];
+        $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name, $query);
+      }
+    }
   }
+
   return $items;
 }
 
@@ -484,6 +514,11 @@ function admin_bar_admin_bar_output_build(&$content) {
         $content['menu']['menu'] += $links;
       }
     }
+  }
+  // Move file/add under the "Content" item.
+  if (isset($content['menu']['menu']['file/add']) && isset($content['menu']['menu']['admin/content'])) {
+    $content['menu']['menu']['admin/content']['file/add'] = $content['menu']['menu']['file/add'];
+    unset($content['menu']['menu']['file/add']);
   }
 }
 

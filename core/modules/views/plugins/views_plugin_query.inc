@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the base query class, which is the underlying layer in a View.

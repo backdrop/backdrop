@@ -13,10 +13,8 @@ class TestFieldEntity extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType() {
+  public function entityType() {
     return 'entity_test';
   }
 
@@ -50,4 +48,29 @@ class TestFieldEntity extends Entity {
     return TRUE;
   }
 
+}
+
+/**
+ * Test class for the test_entity entity type.
+ */
+class TestEntity extends Entity {
+  public $id;
+
+  function id() {
+    return $this->id;
+  }
+
+  public function entityType() {
+    return 'test_entity';
+  }
+
+  function label() {
+    return 'label';
+  }
+
+  function uri() {
+    return array(
+      'path' => 'test/' . $this->id,
+    );
+  }
 }

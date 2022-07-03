@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Load Views' data so that it knows what is available to build queries from.
@@ -127,8 +126,27 @@ function _views_data_process_entity_types(&$data) {
 function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
   static $cache = NULL;
   if (!isset($cache) || $reset) {
+    // Load necessary code once.
     views_include_handlers();
-    $cache = views_discover_plugins();
+
+    // Because plugin data contains translated strings, and as such can be
+    // expensive to build, the results are cached per language.
+    global $language;
+    $cache_key = 'views_plugin_data:' . $language->langcode;
+    if ($reset) {
+      $cache = NULL;
+    }
+    else {
+      if ($cache_object = cache_get($cache_key, 'views')) {
+        $cache = $cache_object->data;
+      }
+    }
+
+    // If not available in the cache, build it and cache it.
+    if (!$cache) {
+      $cache = views_discover_plugins();
+      cache_set($cache_key, $cache, 'views');
+    }
   }
 
   if (!$type && !$plugin) {

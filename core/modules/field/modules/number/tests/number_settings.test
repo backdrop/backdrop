@@ -1,0 +1,197 @@
+<?php
+/**
+ * @file
+ * Tests for number.module settings.
+ */
+
+/**
+ * Tests for number field type settings.
+ */
+class NumberFieldSettingsTestCase extends BackdropWebTestCase {
+  /**
+   * Array of field definitions.
+   *
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * Array of field instance definitions.
+   *
+   * @var array
+   */
+  protected $instance;
+
+  /**
+   * User object.
+   *
+   * @var object
+   */
+  protected $adminUser;
+
+  /**
+   * @inheritdoc
+   */
+  public function setUp() {
+    parent::setUp();
+    $this->adminUser = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer fields',
+    ));
+    $this->backdropLogin($this->adminUser);
+  }
+
+  /**
+   * Test number_decimal field settings.
+   */
+  public function testNumberDecimalFieldSettings() {
+    // Create a field with settings to validate.
+    $field_name = 'field_' . backdrop_strtolower($this->randomName());
+    $precision = 7;
+    $scale = 3;
+
+    $this->field = array(
+      'field_name' => $field_name,
+      'type' => 'number_decimal',
+      'settings' => array(
+        'precision' => $precision,
+        'scale' => $scale,
+        'decimal_separator' => '.',
+      ),
+    );
+    field_create_field($this->field);
+
+    $this->instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_decimal',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    // Admin user sets various min/max values to a decimal field.
+    // Maximum value is smaller than Minimum.
+    $edit = array(
+      'instance[settings][min]' => 30.4,
+      'instance[settings][max]' => -2.222,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('%max must be greater than, or equal to, %min.', array(
+      '%max' => 'Maximum',
+      '%min' => 'Minimum',
+    )), 'Decimal field min setting greater than max setting rejected');
+
+    // Maximum and Minimum exceed the field settings for precision and scale.
+    $edit = array(
+      'instance[settings][min]' => 678.3456,
+      'instance[settings][max]' => 56789.234,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('%min exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+      '%min' => $edit['instance[settings][min]'],
+      '%prec' => $precision,
+      '%scale' => $scale,
+    )), 'Decimal field min setting outside db range rejected');
+    $this->assertRaw(format_string('%max exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+      '%max' => $edit['instance[settings][max]'],
+      '%prec' => $precision,
+      '%scale' => $scale,
+    )), 'Decimal field max setting outside db range rejected');
+
+    // Proper values should pass.
+    $edit = array(
+      'instance[settings][min]' => 5678.901,
+      'instance[settings][max]' => 9999,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('Saved %field_name configuration.', array(
+      '%field_name' => $field_name,
+    )), 'Proper decimal field min/max settings saved');
+  }
+
+  /**
+   * Test number_integer field settings.
+   */
+  public function testNumberIntegerFieldSettings() {
+    // Create a field with settings to validate.
+    $field_name = 'field_' . backdrop_strtolower($this->randomName());
+
+    $this->field = array(
+      'field_name' => $field_name,
+      'type' => 'number_integer',
+    );
+    field_create_field($this->field);
+
+    $this->instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_integer',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    // Admin user sets various min/max values to an integer field.
+    // Maximum value is smaller than Minimum.
+    $edit = array(
+      'instance[settings][min]' => 300,
+      'instance[settings][max]' => 10,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('%max must be greater than, or equal to, %min.', array(
+      '%max' => 'Maximum',
+      '%min' => 'Minimum',
+    )), 'Integer field min setting greater max setting rejected');
+
+    // Maximum and Minimum exceed the values a signed int(11) database field can
+    // store.
+    $min_db_integer = -2147483647;
+    $max_db_integer = 2147483647;
+    $min = -3000000000;
+    $max = 4000000000;
+
+    $edit = array(
+      'instance[settings][min]' => -3000000000,
+      'instance[settings][max]' => 4000000000,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('%min is smaller than the smallest value the database can save. Choose a value equal to or higher than %db_min.', array(
+      '%min' => $min,
+      '%db_min' => $min_db_integer,
+    )), 'Integer field min setting outside db range rejected');
+    $this->assertRaw(format_string('%max is greater than the largest value the database can save. Choose a value equal to or lower than %db_max.', array(
+      '%max' => $max,
+      '%db_max' => $max_db_integer,
+    )), 'Integer field max setting outside db range rejected');
+
+    // Proper values should pass.
+    $edit = array(
+      'instance[settings][min]' => -2000000000,
+      'instance[settings][max]' => 2000000000,
+    );
+    $this->backdropGet("admin/structure/types/manage/post/fields/$field_name");
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    $this->assertRaw(format_string('Saved %field_name configuration.', array(
+      '%field_name' => $field_name,
+    )), 'Proper integer field min/max settings saved');
+  }
+
+}

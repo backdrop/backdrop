@@ -32,7 +32,13 @@
     },
 
     detach: function (element, format, trigger) {
-      var editor = CKEDITOR.dom.element.get(element).getEditor();
+      // CKEditor's getEditor() method takes a single parameter for "optimized"
+      // that defaults to true. This makes it so that only unmodified DOM
+      // textarea elements will qualify for locating the CKEditor instance.
+      // During detachment, other behaviors may also modify the source textarea,
+      // causing CKEditor to lose track of the editor. Therefore pass "false"
+      // to use the more aggressive attempt to find the editor instance.
+      var editor = CKEDITOR.dom.element.get(element).getEditor(false);
       if (!editor) {
         return false;
       }

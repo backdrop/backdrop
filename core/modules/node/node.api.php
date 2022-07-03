@@ -613,7 +613,7 @@ function hook_node_prepare(Node $node) {
  *   Extra information to be displayed with search result. This information
  *   should be presented as an associative array. It will be concatenated with
  *   the post information (last updated, author) in the default search result
- *   theming.
+ *   markup.
  *
  * @ingroup node_api_hooks
  */
@@ -859,7 +859,7 @@ function hook_node_view_alter(&$build) {
  */
 function hook_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
-  $config = config_get('my_module.settings');
+  $config = config('my_module.settings');
   if ($config->get('vote_node_enabled')) {
     return array(
       'vote_average' => array(

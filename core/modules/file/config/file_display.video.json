@@ -1,0 +1,35 @@
+{
+    "_config_name": "file_display.video",
+    "_module": "file",
+    "type": "video",
+    "default": {
+        "formatter": "file_field_file_video",
+        "settings": {
+            "file_field_file_video": {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "muted": 0,
+                "width": "",
+                "height": "",
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    },
+    "preview": {
+        "formatter": "file_field_file_video",
+        "settings": {
+            "file_field_file_video" : {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "muted": 0,
+                "width": "",
+                "height": "",
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    }
+}

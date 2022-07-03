@@ -422,7 +422,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     }
   }
   // Require a link if we have a title.
-  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : NULL) > 0 && strlen(trim($item['url'])) == 0) {
+  if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : '') > 0 && strlen(trim($item['url'])) == 0) {
     $errors[$field['field_name']][$langcode][$delta][] = array(
       'error' => 'link_required',
       'message' => t('You cannot enter a title without a link url.'),
@@ -721,7 +721,7 @@ function _link_escape_domain($url) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']) . $matches['4'];
       }
     }
-    // E-mail links.
+    // Email links.
     elseif (strpos($url, 'mailto:') === 0 && preg_match('/^(mailto:)([^@]+@)(.*)$/', $url, $matches)) {
       if (defined('INTL_IDNA_VARIANT_UTS46')) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
@@ -833,6 +833,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
+    '#autocomplete_path' => 'path-autocomplete',
   );
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.
@@ -999,7 +1000,9 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
       '#theme' => 'link_formatter_' . $display['type'],
       '#element' => $item,
       '#field' => $instance,
-      '#display' => $display,
+      '#display' => array(
+        'settings' => $display['settings']
+      ),
     );
   }
   return $elements;
@@ -1041,7 +1044,7 @@ function link_cleanup_url($url, $protocol = 'http') {
 /**
  * Validates a URL.
  *
- * Accepts all URLs following RFC 1738 standard for URL formation and all e-mail
+ * Accepts all URLs following RFC 1738 standard for URL formation and all email
  * addresses following the RFC 2368 standard for mailto address formation.
  *
  * @param string $text
@@ -1091,7 +1094,7 @@ function link_validate_url($text) {
   $news_pattern = '/^news:(' . $newsgroup_name . '|' . $message_id . ')$/i';
 
   $email_user = '([^ @\-][^ @]*)';
-  $email_pattern = '/^mailto:' . $email_user . '@' . '(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
+  $email_pattern = '/^mailto:' . $email_user . '@(' . $domain . '|' . $ipv4 . '|' . $ipv6 . '|localhost)' . $query . '?$/';
 
   if (strcmp($text, '<front>') === 0) {
     return LINK_FRONT;
