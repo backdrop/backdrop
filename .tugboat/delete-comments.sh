@@ -4,6 +4,12 @@
  * Delete any previous comments in the PR about this preview.
  */
 
+// Don't run this if comment updating is disabled.
+// @see https://dashboard.tugboatqa.com/5f9cffcf6c879bf4534e573e/settings/
+if (!getenv('UPDATE_COMMENTS')) {
+  return;
+}
+
 $curl_header = array(
   'Authorization: token ' . getenv('BACKDROP_GITHUB_TOKEN'),
   'Content-Type: application/json',
