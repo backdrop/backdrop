@@ -2640,7 +2640,7 @@ function hook_schema() {
  *
  * Note that when a module is installed, schema alterations are not applied (see
  * backdrop_install_schema()), so it should also implement hook_install() (and
- * possibly hook_uninstall()) to perform the alterations manually. See
+ * possibly hook_uninstall()) to perform the alterations there. See
  * comment.install for an example.
  *
  * See hook_schema() for details on the schema definition structure.
