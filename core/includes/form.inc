@@ -3007,9 +3007,6 @@ function theme_radio($variables) {
   if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
     $element['#attributes']['checked'] = 'checked';
   }
-  if (!empty($element['#required'])) {
-    $element['#attributes']['required'] = 'required';
-  }
   _form_set_class($element, array('form-radio'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
@@ -4879,6 +4876,14 @@ function theme_form_element($variables) {
     $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
     if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
       $attributes['class'][] = 'form-error';
+    }
+
+    // Make sure that groups of radios are announced as "radiogroup".
+    if ($element['#type'] == 'radios') {
+      $attributes['role'] = 'radiogroup';
+      if (!empty($element['#required'])) {
+        $attributes['aria-required'] = 'true';
+      }
     }
   }
   if (!empty($element['#name'])) {
