@@ -3435,18 +3435,20 @@ class LayoutPathTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test that null paths (in default layouts) don't cause problems.
+   * Tests that null paths (in default layouts) don't cause problems.
    */
   public function testLayoutPath() {
     $layouts = layout_load_multiple_by_path('');
     $default_layout = $layouts['default'];
-    $path = $default_layout->getPath(); // this will be NULL
+    $path = $default_layout->getPath(); // This will be NULL.
     $this->assertNull($path, 'Default layout path is NULL.');
 
+    // Make sure path_is_admin can handle a NULL path.
     backdrop_static_reset('path_is_admin');
     $result = path_is_admin($path);
     $this->assertFalse($result, 'Default layout is not an admin path.');
 
+    // Make sure backdrop_match_path can handle a NULL path.
     backdrop_match_path($path, "foo\nbar");
   }
 }
