@@ -60,6 +60,6 @@ file = layout.test
 
 [LayoutPathTest]
 name = Layout Paths Test
-description = Tests involving layout paths, like the Default Layout.
+description = Tests layout paths, like the Default Layout.
 group = Layout
 file = layout.test
