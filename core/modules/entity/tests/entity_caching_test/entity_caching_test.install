@@ -1,0 +1,129 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the entity_caching_test module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function entity_caching_test_schema() {
+  // Entity type used to check whether entities are properly cached.
+  $schema['test_cacheable'] = array(
+    'description' => 'Stores test_cacheable items.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique test_cacheable item ID.',
+      ),
+      'name' => array(
+        'description' => 'The name of the test entity.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => "The {users}.uid of the associated user.",
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  // Entity type used to check whether caching can be disabled via the
+  // 'entity cache' flag.
+  $schema['test_disable_cache'] = array(
+    'description' => 'Stores test_disable_cache items.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique test_disable_cache item ID.',
+      ),
+      'name' => array(
+        'description' => 'The name of the test entity.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => "The {users}.uid of the associated user.",
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  // Entity type used to check whether entity caching can be disabled at the
+  // bundle level via the 'bundle cache' flag.
+  $schema['test_multibundle'] = array(
+    'description' => 'Stores test_multibundle items.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique test_multibundle item ID.',
+      ),
+      'name' => array(
+        'description' => 'The name of the test entity.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => 'The bundle type of the test entity.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => "The {users}.uid of the associated user.",
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  // Add cache tables for entities that may or may not actually be cached.
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_test_cacheable'] = $cache_schema;
+  $schema['cache_entity_test_cacheable']['description'] = "Cache table used to store test_cacheable entity records.";
+  $schema['cache_entity_test_disable_cache'] = $cache_schema;
+  $schema['cache_entity_test_disable_cache']['description'] = "Cache table used to store test_disable_cache entity records.";
+  $schema['cache_entity_test_multibundle'] = $cache_schema;
+  $schema['cache_entity_test_multibundle']['description'] = "Cache table used to store test_multibundle entity records.";
+
+  return $schema;
+}
