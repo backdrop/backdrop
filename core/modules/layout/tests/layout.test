@@ -3422,8 +3422,8 @@ class LayoutPathTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
-    parent::setUp(array('layout', 'layout_test'));
+  public function setUp() {
+    parent::setUp(array('layout_test'));
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -3443,12 +3443,12 @@ class LayoutPathTest extends BackdropWebTestCase {
     $path = $default_layout->getPath(); // This will be NULL.
     $this->assertNull($path, 'Default layout path is NULL.');
 
-    // Make sure path_is_admin can handle a NULL path.
+    // Make sure path_is_admin() can handle a NULL path.
     backdrop_static_reset('path_is_admin');
     $result = path_is_admin($path);
     $this->assertFalse($result, 'Default layout is not an admin path.');
 
-    // Make sure backdrop_match_path can handle a NULL path.
+    // Make sure backdrop_match_path() can handle a NULL path.
     backdrop_match_path($path, "foo\nbar");
   }
 }
