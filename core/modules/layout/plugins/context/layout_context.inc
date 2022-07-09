@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class that holds information relating to a layouts context.

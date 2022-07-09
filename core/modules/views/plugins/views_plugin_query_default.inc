@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.

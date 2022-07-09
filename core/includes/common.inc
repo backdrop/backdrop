@@ -5335,6 +5335,16 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *   ),
  * @endcode
  *
+ * To specify what a value should NOT be, use '!value':
+ * @code
+ *   '#states' => array(
+ *     // Show the settings if 'bar' has NOT been selected for 'foo'.
+ *     'visible' => array(
+ *       ':input[name="foo"]' => array('!value' => 'bar'),
+ *     ),
+ *   ),
+ * @endcode
+ *
  * @param $elements
  *   A renderable array element having a #states property as described above.
  *

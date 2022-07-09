@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Base FileTransfer class.

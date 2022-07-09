@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_test_plugin_access_test_dynamic.

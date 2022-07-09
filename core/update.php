@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
