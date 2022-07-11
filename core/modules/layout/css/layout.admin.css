@@ -60,6 +60,25 @@
    }
 }
 
+.layout-list .layout-preview,
+.layout-list .layout-detail {
+  display: inline-block;
+  vertical-align: top;
+}
+
+/* touch-up on layout listing form */
+.layout-list .url-paths-info {
+  font-size: smaller;
+  line-height: 1.2;
+  margin-top: 0.25em;
+}
+.layout-list .url-paths-info ul {
+  margin-left: 0;
+}
+.layout-list .url-paths-info ul li {
+  margin-bottom: 0;
+}
+
 /* Individual layout settings form. */
 .layout-settings-page .form-type-checkboxes,
 .layout-settings-form .form-type-radios {
@@ -106,11 +125,13 @@
   margin-top: 0.5em;
 }
 
-/* Toggle for the placeholder examples */
-.layout-placeholder-examples-toggle {
+/* Toggle for the placeholder examples and url paths info. */
+.layout-placeholder-examples-toggle,
+.layout-url-paths-info-toggle {
   white-space: nowrap;
 }
-.layout-placeholder-examples-toggle .arrow {
+.layout-placeholder-examples-toggle .arrow,
+.layout-url-paths-info-toggle .arrow {
   border-bottom-color: transparent;
   border-left-color: transparent;
   border-right-color: transparent;
@@ -123,7 +144,8 @@
   overflow: hidden;
   margin: 0.15em 0.3333em;
 }
-.layout-placeholder-examples-toggle .arrow.close {
+.layout-placeholder-examples-toggle .arrow.close,
+.layout-url-paths-info-toggle .arrow.close {
   border-top-color: transparent;
   border-bottom-color: #0074bd;
   border-width: 0 0.3333em 0.3333em;

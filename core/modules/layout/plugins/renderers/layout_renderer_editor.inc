@@ -133,7 +133,6 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     return $output;
   }
 
-
   /**
    * {@inheritdoc}
    */
