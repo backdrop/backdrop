@@ -422,30 +422,17 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertEqual($comment->id, $reply_loaded->pid, 'Pid of a reply to a comment is set correctly.');
     $this->assertEqual(rtrim($comment_loaded->thread, '/') . '.00/', $reply_loaded->thread, 'Thread of reply grows correctly.');
 
-    // Set comments to have hidden title.
-    $this->backdropLogout();
-    $this->backdropLogin($this->admin_user);
-    $this->setCommentSubject(COMMENT_TITLE_HIDDEN);
-    $this->backdropLogout();
-
-    // Second reply to comment #3 creating comment #4.
-    $this->backdropLogin($this->web_user);
+    // Second reply to comment #2 creating comment #4.
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
-    $this->assertNoText($title_text, 'Individual comment-reply title not found.');
+    $this->assertText($title_text, 'Individual comment-reply subject found.');
     $this->assertText($comment_text, 'Individual comment-reply body found.');
-    $reply = $this->postComment(NULL, $this->randomName(), NULL, TRUE);
+    $reply = $this->postComment(NULL, $this->randomName(), $this->randomName(), TRUE);
     $reply_loaded = comment_load($reply->id);
     $this->assertTrue($this->commentExists($reply, TRUE), 'Second reply found.');
     $this->assertEqual(rtrim($comment_loaded->thread, '/') . '.01/', $reply_loaded->thread, 'Thread of second reply grows correctly.');
-    // Test rendered comment for hidden title.
+    // Test rendered comment for title.
     $this->backdropGet('node/' . $this->node->nid);
-    $this->assertNoText($title_text, 'Individual comment title not found.');
-
-    // Set comments to have hidden title.
-    $this->backdropLogout();
-    $this->backdropLogin($this->admin_user);
-    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
-    $this->backdropLogout();
+    $this->assertText($title_text, 'Individual comment title not found.');
 
     // Edit reply.
     $this->backdropLogin($this->web_user);
@@ -457,11 +444,32 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('node');
     $this->assertRaw('4 comments', 'Link to the 4 comments exist.');
 
+    // Set comments to have hidden title.
+    $this->backdropLogout();
+    $this->backdropLogin($this->admin_user);
+    $this->setCommentSubject(COMMENT_TITLE_HIDDEN);
+    $this->backdropLogout();
+
+    // Third reply to comment #2 creating comment #5 to test hidden titles.
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
+    $this->assertNoText($title_text, 'Individual comment-reply title not found.');
+    $reply = $this->postComment(NULL, $this->randomName(), NULL, TRUE);
+    $reply_loaded = comment_load($reply->id);
+    // Test rendered comment for hidden title.
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertNoText($title_text, 'Individual comment title not found.');
+
+    // Restore comment title setting to custom titles.
+    $this->backdropLogout();
+    $this->backdropLogin($this->admin_user);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
+
     // Confirm a new comment is posted to the correct page.
     $this->setCommentsPerPage(2);
     $comment_new_page = $this->postComment($this->node, $this->randomName(), $this->randomName(), TRUE);
     $this->assertTrue($this->commentExists($comment_new_page), 'Page one exists. %s');
-    $this->backdropGet('node/' . $this->node->nid, array('query' => array('page' => 1)));
+    $this->backdropGet('node/' . $this->node->nid, array('query' => array('page' => 2)));
     $this->assertTrue($this->commentExists($reply, TRUE), 'Page two exists. %s');
     $this->setCommentsPerPage(50);
 
@@ -699,7 +707,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(FALSE);
+    $this->setCommentSubject(COMMENT_TITLE_AUTO);
     $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
@@ -1075,7 +1083,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
@@ -1123,7 +1131,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
 
     $edit = array();
@@ -1231,7 +1239,7 @@ class CommentAnonymous extends CommentHelperCase {
       'subject' => $this->randomName(),
       "comment_body[$langcode][0][value]" => $this->randomName(),
     );
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
     $this->backdropPost('comment/reply/' . $this->node->nid, $edit, t('Save'));
     $this->assertText(t('The name you used is a registered username. If it belongs to you, then login to post. If not, then use another name.'));
@@ -1339,7 +1347,7 @@ class CommentPagerTest extends CommentHelperCase {
 
     // Set comment config.
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentPreview(BACKDROP_DISABLED);
 
     // Create a node and three comments.
@@ -1412,7 +1420,7 @@ class CommentPagerTest extends CommentHelperCase {
 
     // Set comment config.
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentPreview(BACKDROP_DISABLED);
 
     // Display all the comments on the same page.
@@ -1512,7 +1520,7 @@ class CommentPagerTest extends CommentHelperCase {
 
     // Set comment config.
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentPreview(BACKDROP_DISABLED);
 
     // Set comments to one per page so that we are able to test paging without
@@ -1604,7 +1612,7 @@ class CommentNodeAccessTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
@@ -1659,7 +1667,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->assertText(t('No comments available.'));
 
     $this->backdropLogout();
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1725,7 +1733,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentAnonymous('0'); // Ensure that doesn't require contact info.
     $this->backdropLogout();
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
     // Post anonymous comment without contact info.
     $subject = $this->randomName();
@@ -1772,7 +1780,7 @@ class CommentBlockFunctionalTest extends CommentHelperCase {
    */
   function testRecentCommentBlock() {
     $this->backdropLogin($this->admin_user);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
     // Add the block to the sidebar region in the default layout.
     $layout_name = 'default';
@@ -1886,7 +1894,7 @@ class CommentContentRebuild extends CommentHelperCase {
   function testCommentRebuild() {
     // Update the comment settings so preview isn't required.
     $this->backdropLogin($this->admin_user);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentPreview(BACKDROP_OPTIONAL);
     $this->backdropLogout();
 
@@ -1924,7 +1932,7 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
 
     // Set comment config.
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
     // Create a node and a comment.
     $node = $this->backdropCreateNode(array('type' => 'post'));
@@ -2177,7 +2185,7 @@ class CommentThreadingTestCase extends CommentHelperCase {
     $this->backdropLogin($this->admin_user);
     $this->setCommentPreview(BACKDROP_DISABLED);
     $this->setCommentForm(TRUE);
-    $this->setCommentSubject(TRUE);
+    $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
     $this->setCommentSettings('comment_mode', COMMENT_MODE_THREADED, 'Comment paging changed.');
     $this->backdropLogout();
 
