@@ -913,6 +913,7 @@ function node_revision_overview($node) {
     else {
       $row[] = t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view"), '!username' => theme('username', array('account' => $revision))))
                . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $links = array();
       if ($revert_permission) {
         $links['revert'] = array(
           'title' => t('Revert'),

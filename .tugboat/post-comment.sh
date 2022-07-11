@@ -4,6 +4,12 @@
  * Post a comment in the PR with login details.
  */
 
+// Don't run this if comment updating is disabled.
+// @see https://dashboard.tugboatqa.com/5f9cffcf6c879bf4534e573e/settings/
+if (!getenv('UPDATE_COMMENTS')) {
+  return;
+}
+
 $password = file_get_contents(getenv('TUGBOAT_ROOT') . '/.tugboat/password');
 $expires_date = date_create('+2 months', timezone_open('UTC'));
 $comment = 'Tugboat has finished building a preview for this pull request!

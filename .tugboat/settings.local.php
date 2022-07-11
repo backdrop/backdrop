@@ -13,4 +13,7 @@ $settings['trusted_host_patterns'] = array('^.+\.tugboat\.qa$', '^.+\.tugboatqa\
 // Disable sending Telemetry data on cron runs.
 $settings['telemetry_enabled'] = FALSE;
 
+// Show all error/warning messages.
+$config['system.core']['error_level'] = 'all';
+
 // Miscellaneous.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class for loading, modifying, and executing a layout.
@@ -881,6 +880,7 @@ class Layout {
    */
   function clearContexts($key) {
     unset($this->contexts[$key]);
+    backdrop_static_reset('getContexts');
   }
 
   /**
