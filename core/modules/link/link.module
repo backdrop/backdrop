@@ -442,7 +442,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     // Validate the URL type.
     if ($instance['settings']['type'] != LINK_BOTH) {
       $url_type = link_validate_url(trim($item['url']));
-      if ($url_type !== $instance['settings']['type']) {
+      if (($instance['settings']['type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($instance['settings']['type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'link_required',
           'message' => t('Only %type URLs are allowed in %field.', array(
