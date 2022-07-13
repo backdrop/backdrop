@@ -158,8 +158,9 @@ abstract class EntityReferenceBehaviorHandler implements EntityReferenceBehavior
     $this->behavior = $behavior;
 
     $plugins = _entityreference_behavior_plugins();
-    $plugin = $plugins[$behavior];
-    $this->plugin = $plugin;
+    if (!empty($plugins[$behavior])) {
+      $this->plugin = $plugins[$behavior];
+    }
   }
 
   public function schema_alter(&$schema, $field) {}

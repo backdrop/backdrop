@@ -1446,7 +1446,7 @@ function entityreference_entityreference_selection_plugins() {
  */
 function entityreference_load_behavior_class($property) {
   $plugins = _entityreference_behavior_plugins();
-  return $plugins[$property]['class'];
+  return !empty($plugins[$property]['class']) ? $plugins[$property]['class'] : NULL;
 }
 
 /**
@@ -1454,7 +1454,7 @@ function entityreference_load_behavior_class($property) {
  */
 function entityreference_load_selection_class($property) {
   $plugins = _entityreference_selection_plugins();
-  return $plugins[$property]['class'];
+  return !empty($plugins[$property]['class']) ? $plugins[$property]['class'] : NULL;
 }
 
 /**
