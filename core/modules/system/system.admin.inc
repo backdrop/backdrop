@@ -397,7 +397,7 @@ function system_theme_default() {
 }
 
 /**
- * Form builder; display theme configuration for entire site and individual themes.
+ * Form builder; display configuration for individual themes.
  *
  * @param $key
  *   A theme name.
