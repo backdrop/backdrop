@@ -53,3 +53,43 @@ function entityreference_update_1000() {
   $config->delete();
 
 }
+
+/**
+ * Update each field base that references old plugin name "views-select-list" to
+ * "views".
+ */
+function entityreference_update_1001() {
+  foreach (field_info_fields() as $field_name => $field) {
+    // Update the field configuration.
+    if ($field['type'] == 'entityreference') {
+      $settings = &$field['settings'];
+      if (isset($settings['handler_settings']['behaviors']['views-select-list'])) {
+        $settings['handler_settings']['behaviors']['views'] = $settings['handler_settings']['behaviors']['views-select-list'];
+        unset($settings['handler_settings']['behaviors']['views-select-list']);
+        field_update_field($field);
+      }
+    }
+  }
+}
+
+/**
+ * Updates each field instance that references old plugin name "taxonomy-index"
+ * to "taxonomy".
+ */
+function entityreference_update_1002() {
+  foreach (field_info_fields() as $field_name => $field) {
+    // Update the field instance configuration.
+    if ($field['type'] == 'entityreference') {
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle) {
+          $instance = field_info_instance($entity_type, $field_name, $bundle);
+          if (isset($instance['settings']['behaviors']['taxonomy-index'])) {
+            $instance['settings']['behaviors']['taxonomy'] = $instance['settings']['behaviors']['taxonomy-index'];
+            unset($instance['settings']['behaviors']['taxonomy-index']);
+            field_update_instance($instance);
+          }
+        }
+      }
+    }
+  }
+}
