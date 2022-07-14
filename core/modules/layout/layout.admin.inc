@@ -2451,24 +2451,22 @@ function layout_delete_form($form, &$form_state, $layout) {
       $path = $layout->getPath();
       $site_config = config('system.core');
       if ($path == $site_config->get('site_frontpage')) {
-        $url = url('admin/config/system/site-information') . '#edit-front-page';
-        $text = t('This layout creates a page at path %path that is used as the home page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the home page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $text = t('This layout creates a page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-front-page', t('home page'));
       }
       elseif ($path == $site_config->get('site_403')) {
-        $url = url('admin/config/system/site-information') . '#edit-error-page';
-        $text = t('This layout creates a page at path %path that is used as the default 403 (access denied) page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the 403 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $text = t('This layout creates a page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page'));
       }
       elseif ($path == $site_config->get('site_404')) {
         $url = url('admin/config/system/site-information') . '#edit-error-page';
-        $text = t('This layout creates a page at path %path that is used as the default 404 (not found) page of the site. If you delete or disable this layout, which will entirely remove that page, you must change the 404 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url));
+        $text = t('This layout creates a page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . t(' If you delete or disable this layout, that page will be removed.') . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page'));
       }
       else {
-        $text = t('Are you sure you want to delete this layout? This will completely remove the page at %path. This action cannot be undone. If you are unsure, consider disabling the layout instead.', array('%path' => $path));
+        $text = t('Are you sure you want to delete this layout?') . ' ' . t('The page at %path will be completely removed.') . ' ' . t('This action cannot be undone. You may prefer to disable the layout instead.', array('%path' => $path));
       }
     }
     else {
       // We're deleting the layout, but there will still be a page at its path.
-      $text = t('Are you sure you want to delete this layout? This action cannot be undone. if you are unsure, consider disabling the layout instead.');
+      $text = t('Are you sure you want to delete this layout?') . ' ' . t('This action cannot be undone. You may prefer to disable the layout instead.');
     }
     $button_text = t('Delete layout');
   }
@@ -2530,10 +2528,13 @@ function layout_delete_form_submit(&$form, &$form_state) {
 }
 
 /**
- * Returns whether the deletion or disabling of this layout would remove the
- * page at its path, i.e., if the layout creates a page and is the last enabled
- * layout with its path.
- */
+* Determines whether the deletion or disabling of this layout would remove the
+* page at its path.
+*
+* @return Boolean.
+*   TRUE if the layout creates a page that is the last enabled layout with the
+*   same path. FALSE if not.
+*/
 function layout_removal_removes_page($layout) {
   $path = $layout->getPath();
   $form['layout_path'] = $path;
@@ -2565,34 +2566,45 @@ function layout_warn_if_site_info_path($path, $op) {
   switch ($op) {
     case 'delete':
       if ($path == $site_config->get('site_frontpage')) {
-        $url = url('admin/config/system/site-information') . '#edit-front-page';
-        backdrop_set_message(t('You have deleted the page at path %path that is used as the home page of the site. You must change the home page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+        backdrop_set_message(t('You have deleted the page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-front-page', t('home page')), 'warning');
       }
       if ($path == $site_config->get('site_403')) {
-        $url = url('admin/config/system/site-information') . '#edit-error-page';
-        backdrop_set_message(t('You have deleted the page at path %path that is used as the default 403 (access denied) page of the site. You must change the 403 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+        backdrop_set_message(t('You have deleted the page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page')), 'warning');
       }
       if ($path == $site_config->get('site_404')) {
-        $url = url('admin/config/system/site-information') . '#edit-error-page';
-        backdrop_set_message(t('You have deleted the page at path %path that is used as the default 404 (not found) page of the site. You must change the 404 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+        backdrop_set_message(t('You have deleted the page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page')), 'warning');
       }
       break;
 
     case 'disable':
         if ($path == $site_config->get('site_frontpage')) {
-          $url = url('admin/config/system/site-information') . '#edit-front-page';
-          backdrop_set_message(t('You have disabled the page at path %path that is used as the home page of the site. You must change the home page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+          backdrop_set_message(t('You have disabled the page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-front-page', t('home page')), 'warning');
         }
         if ($path == $site_config->get('site_403')) {
-          $url = url('admin/config/system/site-information') . '#edit-error-page';
-          backdrop_set_message(t('You have disabled the page at path %path that is used as the default 403 (access denied) page of the site. You must change the 403 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+          backdrop_set_message(t('You have disabled the page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page')), 'warning');
         }
         if ($path == $site_config->get('site_404')) {
-          $url = url('admin/config/system/site-information') . '#edit-error-page';
-          backdrop_set_message(t('You have disabled the the page at path %path that is used as the default 404 (not found) page of the site. You must change the 404 page on the <a href="!url">site information configuration page</a> to a different path.', array('%path' => $path, '!url' => $url)), 'warning');
+          backdrop_set_message(t('You have disabled the the page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page')), 'warning');
         }
       break;
   }
+}
+
+/**
+ * Returns a "you should also change" message and link to the appropriate part
+ * of the site information page.
+ *
+ * @param string $id
+ *   The CSS ID of the relevant section of the site information page.
+ * @param string $setting_type
+ *   The translated name of the relevant setting type on the site information
+ *   page.
+ *
+ * @return string
+ */
+function _layout_site_info_page_message($id, $setting_type) {
+  $url = url('admin/config/system/site-information') . '#' . $id;
+  return t('You should also change the @setting_type setting under <a href="!url">site information</a>.', array('@setting_type' => $setting_type, '!url' => $url));
 }
 
 /**
