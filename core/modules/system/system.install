@@ -3354,15 +3354,13 @@ function system_update_1083() {
       $num = (integer) ceil($threshold / 60);
       $units = 60;
   }
-  // Save the new values and remove the old config variable. Also remove some
-  // cron-related config variables that are never used for anything.
+  // Save the new values and remove the old config variable. Also remove a
+  // cron-related config variable that is never used for anything.
   $config->set('auto_cron_enabled', TRUE)
     ->set('cron_interval_num', $num)
     ->set('cron_interval_units', $units)
     ->clear('cron_safe_threshold')
-    ->clear('cron_threshold_warning')
     ->clear('cron_max_threshold')
-    ->clear('cron_threshold_error')
     ->save();
 }
 
