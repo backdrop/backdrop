@@ -683,10 +683,12 @@ class CronRunTestCase extends BackdropWebTestCase {
     // Ensure cron does not run when the cron threshold is enabled and was
     // not passed.
     $cron_last = time();
-    $cron_safe_threshold = 100;
+    $cron_interval_num = 100;
     state_set('cron_last', $cron_last);
     config('system.core')
-      ->set('cron_safe_threshold', $cron_safe_threshold)
+      ->set('auto_cron_enabled', 1)
+      ->set('cron_interval_num', $cron_interval_num)
+      ->set('cron_interval_units', 1)
       ->save();
     $this->backdropGet('');
     $this->assertTrue($cron_last == state_get('cron_last'), 'Cron does not run when the cron threshold is not passed.');
@@ -701,7 +703,7 @@ class CronRunTestCase extends BackdropWebTestCase {
     // Disable the cron threshold through the interface.
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
-    $this->backdropPost('admin/config/system/cron', array('cron_safe_threshold' => 0), t('Save configuration'));
+    $this->backdropPost('admin/config/system/cron', array('auto_cron_enabled' => 0), t('Save configuration'));
     $this->assertText(t('The configuration options have been saved.'));
     $this->backdropLogout();
 
@@ -1074,7 +1076,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    */
   function testCustomLogo() {
     $file_public_path = config_get('system.core', 'file_public_path');
-    
+
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
     $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));

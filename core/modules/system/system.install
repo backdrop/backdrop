@@ -3222,6 +3222,80 @@ function system_update_1077() {
 }
 
 /**
+ * Initialize the number and units of cron setting from the existing possible
+ * values.
+ */
+function system_update_1083() {
+  $config = config('system.core');
+  $threshold = $config->get('cron_safe_threshold');
+  // These are the former values of the cron_safe_threshold select options.
+  $enabled = !!$threshold;
+  switch($threshold) {
+    case 0:
+      $num = 0;
+      $units = 60;
+      break;
+
+    case 600:
+      $num = 10;
+      $units = 60;
+      break;
+
+    case 1800:
+      $num = 30;
+      $units = 60;
+      break;
+
+    case 3600:
+      $num = 1;
+      $units = 3600;
+      break;
+
+    case 10800:
+      $num = 3;
+      $units = 3600;
+      break;
+
+    case 21600:
+      $num = 6;
+      $units = 3600;
+      break;
+
+    case 43200:
+      $num = 12;
+      $units = 3600;
+      break;
+
+    case 86400:
+      $num = 1;
+      $units = 86400;
+      break;
+
+    case 604800:
+      $num = 1;
+      $units = 604800;
+      break;
+
+    default:
+      // This could be encountered if cron_safe_threshold has been set to some
+      // other value by altering config directly rather than using the select
+      // options.
+      $num = (integer) ceil($threshold / 60);
+      $units = 60;
+  }
+  // Save the new values and remove the old config variable. Also remove some
+  // cron-related config variables that are never used for anything.
+  $config->set('auto_cron_enabled', TRUE)
+    ->set('cron_interval_num', $num)
+    ->set('cron_interval_units', $units)
+    ->clear('cron_safe_threshold')
+    ->clear('cron_threshold_warning')
+    ->clear('cron_max_threshold')
+    ->clear('cron_threshold_error')
+    ->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

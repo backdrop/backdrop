@@ -449,3 +449,12 @@ table.screenshot {
   margin-left: 1em;
   margin-right: 0;
 }
+
+/**
+ * Cron settings.
+ */
+#automatic-cron-interval .form-item-cron-interval-num,
+#automatic-cron-interval .form-item-cron-interval-units {
+  display: inline-block;
+  margin: 0 0.25em;
+}
