@@ -3910,7 +3910,9 @@ function system_run_automated_cron() {
   // If the site is not fully installed, suppress the automated cron run.
   // Otherwise it could be triggered prematurely by Ajax requests during
   // installation.
-  if (($threshold = config('system.core')->get('cron_safe_threshold')) > 0 && state_get('install_task') == 'done') {
+  $config = config('system.core');
+  $threshold = $config->get('auto_cron_enabled') ? $config->get('cron_interval_num') * $config->get('cron_interval_units') : 0;
+  if ($threshold && state_get('install_task') == 'done') {
     $cron_last = state_get('cron_last', NULL);
     if (!isset($cron_last) || (REQUEST_TIME - $cron_last > $threshold)) {
       backdrop_cron_run();
