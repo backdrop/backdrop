@@ -61,7 +61,7 @@ function theme_layout_info($variables) {
   ));
 
   // Get the URL paths, if any.
-  $url_paths = $layout->getUrlPaths();
+  $url_paths = trim($layout->getUrlPaths());
   if (!empty($url_paths)) {
     $url_paths = explode("\n", $url_paths);
     $url_paths_info = '<div class="url-paths-info">URL paths: ' . theme('item_list', array('items' => $url_paths)) . '</div>';

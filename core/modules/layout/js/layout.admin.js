@@ -55,7 +55,7 @@ Backdrop.behaviors.layoutConfigure = {
     function url_paths_toggle_handler(e) {
       var $examples = $(this).next().toggle();
       if ($examples.is(':visible')) {
-        $(this).text(Backdrop.t('Hide more')).append('<span class="arrow close"></span>');
+        $(this).text(Backdrop.t('Show less')).append('<span class="arrow close"></span>');
       }
       else {
         $(this).text(Backdrop.t('Show more')).append('<span class="arrow"></span>');

@@ -707,6 +707,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       if (!empty(layout_load_functions($layout_path))) {
         $description_list[] = t('The menu router item for %path loads objects for its placeholders, so this layout will only be used if (a) one of these URL paths matches the request path and (b) the menu router path of the request path loads the same objects for its placeholders.', array('%path' => $layout_path));
       }
+      $description_list[] = t('Note that wildcards can contain "/", so that, for example, "node/*" matches both "node/1" and "node/1/edit". Use visibility conditions to narrow the applicability of layouts with URL paths containing wildcards.');
       $description_extra = '<div class="layout-url-paths-info">' . theme('item_list', array('items' => $description_list)) . '</div>';
       $description = $description_intro . $toggle . $description_extra;
       $rows = max(3, 1 + count(explode("\n", $url_paths)));
@@ -900,7 +901,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   }
 
   $url_paths = isset($form_state['values']['url_paths_wrapper']['url_paths']) ? $form_state['values']['url_paths_wrapper']['url_paths'] : '';
-  $form_state['layout']->setUrlPaths($url_paths);
+  $form_state['layout']->setUrlPaths(trim($url_paths));
 }
 
 /**
