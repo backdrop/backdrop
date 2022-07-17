@@ -68,7 +68,7 @@ class Comment extends Entity {
   public $name = '';
 
   /**
-   * The comment author's e-mail address.
+   * The comment author's email address.
    *
    * For anonymous authors, this is the value as typed in the comment form.
    *

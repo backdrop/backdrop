@@ -48,7 +48,7 @@ function _user_password_policy_help() {
   }
 
   $criteria = array();
-  $criteria[] = t('The password cannot be the same as the username or e-mail address.');
+  $criteria[] = t('The password cannot be the same as the username or email address.');
   $criteria[] = t('The password must be sufficiently long or complex.');
 
   $help = '<div class="password-strength-help-text ' . key($threshold_label) . '">' . t('The password strength indicator must be %threshold or better.', array('%threshold' => current($threshold_label)));

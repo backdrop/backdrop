@@ -148,6 +148,12 @@ description = Test the core views_handler_field handler.
 group = Views Handlers
 file = handlers/views_handler_field.test
 
+[ViewsHandlerFieldBulkFormTest]
+name = Field: Bulk form
+description = Test the core views_handler_field_bulk_form.
+group = Views Handlers
+file = handlers/views_handler_field_bulk_form.test
+
 [ViewsHandlerFilterMultipleTest]
 name = Filter: Multiple conditions
 description = Tests multiple filters on a single display.

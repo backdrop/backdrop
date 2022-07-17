@@ -568,6 +568,10 @@ function system_requirements($phase) {
           case 'redirect':
             $change_notice = 43994;
             break;
+
+          case 'entityreference':
+            $change_notice = 47321;
+            break;
         }
         if ($change_notice) {
           $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array('@name' => $file->info['name'], '%path' => $path, '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
@@ -1963,13 +1967,25 @@ function system_update_1016() {
  * Moves system logging settings from variables to config.
  */
 function system_update_1017() {
+  // Convert error levels.
+  switch ((int) update_variable_get('error_level', '2')) {
+    case 0:
+      $error_level = 'hide';
+      break;
+    case 1:
+      $error_level = 'some';
+      break;
+    default:
+      $error_level = 'all';
+  }
+
   // Migrate variables to config.
   $config = config('system.core');
   $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
   $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
   $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
   $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
-  $config->set('error_level', update_variable_get('error_level', 'all'));
+  $config->set('error_level', $error_level);
   $config->save();
 
   // Delete variables.
@@ -3295,14 +3311,29 @@ function system_update_1081() {
 }
 
 /**
- * Creates the {invalidated_cache_tags} table if it does not exist.
+ * Notify if a non-core version of Entity Reference module is present.
  */
 function system_update_1082() {
+  $path = backdrop_get_path('module', 'entityreference');
+  if ($path && strpos($path, 'core/modules/entityreference') === FALSE) {
+    backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
+      '@name' => t('Entity Reference'),
+      '%path' => $path,
+      '!url' => 'https://docs.backdropcms.org/node/47321',
+    )), 'warning');
+  }
+}
+
+/**
+ * Creates the {invalidated_cache_tags} table if it does not exist.
+ */
+function system_update_1083() {
   if (!db_table_exists('invalidated_cache_tags')) {
     $schema = system_schema();
     db_create_table('invalidated_cache_tags', $schema['invalidated_cache_tags']);
   }
 }
+
 
 /**
  * @} End of "defgroup updates-7.x-to-1.x"
