@@ -702,6 +702,7 @@ function image_style_deliver($style, $scheme) {
 
   $image_uri = $scheme . '://' . $target;
   $derivative_uri = image_style_path($style['name'], $image_uri);
+  $derivative_scheme = file_uri_scheme($derivative_uri);
 
   // Image styles are not allowed to modify previously generated style images.
   if (strpos($image_uri, $scheme . '://styles/') === 0) {
@@ -711,21 +712,25 @@ function image_style_deliver($style, $scheme) {
     backdrop_exit();
   }
 
-  // If using the private scheme, let other modules provide headers and
-  // control access to the file.
-  if ($scheme == 'private') {
-    if (file_exists($derivative_uri)) {
-      file_download($scheme, file_uri_target($derivative_uri));
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  $public_schemes = array_merge(array('public'), $additional_public_schemes);
+  $is_public = in_array($derivative_scheme, $public_schemes, TRUE);
+
+  if ($scheme == 'private' && file_exists($derivative_uri)) {
+    file_download($scheme, file_uri_target($derivative_uri));
+  }
+
+  // Other non-public schemes may add additional headers and control access to
+  // the file.
+  if (!$is_public) {
+    $headers = file_download_headers($image_uri);
+    if (empty($headers)) {
+      return MENU_ACCESS_DENIED;
     }
-    else {
-      $headers = file_download_headers($image_uri);
-      if (empty($headers)) {
-        return MENU_ACCESS_DENIED;
-      }
-      if (count($headers)) {
-        foreach ($headers as $name => $value) {
-          backdrop_add_http_header($name, $value);
-        }
+    if (count($headers)) {
+      foreach ($headers as $name => $value) {
+        backdrop_add_http_header($name, $value);
       }
     }
   }
@@ -745,9 +750,12 @@ function image_style_deliver($style, $scheme) {
   }
 
   // Confirm that the original source image exists before trying to process it.
-  if (!is_file($image_uri)) {
+  if (!_image_source_image_exists($image_uri)) {
     watchdog('image', 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.',  array('%source_image_path' => $image_uri, '%derivative_path' => $derivative_uri));
-    return MENU_NOT_FOUND;
+    backdrop_add_http_header('Status', '404 Not Found');
+    backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    print t('Source image not found.');
+    backdrop_exit();
   }
 
   // Don't start generating the image if the derivative already exists or if
@@ -791,6 +799,39 @@ function image_style_deliver($style, $scheme) {
     print t('Error generating image.');
     backdrop_exit();
   }
+}
+
+/**
+ * Checks whether the provided source image exists.
+ *
+ * @param string $image_uri
+ *   The URI for the source image.
+ *
+ * @return bool
+ *   Whether the source image exists.
+ */
+function _image_source_image_exists($image_uri) {
+  $exists = file_exists($image_uri);
+
+  // If the file doesn't exist, we can stop here.
+  if (!$exists) {
+    return FALSE;
+  }
+
+  if (file_uri_scheme($image_uri) !== 'public') {
+    return TRUE;
+  }
+
+  $image_path = backdrop_realpath($image_uri);
+  $private_path = config_get('system.core', 'file_private_path');
+  if ($private_path) {
+    $private_path = realpath($private_path);
+    if ($private_path && strpos($image_path, $private_path) === 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
 }
 
 /**
