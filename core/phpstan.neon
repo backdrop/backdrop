@@ -1,0 +1,20 @@
+# These files are generated with phpstan, separately for the includes and
+# modules directories.
+# @see https://phpstan.org/user-guide/baseline
+includes:
+  - phpstan-baseline-includes.neon
+  - phpstan-baseline-modules.neon
+# @see https://phpstan.org/config-reference
+parameters:
+  level: 0
+  scanDirectories:
+    - .
+  fileExtensions:
+    - module
+    - inc
+    - install
+    - profile
+    - engine
+  excludePaths:
+    - *.tpl.php
+    - *.api.php
