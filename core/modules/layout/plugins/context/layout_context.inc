@@ -219,6 +219,49 @@ abstract class LayoutContext extends LayoutHandler {
   }
 
   /**
+   * Set the context data from the router item map.
+   *
+   * @param array $router_map
+   *   A router item map array.
+   */
+  function setDataFromRouterMap($router_map) {
+    if (isset($this->position) && !empty($router_map[$this->position])) {
+      // If the menu router set the data for a context object or a client did
+      // so via hook_layout_load_by_router_item_alter(), we don't need to do
+      // any setting here. But if $this->data is not an object, then it is
+      // either a raw string that must be converted to an object by a load
+      // callback or it is a string pass-through.
+      if (!is_object($this->data)) {
+        // If clients replaced any layout with one whose placeholders are in a
+        // new position, they need to have altered $context->position so that
+        // it points to the right place in the router item to get the data
+        // object.
+        $context_data = $router_map[$this->position];
+        // If the router item contains the context object in the right
+        // position, then we can just set the data from that.
+        if (is_object($context_data)) {
+          $this->setData($context_data);
+        }
+        else {
+          // If the context data was not an object, then we can try to set
+          // it using the plugin's load callback. If there is no callback,
+          // then it must be a string pass-through, so we leave it as is.
+          $context_info = layout_get_context_info($this->plugin);
+
+          // CHECK: the following 3 lines don't seem to be needed. By this point
+          // of the page request all context data is already loaded onto
+          // $router_item['map'].
+          // if (isset($context_info['load callback'])) {
+          //   $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$this->position]));
+          // }
+
+          $this->setData($context_data);
+        }
+      }
+    }
+  }
+
+  /**
    * Check if this context matches a plugin name.
    *
    * This helps identify contexts which have aliases, such as a "node" context
