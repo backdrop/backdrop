@@ -1,9 +1,7 @@
 name: PHPStan
-on: [pull_request]
-# Temporarily run on all PR, revert before merge.
-#on:
-#  pull_request:
-#    branches: [1.*]
+on:
+  pull_request:
+    branches: [1.*]
 jobs:
   phpstan:
     name: Static code analysis
