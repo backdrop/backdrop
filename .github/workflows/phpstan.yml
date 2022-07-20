@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     # Skip this job if the PR title contains "[skip tests]".
     if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
+    steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
