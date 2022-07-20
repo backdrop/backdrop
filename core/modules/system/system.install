@@ -2464,6 +2464,7 @@ function system_update_1025() {
  */
 function system_update_1026() {
   $config = config('system.core');
+  $config->set('file_additional_public_schemes', update_variable_get('file_additional_public_schemes', array()));
   $config->set('file_default_scheme', update_variable_get('file_default_scheme', 'public'));
   $config->set('file_public_path', update_variable_get('file_public_path', 'files'));
   $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));

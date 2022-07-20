@@ -511,7 +511,7 @@ function views_discover_plugins() {
  * Get enabled display extenders.
  */
 function views_get_enabled_display_extenders() {
-  $enabled = array_filter(config_get('views.settings', 'display_extenders'));
+  $enabled = array_filter((array) config_get('views.settings', 'display_extenders'));
   $options = views_fetch_plugin_names('display_extender');
   foreach ($options as $name => $plugin) {
     $enabled[$name] = $name;
