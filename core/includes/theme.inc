@@ -429,6 +429,10 @@ class ThemeRegistry Extends BackdropCacheArray {
     return array_fill_keys(array_keys($this->completeRegistry), NULL);
   }
 
+  /**
+   * Implements ArrayAccess::offsetExists().
+   */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     // Since the theme registry allows for theme hooks to be requested that
     // are not registered, just check the existence of the key in the registry.
