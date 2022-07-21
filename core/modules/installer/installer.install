@@ -9,6 +9,9 @@
  */
 function installer_update_1000() {
   $config = config('installer.settings');
-  $config->set('core_update', FALSE);
-  $config->save();
+  // Only if the installer module is enabled.
+  if (!$config->isNew()) {
+    $config->set('core_update', FALSE);
+    $config->save();
+  }
 }
