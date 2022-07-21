@@ -3292,10 +3292,10 @@ function system_update_1081() {
 }
 
 /**
- * Notify if a non-core version of Entity Reference module is present.
+ * Previous check for Entity Reference module.
  */
 function system_update_1082() {
-  // Move update hook to 1.23.0.
+  // Update moved to system_update_1084(). See core issue #5694.
 }
 
 /**
