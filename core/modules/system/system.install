@@ -3310,6 +3310,20 @@ function system_update_1083() {
 }
 
 /**
+ * Notify if a non-core version of Entity Reference module is present.
+ */
+function system_update_1084() {
+  $path = backdrop_get_path('module', 'entityreference');
+  if ($path && strpos($path, 'core/modules/entityreference') === FALSE) {
+    backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
+      '@name' => t('Entity Reference'),
+      '%path' => $path,
+      '!url' => 'https://docs.backdropcms.org/node/47321',
+    )), 'warning');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
