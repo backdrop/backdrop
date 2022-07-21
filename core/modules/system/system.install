@@ -3288,17 +3288,10 @@ function system_update_1081() {
 }
 
 /**
- * Notify if a non-core version of Entity Reference module is present.
+ * Previous check for Entity Reference module.
  */
 function system_update_1082() {
-  $path = backdrop_get_path('module', 'entityreference');
-  if ($path && strpos($path, 'core/modules/entityreference') === FALSE) {
-    backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
-      '@name' => t('Entity Reference'),
-      '%path' => $path,
-      '!url' => 'https://docs.backdropcms.org/node/47321',
-    )), 'warning');
-  }
+  // Update moved to system_update_1084(). See core issue #5694.
 }
 
 /**
