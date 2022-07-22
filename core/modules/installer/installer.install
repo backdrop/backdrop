@@ -12,17 +12,3 @@ function installer_update_1000() {
   $config->set('core_update', FALSE);
   $config->save();
 }
-
-/**
- * Check installer.settings.json and fix it if broken.
- */
-function installer_update_1001() {
-  $config = config('installer.settings');
-  if (!$config->isNew() && empty($config->get('installer_server'))) {
-    $config->set('installer_server', array(
-      'url' => 'https://projects.backdropcms.org',
-      'name' => 'Backdrop',
-    ));
-    $config->save();
-  }
-}
