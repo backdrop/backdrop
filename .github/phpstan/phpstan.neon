@@ -8,7 +8,9 @@ includes:
 parameters:
   level: 0
   scanDirectories:
-    - .
+    - ../../core
+  paths:
+    - ../../core
   fileExtensions:
     - module
     - inc
