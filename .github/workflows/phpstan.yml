@@ -13,12 +13,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: phpstan
+          tools: phpstan:1.8
 
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Run PHPStan
         run: |
-          cd core
-          phpstan analyze . --error-format=github --no-progress
+          phpstan analyze -c .github/phpstan/phpstan.neon --error-format=github --no-progress
