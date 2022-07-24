@@ -8,26 +8,19 @@ jobs:
     name: Run phpcs
     runs-on: ubuntu-20.04
     steps:
-      # "backdrop/coder" requires an older PHP version.
-      - name: Setup PHP
+      - name: Setup PHP with CodeSniffer tool
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.2'
-          coverage: none
+          php-version: '8.1'
+          tools: phpcs:3.7
 
       - name: Checkout code with full depth
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Install PHP_CodeSniffer with Backdrop standards
-        run: |
-          cp .github/misc/composer.json .
-          composer install --ansi --prefer-dist --no-interaction --no-progress
-
       - uses: thenabeel/action-phpcs@v8
         with:
           files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
-          phpcs_path: vendor/bin/phpcs
-          standard: vendor/backdrop/coder/coder_sniffer/Backdrop
+          standard: .github/phpcs/phpcs-backdrop.xml
           fail_on_warnings: false
