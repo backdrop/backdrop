@@ -26,8 +26,22 @@ function bar($one, $two = 'what', $three) {
   switch ($two) {
     case 'a':
       $test= 'space';
+     break;
     case 'b':
       $test ='nobreak';
   }
   $newvar = isset($three)?$three : null;
+  $some = array(
+    'a' => '...',
+    'b' => '...'
+  );
+}
+
+function someelse  (array $someparam) {
+
+  foreach ($someparam as $index =>$value){
+    if ($value = 'that') {
+      break;
+    }
+  }
 }

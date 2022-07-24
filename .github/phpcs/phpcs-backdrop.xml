@@ -4,6 +4,8 @@
   repositories or composer. -->
   <description>BETA: The coding standard for Backdrop CMS.</description>
   <arg name="extensions" value="php,inc,module,install,profile,engine" />
+  <!-- This cli arg is only relevant for phpcbf? -->
+  <arg name="tab-width" value="2"/>
 
   <!-- Pick some of the Generic ruleset. -->
   <rule ref="Generic.Classes.DuplicateClassName"/>
@@ -24,15 +26,21 @@
   <rule ref="Generic.WhiteSpace.ArbitraryParenthesesSpacing"/>
   <rule ref="Generic.WhiteSpace.IncrementDecrementSpacing"/>
 
+  <!-- For some Generic rules need overrides to fit Backdrop standards. -->
+  <rule ref="Generic.WhiteSpace.ScopeIndent">
+    <properties>
+      <property name="indent" value="2"/>
+    </properties>
+  </rule>
+
   <!-- Pick some of the Squiz ruleset. -->
   <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
+  <rule ref="Squiz.Arrays.ArrayDeclaration.NoComma"/>
   <rule ref="Squiz.Classes.DuplicateProperty"/>
   <rule ref="Squiz.Classes.LowercaseClassKeywords"/>
   <rule ref="Squiz.Classes.SelfMemberReference"/>
   <rule ref="Squiz.Commenting.EmptyCatchComment"/>
   <rule ref="Squiz.Commenting.FunctionCommentThrowTag"/>
-  <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration"/>
-  <rule ref="Squiz.ControlStructures.ForLoopDeclaration"/>
   <rule ref="Squiz.ControlStructures.LowercaseDeclaration"/>
   <rule ref="Squiz.Debug.JSLint"/>
   <rule ref="Squiz.Debug.JavaScriptLint"/>
@@ -62,5 +70,17 @@
   <rule ref="Squiz.WhiteSpace.ScopeKeywordSpacing"/>
   <rule ref="Squiz.WhiteSpace.SemicolonSpacing"/>
   <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+
+  <!-- Some Squiz rules need overrides to fit Backdrop standards. -->
+  <rule ref="Squiz.ControlStructures.SwitchDeclaration">
+    <properties>
+      <property name="indent" value="2"/>
+    </properties>
+    <exclude name="Squiz.ControlStructures.SwitchDeclaration.MissingDefault"/>
+  </rule>
+  <!-- Overlaps with another Squiz rule. -->
+  <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration">
+    <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceAfterArrow"/>
+  </rule>
 
 </ruleset>
