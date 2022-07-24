@@ -26,7 +26,7 @@
   <rule ref="Generic.WhiteSpace.ArbitraryParenthesesSpacing"/>
   <rule ref="Generic.WhiteSpace.IncrementDecrementSpacing"/>
 
-  <!-- For some Generic rules need overrides to fit Backdrop standards. -->
+  <!-- Some Generic rules need overrides to fit Backdrop standards. -->
   <rule ref="Generic.WhiteSpace.ScopeIndent">
     <properties>
       <property name="indent" value="2"/>
@@ -41,6 +41,7 @@
   <rule ref="Squiz.Classes.SelfMemberReference"/>
   <rule ref="Squiz.Commenting.EmptyCatchComment"/>
   <rule ref="Squiz.Commenting.FunctionCommentThrowTag"/>
+  <rule ref="Squiz.ControlStructures.ForLoopDeclaration"/>
   <rule ref="Squiz.ControlStructures.LowercaseDeclaration"/>
   <rule ref="Squiz.Debug.JSLint"/>
   <rule ref="Squiz.Debug.JavaScriptLint"/>
