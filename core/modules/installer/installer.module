@@ -13,6 +13,7 @@ function installer_permission() {
       'title' => t('Install and update modules, themes & layouts'),
       'description' => t('Allows the user to browse for and install new modules, themes and layouts.'),
       'restrict access' => TRUE,
+      'warning' => t('Allows <em>any</em> functionality to be added to the site.'),
     )
   );
 }

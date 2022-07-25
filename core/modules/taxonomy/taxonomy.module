@@ -1319,7 +1319,7 @@ function taxonomy_get_children($tid, $vid = 0) {
  */
 function taxonomy_get_term_by_name($name, $vocabulary = NULL)  {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
-  taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL);
+  return taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL);
 }
 
 /**

@@ -48,6 +48,7 @@ function simpletest_permission() {
     'administer unit tests' => array(
       'title' => t('Administer tests'),
       'restrict access' => TRUE,
+      'warning' => t('Tests can use a large amount of CPU resources. Running them can potentially cause performance issues on the site.'),
     ),
   );
 }

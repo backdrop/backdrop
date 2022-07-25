@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.22.x-dev');
+define('BACKDROP_VERSION', '1.23.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.3.2');
+define('BACKDROP_MINIMUM_PHP', '5.6.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -272,7 +272,7 @@ if (!defined('DATE_RFC7231')) {
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP ' . BACKDROP_MINIMUM_PHP . '. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -817,6 +817,19 @@ function backdrop_is_apache() {
 function backdrop_is_nginx() {
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/nginx/i", $server_software);
+}
+
+/**
+ * Checks whether Backdrop is running under LiteSpeed.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under LiteSpeed, FALSE if not.
+ *
+ * @since 1.21.4
+ */
+function backdrop_is_litespeed() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/litespeed/i", $server_software);
 }
 
 /**
@@ -2055,8 +2068,7 @@ function format_string($string, array $args = array()) {
  *
  * @return string
  *   An HTML safe version of $text. If $text is not valid UTF-8, an empty string
- *   is returned and, on PHP < 5.4, a warning may be issued depending on server
- *   configuration (see @link https://bugs.php.net/bug.php?id=47494 @endlink).
+ *   is returned.
  *
  * @see backdrop_validate_utf8()
  * @ingroup sanitization
@@ -2555,20 +2567,14 @@ function backdrop_base64_encode($string) {
  */
 function backdrop_random_bytes($count)  {
   // $random_state does not use backdrop_static as it stores random bytes.
-  static $random_state, $bytes, $has_openssl;
+  static $random_state, $bytes;
 
   $missing_bytes = $count - strlen((string) $bytes);
 
   if ($missing_bytes > 0) {
-    // PHP versions prior 5.3.4 experienced openssl_random_pseudo_bytes()
-    // locking on Windows and rendered it unusable.
-    if (!isset($has_openssl)) {
-      $has_openssl = version_compare(PHP_VERSION, '5.3.4', '>=') && function_exists('openssl_random_pseudo_bytes');
-    }
-
     // openssl_random_pseudo_bytes() will find entropy in a system-dependent
     // way.
-    if ($has_openssl) {
+    if (function_exists('openssl_random_pseudo_bytes')) {
       $bytes .= openssl_random_pseudo_bytes($missing_bytes);
     }
 
@@ -3108,14 +3114,16 @@ function _backdrop_bootstrap_page_cache() {
         header('Connection: close');
       }
 
-      // End the request and send the response to the browser. This call has
-      // error suppression on it as some PHP versions may require it (PHP 5.3)
-      // but other PHP versions throw a warning (PHP 5.5).
-      @ob_end_flush();
+      // End the request and send the response to the browser.
+      ob_end_flush();
 
       // Flushing for PHP-FPM based installations.
       if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
+      }
+      // Flushing for LiteSpeed servers.
+      elseif (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
       }
       // Flushing for Apache mod_php installations.
       else {
@@ -3780,7 +3788,7 @@ function request_path() {
  * @param $path
  *   A path to break into components. Defaults to the path of the current page.
  *
- * @return string|NULL
+ * @return string|NULL|array
  *   The component specified by $index, or NULL if the specified component was
  *   not found. If called without arguments, it returns an array containing all
  *   the components of the current path.

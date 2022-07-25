@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Mass import-export and batch import functionality for Gettext .po files.

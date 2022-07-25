@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defintion of views_handler_argument_node_uid_revision.

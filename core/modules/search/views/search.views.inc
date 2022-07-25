@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for search.module.
