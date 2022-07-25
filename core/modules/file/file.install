@@ -1199,3 +1199,24 @@ function file_update_1008() {
   }
   db_create_table('cache_entity_file', $table);
 }
+
+/**
+ * Ensures that the "no results" text in 'file_admin' view has a valid format.
+ */
+function file_update_1009() {
+  // Back in file_update_1000() we created this view containing 'filtered_html'
+  // as the "no results" text format, but if we were upgrading from a site that
+  // didn't contain that format, it results in an error. Here we ensure that the
+  // format for that text is a valid format and if it isn't, use the fallback
+  // format.
+  $view = views_get_view('file_admin');
+  if ($view) {
+    $format = $view->display['default']->display_options['empty']['area']['format'];
+    $filter_format_configs = config_get_names_with_prefix('filter.format.');
+    if (in_array('filter.format.' . $format, $filter_format_configs)) {
+      return;
+    }
+    $view->display['default']->display_options['empty']['area']['format'] = filter_fallback_format();
+    $view->save();
+  }
+}
