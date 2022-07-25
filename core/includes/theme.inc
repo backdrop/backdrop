@@ -1425,13 +1425,9 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  *
  * The final setting is obtained from the last value found in the following
  * sources:
- * - the default global settings specified in this function
  * - the default theme-specific settings defined in any base theme's .info file
  * - the default theme-specific settings defined in the theme's .info file
- * - the saved values from the global theme settings form
  * - the saved values from the theme's settings form
- * To only retrieve the default global theme setting, an empty string should be
- * given for $theme.
  *
  * @param $setting_name
  *   The name of the setting to be retrieved.
@@ -1447,6 +1443,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
   // If no key is given, use the current theme if we can determine it.
   if (!isset($theme)) {
     $theme = !empty($GLOBALS['theme_key']) ? $GLOBALS['theme_key'] : '';
+  }
+
+  if (empty($theme)) {
+    return;
   }
 
   if (empty($configs[$theme])) {
@@ -2376,6 +2376,10 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - empty: A message to display when there are no items. Allowed value is a
+ *     string or render array.
+ *
+ * @since 1.21.0: added the "empty" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2435,6 +2439,9 @@ function theme_item_list($variables) {
     }
     $output .= "</$type>";
   }
+  elseif (!empty($variables['empty'])) {
+    $output .= render($variables['empty']);
+  }
 
   // Only output the list container and title, if there are any list items.
   // Check to see whether the block title exists before adding a header.
@@ -2490,10 +2497,14 @@ function theme_feed_icon($variables) {
 /**
  * Returns HTML for a generic HTML tag with attributes.
  *
+ * This function should only be used for adding HTML tags within the HEAD tag
+ * on the page.
+ *
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array describing the tag:
- *     - #tag: The tag name to output. Typical tags added to the HTML HEAD:
+ *     - #tag: The HTML tag to output. Typical tags added within the HEAD tag
+ *       of the page:
  *       - meta: To provide meta information, such as a page refresh.
  *       - link: To refer to stylesheets and other contextual information.
  *       - script: To load JavaScript.
@@ -2505,6 +2516,8 @@ function theme_feed_icon($variables) {
  *       wrapper prefix.
  *     - #value_suffix: (optional) A string to append to #value, e.g. a CDATA
  *       wrapper suffix.
+ *
+ * @since 1.0.0
  */
 function theme_head_tag($variables) {
   $element = $variables['element'];
@@ -2717,7 +2730,7 @@ function template_preprocess_header(&$variables) {
 /**
  * Preprocess variables for page.tpl.php
  *
- * @see system_elements()
+ * @see system_element_info()
  * @see page.tpl.php
  */
 function template_preprocess_page(&$variables) {

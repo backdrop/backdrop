@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User session handling functions.
@@ -106,7 +105,7 @@ function _backdrop_session_read($sid) {
   // active user.
   if ($user && $user->uid > 0 && $user->status == 1) {
     // This is done to unserialize the data member of $user.
-    $user->data = unserialize($user->data);
+    $user->data = unserialize((string) $user->data);
 
     // Add roles element to $user.
     $user->roles = db_query("SELECT role FROM {users_roles} WHERE uid = :uid", array(':uid' => $user->uid))->fetchCol();
@@ -238,10 +237,8 @@ function backdrop_session_initialize() {
   global $user, $is_https;
 
   // Calling session_set_save_handler() multiple times will cause errors on
-  // PHP 7.2+. But checking a session status is only available 5.4+, so if the
-  // status cannot be checked, or the status indicates that there is no session,
-  // set session handlers.
-  if (!function_exists('session_status') || session_status() === PHP_SESSION_NONE) {
+  // PHP 7.2+.
+  if (session_status() === PHP_SESSION_NONE) {
     session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
   }
 

@@ -2061,7 +2061,7 @@ function drupal_check_module($module) {
 // Functions from mail.inc.
 
 /**
- * Composes and optionally sends an e-mail message.
+ * Composes and optionally sends an email message.
  *
  * @deprecated since 1.0.0
  * @see backdrop_mail()
@@ -2175,7 +2175,7 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
 }
 
 /**
- * Given a path alias, return the internal path it represents.
+ * Given a URL alias, return the internal path it represents.
  *
  * @deprecated since 1.0.0
  * @see backdrop_get_normal_path()
@@ -2208,13 +2208,23 @@ function drupal_match_path($path, $patterns) {
 }
 
 /**
- * Rebuild the path alias white list.
+ * Rebuild the URL alias allowlist.
  *
  * @deprecated since 1.0.0
  */
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
+}
+
+/**
+ * Rebuild the path alias allowlist.
+ *
+ * @deprecated since 1.21.0
+ */
+function drupal_path_alias_allowlist_rebuild($source = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  return drupal_path_alias_whitelist_rebuild();
 }
 
 /**

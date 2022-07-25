@@ -1875,14 +1875,14 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
       image_style_url($this->style_name, $image3),
     );
 
-    // Remove the whitelist to test unauthorized requests.
+    // Remove the allowlist to test unauthorized requests.
     $added_uris = &image_style_add_allowed_uri();
     $added_uris = array();
 
-    // Without the whitelist, only 2 unauthorized requests should be allowed.
+    // Without the allowlist, only 2 unauthorized requests should be allowed.
     $this->assertMultiStyleGenerated($images, 2);
 
-    // Make the list again, this time saving the whitelist immediately.
+    // Make the list again, this time saving the allowlist immediately.
     $images = array(
       image_style_url($this->style_name, $image1),
       image_style_url($this->style_name, $image2),
@@ -1891,7 +1891,7 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
       image_style_url($this->style_name, $image5),
       image_style_url($this->style_name, $image6),
     );
-    // Save the whitelist.
+    // Save the allowlist.
     image_style_save_allowed_uris();
 
     // Now all of these images should be allowed.

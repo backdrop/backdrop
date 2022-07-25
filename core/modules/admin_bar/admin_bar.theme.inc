@@ -14,6 +14,15 @@ function theme_admin_bar_icon($variables) {
 }
 
 /**
+* Renders a page icon to display in the administration bar.
+*
+* @ingroup themeable
+*/
+function theme_admin_bar_icon_page($variables) {
+ return t('This page');
+}
+
+/**
  * Render a themed list of links.
  *
  * @param $variables

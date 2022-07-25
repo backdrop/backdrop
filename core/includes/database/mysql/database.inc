@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database interface code for MySQL database servers.
@@ -68,12 +67,14 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
       // Because MySQL's prepared statements skip the query cache, because it's dumb.
       PDO::ATTR_EMULATE_PREPARES => TRUE,
+      // Convert numeric values to strings when fetching. In PHP 8.1,
+      // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
+      // prepares and returns integers. See https://externals.io/message/113294
+      // for further discussion.
+      PDO::ATTR_STRINGIFY_FETCHES => TRUE,
+      // Limit SQL to a single statement like mysqli.
+      PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE,
     );
-    if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
-      // An added connection option in PHP 5.5.21+ to optionally limit SQL to a
-      // single statement like mysqli.
-      $connection_options['pdo'] += array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE);
-    }
 
     parent::__construct($dsn, $connection_options['username'], $connection_options['password'], $connection_options['pdo']);
 
@@ -370,23 +371,6 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // Caching if this method is called multiple times in the same request.
     if (isset($this->utf8mb4Supported)) {
       return $this->utf8mb4Supported;
-    }
-
-    // Ensure that the MySQL driver supports utf8mb4 encoding.
-    $version = $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
-
-    if (strpos($version, 'mysqlnd') !== FALSE) {
-      // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.
-      $version = preg_replace('/^\D+([\d.]+).*/', '$1', $version);
-      if (version_compare($version, '5.0.9', '<')) {
-        return FALSE;
-      }
-    }
-    else {
-      // The libmysqlclient driver supports utf8mb4 starting at version 5.5.3.
-      if (version_compare($version, '5.5.3', '<')) {
-        return FALSE;
-      }
     }
 
     // Ensure that the MySQL server supports large prefixes and utf8mb4.

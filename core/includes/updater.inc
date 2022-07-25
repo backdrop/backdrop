@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Classes used for updating various files in the Backdrop webroot. These

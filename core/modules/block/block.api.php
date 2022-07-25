@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API hooks for the Block module.

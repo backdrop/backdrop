@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for field_sql_storage.module.
