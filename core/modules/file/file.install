@@ -279,6 +279,18 @@ function file_requirements($phase) {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function file_update_dependencies() {
+  // Ensure that the text filters have been converted to config prior to
+  // updating the "No results" format on the file admin View.
+  $dependencies['file'][1008] = array(
+    'system' => 1028,
+  );
+  return $dependencies;
+}
+
+/**
  * Add a view for managing files.
  */
 function file_update_1000() {
