@@ -284,7 +284,7 @@ function file_requirements($phase) {
 function file_update_dependencies() {
   // Ensure that the text filters have been converted to config prior to
   // updating the "No results" format on the file admin View.
-  $dependencies['file'][1008] = array(
+  $dependencies['file'][1009] = array(
     'system' => 1028,
   );
   return $dependencies;
