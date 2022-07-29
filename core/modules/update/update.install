@@ -240,16 +240,27 @@ function update_update_1004() {
 }
 
 /**
- * Check installer.settings.json and fix it if broken.
+ * Check installer.settings.json and fix it or remove it if needed.
  */
 function update_update_1005() {
   $config = config('installer.settings');
-  if (!$config->isNew() && empty($config->get('installer_server'))) {
-    $config->set('installer_server', array(
-      'url' => 'https://projects.backdropcms.org',
-      'name' => 'Backdrop',
-    ));
-    $config->save();
+  if (!$config->isNew()) {
+    // Check to see if installer is installed.
+    // We must do this with a database query, as module_exists() doesn't tell us
+    // if the module is disabled or uninstalled.
+    $schema_version = db_query("SELECT schema_version FROM {system} WHERE name = 'installer' AND type = 'module'")->fetchObject();
+    if ($schema_version->schema_version < 0) {
+      // instaler is uninstalled. Remove the config file.
+      $config->delete();
+    } 
+    elseif (empty($config->get('installer_server'))) {
+      // Fix the config file.
+      $config->set('installer_server', array(
+        'url' => 'https://projects.backdropcms.org',
+        'name' => 'Backdrop',
+      ));
+      $config->save();
+    }
   }
 }
 
