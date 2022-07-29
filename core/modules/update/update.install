@@ -248,8 +248,8 @@ function update_update_1005() {
     // Check to see if installer is installed.
     // We must do this with a database query, as module_exists() doesn't tell us
     // if the module is disabled or uninstalled.
-    $schema_version = db_query("SELECT schema_version FROM {system} WHERE name = 'installer' AND type = 'module'")->fetchObject();
-    if ($schema_version->schema_version < 0) {
+    $module_info = db_query("SELECT schema_version FROM {system} WHERE name = 'installer' AND type = 'module'")->fetchObject();
+    if ($module_info->schema_version < 0) {
       // instaler is uninstalled. Remove the config file.
       $config->delete();
     } 
