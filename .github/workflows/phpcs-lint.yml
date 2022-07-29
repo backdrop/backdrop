@@ -19,8 +19,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout coding standards
+        uses: actions/checkout@v2
+        with:
+          repository: backdrop-ops/phpcs
+          ref: 1.0.0-beta1
+          path: ../phpcs
+
       - uses: thenabeel/action-phpcs@v8
         with:
           files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
-          standard: .github/phpcs/phpcs-backdrop.xml
+          standard: ../phpcs/Backdrop
           fail_on_warnings: false
