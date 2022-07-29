@@ -397,6 +397,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $is_new = isset($layout->is_new) && $layout->is_new;
   $has_placeholder = strpos((string) $path, '%') !== FALSE;
   $menu_router_path_exists = _layout_menu_router_path_exists($path);
+  $enable_url_paths = !$has_placeholder && $menu_router_path_exists;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
   }
@@ -696,7 +697,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   if (!$layout->isDefault()) {
-    if ($menu_router_path_exists) {
+    if ($enable_url_paths) {
       $url_paths = isset($form_state['values']['url_paths']) ? $form_state['values']['url_paths'] : $layout->getUrlPaths();
       $toggle = ' <a class="layout-url-paths-info-toggle" href="#">' . t('Show more') . '<span class="arrow"></span></a>';
       $description_intro = t('Optionally specify one or more URL paths to be handled by this layout (in addition to the primary path above), one per line. These paths must already be provided by the system or another module and will use any contexts defined above. The asterisk ("*") character is a wildcard, e.g. "node/*" or "node/*/edit".');
@@ -704,17 +705,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       $description_list[] = t('Use wildcards ("*"), not placeholders ("%") here.');
       $description_list[] = t('Unlike placeholders ("%"), wildcards ("*") can appear within a word and can match character strings that contain "/". For example, "n*e/1" matches "node/1", but also "not/the/1", and more.');
       $description_list[] = t('URL paths can match both <em>normal paths</em> (like "node/1") and <em>URL aliases</em> (like "posts/your-first-post").');
-      if (!empty(layout_load_functions($layout_path))) {
-        $description_list[] = t('The menu router item for %path loads objects for its placeholders, so this layout will only be used if (a) one of these URL paths matches the request path and (b) the menu router path of the request path loads the same objects for its placeholders.', array('%path' => $layout_path));
-      }
-      $description_list[] = t('Note that wildcards can contain "/", so that, for example, "node/*" matches both "node/1" and "node/1/edit". Use visibility conditions to narrow the applicability of layouts with URL paths containing wildcards.');
+      $description_list[] = t('Note that wildcards can represent text containing "/", so that, for example, "node/*" matches both "node/1" and "node/1/edit".');
+      $description_list[] = t('Add visibility conditions to narrow the applicability of layouts with URL paths containing wildcards.');
+
       $description_extra = '<div class="layout-url-paths-info">' . theme('item_list', array('items' => $description_list)) . '</div>';
       $description = $description_intro . $toggle . $description_extra;
       $rows = max(3, 1 + count(explode("\n", $url_paths)));
     }
     else {
       $url_paths = '';
-      $description = t('You can only define URL paths for layouts that override other pages, not for layout-created pages.');
+      $description = t('You can only define URL paths for layouts that have no placeholders and that override other pages, i.e., not for layout-created pages.');
       $rows = 1;
     }
     $form['url_paths_wrapper'] = array(
@@ -727,7 +727,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#description' => $description,
       '#default_value' => $url_paths,
       '#rows' => $rows,
-      '#disabled' => !$menu_router_path_exists,
+      '#disabled' => !$enable_url_paths,
     );
   }
 

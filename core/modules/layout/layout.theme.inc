@@ -64,7 +64,7 @@ function theme_layout_info($variables) {
   $url_paths = trim((string) $layout->getUrlPaths());
   if (!empty($url_paths)) {
     $url_paths = explode("\n", $url_paths);
-    $url_paths_info = '<div class="url-paths-info">URL paths: ' . theme('item_list', array('items' => $url_paths)) . '</div>';
+    $url_paths_info = '<div class="url-paths-info">' . format_plural(count($url_paths), 'May also be used if current path matches @url_paths', 'May also be used if current path matches one of @url_paths', array('@url_paths' => implode(', ', $url_paths))) . '</div>';
   }
   else {
     $url_paths_info = '';

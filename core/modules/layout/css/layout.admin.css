@@ -60,10 +60,22 @@
    }
 }
 
-.layout-list .layout-preview,
-.layout-list .layout-detail {
-  display: inline-block;
-  vertical-align: top;
+.layout-list .layout-info {
+  position: relative;
+}
+.layout-list .layout-preview {
+  position: absolute;
+}
+@media (min-width: 768px) {
+  .layout-list .layout-info {
+    min-height: 55px;
+  }
+  .layout-list .layout-detail {
+    padding-left: 50px;
+  }
+  [dir="rtl"] .layout-list .layout-detail {
+    padding-right: 50px;
+  }
 }
 
 /* touch-up on layout listing form */
