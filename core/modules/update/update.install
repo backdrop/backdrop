@@ -250,9 +250,9 @@ function update_update_1005() {
     // if the module is disabled or uninstalled.
     $module_info = db_query("SELECT schema_version FROM {system} WHERE name = 'installer' AND type = 'module'")->fetchObject();
     if ($module_info->schema_version < 0) {
-      // instaler is uninstalled. Remove the config file.
+      // Installer is uninstalled. Remove the config file.
       $config->delete();
-    } 
+    }
     elseif (empty($config->get('installer_server'))) {
       // Fix the config file.
       $config->set('installer_server', array(
