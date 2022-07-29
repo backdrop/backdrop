@@ -14,11 +14,14 @@ jobs:
           php-version: '8.1'
           tools: phpcs:3.7
 
+      # The checkout action refuses to put it outside, so we have to do it in
+      # two steps.
       - name: Checkout coding standard
         uses: actions/checkout@v2
         with:
           repository: backdrop-ops/phpcs
           ref: 1.0.0-beta1
+          path: phpcs
 
       - name: Move standard outside current dir
         run: mv phpcs ..
