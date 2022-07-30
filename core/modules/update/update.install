@@ -245,7 +245,7 @@ function update_update_1004() {
 function update_update_1005() {
   $config = config('installer.settings');
   // Only act if the config file exists. If isNew() returns TRUE, this means
-  // the config object is new, and therefore the file file doesn't exist, in
+  // the config object is new, and therefore the file doesn't exist, in
   // which case, we skip processing.
   if (!$config->isNew()) {
     // Now check to see if installer is installed.
