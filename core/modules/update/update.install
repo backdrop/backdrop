@@ -244,17 +244,21 @@ function update_update_1004() {
  */
 function update_update_1005() {
   $config = config('installer.settings');
+  // Only act if the config file exists. If isNew() returns TRUE, this means
+  // the config object is new, and therefore the file file doesn't exist, in
+  // which case, we skip processing.
   if (!$config->isNew()) {
-    // Check to see if installer is installed.
+    // Now check to see if installer is installed.
     // We must do this by getting the current schema version, as module_exists()
     // doesn't tell us if the module is disabled or uninstalled.
     $schema_version = backdrop_get_installed_schema_version('installer');
     if ($schema_version < 0) {
-      // Installer is uninstalled. Remove the config file.
+      // Installer is uninstalled. Remove the faulty config file.
       $config->delete();
     }
     elseif (empty($config->get('installer_server'))) {
-      // Fix the config file.
+      // Installer is installed.
+      // Fix the config file only if the key installer_server is not present.
       $config->set('installer_server', array(
         'url' => 'https://projects.backdropcms.org',
         'name' => 'Backdrop',
