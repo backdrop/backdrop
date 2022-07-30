@@ -74,7 +74,6 @@ class LayoutAccess extends LayoutHandler {
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $access_info);
   }
 
-
   /**
    * Validate handler for the settings form for this access item.
    */

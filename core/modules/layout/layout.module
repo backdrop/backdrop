@@ -102,6 +102,16 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   ) + $base;
 
+  $items['admin/structure/layouts/null-path'] = array(
+    'title' => 'Null path',
+    'description' => 'Set the layout null path.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_null_path_page'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 30,
+    'file' => 'layout.admin.inc',
+  ) + $base;
+
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'layout_flexible_template_settings_add_form',
@@ -498,6 +508,19 @@ function layout_menu() {
     'access arguments' => array('administer layouts'),
     'file' => 'layout.admin.inc',
   );
+
+  // The Layout null path, if it exists. Used to allow layouts to override
+  // with URL paths.
+  if ($layout_null_path = config_get('layout.settings', 'null_path')) {
+    $items[$layout_null_path] = array(
+      'title' => 'Layout null path',
+      'description' => 'Null path for layouts to override with URL paths',
+      'page callback' => 'layout_null_path_view',
+      'access callback' => TRUE,
+      'file' => 'layout.admin.inc',
+      'type' => MENU_CALLBACK,
+    );
+  }
 
   return $items;
 }
@@ -1036,18 +1059,107 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  *   Flag to skip the attempted loading of menu items for the loaded layouts.
  *
  * @return Layout[]
- *   An array of load Layout object instances.
+ *   An array of loaded Layout object instances.
  */
 function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NULL) {
-  $href = $router_item['href'];
+
+  $menu_router_path = $router_item['path'];
+  $normal_path = $router_item['href'];
+  $alias_path = backdrop_lookup_path('alias', $normal_path); // Could be FALSE.
+  $load_functions = !empty($router_item['load_functions']) ? array_filter($router_item['load_functions']) : array();
+
   $layouts_by_item = &backdrop_static(__FUNCTION__, array());
-  if (isset($layouts_by_item[$href])) {
-    return $layouts_by_item[$href];
+  if (isset($layouts_by_item[$normal_path])) {
+    return $layouts_by_item[$normal_path];
   }
-  $layouts = layout_load_multiple_by_path($router_item['path'], $skip_menu_items);
+
+  // Cache on the normal path, rather than the menu router path, because due to
+  // URL aliases, the same menu router path could have multiple sets of layouts
+  // applicable to it, depending on the various normal paths it gives rise to.
+  if ($cache = cache('layout_path')->get($normal_path)) {
+    $layouts = $cache->data;
+
+    // Populate these cached layouts into layout_load_multiple() to optimize
+    // any future calls to it.
+    $static_cache = &backdrop_static('layout_load_multiple', array());
+    $static_cache = array_merge($layouts, $static_cache);
+  }
+  else {
+    $layout_names = array();
+    $configs = layout_get_all_configs('layout');
+    foreach ($configs as $layout_name => $config) {
+      if (isset($config['path']) && $config['path'] == $menu_router_path) {
+        $layout_names[] = $config['name'];
+      }
+      elseif (!empty($config['url_paths'])) {
+        if (backdrop_match_path($normal_path, $config['url_paths']) || ($alias_path && backdrop_match_path($alias_path, $config['url_paths']))) {
+          // We have a match to a layout, but we also need to check for
+          // consistency of positioned contexts. If the layout has load
+          // functions (which generate positioned contexts), then those contexts
+          // would need to be populated by the load functions of the request
+          // path, which therefore would need to be the same in order to
+          // register a match. We array_filter() to eliminate positions with
+          // NULL load functions.
+          $layout_load_functions = array_filter(layout_load_functions($config['path']));
+          if (!empty($layout_load_functions)) {
+            foreach ($layout_load_functions as $position => $layout_load_function) {
+              if (!isset($load_functions[$position]) || $load_functions[$position] != $layout_load_function) {
+                // Mismatched load functions; don't try to use this layout.
+                break 2;
+              }
+            }
+            // We matched all load functions, so we can use this layout.
+            $layout_names[] = $config['name'];
+          }
+          else {
+            // Since the layout has no load functions, it has no positioned
+            // contexts, and so we can safely register a match.
+            $layout_names[] = $config['name'];
+          }
+        }
+      }
+    }
+    if (empty($layout_names)) {
+      // Skip loading menu items for the default layouts.
+      if (is_null($skip_menu_items)) {
+        $skip_menu_items = TRUE;
+      }
+      if (path_is_admin($menu_router_path)) {
+        $layout_names[] = 'admin_default';
+      }
+      else {
+        $layout_names[] = 'default';
+      }
+    }
+    $layouts = layout_load_multiple($layout_names, $skip_menu_items);
+
+    cache('layout_path')->set($normal_path, $layouts);
+  }
   backdrop_alter('layout_load_by_router_item', $layouts, $router_item);
-  $layouts_by_item[$href] = $layouts;
+  $layouts_by_item[$normal_path] = $layouts;
   return $layouts;
+}
+
+/**
+ * Returns a list of load functions for a system path.
+ *
+ * @param string $path
+ *   A menu router path (e.g., node/%).
+ *
+ * @return string[]
+ *   An array of load functions for the path or an empty array if none.
+ */
+function layout_load_functions($path) {
+  $layout_load_functions = db_query('
+    SELECT load_functions
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchField();
+  if (!empty($layout_load_functions)) {
+    return unserialize($layout_load_functions);
+  }
+  return array();
 }
 
 /**
@@ -1118,7 +1230,6 @@ function layout_load_all() {
   $layout_names = array_keys($configs);
   return layout_load_multiple($layout_names);
 }
-
 
 /**
  * Load an individual Layout menu item.
@@ -1254,7 +1365,8 @@ function layout_get_all_configs($type) {
 }
 
 /**
- * Get a list of layouts that share a particular path.
+ * Get a list of layouts that share a particular path as the layout's primary
+ * path.
  */
 function layout_get_path_layout_names($path) {
   $path_map = &backdrop_static(__FUNCTION__, array());
@@ -1333,6 +1445,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
   }
 
   $layouts = layout_load_multiple_by_router_item($router_item, !$is_layout_page);
+
   $selected_layout = NULL;
   foreach ($layouts as $layout) {
     // Contexts must have their data set before the layout's access may be
@@ -1549,7 +1662,6 @@ function layout_get_context_info($plugin_name) {
   $info = _layout_get_all_info('layout_context');
   return isset($info[$plugin_name]) ? $info[$plugin_name] : FALSE;
 }
-
 
 /**
  * Fetch all relevant relationships.
@@ -1870,7 +1982,6 @@ function layout_clear_layout_tempstore($name, $type = 'layout') {
 function layout_tempstore_load($layout_name) {
   return layout_get_layout_tempstore($layout_name, 'layout');
 }
-
 
 /**
  * Menu loader callback to load a Layout cache object.

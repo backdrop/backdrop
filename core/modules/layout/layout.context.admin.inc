@@ -129,7 +129,6 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
   return $form;
 }
 
-
 /**
  * Form callback; Displays form for adding new relationships to a layout.
  *
@@ -268,7 +267,6 @@ function layout_context_add_form_cancel($form, &$form_state) {
 function layout_context_ajax_style($form, $form_state) {
   return $form['context_settings'];
 }
-
 
 /**
  * Submit handler to select a context or relationship. Hidden when JavaScript

@@ -155,24 +155,25 @@ function layout_list_page() {
   $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
   $help_items = array();
   $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
-  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
+  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the layout\'s primary path, its URL paths (if defined), and visibility conditions. If no other layouts match, one of the defaults will be used.');
   $help .= theme('item_list', array('items' => $help_items));
   $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
   $help_items[] = array(
-    'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.'),
+    'data' => t('The <em>Path</em> for the page is compared to the primary paths of the layouts in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.'),
     'children' => array(
-      t('Each path may have one or more layouts available. These are listed beneath the path.'),
+      t('Each layout primary path may have one or more layouts available. These are listed beneath the path.'),
       array(
         'data' => t('The top available layout for each path is is evaluated for matching visibility conditions first, followed by the second, etc.'),
         'children' => array(t('Available layouts can be reordered to adjust priority.')),
       ),
+      t('Layouts with different primary paths that have <em>URL paths</em> defined for them will also be considered if one of the URL paths matches the request path and the layout satisfies load conditions and visibility conditions.'),
       t('The first layout to match all conditions will be selected.'),
     ),
   );
   $help_items[] = t('If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.');
   $help .= theme('item_list', array('items' => $help_items));
-  $help .= '<p>' . t('Note: Paths used by the layout system are <em>menu router paths</em>, not normal paths or !link. For the default About page, <code>node/%</code> is the menu router path, <code>node/2</code> is the normal path, and <code>about</code> is the URL alias.', array('!link' => l(t('URL aliases'), 'admin/config/urls/path'))) . '</p>';
+  $help .= '<p>' . t('Note: Paths used by the layout system are <em>menu router paths</em>, not !link. For the default About page, <code>node/%</code> is the menu router path, <code>node/2</code> is the normal path, and <code>about</code> is the URL alias.', array('!link' => l(t('normal paths or URL aliases'), 'admin/config/urls/path'))) . '</p>';
   $help .= '<p class="align-right">' . t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.') . '</p>';
 
   $page = array();
@@ -392,29 +393,44 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   // Path entry field with dynamic information about the entered path and
   // toggleable placeholder examples.
-  $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
+  $layout_path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
-  $has_placeholder = strpos((string) $path, '%') !== FALSE;
-  if (empty($path)) {
+  $has_placeholder = strpos((string) $layout_path, '%') !== FALSE;
+  $menu_router_path_exists = _layout_menu_router_path_exists($layout_path);
+  $has_load_functions = _layout_menu_router_path_has_load_functions($layout_path);
+  $is_null_path = ($layout_path == config_get('layout.settings', 'null_path'));
+
+  if (empty($layout_path)) {
     $path_matches_text = t('Please enter a path.');
   }
   else {
-    if (_layout_menu_router_path_exists($path)) {
+    if ($menu_router_path_exists) {
       if ($has_placeholder) {
         if ($is_new) {
-          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern.');
+          $path_matches_text = t('This layout will override the default layout for existing page(s) whose paths match this pattern or any "URL paths" patterns below.');
         }
         else {
-          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern.');
+          $path_matches_text = t('This layout overrides the default layout for existing page(s) whose paths match this pattern or any "URL paths" patterns below.');
         }
       }
       else {
-        if ($is_new) {
-          $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern.');
+        if ($is_null_path) {
+          if ($is_new) {
+            $path_matches_text = t('This layout will be a null path layout. There is no page at @path, but this layout will override pages defined by the "URL paths" patterns below.', array('@path' => $layout_path));
+          }
+          else {
+            $path_matches_text = t('This layout is a null path layout. There is no page at @path, but this layout will override pages defined by the "URL paths" patterns below.', array('@path' => $layout_path));
+          }
         }
         else {
-          $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern.');
+          if ($is_new) {
+            $path_matches_text = t('This layout will override the default layout for an existing page whose path matches this pattern or any "URL paths" patterns below.');
+          }
+          else {
+            $path_matches_text = t('This layout overrides the default layout for an existing page whose path matches this pattern or any "URL paths" patterns below.');
+          }
         }
+
       }
     }
     else {
@@ -449,22 +465,30 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     'path_matches_text' => array('#markup' => $path_matches_text),
   );
   $path_matches_description = backdrop_render($path_matches);
-  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
-  $description_items = array(
-    t('Content: <code>node/%</code>'),
-    t('User accounts: <code>user/%</code>'),
-    t('Taxonomy terms: <code>taxonomy/term/%</code>'),
-    t('Comments: <code>comment/%</code>'),
-  );
-  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  if ($is_null_path) {
+    $placeholder_info = '';
+  }
+  else {
+    // TODO: replace this toggle and its associated JS with 'details' element
+    // when issue 5090 is merged.
+    $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+    $placeholder_description_items = array(
+      t('Content: <code>node/%</code>'),
+      t('User accounts: <code>user/%</code>'),
+      t('Taxonomy terms: <code>taxonomy/term/%</code>'),
+      t('Comments: <code>comment/%</code>'),
+    );
+    $placeholder_description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $placeholder_description_items)) . '</div>';
+    $placeholder_info = t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $placeholder_description_list;
+  }
   $form['path'] = array(
-    '#title' => t('Path'),
+    '#title' => t('Primary Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-    '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
+    '#description' => $path_matches_description . $placeholder_info,
   );
 
   $form['path_update'] = array(
@@ -492,7 +516,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Get all contexts except those provided by relationships.
   $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
-  $context_description = t('Contexts provide additional information to blocks displayed within the layout. Most placeholders in the path will automatically create context(s).');
+  $context_description = t('Contexts provide additional information to blocks displayed within the layout. Most placeholders in the primary path will automatically create context(s).');
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),
     '#type' => 'item',
@@ -574,7 +598,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
             '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
           );
         }
-        else{
+        else {
           $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
             '#type' => 'select',
             '#options' => $context_options,
@@ -676,21 +700,64 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   // Display a notice if overriding a system path that normally contains
-  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
-  // a misconfiguration of the layout.
-  $layout_path = $layout->getPath();
-  $router_item = menu_get_item($layout_path);
-  if ($router_item && $layout_path) {
-    $router_item_path = (string) $router_item['path'];
-    if ($router_item_path !== $layout_path && substr_count($router_item_path, '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item_path)) {
-      $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
-      if (backdrop_is_ajax()) {
-        backdrop_set_message($message, 'warning');
-      }
-      else {
-        $form['messages']['#messages']['warning'][] = $message;
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not
+  // always) a misconfiguration of the layout.
+  if ($layout_path) {
+    $router_item = menu_get_item($layout_path);
+    if ($router_item) {
+      $router_item_path = (string) $router_item['path'];
+      if ($router_item_path !== $layout_path && substr_count($router_item_path, '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item_path)) {
+        $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
+        if (backdrop_is_ajax()) {
+          backdrop_set_message($message, 'warning');
+        }
+        else {
+          $form['messages']['#messages']['warning'][] = $message;
+        }
       }
     }
+  }
+
+  if (!$layout->isDefault()) {
+    if ($menu_router_path_exists) {
+      $url_paths = isset($form_state['values']['url_paths']) ? $form_state['values']['url_paths'] : $layout->getUrlPaths();
+      // TODO: replace this toggle and its associated JS with 'details' element when
+      // issue 5090 is merged.
+      $toggle = ' <a class="layout-url-paths-info-toggle" href="#">' . t('Show more') . '<span class="arrow"></span></a>';
+      $description_intro = t('Optionally specify one or more URL paths to be handled by this layout (in addition to the primary path above), one per line. These paths must already be provided by the system or another module and will use any contexts defined above. The asterisk ("*") character is a wildcard, e.g. "node/*" or "node/*/edit".');
+      $description_list = array();
+      $description_list[] = t('Use wildcards ("*"), not placeholders ("%") here.');
+      $description_list[] = t('Unlike placeholders ("%"), wildcards ("*") can appear within a word and can match character strings that contain "/". For example, "n*e/1" matches "node/1", but also "not/the/1", and more.');
+      $description_list[] = t('URL paths can match both <em>normal paths</em> (like "node/1") and <em>URL aliases</em> (like "posts/your-first-post").');
+      $description_list[] = t('Note that wildcards can represent text containing "/", so that, for example, "node/*" matches both "node/1" and "node/1/edit".');
+      if ($has_load_functions) {
+        $description_list[] = t('This layout will only be considered for paths that load the same type of objects as those defined by the primary path.');
+      }
+      $description_list[] = t('Add visibility conditions to narrow the applicability of layouts with URL paths.');
+// TODO: Add link to documentation page.
+      $description_list[] = t('<a href="#">See the documentation for more details and examples.</a>');
+
+      $description_extra = '<div class="layout-url-paths-info">' . theme('item_list', array('items' => $description_list)) . '</div>';
+      $description = $description_intro . $toggle . $description_extra;
+      $rows = max(3, 1 + count(explode("\n", $url_paths)));
+    }
+    else {
+      $url_paths = '';
+      $description = t('You can only define URL paths for layouts that override other pages, i.e., not for layout-created pages.');
+      $rows = 1;
+    }
+    $form['url_paths_wrapper'] = array(
+      '#type' => 'container',
+      '#id' => 'url-paths',
+    );
+    $form['url_paths_wrapper']['url_paths'] = array(
+      '#type' => 'textarea',
+      '#title' => t('URL paths'),
+      '#description' => $description,
+      '#default_value' => $url_paths,
+      '#rows' => $rows,
+      '#disabled' => !$menu_router_path_exists,
+    );
   }
 
   $form['conditions'] = array(
@@ -799,7 +866,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
 /**
  * Helper function to determine whether a layout path is an existing menu router
- * path.
+ * path not created by a layout.
  */
 function _layout_menu_router_path_exists($path) {
   $path_matches = db_query('
@@ -809,6 +876,24 @@ function _layout_menu_router_path_exists($path) {
     ', array(':path' => $path))
     ->fetchAll();
   return !empty($path_matches);
+}
+
+/**
+ * Helper function to determine whether a layout path is a menu router path that
+ * has load functions.
+ */
+function _layout_menu_router_path_has_load_functions($path) {
+  $load_functions = db_query('
+    SELECT load_functions
+    FROM {menu_router}
+    WHERE path = :path
+    ', array(':path' => $path))
+    ->fetchField();
+  if (empty($load_functions)) {
+    return FALSE;
+  }
+  $load_functions = array_filter(unserialize($load_functions));
+  return !empty($load_functions);
 }
 
 /**
@@ -840,8 +925,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
   // Ensure path is properly formed.
   $parts = explode('/', $path);
   foreach ($parts as $part) {
-    $wildcard_position = strpos($part, '%');
-    if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
+    $placeholder_position = strpos($part, '%');
+    if ($placeholder_position !== FALSE && ($placeholder_position > 0 || strlen($part) > 1)) {
       form_error($form['path'], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
     }
   }
@@ -860,6 +945,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
       form_error($form['conditions']['active'][$key], t('The condition \'!condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('!condition' => $condition->summary())));
     }
   }
+
+  $url_paths = isset($form_state['values']['url_paths_wrapper']['url_paths']) ? $form_state['values']['url_paths_wrapper']['url_paths'] : '';
+  $form_state['layout']->setUrlPaths(trim($url_paths));
 }
 
 /**
@@ -880,6 +968,7 @@ function layout_settings_form_path_ajax($form, &$form_state) {
   $commands[] = ajax_command_remove('.l-messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
   $commands[] = ajax_command_html('#layout-path-matches', $form['path_matches_text']['#value']);
+  $commands[] = ajax_command_html('#url-paths', backdrop_render($form['url_paths_wrapper']));
   $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
   return array(
     '#type' => 'ajax',
@@ -3137,7 +3226,7 @@ function layout_settings_page($form, &$form_state) {
     'operations' => t('Operations'),
   );
 
-  backdrop_set_title(t('Layout settings'));
+  backdrop_set_title(t('Layout templates'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
   $rows = array();
@@ -3189,7 +3278,6 @@ function layout_settings_page($form, &$form_state) {
 
   return $form;
 }
-
 
 /**
  * Validation for layout settings page.
@@ -3274,6 +3362,51 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   }
 
   return $links;
+}
+
+/**
+ * Administrative form for layout null path setting.
+ */
+function layout_null_path_page($form, &$form_state) {
+  backdrop_set_title(t('Layout null path'));
+  $form['#config'] = 'layout.settings';
+  $config = config('layout.settings');
+
+// TODO: add link to documentation page.
+  $form['null_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Layout null path'),
+    '#description' => t('Optionally enter a path to use for null path layouts. This should not be the path of any other page on the website; attempting to access it directly will lead to a "Page not found". <a href="#">See the documentation for examples of null path layouts.</a>'),
+    '#default_value' => $config->get('null_path'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validation for layout null path setting.
+ */
+function layout_null_path_page_validate($form, &$form_state) {
+  $null_path = $form_state['values']['null_path'];
+  if ($null_path) {
+    // Don't allow special characters or spaces
+    if (preg_match('/[ \*%]/', $null_path)) {
+      form_error($form['null_path'], t('Path "%path" contains one or more of space, "*", "%"; please choose a different value with none of these.', array('%path' => $null_path)));
+    }
+    // Don't allow it to match an existing system path.
+    $item = menu_get_item($null_path);
+    if (!empty($item) && $item['page_callback'] != 'layout_null_path_view') {
+      form_error($form['null_path'], t('The path %path already exists in the system; please choose a different value.', array('%path' => $null_path)));
+    }
+  }
+}
+
+/**
+ * Views the layout null path page. Report a 404, since this page doesn't
+ * actually exist.
+ */
+function layout_null_path_view() {
+  return MENU_NOT_FOUND;
 }
 
 /**

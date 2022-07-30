@@ -1,0 +1,47 @@
+<?php
+/**
+ * @file
+ * Layout URL paths test module.
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function layout_url_paths_test_config_info() {
+  $prefixes = array(
+
+    // Views
+    'views.view.layout_static_view' => array(
+      'label' => t('Layout URL path static view'),
+      'group' => t('Layout URL path tests'),
+    ),
+    'views.view.layout_dynamic_view' => array(
+      'label' => t('Layout URL path dynamic view'),
+      'group' => t('Layout URL path tests'),
+    ),
+    'views.view.layout_new_dynamic_view' => array(
+      'label' => t('Layout URL path new dynamic view'),
+      'group' => t('Layout URL path tests'),
+    ),
+
+    // Layouts
+    'layout.layout.test_static_view' => array(
+      'label' => t('Layout URL path static view layout'),
+      'group' => t('Layout URL path tests'),
+    ),
+    'layout.layout.test_dynamic_view' => array(
+      'label' => t('Layout URL path dynamic view layout'),
+      'group' => t('Layout URL path tests'),
+    ),
+    'layout.layout.test_new_dynamic_view' => array(
+      'label' => t('Layout URL path dynamic view layout'),
+      'group' => t('Layout URL path tests'),
+    ),
+    'layout.layout.test_null_path' => array(
+      'label' => t('Layout URL path null path layout'),
+      'group' => t('Layout URL path tests'),
+    ),
+  );
+
+  return $prefixes;
+}

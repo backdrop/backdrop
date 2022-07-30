@@ -60,9 +60,19 @@ function theme_layout_info($variables) {
     'machine_name' => $layout->name,
   ));
 
+  // Get the URL paths, if any.
+  $url_paths = trim((string) $layout->getUrlPaths());
+  if (!empty($url_paths)) {
+    $url_paths = explode("\n", $url_paths);
+    $url_paths_info = '<div class="url-paths-info">' . format_plural(count($url_paths), 'May also be used if current path matches @url_paths', 'May also be used if current path matches one of @url_paths', array('@url_paths' => implode(', ', $url_paths))) . '</div>';
+  }
+  else {
+    $url_paths_info = '';
+  }
+
   $output = '<div class="layout-info">';
-  $output .= $preview;
-  $output .= '<div class="layout-detail">' . $label . '</div>';
+  $output .= '<div class="layout-preview">' . $preview . '</div>';
+  $output .= '<div class="layout-detail">' . $label . $url_paths_info . '</div>';
   $output .= '</div>';
 
   return $output;
@@ -244,7 +254,6 @@ function theme_layout_action_links($variables) {
   $output .= '</ul>';
   return $output;
 }
-
 
 /**
  * Output the list of visibility conditions for layouts.

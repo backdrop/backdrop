@@ -32,7 +32,6 @@ abstract class LayoutRelationship extends LayoutHandler {
    */
   var $context;
 
-
   /**
    * The identifier for the child relationship being provided by this class.
    *
