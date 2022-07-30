@@ -3275,6 +3275,22 @@ function system_update_1081() {
 }
 
 /**
+ * Initialize the layout null path value.
+ */
+function system_update_1082() {
+  if (!config_get('layout.settings', 'null_path')) {
+    // Try to install the default value for the layout null path.
+    $item = menu_get_item('null');
+    if (!empty($item) && $item['page_callback'] != 'layout_null_path_view') {
+      // The 'null' path is already defined by another module, so we won't set
+      // it, but inform the user.
+      return t('Cannot initialize the layout null path to "null"; the path is already in use. If you need to use layout null paths, set your own value on the the !link.', array('!link' => l(t('Layout null path settings page', 'admin/structure/layouts/null-path'))));
+    }
+    config_set('layout.settings', 'null_path', 'null');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

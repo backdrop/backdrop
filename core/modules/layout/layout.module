@@ -102,6 +102,16 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   ) + $base;
 
+  $items['admin/structure/layouts/null-path'] = array(
+    'title' => 'Null path',
+    'description' => 'Set the layout null path.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_null_path_page'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 30,
+    'file' => 'layout.admin.inc',
+  ) + $base;
+
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'layout_flexible_template_settings_add_form',
@@ -498,6 +508,19 @@ function layout_menu() {
     'access arguments' => array('administer layouts'),
     'file' => 'layout.admin.inc',
   );
+
+  // The "Null Layout" path, if it exists. Used to allow layouts to override
+  // with URL paths.
+  if ($layout_null_path = config_get('layout.settings', 'null_path')) {
+    $items[$layout_null_path] = array(
+      'title' => 'Layout null path',
+      'description' => 'Null path for layouts to override with URL paths',
+      'page callback' => 'layout_null_path_view',
+      'access callback' => TRUE,
+      'file' => 'layout.admin.inc',
+      'type' => MENU_CALLBACK,
+    );
+  }
 
   return $items;
 }
@@ -1043,7 +1066,7 @@ function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NU
   $menu_router_path = $router_item['path'];
   $normal_path = $router_item['href'];
   $alias_path = backdrop_lookup_path('alias', $normal_path); // Could be FALSE.
-  $load_functions = $router_item['load_functions'];
+  $load_functions = !empty($router_item['load_functions']) ? array_filter($router_item['load_functions']) : array();
 
   $layouts_by_item = &backdrop_static(__FUNCTION__, array());
   if (isset($layouts_by_item[$normal_path])) {
@@ -1075,8 +1098,9 @@ function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NU
           // functions (which generate positioned contexts), then those contexts
           // would need to be populated by the load functions of the request
           // path, which therefore would need to be the same in order to
-          // register a match.
-          $layout_load_functions = layout_load_functions($config['path']);
+          // register a match. We array_filter() to eliminate positions with
+          // NULL load functions.
+          $layout_load_functions = array_filter(layout_load_functions($config['path']));
           if (!empty($layout_load_functions)) {
             foreach ($layout_load_functions as $position => $layout_load_function) {
               if (!isset($load_functions[$position]) || $load_functions[$position] != $layout_load_function) {
