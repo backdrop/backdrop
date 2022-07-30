@@ -3277,7 +3277,7 @@ function system_update_1081() {
 /**
  * Initialize the layout null path value.
  */
-function system_update_1082() {
+function system_update_1085() {
   if (!config_get('layout.settings', 'null_path')) {
     // Try to install the default value for the layout null path.
     $item = menu_get_item('null');
