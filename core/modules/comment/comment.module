@@ -2137,7 +2137,6 @@ function comment_form_submit($form, &$form_state) {
     if (user_is_anonymous()) {
       user_cookie_save(array_intersect_key($form_state['values'], array_flip(array('name', 'mail', 'homepage'))));
     }
-
     comment_save($comment);
     $form_state['values']['cid'] = $comment->cid;
 
@@ -2149,6 +2148,9 @@ function comment_form_submit($form, &$form_state) {
       if (!user_access('administer comments')) {
         backdrop_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
       }
+    }
+    elseif (isset($comment->new)) {
+      backdrop_set_message(t('Your comment has been updated.'));
     }
     else {
       backdrop_set_message(t('Your comment has been posted.'));
