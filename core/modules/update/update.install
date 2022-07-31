@@ -240,9 +240,13 @@ function update_update_1004() {
 }
 
 /**
- * Check installer.settings.json and fix it or remove it if needed.
+ * Check for a faulty installer.settings.json and fix it or remove it if needed.
  */
 function update_update_1005() {
+  // Saving the Available Update settings form at admin/reports/updates/settings
+  // used to create a defective copy of installer.settings.json in earlier
+  // Backdrop versions. This update hook fixes or removes this defective file.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5690
   $config = config('installer.settings');
   // Only act if the config file exists. If isNew() returns TRUE, this means
   // the config object is new, and therefore the file doesn't exist, in
