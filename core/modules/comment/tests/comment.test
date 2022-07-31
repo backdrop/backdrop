@@ -445,23 +445,21 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertRaw('4 comments', 'Link to the 4 comments exist.');
 
     // Set comments to have hidden title.
-    $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
     $this->setCommentSubject(COMMENT_TITLE_HIDDEN);
-    $this->backdropLogout();
 
     // Third reply to comment #2 creating comment #5 to test hidden titles.
     $this->backdropLogin($this->web_user);
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
     $this->assertNoText($title_text, 'Individual comment-reply title not found.');
     $reply = $this->postComment(NULL, $this->randomName(), NULL, TRUE);
-    $reply_loaded = comment_load($reply->id);
+    $reply_loaded = comment_load($reply->id
+
     // Test rendered comment for hidden title.
     $this->backdropGet('node/' . $this->node->nid);
     $this->assertNoText($title_text, 'Individual comment title not found.');
 
     // Restore comment title setting to custom titles.
-    $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
     $this->setCommentSubject(COMMENT_TITLE_CUSTOM);
 
