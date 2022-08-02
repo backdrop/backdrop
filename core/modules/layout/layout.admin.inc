@@ -1468,6 +1468,7 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
   $block_options = array();
   foreach ($layout->content as $uuid => $block) {
     $title = $all_blocks[$block->module][$block->delta]['info'];
+    if (isset($block->childDelta)) $title .= " - " . $block->childDelta;
     if (!empty($title) && $title !== 'Custom block' && !is_a($block, 'PageComponents')) {
       $block_options[$uuid] = $title;
     }
