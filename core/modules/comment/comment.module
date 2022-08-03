@@ -2150,7 +2150,7 @@ function comment_form_submit($form, &$form_state) {
         backdrop_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
       }
     }
-    elseif (!$comment->isNew()) {
+    elseif (!$is_new) {
       backdrop_set_message(t('Your comment has been updated.'));
     }
     else {
