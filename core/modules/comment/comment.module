@@ -2137,7 +2137,8 @@ function comment_form_submit($form, &$form_state) {
     if (user_is_anonymous()) {
       user_cookie_save(array_intersect_key($form_state['values'], array_flip(array('name', 'mail', 'homepage'))));
     }
-    comment_save($comment);
+   $is_new = $comment->isNew();
+   comment_save($comment);
     $form_state['values']['cid'] = $comment->cid;
 
     // Add an entry to the watchdog log.
