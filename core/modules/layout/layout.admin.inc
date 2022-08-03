@@ -1464,11 +1464,10 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
     '#maxlength' => 255,
   );
 
-  $all_blocks = layout_get_block_info();
   $block_options = array();
   foreach ($layout->content as $uuid => $block) {
-    $title = $all_blocks[$block->module][$block->delta]['info'];
-    if (!empty($title) && $title !== 'Custom block' && !is_a($block, 'PageComponents')) {
+    $title = strip_tags($block->getAdminTitle());
+    if (!empty($title) && $block->delta !== 'custom_block' && !is_a($block, 'PageComponents')) {
       $block_options[$uuid] = $title;
     }
   }
