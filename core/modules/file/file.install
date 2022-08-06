@@ -1220,15 +1220,18 @@ function file_update_1009() {
   // as the "no results" text format, but if we were upgrading from a site that
   // didn't contain that format, it results in an error. Here we ensure that the
   // format for that text is a valid format and if it isn't, use the fallback
-  // format.
+  // format. Check the format for all displays, in case the user has modified
+  // the page from the default.
   $view = views_get_view('file_admin');
   if ($view) {
-    $format = $view->display['default']->display_options['empty']['area']['format'];
     $filter_format_configs = config_get_names_with_prefix('filter.format.');
-    if (in_array('filter.format.' . $format, $filter_format_configs)) {
-      return;
+    foreach ($view->display as &$display) {
+      $format = $display->display_options['empty']['area']['format'];
+      if (in_array('filter.format.' . $format, $filter_format_configs)) {
+        continue;
+      }
+      $display->display_options['empty']['area']['format'] = filter_fallback_format();
     }
-    $view->display['default']->display_options['empty']['area']['format'] = filter_fallback_format();
     $view->save();
   }
 }
