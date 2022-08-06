@@ -1,7 +1,7 @@
 {
     "_config_name": "layout.layout.test_dynamic_view",
     "path": "dynamicview-a/%",
-    "url_paths": "dynamic-view-b/*",
+    "url_paths": "dynamicview-b/*",
     "name": "test_dynamic_view",
     "title": "Test dynamic view",
     "description": null,
