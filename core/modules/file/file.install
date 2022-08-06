@@ -1226,11 +1226,13 @@ function file_update_1009() {
   if ($view) {
     $filter_format_configs = config_get_names_with_prefix('filter.format.');
     foreach ($view->display as &$display) {
-      $format = $display->display_options['empty']['area']['format'];
-      if (in_array('filter.format.' . $format, $filter_format_configs)) {
-        continue;
+      if (isset($display->display_options['empty']['area']['format'])) {
+        $format = $display->display_options['empty']['area']['format'];
+        if (in_array('filter.format.' . $format, $filter_format_configs)) {
+          continue;
+        }
+        $display->display_options['empty']['area']['format'] = filter_fallback_format();
       }
-      $display->display_options['empty']['area']['format'] = filter_fallback_format();
     }
     $view->save();
   }
