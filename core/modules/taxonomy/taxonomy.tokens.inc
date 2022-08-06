@@ -110,6 +110,37 @@ function taxonomy_token_info() {
 }
 
 /**
+ * Implements hook_token_info_alter().
+ *
+ * We use hook_token_info_alter() rather than hook_token_info() as other
+ * modules may already have defined some field tokens.
+ */
+function taxonomy_token_info_alter(&$info) {
+  $fields = _field_token_info();
+
+  // Attach field tokens to their respective entity tokens.
+  foreach ($fields as $field_name => $field) {
+    foreach (array_keys($field['bundles']) as $token_type) {
+      // If it's not a term reference field, then don't add it.
+      if (isset($field['field_type']) && $field['field_type'] != 'taxonomy_term_reference') {
+        continue;
+      }      
+
+      // Ensure both tokens and token types exist.
+      if (!isset($info['types'][$token_type]) || !isset($info['tokens'][$token_type])) {
+        continue;
+      }
+
+      // Ensure field token already exists.
+      if (isset($info['tokens'][$token_type][$field_name])) {
+        // Provide taxonomy term reference chained tokens.
+        $info['tokens'][$token_type][$field_name]['type'] = 'term';
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_tokens().
  */
 function taxonomy_tokens($type, $tokens, array $data = array(), array $options = array()) {
@@ -118,10 +149,10 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
   $url_options = array('absolute' => TRUE);
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
-    $language_code = $options['language']->langcode;
+    $langcode = $options['language']->langcode;
   }
   else {
-    $language_code = NULL;
+    $langcode = NULL;
   }
 
   if ($type == 'term' && !empty($data['term'])) {
@@ -260,6 +291,48 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           break;
       }
     }
+  }
+
+  // Entity tokens.
+  if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
+    // The field API does weird stuff to the entity, so let's clone it.
+    $entity = clone $data[$type];
+    $entity_type = $entity->entityType();
+    $bundle = $entity->bundle();
+
+    // Reset the prepared view flag in case token generation is called from
+    // inside field_attach_view().
+    if (isset($entity->_field_view_prepared)) {
+      unset($entity->_field_view_prepared);
+    }
+
+    $fields_info = _field_token_info();
+    $fields = field_info_instances($entity_type, $bundle);
+    foreach (array_keys($fields) as $field_name) {
+      // Do not continue if this is not a term reference field.
+      if ($fields_info[$field_name]['field_type'] != 'taxonomy_term_reference') {
+        continue;
+      }
+
+      // Do not continue if the field is empty.
+      if (empty($entity->{$field_name})) {
+        continue;
+      }
+
+      if ($field_term_tokens = token_find_with_prefix($tokens, $field_name)) {
+        // Load the first term referenced and use it for replacement.
+        if ($field_items = field_get_items($entity_type, $entity, $field_name, $langcode)) {
+          $item = reset($field_items);
+          if (isset($item['tid'])) {
+            $term = taxonomy_term_load($item['tid']);
+            $replacements += token_generate('term', $field_term_tokens, array('term' => $term), $options);
+          }
+        }
+      }
+    }
+    
+    // Remove the cloned object from memory.
+    unset($entity);
   }
 
   return $replacements;

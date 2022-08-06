@@ -36,11 +36,6 @@ function field_token_info_alter(&$info) {
         'name' => $field['label'],
         'description' => $field['description'],
       );
-
-      // Provide taxonomy term reference chained tokens
-      if (isset($field['field_type']) && $field['field_type'] === 'taxonomy_term_reference') {
-        $info['tokens'][$token_type][$field_name]['type'] = 'term';
-      }
     }
   }
 }
@@ -66,7 +61,6 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
       unset($entity->_field_view_prepared);
     }
 
-    $fields_info = _field_token_info();
     $fields = field_info_instances($entity_type, $bundle);
     foreach (array_keys($fields) as $field_name) {
       // Do not continue if the field is empty.
@@ -86,18 +80,6 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
         $field_output['#token_options'] = $options;
         $field_output['#pre_render'][] = 'field_pre_render_token';
         $replacements[$original] = backdrop_render($field_output);
-      }
-
-      if ($fields_info[$field_name]['field_type'] === 'taxonomy_term_reference' && $field_term_tokens = token_find_with_prefix($tokens, $field_name)) {
-
-        // Load the first term referenced and use it for replacement.
-        if ($field_items = field_get_items($entity_type, $entity, $field_name, $langcode)) {
-          $item = reset($field_items);
-          if (isset($item['tid'])) {
-            $term = taxonomy_term_load($item['tid']);
-            $replacements += token_generate('term', $field_term_tokens, array('term' => $term), $options);
-          }
-        }
       }
     }
 
