@@ -14,6 +14,17 @@
 .field-widget-date-h5widget fieldset .form-item {
   margin: 0;
 }
+.field-widget-date-h5widget .field-multiple-table .field-multiple-drag + td {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+.field-widget-date-h5widget .field-multiple-table td .ajax-new-content {
+  width: 100%;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
 .field-widget-date-h5widget .form-type-date-timezone .form-item {
   padding: 0;
 }
