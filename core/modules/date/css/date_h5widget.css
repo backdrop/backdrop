@@ -1,0 +1,19 @@
+/**
+ * @file
+ * HTML5 widget styles.
+ */
+.field-widget-date-h5widget .fieldset-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.5rem;
+}
+.field-widget-date-h5widget .fieldset-wrapper::before,
+.field-widget-date-h5widget .fieldset-description {
+  width: 100%;
+}
+.field-widget-date-h5widget fieldset .form-item {
+  margin: 0;
+}
+.field-widget-date-h5widget .form-type-date-timezone .form-item {
+  padding: 0;
+}
