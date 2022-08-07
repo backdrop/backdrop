@@ -737,7 +737,7 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
  * Element validation callback.
  *
  * This runs once over the whole value array.
- * @todo validation may be incomplete, error fields are not properly highlighted.
+ * @todo validation may still be incomplete.
  *
  * @param array $element
  *   Element structure.
@@ -767,7 +767,7 @@ function date_h5widget_element_validate($element, &$form_state) {
 
       if (empty($date_values['value']['date'])) {
         if (!empty($element['value']['#required'])) {
-          form_error($element, t('A start date is required'));
+          form_set_error(implode('][', $element['#parents']) . '][value', t('A start date is required'));
         }
         // Value has been emptied.
         continue;
@@ -815,7 +815,7 @@ function date_h5widget_element_validate($element, &$form_state) {
         }
       }
       elseif (!empty($element['value2']['#required'])) {
-        form_error($element, t('An end date is required.'));
+        form_set_error(implode('][', $element['#parents']) . '][value2', t('An end date is required.'));
       }
       else {
         // Function date_field_validate chokes otherwise.
