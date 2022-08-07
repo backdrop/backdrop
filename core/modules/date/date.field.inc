@@ -356,7 +356,8 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   // The HTML5 widget differs quite a bit.
   if ($instance['widget']['type'] == 'date_h5widget') {
     if (!isset($form['#entity'])) {
-      // Prevent additional default value and useless token browser.
+      // Prevent additional default value and useless token browser on the
+      // settings form.
       $form['#access'] = FALSE;
       return;
     }
@@ -673,7 +674,7 @@ function date_field_instance_settings_form($field, $instance) {
 function date_field_widget_settings_form($field, $instance) {
   module_load_include('inc', 'date', 'date.admin');
   if ($instance['widget']['type'] == 'date_h5widget') {
-    return _date_h5widget_field_widget_settings_form($field, $instance);
+    return _date_h5widget_field_widget_settings_form($instance);
   }
   return _date_field_widget_settings_form($field, $instance);
 }
@@ -688,8 +689,14 @@ function date_field_settings_form($field, $instance, $has_data) {
 
 /**
  * Custom callback to provide the widget settings form.
+ *
+ * @param array $instance
+ *   Field instance definition.
+ *
+ * @return array
+ *   Widget settings form structure.
  */
-function _date_h5widget_field_widget_settings_form($field, $instance) {
+function _date_h5widget_field_widget_settings_form(array $instance) {
   $settings = $instance['widget']['settings'];
   $form = array();
 
