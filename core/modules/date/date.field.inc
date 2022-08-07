@@ -847,9 +847,7 @@ function date_h5widget_element_validate($element, &$form_state) {
 function _date_h5widget_get_form_value($value_orig, $type, $timestep, $timezone_db, $timezone) {
   $needs_conversion = ($timezone_db != $timezone);
   if (is_numeric($value_orig)) {
-    // Timestamps need an "@" prepended to create a DateTime object.
-    $value_orig = '@' . $value_orig;
-    $datetime = new DateTime($value_orig, new DateTimeZone('UTC'));
+    $datetime = new DateTime('@' . $value_orig, new DateTimeZone('UTC'));
     $needs_conversion = TRUE;
   }
   else {
