@@ -411,7 +411,7 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       '#type' => $type,
       '#title' => ($has_todate) ? t('Start date') : t('Date'),
       '#default_value' => $value,
-      '#required' => $instance['required'],
+      '#required' => ($instance['required'] && $delta == 0),
       '#attributes' => $attributes,
       '#date_timezone' => $timezone,
       '#timezone_db' => $timezone_db,
@@ -427,7 +427,7 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
         '#type' => $type,
         '#title' => t('End date'),
         '#default_value' => $value2,
-        '#required' => ($field_settings['todate'] != 'optional'),
+        '#required' => (($field_settings['todate'] != 'optional') && $delta == 0),
         '#attributes' => $attributes,
         '#date_timezone' => $timezone,
       );
