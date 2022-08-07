@@ -451,9 +451,9 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     if ($widget_settings['no_fieldset']) {
       if ($field['cardinality'] == '1') {
         $element['value']['#title'] = check_plain($instance['label']);
-      }
-      if (!empty($instance['description'])) {
-        $element['value']['#description'] = field_filter_xss($instance['description']);
+        if (!empty($instance['description'])) {
+          $element['value']['#description'] = field_filter_xss($instance['description']);
+        }
       }
     }
     else {
