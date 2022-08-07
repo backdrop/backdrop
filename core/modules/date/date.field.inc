@@ -766,7 +766,7 @@ function date_h5widget_element_validate($element, &$form_state) {
       }
 
       if (empty($date_values['value']['date'])) {
-        if (!empty($element['value']['#required'])) {
+        if (!empty($element['value']['#required']) && $delta < 1) {
           form_set_error(implode('][', $element['#parents']) . '][value', t('A start date is required'));
         }
         // Value has been emptied.
@@ -814,10 +814,10 @@ function date_h5widget_element_validate($element, &$form_state) {
           form_error($element, t('The end date must be greater than the start date.'));
         }
       }
-      elseif (!empty($element['value2']['#required'])) {
-        form_set_error(implode('][', $element['#parents']) . '][value2', t('An end date is required.'));
-      }
       else {
+        if (!empty($element['value2']['#required']) && $delta < 1) {
+          form_set_error(implode('][', $element['#parents']) . '][value2', t('An end date is required.'));
+        }
         // Function date_field_validate chokes otherwise.
         $values[$delta]['value2'] = NULL;
       }
