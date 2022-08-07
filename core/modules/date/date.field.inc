@@ -365,7 +365,6 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // We have to take some liberties here: only two types of "granularity",
     // date with or without time.
     $type = 'html_date';
-    $title = t('Date');
 
     $attributes = array();
     $now = date_now();
@@ -381,7 +380,6 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $timestep = 1;
     if (!empty($field_settings['granularity']['hour'])) {
       $type = 'html_datetime';
-      $title = t('Date and time');
       if (empty($field_settings['granularity']['second'])) {
         $timestep = 60;
         $attributes['time']['step'] = $timestep;
