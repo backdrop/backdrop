@@ -1009,7 +1009,10 @@ function _date_h5widget_format_value_db(BackdropDateTime $datetime, $field_type)
  * @return array
  */
 function _date_h5widget_get_date_limits(array $limit_settings) {
-  $date_limits = array();
+  $date_limits = array(
+    'min' => NULL,
+    'max' => NULL,
+  );
   switch ($limit_settings['mode']) {
     case 'byyear':
       $now = date_now();
@@ -1024,9 +1027,6 @@ function _date_h5widget_get_date_limits(array $limit_settings) {
       }
       break;
 
-    default:
-      $date_limits['min'] = NULL;
-      $date_limits['max'] = NULL;
   }
 
   return $date_limits;
