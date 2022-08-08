@@ -1013,20 +1013,17 @@ function _date_h5widget_get_date_limits(array $limit_settings) {
     'min' => NULL,
     'max' => NULL,
   );
-  switch ($limit_settings['mode']) {
-    case 'byyear':
-      $now = date_now();
-      $min_year = $max_year = NULL;
-      if ($limit_settings['years_back'] !== '') {
-        $min_year = (int) $now->format('Y') + $limit_settings['years_back'];
-        $date_limits['min'] = $min_year . '-01-01';
-      }
-      if ($limit_settings['years_forward'] !== '') {
-        $max_year = (int) $now->format('Y') + $limit_settings['years_forward'];
-        $date_limits['max'] = $max_year . '-12-31';
-      }
-      break;
-
+  if ($limit_settings['mode'] == 'byyear') {
+    $now = date_now();
+    $min_year = $max_year = NULL;
+    if ($limit_settings['years_back'] !== '') {
+      $min_year = (int) $now->format('Y') + $limit_settings['years_back'];
+      $date_limits['min'] = $min_year . '-01-01';
+    }
+    if ($limit_settings['years_forward'] !== '') {
+      $max_year = (int) $now->format('Y') + $limit_settings['years_forward'];
+      $date_limits['max'] = $max_year . '-12-31';
+    }
   }
 
   return $date_limits;
