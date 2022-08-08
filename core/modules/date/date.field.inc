@@ -364,27 +364,14 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     }
     $field_settings = $field['settings'];
     $widget_settings = $instance['widget']['settings'];
+
     // We have to take some liberties here: only two types of "granularity",
-    // date with or without time.
-    $type = 'html_date';
+    // date with or without time. Time eventually without seconds.
+    $type = empty($field_settings['granularity']['hour']) ? 'html_date' : 'html_datetime';
+    $timestep = empty($field_settings['granularity']['second']) ? 60 : 1;
 
-    $attributes = array();
     $date_limits = _date_h5widget_get_date_limits($widget_settings['limits']);
-    if (!empty($date_limits['min'])) {
-      $attributes['date']['min'] = $date_limits['min'];
-    }
-    if (!empty($date_limits['max'])) {
-      $attributes['date']['max'] = $date_limits['max'];
-    }
-
-    $timestep = 1;
-    if (!empty($field_settings['granularity']['hour'])) {
-      $type = 'html_datetime';
-      if (empty($field_settings['granularity']['second'])) {
-        $timestep = 60;
-        $attributes['time']['step'] = $timestep;
-      }
-    }
+    $attributes = _date_h5widget_get_attributes($date_limits, $field_settings['granularity']);
 
     $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
     $timezone = date_get_timezone($field_settings['tz_handling']);
@@ -1025,4 +1012,45 @@ function _date_h5widget_get_date_limits(array $limit_settings) {
   }
 
   return $date_limits;
+}
+
+/**
+ * Helper function to construct form item attributes.
+ *
+ * Takes care of nested (html_datetime) and unnested (html_date) form items.
+ *
+ * @param array $date_limits
+ *   Array keyed by min/max.
+ * @param array $granularity
+ *   Field's date granularity settings.
+ *
+ * @return array
+ */
+function _date_h5widget_get_attributes(array $date_limits, array $granularity) {
+  $attributes = array();
+  $has_time = !empty($granularity['hour']);
+
+  if (!empty($date_limits['min'])) {
+    if ($has_time) {
+      $attributes['date']['min'] = $date_limits['min'];
+    }
+    else {
+      $attributes['min'] = $date_limits['min'];
+    }
+  }
+
+  if (!empty($date_limits['max'])) {
+    if ($has_time) {
+      $attributes['date']['max'] = $date_limits['max'];
+    }
+    else {
+      $attributes['max'] = $date_limits['max'];
+    }
+  }
+
+  if ($has_time && empty($granularity['second'])) {
+    $attributes['time']['step'] = 60;
+  }
+
+  return $attributes;
 }
