@@ -306,6 +306,7 @@ function date_field_widget_info() {
     'field types' => array('date', 'datetime', 'datestamp'),
     'settings' => array(
       'limits' => array(
+        'mode' => 'none',
         'years_back' => NULL,
         'years_forward' => NULL,
       ),
@@ -368,14 +369,12 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $type = 'html_date';
 
     $attributes = array();
-    $now = date_now();
-    if ($widget_settings['limits']['years_back'] !== '') {
-      $min_year = (int) $now->format('Y') + $widget_settings['limits']['years_back'];
-      $attributes['date']['min'] = $min_year . '-01-01';
+    $date_limits = _date_h5widget_get_date_limits($widget_settings['limits']);
+    if (!empty($date_limits['min'])) {
+      $attributes['date']['min'] = $date_limits['min'];
     }
-    if ($widget_settings['limits']['years_forward'] !== '') {
-      $max_year = (int) $now->format('Y') + $widget_settings['limits']['years_forward'];
-      $attributes['date']['max'] = $max_year . '-12-31';
+    if (!empty($date_limits['max'])) {
+      $attributes['date']['max'] = $date_limits['max'];
     }
 
     $timestep = 1;
@@ -416,6 +415,8 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       '#date_timezone' => $timezone,
       '#timezone_db' => $timezone_db,
       '#field_type' => $field['type'],
+      '#min' => $date_limits['min'],
+      '#max' => $date_limits['max'],
     );
 
     if ($has_todate) {
@@ -702,8 +703,17 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
 
   $form['limits'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Limit year range'),
-    '#description' => t('Applies to start and end (if enabled).'),
+    '#title' => t('Date input limits'),
+    '#description' => t('Applies to start and end if enabled, is relative to current date.'),
+  );
+  $form['limits']['mode'] = array(
+    '#type' => 'radios',
+    '#title' => t('Limit base'),
+    '#options' => array(
+      'none' => t('No limit'),
+      'byyear' => t('By year'),
+    ),
+    '#default_value' => $settings['limits']['mode'],
   );
   $form['limits']['years_back'] = array(
     '#type' => 'number',
@@ -711,8 +721,13 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
     '#min' => -9999,
     '#max' => 0,
     '#default_value' => $settings['limits']['years_back'],
-    '#description' => t('Empty values for no limit.'),
+    '#description' => t('Empty value for no limit.'),
     '#field_suffix' => t('from current year'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[widget][settings][limits][mode]"]' => array('value' => 'byyear'),
+      ),
+    ),
   );
   $form['limits']['years_forward'] = array(
     '#type' => 'number',
@@ -720,9 +735,15 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
     '#min' => 0,
     '#max' => 9999,
     '#default_value' => $settings['limits']['years_forward'],
-    '#description' => t('Empty values for no limit.'),
+    '#description' => t('Empty value for no limit.'),
     '#field_suffix' => t('from current year'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[widget][settings][limits][mode]"]' => array('value' => 'byyear'),
+      ),
+    ),
   );
+
   $form['no_fieldset'] = array(
     '#type' => 'checkbox',
     '#title'  => t('Exclude wrapping fieldset'),
@@ -792,6 +813,25 @@ function date_h5widget_element_validate($element, &$form_state) {
       // The validation of inner form items has happended, so we can rely on the
       // given values to construct a valid date.
       $date = new BackdropDateTime($string, $timezone);
+
+      // Build dates with the same timezone and compare to limit range.
+      if (!empty($element['value']['#min'])) {
+        $min_date = new BackdropDateTime($element['value']['#min'], $timezone);
+        if ($date < $min_date) {
+          form_set_error(implode('][', $element['#parents']) . '][value', t('The date may not be before @date.', array(
+            '@date' => $element['value']['#min'],
+          )));
+        }
+      }
+      if (!empty($element['value']['#max'])) {
+        $max_date = new BackdropDateTime($element['value']['#max'], $timezone);
+        if ($date > $max_date) {
+          form_set_error(implode('][', $element['#parents']) . '][value', t('The date may not be after @date.', array(
+            '@date' => $element['value']['#max'],
+          )));
+        }
+      }
+
       $values[$delta]['offset'] = $date->getOffset();
       // We captured the offset, now we switch to the timezone the date module
       // expects.
@@ -807,6 +847,21 @@ function date_h5widget_element_validate($element, &$form_state) {
       if (!empty($date_values['value2']['date'])) {
         $string2 = implode(' ', array_values($date_values['value2']));
         $date2 = new BackdropDateTime($string2, $timezone);
+        // Build dates with the same timezone and compare to limit range.
+        if (!empty($element['value']['#min'])) {
+          if ($date2 < $min_date) {
+            form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be before @date.', array(
+              '@date' => $element['value']['#min'],
+            )));
+          }
+        }
+        if (!empty($element['value']['#max'])) {
+          if ($date2 > $max_date) {
+            form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be after @date.', array(
+              '@date' => $element['value']['#max'],
+            )));
+          }
+        }
         $values[$delta]['offset2'] = $date2->getOffset();
         $date2->setTimezone(new DateTimeZone($timezone_db));
         $values[$delta]['value2'] = _date_h5widget_format_value_db($date2, $field_type);
@@ -943,4 +998,36 @@ function _date_h5widget_format_value_db(BackdropDateTime $datetime, $field_type)
   }
 
   return $date_string;
+}
+
+/**
+ * Helper function to get widget settings for date limits.
+ *
+ * @param array $limit_settings
+ *   Widget settings for date limits.
+ *
+ * @return array
+ */
+function _date_h5widget_get_date_limits(array $limit_settings) {
+  $date_limits = array();
+  switch ($limit_settings['mode']) {
+    case 'byyear':
+      $now = date_now();
+      $min_year = $max_year = NULL;
+      if ($limit_settings['years_back'] !== '') {
+        $min_year = (int) $now->format('Y') + $limit_settings['years_back'];
+        $date_limits['min'] = $min_year . '-01-01';
+      }
+      if ($limit_settings['years_forward'] !== '') {
+        $max_year = (int) $now->format('Y') + $limit_settings['years_forward'];
+        $date_limits['max'] = $max_year . '-12-31';
+      }
+      break;
+
+    default:
+      $date_limits['min'] = NULL;
+      $date_limits['max'] = NULL;
+  }
+
+  return $date_limits;
 }
