@@ -989,11 +989,11 @@ function _date_h5widget_format_value_db(BackdropDateTime $datetime, $field_type)
       break;
 
     case 'datetime':
-      $date_string = $datetime->format(DATE_FORMAT_ISO);
+      $date_string = $datetime->format(DATE_FORMAT_DATETIME);
       break;
 
     case 'date':
-      $date_string = $datetime->format(DATE_FORMAT_DATETIME);
+      $date_string = $datetime->format(DATE_FORMAT_ISO);
       break;
   }
 
