@@ -399,7 +399,6 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     }
     else {
       if ($delta == 0) {
-        // @todo take a closer look at the current widget's behavior.
         $default = _date_h5widget_get_default_value($field, $instance, $langcode);
         if (!empty($default)) {
           $value = $default[0];
@@ -755,13 +754,12 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
 }
 
 /**
- * Element validation callback.
+ * Element validation callback for the HTML5 widget.
  *
  * This runs once over the whole value array.
- * @todo validation may still be incomplete.
  *
  * @param array $element
- *   Element structure.
+ *   Form element structure.
  * @param array $form_state
  *   The form state of this form submission.
  */
@@ -833,7 +831,7 @@ function date_h5widget_element_validate($element, &$form_state) {
       }
 
       $values[$delta]['offset'] = $date->getOffset();
-      // We captured the offset, now we switch to the timezone the date module
+      // We captured the offset, now we switch to the timezone the date field
       // expects.
       $date->setTimezone(new DateTimeZone($timezone_db));
       $values[$delta]['value'] = _date_h5widget_format_value_db($date, $field_type);
