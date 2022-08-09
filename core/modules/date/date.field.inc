@@ -833,19 +833,15 @@ function date_h5widget_element_validate($element, &$form_state) {
         $string2 = implode(' ', array_values($date_values['value2']));
         $date2 = new BackdropDateTime($string2, $timezone);
         // Compare to limit range, if set.
-        if (isset($min_date)) {
-          if ($date2 < $min_date) {
-            form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be before @date.', array(
-              '@date' => $element['value']['#min'],
-            )));
-          }
+        if (isset($min_date) && $date2 < $min_date) {
+          form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be before @date.', array(
+            '@date' => $element['value']['#min'],
+          )));
         }
-        if (isset($max_date)) {
-          if ($date2 > $max_date) {
-            form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be after @date.', array(
-              '@date' => $element['value']['#max'],
-            )));
-          }
+        if (isset($max_date) && $date2 > $max_date) {
+          form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be after @date.', array(
+            '@date' => $element['value']['#max'],
+          )));
         }
         $values[$delta]['offset2'] = $date2->getOffset();
         $date2->setTimezone(new DateTimeZone($timezone_db));
