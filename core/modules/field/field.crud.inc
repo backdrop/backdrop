@@ -226,8 +226,8 @@ function field_update_field($field) {
 /**
  * Validates a field configuration.
  *
- * @param $field_name
- *   The field name to read.
+ * @param $field
+ *   A field structure. $field['field_name'], $field['type'] must be provided.
  * @param $update
  *   Whether this is a new or existing field.
  */
