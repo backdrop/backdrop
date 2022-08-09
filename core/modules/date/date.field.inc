@@ -307,8 +307,8 @@ function date_field_widget_info() {
     'settings' => array(
       'limits' => array(
         'mode' => 'none',
-        'years_back' => NULL,
-        'years_forward' => NULL,
+        'years_back' => -3,
+        'years_forward' => 3,
       ),
       'no_fieldset' => TRUE,
     ),
