@@ -832,15 +832,15 @@ function date_h5widget_element_validate($element, &$form_state) {
       if (!empty($date_values['value2']['date'])) {
         $string2 = implode(' ', array_values($date_values['value2']));
         $date2 = new BackdropDateTime($string2, $timezone);
-        // Build dates with the same timezone and compare to limit range.
-        if (!empty($element['value']['#min'])) {
+        // Compare to limit range, if set.
+        if (isset($min_date)) {
           if ($date2 < $min_date) {
             form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be before @date.', array(
               '@date' => $element['value']['#min'],
             )));
           }
         }
-        if (!empty($element['value']['#max'])) {
+        if (isset($max_date)) {
           if ($date2 > $max_date) {
             form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be after @date.', array(
               '@date' => $element['value']['#max'],
