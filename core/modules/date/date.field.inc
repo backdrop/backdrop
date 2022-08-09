@@ -690,7 +690,7 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
   $form['limits'] = array(
     '#type' => 'fieldset',
     '#title' => t('Date input limits'),
-    '#description' => t('Applies to start and end if enabled, is relative to current date.'),
+    '#description' => t('Applies to start and end if enabled and is relative to the current date.'),
   );
   $form['limits']['mode'] = array(
     '#type' => 'radios',
@@ -734,7 +734,7 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
     '#type' => 'checkbox',
     '#title'  => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('If using simple inputs such a a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#description' => t('If using simple inputs such as a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
   );
 
   return $form;
