@@ -420,7 +420,7 @@ function comment_permission() {
     'skip comment approval' => array(
       'title' => t('Skip comment approval'),
       'restrict access' => TRUE,
-      'warning' => t('Users could post spam comments that are directly visbile to any user.),
+      'warning' => t('Users could post spam comments that are directly visibile to every user.),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
