@@ -425,7 +425,7 @@ function comment_permission() {
     'edit own comments' => array(
       'title' => t('Edit own comments'),
       'restrict access' => TRUE,
-      'warning' => t('Users could change their comments after they have been approved, without requiring a further approval.'),
+      'warning' => t('Users could change their approved comments, without further approvals.'),
     ),
   );
 }
