@@ -227,9 +227,9 @@ function field_update_field($field) {
  * Validates a field configuration.
  *
  * @param $field
- *   A field structure. $field['field_name'], $field['type'] must be provided.
+ *   field['field_name'], $field['type'] must be provided.
  * @param $update
- *   Whether this is a new or existing field.
+ *   Whether this is an existing field new or a new one
  */
 function field_validate_field($field, $update = FALSE) {
   // Field name is required.
