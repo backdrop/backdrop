@@ -385,12 +385,10 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     if (isset($items[$delta]['value'])) {
       $value = _date_h5widget_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
     }
-    else {
-      if ($delta == 0) {
-        $default = _date_h5widget_get_default_value($field, $instance, $langcode);
-        if (!empty($default)) {
-          $value = $default[0];
-        }
+    elseif ($delta == 0) {
+      $default = _date_h5widget_get_default_value($field, $instance, $langcode);
+      if (!empty($default)) {
+        $value = $default[0];
       }
     }
     $element['value'] = array(
