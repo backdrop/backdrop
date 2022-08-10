@@ -367,11 +367,12 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 
     // We have to take some liberties here: only two types of "granularity",
     // date with or without time. Time eventually without seconds.
-    $type = empty($field_settings['granularity']['hour']) ? 'html_date' : 'html_datetime';
-    $timestep = empty($field_settings['granularity']['second']) ? 60 : 1;
+    $granularity = array_filter($field_settings['granularity']);
+    $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
+    $timestep = empty($granularity['second']) ? 60 : 1;
 
     $date_limits = _date_h5widget_get_date_limits($widget_settings['limits']);
-    $attributes = _date_h5widget_get_attributes($date_limits, $field_settings['granularity']);
+    $attributes = _date_h5widget_get_attributes($date_limits, $granularity);
 
     $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
     $timezone = date_get_timezone($field_settings['tz_handling']);
