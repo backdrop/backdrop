@@ -409,7 +409,7 @@ function comment_permission() {
       'title' => t('Administer comments'),
       'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
       'restrict access' => TRUE,
-      'warning' => t('Allow a user to delete all the comments.'),
+      'warning' => t('Users can delete all comments.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -420,12 +420,12 @@ function comment_permission() {
     'skip comment approval' => array(
       'title' => t('Skip comment approval'),
       'restrict access' => TRUE,
-      'warning' => t('Users could post spam comments that are directly visibile to every user.),
+      'warning' => t('Users could post spam or offensive comments that become immediately visible to every user.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
       'restrict access' => TRUE,
-      'warning' => t('Users could change their approved comments, without further approvals.'),
+      'warning' => t('Users could edit their approved comments, without further approvals.'),
     ),
   );
 }
