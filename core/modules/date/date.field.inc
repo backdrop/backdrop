@@ -780,8 +780,7 @@ function date_h5widget_element_validate($element, &$form_state) {
       if (empty($date_values['value']['date'])) {
         if (!empty($element['value']['#required']) && $delta < 1) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value', t('A start date for value #!delta is required in %field.', array(
-              '!delta' => $delta + 1,
+            form_set_error($item_parents . '][value', t('A start date for value #1 is required in %field.', array(
               '%field' => $field_label,
             )));
           }
