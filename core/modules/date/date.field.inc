@@ -399,7 +399,6 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       '#attributes' => $attributes,
       '#date_timezone' => $timezone,
       '#timezone_db' => $timezone_db,
-      '#field_type' => $field['type'],
       '#min' => $date_limits['min'],
       '#max' => $date_limits['max'],
     );
@@ -448,6 +447,8 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $element['#description'] = field_filter_xss($instance['description']);
     }
     $element['#field_name'] = $field['field_name'];
+    $element['#field_type'] = $field['type'];
+    $element['#field_label'] = $instance['label'];
 
     return $element;
   }
@@ -755,13 +756,19 @@ function date_h5widget_element_validate($element, &$form_state) {
   if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
     $values = array();
     $items = $form_state['values'][$field_name][LANGUAGE_NONE];
-    $field_type = $element['value']['#field_type'];
+    $field_type = $element['#field_type'];
+    $field_label = $element['#field_label'];
 
     foreach ($items as $delta => $date_values) {
       if (is_string($date_values)) {
         // "Add another" or something else, unusable.
         continue;
       }
+      array_pop($element['#parents']);
+      array_push($element['#parents'], $delta);
+      $item_parents = implode('][', $element['#parents']);
+      $multi_value = (count($items) > 1);
+
       $date_only = (is_string($date_values['value']) && strlen($date_values['value']) == 10);
       if ($date_only) {
         $start = $date_values['value'];
@@ -772,7 +779,17 @@ function date_h5widget_element_validate($element, &$form_state) {
 
       if (empty($date_values['value']['date'])) {
         if (!empty($element['value']['#required']) && $delta < 1) {
-          form_set_error(implode('][', $element['#parents']) . '][value', t('A start date is required'));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('A start date for value #!delta is required in %field.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('A start date is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
         }
         // Value has been emptied.
         continue;
@@ -802,17 +819,37 @@ function date_h5widget_element_validate($element, &$form_state) {
       if (!empty($element['value']['#min'])) {
         $min_date = new BackdropDateTime($element['value']['#min'], $timezone);
         if ($date < $min_date) {
-          form_set_error(implode('][', $element['#parents']) . '][value', t('The date may not be before @date.', array(
-            '@date' => $element['value']['#min'],
-          )));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be before @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('The date in %field may not be before @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
         }
       }
       if (!empty($element['value']['#max'])) {
         $max_date = new BackdropDateTime($element['value']['#max'], $timezone);
         if ($date > $max_date) {
-          form_set_error(implode('][', $element['#parents']) . '][value', t('The date may not be after @date.', array(
-            '@date' => $element['value']['#max'],
-          )));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be after @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('The date in %field may not be after @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
         }
       }
 
@@ -833,25 +870,64 @@ function date_h5widget_element_validate($element, &$form_state) {
         $date2 = new BackdropDateTime($string2, $timezone);
         // Compare to limit range, if set.
         if (isset($min_date) && $date2 < $min_date) {
-          form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be before @date.', array(
-            '@date' => $element['value']['#min'],
-          )));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be before @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be before @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
         }
         if (isset($max_date) && $date2 > $max_date) {
-          form_set_error(implode('][', $element['#parents']) . '][value2', t('The end date may not be after @date.', array(
-            '@date' => $element['value']['#max'],
-          )));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be after @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be after @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
         }
         $values[$delta]['offset2'] = $date2->getOffset();
         $date2->setTimezone(new DateTimeZone($timezone_db));
         $values[$delta]['value2'] = _date_h5widget_format_value_db($date2, $field_type);
         if ($date2 <= $date) {
-          form_error($element, t('The end date must be greater than the start date.'));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field must be greater than the start date.', array(
+              '!delta' => ($delta + 1),
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field must be greater than the start date.', array(
+              '%field' => $field_label,
+            )));
+          }
         }
       }
       else {
         if (!empty($element['value2']['#required']) && $delta < 1) {
-          form_set_error(implode('][', $element['#parents']) . '][value2', t('An end date is required.'));
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('An end date for value #1 is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('An end date is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
         }
         // Function date_field_validate chokes otherwise.
         $values[$delta]['value2'] = NULL;
