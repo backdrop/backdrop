@@ -22,9 +22,8 @@
  * software.
  *
  * Image toolkits are discovered based on the associated module's
- * hook_image_toolkits. Additionally the image toolkit include file must be
- * identified in the files array in the module.info file. The toolkit must then
- * be enabled using the admin/config/media/image-toolkit form.
+ * hook_image_toolkits. The toolkit must then be enabled using the
+ * admin/config/media/image-toolkit form.
  *
  * Only one toolkit may be selected at a time. If a module author wishes to call
  * a specific toolkit they can check that it is installed by calling
