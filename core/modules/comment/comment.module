@@ -403,13 +403,13 @@ function comment_permission() {
       'title' => t('Administer comment settings'),
       'description' => t('Configure comment settings per content type.'),
       'restrict access' => TRUE,
-      'warning' => t('Change the comment settings for each content type, including disabling comments.'),
+      'warning' => t('Allows to change comment settings for each content type and disable comments.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
       'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
       'restrict access' => TRUE,
-      'warning' => t('Users can delete all comments.'),
+      'warning' => t('Allows to delete all comments.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -420,12 +420,12 @@ function comment_permission() {
     'skip comment approval' => array(
       'title' => t('Skip comment approval'),
       'restrict access' => TRUE,
-      'warning' => t('Users could post spam or offensive comments that become immediately visible to every user.'),
+      'warning' => t('Allows to post spam or offensive comments that become immediately visible to every visitor.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
       'restrict access' => TRUE,
-      'warning' => t('Users could edit their approved comments, without further approvals.'),
+      'warning' => t('Allows to edit already approved comments, without the need of further approvals.'),
     ),
   );
 }
