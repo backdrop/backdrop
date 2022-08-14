@@ -94,6 +94,16 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         ),
       ),
     );
+    $form['color']['custom_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Name'),
+      '#attributes' => array('data-custom-name' => 'custom-name'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="scheme"]' => array('value' => ''),
+        ),
+      ),
+    );
 
     $form['color']['palette'] = array(
       '#type' => 'container',
@@ -369,10 +379,28 @@ function color_get_info($theme) {
 
   if (!isset($color_info[$theme])) {
     $info = array(); // The variable to be populated by the theme color.inc file.
-    $path = backdrop_get_path('theme', $theme);
-    $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
-    if ($path && file_exists($file)) {
-      include $file;
+    $config_names = config_get_names_with_prefix('color.' . $theme);
+    if (!empty($config_names)) {
+    // Check for a default color config for this theme.
+      if (in_array('color.' . $theme . '.default', $config_names)) {
+        $default_name = 'color.' . $theme . '.default';
+      }
+      else {
+        $default_name = $config_names[0];
+      }
+      $info = config_get($default_name);
+      foreach ($config_names as $config_name) {
+        $data = config_get($config_name);
+        $info['schemes'] += $data['schemes'];
+      }
+    }
+
+    if (!$info) {
+      $path = backdrop_get_path('theme', $theme);
+      $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
+      if ($path && file_exists($file)) {
+        include $file;
+      }
     }
 
     $themes = list_themes();
@@ -402,6 +430,25 @@ function color_get_info($theme) {
   }
 
   return $color_info[$theme];
+}
+
+/**
+ * Implements hook_themes_enabled().
+ */
+function color_themes_enabled($theme_list) {
+  foreach ($theme_list as $theme) {
+    // Don't use color_get_info() here because that function aggregates all
+    // color palettes from all custom config files, and we don't want to save
+    // custom config data in the default file.
+    $path = backdrop_get_path('theme', $theme);
+    $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
+    if ($path && file_exists($file)) {
+      include $file;
+      $config = config('color.' . $theme . '.default');
+      $config->setData($info);
+      $config->save();
+    }
+  }
 }
 
 /**
@@ -511,10 +558,11 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Resolve palette.
   $palette = $form_state['values']['palette'];
-  if ($form_state['values']['scheme'] != '') {
+  $scheme = $form_state['values']['scheme'];
+  if ($scheme != '') {
     foreach ($palette as $key => $color) {
-      if (isset($info['schemes'][$form_state['values']['scheme']]['colors'][$key])) {
-        $palette[$key] = $info['schemes'][$form_state['values']['scheme']]['colors'][$key];
+      if (isset($info['schemes'][$scheme]['colors'][$key])) {
+        $palette[$key] = $info['schemes'][$scheme]['colors'][$key];
       }
     }
     $palette += $info['schemes']['default']['colors'];
@@ -527,6 +575,38 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Save all the values into form state for saving to config.
   $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
+
+  // Save any custom palettes to config.
+  $config_names = config_get_names_with_prefix('color.' . $theme);
+
+  // This is a custom scheme; save a new config.
+  if ($scheme == '') {
+    array_pop($info['schemes']);
+    $custom_name = check_plain($form_state['values']['custom_name']);
+    if (empty($custom_name)) {
+      $number = count($info['schemes']) + 1;
+      $custom_name = t('Custom !number', array('!number' => $number));
+    }
+    $custom_machine_name = system_transliterate_machine_name(strtolower($custom_name));
+    $info['schemes'] = array();
+    $info['schemes'][$custom_machine_name] = array(
+      'title' => $custom_name,
+      'colors' => $palette,
+    );
+    $config = config('color.' . $theme . '.' . $custom_machine_name);
+    $config->setData($info);
+    $config->save();
+  }
+  // This is an existing custom config.
+  // @Todo: This doesn't yet work, as any manipulation of color values creates
+  // a new "custom" palette.
+  else {
+    if (in_array('color.' . $theme . '.' . $scheme, $config_names)) {
+      $config = config('color.' . $theme . '.' . $scheme);
+      $config->set('colors', $palette);
+      $config->save();
+    }
+  }
 }
 
 /**

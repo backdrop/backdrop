@@ -43,6 +43,7 @@ Backdrop.behaviors.color = {
   attach: function (context) {
     var settings = document.getElementById('edit-scheme').dataset;
     var schemes = JSON.parse(settings.colorSchemes);
+    var $nameField = $('input[data-custom-name]').parent();
     // This behavior attaches by ID, so is only valid once on a page.
     var form = $('#system-theme-settings .color-form', context).once('color');
     if (form.length === 0) {
@@ -64,6 +65,7 @@ Backdrop.behaviors.color = {
           }
         }
         updatePreview();
+        $nameField.hide();
       }
     });
 
@@ -71,7 +73,11 @@ Backdrop.behaviors.color = {
       var schemeName =  document.getElementById('edit-scheme').value;
       var key = this.dataset.colorName;
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
+        $nameField.show();
         resetScheme();
+      }
+      else {
+        $nameField.hide();
       }
       updatePreview();
     });
