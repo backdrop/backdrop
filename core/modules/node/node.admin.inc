@@ -210,8 +210,8 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
   node_delete_multiple(array_keys($form_state['values']['nodes']));
   cache_clear_all();
   $count = count($form_state['values']['nodes']);
-  watchdog('content', 'Deleted @count posts.', array('@count' => $count));
+  watchdog('content', 'Deleted @count content items.', array('@count' => $count));
 
-  backdrop_set_message(format_plural($count, 'Deleted 1 content type.', 'Deleted @count content types.'));
+  backdrop_set_message(format_plural($count, 'Deleted 1 content item.', 'Deleted @count content items.'));
   $form_state['redirect'] = 'admin/content';
 }
