@@ -633,6 +633,10 @@ function search_index($sid, $module, $text) {
   $text = str_replace(array('<', '>'), array(' <', '> '), $text);
   $text = strip_tags($text, '<' . implode('><', array_keys($tags)) . '>');
 
+  // Remove any stray greater than or less than symbols that might not be
+  // properly HTML encoded.
+  $text = str_replace(array('< ', ' >'), ' ', $text);
+
   // Split HTML tags from plain text.
   $split = preg_split('/\s*<([^>]+?)>\s*/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
   // Note: PHP ensures the array consists of alternating delimiters and literals
@@ -654,7 +658,7 @@ function search_index($sid, $module, $text) {
       list($tagname) = explode(' ', $value, 2);
       $tagname = backdrop_strtolower($tagname);
       // Closing or opening tag?
-      if ($tagname[0] == '/') {
+      if (strpos($tagname, '/') === 0) {
         $tagname = substr($tagname, 1);
         // If we encounter unexpected tags, reset score to avoid incorrect boosting.
         if (!count($tagstack) || $tagstack[0] != $tagname) {
