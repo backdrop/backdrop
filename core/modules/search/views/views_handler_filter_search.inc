@@ -13,6 +13,13 @@ class views_handler_filter_search extends views_handler_filter {
   var $always_multiple = TRUE;
 
   /**
+   * Set to always required, as the query for this filter should always run.
+   *
+   * Special handling of results is done with "On empty input" option.
+   */
+  var $always_required = TRUE;
+
+  /**
    * Stores a viewsSearchQuery object to be able to use the search.module "api".
    *
    * @var viewsSearchQuery
@@ -92,6 +99,18 @@ class views_handler_filter_search extends views_handler_filter {
       if (count($this->search_query->words()) == 0) {
         form_set_error($key, format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
       }
+    }
+  }
+
+  /**
+   * Set the value field to not be required in the search form.
+   *
+   * This filter's query will always be run, but the value is not required.
+   */
+  function exposed_translate(&$form, $type) {
+    parent::exposed_translate($form, $type);
+    if ($type === 'value') {
+      $form['#required'] = FALSE;
     }
   }
 
