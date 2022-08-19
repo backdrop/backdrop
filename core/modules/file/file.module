@@ -512,8 +512,7 @@ function file_entity_info() {
  * URI callback for file entities.
  */
 function file_uri($file) {
-  $uri['path'] = 'file/' . $file->fid;
-  return $uri;
+  return $file->uri();
 }
 
 /**
