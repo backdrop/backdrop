@@ -148,6 +148,12 @@ description = Test the core views_handler_field handler.
 group = Views Handlers
 file = handlers/views_handler_field.test
 
+[ViewsHandlerFieldBulkFormTest]
+name = Field: Bulk form
+description = Test the core views_handler_field_bulk_form.
+group = Views Handlers
+file = handlers/views_handler_field_bulk_form.test
+
 [ViewsHandlerFilterMultipleTest]
 name = Filter: Multiple conditions
 description = Tests multiple filters on a single display.
@@ -327,3 +333,9 @@ name = Test the view class
 description = Tests some  functionality of the view class.
 group = Views
 file = views_view.test
+
+[ViewsTranslatableTest]
+name = 'Views Translatable Test'
+description = 'Tests the pluggable translations'
+group = Views
+file = views_translatable.test

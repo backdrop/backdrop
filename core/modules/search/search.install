@@ -202,6 +202,29 @@ function search_update_1001() {
 }
 
 /**
+ * Set all search blocks with 'default' title to 'custom' title with 'Search'.
+ */
+function search_update_1002() {
+  $config_names = config_get_names_with_prefix('layout.layout.');
+  foreach ($config_names as $config_file) {
+    $config = config($config_file);
+    $data = $config->get();
+    foreach ($data['content'] as $hash => $block) {
+      if ($block['plugin'] == 'search:form') {
+        $has_title_display = isset($block['data']['settings']['title_display']);
+        if ($has_title_display && $block['data']['settings']['title_display'] == 'default') {
+          $data['content'][$hash]['data']['settings']['title_display'] = 'custom';
+          $data['content'][$hash]['data']['settings']['title'] = 'Search';
+        }
+      }
+    }
+    // Save the config.
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

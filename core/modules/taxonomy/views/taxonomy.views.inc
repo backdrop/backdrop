@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for taxonomy.module.
@@ -111,6 +110,15 @@ function taxonomy_views_data() {
       'help' => t('Taxonomy term name.'),
       'many to one' => TRUE,
       'empty field name' => t('Uncategorized'),
+    ),
+  );
+
+  // Aliased path to term.
+  $data['taxonomy_term_data']['term_path'] = array(
+    'title' => t('Path'),
+    'help' => t('The aliased path to this taxonomy term.'),
+    'field' => array(
+      'handler' => 'views_handler_field_term_path',
     ),
   );
 

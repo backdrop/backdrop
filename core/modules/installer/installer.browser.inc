@@ -413,7 +413,7 @@ function installer_browser_get_destination_after_install() {
   $theme = in_array('theme', $types);
   $module = in_array('module', $types);
 
-  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage layout templates on the layouts !link page.', array('!link' => l(t('Settings'), 'admin/structure/layouts/settings')));
+  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage layout templates on the layouts !link page.', array('!link' => l(t('Templates'), 'admin/structure/layouts/settings')));
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no
@@ -512,7 +512,7 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
         ),
       ),
     );
-    
+
   }
 
   return backdrop_render($build);
@@ -588,7 +588,7 @@ function installer_browser_add_remove_queue_dialog_link_submit($form, &$form_sta
 function installer_browser_check_zip_loaded() {
   $zip_loaded = array_key_exists('zip', archiver_get_info());
   if (!$zip_loaded) {
-    backdrop_set_message(t('Sorry, it seems that the PHP .zip extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed. Please contact your website administrator.'), 'warning', FALSE);
+    backdrop_set_message(t('The Zip PHP extension is not loaded on your server. You will not be able to download any projects using Project Installer until this is fixed.'), 'warning', FALSE);
   }
   return $zip_loaded;
 }

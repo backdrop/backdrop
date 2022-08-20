@@ -27,6 +27,10 @@ class DashboardCreateBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Content creation links');
   }
 
@@ -34,6 +38,10 @@ class DashboardCreateBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Links to create new content.');
   }
 
