@@ -70,17 +70,17 @@ define('COMMENT_NODE_OPEN', 2);
 /**
  * Auto generated comment titles.
  */
-define('COMMENT_TITLE_AUTO', 0);
+define('COMMENT_TITLE_AUTO', 'auto');
 
 /**
  * Custom comment titles.
  */
-define('COMMENT_TITLE_CUSTOM', 1);
+define('COMMENT_TITLE_CUSTOM', 'custom');
 
 /**
  * Hidden comment titles.
  */
-define('COMMENT_TITLE_HIDDEN', 2);
+define('COMMENT_TITLE_HIDDEN', 'hidden');
 
 
 /**
