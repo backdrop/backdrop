@@ -22,6 +22,7 @@ class views_plugin_display_block extends views_plugin_display {
 
     $options['block_description'] = array('default' => '', 'translatable' => TRUE);
     $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
+    $options['block_hide_empty'] = array('default' => FALSE);
 
     $options['allow'] = array(
       'contains' => array(
@@ -94,17 +95,19 @@ class views_plugin_display_block extends views_plugin_display {
    * The display block handler returns the structure necessary for a block.
    */
   function execute() {
-    $output = NULL;
     // Prior to this being called, the $view should already be set to this
     // display, and arguments should be set on the view.
     $rendered_view = $this->view->render();
-    if (!empty($this->view->result) || $this->get_option('empty') || !empty($this->view->style_plugin->definition['even empty'])) {
-      $output = array(
+
+    if ($this->output_is_empty() && !$this->get_option('block_hide_empty') && empty($this->view->style_plugin->definition['even empty'])) {
+      return NULL;
+    }
+    else {
+      return array(
         'content' => $rendered_view,
         'subject' => filter_xss_admin($this->view->get_title()),
       );
     }
-    return $output;
   }
 
   /**
@@ -160,6 +163,12 @@ class views_plugin_display_block extends views_plugin_display {
       'category' => 'block',
       'title' => t('Allow settings override'),
       'value' => empty($filtered_allow) ? t('None') : ($allow === $filtered_allow ? t('All') : t('Some')),
+    );
+
+    $options['block_hide_empty'] = array(
+      'category' => 'block',
+      'title' => t('Show block if the view output is empty'),
+      'value' => $this->get_option('block_hide_empty') ? t('Yes') : t('No'),
     );
 
     $types = $this->block_caching_modes();
@@ -367,6 +376,17 @@ class views_plugin_display_block extends views_plugin_display {
 
         break;
 
+      case 'block_hide_empty':
+        $form['#title'] .= t('Block empty settings');
+
+        $form['block_hide_empty'] = array(
+          '#title' => t('Show block if no result/empty text'),
+          '#type' => 'checkbox',
+          '#description' => t('Show the block if there is no result and no empty text and no header/footer which is shown on empty result'),
+          '#default_value' => $this->get_option('block_hide_empty'),
+        );
+        break;
+
       case 'exposed_form_options':
         $this->view->init_handlers();
         if (!$this->uses_exposed() && parent::uses_exposed()) {
@@ -405,6 +425,9 @@ class views_plugin_display_block extends views_plugin_display {
       case 'inherit_path':
       case 'block_caching':
         $this->set_option($form_state['section'], $form_state['values'][$form_state['section']]);
+        break;
+      case 'block_hide_empty':
+        $this->set_option('block_hide_empty', $form_state['values']['block_hide_empty']);
         break;
     }
   }
