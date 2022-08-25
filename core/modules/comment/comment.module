@@ -185,27 +185,6 @@ function comment_theme() {
  * Implements hook_menu().
  */
 function comment_menu() {
-  $items['admin/content/comment'] = array(
-    'title' => 'Manage comments',
-    'description' => 'List and edit site comments and the comment approval queue.',
-    'page callback' => 'comment_admin',
-    'access arguments' => array('administer comments'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'comment.admin.inc',
-  );
-  // Tabs begin here.
-  $items['admin/content/comment/new'] = array(
-    'title' => 'Published comments',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['admin/content/comment/approval'] = array(
-    'title' => 'Unapproved comments',
-    'title callback' => 'comment_count_unpublished',
-    'page arguments' => array('approval'),
-    'access arguments' => array('administer comments'),
-    'type' => MENU_LOCAL_TASK,
-  );
   $items['comment/%'] = array(
     'title' => 'Comment permalink',
     'page callback' => 'comment_permalink',
@@ -245,6 +224,14 @@ function comment_menu() {
     'file' => 'comment.admin.inc',
     'weight' => 2,
   );
+  $items['admin/content/comment/delete'] = array(
+    'title' => 'Confirm comment deletion',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('comment_multiple_delete_confirm'),
+    'access arguments' => array('administer comments'),
+    'file' => 'comment.admin.inc',
+  );
   $items['comment/reply/%node'] = array(
     'title' => 'Add comment',
     'page callback' => 'comment_reply',
@@ -273,6 +260,20 @@ function comment_menu_alter(&$items) {
 }
 
 /**
+ * Implements hook_url_outbound_alter().
+ */
+function comment_url_outbound_alter(&$path, &$options, $original_path) {
+  // Include a security token in the query if approving from the
+  // manage comments pages.
+  $include_match = preg_match('/comment\/[1-9]+\/approve/', $path);
+  //Exclude if it already has a token.
+  $exclude_match = !preg_match('/token=/', $path);
+  if ($include_match && $exclude_match) {
+    $options['query']['token'] = backdrop_get_token($path);
+  }
+}
+
+/**
  * Loads the comment bundle name corresponding a given content type.
  *
  * This function is used as a menu loader callback in comment_menu().
@@ -291,16 +292,6 @@ function comment_menu_node_type_load($name) {
   if ($type = node_type_get_type(strtr($name, array('-' => '_')))) {
     return 'comment_node_' . $type->type;
   }
-}
-
-/**
- * Returns a menu title which includes the number of unapproved comments.
- */
-function comment_count_unpublished() {
-  $count = db_query('SELECT COUNT(cid) FROM {comment} WHERE status = :status', array(
-    ':status' => COMMENT_NOT_PUBLISHED,
-  ))->fetchField();
-  return t('Unapproved comments (@count)', array('@count' => $count));
 }
 
 /**
@@ -2275,18 +2266,25 @@ function comment_action_info() {
       'type' => 'comment',
       'callback' => 'comment_unpublish_action',
     ),
+    'comment_delete_action' => array(
+      'label' => t('Delete comment'),
+      'type' => 'comment',
+      'callback' => 'comment_delete_action',
+    ),
   );
 }
 
 /**
  * Publishes a comment.
  *
- * @param $comment
- *   The comment object.
+ * @param Comment $comment
+ *   A comment entity.
+ * @param $context
+ *   Contextual information about the triggered action.
  *
  * @ingroup actions
  */
-function comment_publish_action($comment, $context = array()) {
+function comment_publish_action(Comment $comment, $context = array()) {
   $comment->status = COMMENT_PUBLISHED;
   $comment->save();
 }
@@ -2294,17 +2292,46 @@ function comment_publish_action($comment, $context = array()) {
 /**
  * Unpublishes a comment.
  *
- * @param $comment
- *   An optional comment object.
- * @param array $context
- *   Array with components:
+ * @param Comment $comment
+ *   A comment entity.
+ * @param $context
+ *   Contextual information about the triggered action.
  *   - 'cid': Comment ID. Required if $comment is not given.
  *
  * @ingroup actions
  */
-function comment_unpublish_action($comment, $context = array()) {
+function comment_unpublish_action(Comment $comment, $context = array()) {
   $comment->status = COMMENT_NOT_PUBLISHED;
   $comment->save();
+}
+
+/**
+ * Deletes a comment.
+ *
+ * @param Comment $comment
+ *   A comment entity.
+ * @param $context
+ *   Contextual information about the triggered action.
+ *   - 'cid': Comment ID. Required if $comment is not given.
+ *
+ * @ingroup actions
+ */
+function comment_delete_action(Comment $comment, &$context) {
+  // Save the list of comments to be deleted in the session. Append to the existing
+  // list if within the last minute, otherwise start a new list of comments.
+  $last_action_time = 0;
+  if (isset($_SESSION['comment_delete_action'])) {
+    $last_action_time = $_SESSION['comment_delete_action']['timestamp'];
+  }
+  if (REQUEST_TIME - $last_action_time > 60) {
+    $_SESSION['comment_delete_action'] = array(
+      'timestamp' => REQUEST_TIME,
+      'cids' => array(),
+    );
+  }
+
+  $_SESSION['comment_delete_action']['cids'][] = $comment->cid;
+  $context['redirect'] = 'admin/content/comment/delete';
 }
 
 /**
