@@ -33,7 +33,7 @@ class Layout {
   var $module;
 
   /**
-   * The internal path of a layout.
+   * The internal (primary) path of a layout.
    *
    * The layout path must match the provided menu item path. Set and get this
    * variable's value with Layout::getPath() and Layout::setPath().
@@ -41,6 +41,18 @@ class Layout {
    * @var string
    */
   private $path;
+
+  /**
+   * Alternative URL paths of a layout.
+   *
+   * This layout may be applied to paths that match any of these paths, which
+   * may contain wildcards, so long as the system paths have the same number of
+   * placeholders as the primary path of the layout. Set and get this
+   * variable's value with Layout::getUrlPaths() and Layout::setUrlPaths().
+   *
+   * @var string
+   */
+  private $url_paths;
 
   /**
    * The weight of this layout compared with other layouts at the same path.
@@ -281,6 +293,7 @@ class Layout {
 
     $data = array(
       'path' => $this->path,
+      'url_paths' => $this->url_paths,
       'name' => $this->name,
       'title' => $this->title,
       'description' => $this->description,
@@ -639,7 +652,7 @@ class Layout {
   }
 
   /**
-   * Set a layout path.
+   * Set a layout's primary path.
    */
   function setPath($path) {
     if (empty($this->menu_item) || $this->menu_item->path !== $path) {
@@ -687,6 +700,22 @@ class Layout {
     else {
       return $this->path;
     }
+  }
+
+  /**
+   * Set a layout's URL paths.
+   */
+  function setUrlPaths($url_paths) {
+    $this->url_paths = $url_paths;
+  }
+
+  /**
+   * Return a layout's URL paths.
+   *
+   * @return string
+   */
+  function getUrlPaths() {
+    return $this->url_paths;
   }
 
   /**
