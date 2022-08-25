@@ -847,13 +847,14 @@ function node_form_submit_build_node($form, &$form_state) {
  * @see node_delete_confirm_submit()
  */
 function node_delete_confirm($form, &$form_state, $node) {
+  backdrop_set_message(t('This action cannot be undone!'), 'warning');
   $form['#node'] = $node;
   // Always provide entity id in the same form key as in the entity edit form.
   $form['nid'] = array('#type' => 'value', '#value' => $node->nid);
   return confirm_form($form,
-    t('Are you sure you want to delete %title?', array('%title' => $node->title)),
+    t('Are you sure you want to delete the @content_type %title?', array('@content_type' => $node->type, '%title' => $node->title)),
     'node/' . $node->nid,
-    t('This action cannot be undone.'),
+    t('If you need to hide content from site visitors, you may consider unpublishing it instead.'),
     t('Delete'),
     t('Cancel')
   );
