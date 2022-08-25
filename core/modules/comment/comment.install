@@ -471,6 +471,75 @@ function comment_update_1007() {
 }
 
 /**
+ * Replace any "Recent comments" blocks previously provided by comment.module
+ * with blocks provided by block displays of the "Recent comments" view.
+ */
+function comment_update_1004() {
+
+  // Enable the "Recent comments" view if not already enabled.
+  $view = views_get_view('comments_recent');
+  if (!views_view_is_enabled($view)) {
+    $view->disabled = FALSE;
+    $view->save();
+  }
+
+  $layouts = layout_load_all();
+
+// Go through each layout...
+  foreach ($layouts as $layout) {
+    // ...load their config file...
+    $layout_config_file = 'layout.layout.' . $layout->name;
+    $layout_config = config($layout_config_file);
+    // ...and within each layout go through each block...
+    foreach ($layout->content as $block) {
+      // ...and get the block plugin, module and delta values from their config.
+      $block_plugin = config_get($layout_config_file, 'content.' . $block->uuid . '.plugin');
+      $block_module = config_get($layout_config_file, 'content.' . $block->uuid . '.data.module');
+      $block_delta = config_get($layout_config_file, 'content.' . $block->uuid . '.data.delta');
+      // If the block is the "Recent comments" block provided by the
+      // comment.module...
+      if ($block_plugin === 'comment:recent' && $block_module === 'comment' && $block_delta === 'recent') {
+        // ...store its layout in an associative array keyed by the block uuid.
+        $recent_comments_blocks[$block->uuid] = $layout->name;
+      }
+    }
+  }
+
+  // If there were no "Recent comments" blocks found in any layout, then there
+  // is nothing to do (other than enabling the "Recent comments" view).
+  // If "Recent comments" blocks have been found,...
+  if (count($recent_comments_blocks) !== 0) {
+    // ...then go through each one of them...
+    foreach ($recent_comments_blocks as $block_uuid => $layout_name) {
+      // ...load its layout...
+      $layout_config_file = 'layout.layout.' . $layout_name;
+      $layout_config = config($layout_config_file);
+      // ...and get its "Number of recent comments" setting.
+      $comment_count = config_get($layout_config_file, 'content.' . $block_uuid . '.data.settings.block_settings.comment_count');
+      // Then create a new block display in the "Recent comments" view and set
+      // the pager for that block display to be the same as the "Number of
+      // recent comments" setting for the block that was provided by the
+      // comment.module.
+      $recent_comments_view_config = config('views.view.comments_recent');
+      config_set('views.view.comments_recent', 'display.block_' . $block_uuid . '.display_options.pager.options.items_per_page', $comment_count);
+      $recent_comments_view_config->save();
+      // Finally change the "Recent comments" block from being provided by the
+      // commnet.module to being provided by the "Recent comments" view...
+      config_set($layout_config_file, 'content.' . $block_uuid . '.plugin', 'views:comments_recent-block');
+      config_set($layout_config_file, 'content.' . $block_uuid . '.data.module', 'views');
+      // ...and specifically by the new block display that was created earlier.
+      config_set($layout_config_file, 'content.' . $block_uuid . '.data.delta', 'comments_recent-block_' . $block_uuid);
+      $layout_config->save();
+      // Also delete the "Number of recent comments" value which is valid only
+      // for the block provided by the comment.module and which can now be set
+      // in the "Recent comments" view instead.
+      //config_set($layout_config_file, 'content.' . $block->uuid . '.data.settings', []);
+    }
+  }
+
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
