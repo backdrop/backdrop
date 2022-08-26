@@ -1006,7 +1006,6 @@ function _date_html5_get_default_value(array $field, array $instance, $langcode)
   $values = reset($date_defaults);
   $timezone_db = $values['timezone_db'];
   $timezone = $values['timezone'];
-  $type = $values['date_type'];
   $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
   $timestep = empty($granularity['second']) ? 60 : 1;
 
