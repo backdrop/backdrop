@@ -382,14 +382,15 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 
     $value = '';
     $has_todate = !empty($field_settings['todate']);
+    if ($delta == 0) {
+      $default = _date_html5_get_default_value($field, $instance, $langcode);
+    }
+
     if (isset($items[$delta]['value'])) {
       $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
     }
     elseif ($delta == 0) {
-      $default = _date_html5_get_default_value($field, $instance, $langcode);
-      if (!empty($default)) {
-        $value = $default[0];
-      }
+      $value = $default['start'];
     }
     $element['value'] = array(
       '#type' => $type,
@@ -407,6 +408,9 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $value2 = '';
       if (isset($items[$delta]['value2'])) {
         $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
+      }
+      elseif ($delta == 0) {
+        $value2 = $default['end'];
       }
       $element['value2'] = array(
         '#type' => $type,
@@ -993,34 +997,24 @@ function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db,
  * @return array
  */
 function _date_html5_get_default_value(array $field, array $instance, $langcode) {
-  $default = array();
+  $default = array(
+    'start' => NULL,
+    'end' => NULL,
+  );
   $granularity = $field['settings']['granularity'];
-  $date_default = date_default_value($field, $instance, $langcode);
-  if (empty($date_default[0]['value'])) {
-    return $default;
-  }
+  $date_defaults = date_default_value($field, $instance, $langcode);
+  $values = reset($date_defaults);
+  $timezone_db = $values['timezone_db'];
+  $timezone = $values['timezone'];
+  $type = $values['date_type'];
+  $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
+  $timestep = empty($granularity['second']) ? 60 : 1;
 
-  $timezone_db = $date_default[0]['timezone_db'];
-  $timezone = $date_default[0]['timezone'];
-  foreach ($date_default as $delta => $values) {
-    $timestamp = $values['value'];
-    if ($values['date_type'] != 'datestamp') {
-      $date = new BackdropDateTime($values['value'], $timezone_db);
-      if ($timezone != $timezone_db) {
-        $date->setTimezone(new DateTimeZone($timezone));
-      }
-      $timestamp = $date->format('U');
-    }
-    if (!empty($granularity['hour'])) {
-      $time_format = !empty($granularity['second']) ? 'H:i:s' : 'H:i';
-      $default[$delta] = array(
-        'date' => format_date($timestamp, 'custom', 'Y-m-d'),
-        'time' => format_date($timestamp, 'custom', $time_format),
-      );
-    }
-    else {
-      $default[$delta] = format_date($timestamp, 'custom', 'Y-m-d');
-    }
+  if (!empty($values['value'])) {
+    $default['start'] = _date_html5_get_form_value($values['value'], $type, $timestep, $timezone_db, $timezone);
+  }
+  if (!empty($values['value2'])) {
+    $default['end'] = _date_html5_get_form_value($values['value2'], $type, $timestep, $timezone_db, $timezone);
   }
 
   return $default;
