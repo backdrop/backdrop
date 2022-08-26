@@ -905,8 +905,10 @@ function date_default_value_part($item, $field, $instance, $langcode, $part = 'v
       return NULL;
     }
     else {
+      // Consider timestamps.
+      $string = is_numeric($item[0]['value']) ? '@' . $item[0]['value'] : $item[0]['value'];
       // The date stored in 'value' has already been switched to the db timezone.
-      $date = new BackdropDateTime($item[0]['value'], $timezone_db, DATE_FORMAT_DATETIME);
+      $date = new BackdropDateTime($string, $timezone_db, DATE_FORMAT_DATETIME);
     }
   }
   // Special case for 'now' when using dates with no timezone,
