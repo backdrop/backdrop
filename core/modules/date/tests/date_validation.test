@@ -15,7 +15,7 @@ class DateValidationTestCase extends DateFieldBasic {
     // Attempts to create text date field stored as a date with default settings
     // (from input which is not valid).
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
-      foreach (array('date_select', 'date_popup', 'date_text', 'date_h5widget') as $widget_type) {
+      foreach (array('date_select', 'date_popup', 'date_text', 'date_html5') as $widget_type) {
         $field_name = 'field_test';
         $label = 'Test';
         $options = array(
@@ -28,8 +28,8 @@ class DateValidationTestCase extends DateFieldBasic {
         $this->createDateField($options);
 
         // Malformed date test won't work on date_select, which won't allow
-        // invalid input. Similar with date_h5widget, which falls back to "now".
-        if ($widget_type != 'date_select' && $widget_type != 'date_h5widget') {
+        // invalid input. Similar with date_html5, which falls back to "now".
+        if ($widget_type != 'date_select' && $widget_type != 'date_html5') {
           $this->malFormedDate($field_name, $field_type, $widget_type);
         }
 
@@ -135,7 +135,7 @@ class DateValidationTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value][date]'] = '12/10/2011';
       $edit[$field_name . '[und][0][value][time]'] = '';
     }
-    elseif ($widget_type == 'date_h5widget') {
+    elseif ($widget_type == 'date_html5') {
       $edit[$field_name . '[und][0][value][date]'] = '2011-12-10';
       $edit[$field_name . '[und][0][value][time]'] = '';
     }

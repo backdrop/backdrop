@@ -265,7 +265,7 @@ class DateFieldTestCase extends DateFieldBasic {
   public function testField() {
     // Create a date fields with simple values.
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
-      foreach (array('date_select', 'date_popup', 'date_text', 'date_h5widget') as $widget_type) {
+      foreach (array('date_select', 'date_popup', 'date_text', 'date_html5') as $widget_type) {
         $field_name = "field_test_$widget_type";
         $label = 'Test';
         $options = array(
@@ -321,7 +321,7 @@ class DateFieldTestCase extends DateFieldBasic {
         $edit[$field_name . '[und][0][value2][time]'] = '11:30am';
       }
     }
-    elseif ($widget_type == 'date_h5widget') {
+    elseif ($widget_type == 'date_html5') {
       $edit[$field_name . '[und][0][value][date]'] = '2010-10-07';
       $edit[$field_name . '[und][0][value][time]'] = '10:30';
       if ($todate) {

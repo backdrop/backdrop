@@ -301,7 +301,7 @@ function date_field_widget_info() {
   $info['date_select']['settings']['no_fieldset'] = FALSE;
 
   // HTML5 widget with slightly different settings.
-  $info['date_h5widget'] = array(
+  $info['date_html5'] = array(
     'label' => t('HTML5 widget'),
     'field types' => array('date', 'datetime', 'datestamp'),
     'settings' => array(
@@ -355,7 +355,7 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   module_load_include('inc', 'date', 'date.elements');
 
   // The HTML5 widget differs quite a bit.
-  if ($instance['widget']['type'] == 'date_h5widget') {
+  if ($instance['widget']['type'] == 'date_html5') {
     if (!isset($form['#entity'])) {
       // Prevent additional default value and useless token browser on the
       // settings form.
@@ -371,8 +371,8 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
     $timestep = empty($granularity['second']) ? 60 : 1;
 
-    $date_limits = _date_h5widget_get_date_limits($widget_settings['limits']);
-    $attributes = _date_h5widget_get_attributes($date_limits, $granularity);
+    $date_limits = _date_html5_get_date_limits($widget_settings['limits']);
+    $attributes = _date_html5_get_attributes($date_limits, $granularity);
 
     $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
     $timezone = date_get_timezone($field_settings['tz_handling']);
@@ -383,10 +383,10 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $value = '';
     $has_todate = !empty($field_settings['todate']);
     if (isset($items[$delta]['value'])) {
-      $value = _date_h5widget_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
+      $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
     }
     elseif ($delta == 0) {
-      $default = _date_h5widget_get_default_value($field, $instance, $langcode);
+      $default = _date_html5_get_default_value($field, $instance, $langcode);
       if (!empty($default)) {
         $value = $default[0];
       }
@@ -406,7 +406,7 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     if ($has_todate) {
       $value2 = '';
       if (isset($items[$delta]['value2'])) {
-        $value2 = _date_h5widget_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
+        $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
       }
       $element['value2'] = array(
         '#type' => $type,
@@ -428,8 +428,8 @@ function date_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 
     // Prevent running again for every additional field item.
     if ($delta == 0) {
-      $element['#element_validate'] = array('date_h5widget_element_validate');
-      $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date_h5widget.css';
+      $element['#element_validate'] = array('date_html5_element_validate');
+      $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date-html5.css';
     }
 
     // Wrap in a fieldset or not, set labels accordingly.
@@ -660,8 +660,8 @@ function date_field_instance_settings_form($field, $instance) {
  */
 function date_field_widget_settings_form($field, $instance) {
   module_load_include('inc', 'date', 'date.admin');
-  if ($instance['widget']['type'] == 'date_h5widget') {
-    return _date_h5widget_field_widget_settings_form($instance);
+  if ($instance['widget']['type'] == 'date_html5') {
+    return _date_html5_field_widget_settings_form($instance);
   }
   return _date_field_widget_settings_form($field, $instance);
 }
@@ -683,7 +683,7 @@ function date_field_settings_form($field, $instance, $has_data) {
  * @return array
  *   Widget settings form structure.
  */
-function _date_h5widget_field_widget_settings_form(array $instance) {
+function _date_html5_field_widget_settings_form(array $instance) {
   $settings = $instance['widget']['settings'];
   $form = array();
 
@@ -750,7 +750,7 @@ function _date_h5widget_field_widget_settings_form(array $instance) {
  * @param array $form_state
  *   The form state of this form submission.
  */
-function date_h5widget_element_validate($element, &$form_state) {
+function date_html5_element_validate(array $element, array &$form_state) {
   $field_name = $element['#field_name'];
 
   if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
@@ -856,7 +856,7 @@ function date_h5widget_element_validate($element, &$form_state) {
       // We captured the offset, now we switch to the timezone the date field
       // expects.
       $date->setTimezone(new DateTimeZone($timezone_db));
-      $values[$delta]['value'] = _date_h5widget_format_value_db($date, $field_type);
+      $values[$delta]['value'] = _date_html5_format_value_db($date, $field_type);
 
       if (!empty($date_values['value2']) && $date_only) {
         $end = $date_values['value2'];
@@ -900,7 +900,7 @@ function date_h5widget_element_validate($element, &$form_state) {
         }
         $values[$delta]['offset2'] = $date2->getOffset();
         $date2->setTimezone(new DateTimeZone($timezone_db));
-        $values[$delta]['value2'] = _date_h5widget_format_value_db($date2, $field_type);
+        $values[$delta]['value2'] = _date_html5_format_value_db($date2, $field_type);
         if ($date2 <= $date) {
           if ($multi_value) {
             form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field must be greater than the start date.', array(
@@ -954,7 +954,7 @@ function date_h5widget_element_validate($element, &$form_state) {
  *
  * @return array
  */
-function _date_h5widget_get_form_value($value_orig, $type, $timestep, $timezone_db, $timezone) {
+function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db, $timezone) {
   $needs_conversion = ($timezone_db != $timezone);
   if (is_numeric($value_orig)) {
     $datetime = new DateTime('@' . $value_orig, new DateTimeZone('UTC'));
@@ -992,7 +992,7 @@ function _date_h5widget_get_form_value($value_orig, $type, $timestep, $timezone_
  *
  * @return array
  */
-function _date_h5widget_get_default_value(array $field, array $instance, $langcode) {
+function _date_html5_get_default_value(array $field, array $instance, $langcode) {
   $default = array();
   $granularity = $field['settings']['granularity'];
   $date_default = date_default_value($field, $instance, $langcode);
@@ -1036,7 +1036,7 @@ function _date_h5widget_get_default_value(array $field, array $instance, $langco
  *
  * @return string
  */
-function _date_h5widget_format_value_db(BackdropDateTime $datetime, $field_type) {
+function _date_html5_format_value_db(BackdropDateTime $datetime, $field_type) {
   $date_string = '';
   switch ($field_type) {
     case 'datestamp':
@@ -1063,7 +1063,7 @@ function _date_h5widget_format_value_db(BackdropDateTime $datetime, $field_type)
  *
  * @return array
  */
-function _date_h5widget_get_date_limits(array $limit_settings) {
+function _date_html5_get_date_limits(array $limit_settings) {
   $date_limits = array(
     'min' => NULL,
     'max' => NULL,
@@ -1095,7 +1095,7 @@ function _date_h5widget_get_date_limits(array $limit_settings) {
  *
  * @return array
  */
-function _date_h5widget_get_attributes(array $date_limits, array $granularity) {
+function _date_html5_get_attributes(array $date_limits, array $granularity) {
   $attributes = array();
   $has_time = !empty($granularity['hour']);
 
