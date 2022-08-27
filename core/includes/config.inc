@@ -596,6 +596,8 @@ class Config {
    *   All of the data from this config object.
    *
    * @see Config::get()
+   *
+   * @since 1.23.0 Method added.
    */
   public function getData() {
     return $this->get();
