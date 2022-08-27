@@ -2029,7 +2029,7 @@ class FileUnitTestCase extends FileTestHelper {
 
     // Test the entity URI callback.
     $uri = entity_uri('file', $file);
-    $this->assertEqual($uri['path'], $file->uri);
+    $this->assertEqual($uri, $file->uri());
   }
 
   /**

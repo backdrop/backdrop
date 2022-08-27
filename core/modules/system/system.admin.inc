@@ -397,7 +397,7 @@ function system_theme_default() {
 }
 
 /**
- * Form builder; display theme configuration for entire site and individual themes.
+ * Form builder; display configuration for individual themes.
  *
  * @param $key
  *   A theme name.
@@ -1386,7 +1386,8 @@ function system_site_information_settings_validate($form, &$form_state) {
   // Handle file uploads.
   $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
-  // Check for a new uploaded logo.
+  // Check for a new uploaded logo, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_logo_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1400,7 +1401,8 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for a new uploaded favicon.
+  // Check for a new uploaded favicon, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_favicon_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1499,6 +1501,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   if ($form_state['values']['site_logo_path']) {
@@ -1522,6 +1526,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   // If the user entered a path relative to the system files directory for

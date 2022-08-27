@@ -1,9 +1,8 @@
 <?php
-
 /**
-* @file
-* Provides Unicode-related conversions and operations.
-*/
+ * @file
+ * Provides Unicode-related conversions and operations.
+ */
 
 /**
  * Indicates an error during check for PHP unicode support.

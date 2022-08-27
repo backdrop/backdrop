@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the base system for language support.

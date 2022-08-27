@@ -801,6 +801,13 @@ function admin_bar_theme_settings() {
     ),
   );
 
+  $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
+  $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
+  $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+
   $form['actions'] = array(
     '#type' => 'actions',
   );

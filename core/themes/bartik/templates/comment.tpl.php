@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Bartik's theme implementation for comments.

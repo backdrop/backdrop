@@ -3335,7 +3335,7 @@ function system_header_block($settings) {
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
   if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));
@@ -4386,6 +4386,24 @@ function system_admin_paths() {
     'admin/reports/status/php' => FALSE,
   );
   return $paths;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function system_file_download($uri) {
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  if ($additional_public_schemes) {
+    $scheme = file_uri_scheme($uri);
+    if (in_array($scheme, $additional_public_schemes, TRUE)) {
+      return array(
+        // Returning any header grants access, and setting the 'Cache-Control'
+        // header is appropriate for public files.
+        'Cache-Control' => 'public',
+      );
+    }
+  }
 }
 
 /**

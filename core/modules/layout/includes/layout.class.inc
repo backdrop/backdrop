@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class for loading, modifying, and executing a layout.
@@ -788,7 +787,7 @@ class Layout {
    * @return LayoutContext[]
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
-    $contexts_cache = &backdrop_static(__FUNCTION__, array());
+    $contexts_cache = &backdrop_static(__METHOD__, array());
     if (isset($contexts_cache[$this->name])) {
       return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
@@ -810,16 +809,18 @@ class Layout {
       }
     }
 
-    // Load contexts from paths and menu items.
-    if ($this->menu_item) {
-      $this->contexts += $this->menu_item->getContexts();
-    }
-    elseif ($this->path) {
-      $this->contexts += layout_context_required_by_path($this->path);
+    // Load contexts from paths or menu items if available.
+    if ($this->menu_item || $this->path) {
+      if ($this->menu_item) {
+        $this->contexts += $this->menu_item->getContexts();
+      }
+      else {
+        $this->contexts += layout_context_required_by_path($this->path);
+      }
     }
 
     // Load contexts from relationships.
-    if (empty($contexts_cache[$this->name]) || $include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
+    if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {
       $this->contexts += $this->getContextsFromRelationships();
     }
 
@@ -879,6 +880,7 @@ class Layout {
    */
   function clearContexts($key) {
     unset($this->contexts[$key]);
+    backdrop_static_reset('Layout::getContexts');
   }
 
   /**
