@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains a search filter handler.
