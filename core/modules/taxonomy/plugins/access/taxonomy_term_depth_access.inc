@@ -7,7 +7,7 @@
     /**
      * Constructor for a Layout access rule.
      */
-    function __construct($plugin_name, array $data = array()) {
+    public function __construct($plugin_name, array $data = array()) {
       parent::__construct($plugin_name, $data);
       $this->settings += array(
         'depth' => array()
@@ -17,7 +17,7 @@
     /**
      * {@inheritdoc}
      */
-    function form(&$form, &$form_state) {
+    public function form(&$form, &$form_state) {
       parent::form($form, $form_state);
 
       $form['depth'] = array(
@@ -42,7 +42,7 @@
     /**
      * {@inheritdoc}
      */
-    function formSubmit($form, &$form_state) {
+    public function formSubmit($form, &$form_state) {
       parent::formSubmit($form, $form_state);
       $this->settings['depth'] = $form_state['values']['depth'];
     }
@@ -50,7 +50,7 @@
     /**
      * {@inheritdoc}
      */
-    function summary() {
+    public function summary() {
       if (isset($this->settings['depth'])) {
         return t('Taxonomy term depth: @depth', array('@depth' => $this->settings['depth']));
       }
@@ -61,7 +61,7 @@
     /**
      * {@inheritdoc}
      */
-    function checkAccess() {
+    public function checkAccess() {
       if (!isset($this->contexts['taxonomy_term']->data)) {
         return FALSE;
       };
@@ -85,7 +85,7 @@
      * @return int
      *   An integer representing how many levels deep your term is nested.
      */
-    function getTermDepth($tid) {
+    public function getTermDepth($tid) {
       $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", array(':tid' => $tid))->fetchField();
       if ($parent == 0) {
         return 1;
