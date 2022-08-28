@@ -698,7 +698,7 @@ function _date_html5_field_widget_settings_form(array $instance) {
   );
   $form['limits']['mode'] = array(
     '#type' => 'radios',
-    '#title' => t('Limit base'),
+    '#title' => t('Limits'),
     '#options' => array(
       'none' => t('No limit'),
       'byyear' => t('By year'),
