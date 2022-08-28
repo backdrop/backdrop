@@ -4383,7 +4383,7 @@ function form_validate_email(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   if ($value !== '' && !valid_email_address($value)) {
-    form_error($element, t('The e-mail address %mail is not valid.', array('%mail' => $value)));
+    form_error($element, t('The email address %mail is not valid.', array('%mail' => $value)));
   }
 }
 

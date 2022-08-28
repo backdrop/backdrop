@@ -1337,40 +1337,12 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
   foreach ($layouts as $layout) {
     // Contexts must have their data set before the layout's access may be
     // checked.
-    $contexts = $layout->getContexts();
-    foreach ($contexts as $context) {
-      if (isset($context->position)) {
-        // If the menu router set the data for a context object or a client did
-        // so via hook_layout_load_by_router_item_alter(), we don't need to do
-        // any setting here. But if $context->data is not an object, then it is
-        // either a raw string that must be converted to an object by a load
-        // callback or it is a string pass-through.
-        if (!is_object($context->data)) {
-          // If clients replaced any layout with one whose placeholders are in a
-          // new position, they need to have altered $context->position so that
-          // it points to the right place in the router item to get the data
-          // object.
-          if (isset($router_item['map'][$context->position])) {
-            $context_data = $router_item['map'][$context->position];
-            // If the router item contains the context object in the right
-            // position, then we can just set the data from that.
-            if (is_object($context_data)) {
-              $context->setData($context_data);
-            }
-            else {
-              // If the context data was not an object, then we can try to set
-              // it using the plugin's load callback. If there is no callback,
-              // then it must be a string pass-through, so we leave it as is.
-              $context_info = layout_get_context_info($context->plugin);
-              if (isset($context_info['load callback'])) {
-                $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$context->position]));
-              }
-              $context->setData($context_data);
-            }
-          }
-        }
-      }
+    $menu_contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_MENU);
+    foreach ($menu_contexts as $menu_context) {
+      $menu_context->setDataFromRouterMap($router_item['map']);
     }
+    backdrop_static_reset('Layout::getContexts');
+
     if (!$layout->disabled && $layout->checkAccess()) {
       $selected_layout = $layout;
       break;
@@ -1728,7 +1700,8 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
   // Block "plugins" for Layouts are wrappers around the generic block system.
   $broken_class = NULL;
   if ($plugin_type === 'block') {
-    list($module, $delta) = explode(':', $plugin_name);
+    $parts = explode(':', $plugin_name);
+    list($module, $delta) = $parts;
     $info = layout_get_block_info($module, $delta);
     if ($info) {
       if (isset($info['class'])) {
@@ -1736,6 +1709,15 @@ function layout_get_handler_name($plugin_type, $plugin_name) {
       }
       else {
         $class_name = 'BlockLegacy';
+      }
+      // Field blocks use the field name as the third part of the plugin name.
+      // If the field no longer exists, return a broken block.
+      if ($delta == 'field_block' && isset($parts[2])) {
+        $field_name = $parts[2];
+        $available_fields = field_get_block_list();
+        if (empty($available_fields[$field_name])) {
+          $class_name = 'BlockBroken';
+        }
       }
     }
     else {
@@ -2520,4 +2502,11 @@ function _layout_clean_custom_css($classes = array()) {
   }
 
   return '';
+}
+
+/**
+ * Implements hook_field_delete_instance().
+ */
+function layout_field_delete_instance($instance) {
+  cache('layout_path')->flush();
 }

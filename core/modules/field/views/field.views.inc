@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide Views data and handlers for field.module.

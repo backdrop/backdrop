@@ -6,6 +6,8 @@ jobs:
   simpletest:
     name: Simpletest batches
     runs-on: ubuntu-20.04
+    # Skip this job if the PR title contains "[skip tests]".
+    if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
     timeout-minutes: 20
     strategy:
       fail-fast: false

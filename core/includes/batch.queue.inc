@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Queue handlers used by the Batch API.

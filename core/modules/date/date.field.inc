@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field hooks to implement a date field.

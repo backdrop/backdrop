@@ -87,7 +87,8 @@ function layout_test_block_view($delta = '', $settings = array(), $contexts = ar
 
     case 'bar':
       $block['subject'] = 'Bar subject';
-      $block['content'] = format_string('The user name is @name and the node title is @title', array('@name' => $contexts['my_user']->name, '@title' => $contexts['my_node']->title));
+      $mail = !empty($contexts['my_user']->mail) ? $contexts['my_user']->mail : 'unavailable';
+      $block['content'] = format_string('The user email is @mail and the node title is @title', array('@mail' => $mail, '@title' => $contexts['my_node']->title));
       break;
 
     case 'test_node_title':

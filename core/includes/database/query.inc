@@ -1,12 +1,12 @@
 <?php
 /**
- * @addtogroup database
- * @{
+ * @file
+ * Non-specific Database query code. Used by all engines.
  */
 
 /**
- * @file
- * Non-specific Database query code. Used by all engines.
+ * @addtogroup database
+ * @{
  */
 
 /**
