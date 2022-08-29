@@ -471,40 +471,43 @@ function comment_update_1007() {
 }
 
 /**
- * New setting for comment titles. Replacing comment_subject_field
- * with comment_title_options.
+ * Replace comment_subject_field setting with comment_title_options.
  */
 function comment_update_1008() {
   foreach (config_get_names_with_prefix('node.type.') as $config_name) {
     $config = config($config_name);
     $comment_title = $config->get('settings.comment_subject_field');
-    if ($comment_title == COMMENT_TITLE_AUTO) {
-      // Check to see if contrib module is installed and preserve settings.
-      if (module_exists('comment_hide_subject')) {
-        $config->set('settings.comment_title_options', COMMENT_TITLE_HIDDEN);
-      } 
-      else {
-        $config->set('settings.comment_title_options', COMMENT_TITLE_AUTO);   
-      }
+
+    // If the old config value has already been removed, do nothing.
+    if (is_null($comment_title)) {
+      continue;
     }
-    else {
+
+    // If comment title was previously enabled, use the custom title option.
+    if ($comment_title) {
       $config->set('settings.comment_title_options', COMMENT_TITLE_CUSTOM);
     }
-    $config->save();
-    // Remove old comment_subject_title setting
-    foreach (node_type_get_types() as $type_name => $node_type) {
-      if (isset($node_type->settings['comment_subject_field'])) {
-        unset($node_type->settings['comment_subject_field']);
+    else {
+      // Check to see if contrib module comment_hide_subject is installed and
+      // preserve the setting to hide comment titles entirely.
+      if (module_exists('comment_hide_subject')) {
+        $config->set('settings.comment_title_options', COMMENT_TITLE_HIDDEN);
+      }
+      // Otherwise, the previous behavior was to display an automatically
+      // generated title.
+      else {
+        $config->set('settings.comment_title_options', COMMENT_TITLE_AUTO);
       }
     }
-    node_type_save($node_type);
+    // Remove the previous setting.
+    $config->clear('settings.comment_subject_field');
+    $config->save();
   }
 
-  // Now disable and uninstall contrib module.
-  $path = backdrop_get_path('module', 'comment_hide_subject');
+  // Now disable and uninstall comment_hide_subject contrib module if present.
   if (module_exists('comment_hide_subject')) {
-    module_disable(array('comment_hide_subject'));
-    backdrop_uninstall_modules(array('comment_hide_subject'));
+    $path = backdrop_get_path('module', 'comment_hide_subject');
+    db_query("DELETE FROM {system} WHERE name = 'comment_hide_subject' AND type = 'module'");
     backdrop_set_message(t('The contributed module <em>Comment Hide Subject</em> is located at %path. The module has been disabled and uninstalled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
