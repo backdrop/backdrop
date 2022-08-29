@@ -85,7 +85,7 @@
      * @return int
      *   An integer representing how many levels deep your term is nested.
      */
-    public function getTermDepth($tid) {
+    protected function getTermDepth($tid) {
       $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", array(':tid' => $tid))->fetchField();
       if ($parent == 0) {
         return 1;
