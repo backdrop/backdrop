@@ -28,9 +28,9 @@
       );
 
       $code  = '<code>';
-      $code .= 'State (1st level, <strong>depth 1</strong>)<br />';
-      $code .= '- City (2nd level, <strong>depth 2</strong>)<br />';
-      $code .= '&nbsp; - Neighborhood (3rd level, <strong>depth 3</strong>)';
+      $code .= t('State (1st level, <strong>depth 1</strong>)') . '<br />';
+      $code .= '- ' . t('City (2nd level, <strong>depth 2</strong>)') . '<br />';
+      $code .= '&nbsp; - ' . t('Neighborhood (3rd level, <strong>depth 3</strong>)');
       $code .= '</code>';
 
       $form['depth_example'] = array(
