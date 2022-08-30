@@ -1110,6 +1110,8 @@ function taxonomy_autoload_info() {
     'TaxonomyTerm' => 'taxonomy.entity.inc',
     'TaxonomyTermController' => 'taxonomy.entity.inc',
     'TaxonomyVocabulary' => 'taxonomy_vocabulary.class.inc',
+    // Layout plugins.
+    'TaxonomyTermDepthLayoutAccess' => 'layout/taxonomy_term_depth_access.inc',
     // Views handlers.
     'views_handler_argument_taxonomy' => 'views/views_handler_argument_taxonomy.inc',
     'views_handler_argument_term_node_tid' => 'views/views_handler_argument_term_node_tid.inc',
@@ -1129,6 +1131,21 @@ function taxonomy_autoload_info() {
     'views_plugin_argument_validate_taxonomy_term' => 'views/views_plugin_argument_validate_taxonomy_term.inc',
     'views_plugin_argument_default_taxonomy_tid' => 'views/views_plugin_argument_default_taxonomy_tid.inc',
   );
+}
+
+/**
+ * Implements hook_layout_access_info().
+ */
+function taxonomy_layout_access_info() {
+  $info['taxonomy_term_depth'] = array(
+    'title' => t('Taxonomy term: Depth'),
+    'description' => t('Control access by how deep your term is nested.'),
+    'class' => 'TaxonomyTermDepthLayoutAccess',
+    'required contexts' => array(
+      'taxonomy_term' => 'taxonomy_term',
+    ),
+  );
+  return $info;
 }
 
 /**
