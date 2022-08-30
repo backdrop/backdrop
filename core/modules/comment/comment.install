@@ -485,18 +485,18 @@ function comment_update_1008() {
 
     // If comment title was previously enabled, use the custom title option.
     if ($comment_title) {
-      $config->set('settings.comment_title_options', COMMENT_TITLE_CUSTOM);
+      $config->set('settings.comment_title_options', 'custom');
     }
     else {
       // Check to see if contrib module comment_hide_subject is installed and
       // preserve the setting to hide comment titles entirely.
       if (module_exists('comment_hide_subject')) {
-        $config->set('settings.comment_title_options', COMMENT_TITLE_HIDDEN);
+        $config->set('settings.comment_title_options', 'hidden');
       }
       // Otherwise, the previous behavior was to display an automatically
       // generated title.
       else {
-        $config->set('settings.comment_title_options', COMMENT_TITLE_AUTO);
+        $config->set('settings.comment_title_options', 'auto');
       }
     }
     // Remove the previous setting.
