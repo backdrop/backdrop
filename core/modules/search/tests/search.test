@@ -692,7 +692,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
       'settings' => array(
         'comment_default' => COMMENT_NODE_OPEN,
         'comment_preview' => BACKDROP_OPTIONAL,
-        'comment_subject_field' => TRUE,
+        'comment_title_options' => COMMENT_TITLE_CUSTOM,
       ),
     ));
     $full_html_format = (object) array(
