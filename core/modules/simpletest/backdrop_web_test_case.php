@@ -3664,33 +3664,37 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Asserts that a checkbox/radio field in the current page is checked.
    *
-   * @param $id
+   * @param string $id
    *   ID attribute of field to assert.
-   * @param $message
+   * @param string $message
    *   Message to display.
-   * @return
+   * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
     $type = $this->xpath('//input[@id=:id]/@type', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message ? $message : t('@type field @id is checked/selected.', array('@type' => $type, '@id' => $id)), $group);
+    $message = $message ? $message : format_string('@type field @id is checked/selected.', array('@type' => $type, '@id' => $id));
+
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message, $group);
   }
 
   /**
    * Asserts that a checkbox/radio field in the current page is not checked.
    *
-   * @param $id
+   * @param string $id
    *   ID attribute of field to assert.
-   * @param $message
+   * @param string $message
    *   Message to display.
-   * @return
+   * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
     $type = $this->xpath('//input[@id=:id]/@type', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message ? $message : t('@type field @id is not checked/selected.', array('@type' => $type, '@id' => $id)), $group);
+    $message = $message ? $message : format_string('@type field @id is not checked/selected.', array('@type' => $type, '@id' => $id));
+
+    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message , $group);
   }
 
   /**
