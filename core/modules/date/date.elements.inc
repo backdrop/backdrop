@@ -2194,3 +2194,203 @@ function _date_html5_get_attributes(array $date_limits, array $granularity) {
 
   return $attributes;
 }
+
+/**
+ * Helper for the default widget form.
+ *
+ * @param array $field
+ *   The field structure.
+ * @param array $instance
+ *   The field instance.
+ * @param string $langcode
+ *   The language associated with $items.
+ * @param array $items
+ *   Array of default values for this field.
+ * @param int $delta
+ *   The order of this item in the array of subelements (0, 1, 2, etc).
+ * @param array $base
+ *   A form element array containing basic properties for the widget.
+ *
+ * @return array
+ *   The form elements for a single widget for this field.
+ */
+function _date_default_field_widget_form($field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
+
+  // If this is a new entity, populate the field with the right default values.
+  // This happens early so even fields later hidden with #access get those values.
+  // We should only add default values to new entities, to avoid over-writing
+  // a value that has already been set. This means we can't just check to see
+  // if $items is empty, because it might have been set that way on purpose.
+  // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
+
+  // We check !isset($items[$delta]['value']) because entity translation may create
+  // a new translation entity for an existing entity and we don't want to clobber
+  // values that were already set in that case.
+  // @see http://drupal.org/node/1478848.
+
+  $is_default = FALSE;
+  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
+    $items = date_default_value($field, $instance, $langcode);
+    $is_default = TRUE;
+  }
+
+  $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
+
+  // TODO see if there's a way to keep the timezone element from ever being
+  // nested as array('timezone' => 'timezone' => value)). After struggling
+  // with this a while, I can find no way to get it displayed in the form
+  // correctly and get it to use the timezone element without ending up
+  // with nesting.
+  if (is_array($timezone)) {
+    $timezone = $timezone['timezone'];
+  }
+
+  $element += array(
+    '#type' => 'date_combo',
+    '#theme_wrappers' => array('date_combo'),
+    '#weight' => $delta,
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#date_timezone' => $timezone,
+    '#element_validate' => array('date_combo_validate'),
+    '#date_is_default' => $is_default,
+
+    // Store the original values, for use with disabled and hidden fields.
+    '#date_items' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+
+  if ($field['settings']['tz_handling'] == 'date') {
+    $element['timezone'] = array(
+      '#type' => 'date_timezone',
+      '#theme_wrappers' => array('date_timezone'),
+      '#delta' => $delta,
+      '#default_value' => $timezone,
+      '#weight' => $instance['widget']['weight'] + 1,
+      '#date_label_position' => $instance['widget']['settings']['label_position'],
+    );
+  }
+
+  // Make changes if instance is set to be rendered as a regular field.
+  if ($instance['widget']['settings']['no_fieldset']) {
+    $element['#title'] = NULL;
+    $element['#theme_wrappers'] = array();
+    $element['#date_title_printed'] = FALSE;
+  } else {
+    $element['#title'] = $instance['label'];
+    $element['#date_title_printed'] = TRUE;
+  }
+
+  return $element;
+}
+
+/**
+ * Helper for the HTML5 widget form.
+ *
+ * @param array $field
+ *   The field structure.
+ * @param array $instance
+ *   The field instance.
+ * @param string $langcode
+ *   The language associated with $items.
+ * @param array $items
+ *   Array of default values for this field.
+ * @param int $delta
+ *   The order of this item in the array of subelements (0, 1, 2, etc).
+ * @param array $base
+ *   A form element array containing basic properties for the widget.
+ *
+ * @return array
+ *   The form elements for a single widget for this field.
+ */
+function _date_html5_field_widget_form($field, $instance, $langcode, $items, $delta, $element) {
+  $field_settings = $field['settings'];
+  $widget_settings = $instance['widget']['settings'];
+
+  // We have to take some liberties here: only two types of "granularity",
+  // date with or without time. Time eventually without seconds.
+  $granularity = array_filter($field_settings['granularity']);
+  $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
+  $timestep = empty($granularity['second']) ? 60 : 1;
+
+  $date_limits = _date_html5_get_date_limits($widget_settings['limits']);
+  $attributes = _date_html5_get_attributes($date_limits, $granularity);
+
+  $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
+  $timezone = date_get_timezone($field_settings['tz_handling']);
+  if (isset($items[$delta]['timezone'])) {
+    $timezone = $items[$delta]['timezone'];
+  }
+
+  $value = '';
+  $has_todate = !empty($field_settings['todate']);
+  if ($delta == 0) {
+    $default = _date_html5_get_default_value($field, $instance, $langcode);
+  }
+
+  if (isset($items[$delta]['value'])) {
+    $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
+  } elseif ($delta == 0) {
+    $value = $default['start'];
+  }
+  $element['value'] = array(
+    '#type' => $type,
+    '#title' => ($has_todate) ? t('Start date') : t('Date'),
+    '#default_value' => $value,
+    '#required' => ($instance['required'] && $delta == 0),
+    '#attributes' => $attributes,
+    '#date_timezone' => $timezone,
+    '#timezone_db' => $timezone_db,
+    '#min' => $date_limits['min'],
+    '#max' => $date_limits['max'],
+  );
+
+  if ($has_todate) {
+    $value2 = '';
+    if (isset($items[$delta]['value2'])) {
+      $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
+    } elseif ($delta == 0) {
+      $value2 = $default['end'];
+    }
+    $element['value2'] = array(
+      '#type' => $type,
+      '#title' => t('End date'),
+      '#default_value' => $value2,
+      '#required' => (($field_settings['todate'] != 'optional') && $delta == 0),
+      '#attributes' => $attributes,
+      '#date_timezone' => $timezone,
+    );
+  }
+  if ($field_settings['tz_handling'] == 'date') {
+    $element['timezone'] = array(
+      '#type' => 'date_timezone',
+      '#title' => t('Timezone'),
+      '#date_label_position' => NULL,
+      '#default_value' => isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : '',
+    );
+  }
+
+  // Prevent running again for every additional field item.
+  if ($delta == 0) {
+    $element['#element_validate'] = array('date_html5_element_validate');
+    $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date-html5.css';
+  }
+
+  // Wrap in a fieldset or not, set labels accordingly.
+  if ($widget_settings['no_fieldset']) {
+    if ($field['cardinality'] == '1') {
+      $element['value']['#title'] = check_plain($instance['label']);
+      if (!empty($instance['description'])) {
+        $element['value']['#description'] = field_filter_xss($instance['description']);
+      }
+    }
+  } else {
+    $element['#theme_wrappers'][] = 'fieldset';
+    $element['#title'] = check_plain($instance['label']);
+    $element['#description'] = field_filter_xss($instance['description']);
+  }
+  $element['#field_name'] = $field['field_name'];
+  $element['#field_type'] = $field['type'];
+  $element['#field_label'] = $instance['label'];
+
+  return $element;
+}
