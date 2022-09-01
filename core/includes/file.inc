@@ -456,7 +456,7 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
     if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
       return backdrop_chmod($directory);
     }
-    return FALSE;
+    return is_dir($directory);
   }
   // The directory exists, so check to see if it is writable.
   $writable = is_writable($directory);
