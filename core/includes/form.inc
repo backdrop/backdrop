@@ -1469,11 +1469,15 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       $is_empty_value = ($elements['#value'] === 0);
       $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
-        // Although discouraged, a #title is not mandatory for form elements. In
-        // case there is no #title, we cannot set a form error message.
-        // Instead of setting no #title, form constructors are encouraged to set
-        // #title_display to 'invisible' to improve accessibility.
-        if (isset($elements['#title'])) {
+        // Use a custom required message if provided.
+        if (isset($elements['#required_message'])) {
+          form_error($elements, $elements['#required_message']);
+        }
+        // A #title is not mandatory for form elements, but without it we cannot
+        // set a form error message. So when a visible title is undesirable,
+        // form constructors are encouraged to set #title anyway, and then set
+        // #title_display to 'invisible'. This improves accessibility.
+        elseif (isset($elements['#title'])) {
           form_error($elements, $t('!name field is required.', array('!name' => $elements['#title'])));
         }
         else {
@@ -1493,6 +1497,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         call_user_func_array($function, array(&$elements, &$form_state, $form_state['complete_form']));
       }
     }
+
     $elements['#validated'] = TRUE;
   }
 
