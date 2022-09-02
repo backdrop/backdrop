@@ -41,8 +41,12 @@ Backdrop.behaviors.userFieldsetSummaries = {
       // Signature.
       var $signature = $context.find('textarea[name="signature[value]"]');
       if ($signature.length && $signature.val().length) {
-        vals.push(Backdrop.t('Signature'));
+        var signatureText = Backdrop.t('Signature');
       }
+      else {
+        var signatureText = Backdrop.t('No signature');
+      }
+      vals.push(signatureText);
 
       // Picture.
       var $pictureNew = $context.find('input[name="files[picture_upload]"]');
