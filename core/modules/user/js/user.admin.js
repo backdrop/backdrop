@@ -45,9 +45,9 @@ Backdrop.behaviors.userFieldsetSummaries = {
       }
 
       // Picture.
-      var pictureNew = $context.find('input[name="files[picture_upload]"]');
-      var pictureExisting = $context.find('.user-picture');
-      if ((pictureNew.length && pictureNew.val().length) || pictureExisting.length) {
+      var $pictureNew = $context.find('input[name="files[picture_upload]"]');
+      var $pictureExisting = $context.find('.user-picture');
+      if (($pictureNew.length && $pictureNew.val().length) || $pictureExisting.length) {
         vals.push(Backdrop.t('Picture'));
       }
 
