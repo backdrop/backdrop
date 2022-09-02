@@ -2490,7 +2490,7 @@ function system_user_timezone(&$form, &$form_state) {
     '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['regional_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
+    $form['region_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
 }
