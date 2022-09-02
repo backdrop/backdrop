@@ -204,7 +204,7 @@ function locale_form_alter(&$form, &$form_state, $form_id) {
       $selector['locale']['#type'] = 'container';
       $form['regional_language'] += $selector;
       if ($form_id == 'user_register_form') {
-        $form['regional_language']['locale']['#access'] = user_access('administer users');
+        $form['region_language']['locale']['#access'] = user_access('administer users');
       }
     }
   }
