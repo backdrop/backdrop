@@ -2131,6 +2131,7 @@ function theme_breadcrumb($variables) {
  *   The HTML output.
  *
  * @since 1.18.4 "footer" key added to $variables parameter.
+ * @since 1.23.1 optional "initial_click_sort" key added to $header.
  */
 function theme_table(array $variables) {
   $header = (array) $variables['header'];
