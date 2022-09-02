@@ -51,7 +51,7 @@ function tablesort_header($cell, $header, $ts) {
       // the user. It is "asc" by default but the sort can be changed if
       // $cell['initial_click_sort'] is defined. The possible values are "asc"
       // or "desc".
-      $ts['sort'] = $cell['initial_click_sort'] ? $cell['initial_click_sort'] : 'asc';
+      $ts['sort'] = isset($cell['initial_click_sort']) ? $cell['initial_click_sort'] : 'asc';
 
       $image = '';
     }
