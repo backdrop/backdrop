@@ -985,7 +985,7 @@ function user_account_form(&$form, &$form_state) {
     $form['#validate'][] = 'user_validate_picture';
   }
 
-  $form['regional_language'] = array(
+  $form['region_language'] = array(
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
     '#weight' => 6,
