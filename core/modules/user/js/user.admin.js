@@ -39,7 +39,7 @@ Backdrop.behaviors.userFieldsetSummaries = {
       var vals = [];
 
       // Signature.
-      var signature = $context.find('textarea[name="signature[value]"]');
+      var $signature = $context.find('textarea[name="signature[value]"]');
       if (signature.length && signature.val().length) {
         vals.push(Backdrop.t('Signature'));
       }
