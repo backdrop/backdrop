@@ -52,8 +52,12 @@ Backdrop.behaviors.userFieldsetSummaries = {
       var $pictureNew = $context.find('input[name="files[picture_upload]"]');
       var $pictureExisting = $context.find('.user-picture');
       if (($pictureNew.length && $pictureNew.val().length) || $pictureExisting.length) {
-        vals.push(Backdrop.t('Picture'));
+        var pictureText = Backdrop.t('Picture');
       }
+      else {
+        var pictureText = Backdrop.t('No picture');
+      }
+      vals.push(pictureText);
 
       return Backdrop.checkPlain(vals.join(', '));
     });
