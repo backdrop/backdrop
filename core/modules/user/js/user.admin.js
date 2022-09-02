@@ -59,9 +59,9 @@ Backdrop.behaviors.userFieldsetSummaries = {
       var vals = [];
 
       // Timezone.
-      var timezone = $context.find('select[name="timezone"]');
-      if (timezone.length && timezone.val().length) {
-        vals.push($.trim(timezone.val()));
+      var $timezone = $context.find('select[name="timezone"]');
+      if ($timezone.length && $timezone.val().length) {
+        vals.push($.trim($timezone.val()));
       }
 
       // Language.
