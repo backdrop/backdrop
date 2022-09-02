@@ -19,8 +19,8 @@ Backdrop.behaviors.userFieldsetSummaries = {
 
       // Roles.
       var roles = [];
-      var checkedRoles = $context.find('input[name^="roles"]:not([disabled]):checked');
-      checkedRoles.each(function() {
+      var $checkedRoles = $context.find('input[name^="roles"]:not([disabled]):checked');
+      $checkedRoles.each(function() {
         roles.push($.trim($(this).parent().find('label').text()));
       });
       if (roles.length) {
