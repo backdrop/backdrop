@@ -2482,7 +2482,7 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['regional_language']['timezone'] = array(
+  $form['region_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
