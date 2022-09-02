@@ -23,7 +23,7 @@ function user_autocomplete($string = '') {
 /** 
  * Menu callback for reset password form.
  * 
- * @since 1.23.0 Replaces user_pass() as menu callback.
+ * @since 1.22.3 Replaces user_pass() as menu callback.
  * 
  * @see user_pass()
  */

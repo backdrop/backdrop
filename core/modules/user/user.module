@@ -3097,7 +3097,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 /** 
  * Menu callback to create a new account. 
  * 
- * @since 1.23.0 Replaces user_register_form() as menu callback.
+ * @since 1.22.3 Replaces user_register_form() as menu callback.
  * 
  * @see user_register_form()
  */
