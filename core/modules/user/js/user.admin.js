@@ -76,16 +76,12 @@ Backdrop.behaviors.userFieldsetSummaries = {
 
     // Contact form.
     $context.find('fieldset#edit-contact').backdropSetSummary(function() {
-      var vals = [];
-
       if ($context.find('input[name="contact"]:checked').length) {
-        vals.push(Backdrop.t('Enabled'));
+        return Backdrop.t('Enabled');
       }
       else {
-        vals.push(Backdrop.t('Disabled'));
+        return Backdrop.t('Disabled');
       }
-
-      return Backdrop.checkPlain(vals.join(', '));
     });
   }
 };
