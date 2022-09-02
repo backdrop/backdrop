@@ -2041,11 +2041,15 @@ function theme_breadcrumb($variables) {
  *   - header: An array containing the table headers. Each element of the array
  *     can be either a localized string or an associative array with the
  *     following keys:
- *     - "data": The localized title of the table column.
- *     - "field": The database field represented in the table column (required
+ *     - data: The localized title of the table column.
+ *     - field: The database field represented in the table column (required
  *       if user is to be able to sort on this column).
- *     - "sort": A default sort order for this column ("asc" or "desc").
- *     - "class": An array of values for the 'class' attribute. In particular,
+ *     - sort: A default sort order for this column ("asc" or "desc"). Only
+ *       one column should be given a default sort order because table sorting
+ *       only applies to one column at a time.
+ *     - initial_click_sort: Set the initial sort of the column when clicked.
+ *       Defaults to "asc".
+ *     - class: An array of values for the 'class' attribute. In particular,
  *       the least important columns that can be hidden on narrow and medium
  *       width screens should have a 'priority-low' class, referenced with the
  *       RESPONSIVE_PRIORITY_LOW constant. Columns that should be shown on
@@ -2064,14 +2068,14 @@ function theme_breadcrumb($variables) {
  *     for the table footer.
  *   - rows: An array of table rows. Every row is an array of cells, or an
  *     associative array with the following keys:
- *     - "data": an array of cells
+ *     - data: an array of cells
  *     - Any HTML attributes, such as "class", to apply to the table row.
- *     - "no_striping": a boolean indicating that the row should receive no
+ *     - no_striping: a boolean indicating that the row should receive no
  *       'even / odd' styling. Defaults to FALSE.
  *     Each cell can be either a string or an associative array with the
  *     following keys:
- *     - "data": The string to display in the table cell.
- *     - "header": Indicates this cell is a header.
+ *     - data: The string to display in the table cell.
+ *     - header: Indicates this cell is a header.
  *     - Any HTML attributes, such as "colspan", to apply to the table cell.
  *     Here's an example for $rows:
  *     @code
