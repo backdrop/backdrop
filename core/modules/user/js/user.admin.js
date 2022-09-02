@@ -65,9 +65,9 @@ Backdrop.behaviors.userFieldsetSummaries = {
       }
 
       // Language.
-      var language = $context.find('input[name="language"]:checked');
-      if (language.length) {
-        vals.push($.trim(language.parent().find('label').text()));
+      var $language = $context.find('input[name="language"]:checked');
+      if ($language.length) {
+        vals.push($.trim($language.parent().find('label').text()));
       }
 
       return Backdrop.checkPlain(vals.join(', '));
