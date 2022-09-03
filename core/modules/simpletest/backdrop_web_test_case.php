@@ -3673,8 +3673,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    $type = $this->xpath('//input[@id=:id]/@type', array(':id' => $id));
-    $message = $message ? $message : format_string('@type field @id is checked/selected.', array('@type' => $type, '@id' => $id));
+    $message = $message ? $message : format_string('@type field @id is checked/selected.', array('@type' => $elements[0]['type'], '@id' => $id));
 
     return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message, $group);
   }
@@ -3691,8 +3690,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertNoFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    $type = $this->xpath('//input[@id=:id]/@type', array(':id' => $id));
-    $message = $message ? $message : format_string('@type field @id is not checked/selected.', array('@type' => $type, '@id' => $id));
+    $message = $message ? $message : format_string('@type field @id is not checked/selected.', array('@type' => $elements[0]['type'], '@id' => $id));
 
     return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message , $group);
   }
