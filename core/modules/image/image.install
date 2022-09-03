@@ -106,7 +106,7 @@ function image_requirements($phase) {
         ),
         'WEBP' => array(
           'info' => ['WebP Support'],
-          'read' => '_imagecreatefromwebp',
+          'read' => 'imagecreatefromwebp',
           'write' => 'imagewebp',
         ),
       );
@@ -149,7 +149,7 @@ function image_requirements($phase) {
       // Check for support of image effects.
       $check_effects = array(
         'Desaturate' => 'imagefilter',
-        'Rotate' => '_imagerotate',
+        'Rotate' => 'imagerotate',
       );
       $unsupported_effects = array();
       foreach ($check_effects as $effect => $function) {
