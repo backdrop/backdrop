@@ -3668,6 +3668,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   ID attribute of field to assert.
    * @param string $message
    *   Message to display.
+   * @param string $group
+   *   The group this message belongs to.
+   *
    * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
@@ -3685,6 +3688,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   ID attribute of field to assert.
    * @param string $message
    *   Message to display.
+   * @param string $group
+   *   The group this message belongs to.
+   *
    * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
