@@ -507,8 +507,8 @@ function file_manage_form($form, &$form_state, File $file) {
 
   $form['filename'] = array(
     '#type' => 'textfield',
-    '#title' => t('Description'),
-    '#description' => t('This description will be used as the text in links to the file.'),
+    '#title' => t('File display title'),
+    '#description' => t('This text will be used in links to the uploaded file.'),
     '#default_value' => $file->filename,
     '#required' => TRUE,
     '#maxlength' => 255,
@@ -567,15 +567,17 @@ function file_manage_form($form, &$form_state, File $file) {
     '#default_value' => file_uri_scheme($file->uri),
   );
 
-
   if (!empty($file->uri)) {
     $directory_path = file_stream_wrapper_get_instance_by_uri($file->uri)->getDirectoryPath();
     $filename = file_uri_target($file->uri);
     $filepath = $directory_path . '/' . $filename;
+    $url = url($filepath, array('absolute' => TRUE));
     $form['destination']['url'] = array(
       '#type' => 'item',
       '#title' => t('File URL'),
-      '#markup' => url(check_plain($filepath), array('absolute' => TRUE)),
+      '#markup' => l($url, $url, array(
+        'attributes' => array('class' => array('file-preview-link')),
+      )),
     );
   }
 
