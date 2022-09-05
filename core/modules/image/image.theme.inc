@@ -386,6 +386,12 @@ function theme_image_formatter($variables) {
     unset($item['title']);
   }
 
+  // Override the alt tag with destination information when the image is linked. 
+  if (isset($variables['path']['path']) && isset($variables['alt'])) {
+    $item['alt'] = $variables['alt'];
+  }
+
+  // Use an image style if requested.
   if ($variables['image_style']) {
     $item['style_name'] = $variables['image_style'];
     $output = theme('image_style', $item);
