@@ -453,7 +453,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
     $this->assertNoText($title_text, 'Individual comment-reply title not found.');
     $reply = $this->postComment(NULL, $this->randomName(), NULL, TRUE);
-    $reply_loaded = comment_load($reply->id
+    $reply_loaded = comment_load($reply->id);
 
     // Test rendered comment for hidden title.
     $this->backdropGet('node/' . $this->node->nid);
