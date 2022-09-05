@@ -2579,6 +2579,21 @@ function system_get_date_types($type = NULL) {
 }
 
 /**
+ * Returns HTML for a log message.
+ *
+ * @deprecated since 1.0.0
+ */
+function theme_dblog_message($variables) {
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/change-records/theme_dblog_message-has-been-removed', array('attributes' => array('target' => '_blank'))));
+  $event = $variables['event'];
+  if ($variables['link'] && isset($event->wid)) {
+    $is_link = TRUE;
+  }
+
+  return dblog_format_message($event, $is_link);
+}
+
+/**
  * Drupal-compatible wrapper for creating safe CSS identifiers.
  *
  * @deprecated since 1.0.0
