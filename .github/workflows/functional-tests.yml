@@ -73,6 +73,11 @@ jobs:
           # with the rest of the results, otherwise it prints them afterwards.
           core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }} --concurrency 7 2>&1
 
+      - name: Run linter
+        # Run once on every php version.
+        if: ${{ matrix.fraction }} == '1/3'
+        run: php .github/misc/phplinter.php
+
       - name: System status
         if: ${{ always() }}
         run: |
