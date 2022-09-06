@@ -1012,7 +1012,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     'above' => t('Above'),
     'inline' => t('Inline'),
     'hidden' => t('Hidden'),
-    'visually_hidden' => t('Visually hidden'),
+    'invisible' => t('Visually hidden'),
   );
   $extra_visibility_options = array(
     'visible' => t('Visible'),

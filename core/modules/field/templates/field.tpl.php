@@ -21,8 +21,7 @@
  * - $items: An array of field values. Use render() to output them.
  * - $label: The item label.
  * - $label_hidden: Whether the label display is set to 'hidden'.
- * - $label_visually_hidden: Whether the label display is set to
- *   'visually_hidden'.
+ * - $label_invisible: Whether the label display is set to 'visually_hidden'.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
  *   - field: The current template type, i.e., "theme hook".
@@ -42,10 +41,9 @@
  * - $element['#field_language']: The field language.
  * - $element['#field_translatable']: Whether the field is translatable or not.
  * - $element['#label_display']: Position of label display: 'inline', 'above',
- *   'hidden', or 'visually_hidden'.
+ *   'hidden', or 'invisible'.
  * - $field_name_css: The css-compatible field name.
  * - $field_type_css: The css-compatible field type.
- * - $field_label_css: The css-compatible position of the label display.
  *
  * @see template_preprocess_field()
  * @see theme_field()
@@ -55,7 +53,7 @@
 ?>
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php if (!$label_hidden): ?>
-    <div class="field-label <?php print $label_visually_hidden ? 'element-invisible' : ''; ?>"><?php print $label ?>:&nbsp;</div>
+    <div class="field-label <?php print $label_invisible ? 'element-invisible' : ''; ?>"><?php print $label ?>:&nbsp;</div>
   <?php endif; ?>
   <div class="field-items"<?php print backdrop_attributes($content_attributes); ?>>
     <?php foreach ($items as $delta => $item): ?>
