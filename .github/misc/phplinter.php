@@ -10,6 +10,7 @@
  * Get a list of changed files via git diff and run the linter function.
  */
 function lint_changed_files() {
+  $exit_code = 0;
   $descriptorspec = array(
     1 => array('pipe', 'w'),
   );
@@ -32,10 +33,14 @@ function lint_changed_files() {
       if (!in_array($extension, $php_extensions)) {
         continue;
       }
-      phplinter($file);
+      $error = phplinter($file);
+      if ($error) {
+        $exit_code = 1;
+      }
     }
     fclose($pipes[1]);
     proc_close($git_process);
+    exit($exit_code);
   }
   else {
     exit(1);
@@ -51,6 +56,7 @@ function lint_changed_files() {
  *   Path to php file that changed compared to 1.x branch.
  */
 function phplinter($file) {
+  $error = NULL;
   $descriptorspec = array(
     1 => array('pipe', 'w'),
     2 => array('pipe', 'w'),
@@ -61,12 +67,14 @@ function phplinter($file) {
     while (!feof($lint_pipes[2])) {
       $line = fgets($lint_pipes[2], 1024);
       if (preg_match('#^(.+) in ([a-z./_-]+) on line (\d+)#', $line, $matches)) {
+        $error = 1;
         print "::error file=$matches[2],line=$matches[3],col=0::$matches[1]\n";
       }
     }
     fclose($lint_pipes[2]);
     proc_close($lint_process);
   }
+  return $error;
 }
 
 lint_changed_files();
