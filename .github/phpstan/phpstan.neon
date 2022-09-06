@@ -17,6 +17,7 @@ parameters:
     - install
     - profile
     - engine
+    - test
   excludePaths:
     - *.tpl.php
     - *.api.php
