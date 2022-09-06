@@ -21,8 +21,5 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Debug
-        run: git diff --name-only --diff-filter=d origin/1.x
-
       - name: Run lint
         run: php .github/misc/phplinter.php
