@@ -21,7 +21,8 @@ function lint_changed_files() {
     'test',
     'profile',
   );
-  $git_command = 'git diff --name-only --diff-filter=d origin';
+  // Note that "origin" is just a naming convention.
+  $git_command = 'git diff --name-only --diff-filter=d origin/1.x';
   $git_process = proc_open($git_command, $descriptorspec, $pipes);
 
   if (is_resource($git_process)) {
