@@ -41,6 +41,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        # Full depth only needed for php lint to get a git diff.
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
