@@ -4146,12 +4146,12 @@ function path_autocomplete($string = '') {
 
   if ($string) {
     // Get node matches.
-    $results = db_select('node', 'n')
-      ->fields('n', array('nid', 'type', 'title', 'status'))
-      ->condition('n.title', '%' . db_like($string) . '%', 'LIKE')
-      ->condition('n.status', 1)
+    $results = db_select('node')
+      ->fields('node', array('nid', 'type', 'title', 'status'))
+      ->condition('node.title', '%' . db_like($string) . '%', 'LIKE')
+      ->condition('node.status', 1)
       ->addTag('node_access')
-      ->orderBy('n.nid', 'DESC')
+      ->orderBy('node.nid', 'DESC')
       ->range(0, $range)
       ->execute();
     foreach ($results as $result) {
@@ -4211,12 +4211,12 @@ function path_autocomplete($string = '') {
 
     // Get taxonomy term matches.
     if (module_exists('taxonomy') && $match_count < $range) {
-      $results = db_select('taxonomy_term_data', 'ttd')
-        ->fields('ttd', array('tid', 'vocabulary', 'name'))
-        ->condition('ttd.name', '%' . db_like($string) . '%', 'LIKE')
+      $results = db_select('taxonomy_term_data')
+        ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
+        ->condition('taxonomy_term_data.name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
-        ->orderBy('ttd.tid', 'DESC')
+        ->orderBy('taxonomy_term_data.tid', 'DESC')
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
