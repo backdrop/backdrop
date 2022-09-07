@@ -11,7 +11,7 @@
  */
 function lint_changed_files() {
   $exit_code = 0;
-  $descriptorspec = array(
+  $descriptor_spec = array(
     1 => array('pipe', 'w'),
   );
   $php_extensions = array(
@@ -24,7 +24,7 @@ function lint_changed_files() {
   );
   // Note that "origin" is just a naming convention.
   $git_command = 'git diff --name-only --diff-filter=d origin/1.x';
-  $git_process = proc_open($git_command, $descriptorspec, $pipes);
+  $git_process = proc_open($git_command, $descriptor_spec, $pipes);
 
   if (is_resource($git_process)) {
     while (!feof($pipes[1])) {
@@ -57,12 +57,12 @@ function lint_changed_files() {
  */
 function phplinter($file) {
   $error = NULL;
-  $descriptorspec = array(
+  $descriptor_spec = array(
     1 => array('pipe', 'w'),
     2 => array('pipe', 'w'),
   );
   $lint_command = "php -l $file";
-  $lint_process = proc_open($lint_command, $descriptorspec, $lint_pipes);
+  $lint_process = proc_open($lint_command, $descriptor_spec, $lint_pipes);
   if (is_resource($lint_process)) {
     while (!feof($lint_pipes[2])) {
       $line = fgets($lint_pipes[2], 1024);
