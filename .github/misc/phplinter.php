@@ -56,7 +56,7 @@ function lint_changed_files() {
  *   Path to php file that changed compared to 1.x branch.
  */
 function phplinter($file) {
-  $error = NULL;
+  $error = FALSE;
   $descriptor_spec = array(
     1 => array('pipe', 'w'),
     2 => array('pipe', 'w'),
@@ -66,8 +66,8 @@ function phplinter($file) {
   if (is_resource($lint_process)) {
     while (!feof($lint_pipes[2])) {
       $line = fgets($lint_pipes[2], 1024);
-      if (preg_match('#^(.+) in ([a-z./_-]+) on line (\d+)#', $line, $matches)) {
-        $error = 1;
+      if (preg_match('#^(.+) in ([a-z./_-]+) on line (\d+)$#', $line, $matches)) {
+        $error = TRUE;
         print "::error file=$matches[2],line=$matches[3],col=0::$matches[1]\n";
       }
     }
