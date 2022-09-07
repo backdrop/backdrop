@@ -68,7 +68,8 @@ function phplinter($file) {
       $line = fgets($lint_pipes[2], 1024);
       if (preg_match('#^(.+) in ([a-z./_-]+) on line (\d+)$#', $line, $matches)) {
         $error = TRUE;
-        print "::error file=$matches[2],line=$matches[3],col=0::$matches[1]\n";
+        $title = $matches[2] . '#L' . $matches[3];
+        print "::error file=$matches[2],line=$matches[3],col=0,title=$title::$matches[1]\n";
       }
     }
     fclose($lint_pipes[2]);
