@@ -661,7 +661,7 @@ function _field_write_instance($instance, $update = FALSE) {
   );
   foreach ($instance['display'] as $view_mode => $display) {
     $display += array(
-      'label' => 'hidden',
+      'label' => 'invisible',
       'type' => isset($field_type['default_formatter']) ? $field_type['default_formatter'] : 'hidden',
       'settings' => array(),
     );
