@@ -299,13 +299,13 @@ function standard_install() {
 
     'display' => array(
       'default' => array(
-        'label' => 'hidden',
+        'label' => 'invisible',
         'type' => 'image',
         'settings' => array('image_style' => 'large', 'image_link' => ''),
         'weight' => -1,
       ),
       'teaser' => array(
-        'label' => 'hidden',
+        'label' => 'invisible',
         'type' => 'image',
         'settings' => array(
           'image_style' => 'medium',
@@ -347,13 +347,13 @@ function standard_install() {
 
     'display' => array(
       'default' => array(
-        'label' => 'hidden',
+        'label' => 'invisible',
         'type' => 'image',
         'settings' => array('image_style' => 'large', 'image_link' => ''),
         'weight' => 0,
       ),
       'teaser' => array(
-        'label' => 'hidden',
+        'label' => 'invisible',
         'type' => 'image',
         'settings' => array(
           'image_style' => 'medium',
