@@ -108,7 +108,7 @@ function _vocabulary_get_operations($vocabulary) {
       'weight' => 10,
       );
     }
-  if (user_access('synchronize configuration')) {
+  if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
       'href' => 'admin/config/development/configuration/single/export',

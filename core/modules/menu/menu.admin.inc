@@ -39,7 +39,7 @@ function menu_overview_page() {
         'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
