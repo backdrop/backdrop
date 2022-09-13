@@ -456,7 +456,9 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
     if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
       return backdrop_chmod($directory);
     }
-    // Check directory existence again @see https://github.com/backdrop/backdrop-issues/issues/5631
+    // Race-conditions could lead to the directory having been created by
+    // another request. Check if the directory exists again after failing.
+    // See https://github.com/backdrop/backdrop-issues/issues/5631
     return is_dir($directory) && is_writable($directory);
   }
   // The directory exists, so check to see if it is writable.
