@@ -139,7 +139,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 
     // Get comment.
     if ($contact !== TRUE) { // If true then attempting to find error message.
-      if ($subject && $subject_mode) {
+      if ($subject && $subject_mode == COMMENT_TITLE_CUSTOM) {
         $this->assertText($subject, 'Comment title posted.');
       }
       $this->assertText($comment, 'Comment body posted.');
