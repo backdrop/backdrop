@@ -1179,7 +1179,6 @@ function image_effect_definitions() {
       include_once BACKDROP_ROOT . '/core/modules/image/image.effects.inc';
       foreach (module_implements('image_effect_info') as $module) {
         foreach (module_invoke($module, 'image_effect_info') as $name => $effect) {
-          // Ensure the current toolkit supports the effect.
           $effect['module'] = $module;
           $effect['name'] = $name;
           $effect['data'] = isset($effect['data']) ? $effect['data'] : array();
