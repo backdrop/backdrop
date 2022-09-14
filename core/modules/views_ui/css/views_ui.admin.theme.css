@@ -515,8 +515,11 @@ td.group-title {
   border-bottom: none;
 }
 #views-rearrange-filters td.group-operator {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid #ccc; /* LTR */
   vertical-align: middle;
+}
+[dir="rtl"] #views-rearrange-filters td.group-operator {
+  border-left: 1px solid #ccc;
 }
 
 /* This keeps the collapsible fieldsets of options from crashing into the bottom
