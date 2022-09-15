@@ -1167,7 +1167,7 @@ function _date_popup_process_time_part(&$element) {
   // Add in the timepicker if set.
   if ($element['#timepicker']) {
     $settings = array(
-      'show24Hours' => strpos($element['#date_format'], 'H') !== FALSE ? TRUE : FALSE,
+      'show24Hours' => (strpos($element['#date_format'], 'H') !== FALSE || strpos($element['#date_format'], 'G') !== FALSE) ? TRUE : FALSE,
       'showSeconds' => (in_array('second', $granularity) ? TRUE : FALSE),
       'timeSteps' => array(1, intval($element['#date_increment']), (in_array('second', $granularity) ? $element['#date_increment'] : 0)),
       'fromTo' => isset($fromto),
