@@ -240,6 +240,39 @@ function update_update_1004() {
 }
 
 /**
+ * Check for a faulty installer.settings.json and fix it or remove it if needed.
+ */
+function update_update_1005() {
+  // Saving the Available Update settings form at admin/reports/updates/settings
+  // used to create a defective copy of installer.settings.json in earlier
+  // Backdrop versions. This update hook fixes or removes this defective file.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5690
+  $config = config('installer.settings');
+  // Only act if the config file exists. If isNew() returns TRUE, this means
+  // the config object is new, and therefore the file doesn't exist, in
+  // which case, we skip processing.
+  if (!$config->isNew()) {
+    // Now check to see if installer is installed.
+    // We must do this by getting the current schema version, as module_exists()
+    // doesn't tell us if the module is disabled or uninstalled.
+    $schema_version = backdrop_get_installed_schema_version('installer');
+    if ($schema_version < 0) {
+      // Installer is uninstalled. Remove the faulty config file.
+      $config->delete();
+    }
+    elseif (empty($config->get('installer_server'))) {
+      // Installer is installed.
+      // Fix the config file only if the key installer_server is not present.
+      $config->set('installer_server', array(
+        'url' => 'https://projects.backdropcms.org',
+        'name' => 'Backdrop',
+      ));
+      $config->save();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
