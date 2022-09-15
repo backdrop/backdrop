@@ -326,8 +326,7 @@ function update_info_page() {
   $children[] = array(
     'data' => '<strong>Configuration files:</strong> Back up the entire directory at ' . $config_dir . '.',
   );
-  $steps[] = array(
-    'data' => '<strong>Create backups.</strong> This update utility will alter your database and configuration files. In case of an emergency you may need to revert to a recent backup; make sure you have one.' . theme('item_list', array('items' => $children, 'type' => 'ul')),
+  $steps[] = '<strong>Create backups.</strong> This update utility will alter your database and configuration files. In case of an emergency you may need to revert to a recent backup; make sure you have one.' . theme('item_list', array('items' => $children, 'type' => 'ul'));
   $steps[] = 'Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.';
   $steps[] = 'Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.';
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
