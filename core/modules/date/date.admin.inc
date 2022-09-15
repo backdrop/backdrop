@@ -440,7 +440,7 @@ function _date_field_widget_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('If using simple inputs such a a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#description' => t('If using simple inputs such as a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
   );
 
   $context = array(
