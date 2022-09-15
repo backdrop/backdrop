@@ -22,7 +22,11 @@
 [dir="rtl"] .item-list ul {
   margin: 0.25em 1.5em 0.25em 0;
 }
-.item-list ul li,
+.item-list ol>li {
+  list-style-type: decimal;
+  list-style-image: none;
+}
+.item-list ul>li,
 li.leaf,
 ul.menu li {
   list-style-type: disc;
