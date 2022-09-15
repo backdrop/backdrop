@@ -119,8 +119,11 @@ function system_requirements($phase) {
   // 1000 is the default value and indicates potential issues.
   // @see https://www.php.net/manual/en/info.configuration.php
   if ($max_input_vars <= 1000) {
-    $requirements['php_max_input_vars']['description'] = $t('When set too low, the <code>max_input_vars</code> PHP setting can cause silent failures on large forms, such as the permissions page. A value of <code>10000</code> is recommended. <a href="@documentation" target="_blank">Read more about increasing the <code>max_input_vars</code> PHP setting</a>.', array('@documentation' => url('https://docs.backdropcms.org/max-input-vars')));
+    $requirements['php_max_input_vars']['description'] = $t('When set too low, the <code>max_input_vars</code> PHP setting can cause silent failures on large forms, such as the permissions page. A value of <code>10000</code> is recommended. <a href="@documentation" target="_blank">Read more about increasing the <code>max_input_vars</code> PHP setting</a>.', array('@documentation' => 'https://docs.backdropcms.org/max-input-vars'));
     $requirements['php_max_input_vars']['severity'] = REQUIREMENT_WARNING;
+    if ($phase == 'install' || $phase == 'update') {
+      $requirements['php_max_input_vars']['severity'] = REQUIREMENT_INFO;
+    }
   }
 
   // Test for PHP extensions.
