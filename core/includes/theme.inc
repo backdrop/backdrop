@@ -2368,15 +2368,19 @@ function theme_mark($variables) {
  *     - children: A list of nested child items to render that behave
  *       identically to 'items', but any non-numeric string keys are treated as
  *       HTML attributes for the child list that wraps 'children'.
+ *     - type: The type of list to return for the nested/children items (e.g.
+ *       "ul", "ol").
  *     Any other key/value pairs are used as HTML attributes for the list item
  *     in 'data'.
  *   - title: The title of the list.
- *   - type: The type of list to return (e.g. "ul", "ol").
+ *   - type: The type of list to return for the main/parent list (e.g. "ul",
+ *     "ol").
  *   - attributes: The attributes applied to the list element.
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
+ * @since ???: added support for a "type" variable in nested/children items.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
@@ -2399,7 +2403,7 @@ function theme_item_list($variables) {
         if (isset($item['data'])) {
           $value .= $item['data'];
         }
-        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0));
+        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0, 'type' => 0));
 
         // Append nested child list, if any.
         if (isset($item['children'])) {
@@ -2415,7 +2419,7 @@ function theme_item_list($variables) {
           }
           $value .= theme('item_list', array(
             'items' => $item['children'],
-            'type' => $type,
+            'type' => isset($item['type']) ? $item['type'] : $type,
             'attributes' => $child_list_attributes,
           ));
         }
