@@ -3343,8 +3343,6 @@ function system_update_1085() {
   }
 }
 
-function system_update_1086() {}
-
 /**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
