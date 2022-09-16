@@ -3127,7 +3127,7 @@ function hook_disable() {
  * or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
- * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
+ * @link https://docs.backdropcms.org/php-standards Backdrop Coding Standards @endlink
  *
  * The contents of this hook are not cached. Because of this, absolutely no
  * logic should be included in this hook. Do not do any database queries or

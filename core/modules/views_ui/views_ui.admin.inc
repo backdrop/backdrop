@@ -4523,7 +4523,7 @@ function views_ui_admin_settings_basic() {
   $form['basic']['display_embed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
-    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
+    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://docs.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
     '#default_value' => $config->get('display_embed'),
   );
   $options = array();

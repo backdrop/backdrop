@@ -9,7 +9,7 @@
  * In Backdrop this conversion may be done through UI at
  * admin/config/development/utf8mb4-upgrade. More information about this upgrade
  * can be found in the Backdrop documentation on database configuration:
- * https://api.backdropcms.org/database-configuration
+ * https://docs.backdropcms.org/documentation/database-configuration
  *
  * Although this class is used within Backdrop purely for the utf8mb4 upgrade,
  * it is a general purpose converter and could be used for other purposes in
@@ -95,7 +95,7 @@ class DatabaseCharsetConverter {
         if ($this->charset == 'utf8mb4' && !$connection->utf8mb4IsSupported()) {
           // Intentionally no translation here in the event this is used
           // outside a full Backdrop bootstrap (e.g. a command line tool).
-          throw new Exception('The ' . $database_key . ':' . $target . ' MySQL database does not support UTF8MB4! Ensure that the conditions listed in settings.php related to innodb_large_prefix, the server version, and the MySQL driver version are met. See http://api.backdropcms.org/database-configuration for more information.');
+          throw new Exception('The ' . $database_key . ':' . $target . ' MySQL database does not support UTF8MB4! Ensure that the conditions listed in settings.php related to innodb_large_prefix, the server version, and the MySQL driver version are met. See https://docs.backdropcms.org/documentation/database-configuration for more information.');
           continue;
         }
         // For each database:
