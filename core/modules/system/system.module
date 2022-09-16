@@ -3003,9 +3003,12 @@ function _system_rebuild_module_data() {
           }
         }
         if ($git_version) {
-          $git_version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $git_version);
           $modules[$key]->info['version'] = $git_version . '-dev';
         }
+      }
+      else {
+        $t = get_t();
+        $modules[$key]->info['version'] = $t('unknown');
       }
     }
 
