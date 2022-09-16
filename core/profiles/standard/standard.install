@@ -114,7 +114,7 @@ function standard_install() {
 
   // Create default pre-defined node types. For a complete list of available
   // node type attributes please refer to the node type API documentation at:
-  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
+  // https://docs.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
   $types = array(
     array(
       'type' => 'page',
@@ -248,7 +248,7 @@ function standard_install() {
 
   // Create an image field named "Image", enabled for the 'post' content type.
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See https://api.backdropcms.org/api/function/field_create_field/1
+  // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_field/1
 
   $field = array(
     'field_name' => 'field_image',
@@ -269,7 +269,7 @@ function standard_install() {
 
 
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See https://api.backdropcms.org/api/function/field_create_instance/1
+  // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_instance/1
   $instance = array(
     'field_name' => 'field_image',
     'entity_type' => 'node',
