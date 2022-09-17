@@ -1428,7 +1428,7 @@ class view {
     }
 
     // Allow hook_views_pre_view() to set the dom_id, then ensure it is set.
-    $this->dom_id = !empty($this->dom_id) ? $this->dom_id : md5($this->name . REQUEST_TIME . rand());
+    $this->dom_id = !empty($this->dom_id) ? $this->dom_id : hash('sha256', $this->name . REQUEST_TIME . rand());
 
     // Allow the display handler to set up for execution
     $this->display_handler->pre_execute();

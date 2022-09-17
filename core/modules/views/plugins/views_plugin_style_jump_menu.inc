@@ -127,7 +127,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
         $path = url($url_options['path'], $url_options);
         $field = strip_tags(decode_entities($this->row_plugin->render($row)));
-        $key = md5($path . $field) . "::" . $path;
+        $key = hash('sha256', $path . $field) . "::" . $path;
         if ($title) {
           $options[$title][$key] = $field;
         }

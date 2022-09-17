@@ -118,7 +118,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       }
       $path = url($this->view->get_url($args, $base_path), $url_options);
       $summary_value = strip_tags($argument->summary_name($row));
-      $key = md5($path . $summary_value) . "::" . $path;
+      $key = hash('sha256', $path . $summary_value) . "::" . $path;
 
       $options[$key] = $summary_value;
       if (!empty($this->options['count'])) {
