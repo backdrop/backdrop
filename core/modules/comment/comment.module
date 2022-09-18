@@ -418,14 +418,12 @@ function comment_permission() {
       'title' => t('Post comments'),
     ),
     'skip comment approval' => array(
-      'title' => t('Skip comment approval'),
-      'restrict access' => TRUE,
+      'title' => t('Skip comment approval: Comments will be immediately visible to everyone'),
       'warning' => t('Allows posting spam or offensive comments that become immediately visible to every visitor.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
-      'restrict access' => TRUE,
-      'warning' => t('Allows editing previously approved comments, bypassing the need for further approvals.'),
+      'warning' => t('Because spam and offensive comments are common, this permission should only be granted to those who are trusted, or on a site with additional spam protection measures in place.'),
     ),
   );
 }
