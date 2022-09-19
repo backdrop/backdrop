@@ -55,9 +55,9 @@ jobs:
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
           # DEBUG:
-          sudo apache2ctl -M
           sudo a2dismod mpm_prefork
           sudo a2enmod mpm_event
+          sudo apache2ctl -V
           # Setup php-fpm, this script is by intention not executable by default.
           chmod 700 .github/misc/setup-php-fpm.sh
           ./.github/misc/setup-php-fpm.sh ${{ matrix.php-versions }}
