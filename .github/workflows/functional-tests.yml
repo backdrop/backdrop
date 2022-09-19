@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['5.6']
-        fraction: ['1/3']
+        php-versions: ['5.6', '7.4', '8.1']
+        fraction: ['1/3', '2/3', '3/3']
         database-versions: ['mariadb-10.3']
 
     steps:
@@ -49,16 +49,19 @@ jobs:
           coverage: none
           tools: none
 
+      - name: Switch mpm if necessary
+        if: ${{ matrix.php-versions == '5.6' }}
+        run: |
+          sudo a2dismod php5.6
+          sudo a2dismod mpm_prefork
+          sudo a2enmod mpm_event
+          sudo apache2ctl -V
+
       - name: Setup webserver
         run: |
           # Set up apache with php-fpm.
           sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
           sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
-          # DEBUG:
-          sudo a2dismod php5.6
-          sudo a2dismod mpm_prefork
-          sudo a2enmod mpm_event
-          sudo apache2ctl -V
           # Setup php-fpm, this script is by intention not executable by default.
           chmod 700 .github/misc/setup-php-fpm.sh
           ./.github/misc/setup-php-fpm.sh ${{ matrix.php-versions }}
