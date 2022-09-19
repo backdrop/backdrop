@@ -139,7 +139,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 
     // Get comment.
     if ($contact !== TRUE) { // If true then attempting to find error message.
-      if ($subject && $subject_mode) {
+      if ($subject && $subject_mode == COMMENT_TITLE_CUSTOM) {
         $this->assertText($subject, 'Comment title posted.');
       }
       $this->assertText($comment, 'Comment body posted.');
@@ -432,7 +432,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->assertEqual(rtrim($comment_loaded->thread, '/') . '.01/', $reply_loaded->thread, 'Thread of second reply grows correctly.');
     // Test rendered comment for title.
     $this->backdropGet('node/' . $this->node->nid);
-    $this->assertText($title_text, 'Individual comment title not found.');
+    $this->assertText($title_text, 'Individual comment title found.');
 
     // Edit reply.
     $this->backdropLogin($this->web_user);
@@ -453,7 +453,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('comment/reply/' . $this->node->nid . '/' . $comment->id);
     $this->assertNoText($title_text, 'Individual comment-reply title not found.');
     $reply = $this->postComment(NULL, $this->randomName(), NULL, TRUE);
-    $reply_loaded = comment_load($reply->id
+    $reply_loaded = comment_load($reply->id);
 
     // Test rendered comment for hidden title.
     $this->backdropGet('node/' . $this->node->nid);
