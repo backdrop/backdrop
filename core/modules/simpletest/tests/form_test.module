@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Helper module for the form API tests.
+ * Helper module for the Form API tests.
  */
 
 /**
@@ -439,26 +439,37 @@ function form_test_validate_required_form($form, &$form_state) {
 
   $form['textfield'] = array(
     '#type' => 'textfield',
-    '#title' => 'Textfield',
+    '#title' => 'Name',
     '#required' => TRUE,
+    '#required_message' => 'Please enter a name.',
+    // The following is not a real Form API property, it is only used in the
+    // test validation to check the expected message.
+    // See FormValidationTestCase::testCustomRequiredMessage() and
+    // FormValidationTestCase::testCustomRequiredMessage().
+    '#form_test_expected_message' => 'Please enter a name.',
   );
   $form['checkboxes'] = array(
     '#type' => 'checkboxes',
     '#title' => 'Checkboxes',
     '#options' => $options,
     '#required' => TRUE,
+    '#required_message' => 'Please choose at least one option.',
+    '#form_test_expected_message' => 'Please choose at least one option.',
   );
   $form['select'] = array(
     '#type' => 'select',
     '#title' => 'Select',
     '#options' => $options,
     '#required' => TRUE,
+    '#form_test_expected_message' => 'Select field is required.',
+    '#element_validate' => array('form_test_validate_select_element_validate'),
   );
   $form['radios'] = array(
     '#type' => 'radios',
     '#title' => 'Radios',
     '#options' => $options,
     '#required' => TRUE,
+    '#form_test_expected_message' => 'Radios field is required.',
   );
   $form['radios_optional'] = array(
     '#type' => 'radios',
@@ -474,6 +485,17 @@ function form_test_validate_required_form($form, &$form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => 'Submit');
   return $form;
+}
+
+/**
+ * An individual element validator used by form_test_validate_required_form().
+ */
+function form_test_validate_select_element_validate($element, &$form_state) {
+  // Set a validation error based on criteria other than the #required property.
+  // This should only fire after a value has been set.
+  if ($form_state['values']['select'] !== 'foo') {
+    form_error($element, 'Please select the "foo" option.');
+  }
 }
 
 /**

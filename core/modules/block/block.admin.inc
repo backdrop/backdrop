@@ -40,7 +40,7 @@ function block_admin_list() {
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',

@@ -902,6 +902,14 @@ function user_account_form(&$form, &$form_state) {
   }
   $form['account']['pass']['#description'] = $description;
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'user') . '/js/user.admin.js'),
+    ),
+  );
+
   $form['account_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
@@ -938,49 +946,57 @@ function user_account_form(&$form, &$form_state) {
     '#value' => 'authenticated',
   );
 
+  $form['personalization'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Personalization'),
+    '#weight' => 2,
+    '#access' => (!$register && ($site_config->get('user_signatures') || $site_config->get('user_pictures'))),
+    '#group' => 'additional_settings',
+  );
   // Signature.
-  $form['signature_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Signature settings'),
-    '#weight' => 2,
-    '#access' => (!$register && $site_config->get('user_signatures')),
-  );
-
-  $form['signature_settings']['signature'] = array(
-    '#type' => 'text_format',
-    '#title' => t('Signature'),
-    '#default_value' => isset($account->signature) ? $account->signature : '',
-    '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
-    '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
-  );
-
+  if ($site_config->get('user_signatures')) {
+    $form['personalization']['signature'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Signature'),
+      '#default_value' => isset($account->signature) ? $account->signature : '',
+      '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
+      '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
+    );
+  }
   // Picture/avatar.
-  $form['picture'] = array(
+  if ($site_config->get('user_pictures')) {
+    $form['personalization']['picture'] = array(
+      '#type' => 'value',
+      '#value' => isset($account->picture) ? $account->picture : NULL,
+    );
+    $form['personalization']['picture_current'] = array(
+      '#markup' => theme('user_picture', array('account' => $account)),
+    );
+    $form['personalization']['picture_delete'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete picture'),
+      '#access' => !empty($account->picture->fid),
+      '#description' => t('Check this box to delete your current picture.'),
+    );
+    $form['personalization']['picture_upload'] = array(
+      '#type' => 'file',
+      '#title' => t('Upload picture'),
+      '#size' => 48,
+      '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
+    );
+    $form['#validate'][] = 'user_validate_picture';
+  }
+
+  $form['region_language'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Picture'),
-    '#weight' => 2,
-    '#access' => (!$register && $site_config->get('user_pictures')),
+    '#title' => t('Region and language'),
+    '#weight' => 6,
+    '#collapsible' => TRUE,
+    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
+    '#group' => 'additional_settings',
   );
-  $form['picture']['picture'] = array(
-    '#type' => 'value',
-    '#value' => isset($account->picture) ? $account->picture : NULL,
-  );
-  $form['picture']['picture_current'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
-  );
-  $form['picture']['picture_delete'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Delete picture'),
-    '#access' => !empty($account->picture->fid),
-    '#description' => t('Check this box to delete your current picture.'),
-  );
-  $form['picture']['picture_upload'] = array(
-    '#type' => 'file',
-    '#title' => t('Upload picture'),
-    '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
-  );
-  $form['#validate'][] = 'user_validate_picture';
+  // See system_user_timezone() and locale_language_selector_form() for the form
+  // items displayed here.
 }
 
 /**
@@ -2488,7 +2504,7 @@ function user_role_load($role_name) {
 /**
  * Legacy wrapper function preserved for backwards-compatibility. This function
  * is no longer used by Backdrop core, since all roles are loaded by name now.
- * See https://api.backdropcms.org/change-records/converted-user-roles-cmi
+ * See https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi
  *
  * Do not call this function; use user_role_load() instead.
  *
@@ -2504,7 +2520,7 @@ function user_role_load($role_name) {
  * @deprecated since 1.0.0
  */
 function user_role_load_by_name($role_name) {
-  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://api.backdropcms.org/change-records/converted-user-roles-cmi', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi', array('attributes' => array('target' => '_blank'))));
   user_role_load($role_name);
 }
 

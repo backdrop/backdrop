@@ -299,6 +299,17 @@ function views_ui_autoload_info() {
 }
 
 /**
+ * Implements hook_admin_bar_cache_info().
+ */
+function views_ui_admin_bar_cache_info() {
+  $caches['views'] = array(
+    'title' => t('Views'),
+    'callback' => 'views_invalidate_cache',
+  );
+  return $caches;
+}
+
+/**
  * Page title callback for the Configure View page.
  */
 function views_ui_edit_page_title($view) {

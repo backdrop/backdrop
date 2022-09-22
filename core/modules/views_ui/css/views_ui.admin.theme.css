@@ -498,6 +498,30 @@ td.group-title {
   padding-right: 10px;
 }
 
+#views-rearrange-filters {
+  border-top: 1px solid #ccc;
+}
+#views-rearrange-filters tr.even,
+#views-rearrange-filters tr.odd {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+#views-rearrange-filters tr.filter-group-operator-row {
+  border-bottom: 1px solid #ccc;
+}
+#views-rearrange-filters tr.views-group-title {
+  border-bottom: none;
+}
+#views-rearrange-filters td.group-operator {
+  border-right: 1px solid #ccc; /* LTR */
+  vertical-align: middle;
+}
+[dir="rtl"] #views-rearrange-filters td.group-operator {
+  border-left: 1px solid #ccc;
+}
+
 /* This keeps the collapsible fieldsets of options from crashing into the bottom
  * of the edit option columns. Because the edit option columns are floated, the collapsible
  * fieldsets need to be floated as well so that the margin above the fieldset interacts with
