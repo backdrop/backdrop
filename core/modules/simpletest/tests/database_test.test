@@ -1529,6 +1529,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     $query_1->union($query_2);
 
     $names = $query_1->execute()->fetchCol();
+    sort($names);
 
     // Ensure we only get 2 records.
     $this->assertEqual(count($names), 2, 'UNION correctly discarded duplicates.');
@@ -1552,6 +1553,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     $query_1->union($query_2, 'ALL');
 
     $names = $query_1->execute()->fetchCol();
+    sort($names);
 
     // Ensure we get all 3 records.
     $this->assertEqual(count($names), 3, 'UNION ALL correctly preserved duplicates.');
