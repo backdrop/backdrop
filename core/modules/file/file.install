@@ -1207,5 +1207,8 @@ function file_update_1008() {
  */
 function file_update_1009() {
   $queue = BackdropQueue::get('file_type_determine');
+  if ($queue->numberOfItems() > 0) {
+    file_needs_type_classification(TRUE);
+  }
   $queue->deleteQueue();
 }
