@@ -687,8 +687,17 @@ function _file_sort_weight_label($a, $b) {
  * @ingroup forms
  */
 function file_type_classify_confirm($form, $form_state) {
-  return confirm_form(array(), t('Are you sure you want to classify the file types?'),
-  'admin/reports/status', t('This action will classify all files that are missing a type, and may be a lengthy process. This action cannot be undone.'), t('Classify file types'), t('Cancel'));
+  $form = confirm_form(
+    array(),
+    t('Are you sure you want to classify the file types?'),
+    'admin/reports/status',
+    t('This action will classify all files that are missing a type, and may be a lengthy process.'),
+    t('Classify file types'),
+    t('Cancel')
+  );
+  // Change the css class of the submit button to something less scary.
+  $form['actions']['submit']['#attributes']['class'][0] = 'button-primary';
+  return $form;
 }
 
 /**
@@ -705,6 +714,7 @@ function file_type_classify_confirm_submit($form, &$form_state) {
       'operations' => array(
         array('file_type_classify_batch', array($fids)),
       ),
+      'progress_message' => '',
       'finished' => 'file_type_classify_finished',
     );
     batch_set($batch);

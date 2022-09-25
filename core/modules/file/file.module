@@ -429,12 +429,12 @@ function file_menu() {
     'file' => 'file.pages.inc',
   );
 
-  $items['admin/reports/status/classify'] = array(
+  $items['admin/structure/file-types/classify'] = array(
     'title' => 'Classify file types',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_type_classify_confirm'),
     'access arguments' => array('access administration pages'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'file' => 'file.admin.inc',
   );
 
