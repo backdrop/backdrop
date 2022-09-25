@@ -3441,18 +3441,16 @@ function file_type_classify_batch($fids, &$context) {
     $context['sandbox']['count'] = count($fids);
   }
 
-  if ($context['sandbox']['current_item'] < $context['sandbox']['count']) {
-    // Process 15 files at a time.
-    $limit = min($context['sandbox']['current_item'] + 15, $context['sandbox']['count']);
-    while ($context['sandbox']['current_item'] < $limit) {
-      $fid = $fids[$context['sandbox']['current_item']];
-      file_type_determine($fid);
-      $context['results'][] = $fid;
-      $context['message'] = t('Now processing file ID %fid', array('%fid' => $fid));
-      $context['sandbox']['current_item']++;
-    }
-    $context['finished'] = $context['sandbox']['current_item'] / $context['sandbox']['count'];
+  // Process 15 files at a time.
+  $limit = min($context['sandbox']['current_item'] + 15, $context['sandbox']['count']);
+  while ($context['sandbox']['current_item'] < $limit) {
+    $fid = $fids[$context['sandbox']['current_item']];
+    file_type_determine($fid);
+    $context['results'][] = $fid;
+    $context['message'] = t('Now processing file ID %fid', array('%fid' => $fid));
+    $context['sandbox']['current_item']++;
   }
+  $context['finished'] = $context['sandbox']['current_item'] / $context['sandbox']['count'];
 }
 
 /**
