@@ -1385,7 +1385,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->assertText(t('There are @count items left to index.', array('@count' => 0)));
 
     // Reset indexes and verify the count of items left to index is correct.
-    module_invoke_all('search_reset');
+    search_reindex();
     $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There is @count item left to index.', array('@count' => 1)));
 
