@@ -1423,6 +1423,36 @@ function search_config_info() {
   return $prefixes;
 }
 
+/** 
+ * Gets stats for total and remaining items to be indexed.
+ * 
+ * @param array $modules
+ *  An array of module names whose index stats we are getting.
+ * 
+ * @return array
+ *  An array with the following keys:
+ *  - remaining: The number of remaining items to be indexed.
+ *  - total: The total number of indexable items. 
+ */
+function search_get_stats($modules = array()) {
+  if (empty($module)) {
+    $modules = config_get('search.settings', 'search_active_modules');
+  }
+  $remaining = 0;
+  $total = 0;
+  foreach ($modules as $module) {
+    if ($status = module_invoke($module, 'search_status')) {
+      $remaining += $status['remaining'];
+      $total += $status['total'];
+    }
+  }
+
+  return array(
+    'remaining' => $remaining,
+    'total' => $total,
+  );
+}
+
 /**
  * Batch operation to rebuild the search index.
  * 
@@ -1442,7 +1472,7 @@ function search_reindex_batch($passes_needed, $search_active_modules, &$context)
       module_invoke($module, 'update_index');
     }
     $context['sandbox']['current_pass']++;
-    $context['message'] = t('Now processing pass %pass of %needed', array('%pass' => $context['sandbox']['current_pass'] + 1, '%needed' => $passes_needed));
+    $context['message'] = t('Now processing pass %pass of %needed', array('%pass' => $context['sandbox']['current_pass'], '%needed' => $passes_needed));
     $context['finished'] = $context['sandbox']['current_pass'] / $passes_needed;
   }
 }
