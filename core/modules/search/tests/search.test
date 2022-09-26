@@ -1391,7 +1391,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
 
     // Test the Rebuild search index button.
     $this->backdropPost('admin/config/search/settings', array(), t('Rebuild search index'));
-    $this->assertText(t('Are you sure you want to rebuild the search index?'));
+    $this->assertText(t('This action will rebuild the search index. It may be a lengthy process.'));
     $this->backdropPost('admin/config/search/settings/reindex', array(), t('Rebuild search index'));
 
     // Test that there are no items left to index.
