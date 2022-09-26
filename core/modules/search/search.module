@@ -1436,6 +1436,8 @@ function search_reindex_batch($passes_needed, $search_active_modules, &$context)
 
   // Invoke hook_update_index for all search active modules. 
   if ($context['sandbox']['current_pass'] < $passes_needed) {
+    // Register a shutdown function to ensure that search_total is up-to-date.
+    backdrop_register_shutdown_function('search_update_totals');
     foreach ($search_active_modules as $module) {
       module_invoke($module, 'update_index');
     }

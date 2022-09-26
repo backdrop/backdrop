@@ -45,8 +45,6 @@ function search_reindex_confirm_submit(&$form, &$form_state) {
 
     // Create the batch if needed.
     if ($passes_needed && isset($search_active_modules)) {
-      // Register a shutdown function to ensure that search_total is up-to-date.
-      backdrop_register_shutdown_function('search_update_totals');
       $batch = array(
         'title' => t('Rebuilding search index'),
         'operations' => array(
