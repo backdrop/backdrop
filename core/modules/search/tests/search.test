@@ -1384,13 +1384,19 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There are @count items left to index.', array('@count' => 0)));
 
-    // Test the Invalidate search index button.
-    $this->backdropPost('admin/config/search/settings', array(), t('Invalidate search index'));
-    $this->assertText(t('Are you sure you want to invalidate the search index?'));
-    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Invalidate search index'));
-    $this->assertText(t('The search index will be invalidated'));
+    // Reset indexes and verify the count of items left to index is correct.
+    module_invoke_all('search_reset');
     $this->backdropGet('admin/config/search/settings');
-    $this->assertText(t('There is 1 item left to index.'));
+    $this->assertText(t('There is @count item left to index.', array('@count' => 1)));
+
+    // Test the Rebuild search index button.
+    $this->backdropPost('admin/config/search/settings', array(), t('Rebuild search index'));
+    $this->assertText(t('Are you sure you want to rebuild the search index?'));
+    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Rebuild search index'));
+
+    // Test that there are no items left to index.
+    $this->backdropGet('admin/config/search/settings');
+    $this->assertText(t('There are 0 items left to index.'));
 
     // Test that the form saves with the default values.
     $this->backdropPost('admin/config/search/settings', array(), t('Save configuration'));
