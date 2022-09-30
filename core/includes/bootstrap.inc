@@ -2578,13 +2578,6 @@ function backdrop_random_bytes($count)  {
       $bytes .= openssl_random_pseudo_bytes($missing_bytes);
     }
 
-    // If OpenSSL is not available, we can use mcrypt. On Windows, this will
-    // transparently pull from CryptGenRandom. On Unix-based systems, it will
-    // read from /dev/urandom as expected.
-    elseif (function_exists(('mcrypt_create_iv')) && defined('MCRYPT_DEV_URANDOM')) {
-      $bytes .= mcrypt_create_iv($count, MCRYPT_DEV_URANDOM);
-    }
-
     // Else, read directly from /dev/urandom, which is available on many *nix
     // systems and is considered cryptographically secure.
     elseif ($fh = @fopen('/dev/urandom', 'rb')) {
@@ -2597,16 +2590,15 @@ function backdrop_random_bytes($count)  {
 
     // If we couldn't get enough entropy, this simple hash-based PRNG will
     // generate a good set of pseudo-random bytes on any system.
-    // Note that it may be important that our $random_state is passed through
-    // hash() prior to being rolled into $output, that the two hash()
+    // Note that it may be important that our $random_state is passed
+    // through hash() prior to being rolled into $output, that the two hash()
     // invocations are different, and that the extra input into the first one -
     // the microtime() - is prepended rather than appended. This is to avoid
-    // directly leaking $random_state via the $output stream, which could allow
-    // for trivial prediction of further "random" numbers.
+    // directly leaking $random_state via the $output stream, which could
+    // allow for trivial prediction of further "random" numbers.
     if (empty($bytes) || strlen($bytes) < $count) {
-      // Initialize on the first call. The contents of $_SERVER includes a mix
-      // of user-specific and system information that varies a little with each
-      // page.
+      // Initialize on the first call. The contents of $_SERVER includes a mix of
+      // user-specific and system information that varies a little with each page.
       if (!isset($random_state)) {
         $random_state = print_r($_SERVER, TRUE);
         if (function_exists('getmypid')) {
