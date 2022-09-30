@@ -817,10 +817,11 @@ function user_account_form(&$form, &$form_state) {
       '#password_strength' => TRUE,
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL. Store this in $form_state
-    // so it persists even on subsequent Ajax requests.
-    if (!isset($form_state['user_pass_reset'])) {
-      $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
+    // one-time link and have the token in the URL. Store this in $form_state,
+    // so it persists even on subsequent AJAX requests.
+    if (!isset($form_state['user_pass_reset']) && $token = $_GET['pass-reset-token']) {
+      $session_key = 'pass_reset_' . $account->uid;
+      $form_state['user_pass_reset'] = isset($_SESSION[$session_key]) && hash_equals($_SESSION[$session_key], $token);
     }
     $protected_values = array();
     $current_pass_description = '';
