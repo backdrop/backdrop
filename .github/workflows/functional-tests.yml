@@ -49,13 +49,9 @@ jobs:
           coverage: none
           tools: none
 
-      - name: Switch mpm if necessary
+      - name: Disable mod_php if necessary
         if: ${{ matrix.php-versions == '5.6' }}
-        run: |
-          sudo a2dismod php5.6
-          sudo a2dismod mpm_prefork
-          sudo a2enmod mpm_event
-          sudo apache2ctl -V
+        run: if [ $(sudo apache2ctl -M | grep -c 'php.*module') -eq 1 ]; then sudo a2dismod php5.6; fi
 
       - name: Setup webserver
         run: |
