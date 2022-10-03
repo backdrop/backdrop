@@ -502,7 +502,8 @@ abstract class DatabaseTasks {
       Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
       try {
         Database::getConnection()->createDatabase($database);
-        $last_exception = FALSE;
+        Database::removeConnection('default');
+        return $this->connect();
       }
       catch (PDOException $e) {
         $last_exception = $e;
