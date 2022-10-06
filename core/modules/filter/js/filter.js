@@ -276,13 +276,9 @@ Backdrop.behaviors.editorImageLibrary = {
         var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
 
         var $form = $('.filter-format-editor-image-form');
-        $form.find('[name="attributes[src]"]').val(relativeImgSrc);
+        $form.find('[name="attributes[src]"]').val(relativeImgSrc).trigger('change');
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Reset width and height so image is not stretched to the any
-        // previous image's dimensions.
-        $form.find('[name="attributes[width]"]').val('');
-        $form.find('[name="attributes[height]"]').val('');
         // Remove style from previous selection.
         $('.image-library-image-selected').removeClass('image-library-image-selected');
         // Add style to this selection.
@@ -295,6 +291,78 @@ Backdrop.behaviors.editorImageLibrary = {
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
+
+    // Lock image aspect ratio.
+    var naturalDimensions = {
+      width: null,
+      height: null
+    };
+    // When editing a previously added image or upload a new one.
+    var existingFile = $('.filter-format-editor-image-form .form-managed-file a').attr('href');
+    if (typeof existingFile !== 'undefined') {
+      let img = new Image();
+      img.onload = function() {
+        naturalDimensions.width = this.width;
+        naturalDimensions.height = this.height;
+        if (!$('.filter-format-editor-image-form [name="attributes[width]').val().length) {
+          Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
+        }
+      }
+      img.onerror = function() {
+        naturalDimensions.width = null;
+        naturalDimensions.height = null;
+      }
+      img.src = existingFile;
+    }
+    else if ($('.filter-format-editor-image-form [name="attributes[width]').length) {
+      // After an image has been removed via button, and the managed form item
+      // reloads, reset width and height.
+      if ($('.filter-format-editor-image-form [name="attributes[width]').val().length) {
+        naturalDimensions.width = null;
+        naturalDimensions.height = null;
+        Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
+      }
+    }
+
+    // Selecting an image from library updates width and height values.
+    $('.filter-format-editor-image-form [name="attributes[src]"]').once().on('change', function() {
+      let img = new Image();
+      img.onload = function() {
+        naturalDimensions.width = this.width;
+        naturalDimensions.height = this.height;
+        Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
+      }
+      img.onerror = function() {
+        naturalDimensions.width = null;
+        naturalDimensions.height = null;
+        Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
+      }
+      img.src = this.value;
+    });
+
+    // Keep width and height in sync based on the natural image dimensions.
+    $('.filter-format-editor-image-form [name="attributes[width]"]').once().on('change', function() {
+      var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
+      $('.filter-format-editor-image-form [name="attributes[height]').val(newHeight);
+    });
+    $('.filter-format-editor-image-form [name="attributes[height]"]').once().on('change', function() {
+      var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
+      $('.filter-format-editor-image-form [name="attributes[width]').val(newWidth);
+    });
+  },
+  /**
+   * Helper function to empty the width and height form items.
+   */
+  imageDimensionsEmpty: function() {
+    $('.filter-format-editor-image-form [name="attributes[width]').val('');
+    $('.filter-format-editor-image-form [name="attributes[height]').val('');
+  },
+  /**
+   * Helper funtion to set width and height values.
+   */
+  imageDimensionsSet: function(values) {
+    $('.filter-format-editor-image-form [name="attributes[width]').val(values.width);
+    $('.filter-format-editor-image-form [name="attributes[height]').val(values.height);
   }
 };
 
