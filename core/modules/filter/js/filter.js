@@ -306,8 +306,8 @@ Backdrop.behaviors.editorImageLibrary = {
         naturalDimensions.height = this.height;
         if (!$('.filter-format-editor-image-form [name="attributes[width]').val().length) {
           Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
-          Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
         }
+        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
       }
       img.onerror = function() {
         naturalDimensions.width = null;
