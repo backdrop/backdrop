@@ -306,6 +306,7 @@ Backdrop.behaviors.editorImageLibrary = {
         naturalDimensions.height = this.height;
         if (!$('.filter-format-editor-image-form [name="attributes[width]').val().length) {
           Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
+          Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
         }
       }
       img.onerror = function() {
@@ -331,6 +332,7 @@ Backdrop.behaviors.editorImageLibrary = {
         naturalDimensions.width = this.width;
         naturalDimensions.height = this.height;
         Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
+        Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
       }
       img.onerror = function() {
         naturalDimensions.width = null;
@@ -340,15 +342,6 @@ Backdrop.behaviors.editorImageLibrary = {
       img.src = this.value;
     });
 
-    // Keep width and height in sync based on the natural image dimensions.
-    $('.filter-format-editor-image-form [name="attributes[width]"]').once().on('change', function() {
-      var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
-      $('.filter-format-editor-image-form [name="attributes[height]').val(newHeight);
-    });
-    $('.filter-format-editor-image-form [name="attributes[height]"]').once().on('change', function() {
-      var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
-      $('.filter-format-editor-image-form [name="attributes[width]').val(newWidth);
-    });
   },
   /**
    * Helper function to empty the width and height form items.
@@ -363,6 +356,22 @@ Backdrop.behaviors.editorImageLibrary = {
   imageDimensionsSet: function(values) {
     $('.filter-format-editor-image-form [name="attributes[width]').val(values.width);
     $('.filter-format-editor-image-form [name="attributes[height]').val(values.height);
+  },
+  /**
+   * Remove previous event listeners, add new ones with current dimensions.
+   *
+   * Keep width and height input values in sync based on the natural image
+   * dimensions.
+   */
+  syncAspectRatio: function(naturalDimensions) {
+    $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {
+      var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
+      $('.filter-format-editor-image-form [name="attributes[height]').val(newHeight);
+    });
+    $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {
+      var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
+      $('.filter-format-editor-image-form [name="attributes[width]').val(newWidth);
+    });
   }
 };
 
