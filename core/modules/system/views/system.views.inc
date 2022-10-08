@@ -121,13 +121,12 @@ function system_views_data() {
   );
 
   // - info
-  $data['system']['system_info'] = array(
-    'title' => t('Module/Theme/Theme engine settings'),
-    'help' => t("Selected settings from the info file."),
+  $data['system']['info'] = array(
+    'title' => t('Module/Theme/Theme engine properties'),
+    'help' => t('Selected properties from the info file.'),
     'field' => array(
       'handler' => 'views_handler_field_system_info',
       'click sortable' => FALSE,
-      'real field' => 'info',
     ),
   );  
 
