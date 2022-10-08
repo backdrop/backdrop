@@ -208,6 +208,7 @@ class views_handler_field_system_info extends views_handler_field {
       'version' => t('Version'),
       'backdrop' => t('Backdrop version'),
       'dependencies' => t('Dependencies'),
+      'required' => t('Required'),
       'base theme' => t('Base theme'),
       'scripts' => t('Scripts'),
     );
