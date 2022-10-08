@@ -147,7 +147,7 @@ class views_handler_field_system_info extends views_handler_field {
       case 'scripts':    
         $items = $info_array[$info_property];
 
-        if ($info_property == 'dependencies' && $this->options['dependencies_display'] == 'project_names' && ($info_array['type' == 'module'] || $info_array['type' == 'profile'])) {
+        if ($info_property == 'dependencies' && $this->options['dependencies_display'] == 'project_names' && ($info_array['type'] == 'module' || $info_array['type'] == 'profile')) {
           // Display human names for projects.
           $modules = system_rebuild_module_data();
           $module_labels = array();
@@ -174,7 +174,7 @@ class views_handler_field_system_info extends views_handler_field {
       default:
         $output = $info_array[$info_property];
         if (is_array($output)) {
-          $output = print_r($output, TRUE);
+          $output = theme('item_list', array('items' => $this->_array2list($output)));
         } 
         return $output;
     } 
@@ -212,5 +212,26 @@ class views_handler_field_system_info extends views_handler_field {
       'base theme' => t('Base theme'),
       'scripts' => t('Scripts'),
     );
+  }
+
+  /** 
+   * Helper to convert multilevel array to multilevel item list.
+   */
+  protected function _array2list($array) {
+    $return = array();  
+    foreach ($array as $key => $item) {
+      if (is_array($item)) {
+        $return[] = array(
+          'data' => $key,
+          'children' => $this->_array2list($item)
+        );
+      } 
+      else {
+        $return[] = array(
+          'data' => $key . ' = ' . $item,
+        );
+      }
+    }
+    return $return;
   }
 }
