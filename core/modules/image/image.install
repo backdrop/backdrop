@@ -75,6 +75,7 @@ function image_field_schema($field) {
  */
 function image_requirements($phase) {
   $requirements = array();
+  $problems_detected = FALSE;
 
   if ($phase == 'runtime') {
     // Check for the PHP GD library.
@@ -141,7 +142,8 @@ function image_requirements($phase) {
         }
       }
 
-      if ($unsupported_formats) {
+      if (!empty($unsupported_formats)) {
+        $problems_detected = TRUE;
         $requirements['image_gd']['severity'] = REQUIREMENT_WARNING;
         $fix_info[] = t('If you want to add support for any unsupported image format, check the <a href="@url">PHP GD installation documentation</a>.', array('@url' => 'https://www.php.net/manual/image.installation.php'));
       }
@@ -169,12 +171,17 @@ function image_requirements($phase) {
         }
       }
       if (!empty($unsupported_effects)) {
+        $problems_detected = TRUE;
         $fix_info[] = t('The GD library was compiled without support for functions required by certain effects. It was probably compiled using the official GD libraries from http://www.libgd.org instead of the GD library bundled with PHP. If you want to add support for these effects, recompile PHP --with-gd using the bundled GD library. See <a href="http://www.php.net/manual/book.image.php">the PHP manual</a>.');
       }
 
-      $formats_and_effects = theme('item_list', array('items' => $descriptions, 'title' => t('Supported image formats and effects'), 'attributes' => array('class' => array('requirements'))));
+      $formats_and_effects = theme('item_list', array('items' => $descriptions, 'attributes' => array('class' => array('requirements'))));
       $fix_info = theme('item_list', array('items' => $fix_info, 'title' => t('Fixing issues')));
       $requirements['image_gd']['description'] = $formats_and_effects . $fix_info;
+
+      $support_status = $problems_detected ? t('Partial support of image formats and effects') : t('All image formats and effects supported');
+      $requirements['image_gd']['value'] .= ' - ' . $support_status;
+
     }
     else {
       $requirements['image_gd'] = array(
