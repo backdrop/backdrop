@@ -245,12 +245,12 @@ span.admin-missing {
 }
 .system-status-report ul.requirements li.status-ok:before {
   content: "✓";
-  color: green;
+  color: #006100;
   padding-right: 1ch; /* LTR */
 }
 .system-status-report ul.requirements li.status-error:before {
   content: "✗";
-  color: red;
+  color: #ad0000;
   padding-right: 1ch; /* LTR */
 }
 [dir="rtl"] .system-status-report ul.requirements li.status-ok:before,
