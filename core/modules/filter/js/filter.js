@@ -304,7 +304,7 @@ Backdrop.behaviors.editorImageLibrary = {
       img.onload = function() {
         naturalDimensions.width = this.width;
         naturalDimensions.height = this.height;
-        if (!$('.filter-format-editor-image-form [name="attributes[width]').val().length) {
+        if (!$('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
           Backdrop.behaviors.editorImageLibrary.imageDimensionsSet(naturalDimensions);
         }
         Backdrop.behaviors.editorImageLibrary.syncAspectRatio(naturalDimensions);
@@ -315,10 +315,10 @@ Backdrop.behaviors.editorImageLibrary = {
       }
       img.src = existingFile;
     }
-    else if ($('.filter-format-editor-image-form [name="attributes[width]').length) {
+    else if ($('.filter-format-editor-image-form [name="attributes[width]"]').length) {
       // After an image has been removed via button, and the managed form item
       // reloads, reset width and height.
-      if ($('.filter-format-editor-image-form [name="attributes[width]').val().length) {
+      if ($('.filter-format-editor-image-form [name="attributes[width]"]').val().length) {
         naturalDimensions.width = null;
         naturalDimensions.height = null;
         Backdrop.behaviors.editorImageLibrary.imageDimensionsEmpty();
@@ -326,7 +326,7 @@ Backdrop.behaviors.editorImageLibrary = {
     }
 
     // Selecting an image from library updates width and height values.
-    $('.filter-format-editor-image-form [name="attributes[src]"]').once().on('change', function() {
+    $('.filter-format-editor-image-form [name="attributes[src]"]').once('filter-editor-img-src').on('change', function() {
       let img = new Image();
       img.onload = function() {
         naturalDimensions.width = this.width;
@@ -347,15 +347,15 @@ Backdrop.behaviors.editorImageLibrary = {
    * Helper function to empty the width and height form items.
    */
   imageDimensionsEmpty: function() {
-    $('.filter-format-editor-image-form [name="attributes[width]').val('');
-    $('.filter-format-editor-image-form [name="attributes[height]').val('');
+    $('.filter-format-editor-image-form [name="attributes[width]"]').val('');
+    $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
   },
   /**
    * Helper funtion to set width and height values.
    */
   imageDimensionsSet: function(values) {
-    $('.filter-format-editor-image-form [name="attributes[width]').val(values.width);
-    $('.filter-format-editor-image-form [name="attributes[height]').val(values.height);
+    $('.filter-format-editor-image-form [name="attributes[width]"]').val(values.width);
+    $('.filter-format-editor-image-form [name="attributes[height]"]').val(values.height);
   },
   /**
    * Remove previous event listeners, add new ones with current dimensions.
@@ -366,11 +366,11 @@ Backdrop.behaviors.editorImageLibrary = {
   syncAspectRatio: function(naturalDimensions) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').off('change').on('change', function() {
       var newHeight = Math.round(this.value / naturalDimensions.width * naturalDimensions.height);
-      $('.filter-format-editor-image-form [name="attributes[height]').val(newHeight);
+      $('.filter-format-editor-image-form [name="attributes[height]"]').val(newHeight);
     });
     $('.filter-format-editor-image-form [name="attributes[height]"]').off('change').on('change', function() {
       var newWidth = Math.round(this.value / naturalDimensions.height * naturalDimensions.width);
-      $('.filter-format-editor-image-form [name="attributes[width]').val(newWidth);
+      $('.filter-format-editor-image-form [name="attributes[width]"]').val(newWidth);
     });
   }
 };
