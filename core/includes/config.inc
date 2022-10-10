@@ -296,6 +296,7 @@ function config_install_default_config($module, $config_name = NULL) {
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
           $config->setData($data);
+          module_invoke_all('config_create', $config);
           $config->save();
         }
       }
@@ -587,6 +588,22 @@ class Config {
   }
 
   /**
+   * Gets all data from this configuration object.
+   *
+   * This call provides API symmetry with Config::setData().
+   *
+   * @return array
+   *   All of the data from this config object.
+   *
+   * @see Config::get()
+   *
+   * @since 1.23.0 Method added.
+   */
+  public function getData() {
+    return $this->get();
+  }
+
+  /**
    * Gets data from this configuration object.
    *
    * @param string $key
@@ -697,7 +714,7 @@ class Config {
    */
   public function getOverride($key) {
     $value = NULL;
-    $parts = explode('.', $key);
+    $parts = explode('.', (string) $key);
     $popped_parts = array();
     while ($parts) {
       $assembled_key = implode('.', $parts);
@@ -1239,7 +1256,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
 
   /**
    * Create a configuration directory, if it does not already exist, and ensure
-   * it is writable by the site.
+   * it is writable by the site. Additionally, protect it with a .htaccess file.
    *
    * @return bool
    *   TRUE on success, FALSE in case of an error.
@@ -1251,6 +1268,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
       throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
         '@directory' => $this->directory,
       )));
+    }
+    // No need to create htaccess files if not running Apache.
+    if (backdrop_is_apache()) {
+      file_save_htaccess($this->directory);
     }
   }
 

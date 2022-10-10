@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File type editing user interface.
+ * Admin page callbacks for the File module.
  */
 
 /**
@@ -12,7 +12,7 @@ function file_list_types_page() {
   $types = file_type_get_types();
   $names = file_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Storage state'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Storage state'), t('Operations'));
   $rows_enabled = array();
   $rows_disabled = array();
   $weight = 0;
@@ -26,13 +26,12 @@ function file_list_types_page() {
     $weight++;
     $row = array(
       array(
-        'data' => theme('file_type_overview',
-          array(
-            'name' => $type->name,
-            'description' => $type->description,
-          )
-        ),
+        'data' => theme('label_machine_name__file', array(
+          'label' => $type->name,
+          'machine_name' => $type->type,
+        )),
       ),
+      filter_xss_admin($type->description),
     );
 
 
@@ -369,10 +368,13 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
+  $formatter = $form_state['values']['display']['formatter'];
+  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : array();
+
 
   $display = array(
-    'formatter' => $form_state['values']['display']['formatter'],
-    'settings' => $form_state['values']['display']['settings'],
+    'formatter' => $formatter,
+    'settings' => $settings,
   );
 
   file_display_save($form['#file_type'], $form['#view_mode'], $display);
@@ -509,14 +511,10 @@ function file_settings_form($form, &$form_state) {
   $form['default_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Default file directory'),
-    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.'),
+    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.') . ' ' . theme('token_tree_link'),
     '#default_value' => $config->get('default_file_directory'),
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
-  );
-  $form['default_file_directory']['tokens'] = array(
-    '#theme' => 'token_tree',
-    '#dialog' => TRUE,
   );
 
   $form['default_allowed_extensions'] = array(

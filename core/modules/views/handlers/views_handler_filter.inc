@@ -372,7 +372,7 @@ class views_handler_filter extends views_handler {
     $grouped_description = t('Grouped filters allow a choice between predefined operator|value pairs.');
     $form['group_button']['radios'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['group_button']['radios']['radios'] = array(
       '#title' => t('Filter type to expose'),
@@ -427,7 +427,7 @@ class views_handler_filter extends views_handler {
     // so it can replace the button.
     $form['expose_button']['checkbox'] = array(
       '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-only')),
+      '#attributes' => array('class' => array('js-show')),
     );
     $form['expose_button']['checkbox']['checkbox'] = array(
       '#title' => t('Expose this filter to visitors, to allow them to change it'),
@@ -967,13 +967,13 @@ class views_handler_filter extends views_handler {
         }
         if ($has_state) {
           foreach ($states as $key => $state) {
-            $row['value'][$children]['#states']['visible'][] = array(
+            $row['value'][$children]['#states']['visible'][$key] = array(
               ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => array('value' => $state),
             );
-            unset($row['value'][$children]['#states']['visible'][$key]);
           }
 
-          $row['value'][$children]['#title'] = '';
+          $row['value'][$children]['#title_display'] = 'invisible';
+          $row['value'][$children]['#placeholder'] = $row['value'][$children]['#title'];
 
           if (!empty($this->options['group_info']['group_items'][$item_id]['value'][$children])) {
             $row['value'][$children]['#default_value'] = $this->options['group_info']['group_items'][$item_id]['value'][$children];
@@ -1046,6 +1046,9 @@ class views_handler_filter extends views_handler {
       '#type' => 'submit',
       '#value' => t('Add another item'),
       '#submit' => array('views_ui_config_item_form_add_group'),
+      '#attributes' => array(
+        'class' => array('use-ajax-submit'),
+      ),
     );
 
     $js = array();
@@ -1294,7 +1297,7 @@ class views_handler_filter extends views_handler {
         }
 
         if ($this->operator != 'empty' && $this->operator != 'not empty') {
-          if ($value == 'All' || $value === array()) {
+          if ($value === 'All' || $value === array() || $value === 0) {
             return FALSE;
           }
         }

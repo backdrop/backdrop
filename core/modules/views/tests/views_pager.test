@@ -10,9 +10,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the pluggable pager system.
  */
 class ViewsPagerTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp('views', 'views_ui', 'views_test');
-  }
 
   /**
    * Pagers was sometimes not stored.
@@ -119,7 +116,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view = $this->viewsPagerNoLimit();
     $view->set_display('default');
     $this->executeView($view);
-    $this->assertEqual(count($view->result), 11, 'Make sure that every item is returned in the result');
+    $this->assertEqual(count($view->result), 9, 'Make sure that every item is returned in the result');
 
     $view->destroy();
 
@@ -136,7 +133,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->display_handler->set_option('pager', $pager);
     $this->executeView($view);
 
-    $this->assertEqual(count($view->result), 8, 'Make sure that every item beside the first three is returned in the result');
+    $this->assertEqual(count($view->result), 6, 'Make sure that every item beside the first three is returned in the result');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -174,7 +171,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->set_display('default');
     $this->executeView($view);
 
-    $this->assertEqual($view->total_rows, 25, "'total_rows' is calculated when pager type is 'none' and 'get_total_rows' is TRUE.");
+    $this->assertEqual($view->total_rows, 23, "'total_rows' is calculated when pager type is 'none' and 'get_total_rows' is TRUE.");
   }
 
   public function createNodes($count) {
@@ -191,9 +188,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   public function testLimit() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
-    for ($i = 0; $i < 9; $i++) {
-      $this->backdropCreateNode();
-    }
+    $this->createNodes(11);
     $view = $this->viewsPagerLimit();
     $view->set_display('default');
     $this->executeView($view);
@@ -250,9 +245,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   public function testNormalPager() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
-    for ($i = 0; $i < 9; $i++) {
-      $this->backdropCreateNode();
-    }
+    $this->createNodes(11);
     $view = $this->viewsPagerFull();
     $view->set_display('default');
     $this->executeView($view);

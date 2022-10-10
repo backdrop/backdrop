@@ -554,7 +554,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('search');
 
-    // Create and login user
+    // Create and log user in.
     $admin_user = $this->backdropCreateUser(array('administer blocks', 'search content'));
     $this->backdropLogin($admin_user);
   }
@@ -563,12 +563,12 @@ class SearchBlockTestCase extends BackdropWebTestCase {
    * Test that the search block form works correctly.
    */
   function testBlock() {
-    // Enable the search block.
+    // Add the search block to the default layout.
     $layout = layout_load('default');
     $layout->addBlock('search', 'form', 'content');
     $layout->save();
 
-    // Test a normal search via the block form, from the front page.
+    // Test a normal search via the block form, from the /user page.
     $terms = array('search_block_form' => 'test');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Your search yielded no results');
@@ -587,7 +587,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
       'Redirected to correct url.'
     );
 
-    // Test an empty search via the block form, from the front page.
+    // Test an empty search via the block form, from the /user page.
     $terms = array('search_block_form' => '');
     $this->backdropPost('user', $terms, t('Search'));
     $this->assertText('Please enter some keywords');
@@ -692,12 +692,12 @@ class SearchCommentTestCase extends BackdropWebTestCase {
       'settings' => array(
         'comment_default' => COMMENT_NODE_OPEN,
         'comment_preview' => BACKDROP_OPTIONAL,
-        'comment_subject_field' => TRUE,
+        'comment_title_options' => COMMENT_TITLE_CUSTOM,
       ),
     ));
     $full_html_format = (object) array(
       'format' => 'full_html',
-      'name' => 'Full HTML',
+      'name' => 'Raw HTML',
       'weight' => 1,
       'editor' => NULL,
       'filters' => array(),
@@ -717,8 +717,8 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-    // Create and log in an administrative user having access to the Full HTML
-    // text format.
+    // Create and log in an administrative user having access to the Raw HTML
+    // (full_html) text format.
     $permissions = array(
       'administer filters',
       filter_permission_name($full_html_format),
@@ -753,7 +753,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'post'));
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = 'Test comment subject';
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
@@ -811,7 +811,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     // Create a node.
     $this->node = $this->backdropCreateNode(array('type' => 'post'));
 
-    // Post a comment using 'Full HTML' text format.
+    // Post a comment using 'Raw HTML' (full_html) text format.
     $edit_comment = array();
     $edit_comment['subject'] = $this->comment_subject;
     $edit_comment['comment_body[' . LANGUAGE_NONE . '][0][value]'] = '<h1>' . $comment_body . '</h1>';
@@ -1030,7 +1030,8 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Verify that comment count display toggles properly on comment status of node
+   * Verify that comment count displays correctly based on comment status of 
+   * node.
    */
   function testSearchCommentCountToggle() {
     // Search for the nodes by string in the node body.
@@ -1038,12 +1039,12 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
       'search_block_form' => "'SearchCommentToggleTestCase'",
     );
 
-    // Test comment count display for nodes with comment status set to Open
+    // Test comment count display for nodes with comment status set to Open.
     $this->backdropPost('user', $edit, t('Search'));
     $this->assertText(t('0 comments'), 'Empty comment count displays for nodes with comment status set to Open');
     $this->assertText(t('1 comment'), 'Non-empty comment count displays for nodes with comment status set to Open');
 
-    // Test comment count display for nodes with comment status set to Closed
+    // Test comment count display for nodes with comment status set to Closed.
     $this->searchable_nodes['0 comments']->comment = COMMENT_NODE_CLOSED;
     node_save($this->searchable_nodes['0 comments']);
     $this->searchable_nodes['1 comment']->comment = COMMENT_NODE_CLOSED;
@@ -1053,7 +1054,7 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
     $this->assertNoText(t('0 comments'), 'Empty comment count does not display for nodes with comment status set to Closed');
     $this->assertText(t('1 comment'), 'Non-empty comment count displays for nodes with comment status set to Closed');
 
-    // Test comment count display for nodes with comment status set to Hidden
+    // Test comment count display for nodes with comment status set to Hidden.
     $this->searchable_nodes['0 comments']->comment = COMMENT_NODE_HIDDEN;
     node_save($this->searchable_nodes['0 comments']);
     $this->searchable_nodes['1 comment']->comment = COMMENT_NODE_HIDDEN;
@@ -1351,8 +1352,9 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->search_user = $this->backdropCreateUser(array('search content', 'use advanced search', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
     $this->backdropLogin($this->search_user);
 
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
 
     // Add a single piece of content and index it.
     $node = $this->backdropCreateNode();

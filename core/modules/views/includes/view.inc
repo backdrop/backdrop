@@ -1224,6 +1224,7 @@ class view {
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
+    $show_additional_queries = config_get('views.settings', 'show_additional_queries');
 
     // Check to see if the build failed.
     if (!empty($this->build_info['fail'])) {
@@ -1236,7 +1237,7 @@ class view {
     backdrop_theme_initialize();
 
     $start = microtime(TRUE);
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->start_query_capture();
     }
 
@@ -1326,7 +1327,7 @@ class view {
       $function($this, $this->display_handler->output, $cache);
     }
 
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->end_query_capture();
     }
 
@@ -1992,6 +1993,12 @@ class view {
 
   /**
    * Find and initialize the localization plugin.
+   *
+   * @return bool
+   *   Whether the active plugin does handle translation or not. FALSE for the
+   *   plugin "none", or if no plugin was available.
+   *
+   * @see unpack_options()
    */
   public function init_localization() {
     // If the translate attribute isn't set, init the localization plugin.
@@ -2003,6 +2010,11 @@ class view {
       // property set to FALSE, signifying localization should not occur.
       if (empty($this->localization_plugin)) {
         $this->localization_plugin = views_get_plugin('localization', 'none');
+        // If it is still NULL, not even plugin "none" is available. Only needed
+        // for edge cases, like core update.
+        if (is_null($this->localization_plugin)) {
+          return FALSE;
+        }
       }
 
       // Init the plugin.
