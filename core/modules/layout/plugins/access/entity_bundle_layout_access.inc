@@ -75,7 +75,8 @@ class EntityBundleLayoutAccess extends LayoutAccess {
     /* @var Entity $entity */
     $entity = $this->contexts[$this->entity_type]->data;
     // Make sure we're testing an entity here. Views could override system
-    // paths and cause difficulties. See issue #5809.
+    // paths and cause difficulties.
+    // See https://github.com/backdrop/backdrop-issues/issues/5809
     if (!is_object($entity)) {
       $entity = entity_load($this->entity_type, $entity);
     }
