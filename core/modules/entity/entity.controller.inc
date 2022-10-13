@@ -219,7 +219,7 @@ class DefaultEntityController implements EntityControllerInterface {
     // Reset the persistent cache.
     if ($this->persistentCache) {
       if (!empty($ids)) {
-        cache('cache_entity_' . $this->entityType)->delete($ids);
+        cache('cache_entity_' . $this->entityType)->deleteMultiple($ids);
       }
       else {
         // Force all cached entries to be deleted.
