@@ -166,7 +166,7 @@ function cache_flush($bin) {
  *
  * @see cache_flush()
  *
- * @deprecated since 1.22
+ * @deprecated since 1.24.0
  */
 function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
   watchdog_deprecated_function('cache', __FUNCTION__);
