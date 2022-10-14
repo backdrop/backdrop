@@ -1388,7 +1388,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     search_reindex();
 
     // Create a new node to test index rebuilding.
-    $body_text = 'Glutten-free.';
+    $body_text = 'Gluten-free.';
     $this->backdropCreateNode(array(
       'body' => array(LANGUAGE_NONE => array(array('value' => $body_text))),
     ));
