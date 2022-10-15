@@ -475,13 +475,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   $options = menu_parent_options(menu_get_menus(), $item);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
-    if ($item['type'] == MENU_SUGGESTED_ITEM) {
-      $options = array('none' => t('-- None --')) + $options;
-      $default = 'none';
-    }
-    else {
-      $default = 'main-menu:0';
-    }
+    $default = $item['type'] == MENU_SUGGESTED_ITEM ? 'none' : 'main-menu:0';
   }
   $form['parent'] = array(
     '#type' => 'select',
@@ -493,6 +487,10 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
   );
+  if (isset($item['type']) && $item['type'] == MENU_SUGGESTED_ITEM) {
+    $form['parent']['#empty_option'] = t('None (do not place in any menu)');
+    $form['parent']['#empty_value'] = 'none';
+  }
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
