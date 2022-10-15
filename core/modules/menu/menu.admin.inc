@@ -334,7 +334,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
-  $link_to_parent_menu = 'admin/structure/menu/manage/' . $item['menu_name'];
+  $link_to_parent_menu = 'admin/structure/menu/manage/';
 
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
@@ -352,11 +352,13 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       'hidden' => 0,
       'has_children' => 0,
     );
+    $link_to_parent_menu .= $menu['menu_name'];
   }
   else {
     // Get the human-readable menu title from the given menu name.
     $titles = menu_get_menus();
     $current_title = $titles[$item['menu_name']];
+    $link_to_parent_menu .= $item['menu_name'];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
