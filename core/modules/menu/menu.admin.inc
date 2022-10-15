@@ -92,16 +92,7 @@ function menu_overview_form($form, &$form_state, $menu) {
     '#submit' => array('menu_overview_form_language_filter_submit'),
   );
 
-  $sql = "
-    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
-    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
-    WHERE ml.menu_name = :menu
-    ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
-  $result = db_query($sql, array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
-  $links = array();
-  foreach ($result as $item) {
-    $links[] = $item;
-  }
+  $links = _menu_get_links($menu);
   $tree = menu_tree_data($links);
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
@@ -125,6 +116,84 @@ function menu_overview_form($form, &$form_state, $menu) {
     $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add')));
   }
   return $form;
+}
+
+/**
+ * Helper function that retrieves all menu items.
+ *
+ * @param array|NULL $menu
+ *   The menu to retrieve the items for. If NULL, all menu items will be
+ *   retrieved from the database, regardless to which menu they belong.
+ * @param array $menu_item_types
+ *   A list of menu item types to retrieve. If left empty, all menu item types
+ *   will be retrieved. For a list of available menu item types, see defgroup
+ *   menu_item_types in core/includes/menu.inc
+ *
+ * @return array
+ *   All menu item links that match the menu/menu_item_types criteria, or all
+ *   menu item links if no criteria have been specified.
+ *
+ * @see menu_overview_form()
+ * @see menu_menu_item_library_form()
+ */
+function _menu_get_links($menu = NULL, $menu_item_types = array()) {
+  $select = db_select('menu_links', 'ml')->fields('ml');
+  $select->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
+  $select->fields('m', array('load_functions', 'to_arg_functions', 'access_callback', 'access_arguments', 'page_callback', 'page_arguments', 'delivery_callback', 'title', 'title_callback', 'title_arguments', 'type', 'description', 'include_file'))
+    ->orderBy('ml.p1', 'ASC')
+    ->orderBy('ml.p2', 'ASC')
+    ->orderBy('ml.p3', 'ASC')
+    ->orderBy('ml.p4', 'ASC')
+    ->orderBy('ml.p5', 'ASC')
+    ->orderBy('ml.p6', 'ASC')
+    ->orderBy('ml.p7', 'ASC')
+    ->orderBy('ml.p8', 'ASC')
+    ->orderBy('ml.p9', 'ASC');
+
+  if (!is_null($menu)) {
+    $select->condition('ml.menu_name', $menu['menu_name'], '=');
+  }
+
+  if (!empty($menu_item_types)) {
+    $menu_item_types_conditions = db_or();
+    foreach ($menu_item_types as $menu_item_type) {
+      $menu_item_types_conditions->condition('m.type', $menu_item_type, '=');
+    }
+    $select->condition($menu_item_types_conditions);
+  }
+
+  $result = $select->execute()->fetchAll();
+
+  $links = array();
+  foreach ($result as $item) {
+    $links[] = (array) $item;
+  }
+
+  return $links;
+}
+
+function _menu_menu_link_operations($item) {
+  // Build a list of operations.
+  $links = array();
+  $links['edit'] = array(
+    'title' => t('Edit'),
+    'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/edit',
+  );
+  // Only items created by the menu module can be deleted.
+  if ($item['module'] == 'menu' || $item['updated'] == 1) {
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/delete',
+    );
+  }
+  // Set the reset column.
+  elseif ($item['module'] == 'system' && $item['customized']) {
+    $links['reset'] = array(
+      'title' => t('Reset'),
+      'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/reset',
+    );
+  }
+  return $links;
 }
 
 /**
@@ -188,29 +257,9 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
         '#type' => 'hidden',
         '#default_value' => $item['plid'],
       );
-      // Build a list of operations.
-      $links = array();
-      $links['edit'] = array(
-        'title' => t('Edit'),
-        'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/edit',
-      );
-      // Only items created by the menu module can be deleted.
-      if ($item['module'] == 'menu' || $item['updated'] == 1) {
-        $links['delete'] = array(
-          'title' => t('Delete'),
-          'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/delete',
-        );
-      }
-      // Set the reset column.
-      elseif ($item['module'] == 'system' && $item['customized']) {
-        $links['reset'] = array(
-          'title' => t('Reset'),
-          'href' => 'admin/structure/menu/item/' . $item['mlid'] . '/reset',
-        );
-      }
       $form[$mlid]['operations'] = array(
         '#type' => 'operations',
-        '#links' => $links,
+        '#links' => _menu_menu_link_operations($item),
       );
     }
 
@@ -303,17 +352,28 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     );
   }
   else {
-    // Get the human-readable menu title from the given menu name
+    // Get the human-readable menu title from the given menu name.
     $titles = menu_get_menus();
     $current_title = $titles[$item['menu_name']];
+    $link_to_parent_menu = 'admin/structure/menu/manage/' . $item['menu_name'];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
-    $breadcrumb[] = l($current_title, 'admin/structure/menu/manage/' . $item['menu_name']);
+    $breadcrumb[] = l($current_title, $link_to_parent_menu);
     backdrop_set_breadcrumb($breadcrumb);
   }
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $link_to_parent_menu,
+    '#weight' => 99,
+  );
+
   $form['link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
@@ -406,11 +466,18 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t("When displayed in a 'hierarchial tree' menu style, children of expanded menu links will always be visible."),
   );
 
-  // Generate a list of possible parents (not including this link or descendants).
+  // Generate a list of possible parents (not including this link or
+  // descendants).
   $options = menu_parent_options(menu_get_menus(), $item);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
-    $default = 'main-menu:0';
+    if ($item['type'] == MENU_SUGGESTED_ITEM) {
+      $options = array('none' => t('-- None --')) + $options;
+      $default = 'none';
+    }
+    else {
+      $default = 'main-menu:0';
+    }
   }
   $form['parent'] = array(
     '#type' => 'select',
@@ -791,4 +858,43 @@ function menu_settings_form_validate($form, &$form_state) {
 function menu_settings_form_submit($form, &$form_state) {
   // Flush page cache to allow new breakpoint to take effect immediately.
   cache_flush('page');
+}
+
+/**
+ * Menu callback; lists all "seggested" menu items provided by modules.
+ *
+ * @see MENU_SUGGESTED_ITEM
+ */
+function menu_menu_item_library_form() {
+  $menus = menu_get_menus();
+  $sugested_menu_links = _menu_get_links(NULL, array(MENU_SUGGESTED_ITEM));
+
+  $help_text = t('This page allows you to manage "suggested" menu items (of type <code>MENU_SUGGESTED_ITEM</code>) that are provided by enabled modules.');
+  $output = theme('help', array('markup' => $help_text));
+
+  $header = array(t('Menu link'), t('Module'), t('Placed in'), t('Operations'));
+
+  $rows = array();
+  foreach ($sugested_menu_links as $link) {
+    $menu = $link['menu_name'];
+    // Check if the menu reported that this item belongs to exists, and is among
+    // the available menus (i.e. not the fictional 'internal' menu).
+    $placed = isset($menus[$link['menu_name']]);
+    $operations = _menu_menu_link_operations($link);
+
+    $rows[] = array(
+      array('data' => l($link['link_title'], $link['link_path'])),
+      // We cannot rely on $link['module'] for the name of the module that
+      // provides the link, because in _menu_link_build() all menu links
+      // generated automatically from entries in {menu_router} are set to
+      // 'system' (as opposed to 'menu' for user-created menus).
+      array('data' => $link['include_file']),
+      array('data' => $placed ? $menus[$link['menu_name']] : t('Not placed in any menu')),
+      array('data' => array('#type' => 'operations', '#links' => $operations)),
+    );
+  }
+
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No suggested menu links available.')));
+
+  return $output;
 }

@@ -1167,15 +1167,15 @@ function menu_tree_output($tree, $_current_depth = 0) {
 /**
  * Gets the data structure representing a named menu tree.
  *
- * Since this can be the full tree including hidden items, the data returned
- * may be used for generating an an admin interface or a select.
+ * Since this can be the full tree including hidden items, the data returned may
+ * be used for generating an admin interface or a select.
  *
  * @param $menu_name
  *   The named menu links to return
  * @param $link
- *   A fully loaded menu link, or NULL. If a link is supplied, only the
- *   path to root will be included in the returned tree - as if this link
- *   represented the current page in a visible menu.
+ *   A fully loaded menu link, or NULL. If a link is supplied, only the path to
+ *   root will be included in the returned tree - as if this link represented
+ *   the current page in a visible menu.
  * @param $max_depth
  *   Optional maximum depth of links to retrieve. Typically useful if only one
  *   or two levels of a sub tree are needed in conjunction with a non-NULL
