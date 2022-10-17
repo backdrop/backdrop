@@ -2836,7 +2836,7 @@ function theme_select($variables) {
  *
  * @param array $element
  *   An associative array containing the following key-value pairs:
- *   - #multiple: Optional Boolean indicating if the user may select more than
+ *   - #multiple: (optional) Boolean indicating if the user may select more than
  *     one item.
  *   - #options: An associative array of options to render as HTML. Each array
  *     value can be a string, an array, or an object with an 'option' property:
@@ -2854,7 +2854,7 @@ function theme_select($variables) {
  *       object with an 'option' property, the key is ignored, the contents of
  *       the option property are interpreted as $element['#options'], and the
  *       resulting HTML is added to the output.
- *   - #value: Optional integer, string, or array representing which option(s)
+ *   - #value: (optional) Integer, string, or array representing which option(s)
  *     to pre-select when the list is first displayed. The integer or string
  *     must match the key of an option in the '#options' list. If '#multiple' is
  *     TRUE, this can be an array of integers or strings.
@@ -2876,6 +2876,7 @@ function form_select_options($element, $choices = NULL) {
   $value_is_array = $value_valid && is_array($element['#value']);
   $options = '';
   foreach ($choices as $key => $choice) {
+    $disabled = '';
     if (is_array($choice)) {
       $options .= '<optgroup label="' . check_plain($key) . '">';
       $options .= form_select_options($element, $choice);
@@ -2892,7 +2893,12 @@ function form_select_options($element, $choices = NULL) {
       else {
         $selected = '';
       }
-      $options .= '<option value="' . check_plain($key) . '"' . $selected . '>' . check_plain($choice) . '</option>';
+      if (isset($element[$key])) {
+        if (isset($element[$key]['#disabled']) && $element[$key]['#disabled'] == TRUE) {
+          $disabled = ' disabled';
+        }
+      }
+      $options .= '<option value="' . check_plain($key) . '"' . $selected . $disabled . '>' . check_plain($choice) . '</option>';
     }
   }
   return $options;
