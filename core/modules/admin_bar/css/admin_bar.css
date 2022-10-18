@@ -83,6 +83,16 @@
   padding-right: 28px;
 }
 
+/* Back to Site arrow. */
+
+#admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../icons/chevron-disc-left.png");
+}
+[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../icons/chevron-disc-right.png");
+}
+
+
 /* Admin bar label. */
 #admin-bar #admin-bar-menu.dropdown li > span.menu {
   background: transparent url(../images/bars--white--64.png) 5% center no-repeat; /* LTR */

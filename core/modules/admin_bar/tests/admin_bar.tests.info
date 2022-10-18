@@ -21,3 +21,4 @@ name = Customized links
 description = Tests customized menu links.
 group = Administration bar
 file = admin_bar.test
+
