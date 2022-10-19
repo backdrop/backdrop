@@ -22,7 +22,7 @@ abstract class BackdropTestCase {
    *
    * @var string
    */
-  protected $profile = 'standard';
+  protected $profile = 'testing';
 
   /**
    * The test run ID.
@@ -975,6 +975,12 @@ class BackdropUnitTestCase extends BackdropTestCase {
  * Test case for typical Backdrop tests.
  */
 class BackdropWebTestCase extends BackdropTestCase {
+  /**
+   * The profile to install as a basis for testing.
+   *
+   * @var string
+   */
+  protected $profile = 'standard';
 
   /**
    * The URL currently loaded in the internal browser.
