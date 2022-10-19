@@ -352,7 +352,7 @@ interface BackdropCacheInterface {
  *
  * @ingroup cache
  */
-interface BackdropTaggableCacheInterface  extends BackdropCacheInterface {
+interface BackdropTaggableCacheInterface {
 
   /**
    * Stores data in the persistent cache.
