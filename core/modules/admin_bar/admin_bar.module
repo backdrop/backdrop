@@ -250,7 +250,7 @@ function admin_bar_preprocess_page(&$variables) {
   if (path_is_admin($settings['current_path'])) {
     $settings['current_path_is_admin'] = TRUE;
   }
-  $settings['back_to_site'] = config_get('admin_bar.settings', 'back_to_site');
+  $settings['back_to_site_link'] = config_get('admin_bar.settings', 'back_to_site_link');
   $settings['frontpage'] = config_get('system.core', 'site_frontpage');
 
   backdrop_add_js(array('admin_bar' => $settings), 'setting');

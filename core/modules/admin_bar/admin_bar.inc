@@ -779,7 +779,7 @@ function admin_bar_theme_settings() {
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
 
-  $form['back_to_site'] = array(
+  $form['back_to_site_link'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add Back To Site Link'),
     '#default_value' => $config->get('back_to_site_link'),
