@@ -994,8 +994,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * @param $action
  *   Form action. Defaults to "search/$path", where $path is the search path
- *   associated with the module in its hook_search_info(). This will be
- *   run through url().
+ *   associated with the module in its hook_search_info(). This will be run
+ *   through url().
  * @param $keys
  *   The search string entered by the user, containing keywords for the search.
  * @param $module
@@ -1036,6 +1036,9 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   $form_state['action'] = $action;
   $form['module'] = array('#type' => 'value', '#value' => $module);
   $form['basic'] = array('#type' => 'container', '#attributes' => array('class' => array('container-inline')));
+
+  // This field is not required because it may be populated by the advanced
+  // search fields provided by other modules (such as node module).
   $form['basic']['keys'] = array(
     '#type' => 'search',
     '#title' => $prompt,
@@ -1059,13 +1062,15 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
  * @see search_box_form_submit()
  */
 function search_box($form, &$form_state, $form_id) {
+  // The #required property is not set here, so that the user is taken to the
+  // search page before any error is shown.
   $form[$form_id] = array(
     '#type' => 'search',
     '#title' => t('Search'),
     '#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => '',
-    '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+    '#attributes' => array('title' => t('Enter the keywords you wish to search for.')),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
@@ -1088,10 +1093,8 @@ function search_box_form_submit($form, &$form_state) {
 
   // Check to see if the form was submitted empty.
   // If it is empty, display an error message.
-  // (This method is used instead of setting #required to TRUE for this field
-  // because that results in a confusing error message.  It would say a plain
-  // "field is required" because the search keywords field has no title.
-  // The error message would also complain about a missing #title field.)
+  // This method is used instead of the #required property so that the user
+  // will be taken to the search page before the error is shown.
   if ($form_state['values']['search_block_form'] == '') {
     form_set_error('keys', t('Please enter some keywords.'));
   }
