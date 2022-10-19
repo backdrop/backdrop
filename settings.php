@@ -34,8 +34,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
-$config_directories['active'] = './files/config_e8d5a49914859b15b39dd1e4c1bee22e/active';
-$config_directories['staging'] = './files/config_e8d5a49914859b15b39dd1e4c1bee22e/staging';
+$config_directories['active'] = 'files/config_' . md5($database) . '/active';
+$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
  * Skip the configuration staging directory cleanup
@@ -77,7 +77,7 @@ $settings['update_free_access'] = FALSE;
  * @endcode
  *
  */
-$settings['hash_salt'] = 'nbeo_FDwDyeUKsZV0TOLXXvuNLXHN8N1BCSwqewL4dg';
+$settings['hash_salt'] = '';
 
 /**
  * Trusted host configuration (optional but highly recommended).
