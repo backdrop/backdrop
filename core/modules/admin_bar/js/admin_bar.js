@@ -524,8 +524,6 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       sessionStorage.setItem('escapeAdminPath', settings.admin_bar.current_path);
     }
 
-
-
     // We only want to change the first anchor tag in the admin bar icon sub-menu.
     var $toolbarEscape = $('.admin-bar-icon a').first();
 

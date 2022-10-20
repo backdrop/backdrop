@@ -246,10 +246,12 @@ function admin_bar_preprocess_page(&$variables) {
 
   // Send whether this is an admin page to JS for back to site functionality.
   $settings['current_path_is_admin'] = FALSE;
-  $settings['current_path'] = current_path();
-  if (path_is_admin($settings['current_path'])) {
+  $current_path = current_path();
+  if (path_is_admin($current_path)) {
     $settings['current_path_is_admin'] = TRUE;
   }
+  $alias = backdrop_get_path_alias($current_path, $language->langcode);
+  $settings['current_path'] = $alias;
   $settings['back_to_site_link'] = config_get('admin_bar.settings', 'back_to_site_link');
   $settings['frontpage'] = config_get('system.core', 'site_frontpage');
 
