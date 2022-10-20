@@ -10,5 +10,5 @@
         "admin_bar.users",
         "admin_bar.account"
     ],
-    "back_to_site_link": 0
+    "back_to_site_link": 1
 }
