@@ -1700,6 +1700,15 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
+    // Set path variables.
+    config_install_default_config('system.core');
+    $core_config = config('system.core');
+    $core_config->set('file_default_scheme', 'public');
+    $core_config->set('file_public_path', $this->public_files_directory);
+    $core_config->set('file_private_path', $this->private_files_directory);
+    $core_config->set('file_temporary_path', $this->temp_files_directory);
+    $core_config->save();
+
     $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
@@ -1721,14 +1730,6 @@ class BackdropWebTestCase extends BackdropTestCase {
         module_enable(array($this->profile), FALSE);
       }
     }
-
-    // Set path variables.
-    $core_config = config('system.core');
-    $core_config->set('file_default_scheme', 'public');
-    $core_config->set('file_public_path', $this->public_files_directory);
-    $core_config->set('file_private_path', $this->private_files_directory);
-    $core_config->set('file_temporary_path', $this->temp_files_directory);
-    $core_config->save();
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
