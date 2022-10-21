@@ -1,6 +1,6 @@
-name = "Taxonomy module node list tests"
+name = Taxonomy module node list tests
 type = module
-description = "Support module for taxonomy node list related testing."
+description = Support module for taxonomy node list related testing.
 package = Testing
 version = VERSION
 backdrop = 1.x
