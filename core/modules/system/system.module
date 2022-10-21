@@ -4920,10 +4920,6 @@ function _system_cache_tags_load_from_db($query_tags) {
   return $result;
 }
 
-/* -----------------------------------------------------------------------
- * Cache helper functions
- */
-
 /**
  * Invalidate a tag from the cache tags cache.
  *

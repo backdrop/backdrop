@@ -680,6 +680,18 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   }
 }
 
+/**
+ * Defines a cache implementation that handles cache tags.
+ *
+ * This class does not directly handle saving and loading of cache data to
+ * another system. Instead it handles the checking of cache tags and then
+ * contains another cache object to use as it's data backend.
+ *
+ * The cache backend can be set by putting a setting in your settings.php file.
+ * @code
+ * $settings['taggable_cache_default_class'] = 'BackdropTaggableCache';
+ * @endcode
+ */
 class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 
   /**
@@ -704,7 +716,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
   protected $configuration;
 
   /**
-   * Constructs a Backdrop8CacheBackend object.
+   * Constructs a BackdropCacheInterface object to be used for the data backend.
    *
    * @param string $bin
    *   The cache bin for which the object is created.
