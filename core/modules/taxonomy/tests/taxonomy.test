@@ -918,6 +918,29 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
     $terms = taxonomy_term_load_multiple_by_name($term2->name, 'non_existing_vocabulary');
     $this->assertEqual(count($terms), 0, 'No terms loaded when restricted by a non-existing vocabulary.');
   }
+
+  /**
+   * Tests that taxonomy term detail page is working even after the default
+   * taxonomy_select_nodes() query is altered.
+   */
+  public function testTaxonomySelectNodesAlter() {
+    // Create a new term.
+    $term = $this->createTerm($this->vocabulary);
+
+    // Create an article.
+    $settings = array(
+      'type' => 'article',
+      $this->instance['field_name'] => array(LANGUAGE_NONE => array(array('tid' => $term->tid))),
+    );
+    $this->backdropCreateNode($settings);
+
+    // Check if the taxonomy term detail page is working.
+    module_enable(array('taxonomy_nodes_test'));
+    state_set('taxonomy_nodes_test_query_node_access_alter', TRUE);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
+    $this->assertResponse(200, 'The taxonomy term page is working.');
+    state_set('taxonomy_nodes_test_query_node_access_alter', FALSE);
+  }
 }
 
 /**
