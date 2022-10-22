@@ -377,7 +377,7 @@ interface BackdropTaggableCacheInterface {
    * @param array $tags
    *   (optional) An array of cache tags, defaults to no tags.
    */
-  public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array());
+  public function set($cid, $data, $expire = CACHE_PERMANENT, array $tags = array());
 
   /**
    * Returns data from the persistent cache.
@@ -418,7 +418,7 @@ interface BackdropTaggableCacheInterface {
    * @return array
    *   An array of the items successfully returned from cache indexed by cid.
    */
-  public function getMultiple(&$cids, $allow_invalid = FALSE);
+  public function getMultiple(array &$cids, $allow_invalid = FALSE);
 }
 
 /**
@@ -894,6 +894,10 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
   /**
    * Merges an max-age value with an expire timestamp.
    *
+   * The difference between $expire and $max-age is that while $expire is a unix
+   * timestamp, $max_age is a relative TTL. So, when they interact, we have to
+   * be careful to not compare apples and oranges.
+   *
    * @param int $expire
    *   A unix timestamp when this item will expire or one of the CACHE_*
    *   constants.
@@ -905,10 +909,6 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
    *   constants.
    */
   protected function mergeExpireWithMaxAge($expire, $max_age) {
-    // The difference between $expire and $max-age is that while $expire is
-    // a unix timestamp, $max_age is a relative TTL. So, when they interact,
-    // we have to be careful to not compare apples and oranges.
-
     // Do not mess with temporary items.
     if ($expire == CACHE_TEMPORARY) {
       return $expire;
@@ -1031,9 +1031,9 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 /**
  * Provices a way to collect attachments added during the rendering process.
  *
- * Attachments added via backdrop_add_js() / backdrop_add_css() or that are early
- * rendered as part of a template have been lost in the past and that made
- * caching of anything that is not the whole page difficult.
+ * Attachments added via backdrop_add_js() / backdrop_add_css() or that are
+ * early rendered as part of a template have been lost in the past and that
+ * made caching of anything that is not the whole page difficult.
  * The AttachmentsCollector solves this problem by routing all adding of
  * attachments through backdrop_process_attached(), which is then storing the
  * attachments in the registered storage of listeners - if any.
@@ -1243,7 +1243,8 @@ class BackdropAttachmentsCollectorCache extends BackdropTaggableCache {
    * {@inheritdoc}
    */
   public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
-    // Fall back to regular BackdropTaggableCache if we are not in a valid state.
+    // Fall back to regular BackdropTaggableCache if attachment processing
+    // is not yet available.
     if (!$this->isValid) {
       parent::set($cid, $data, $expire, $tags);
       return;

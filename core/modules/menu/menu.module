@@ -919,7 +919,6 @@ function menu_preprocess_menu_link(&$variables) {
 /**
  * Implements hook_preprocess_links().
  */
-
 function menu_preprocess_links(&$variables) {
   $tag_map = array();
   if (isset($variables['links'])) {

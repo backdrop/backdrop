@@ -336,7 +336,7 @@ class CacheTagsUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests that attachment collectors work properly.
    */
-  function testAttachmentCollectors() {
+  public function testAttachmentCollectors() {
     // Skip test if attachment collectors do not exist.
     if (!class_exists('BackdropAttachmentsCollector')) {
       return;

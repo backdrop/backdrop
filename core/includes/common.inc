@@ -2300,10 +2300,13 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
  *   An integer representation of the size in bytes.
  */
 function parse_size($size) {
-  $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
-  $size = (float) preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+  // Remove the non-unit characters from the size.
+  $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
+  // Remove the non-numeric characters from the size.
+  $size = (float) preg_replace('/[^0-9\.]/', '', $size);
   if ($unit) {
-    // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
+    // Find the position of the unit in the ordered string which is the power
+    // of magnitude to multiply a kilobyte by.
     return round($size * pow(BACKDROP_KILOBYTE, stripos('bkmgtpezy', $unit[0])));
   }
   else {
@@ -8642,63 +8645,63 @@ function backdrop_add_cache_tags(array $tags) {
   $stored_tags = backdrop_merge_cache_tags($stored_tags, $tags);
 }
 
-  /**
-   * Get cache tags for the current context.
-   *
-   * @return array
-   *   Tags in current context.
-   */
-  function backdrop_get_cache_tags() {
-    $stored_tags = &backdrop_static('backdrop_add_cache_tags', array());
+/**
+ * Get cache tags for the current context.
+ *
+ * @return array
+ *   Tags in current context.
+ */
+function backdrop_get_cache_tags() {
+  $stored_tags = &backdrop_static('backdrop_add_cache_tags', array());
 
-    // Add the rendered cache tag.
-    $tags = backdrop_merge_cache_tags($stored_tags, array('rendered'));
+  // Add the rendered cache tag.
+  $tags = backdrop_merge_cache_tags($stored_tags, array('rendered'));
 
-    sort($tags);
-    return $tags;
-  }
+  sort($tags);
+  return $tags;
+}
 
-  /**
-   * Invalidate cache tags immediately.
-   *
-   * @param array $tags
-   *   Tags to invalidate.
-   */
-  function backdrop_invalidate_cache_tags(array $tags) {
-    // @todo Add hooks to .api.php.
-    backdrop_alter('pre_invalidate_cache_tags', $tags);
-    module_invoke_all('invalidate_cache_tags', $tags);
-  }
+/**
+ * Invalidate cache tags immediately.
+ *
+ * @param array $tags
+ *   Tags to invalidate.
+ */
+function backdrop_invalidate_cache_tags(array $tags) {
+  // @todo Add hooks to .api.php.
+  backdrop_alter('pre_invalidate_cache_tags', $tags);
+  module_invoke_all('invalidate_cache_tags', $tags);
+}
 
-  /**
-   * Merges arrays of cache tags and removes duplicates.
-   *
-   * When caching elements, it is necessary to collect all cache tags into a
-   * single array, from both the element itself and all child elements. This
-   * allows items to be invalidated based on all tags attached to the content
-   * they're constituted from.
-   *
-   * @param array $tags1
-   *   Cache tags array to merge.
-   * @param array $tags2
-   *   Cache tags array to merge.
-   *
-   * @return string[]
-   *   The merged array of cache tags.
-   */
-  function backdrop_merge_cache_tags(array $tags1, array $tags2) {
-    return array_unique(array_merge($tags1, $tags2));
-  }
+/**
+ * Merges arrays of cache tags and removes duplicates.
+ *
+ * When caching elements, it is necessary to collect all cache tags into a
+ * single array, from both the element itself and all child elements. This
+ * allows items to be invalidated based on all tags attached to the content
+ * they're constituted from.
+ *
+ * @param array $tags1
+ *   Cache tags array to merge.
+ * @param array $tags2
+ *   Cache tags array to merge.
+ *
+ * @return string[]
+ *   The merged array of cache tags.
+ */
+function backdrop_merge_cache_tags(array $tags1, array $tags2) {
+  return array_unique(array_merge($tags1, $tags2));
+}
 
-  /**
-   * Emit cache tags for current context.
-   */
-  function backdrop_emit_cache_tags() {
-    $tags = backdrop_get_cache_tags();
-    // @todo Add hooks to .api.php.
-    backdrop_alter('pre_emit_cache_tags', $tags);
-    module_invoke_all('emit_cache_tags', $tags);
-  }
+/**
+ * Emit cache tags for current context.
+ */
+function backdrop_emit_cache_tags() {
+  $tags = backdrop_get_cache_tags();
+  // @todo Add hooks to .api.php.
+  backdrop_alter('pre_emit_cache_tags', $tags);
+  module_invoke_all('emit_cache_tags', $tags);
+}
 
 /**
  * Sets the maximum age (in seconds).
@@ -8768,7 +8771,7 @@ function backdrop_merge_cache_max_ages($a, $b) {
  * @return array
  *   Cacheable metadata array.
  */
-function backdrop_get_cacheable_metadata_from_render_array($build) {
+function backdrop_get_cacheable_metadata_from_render_array(array $build) {
   if (!isset($build['#attached'])) {
     return array();
   }

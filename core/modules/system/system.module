@@ -4770,8 +4770,10 @@ function system_do_invalidate_cache_tags($tags) {
       throw $e;
     }
   }
-  // COMMIT
+
+  // Commit the transaction.
   unset($transaction);
+
   // Ensure the cache tags cache is invalidated too.
   foreach ($tags as $tag) {
     _system_cache_tags_invalidate_cache($tag);
@@ -4904,7 +4906,7 @@ function _system_cache_tags_calculate_checksum(array $tags) {
  *   An array keyed by tag with invalidations as value. Using 0 if no
  *   invalidation occured, yet.
  */
-function _system_cache_tags_load_from_db($query_tags) {
+function _system_cache_tags_load_from_db(array $query_tags) {
   $result = array();
 
   // Ensure database is loaded, since we can get called to load missing tags
@@ -4940,7 +4942,7 @@ function _system_cache_tags_invalidate_cache($tag) {
  * @param array $result
  *   The array of (tag, invalidations) to sync to the database.
  */
-function _system_cache_tags_update_cache($result) {
+function _system_cache_tags_update_cache(array $result) {
   if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
     return;
   }
@@ -4960,7 +4962,7 @@ function _system_cache_tags_update_cache($result) {
  * @return array
  *   An array keyed by tag with invalidations as value.
  */
-function _system_cache_tags_load_from_cache(&$query_tags) {
+function _system_cache_tags_load_from_cache(array &$query_tags) {
   if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
     return array();
   }

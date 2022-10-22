@@ -333,7 +333,10 @@ abstract class DatabaseConnection {
 
     // Set a Statement class, unless the driver opted out.
     if (!empty($this->statementClass)) {
-      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array(
+        $this->statementClass,
+        array($this),
+      ));
     }
   }
 
@@ -349,7 +352,10 @@ abstract class DatabaseConnection {
     // Destroy all references to this connection by setting them to NULL.
     // The Statement class attribute only accepts a new value that presents a
     // proper callable, so we reset it to PDOStatement.
-    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array(
+      'PDOStatement',
+      array(),
+    ));
     $this->schema = NULL;
   }
 
@@ -1040,7 +1046,7 @@ abstract class DatabaseConnection {
    * @param string $string
    *   The string to be quoted.
    *
-   * @return
+   * @return mixed
    *   The quoted string.
    */
   public function quote($string) {
@@ -1229,6 +1235,7 @@ abstract class DatabaseConnection {
    * transaction.
    *
    * @param callable $func
+   *   The function to call after ending the transaction.
    *
    * @throws \DatabaseTransactionNoActiveException
    */
@@ -1241,7 +1248,9 @@ abstract class DatabaseConnection {
 
   /**
    * Execute callbacks registered while the root transaction has been open.
-   * @param $committed bool Whether the transaction was committed or rolled back.
+   *
+   * @param bool $committed
+   *   Whether the transaction was committed or rolled back.
    */
   protected function executeRootTransactionEndCallbacks($committed) {
     $callbacks = $this->rootTransactionEndCallbacks;
@@ -1779,7 +1788,7 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
-   * @param $close
+   * @param bool $close
    *   Whether to close the connection.
    * @return
    *   TRUE in case of success, FALSE otherwise.
