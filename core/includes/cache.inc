@@ -756,7 +756,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMultiple(&$cids, $allow_invalid = FALSE) {
+  public function getMultiple(array &$cids, $allow_invalid = FALSE) {
     $cache = array();
     $cids_map = array_flip($cids);
 
@@ -800,7 +800,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
   /**
    * {@inheritdoc}
    */
-  public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
+  public function set($cid, $data, $expire = CACHE_PERMANENT, array $tags = array()) {
     // Allow to override the TTL for a whole bin.
     if (isset($this->configuration['ttl'])) {
       if ($this->configuration['ttl'] == CACHE_MAX_AGE_PERMANENT) {
@@ -1205,7 +1205,7 @@ class BackdropAttachmentsCollectorCache extends BackdropTaggableCache {
   /**
    * {@inheritdoc}
    */
-  public function getMultiple(&$cids, $allow_invalid = FALSE) {
+  public function getMultiple(array &$cids, $allow_invalid = FALSE) {
     // The parent will properly populate $cids, so we can rely on it.
     $cache = parent::getMultiple($cids, $allow_invalid);
 
@@ -1242,7 +1242,7 @@ class BackdropAttachmentsCollectorCache extends BackdropTaggableCache {
   /**
    * {@inheritdoc}
    */
-  public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
+  public function set($cid, $data, $expire = CACHE_PERMANENT, array $tags = array()) {
     // Fall back to regular BackdropTaggableCache if attachment processing
     // is not yet available.
     if (!$this->isValid) {

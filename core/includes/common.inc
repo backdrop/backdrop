@@ -8668,7 +8668,6 @@ function backdrop_get_cache_tags() {
  *   Tags to invalidate.
  */
 function backdrop_invalidate_cache_tags(array $tags) {
-  // @todo Add hooks to .api.php.
   backdrop_alter('pre_invalidate_cache_tags', $tags);
   module_invoke_all('invalidate_cache_tags', $tags);
 }
@@ -8698,7 +8697,7 @@ function backdrop_merge_cache_tags(array $tags1, array $tags2) {
  */
 function backdrop_emit_cache_tags() {
   $tags = backdrop_get_cache_tags();
-  // @todo Add hooks to .api.php.
+
   backdrop_alter('pre_emit_cache_tags', $tags);
   module_invoke_all('emit_cache_tags', $tags);
 }
@@ -8816,7 +8815,7 @@ function backdrop_get_cacheable_metadata_from_render_array(array $build) {
  */
 function backdrop_emit_cache_max_age() {
   $max_age = backdrop_get_cache_max_age();
-  // @todo Add hooks to .api.php.
+
   backdrop_alter('pre_emit_cache_max_age', $max_age);
   module_invoke_all('emit_cache_max_age', $max_age);
 }
