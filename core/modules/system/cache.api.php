@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks added by Backdrop core related to cache handling.
