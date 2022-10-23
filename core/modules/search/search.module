@@ -234,7 +234,7 @@ function search_menu() {
     'file' => 'search.admin.inc',
   );
   $items['admin/config/search/settings/reindex'] = array(
-    'title' => 'Invalidate search index',
+    'title' => 'Rebuild search index',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_reindex_confirm'),
     'access arguments' => array('administer search'),
@@ -1421,4 +1421,94 @@ function search_config_info() {
     'group' => t('Configuration'),
   );
   return $prefixes;
+}
+
+/** 
+ * Gets stats for total and remaining items to be indexed.
+ * 
+ * @param array $modules
+ *  An array of module names whose index stats we are getting.
+ * 
+ * @return array
+ *  An array with the following keys:
+ *  - remaining: The number of remaining items to be indexed.
+ *  - total: The total number of indexable items. 
+ */
+function search_get_stats($modules = array()) {
+  if (empty($module)) {
+    $modules = config_get('search.settings', 'search_active_modules');
+  }
+  $remaining = 0;
+  $total = 0;
+  foreach ($modules as $module) {
+    if ($status = module_invoke($module, 'search_status')) {
+      $remaining += $status['remaining'];
+      $total += $status['total'];
+    }
+  }
+
+  return array(
+    'remaining' => $remaining,
+    'total' => $total,
+  );
+}
+
+/**
+ * Batch operation to rebuild the search index.
+ * 
+ * @see search_reindex_confirm()
+ * @see search_reindex_confirm_submit()
+ */
+function search_reindex_batch($passes_needed, $search_active_modules, &$context) {
+  if (!isset($context['sandbox']['current_pass'])) {
+    $context['sandbox']['current_pass'] = 0;
+  }
+
+  // Invoke hook_update_index for all search active modules. 
+  if ($context['sandbox']['current_pass'] < $passes_needed) {
+    // Register a shutdown function to ensure that search_total is up-to-date.
+    backdrop_register_shutdown_function('search_update_totals');
+    foreach ($search_active_modules as $module) {
+      module_invoke($module, 'update_index');
+    }
+    $context['sandbox']['current_pass']++;
+    $context['message'] = t('Now processing pass %pass of %needed', array('%pass' => $context['sandbox']['current_pass'], '%needed' => $passes_needed));
+    $context['finished'] = $context['sandbox']['current_pass'] / $passes_needed;
+  }
+}
+
+/**
+ * Batch 'finished' callback for rebuilding the search index.
+ * 
+ * @see search_reindex_batch()
+ */
+function search_reindex_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $config = config('search.settings');
+    // Collect some stats
+    $remaining = 0;
+    $total = 0;
+    foreach ($config->get('search_active_modules') as $module) {
+      if ($status = module_invoke($module, 'search_status')) {
+        $remaining += $status['remaining'];
+        $total += $status['total'];
+      }
+    }
+    $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
+    $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+    $message = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
+    backdrop_set_message($message);
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    backdrop_set_message(
+      t('An error occurred while processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      )
+    );
+  }
 }
