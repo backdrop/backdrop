@@ -781,9 +781,15 @@ function admin_bar_theme_settings() {
 
   $form['back_to_site_link'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Add Back To Site Link'),
+    '#title' => t('Add Back to site link'),
     '#default_value' => $config->get('back_to_site_link'),
-    '#description' => t('Changes the home link to the last non-admin page you visited.'),
+    '#description' => t('Changes the Home link/icon to a Back to site link that links to the last non-admin page you visited.'),
+    '#states' => array(
+          'visible' => array(
+            ':input[name="components[admin_bar.icon]"]' => array('checked' =>
+                                                                TRUE),
+          ),
+        ),
   );
 
   $form['components'] = array(

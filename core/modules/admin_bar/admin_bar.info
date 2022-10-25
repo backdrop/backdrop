@@ -10,3 +10,7 @@ backdrop = 1.x
 
 configure = admin/config/administration/admin-bar
 
+; Added by Backdrop CMS packaging script on 2022-09-15
+project = backdrop
+version = 1.23.0
+timestamp = 1663295416

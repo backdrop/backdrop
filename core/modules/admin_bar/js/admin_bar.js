@@ -509,7 +509,11 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
 
     // Don't do anything if variable isn't set.
-    if (settings.admin_bar.back_to_site && settings.admin_bar.back_to_site === 0) {
+    /*if (settings.admin_bar.back_to_site_link && settings.admin_bar.back_to_site_link === 0) {
+      return;
+    }*/
+
+    if (settings.admin_bar.back_to_site_link === 0) {
       return;
     }
 
@@ -536,7 +540,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       && escapeAdminPath !== null) {
       $toolbarEscape.addClass("escape");
       $toolbarEscape.attr('href', settings.basePath + escapeAdminPath);
-      $toolbarEscape.text(Backdrop.t('Back To Site'));
+      $toolbarEscape.text(Backdrop.t('Back to site'));
     }
   };
 

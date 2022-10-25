@@ -86,10 +86,10 @@
 /* Back to Site arrow. */
 
 #admin-bar .dropdown li.admin-bar-icon > a.escape {
-  background-image: url("../icons/chevron-disc-left.png");
+  background-image: url("../images/chevron-disc-left.png");
 }
 [dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a.escape {
-  background-image: url("../icons/chevron-disc-right.png");
+  background-image: url("../images/chevron-disc-right.png");
 }
 
 
