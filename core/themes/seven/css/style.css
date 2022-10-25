@@ -1790,6 +1790,9 @@ div.add-or-remove-shortcuts {
   -moz-box-shadow: 0 0 12px -8px #666;
   box-shadow: 0 0 12px -8px #666;
 }
+.ui-dialog-content {
+  overflow: auto;
+}
 .ui-dialog-titlebar {
   border: 1px solid #d0d0d0;
   border-bottom: none;
