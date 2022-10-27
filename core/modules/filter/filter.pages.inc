@@ -438,8 +438,8 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     // Check for FID for this URI.
     $fid = _filter_get_file_id($uri);
   }
-  // File upload will not have provided href but provides fid.
-  elseif (isset($form_state['values']['fid'])) {
+  // FID is set with file upload or when editing existing managed file.
+  if (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
   }
   // If file is found get its URI.
