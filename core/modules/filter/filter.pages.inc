@@ -438,8 +438,8 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     // Check for FID for this URI.
     $fid = _filter_get_file_id($uri);
   }
-  // FID is set with file upload or when editing existing managed file.
-  if (isset($form_state['values']['fid'])) {
+  // File upload will not have provided href but provides fid.
+  elseif (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
   }
   // If file is found get its URI.
@@ -655,11 +655,6 @@ function _filter_url_has_protocol($url) {
  */
 function _filter_get_file_id($href) {
   $result = 0;
-
-  // Check URI for valid file scheme.
-  if (!file_valid_uri($href)){
-    return $result;
-  }
 
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
