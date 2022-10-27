@@ -513,9 +513,13 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       return;
     }*/
 
-    if (settings.admin_bar.back_to_site_link === 0) {
+    if (!settings.admin_bar.back_to_site_link) {
       return;
     }
+
+    /*if (settings.admin_bar.back_to_site_link = FALSE) {
+      return;
+    }*/
 
     // Grab the stored path of the last non-admin page.
     var escapeAdminPath = sessionStorage.getItem('escapeAdminPath');
@@ -528,13 +532,15 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       sessionStorage.setItem('escapeAdminPath', settings.admin_bar.current_path);
     }
 
+
+
     // We only want to change the first anchor tag in the admin bar icon sub-menu.
     var $toolbarEscape = $('.admin-bar-icon a').first();
 
     // If the current page is admin, then switch the path.
     if ($toolbarEscape.length
       && settings.admin_bar.current_path_is_admin
-      && settings.admin_bar.frontpage !== escapeAdminPath
+      //&& settings.admin_bar.frontpage !== escapeAdminPath
       && escapeAdminPath !== null) {
       $toolbarEscape.addClass("escape");
       $toolbarEscape.attr('href', settings.basePath + escapeAdminPath);

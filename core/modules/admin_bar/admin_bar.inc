@@ -779,24 +779,25 @@ function admin_bar_theme_settings() {
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
 
-  $form['back_to_site_link'] = array(
+  /*$form['back_to_site_link'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add Back to site link'),
     '#default_value' => $config->get('back_to_site_link'),
-    '#description' => t('Changes the Home link/icon to a Back to site link that links to the last non-admin page you visited.'),
+    '#description' => t('Changes the "Home" to a "Back to site" link that links to the last non-admin page you visited.'),
     '#states' => array(
           'visible' => array(
             ':input[name="components[admin_bar.icon]"]' => array('checked' =>
                                                                 TRUE),
           ),
         ),
-  );
+  );*/
 
   $form['components'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
+      'admin_bar.back_to_site_link' => t('Add Back to site link'),
       'admin_bar.menu' => t('Management menu'),
       'admin_bar.search' => t('Search bar'),
       'admin_bar.page' => t('Page links'),
@@ -805,6 +806,13 @@ function admin_bar_theme_settings() {
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    'admin_bar.back_to_site_link' => array (
+      '#states' => array(
+        'visible' => array(
+          ':input[name="components[admin_bar.icon]"]' => array('checked' => TRUE),
+        ),
+      ),
+    ),
     'admin_bar.search' => array(
       '#states' => array(
         'visible' => array(
@@ -815,6 +823,8 @@ function admin_bar_theme_settings() {
   );
 
   $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['admin_bar.back_to_site_link']['#description'] = t
+  ('Changes the "Home" to a "Back to site" link that links to the last non-admin page you visited.');
   $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
   $form['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
   $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
@@ -839,6 +849,10 @@ function admin_bar_theme_settings() {
 function admin_bar_theme_settings_submit($form, &$form_state) {
   $components = &$form_state['values']['components'];
 
+  // Disable back to site if icon bar is also disabled.
+  if (!$components['admin_bar.icon']) {
+    $components['admin_bar.back_to_site_link'] = FALSE;
+  }
   // Disable the search bar if the management menu is also disabled.
   if (!$components['admin_bar.menu']) {
     $components['admin_bar.search'] = FALSE;
