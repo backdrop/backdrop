@@ -656,9 +656,16 @@ function _filter_url_has_protocol($url) {
 function _filter_get_file_id($href) {
   $result = 0;
 
+  // Make sure this is a file.
+  global $base_path;
+  $file_path = $base_path . config_get('system.core', 'file_public_path');
+  if (strpos($href, $file_path) !== 0) {
+    return $result;
+  }
+
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
-  $filename = substr($href,$pos + 1);
+  $filename = substr($href, $pos + 1);
 
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
