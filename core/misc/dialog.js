@@ -75,7 +75,15 @@ Backdrop.dialog = function (element, options) {
         })
         .dialog('widget').css('position', 'fixed');
       Backdrop.optimizedResize.add(resetPosition, 'dialogResize.' + dialogId);
-      resetPosition();
+      // Delay only in Chrome to prevent miscalculation.
+      if (typeof window.chrome !== 'undefined') {
+        setTimeout(function() {
+          resetPosition();
+        }, 50);
+      }
+      else {
+        resetPosition();
+      }
     }
     dialog.open = true;
     $(window).trigger('dialog:aftercreate', [dialog, $element, settings]);
