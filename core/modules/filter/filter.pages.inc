@@ -656,10 +656,11 @@ function _filter_url_has_protocol($url) {
 function _filter_get_file_id($href) {
   $result = 0;
 
-  // Make sure this is a file.
+  // Make sure this is a file, either in public or in private path.
   global $base_path;
-  $file_path = $base_path . config_get('system.core', 'file_public_path');
-  if (strpos($href, $file_path) !== 0) {
+  $public_path = config_get('system.core', 'file_public_path');
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/' . ')#';
+  if (preg_match($pattern, $href) === FALSE) {
     return $result;
   }
 
@@ -671,7 +672,7 @@ function _filter_get_file_id($href) {
   if (!empty($filename)) {
     $results = db_select('file_managed')
       ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%' . $filename, 'LIKE')
+      ->condition('uri', '%/' . $filename, 'LIKE')
       ->orderBy('fid', 'DESC')
       ->execute();
 
