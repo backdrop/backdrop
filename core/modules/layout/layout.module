@@ -272,7 +272,9 @@ function layout_menu() {
     'title' => 'Configure page title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_title_settings_form', 4),
+    'type' => MENU_LOCAL_TASK,
     'file' => 'layout.admin.inc',
+    'weight' => 11,
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
