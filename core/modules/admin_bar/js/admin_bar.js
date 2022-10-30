@@ -508,20 +508,12 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
    */
   Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
 
-    // Don't do anything if variable isn't set.
-    /*if (settings.admin_bar.back_to_site_link && settings.admin_bar.back_to_site_link === 0) {
-      return;
-    }*/
 
     if (!settings.admin_bar.back_to_site_link) {
       return;
     }
 
-    /*if (settings.admin_bar.back_to_site_link = FALSE) {
-      return;
-    }*/
-
-    // Grab the stored path of the last non-admin page.
+        // Grab the stored path of the last non-admin page.
     var escapeAdminPath = sessionStorage.getItem('escapeAdminPath');
 
     // Saves the last non-administrative page in the browser to be able to link back
