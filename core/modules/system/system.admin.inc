@@ -1568,7 +1568,10 @@ function system_cron_settings($form, &$form_state) {
   $form['#config'] = 'system.core';
   $config = config('system.core');
 
-  backdrop_set_message(t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)));
+  $form['last_run'] = array(
+    '#type' => 'help',
+    '#markup' => t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)),
+  );
 
   $form['description'] = array(
     '#type' => 'help',
