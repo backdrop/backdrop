@@ -664,7 +664,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
-    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
+    '#description' => t('This setting is most commonly used when replacing existing URL aliases under "Update action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
   $form['passthrough_querystring'] = array(
