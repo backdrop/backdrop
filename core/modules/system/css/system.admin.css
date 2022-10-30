@@ -457,3 +457,6 @@ table.screenshot {
   display: inline-block;
   margin: 0 0.25em;
 }
+#automatic-cron-interval #edit-cron-interval-num {
+  max-width: 5em;
+}

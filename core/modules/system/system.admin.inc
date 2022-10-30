@@ -1629,6 +1629,7 @@ function system_cron_settings($form, &$form_state) {
     '#default_value' => $config->get('cron_interval_num'),
     '#min' => 0,
     '#step' => 1,
+    '#size' => 3,
   );
   $form['automatic']['interval']['cron_interval_units'] = array(
     '#type' => 'select',
