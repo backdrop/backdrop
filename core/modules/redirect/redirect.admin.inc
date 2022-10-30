@@ -375,7 +375,10 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['source'] = array(
     '#type' => 'textfield',
     '#title' => t('From'),
-    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array('%example1' => 'node/123', '%example2' => 'taxonomy/term/123', '%anchor' => '#anchor')),
+    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array(
+      '%example1' => 'node/123',
+      '%example2' => 'taxonomy/term/123',
+      '%anchor' => '#anchor')),
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->source ? redirect_url($redirect->source, $redirect->source_options + array('alter' => FALSE)) : '',
     '#required' => TRUE,
