@@ -1570,7 +1570,8 @@ function system_cron_settings($form, &$form_state) {
 
   $form['last_run'] = array(
     '#type' => 'help',
-    '#markup' => t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)),
+    '#markup' => t('Last run: %cron-last ago.', array(
+      '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)),
   );
 
   $form['description'] = array(
@@ -1593,7 +1594,9 @@ function system_cron_settings($form, &$form_state) {
     '#title' => t('External cron'),
     '#description' => t('The link below allows you to run cron from outside the site, e.g., from a third-party service. You can also use this URL to run cron via a native cron job.'),
   );
-  $url = url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop'))));
+  $url = url($base_url . '/core/cron.php', array(
+    'external' => TRUE,
+    'query' => array('cron_key' => state_get('cron_key', 'backdrop'))));
   $form['external']['cron_url'] = array(
     '#type' => 'help',
     '#markup' => l($url, $url),
