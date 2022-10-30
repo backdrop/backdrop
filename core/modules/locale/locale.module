@@ -201,10 +201,11 @@ function locale_form_alter(&$form, &$form_state, $form_id) {
     // interface or editing a user account.
     if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
       $selector = locale_language_selector_form($form['#user']);
+      $selector['locale']['#type'] = 'container';
+      $form['region_language'] += $selector;
       if ($form_id == 'user_register_form') {
-        $selector['locale']['#access'] = user_access('administer users');
+        $form['region_language']['locale']['#access'] = user_access('administer users');
       }
-      $form += $selector;
     }
   }
 }

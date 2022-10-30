@@ -3651,7 +3651,7 @@ function node_config_info() {
   $prefixes['node.type'] = array(
     'name_key' => 'type',
     'label_key' => 'name',
-    'group' => t('Node types'),
+    'group' => t('Content types'),
   );
   return $prefixes;
 }

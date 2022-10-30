@@ -905,8 +905,10 @@ function date_default_value_part($item, $field, $instance, $langcode, $part = 'v
       return NULL;
     }
     else {
+      // Consider timestamps.
+      $string = is_numeric($item[0]['value']) ? '@' . $item[0]['value'] : $item[0]['value'];
       // The date stored in 'value' has already been switched to the db timezone.
-      $date = new BackdropDateTime($item[0]['value'], $timezone_db, DATE_FORMAT_DATETIME);
+      $date = new BackdropDateTime($string, $timezone_db, DATE_FORMAT_DATETIME);
     }
   }
   // Special case for 'now' when using dates with no timezone,
@@ -1167,7 +1169,7 @@ function _date_popup_process_time_part(&$element) {
   // Add in the timepicker if set.
   if ($element['#timepicker']) {
     $settings = array(
-      'show24Hours' => strpos($element['#date_format'], 'H') !== FALSE ? TRUE : FALSE,
+      'show24Hours' => (strpos($element['#date_format'], 'H') !== FALSE || strpos($element['#date_format'], 'G') !== FALSE) ? TRUE : FALSE,
       'showSeconds' => (in_array('second', $granularity) ? TRUE : FALSE),
       'timeSteps' => array(1, intval($element['#date_increment']), (in_array('second', $granularity) ? $element['#date_increment'] : 0)),
       'fromTo' => isset($fromto),
@@ -1820,4 +1822,577 @@ function date_hidden_element($element) {
     return TRUE;
   }
   return FALSE;
+}
+
+/**
+ * Element validation callback for the HTML5 widget.
+ *
+ * This runs once over the whole value array.
+ *
+ * @param array $element
+ *   Form element structure.
+ * @param array $form_state
+ *   The form state of this form submission.
+ */
+function date_html5_element_validate(array $element, array &$form_state) {
+  $field_name = $element['#field_name'];
+
+  if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
+    $values = array();
+    $items = $form_state['values'][$field_name][LANGUAGE_NONE];
+    $field_type = $element['#field_type'];
+    $field_label = $element['#field_label'];
+
+    foreach ($items as $delta => $date_values) {
+      if (is_string($date_values)) {
+        // "Add another" or something else, unusable.
+        continue;
+      }
+      array_pop($element['#parents']);
+      array_push($element['#parents'], $delta);
+      $item_parents = implode('][', $element['#parents']);
+      $multi_value = (count($items) > 1);
+
+      $date_only = (is_string($date_values['value']) && strlen($date_values['value']) == 10);
+      if ($date_only) {
+        $start = $date_values['value'];
+        $date_values['value'] = array(
+          'date' => $start,
+        );
+      }
+
+      if (empty($date_values['value']['date'])) {
+        if (!empty($element['value']['#required']) && $delta < 1) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('A start date for value #1 is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('A start date is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
+        }
+        // Value has been emptied.
+        continue;
+      }
+
+      // Timezone from submission or fallback to default value.
+      $timezone = $element['value']['#date_timezone'];
+      $timezone_db = $element['value']['#timezone_db'];
+      if (!empty($date_values['timezone'])) {
+        // @see Core bfad032030, where the same problem strikes.
+        if (is_array($date_values['timezone'])) {
+          $timezone = $date_values['timezone']['timezone'];
+        }
+        else {
+          $timezone = $date_values['timezone'];
+        }
+      }
+      // Also save timezone to db.
+      $values[$delta]['timezone'] = $timezone;
+
+      $string = implode(' ', array_values($date_values['value']));
+      // The validation of inner form items has happended, so we can rely on the
+      // given values to construct a valid date.
+      $date = new BackdropDateTime($string, $timezone);
+
+      // Build dates with the same timezone and compare to limit range.
+      if (!empty($element['value']['#min'])) {
+        $min_date = new BackdropDateTime($element['value']['#min'], $timezone);
+        if ($date < $min_date) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be before @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('The date in %field may not be before @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+        }
+      }
+      if (!empty($element['value']['#max'])) {
+        $max_date = new BackdropDateTime($element['value']['#max'], $timezone);
+        if ($date > $max_date) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be after @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value', t('The date in %field may not be after @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+        }
+      }
+
+      $values[$delta]['offset'] = $date->getOffset();
+      // We captured the offset, now we switch to the timezone the date field
+      // expects.
+      $date->setTimezone(new DateTimeZone($timezone_db));
+      $values[$delta]['value'] = _date_html5_format_value_db($date, $field_type);
+
+      if (!empty($date_values['value2']) && $date_only) {
+        $end = $date_values['value2'];
+        $date_values['value2'] = array(
+          'date' => $end,
+        );
+      }
+      if (!empty($date_values['value2']['date'])) {
+        $string2 = implode(' ', array_values($date_values['value2']));
+        $date2 = new BackdropDateTime($string2, $timezone);
+        // Compare to limit range, if set.
+        if (isset($min_date) && $date2 < $min_date) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be before @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be before @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#min'],
+            )));
+          }
+        }
+        if (isset($max_date) && $date2 > $max_date) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be after @date.', array(
+              '!delta' => $delta + 1,
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be after @date.', array(
+              '%field' => $field_label,
+              '@date' => $element['value']['#max'],
+            )));
+          }
+        }
+        $values[$delta]['offset2'] = $date2->getOffset();
+        $date2->setTimezone(new DateTimeZone($timezone_db));
+        $values[$delta]['value2'] = _date_html5_format_value_db($date2, $field_type);
+        if ($date2 <= $date) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field must be greater than the start date.', array(
+              '!delta' => ($delta + 1),
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('The end date in %field must be greater than the start date.', array(
+              '%field' => $field_label,
+            )));
+          }
+        }
+      }
+      else {
+        if (!empty($element['value2']['#required']) && $delta < 1) {
+          if ($multi_value) {
+            form_set_error($item_parents . '][value2', t('An end date for value #1 is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
+          else {
+            form_set_error($item_parents . '][value2', t('An end date is required in %field.', array(
+              '%field' => $field_label,
+            )));
+          }
+        }
+        // Function date_field_validate chokes otherwise.
+        $values[$delta]['value2'] = NULL;
+      }
+    }
+
+    // Override the value to what date fields expect.
+    $form_state['values'][$field_name][LANGUAGE_NONE] = $values;
+  }
+}
+
+/**
+ * Prepare values from database for the widget form.
+ *
+ * @param string $value_orig
+ *   Original value from database.
+ * @param string $type
+ *   Form API type of the widget.
+ * @param int $timestep
+ *   Step value for the form, 1 or 60.
+ * @param string $timezone_db
+ *   Timezone of the database value.
+ * @param string $timezone
+ *   Actual timezone for output.
+ *
+ * @return array
+ */
+function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db, $timezone) {
+  $needs_conversion = ($timezone_db != $timezone);
+  if (is_numeric($value_orig)) {
+    $datetime = new DateTime('@' . $value_orig, new DateTimeZone('UTC'));
+    $needs_conversion = TRUE;
+  }
+  else {
+    $datetime = new DateTime($value_orig, new DateTimeZone($timezone_db));
+  }
+
+  // Adapt timezone offset to local datetime if necessary.
+  if ($needs_conversion) {
+    $datetime->setTimezone(new DateTimeZone($timezone));
+  }
+
+  $value = array(
+    'date' => $datetime->format('Y-m-d'),
+  );
+  if ($type == 'html_datetime') {
+    $pattern = ($timestep > 1) ? 'H:i' : 'H:i:s';
+    $value['time'] = $datetime->format($pattern);
+  }
+
+  return $value;
+}
+
+/**
+ * Helper function to return default values as expected by the form item.
+ *
+ * @param array $field
+ *   Field structure.
+ * @param array $instance
+ *   Field instance structure.
+ * @param string $langcode
+ *   Language code.
+ *
+ * @return array
+ */
+function _date_html5_get_default_value(array $field, array $instance, $langcode) {
+  $default = array(
+    'start' => NULL,
+    'end' => NULL,
+  );
+  $granularity = $field['settings']['granularity'];
+  $date_defaults = date_default_value($field, $instance, $langcode);
+  $values = reset($date_defaults);
+  $timezone_db = $values['timezone_db'];
+  $timezone = $values['timezone'];
+  $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
+  $timestep = empty($granularity['second']) ? 60 : 1;
+
+  if (!empty($values['value'])) {
+    $default['start'] = _date_html5_get_form_value($values['value'], $type, $timestep, $timezone_db, $timezone);
+  }
+  if (!empty($values['value2'])) {
+    $default['end'] = _date_html5_get_form_value($values['value2'], $type, $timestep, $timezone_db, $timezone);
+  }
+
+  return $default;
+}
+
+/**
+ * Helper function to return a formatted date string.
+ *
+ * @param BackdropDateTime $datetime
+ *   Datetime object.
+ * @param string $field_type
+ *   Date field type.
+ *
+ * @return string
+ */
+function _date_html5_format_value_db(BackdropDateTime $datetime, $field_type) {
+  $date_string = '';
+  switch ($field_type) {
+    case 'datestamp':
+      $date_string = $datetime->format('U');
+      break;
+
+    case 'datetime':
+      $date_string = $datetime->format(DATE_FORMAT_DATETIME);
+      break;
+
+    case 'date':
+      $date_string = $datetime->format(DATE_FORMAT_ISO);
+      break;
+  }
+
+  return $date_string;
+}
+
+/**
+ * Helper function to get widget settings for date limits.
+ *
+ * @param array $limit_settings
+ *   Widget settings for date limits.
+ *
+ * @return array
+ */
+function _date_html5_get_date_limits(array $limit_settings) {
+  $date_limits = array(
+    'min' => NULL,
+    'max' => NULL,
+  );
+  if ($limit_settings['mode'] == 'byyear') {
+    $now = date_now();
+    if ($limit_settings['years_back'] !== '') {
+      $min_year = (int) $now->format('Y') + $limit_settings['years_back'];
+      $date_limits['min'] = $min_year . '-01-01';
+    }
+    if ($limit_settings['years_forward'] !== '') {
+      $max_year = (int) $now->format('Y') + $limit_settings['years_forward'];
+      $date_limits['max'] = $max_year . '-12-31';
+    }
+  }
+
+  return $date_limits;
+}
+
+/**
+ * Helper function to construct form item attributes.
+ *
+ * Takes care of nested (html_datetime) and unnested (html_date) form items.
+ *
+ * @param array $date_limits
+ *   Array keyed by min/max.
+ * @param array $granularity
+ *   Field's date granularity settings.
+ *
+ * @return array
+ */
+function _date_html5_get_attributes(array $date_limits, array $granularity) {
+  $attributes = array();
+  $has_time = !empty($granularity['hour']);
+
+  if (!empty($date_limits['min'])) {
+    if ($has_time) {
+      $attributes['date']['min'] = $date_limits['min'];
+    }
+    else {
+      $attributes['min'] = $date_limits['min'];
+    }
+  }
+
+  if (!empty($date_limits['max'])) {
+    if ($has_time) {
+      $attributes['date']['max'] = $date_limits['max'];
+    }
+    else {
+      $attributes['max'] = $date_limits['max'];
+    }
+  }
+
+  if ($has_time && empty($granularity['second'])) {
+    $attributes['time']['step'] = 60;
+  }
+
+  return $attributes;
+}
+
+/**
+ * Helper for the default widget form.
+ *
+ * @param array $field
+ *   The field structure.
+ * @param array $instance
+ *   The field instance.
+ * @param string $langcode
+ *   The language associated with $items.
+ * @param array $items
+ *   Array of default values for this field.
+ * @param int $delta
+ *   The order of this item in the array of subelements (0, 1, 2, etc).
+ * @param array $base
+ *   A form element array containing basic properties for the widget.
+ *
+ * @return array
+ *   The form elements for a single widget for this field.
+ */
+function _date_default_field_widget_form($field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
+
+  // If this is a new entity, populate the field with the right default values.
+  // This happens early so even fields later hidden with #access get those values.
+  // We should only add default values to new entities, to avoid over-writing
+  // a value that has already been set. This means we can't just check to see
+  // if $items is empty, because it might have been set that way on purpose.
+  // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
+
+  // We check !isset($items[$delta]['value']) because entity translation may create
+  // a new translation entity for an existing entity and we don't want to clobber
+  // values that were already set in that case.
+  // @see http://drupal.org/node/1478848.
+
+  $is_default = FALSE;
+  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
+    $items = date_default_value($field, $instance, $langcode);
+    $is_default = TRUE;
+  }
+
+  $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
+
+  // TODO see if there's a way to keep the timezone element from ever being
+  // nested as array('timezone' => 'timezone' => value)). After struggling
+  // with this a while, I can find no way to get it displayed in the form
+  // correctly and get it to use the timezone element without ending up
+  // with nesting.
+  if (is_array($timezone)) {
+    $timezone = $timezone['timezone'];
+  }
+
+  $element += array(
+    '#type' => 'date_combo',
+    '#theme_wrappers' => array('date_combo'),
+    '#weight' => $delta,
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#date_timezone' => $timezone,
+    '#element_validate' => array('date_combo_validate'),
+    '#date_is_default' => $is_default,
+
+    // Store the original values, for use with disabled and hidden fields.
+    '#date_items' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+
+  if ($field['settings']['tz_handling'] == 'date') {
+    $element['timezone'] = array(
+      '#type' => 'date_timezone',
+      '#theme_wrappers' => array('date_timezone'),
+      '#delta' => $delta,
+      '#default_value' => $timezone,
+      '#weight' => $instance['widget']['weight'] + 1,
+      '#date_label_position' => $instance['widget']['settings']['label_position'],
+    );
+  }
+
+  // Make changes if instance is set to be rendered as a regular field.
+  if ($instance['widget']['settings']['no_fieldset']) {
+    $element['#title'] = NULL;
+    $element['#theme_wrappers'] = array();
+    $element['#date_title_printed'] = FALSE;
+  } else {
+    $element['#title'] = $instance['label'];
+    $element['#date_title_printed'] = TRUE;
+  }
+
+  return $element;
+}
+
+/**
+ * Helper for the HTML5 widget form.
+ *
+ * @param array $field
+ *   The field structure.
+ * @param array $instance
+ *   The field instance.
+ * @param string $langcode
+ *   The language associated with $items.
+ * @param array $items
+ *   Array of default values for this field.
+ * @param int $delta
+ *   The order of this item in the array of subelements (0, 1, 2, etc).
+ * @param array $base
+ *   A form element array containing basic properties for the widget.
+ *
+ * @return array
+ *   The form elements for a single widget for this field.
+ */
+function _date_html5_field_widget_form($field, $instance, $langcode, $items, $delta, $element) {
+  $field_settings = $field['settings'];
+  $widget_settings = $instance['widget']['settings'];
+
+  // We have to take some liberties here: only two types of "granularity",
+  // date with or without time. Time eventually without seconds.
+  $granularity = array_filter($field_settings['granularity']);
+  $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
+  $timestep = empty($granularity['second']) ? 60 : 1;
+
+  $date_limits = _date_html5_get_date_limits($widget_settings['limits']);
+  $attributes = _date_html5_get_attributes($date_limits, $granularity);
+
+  $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
+  $timezone = date_get_timezone($field_settings['tz_handling']);
+  if (isset($items[$delta]['timezone'])) {
+    $timezone = $items[$delta]['timezone'];
+  }
+
+  $value = '';
+  $has_todate = !empty($field_settings['todate']);
+  if ($delta == 0) {
+    $default = _date_html5_get_default_value($field, $instance, $langcode);
+  }
+
+  if (isset($items[$delta]['value'])) {
+    $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
+  } elseif ($delta == 0) {
+    $value = $default['start'];
+  }
+  $element['value'] = array(
+    '#type' => $type,
+    '#title' => ($has_todate) ? t('Start date') : t('Date'),
+    '#default_value' => $value,
+    '#required' => ($instance['required'] && $delta == 0),
+    '#attributes' => $attributes,
+    '#date_timezone' => $timezone,
+    '#timezone_db' => $timezone_db,
+    '#min' => $date_limits['min'],
+    '#max' => $date_limits['max'],
+  );
+
+  if ($has_todate) {
+    $value2 = '';
+    if (isset($items[$delta]['value2'])) {
+      $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
+    } elseif ($delta == 0) {
+      $value2 = $default['end'];
+    }
+    $element['value2'] = array(
+      '#type' => $type,
+      '#title' => t('End date'),
+      '#default_value' => $value2,
+      '#required' => (($field_settings['todate'] != 'optional') && $delta == 0),
+      '#attributes' => $attributes,
+      '#date_timezone' => $timezone,
+    );
+  }
+  if ($field_settings['tz_handling'] == 'date') {
+    $element['timezone'] = array(
+      '#type' => 'date_timezone',
+      '#title' => t('Timezone'),
+      '#date_label_position' => NULL,
+      '#default_value' => isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : '',
+    );
+  }
+
+  // Prevent running again for every additional field item.
+  if ($delta == 0) {
+    $element['#element_validate'] = array('date_html5_element_validate');
+    $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date-html5.css';
+  }
+
+  // Wrap in a fieldset or not, set labels accordingly.
+  if ($widget_settings['no_fieldset']) {
+    if ($field['cardinality'] == '1') {
+      $element['value']['#title'] = check_plain($instance['label']);
+      if (!empty($instance['description'])) {
+        $element['value']['#description'] = field_filter_xss($instance['description']);
+      }
+    }
+  } else {
+    $element['#theme_wrappers'][] = 'fieldset';
+    $element['#title'] = check_plain($instance['label']);
+    $element['#description'] = field_filter_xss($instance['description']);
+  }
+  $element['#field_name'] = $field['field_name'];
+  $element['#field_type'] = $field['type'];
+  $element['#field_label'] = $instance['label'];
+
+  return $element;
 }

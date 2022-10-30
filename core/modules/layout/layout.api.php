@@ -682,8 +682,10 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- *   - settings: All block settings as defined for this instance of the block.
- *   - contexts: All layout contexts available for the layout.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
@@ -719,8 +721,10 @@ function hook_block_view_alter(&$data, $block) {
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_alter()
  * @see hook_block_view()

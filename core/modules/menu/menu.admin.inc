@@ -39,7 +39,7 @@ function menu_overview_page() {
         'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -538,6 +538,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#default_value' => $menu['menu_name'],
     '#maxlength' => MENU_MAX_MENU_NAME_LENGTH_UI,
     '#description' => t('A unique name to construct the URL for the menu. It must only contain lowercase letters, numbers and hyphens.'),
+    '#field_prefix' => empty($menu['old_name']) ? 'menu-' : '',
     '#machine_name' => array(
       'exists' => 'menu_edit_menu_name_exists',
       'source' => array('title'),
