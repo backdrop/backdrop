@@ -200,7 +200,8 @@ function admin_bar_preprocess_page(&$variables) {
   $args = explode('/', $_GET['q']);
   if ($args[0] == 'admin' && !empty($args[1])) {
     $settings['activeTrail'] = url($args[0] . '/' . $args[1]);
-  } elseif (backdrop_is_front_page()) {
+  }
+  elseif (backdrop_is_front_page()) {
     $settings['activeTrail'] = url('<front>');
   }
 
