@@ -76,16 +76,9 @@ Backdrop.dialog = function (element, options) {
         .dialog('widget').css('position', 'fixed');
       Backdrop.optimizedResize.add(resetPosition, 'dialogResize.' + dialogId);
 
-      // Because of a bug in Chromium, we must wait until the ajax-loaded
-      // jquery.ui.dialog.css is applied to the content of the modal through the
-      // class .ui-dialog-content. 
-
-      // First, get the computed style for the content element. Note: this
-      // variable changes automatically when the element's style is changed. 
+      // Because of Chromium's behavior, we must wait until the ajax-loaded
+      // jquery.ui.dialog.css is applied.
       var computedStyle = getComputedStyle($element[0]);
-
-      // Get the current value for the overflow property, which must by 'auto'
-      // after jquery.ui.dialog.css has been applied. 
       var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
       if (cssOverflowProperty != 'auto') {
         setTimeout(
