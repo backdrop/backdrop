@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Render an administrative bar as a dropdown menu at the top of the window.
@@ -199,8 +200,7 @@ function admin_bar_preprocess_page(&$variables) {
   $args = explode('/', $_GET['q']);
   if ($args[0] == 'admin' && !empty($args[1])) {
     $settings['activeTrail'] = url($args[0] . '/' . $args[1]);
-  }
-  elseif (backdrop_is_front_page()) {
+  } elseif (backdrop_is_front_page()) {
     $settings['activeTrail'] = url('<front>');
   }
 
@@ -254,12 +254,11 @@ function admin_bar_preprocess_page(&$variables) {
   $settings['current_path'] = $alias;
 
   $components = $config->get('components');
-  if (in_array('admin_bar.back_to_site_link', $components) ) {
+  if (in_array('admin_bar.back_to_site_link', $components)) {
     $settings['back_to_site_link'] = TRUE;
   }
 
   $settings['frontpage'] = config_get('system.core', 'site_frontpage');
-
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
