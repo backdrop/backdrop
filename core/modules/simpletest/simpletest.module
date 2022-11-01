@@ -373,9 +373,9 @@ function simpletest_test_get_all() {
         // watchdog() wants to see the variables as a separate argument.
         // Instead, accumulate them in $variables as needed.
         $error = '';
-        $variables = array('%uri' => $file->uri);
+        $variables = array('@uri' => $file->uri);
         if (empty($classes)) {
-          $error = t('File %uri contains no testing classes.');
+          $error = t('File @uri contains no testing classes.');
         }
         else {
           // If the .tests.info file is malformed, it puts a slew of
@@ -384,8 +384,8 @@ function simpletest_test_get_all() {
           // informative error.
           foreach ($classes as $class => $info) {
             if (!is_array($info) || empty($info)) {
-              $error = t('File %uri contains a definition for %class that is not an array of testing class fields.');
-              $variables += array('%class' => $class);
+              $error = t('File @uri contains a definition for @class that is not an array of testing class fields.');
+              $variables += array('@class' => $class);
               continue;
             }
             else {
@@ -397,8 +397,8 @@ function simpletest_test_get_all() {
               }
               if (!empty($missing_keys)) {
                 $keys = implode(', ', $missing_keys);
-                $error = format_plural(count($missing_keys), 'File %uri contains a definition for %class that is missing field %keys.', 'File %uri contains a definition for %class that is missing fields %keys.');
-                $variables += array('%class' => $class, '%keys' => $keys);
+                $error = format_plural(count($missing_keys), 'File @uri contains a definition for @class that is missing field @keys.', 'File @uri contains a definition for @class that is missing fields @keys.');
+                $variables += array('@class' => $class, '@keys' => $keys);
                 continue;
               }
             }
@@ -408,8 +408,8 @@ function simpletest_test_get_all() {
               $info['file path'] = dirname($file->uri);
               $test_file_full = BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
               if (!file_exists($test_file_full)) {
-                $error = t('File %uri specifies a non-existent file %test_file_full. Please verify that the test file exists in the location specified in %uri.');
-                $variables += array('%test_file_full' => $test_file_full);
+                $error = t('File @uri specifies a non-existent file @test_file_full. Please verify that the test file exists in the location specified in @uri.');
+                $variables += array('@test_file_full' => $test_file_full);
                 continue;
               }
             }
