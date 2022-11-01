@@ -391,7 +391,7 @@ function simpletest_test_get_all() {
               }
               if (!empty($missing_keys)) {
                 $keys = implode(', ', $missing_keys);
-                $error = format_plural(count($missing_keys), 'File @uri contains a definition for @class that is missing field @keys.','File @uri contains a definition for @class that is missing fields @keys.', array(
+                $error = format_plural(count($missing_keys), 'File @uri contains a definition for @class that is missing field @keys.', 'File @uri contains a definition for @class that is missing fields @keys.', array(
                   '@class' => $class,
                   '@keys' => $keys));
                 continue;
