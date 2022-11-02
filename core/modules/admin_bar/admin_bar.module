@@ -257,8 +257,6 @@ function admin_bar_preprocess_page(&$variables) {
   if (in_array('admin_bar.back_to_site_link', $components)) {
     $settings['back_to_site_link'] = TRUE;
   }
-
-  $settings['frontpage'] = config_get('system.core', 'site_frontpage');
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
