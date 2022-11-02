@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Render an administrative bar as a dropdown menu at the top of the window.
