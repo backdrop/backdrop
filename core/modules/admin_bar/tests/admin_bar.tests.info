@@ -21,7 +21,3 @@ name = Customized links
 description = Tests customized menu links.
 group = Administration bar
 file = admin_bar.test
-; Added by Backdrop CMS packaging script on 2022-09-15
-project = backdrop
-version = 1.23.0
-timestamp = 1663295416
