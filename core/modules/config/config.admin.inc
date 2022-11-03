@@ -309,8 +309,17 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   $default_type = isset($form_state['values']['config_group']) ? $form_state['values']['config_group'] : $config_group;
   $config_names = array();
   if ($default_type) {
-    $config_names = $form_state['config_groups'][$default_type];
-    natsort($config_names);
+    // Prevent fatal errors if the key is not available in the select list.
+    if (isset($form_state['config_groups'][$default_type])) {
+      $config_names = $form_state['config_groups'][$default_type];
+      natsort($config_names);
+    }
+    else {
+      $config_names = array();
+      backdrop_set_message(t('Configuration group %type not available.', array(
+        '%type' => $default_type,
+      )), 'warning');
+    }
   }
   $form['config_name'] = array(
     '#title' => t('Configuration name'),
