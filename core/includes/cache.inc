@@ -726,9 +726,24 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 
     $this->bin = $bin;
 
-    $class = settings_get('taggable_cache_default_class');
+    // Get the specific taggable cache backend.
+    $class = settings_get('taggable_cache_class_' . $bin);
+
+    // If a specific class is not set, use the default for taggable cache.
     if (empty($class)) {
-      $class = settings_get('cache_default_class', 'BackdropDatabaseCache');
+      $class = settings_get('taggable_cache_default_class');
+    }
+
+    // If a default taggable cache backend is not set, check for a default
+    // non taggable cache.
+    if (empty($class)) {
+      $class = settings_get('cache_default_class');
+    }
+
+    // If no class is selected or a taggable cache is selected as the backend,
+    // reset to the database cache.
+    if (empty($class) || $class instanceof BackdropTaggableCacheInterface) {
+      $class = 'BackdropDatabaseCache';
     }
 
     $this->backend = new $class($bin);
@@ -1029,7 +1044,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 }
 
 /**
- * Provices a way to collect attachments added during the rendering process.
+ * Provides a way to collect attachments added during the rendering process.
  *
  * Attachments added via backdrop_add_js() / backdrop_add_css() or that are
  * early rendered as part of a template have been lost in the past and that
