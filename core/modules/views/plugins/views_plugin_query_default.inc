@@ -289,8 +289,10 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
-    $value = array_filter(array_map('trim', $value));
+    $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    if (is_string($value)) {
+      $value = explode(',', $value);
+    }
     form_set_value($element, $value, $form_state);
   }
 
