@@ -293,6 +293,7 @@ class views_plugin_query_default extends views_plugin_query {
     if (is_string($value)) {
       $value = explode(',', $value);
     }
+    $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
 
