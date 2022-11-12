@@ -66,9 +66,11 @@ function system_requirements($phase) {
     $directory_sizes = array();
     $total_dir_size = 0;
     foreach ($directories as $directory => $path) {
-      $dir_size = _system_get_dir_size($path);
-      $directory_sizes[$directory] = $t('@dir: @size', array('@dir' => $directory, '@size' => format_size($dir_size)));
-      $total_dir_size += $dir_size;
+      if (!empty($path)) {
+        $dir_size = _system_get_dir_size($path);
+        $directory_sizes[$directory] = $t('@dir: @size', array('@dir' => $directory, '@size' => format_size($dir_size)));
+        $total_dir_size += $dir_size;
+      }
     }
     $dir_size_breakdown = theme('item_list', array('items' => $directory_sizes));
 
