@@ -57,6 +57,21 @@ function system_requirements($phase) {
     $disk_used = $disk_total - $disk_free;
     $disk_usage = round($disk_used / $disk_total * 100);
 
+    // Sizes of the various files directories.
+    $directories = array(
+      'temp' => file_directory_temp(),
+      'public' => backdrop_realpath('public://'),
+      'private' => backdrop_realpath('private://'),
+    );
+    $directory_sizes = array();
+    $total_dir_size = 0;
+    foreach ($directories as $directory => $path) {
+      $dir_size = _system_get_dir_size($path);
+      $directory_sizes[$directory] = $t('@dir: @size', array('@dir' => $directory, '@size' => format_size($dir_size)));
+      $total_dir_size += $dir_size;
+    }
+    $dir_size_breakdown = theme('item_list', array('items' => $directory_sizes));
+
     // Database metrics.
     $rows = db_query('SHOW TABLE STATUS')->fetchAll();
     $db_size = 0;
@@ -87,12 +102,6 @@ function system_requirements($phase) {
 
     $metrics = array(
       'cpu_load' => $cpu_metric,
-      'disk_usage' => $t('Disk: @percentage used (@used) | @free free of @total total', array(
-        '@percentage' => $disk_usage . '%',
-        '@used' => format_size($disk_used),
-        '@free' => format_size($disk_free),
-        '@total' => format_size($disk_total)
-      )),
       'ram_usage' => $t('RAM (system): @percentage used (@used) | @free free of @total total', array(
         '@percentage' => $mem_usage . '%',
         '@used' => format_size($mem_metrics['mem_used'] * 1024),
@@ -104,10 +113,17 @@ function system_requirements($phase) {
         '@peak' => $php_mem_peak_usage,
         '@true' => $php_mem_true_usage
       )),
+      'disk_usage' => $t('Disk (system): @percentage used (@used) | @free free of @total total', array(
+        '@percentage' => $disk_usage . '%',
+        '@used' => format_size($disk_used),
+        '@free' => format_size($disk_free),
+        '@total' => format_size($disk_total)
+      )),
       'db_size' => $t('Database size: @size (@cache_size of which is cache)', array(
         '@size' => format_size($db_size),
         '@cache_size' => format_size($db_cache_size)
       )),
+      'files_dir_size' => $t('Files directories size: @total_size total', array('@total_size' => format_size($total_dir_size))) . $dir_size_breakdown,
     );
 
     $requirements['metrics'] = array(
@@ -766,6 +782,23 @@ function system_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Gets the size of a specified directory.
+ *
+ * @param string $directory
+ *
+ * @return integer
+ */
+function _system_get_dir_size($directory) {
+  $size = 0;
+
+  foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file) {
+    $size += $file->getSize();
+  }
+
+  return $size;
 }
 
 /**
