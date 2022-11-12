@@ -14,7 +14,111 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version
+  // System metrics.
+  if ($phase == 'runtime') {
+    $metrics = array();
+
+    $free_output = shell_exec('free');
+    $free_output = (string) trim($free_output);
+    $free_lines = explode("\n", $free_output);
+
+    $result = array();
+    foreach ($free_lines as $line => $output) {
+      // Convert to lowercase.
+      $output = strtolower($output);
+      // Remove multiple spaces.
+      $output = preg_replace('/[\s]+/mu', ' ', $output);
+      // Convert any special characters to underscore.
+      $output = preg_replace('/[^a-zA-Z0-9_\s]/', '_', $output);
+
+      $result[$line] = explode(" ", $output);
+    }
+
+    // Grab the 1st line of the output (which is the heading of the various
+    // columns), then remove that from the rest of the output.
+    $header = $result[0];
+    unset($result[0]);
+    // Grab each RAM metric (per column).
+    $mem_metrics = array();
+    foreach ($result as $result_line => $data) {
+      // The first column contains the type of memory ("mem" or "swap").
+      $prefix = $data[0];
+      array_splice($data, 0, 1);
+      foreach ($data as $column => $metric) {
+        $mem_metrics[$prefix . $header[$column]] = $metric;
+      }
+    }
+
+    $mem_usage = round(($mem_metrics['mem_total'] - $mem_metrics['mem_available']) / $mem_metrics['mem_total'] * 100);
+
+    // Disk metrics. Should work the same across operating systems.
+    $disk_total = disk_total_space('.');
+    $disk_free = disk_free_space('.');
+    $disk_used = $disk_total - $disk_free;
+    $disk_usage = round($disk_used / $disk_total * 100);
+
+    // Database metrics.
+    $rows = db_query('SHOW TABLE STATUS')->fetchAll();
+    $db_size = 0;
+    $db_cache_size = 0;
+    foreach ($rows as $row) {
+      if (strpos($row->Name, 'cache') === 0) {
+        $db_cache_size += $row->Data_length + $row->Index_length;
+      }
+      $db_size += $row->Data_length + $row->Index_length;
+    }
+
+    // PHP memory usage.
+    $php_mem_usage = format_size(memory_get_usage());
+    $php_mem_peak_usage = format_size(memory_get_peak_usage());
+    $php_mem_true_usage = format_size(memory_get_peak_usage(TRUE));
+
+    // CPU load - not implemented on Windows platforms.
+    if (stristr(PHP_OS, 'win') === FALSE) {
+      $cpu_load = sys_getloadavg();
+      // This is not a percentage. For details, see:
+      // - https://stackoverflow.com/questions/9719155/understading-sys-getloadavg
+      // - https://www.php.net/manual/function.sys-getloadavg.php
+      $cpu_metric = $t('CPU load (over 1, 5 and 15 minutes): @load', array('@load' => implode(' / ', $cpu_load)));
+    }
+    else {
+      $cpu_metric = $t('CPU load cannot be estimated on Windows platforms');
+    }
+
+    $metrics = array(
+      'cpu_load' => $cpu_metric,
+      'disk_usage' => $t('Disk: @percentage used (@used) | @free free of @total total', array(
+        '@percentage' => $disk_usage . '%',
+        '@used' => format_size($disk_used),
+        '@free' => format_size($disk_free),
+        '@total' => format_size($disk_total)
+      )),
+      'ram_usage' => $t('RAM (system): @percentage used (@used) | @free free of @total total', array(
+        '@percentage' => $mem_usage . '%',
+        '@used' => format_size($mem_metrics['mem_used'] * 1024),
+        '@free' => format_size($mem_metrics['mem_available'] * 1024),
+        '@total' => format_size($mem_metrics['mem_total'] * 1024)
+      )),
+      'php_mem_usage' => $t('PHP memory usage: @usage | @peak (peak) | @true (true)', array(
+        '@usage' => $php_mem_usage,
+        '@peak' => $php_mem_peak_usage,
+        '@true' => $php_mem_true_usage
+      )),
+      'db_size' => $t('Database size: @size (@cache_size of which is cache)', array(
+        '@size' => format_size($db_size),
+        '@cache_size' => format_size($db_cache_size)
+      )),
+    );
+
+    $requirements['metrics'] = array(
+      'title' => $t('System metrics'),
+      'value' => theme('item_list', array('items' => $metrics)),
+      'severity' => REQUIREMENT_INFO,
+      'weight' => -999,
+    );
+  }
+
+  // Report Backdrop version.
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
@@ -23,8 +127,8 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
