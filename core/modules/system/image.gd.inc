@@ -339,10 +339,11 @@ function image_gd_get_info(stdClass $image) {
   $data = @getimagesize($image->source);
 
   if (isset($data) && is_array($data)) {
+    $extension = image_type_to_extension($data[2], FALSE) ?: ''; 
     $details = array(
       'width' => $data[0],
       'height' => $data[1],
-      'extension' => image_type_to_extension($data[2], FALSE) ?: '',
+      'extension' => $extension == 'jpeg' ? 'jpg' : $extension,
       'mime_type' => $data['mime'],
     );
   }
