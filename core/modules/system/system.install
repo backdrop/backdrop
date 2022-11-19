@@ -50,72 +50,120 @@ function system_requirements($phase) {
     'severity' => REQUIREMENT_INFO,
   );
 
-  // Test PHP version and show link to phpinfo() if it's available
-  $phpversion = phpversion();
-  if (function_exists('phpinfo')) {
-    if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
-    }
-    else {
-      $php_value = $t('Version: !version', array('!version' => $phpversion));
-    }
-    $requirements['php'] = array(
-      'title' => $t('PHP'),
-      'value' =>  $php_value,
-      'severity' => REQUIREMENT_INFO,
-    );
-  }
-  else {
-    $requirements['php'] = array(
-      'title' => $t('PHP'),
-      'value' => $phpversion,
-      'description' => $t('The phpinfo() function has been disabled for security reasons. To see your server\'s phpinfo() information, change your PHP settings. For more information, see the <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'https://backdropcms.org/user-guide/enabling-and-disabling-phpinfo')),
-      'severity' => REQUIREMENT_INFO,
-    );
-  }
+  // PHP info and memory usage.
+  $php_version = phpversion();
+  $description_items = array();
+  $php_fix_info = array();
+
+  // Set some defaults.
+  $requirements['php'] = array(
+    'title' => $t('PHP'),
+    'value' => $t('Version: !version', array('!version' => $php_version)),
+    'severity' => REQUIREMENT_INFO,
+  );
 
   // Minimum recommended PHP version can be incremented when deprecating older
-  // versions of PHP but while they are still supported. This does not throw
-  // a warning or error on updates to keep upgrade tests compatible.
+  // versions of PHP but while they are still supported. This does not throw a
+  // warning or error on updates to keep upgrade tests compatible.
   $minimum_recommended_version = '5.6.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
-  if (version_compare($phpversion, $minimum_recommended_version) < 0) {
+  if (version_compare($php_version, $minimum_recommended_version) < 0) {
     $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
-    $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
+    if ($phase === 'runtime') {
+      $requirements['php']['severity'] = REQUIREMENT_ERROR;
+    }
   }
 
   // If PHP does not meet the bare minimum, remaining checks are unnecessary.
-  if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
+  if (version_compare($php_version, BACKDROP_MINIMUM_PHP) < 0) {
     $requirements['php']['description'] = $minimum_warning;
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
     return $requirements;
   }
 
-  // Test PHP register_globals setting.
-  $requirements['php_register_globals'] = array(
-    'title' => $t('PHP register globals'),
-  );
-  $register_globals = trim(ini_get('register_globals'));
-  // Unfortunately, ini_get() may return many different values, and we can't
-  // be certain which values mean 'on', so we instead check for 'not off'
-  // since we never want to tell the user that their site is secure
-  // (register_globals off), when it is in fact on. We can only guarantee
-  // register_globals is off if the value returned is 'off', '', or 0.
-  if (!empty($register_globals) && strtolower($register_globals) != 'off') {
-    $requirements['php_register_globals']['description'] = $t('<em>register_globals</em> is enabled. Backdrop requires this configuration directive to be disabled. Your site may not be secure when <em>register_globals</em> is enabled. The PHP manual has instructions for <a href="http://php.net/configuration.changes">how to change configuration settings</a>.');
-    $requirements['php_register_globals']['severity'] = REQUIREMENT_ERROR;
-    $requirements['php_register_globals']['value'] = $t("Enabled ('@value')", array('@value' => $register_globals));
+  // Append link to php info page if phpinfo() is available.
+  if (function_exists('phpinfo')) {
+    if ($phase == 'runtime') {
+      $requirements['php']['value'] .= ' (' . l(t('PHP information'), 'admin/reports/status/php') . ')';
+    }
   }
   else {
-    $requirements['php_register_globals']['value'] = $t('Disabled');
+    $requirements['php']['description'] = $t('The <code>phpinfo()</code> function has been disabled for security reasons. To see your server\'s <code>phpinfo()</code> information, change your PHP settings. For more information, see the <a href="@phpinfo">Enabling and disabling phpinfo()</a> handbook page.', array('@phpinfo' => 'https://backdropcms.org/user-guide/enabling-and-disabling-phpinfo'));
   }
 
-  // Test for PHP extensions.
-  $requirements['php_extensions'] = array(
-    'title' => $t('PHP extensions'),
+  if ($phase === 'runtime') {
+    $php_mem_usage_info = $t('PHP memory usage: @usage | @peak (peak) | @true (true)', array(
+      '@usage' => format_size(memory_get_usage()),
+      '@peak' => format_size(memory_get_peak_usage()),
+      '@true' => format_size(memory_get_peak_usage(TRUE))
+    ));
+    $description_items[] = array(
+      'data' => $php_mem_usage_info,
+      'class' => array('status-bullet', 'status-info'),
+    );
+  }
+
+  // Test PHP memory_limit.
+  $memory_limit = ini_get('memory_limit');
+
+  if (!backdrop_check_memory_limit(BACKDROP_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
+    $php_memory_limit_fix = '';
+    if ($phase == 'install') {
+      $php_memory_limit_fix = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the installation process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
+    }
+    elseif ($phase == 'update') {
+      $php_memory_limit_fix = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the update process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
+    }
+    elseif ($phase == 'runtime') {
+      $php_memory_limit_fix = $t('Depending on your configuration, Backdrop can run with a %memory_limit PHP memory limit. However, a %memory_minimum_limit PHP memory limit or above is recommended, especially if your site uses additional custom or contributed modules.', array('%memory_limit' => $memory_limit, '%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
+    }
+
+    if (!empty($php_memory_limit_fix)) {
+      if ($php_ini_path = get_cfg_var('cfg_file_path')) {
+        $php_memory_limit_fix .= ' ' . $t('Increase the memory limit by editing the <code>memory_limit</code> parameter in the file %configuration-file and then restart your web server.', array('%configuration-file' => $php_ini_path));
+      }
+
+      $php_memory_limit_fix .= ' ' . $t('See the <a href="@url" target="_blank">Backdrop system requirements</a> page for more information.', array('@url' => 'https://backdropcms.org/requirements'));
+
+      $requirements['php']['severity'] = REQUIREMENT_WARNING;
+      $php_fix_info[] = $php_memory_limit_fix;
+      $item_class = 'status-warning';
+    }
+  }
+
+  if ($memory_limit == -1) {
+    $memory_limit .= ' (' . $t('Unlimited') . ')';
+  }
+  $item_class = isset($item_class) ? $item_class : 'status-ok';
+  $description_items[] = array(
+    'data' => $t('PHP memory limit: @limit', array('@limit' => $memory_limit)),
+    'class' => array('status-bullet', $item_class),
   );
 
-  $missing_extensions = array();
+  // Test PHP register_globals setting.
+  $register_globals = trim(ini_get('register_globals'));
+  // Unfortunately, ini_get() may return many different values, and we can't be
+  // certain which values mean 'on', so we instead check for 'not off', since we
+  // never want to tell the user that their site is secure (register_globals
+  // off), when it is in fact on. We can only guarantee register_globals is off
+  // if the value returned is 'off', '', or 0.
+  if (!empty($register_globals) && strtolower($register_globals) != 'off') {
+    $register_globals_report = $t("PHP register globals enabled ('@value')", array('@value' => $register_globals));
+    $requirements['php']['severity'] = REQUIREMENT_ERROR;
+    $item_class = 'status-error';
+    $php_fix_info[] = $t('<code>register_globals</code> is enabled. Backdrop requires this configuration directive to be disabled. Your site may not be secure when <code>register_globals</code> is enabled. The PHP manual has instructions for <a href="http://php.net/configuration.changes">how to change configuration settings</a>.');
+  }
+  else {
+    $register_globals_report = $t('PHP register globals disabled');
+    $item_class = 'status-ok';
+  }
+
+  $description_items[] = array(
+    'data' => $register_globals_report,
+    'class' => array('status-bullet', $item_class),
+  );
+
+  // Test for required PHP extensions.
   $required_extensions = array(
     'date',
     'dom',
@@ -130,27 +178,50 @@ function system_requirements($phase) {
     'SPL',
     'xml',
   );
+  $missing_extensions = FALSE;
+  $extensions_list = array();
   foreach ($required_extensions as $extension) {
-    if (!extension_loaded($extension)) {
-      $missing_extensions[] = $extension;
+    if (extension_loaded($extension)) {
+      $extensions_list[] = array(
+        'data' => $extension,
+        'class' => array('status-bullet', 'status-ok'),
+      );
+    }
+    else {
+      $missing_extensions = TRUE;
+      $extensions_list[] = array(
+        'data' => $extension . ' (' . $t('missing or disabled') . ')',
+        'class' => array('status-bullet', 'status-error'),
+      );
     }
   }
+  $php_extensions_report = theme('item_list', array('items' => $extensions_list, 'attributes' => array('class' => array('requirements'))));
 
-  if (!empty($missing_extensions)) {
-    $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements" target="_blank">system requirements page</a> for more information):', array(
+  if ($missing_extensions) {
+    $requirements['php']['severity'] = REQUIREMENT_ERROR;
+    $php_fix_info[] = $t('Enable the missing PHP extensions from the list above. See the <a href="@system_requirements" target="_blank">System requirements</a> page for more information.', array(
       '@system_requirements' => 'https://backdropcms.org/requirements',
     ));
-
-    $description .= theme('item_list', array('items' => $missing_extensions));
-
-    $requirements['php_extensions']['value'] = $t('Disabled');
-    $requirements['php_extensions']['severity'] = REQUIREMENT_ERROR;
-    $requirements['php_extensions']['description'] = $description;
   }
-  else {
-    $description = $t('Enabled: !extensions', array('!extensions' => implode(', ', $required_extensions)));
-    $requirements['php_extensions']['value'] = $description;
+
+  $item_class = $missing_extensions ? 'status-error' : 'status-ok';
+  $description_items[] = array(
+    'data' => $t('Required PHP extensions: !extensions', array('!extensions' => $php_extensions_report)),
+    'class' => array('status-bullet', $item_class),
+  );
+
+  $problems_suffix = '';
+  if ($requirements['php']['severity'] == REQUIREMENT_WARNING) {
+    $problems_suffix = ' - ' . $t('Potential problems detected');
   }
+  if ($requirements['php']['severity'] == REQUIREMENT_ERROR) {
+    $problems_suffix = ' - ' . $t('Problems detected');
+  }
+  $requirements['php']['value'] .= $problems_suffix;
+
+  $php_more = theme('item_list', array('items' => $description_items, 'attributes' => array('class' => array('requirements'))));
+  $php_fix_info = theme('item_list', array('items' => $php_fix_info, 'title' => t('Fixing issues')));
+  $requirements['php']['description'] = $php_more . $php_fix_info;
 
   if ($phase == 'install' || $phase == 'update') {
     // Test for PDO (database).
@@ -208,35 +279,6 @@ function system_requirements($phase) {
       'severity' => REQUIREMENT_OK,
       'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
     );
-  }
-
-  // Test PHP memory_limit
-  $memory_limit = ini_get('memory_limit');
-  $requirements['php_memory_limit'] = array(
-    'title' => $t('PHP memory limit'),
-    'value' => $memory_limit == -1 ? t('-1 (Unlimited)') : $memory_limit,
-  );
-
-  if (!backdrop_check_memory_limit(BACKDROP_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
-    $description = '';
-    if ($phase == 'install') {
-      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the installation process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
-    }
-    elseif ($phase == 'update') {
-      $description = $t('Consider increasing your PHP memory limit to %memory_minimum_limit to help prevent errors in the update process.', array('%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
-    }
-    elseif ($phase == 'runtime') {
-      $description = $t('Depending on your configuration, Backdrop can run with a %memory_limit PHP memory limit. However, a %memory_minimum_limit PHP memory limit or above is recommended, especially if your site uses additional custom or contributed modules.', array('%memory_limit' => $memory_limit, '%memory_minimum_limit' => BACKDROP_MINIMUM_PHP_MEMORY_LIMIT));
-    }
-
-    if (!empty($description)) {
-      if ($php_ini_path = get_cfg_var('cfg_file_path')) {
-        $description .= ' ' . $t('Increase the memory limit by editing the memory_limit parameter in the file %configuration-file and then restart your web server.', array('%configuration-file' => $php_ini_path));
-      }
-
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url" target="_blank">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
-      $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
-    }
   }
 
   // Test the contents of the .htaccess files.
