@@ -2546,7 +2546,7 @@ function backdrop_basename($uri, $suffix = NULL) {
     $separators .= DIRECTORY_SEPARATOR;
   }
   // Remove right-most slashes when $uri points to directory.
-  $uri = rtrim($uri, $separators);
+  $uri = rtrim((string) $uri, $separators);
   // Returns the trailing part of the $uri starting after one of the directory
   // separators.
   $filename = preg_match('@[^' . preg_quote($separators, '@') . ']+$@', $uri, $matches) ? $matches[0] : '';
