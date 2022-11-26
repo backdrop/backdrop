@@ -1782,6 +1782,7 @@ div.add-or-remove-shortcuts {
   background: #e9e8e8;
 }
 .ui-dialog {
+  position: absolute;
   border: 1px solid #d0d0d0;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
