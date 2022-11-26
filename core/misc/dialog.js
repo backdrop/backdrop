@@ -36,7 +36,7 @@ Backdrop.dialog = function (element, options) {
     $(window).trigger('dialog:beforecreate', [dialog, $element, settings]);
     $element.dialog(settings);
 
-    if (settings.autoResize === true || settings.autoResize === 'true') {
+    if (settings.autoResize === true || settings.autoResize === 'true') {
       // Add a class specifically to help to lock scrolling.
       $('html').addClass('dialog-auto-resize');
 
@@ -78,25 +78,17 @@ Backdrop.dialog = function (element, options) {
 
       // Because of Chromium's behavior, we must wait until the ajax-loaded
       // jquery.ui.dialog.css is applied.
-      var computedStyle = getComputedStyle($element[0]);
-      var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
-      if (cssOverflowProperty != 'auto') {
-        setTimeout(
-          function waitForCss() {
-            var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
-            // If the overflow is not 'auto' yet, schedule this function again.
-            if (cssOverflowProperty != 'auto') {
-              setTimeout(waitForCss, 0);
-            }
-            else {
-              resetPosition();
-            }
-          }, 0
-        )
+      var waitForCss = function() {
+        var cssOverflowProperty = getComputedStyle($element[0]).getPropertyValue('overflow');
+        // If the overflow is not 'auto' yet, schedule this function again.
+        if (cssOverflowProperty != 'auto') {
+          setTimeout(waitForCss, 10);
+        }
+        else {
+          resetPosition();
+        }
       }
-      else {
-        resetPosition();
-      }
+      setTimeout(waitForCss, 0);
     }
     dialog.open = true;
     $(window).trigger('dialog:aftercreate', [dialog, $element, settings]);
