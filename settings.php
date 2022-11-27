@@ -8,11 +8,23 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * below. If using primary/replica databases or multiple connections, see the
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
 $database = 'mysql://user:pass@localhost/database_name';
+
+/**
+ * Most modern versions of MySQL and MariaDB use the "utf8mb4" character set for
+ * full support of emoji and Chinese character sets. If the database does not
+ * support this feature, remove this line or specify "utf8" (the default).
+ */
+$database_charset = 'utf8mb4';
+
+/**
+ * If more than one application will be sharing this database, specify a prefix
+ * such as "backdrop_". Unless needed, this should be left empty.
+ */
 $database_prefix = '';
 
 /**
