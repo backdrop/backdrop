@@ -78,8 +78,9 @@ Backdrop.dialog = function (element, options) {
 
       // Because of Chromium's behavior, we must wait until the ajax-loaded
       // jquery.ui.dialog.css is applied.
+      var computedStyle = getComputedStyle($element[0]);
       var waitForCss = function() {
-        var cssOverflowProperty = getComputedStyle($element[0]).getPropertyValue('overflow');
+        var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
         // If the overflow is not 'auto' yet, schedule this function again.
         if (cssOverflowProperty != 'auto') {
           setTimeout(waitForCss, 10);
