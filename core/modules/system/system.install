@@ -3361,6 +3361,13 @@ function system_update_1086() {
 }
 
 /**
+ * Set the message length for the database log.
+ */
+function system_update_1087() {
+  config_set('system.core', 'log_max_length', 56);
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
