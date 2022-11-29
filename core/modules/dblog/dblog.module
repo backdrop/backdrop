@@ -182,6 +182,17 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
       'id' => 'date-format-pattern',
     ),
   );
+
+  $form['dblog_max_length'] = array(
+    '#type' => 'number',
+    '#title' => t('Log message length'),
+    '#default_value' => $site_config->get('log_max_length'),
+    '#description' => t('The maximum log message length before truncation.'),
+    '#required' => TRUE,
+    '#min' => 1,
+    '#max' => 255,
+  );
+
   $form['#submit'][] = 'dblog_logging_settings_submit';
 }
 
@@ -193,4 +204,5 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
 function dblog_logging_settings_submit($form, &$form_state) {
   config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
   config_set('system.core', 'log_date_format', $form_state['values']['dblog_date_format']);
+  config_set('system.core', 'log_max_length', $form_state['values']['dblog_max_length']);
 }

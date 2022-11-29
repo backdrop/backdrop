@@ -314,8 +314,8 @@ function dblog_format_message($event, $is_link = FALSE) {
     // special characters by using filter_xss() without any allowed tags.
     // If not, use filter_xss_admin() to allow some tags.
     if ($is_link && isset($event->wid)) {
-      // Truncate message to 56 chars after stripping all the tags.
-      $output = truncate_utf8(filter_xss($output, array()), 56, TRUE, TRUE);
+      // Truncate message after stripping all the tags.
+      $output = truncate_utf8(filter_xss($output, array()), config_get('system.core', 'log_max_length'), TRUE, TRUE);
       $output = l($output, 'admin/reports/event/' . $event->wid, array('html' => TRUE));
     }
     else {
