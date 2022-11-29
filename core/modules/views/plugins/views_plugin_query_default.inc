@@ -290,6 +290,9 @@ class views_plugin_query_default extends views_plugin_query {
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
     $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    // This method may be called more than once. When called for the first time,
+    // it receives a string from the form element. That string must be exploded
+    // into an array before setting the form value. 
     if (is_string($value)) {
       $value = explode(',', $value);
     }
