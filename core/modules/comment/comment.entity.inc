@@ -416,11 +416,11 @@ class CommentStorageController extends EntityDatabaseStorageController {
         ':nid' => $nid,
         ':status' => COMMENT_PUBLISHED,
       ))->fetchObject();
-      // Ensure the respctive entry exists.
-      $count = db_query('SELECT * FROM {node_comment_statistics} WHERE nid = :nid', array(
+      // Ensure the respective node comment record exists.
+      $record = db_query('SELECT * FROM {node_comment_statistics} WHERE nid = :nid', array(
         ':nid' => $nid,
       ))->fetchField();
-      if (empty($count)) {
+      if (empty($record)) {
         db_insert('node_comment_statistics')
           ->fields(array(
             'nid' => $nid,
