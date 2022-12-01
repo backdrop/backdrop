@@ -2269,20 +2269,24 @@ function views_autoload_info() {
 function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
   if (!empty($class)) {
     // To support a class that is part hand-typed and part token, split out tokens.
-    $subclasses = preg_split('/(\[[^\]]*])/i', $class, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-    foreach ($subclasses as &$subclass) {
-      $tokenized = $plugin->tokenize_value($subclass, $row_index);
-      if ($tokenized == $subclass) {
-        // No token replacement, all valid CSS characters allowed.
-        $subclass = backdrop_clean_css_identifier($tokenized, array());
+    $substrings = preg_split('/(\[[^\]]*])/i', $class, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    foreach ($substrings as &$substring) {
+      $tokenized = $plugin->tokenize_value($substring, $row_index);
+      if ($tokenized == $substring) {
+        // No token replacement, keep entered string as it is.
+        $substring = $tokenized;
       }
       else {
         // Tokens that are replaced should be additionally sanitized, such
         // as replacing underscores with hyphens.
-        $subclass = backdrop_clean_css_identifier($tokenized);
+        // To avoid unexpected replacement at the start of this substring, we
+        // prefix two hyphens and remove them again.
+        $substring = substr(backdrop_clean_css_identifier('--' . $tokenized), 2);
       }
-      $class = implode('', $subclasses);
     }
-    return $class;
+    // Merge strings into class identifier.
+    $class = implode('', $substrings);
+    // Return cleaned identifier, all valid CSS characters allowed.
+    return backdrop_clean_css_identifier($class, array());
   }
 }

@@ -229,8 +229,8 @@ function file_schema() {
 function file_requirements($phase) {
   $requirements = array();
 
-  // Check the server's ability to indicate upload progress.
   if ($phase == 'runtime') {
+    // Check the server's ability to indicate upload progress.
     $description = NULL;
     $implementation = file_progress_implementation();
     $server_software = $_SERVER['SERVER_SOFTWARE'];
@@ -273,8 +273,18 @@ function file_requirements($phase) {
       'severity' => $severity,
       'description' => $description,
     );
-  }
 
+    // Show an error if files need to be classified.
+    $file_needs_classification = file_needs_type_classification();
+    if ($file_needs_classification) {
+      $requirements['file_needs_classification'] = array(
+        'title' => t('File Type Classification'),
+        'value' => t('File types need to be classified. (<a href="!path">Classify file types</a>).', array('!path' => '/admin/structure/file-types/classify')),
+        'description' => t('This site may not work properly if file types are not classified. Classifying file types may take some time if there are a lot of files without an assigned file type.'),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
   return $requirements;
 }
 
@@ -848,18 +858,10 @@ function file_update_1003() {
     user_role_grant_permissions($rid, array('view files'));
   }
 
-  // Classify existing files according to the currently defined file types.
-  // Queue all files to be classified during cron runs using the Queue API.
-  $queue = BackdropQueue::get('file_type_determine');
+  // Set flag if file types need to be classified.
   $result = db_query('SELECT fid FROM {file_managed}');
-  foreach ($result as $record) {
-    $queue->createItem($record->fid);
-  }
-
-  // Warn users that existing files will not have a file type until the queue
-  // has been processed.
-  if ($queue->numberOfItems()) {
-    backdrop_set_message(t('All files must now be classified according to file types. Your files have been queued for processing, and will have their file type determined during cron runs.'));
+  if ($result->rowCount()) {
+    file_needs_type_classification(TRUE);
   }
 }
 
@@ -1198,4 +1200,15 @@ function file_update_1008() {
     db_drop_table('cache_entity_file');
   }
   db_create_table('cache_entity_file', $table);
+}
+
+/** 
+ * Remove the file_type_determine queue.
+ */
+function file_update_1009() {
+  $queue = BackdropQueue::get('file_type_determine');
+  if ($queue->numberOfItems() > 0) {
+    file_needs_type_classification(TRUE);
+  }
+  $queue->deleteQueue();
 }

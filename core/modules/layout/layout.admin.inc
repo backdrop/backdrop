@@ -1464,11 +1464,10 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
     '#maxlength' => 255,
   );
 
-  $all_blocks = layout_get_block_info();
   $block_options = array();
   foreach ($layout->content as $uuid => $block) {
-    $title = $all_blocks[$block->module][$block->delta]['info'];
-    if (!empty($title) && $title !== 'Custom block' && !is_a($block, 'PageComponents')) {
+    $title = strip_tags($block->getAdminTitle());
+    if (!empty($title) && $block->delta !== 'custom_block' && !is_a($block, 'PageComponents')) {
       $block_options[$uuid] = $title;
     }
   }
@@ -3246,7 +3245,7 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'Flexible layout templates',
+          'group' => t('Flexible layout templates'),
           'name' => 'layout.flexible.' . $template_info['name'],
         ),
       );
