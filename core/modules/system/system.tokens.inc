@@ -302,12 +302,12 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $slogan = config_get_translated('system.core', 'site_slogan');
           $replacements[$original] = $sanitize ? check_plain($slogan) : $slogan;
           break;
-          
+        
         case 'logo':
           $logo = config_get('system.core', 'site_logo_path');
           $replacements[$original] = $sanitize ? check_plain($logo) : $logo;
-          break;  
-
+          break;
+        
         case 'mail':
           $replacements[$original] = config_get('system.core', 'site_mail');
           break;
