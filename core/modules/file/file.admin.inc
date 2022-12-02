@@ -196,7 +196,7 @@ function file_type_form($form, &$form_state, $type = NULL) {
   );
 
   $mimetypes_description = t('The media (MIME) type(s) to be associated with this file type. When uploading a file, Backdrop automatically identifies the file type based on its media type. If multiple file types have the same media type, you will be prompted to manually select the file type.');
-  $mimetypes_description .= ' ' . l(t('More information about media types.'), 'https://en.wikipedia.org/wiki/Media_type');
+  $mimetypes_description .= ' ' . l(t('More information about media types'), 'https://en.wikipedia.org/wiki/Media_type') . '.';
   $mimetypes_description .= theme('item_list', array('items' => array(
     t('Enter one media type per line'),
     t('Asterisks can be used as wildcards (e.g.: !example)', array('!example' => '<code>image/*</code>')),
