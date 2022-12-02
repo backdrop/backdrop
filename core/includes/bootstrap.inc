@@ -4215,7 +4215,7 @@ function backdrop_static_reset($name = NULL) {
  * Detects whether the current script is running in a command-line environment.
  */
 function backdrop_is_cli() {
-  return (!isset($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
+  return (empty($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
 }
 
 /**
