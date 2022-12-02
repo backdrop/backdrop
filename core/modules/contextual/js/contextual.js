@@ -50,8 +50,8 @@ Backdrop.behaviors.contextualLinks = {
             if (childOffset.left > parentOffset.left - 25) {
               // There's a collision at right, so we need to shift the child.
               if (parentHeight >= 40) {
-                  // If there's enought vertical room in the child contextual links
-                  // region, shift the child links down.
+                  // If there's enough vertical room in the child contextual
+                  // links region, shift the child links down.
                 $child.css('margin-top', '20px');
               }
               else {
@@ -65,8 +65,8 @@ Backdrop.behaviors.contextualLinks = {
             if (childOffset.left < parentOffset.left + 25) {
               // There's a collision at left, so we need to shift the child.
               if (parentHeight >= 40) {
-                  // If there's enought vertical room in the child contextual links
-                  // region, shift the child links down.
+                  // If there's enough vertical room in the child contextual
+                  // links region, shift the child links down.
                 $child.css('margin-top', '20px');
               }
               else {
