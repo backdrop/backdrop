@@ -173,6 +173,7 @@ function file_type_form($form, &$form_state, $type = NULL) {
     '#description' => t('This is the human readable name of the file type.'),
     '#required' => TRUE,
     '#default_value' => $type->name,
+    '#size' => 30,
   );
 
   $form['type'] = array(
@@ -194,10 +195,16 @@ function file_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->description,
   );
 
+  $mimetypes_description = t('The media (MIME) type(s) to be associated with this file type. When uploading a file, Backdrop automatically identifies the file type based on its media type. If multiple file types have the same media type, you will be prompted to manually select the file type.');
+  $mimetypes_description .= ' ' . l(t('More information about media types'), 'https://en.wikipedia.org/wiki/Media_type') . '.';
+  $mimetypes_description .= theme('item_list', array('items' => array(
+    t('Enter one media type per line'),
+    t('Asterisks can be used as wildcards (e.g.: !example)', array('!example' => '<code>image/*</code>')),
+  )));
   $form['mimetypes'] = array(
     '#type' => 'textarea',
     '#title' => t('Media types'),
-    '#description' => t("This is the list of media types (MIME types) which will be aassociated with this file type. When files with these media types are uploaded, Backdrop will identify the file type based on its media type. You should not use the same media types in more than one file type. Enter one media type per line. <br/><a href='@media_types_info'>More information about media types</a>.", array('@media_types_info' => 'https://en.wikipedia.org/wiki/Media_type')),
+    '#description' => $mimetypes_description,
     '#default_value' => implode("\n", $type->mimetypes),
   );
 
