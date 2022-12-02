@@ -368,10 +368,6 @@ function simpletest_test_get_all() {
       $check_keys = array('name', 'description', 'group', 'file');
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
-        // Error messages will get translated as we create them below, but we
-        // won't substitute in the variables in the calls to t() because
-        // watchdog() wants to see the variables as a separate argument.
-        // Instead, accumulate them in $variables as needed.
         $error = '';
         $variables = array('@uri' => $file->uri);
         if (empty($classes)) {
