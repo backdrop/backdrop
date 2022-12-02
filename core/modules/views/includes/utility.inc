@@ -123,8 +123,11 @@ function views_get_table_join($table, $base_table) {
     return $handler;
   }
 
-  // DEBUG -- identify missing handlers
-  watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  // DEBUG: Identify missing handlers unless both tables are the same, because
+  // no join is needed in that case.
+  if ($table != $base_table) {
+    watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  }
 }
 
 /**
