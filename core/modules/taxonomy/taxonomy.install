@@ -411,11 +411,15 @@ function taxonomy_update_1010() {
   foreach ($config_names as $config_name) {
     $config = config($config_name);
     $extra_fields_display_langcode = $config->get('extra_fields.display.language');
+    if (isset($extra_fields_display_langcode)) {
+      $config->set('extra_fields.display.langcode', $extra_fields_display_langcode);
+      $config->clear('extra_fields.display.language');
+    }
     $extra_fields_form_langcode = $config->get('extra_fields.form.language');
-    $config->set('extra_fields.display.langcode', $extra_fields_display_langcode);
-    $config->set('extra_fields.form.langcode', $extra_fields_form_langcode);
-    $config->clear('extra_fields.display.language');
-    $config->clear('extra_fields.form.language');
+    if (isset($extra_fields_form_langcode)) {
+      $config->set('extra_fields.form.langcode', $extra_fields_form_langcode);
+      $config->clear('extra_fields.form.language');
+    }
     $config->save();
   }
 }
