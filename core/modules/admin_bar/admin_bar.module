@@ -244,6 +244,19 @@ function admin_bar_preprocess_page(&$variables) {
     $settings['position_fixed'] = $setting;
   }
 
+  // Send whether this is an admin page to JS for back to site functionality.
+  $settings['current_path_is_admin'] = FALSE;
+  $current_path = current_path();
+  if (path_is_admin($current_path)) {
+    $settings['current_path_is_admin'] = TRUE;
+  }
+  $alias = backdrop_get_path_alias($current_path, $language->langcode);
+  $settings['current_path'] = $alias;
+
+  $components = $config->get('components');
+  if (in_array('admin_bar.back_to_site_link', $components)) {
+    $settings['back_to_site_link'] = TRUE;
+  }
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
@@ -395,7 +408,6 @@ function admin_bar_admin_bar_replacements($complete) {
       // Replace the counters in the cached menu output with current counts.
       $items['.admin-bar-users a'] = $user_count;
     }
-
     // Check whether the page links component is enabled.
     if (in_array('admin_bar.page', $components)) {
       $query = array('query' => array(
