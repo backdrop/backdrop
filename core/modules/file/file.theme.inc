@@ -323,7 +323,6 @@ function theme_file_upload_help($variables) {
  * @ingroup themeable
  */
 function theme_file_formatter_table($variables) {
-  $header = array(t('Attachment'), t('Size'));
   $rows = array();
   foreach ($variables['items'] as $delta => $item) {
     $rows[] = array(
@@ -331,6 +330,8 @@ function theme_file_formatter_table($variables) {
       format_size($item['filesize']),
     );
   }
+  count($rows) > 1 ? $title = t('Attachments') : $title = t('Attachment');
+  $header = array($title, t('Size'));
 
   return empty($rows) ? '' : theme('table', array('header' => $header, 'rows' => $rows));
 }
