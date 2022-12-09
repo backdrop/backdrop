@@ -512,28 +512,36 @@ function user_admin_roles($form, $form_state) {
   );
 
   // Administrative role option.
-  $form['admin_role'] = array(
+  $form['permission_auto_assign'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Administrator role'),
+    '#title' => t('Automatic permission assignment'),
+    '#description' => t('Changing these settings will not affect existing permissions.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
   $roles = user_roles();
-  // Do not allow the anonymous or authenticated roles to be set as the
-  // administrator.
+  // Do not allow the anonymous or authenticated roles to be set as the default
+  // administrator or content editor roles.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   // Add the "disabled" option to the top of the roles list (makes sure that
-  // this is the selected option if the role that was previously set as admin is
-  // deleted).
+  // this is the selected option if the role that was previously set as admin or
+  // content editor is deleted).
   $roles = array(0 => t('disabled')) + $roles;
-  $form['admin_role']['user_admin_role'] = array(
+  $form['permission_auto_assign']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Changing this setting will not affect existing permissions.'),
+    '#description' => t('Whenever a new modules are enabled, any new permissions these modules introduce will be automatically granted to the role selected here.'),
+  );
+  $form['permission_auto_assign']['user_editor_role'] = array(
+    '#type' => 'select',
+    '#title' => t('Default content editor role'),
+    '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
+    '#options' => $roles,
+    '#description' => t('Whenever a new content type is created, permissions required to create, edit and manage content of that type will be automatically granted to the role selected here.'),
   );
 
   // Settings for anonymous users.
@@ -606,7 +614,7 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
+    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -621,6 +629,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->set('user_editor_role', $form_state['values']['user_editor_role']);
   $config->save();
 
   // Save roles.

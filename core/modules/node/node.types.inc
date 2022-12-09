@@ -84,11 +84,64 @@ function node_overview_types() {
  * @ingroup forms
  */
 function node_type_form($form, &$form_state, $type = NULL) {
+  // This is a new content type.
   if (!isset($type->type)) {
-    // This is a new type. Populate with the defaults...
+    // Populate with the defaults.
     $type = node_type_set_defaults();
-    // ...and set the page title.
+
+    // Set the page title.
     backdrop_set_title(t('Add content type'));
+
+    // Show message about automatic permission assignment.
+    $roles = user_roles();
+    $system_config = config('system.core');
+    $auto_permission_roles = array(
+      '%admin' => 'admin',
+      '%editor' => 'editor',
+    );
+    foreach ($auto_permission_roles as $key => $auto_permission_role) {
+      $in_config = $system_config->get('user_' . $auto_permission_role . '_role');
+      if ($in_config) {
+        $role = user_role_load($in_config);
+        if (!in_array($role->label, $auto_permission_roles)) {
+          $auto_permission_roles['%' . $auto_permission_role] = $role->label;
+        }
+        else {
+          unset($auto_permission_roles['%' . $auto_permission_role]);
+        }
+      }
+      else {
+        unset($auto_permission_roles['%' . $auto_permission_role]);
+      }
+    }
+    if (count($auto_permission_roles) == 1) {
+      $keys = array_keys($auto_permission_roles);
+      $auto_permission_roles['%role'] = $auto_permission_roles[$keys[0]];
+      unset($auto_permission_roles[$keys[0]]);
+    }
+
+    $permissions_message = format_plural(
+      count($auto_permission_roles),
+      'The %role role has been automatically assigned some sensible default permissions.',
+      'The %admin and %editor roles have been automatically assigned some sensible default permissions.',
+      $auto_permission_roles
+    );
+    $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
+
+    if (user_access('administer permissions')) {
+      $permissions_message .= ' ' . t('You can adjust this behavior in the <em>Automatic permission assignment</em> section of the <a href="@link">Roles</a> confirguration page.', array('@link' => 'test'));
+    }
+    // backdrop_set_message($permissions_message, 'info');
+
+    $form['permissions_message_container'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'info')),
+      '#weight' => 3,
+    );
+    $form['permissions_message_container']['message'] = array(
+      '#type' => 'markup',
+      '#markup' => $permissions_message,
+    );
   }
 
   // Make the type object available to implementations of hook_form_alter().
@@ -135,6 +188,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#attached' => array(
       'js' => array(backdrop_get_path('module', 'node') . '/js/node.types.js'),
     ),
+    '#weight' => 5,
   );
 
   // Submission form settings.
@@ -520,6 +574,7 @@ function node_type_form_permissions($type) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
+  $editor_role = config_get('system.core', 'user_editor_role');
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
@@ -572,9 +627,11 @@ function node_type_form_permissions($type) {
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. Always select the Admin
-      // role on new forms.
-      if (in_array($perm, $role->permissions) || (!$type && $role->name == $admin_role)) {
+      // Builds arrays for checked boxes for each role. For new content types,
+      // if user_admin_role and/or user_editor_role have been configured in the
+      // "Automatic permission assignment" section in admin/config/people/roles,
+      // then always select all permissions for these roles.
+      if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
         $status[$role_name][] = $perm;
       }
     }
