@@ -1837,9 +1837,10 @@ function date_hidden_element($element) {
 function date_html5_element_validate(array $element, array &$form_state) {
   $field_name = $element['#field_name'];
 
-  if (!empty($form_state['values'][$field_name][LANGUAGE_NONE])) {
+  if (!empty(backdrop_array_get_nested_value($form_state['values'], $element['#parents']))) {
     $values = array();
-    $items = $form_state['values'][$field_name][LANGUAGE_NONE];
+    $trimmed_parents = array_slice($element['#parents'], 0, -1);
+    $items = backdrop_array_get_nested_value($form_state['values'], $trimmed_parents);
     $field_type = $element['#field_type'];
     $field_label = $element['#field_label'];
 
@@ -2018,7 +2019,7 @@ function date_html5_element_validate(array $element, array &$form_state) {
     }
 
     // Override the value to what date fields expect.
-    $form_state['values'][$field_name][LANGUAGE_NONE] = $values;
+    backdrop_array_set_nested_value($form_state['values'], $trimmed_parents, $values);
   }
 }
 
