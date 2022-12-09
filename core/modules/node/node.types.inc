@@ -101,7 +101,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     );
     foreach ($auto_permission_roles as $key => $auto_permission_role) {
       $in_config = $system_config->get('user_' . $auto_permission_role . '_role');
-      if ($in_config) {
+      if ($in_config && user_role_load($in_config)) {
         $role = user_role_load($in_config);
         if (!in_array($role->label, $auto_permission_roles)) {
           $auto_permission_roles['%' . $auto_permission_role] = $role->label;
@@ -129,7 +129,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
 
     if (user_access('administer permissions')) {
-      $permissions_message .= ' ' . t('You can adjust this behavior in the <em>Automatic permission assignment</em> section of the <a href="@link">Roles</a> confirguration page.', array('@link' => 'test'));
+      $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
     }
     // backdrop_set_message($permissions_message, 'info');
 

@@ -534,7 +534,7 @@ function user_admin_roles($form, $form_state) {
     '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Whenever a new modules are enabled, any new permissions these modules introduce will be automatically granted to the role selected here.'),
+    '#description' => t('Whenever new modules are enabled, any new permissions these modules introduce will be automatically granted to the role selected here.'),
   );
   $form['permission_auto_assign']['user_editor_role'] = array(
     '#type' => 'select',
