@@ -223,7 +223,7 @@ function template_preprocess_user_picture(&$variables) {
       // @TODO: Ideally this function would only be passed file entities, but
       // since there's a lot of legacy code that JOINs the {users} table to
       // {node} or {comments} and passes the results into this function if we
-      // a numeric value in the picture field we'll assume it's a file id
+      // use a numeric value in the picture field we'll assume it's a file id
       // and load it for them. Once we've got user_load_multiple() and
       // comment_load_multiple() functions the user module will be able to load
       // the picture files in mass during the object's load process.
@@ -239,7 +239,7 @@ function template_preprocess_user_picture(&$variables) {
     }
     if (isset($filepath)) {
       $alt = t("@user's picture", array('@user' => user_format_name($account)));
-      // If the image does not have a valid Backdrop scheme (for eg. HTTP),
+      // If the image does not have a valid Backdrop scheme (for eg. public:// or private://),
       // don't load image styles.
       if (module_exists('image') && file_valid_uri($filepath) && $style = $site_config->get('user_picture_style')) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
