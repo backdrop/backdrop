@@ -114,34 +114,35 @@ function node_type_form($form, &$form_state, $type = NULL) {
         unset($auto_permission_roles['%' . $auto_permission_role]);
       }
     }
-    if (count($auto_permission_roles) == 1) {
-      $keys = array_keys($auto_permission_roles);
-      $auto_permission_roles['%role'] = $auto_permission_roles[$keys[0]];
-      unset($auto_permission_roles[$keys[0]]);
+    if (count($auto_permission_roles) != 0) {
+      if (count($auto_permission_roles) == 1) {
+        $keys = array_keys($auto_permission_roles);
+        $auto_permission_roles['%role'] = $auto_permission_roles[$keys[0]];
+        unset($auto_permission_roles[$keys[0]]);
+      }
+
+      $permissions_message = format_plural(
+        count($auto_permission_roles),
+        'The %role role has been automatically assigned some sensible default permissions.',
+        'The %admin and %editor roles have been automatically assigned some sensible default permissions.',
+        $auto_permission_roles
+      );
+      $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
+
+      if (user_access('administer permissions')) {
+        $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+      }
+
+      $form['permissions_message_container'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('messages', 'info')),
+        '#weight' => 3,
+      );
+      $form['permissions_message_container']['message'] = array(
+        '#type' => 'markup',
+        '#markup' => $permissions_message,
+      );
     }
-
-    $permissions_message = format_plural(
-      count($auto_permission_roles),
-      'The %role role has been automatically assigned some sensible default permissions.',
-      'The %admin and %editor roles have been automatically assigned some sensible default permissions.',
-      $auto_permission_roles
-    );
-    $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
-
-    if (user_access('administer permissions')) {
-      $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
-    }
-    // backdrop_set_message($permissions_message, 'info');
-
-    $form['permissions_message_container'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('messages', 'info')),
-      '#weight' => 3,
-    );
-    $form['permissions_message_container']['message'] = array(
-      '#type' => 'markup',
-      '#markup' => $permissions_message,
-    );
   }
 
   // Make the type object available to implementations of hook_form_alter().
