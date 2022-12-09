@@ -879,7 +879,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Enable comment subjects on 'page' nodes
     $node_type = node_type_get_type('page');
-    $node_type->settings['comment_subject_field'] = TRUE;
+    $node_type->settings['comment_title_options'] = COMMENT_TITLE_CUSTOM;
     node_type_save($node_type);
 
     // Create a simple node.
@@ -2070,7 +2070,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
   function testUserSignature() {
     // Enable comment subjects on 'page' nodes
     $node_type = node_type_get_type('page');
-    $node_type->settings['comment_subject_field'] = TRUE;
+    $node_type->settings['comment_title_options'] = COMMENT_TITLE_CUSTOM;
     node_type_save($node_type);
 
     // Create a new node with comments on.

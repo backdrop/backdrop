@@ -28,7 +28,7 @@ function book_tokens($type, $tokens, array $data = array(), array $options = arr
     $node = $data['node'];
 
     if (!empty($node->book['mlid'])) {
-      // Skip access check to generat tokens before node grants are saved.
+      // Skip access check to generate tokens before node grants are saved.
       $link = book_link_load($node->book['mlid'], TRUE);
 
       foreach ($tokens as $name => $original) {
