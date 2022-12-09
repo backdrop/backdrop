@@ -1,3 +1,6 @@
+#user-roles .role-name {
+  white-space: nowrap;
+}
 
 #permissions td.module {
   font-weight: bold;

@@ -472,6 +472,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => $role->description,
       '#tree' => TRUE,
     );
   }
@@ -665,6 +666,13 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#rows' => 3,
+    '#title' => t('Description'),
+    '#default_value' => empty($role->description) ? '' : $role->description,
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page.'),
+  );
   $form['weight'] = array(
     '#type' => 'value',
     '#value' => empty($role->weight) ? 0 : $role->weight,
@@ -703,6 +711,7 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
+      'description' => $form_state['values']['description'],
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
@@ -715,11 +724,10 @@ function user_admin_role_submit($form, &$form_state) {
   else {
     // Update existing role.
     $role = $form_state['role'];
-    $old_role = $role->label;
     $role->label = $form_state['values']['label'];
+    $role->description = $form_state['values']['description'];
     user_role_save($role);
-    $new_role = $role->label;
-    backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+    backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));
   }
 
   $form_state['redirect'] = $redirect;

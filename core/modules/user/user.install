@@ -1310,5 +1310,30 @@ function user_update_1022() {
 }
 
 /**
+ * Add default descriptions to user roles.
+ */
+function user_update_1023() {
+  $config_names = config_get_names_with_prefix('user.role.');
+  $admin_role = config_get('system.core', 'user_admin_role');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    if ($config->get('description') === NULL) {
+      $description = '';
+      if ($config_name === 'user.role.anonymous') {
+        $description = 'Special role assigned to any site visitor that has not signed into the site.';
+      }
+      elseif ($config_name === 'user.role.authenticated') {
+        $description = 'Special role assigned to all users who have signed into the site. Permissions assigned to this role are given to all other roles except the anonymous role.';
+      }
+      elseif ($config->get('name') === $admin_role) {
+        $description = 'This role receives all permissions on the site.';
+      }
+      $config->set('description', $description);
+      $config->save();
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
