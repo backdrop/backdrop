@@ -133,8 +133,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // Prepare various messages about automatic permission assignment, and
   // warnings if no role is configured to create/view/edit content of this type.
   $permissions_message = '';
-  $roles = user_roles();
-  $user_module_permissions = module_invoke('user', 'permission');
 
   $system_config = config('system.core');
   // Prepare the array with the human-readable labels of any roles that are have
@@ -174,29 +172,25 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // admin/config/people/roles, while at the same time no other role has been
   // granted any permission associated with this content type. We show this
   // warning for both new and existing content types.
-  if (count($auto_permission_roles) == 0 && !$permissions_assigned) {
+  if (count($auto_permission_roles) == 0 || !$permissions_assigned) {
     $permissions_message = t('Nobody will be able to create, view or edit any content of this type until permissions have been configured appropriately for it.');
 
     if (user_access('administer permissions')) {
       $permissions_message .= ' ' . t('You can do that manually for this contnet type in the <em>Permissions</em> tab below. You may also want to consider automating this, by specifying a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
     }
-    else {
-      $permissions_message .= ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
-    }
 
     $permissions_message_type = 'warning';
   }
-  // Show some info messsages if automatic permission assignments is enabled for
+  // Show some info messsages if automatic permission assignment is enabled for
   // at least one of the default admin/editor roles. We only show these when
   // creating a new content type.
-  if (count($auto_permission_roles) != 0 && !isset($type->type)) {
+  if (count($auto_permission_roles) != 0 && empty($type->type)) {
     $permissions_message = format_plural(
       count($auto_permission_roles),
       'The %role role has been automatically assigned some sensible default permissions, to be able to create, view or edit any content of this type.',
       'The %admin and %editor roles have been automatically assigned some sensible default permissions, to be able to create, view or edit any content of this type.',
       $auto_permission_roles
     );
-    $permissions_message .= ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
 
     if (user_access('administer permissions')) {
       $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
@@ -205,6 +199,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
     $permissions_message_type = 'info';
   }
+
+  $roles = user_roles();
+  $user_module_permissions = module_invoke('user', 'permission');
+  $only_admin_roles_message = ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+  $permissions_message .= !user_access('administer permissions') ? $only_admin_roles_message : '';
 
   if ($permissions_message) {
     // We are faking a message here. If we used backdrop_set_message(), the
