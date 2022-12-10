@@ -84,9 +84,8 @@ function node_overview_types() {
  * @ingroup forms
  */
 function node_type_form($form, &$form_state, $type = NULL) {
-  // This is a new type. Populate with the defaults...
   if (!isset($type->type)) {
-    // Populate with the defaults.
+    // This is a new type. Populate with the defaults...
     $type = node_type_set_defaults();
     // ...and set the page title.
     backdrop_set_title(t('Add content type'));
