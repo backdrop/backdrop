@@ -84,12 +84,11 @@ function node_overview_types() {
  * @ingroup forms
  */
 function node_type_form($form, &$form_state, $type = NULL) {
-  // This is a new content type.
+  // This is a new type. Populate with the defaults...
   if (!isset($type->type)) {
     // Populate with the defaults.
     $type = node_type_set_defaults();
-
-    // Set the page title.
+    // ...and set the page title.
     backdrop_set_title(t('Add content type'));
   }
 
@@ -180,7 +179,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $permissions_message = t('Nobody will be able to create, view or edit any content of this type until permissions have been configured appropriately for it.');
 
     if (user_access('administer permissions')) {
-      $permissions_message .= ' ' . t('You can either do that manually for this contnet type in the <em>Permissions</em> tab below, or you can specify a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+      $permissions_message .= ' ' . t('You can do that manually for this contnet type in the <em>Permissions</em> tab below. You may also want to consider automating this, by specifying a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
     }
     else {
       $permissions_message .= ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
