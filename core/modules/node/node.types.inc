@@ -132,7 +132,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
   // Prepare various messages about automatic permission assignment, and
   // warnings if no role is configured to create/view/edit content of this type.
-  $permissions_message = '';
+  $permissions_message = $permissions_message_type = '';
 
   $system_config = config('system.core');
   // Prepare the array with the human-readable labels of any roles that are have
@@ -205,19 +205,18 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $only_admin_roles_message = ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
   $permissions_message .= !user_access('administer permissions') ? $only_admin_roles_message : '';
 
-  if ($permissions_message) {
+  if ($permissions_message && $permissions_message_type) {
     // We are faking a message here. If we used backdrop_set_message(), the
     // message would be placed at the top of the page, which would make it
-    // unnecessarily prominent and potentially distracting. By setting a weight
-    // for it, we are placing it right above the vertical tabs section (where
-    // permissions can be configured). Intentionally not placing it inside the
-    // "Permissions" tab either, since a) that is not the deault tab, so it
-    // wouldn't be visible, and b) we need to show some warnings to people even
-    // if they don't have access to the "Permissions" tab.
+    // unnecessarily prominent and potentially distracting. We are placing it
+    // right above the vertical tabs section instead (where permissions can be
+    // configured). Intentionally not placing it inside the "Permissions" tab
+    // either, since a) that is not the deault tab, so it wouldn't be visible,
+    // and b) we need to show some warnings to people even if they don't have
+    // access to the "Permissions" tab.
     $form['permissions_message_container'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('messages', $permissions_message_type)),
-      '#weight' => 3,
     );
     $form['permissions_message_container']['message'] = array(
       '#type' => 'markup',
@@ -230,7 +229,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#attached' => array(
       'js' => array(backdrop_get_path('module', 'node') . '/js/node.types.js'),
     ),
-    '#weight' => 5,
   );
 
   // Submission form settings.
