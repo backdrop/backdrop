@@ -91,58 +91,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
     // Set the page title.
     backdrop_set_title(t('Add content type'));
-
-    // Show message about automatic permission assignment.
-    $roles = user_roles();
-    $system_config = config('system.core');
-    $auto_permission_roles = array(
-      '%admin' => 'admin',
-      '%editor' => 'editor',
-    );
-    foreach ($auto_permission_roles as $key => $auto_permission_role) {
-      $in_config = $system_config->get('user_' . $auto_permission_role . '_role');
-      if ($in_config && user_role_load($in_config)) {
-        $role = user_role_load($in_config);
-        if (!in_array($role->label, $auto_permission_roles)) {
-          $auto_permission_roles['%' . $auto_permission_role] = $role->label;
-        }
-        else {
-          unset($auto_permission_roles['%' . $auto_permission_role]);
-        }
-      }
-      else {
-        unset($auto_permission_roles['%' . $auto_permission_role]);
-      }
-    }
-    if (count($auto_permission_roles) != 0) {
-      if (count($auto_permission_roles) == 1) {
-        $keys = array_keys($auto_permission_roles);
-        $auto_permission_roles['%role'] = $auto_permission_roles[$keys[0]];
-        unset($auto_permission_roles[$keys[0]]);
-      }
-
-      $permissions_message = format_plural(
-        count($auto_permission_roles),
-        'The %role role has been automatically assigned some sensible default permissions.',
-        'The %admin and %editor roles have been automatically assigned some sensible default permissions.',
-        $auto_permission_roles
-      );
-      $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
-
-      if (user_access('administer permissions')) {
-        $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
-      }
-
-      $form['permissions_message_container'] = array(
-        '#type' => 'container',
-        '#attributes' => array('class' => array('messages', 'info')),
-        '#weight' => 3,
-      );
-      $form['permissions_message_container']['message'] = array(
-        '#type' => 'markup',
-        '#markup' => $permissions_message,
-      );
-    }
   }
 
   // Make the type object available to implementations of hook_form_alter().
@@ -183,6 +131,102 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->description,
     '#description' => t('Describe this content type. The text will be displayed on the <em>Add content</em> page.'),
   );
+
+  // Prepare various messages about automatic permission assignment, and
+  // warnings if no role is configured to create/view/edit content of this type.
+  $permissions_message = '';
+  $roles = user_roles();
+  $user_module_permissions = module_invoke('user', 'permission');
+
+  $system_config = config('system.core');
+  // Prepare the array with the human-readable labels of any roles that are have
+  // been configured for automatic permission assignment (in the "Automatic
+  // permission assignment" section in admin/config/people/roles). This array is
+  // used in format_plural() later.
+  $admin_auto_permissions = $system_config->get('user_admin_role');
+  $editor_auto_permissions = $system_config->get('user_editor_role');
+  $auto_permission_roles = array();
+  if ($admin_auto_permissions && user_role_load($admin_auto_permissions)) {
+    $admin_role = user_role_load($admin_auto_permissions);
+    $auto_permission_roles['%admin'] = $admin_role->label;
+  }
+  if ($editor_auto_permissions && user_role_load($editor_auto_permissions)) {
+    $editor_role = user_role_load($editor_auto_permissions);
+    $auto_permission_roles['%editor'] = $editor_role->label;
+  }
+  if (count($auto_permission_roles) == 1) {
+    $one_role = reset($auto_permission_roles);
+    unset($auto_permission_roles);
+    $auto_permission_roles['%role'] = $one_role;
+  }
+
+  $permissions_assigned = FALSE;
+  $content_type_permissions = node_type_form_permissions($type->type);
+  foreach ($content_type_permissions['checkboxes'] as $role => $checkboxes) {
+    if (!empty($checkboxes['#default_value'])) {
+      // At least one permission related to this content type is assigned to at
+      // least one role.
+      $permissions_assigned = TRUE;
+      break;
+    }
+  }
+
+  // Edge case, where both the default admin role and the default content editor
+  // role have been disabled in the "Automatic permission assignment" section in
+  // admin/config/people/roles, while at the same time no other role has been
+  // granted any permission associated with this content type. We show this
+  // warning for both new and existing content types.
+  if (count($auto_permission_roles) == 0 && !$permissions_assigned) {
+    $permissions_message = t('Nobody will be able to create, view or edit any content of this type until permissions have been configured appropriately for it.');
+
+    if (user_access('administer permissions')) {
+      $permissions_message .= ' ' . t('You can either do that manually for this contnet type in the <em>Permissions</em> tab below, or you can specify a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+    }
+    else {
+      $permissions_message .= ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+    }
+
+    $permissions_message_type = 'warning';
+  }
+  // Show some info messsages if automatic permission assignments is enabled for
+  // at least one of the default admin/editor roles. We only show these when
+  // creating a new content type.
+  if (count($auto_permission_roles) != 0 && !isset($type->type)) {
+    $permissions_message = format_plural(
+      count($auto_permission_roles),
+      'The %role role has been automatically assigned some sensible default permissions, to be able to create, view or edit any content of this type.',
+      'The %admin and %editor roles have been automatically assigned some sensible default permissions, to be able to create, view or edit any content of this type.',
+      $auto_permission_roles
+    );
+    $permissions_message .= ' ' . t('Only roles with the %permission permission can configure this.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+
+    if (user_access('administer permissions')) {
+      $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
+      $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+    }
+
+    $permissions_message_type = 'info';
+  }
+
+  if ($permissions_message) {
+    // We are faking a message here. If we used backdrop_set_message(), the
+    // message would be placed at the top of the page, which would make it
+    // unnecessarily prominent and potentially distracting. By setting a weight
+    // for it, we are placing it right above the vertical tabs section (where
+    // permissions can be configured). Intentionally not placing it inside the
+    // "Permissions" tab either, since a) that is not the deault tab, so it
+    // wouldn't be visible, and b) we need to show some warnings to people even
+    // if they don't have access to the "Permissions" tab.
+    $form['permissions_message_container'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+      '#weight' => 3,
+    );
+    $form['permissions_message_container']['message'] = array(
+      '#type' => 'markup',
+      '#markup' => $permissions_message,
+    );
+  }
 
   $form['additional_settings'] = array(
     '#type' => 'vertical_tabs',
@@ -331,7 +375,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
-  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+  $form['permissions']['permissions'] = $content_type_permissions;
 
   // Revision settings.
   $form['revision'] = array(
