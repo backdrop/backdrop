@@ -416,16 +416,16 @@ class CommentStorageController extends EntityDatabaseStorageController {
         ':nid' => $nid,
         ':status' => COMMENT_PUBLISHED,
       ))->fetchObject();
-      // Sync with node_comment_statistics table.
-      $record = db_query('SELECT * FROM {node_comment_statistics} WHERE nid = :nid', array(
+      // Make sure node_comment_statistics has respective entry.
+      $count_comment_statistics = db_query('SELECT COUNT(cid) FROM {node_comment_statistics} WHERE nid = :nid', array(
         ':nid' => $nid,
-      ))->fetchField();
-      if (empty($record)) {
+      ))->fetchField();   
+      if (empty($count_comment_statistics)) {
         db_insert('node_comment_statistics')
           ->fields(array(
             'nid' => $nid,
             'cid' => $last_reply->cid,
-            'comment_count' => '1',
+            'comment_count' => $count,
             'last_comment_timestamp' => $last_reply->changed,
             'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
             'last_comment_uid' => $last_reply->uid,
