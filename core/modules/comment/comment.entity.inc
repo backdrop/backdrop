@@ -415,11 +415,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
       $last_reply = db_query_range('SELECT cid, name, changed, uid FROM {comment} WHERE nid = :nid AND status = :status ORDER BY cid DESC', 0, 1, array(
         ':nid' => $nid,
         ':status' => COMMENT_PUBLISHED,
-      ))->fetchObject();
-      // Make sure node_comment_statistics has respective entry.
-      $count_comment_statistics = db_query('SELECT COUNT(cid) FROM {node_comment_statistics} WHERE nid = :nid', array(
-        ':nid' => $nid,
-      ))->fetchField();   
+      ))->fetchObject();  
       db_merge('node_comment_statistics')
         ->fields(array(
           'cid' => $last_reply->cid,
