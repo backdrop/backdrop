@@ -330,8 +330,8 @@ function theme_file_formatter_table($variables) {
       format_size($item['filesize']),
     );
   }
-  count($rows) > 1 ? $title = t('Attachments') : $title = t('Attachment');
-  $header = array($title, t('Size'));
+  $title = format_plural(count($rows), 'Attachment', 'Attachments');
+  $header = array(t($title), t('Size'));
 
   return empty($rows) ? '' : theme('table', array('header' => $header, 'rows' => $rows));
 }
