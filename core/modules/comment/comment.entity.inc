@@ -420,30 +420,16 @@ class CommentStorageController extends EntityDatabaseStorageController {
       $count_comment_statistics = db_query('SELECT COUNT(cid) FROM {node_comment_statistics} WHERE nid = :nid', array(
         ':nid' => $nid,
       ))->fetchField();   
-      if (empty($count_comment_statistics)) {
-        db_insert('node_comment_statistics')
-          ->fields(array(
-            'nid' => $nid,
-            'cid' => $last_reply->cid,
-            'comment_count' => $count,
-            'last_comment_timestamp' => $last_reply->changed,
-            'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
-            'last_comment_uid' => $last_reply->uid,
-          ))
-          ->execute();
-      }
-      else {
-        db_update('node_comment_statistics')
-          ->fields(array(
-            'cid' => $last_reply->cid,
-            'comment_count' => $count,
-            'last_comment_timestamp' => $last_reply->changed,
-            'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
-            'last_comment_uid' => $last_reply->uid,
-          ))
-          ->condition('nid', $nid)
-          ->execute();
-      }
+      db_merge('node_comment_statistics')
+        ->fields(array(
+          'cid' => $last_reply->cid,
+          'comment_count' => $count,
+          'last_comment_timestamp' => $last_reply->changed,
+          'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
+          'last_comment_uid' => $last_reply->uid,
+        ))
+        ->key(array('nid' => $nid))
+        ->execute();
     }
     else {
       // Comments do not exist.
