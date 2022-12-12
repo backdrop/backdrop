@@ -2651,7 +2651,7 @@ function user_permission_get_title($permission_name) {
  * Retrieve information about a given permission or all permissions.
  *
  * @param string $permission_name
- *   (optional) The name of a speciff permission for which to return
+ *   (optional) The name of a specific permission for which to return
  *   information. If ommitted, an array of all permissions found will be
  *   returned.
  * @param string $property
