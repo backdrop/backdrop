@@ -773,7 +773,7 @@ function comment_node_page_additions(Node $node) {
             'last_comment_name' => '',
             'last_comment_uid' => $node->uid,
           ))
-          ->key(array('nid' => $nid))
+          ->key(array('nid' => $node->nid))
           ->execute();
       }
     }
