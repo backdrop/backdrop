@@ -2598,18 +2598,132 @@ function user_role_delete_access($role) {
 /**
  * Determine the modules that permissions belong to.
  *
- * @return
+ * @return array
  *   An associative array in the format $permission => $module.
  */
 function user_permission_get_modules() {
-  $permissions = array();
+  return user_permission_get_info(NULL, 'module');
+}
+
+/**
+ * Determine the module providing a specific permission.
+ *
+ * @param string $permission_name
+ *   The machine name of the target permission.
+ *
+ * @return string
+ *   The machine name of the module the permission belongs to.
+ *
+ * @since 1.24.0
+ */
+function user_permission_get_module($permission_name) {
+  return user_permission_get_info($permission_name, 'module');
+}
+
+/**
+ * Get the titles (human-readable names) of all permissions.
+ *
+ * @return array
+ *   An associative array in the format $permission => $title.
+ *
+ * @since 1.24.0
+ */
+function user_permission_get_titles() {
+  return user_permission_get_info(NULL, 'title');
+}
+
+/**
+ * Get the title (human-readable name) of a specific permission.
+ *
+ * @param string $permission_name
+ *   The machine name of the target permission.
+ *
+ * @return string
+ *   The human-readable title of the permission.
+ *
+ * @since 1.24.0
+ */
+function user_permission_get_title($permission_name) {
+  return user_permission_get_info($permission_name, 'title');
+}
+
+/**
+ * Retrieve information about a given permission or all permissions.
+ *
+ * @param string $permission_name
+ *   (optional) The name of a speciff permission for which to return
+ *   information. If ommitted, an array of all permissions found will be
+ *   returned.
+ * @param string $property
+ *   (optional) The name of a specific property to be retrieved. Can be:
+ *   - 'title' (string)
+ *   - 'description' (string)
+ *   - 'restrict access' (boolean)
+ *   - 'warning' (string)
+ *   - 'module' (string - the machine name of module providing the permission)
+ *   If ommitted, all avaliable permission properties will be returned as an
+ *   array.
+ *
+ * @return array|string|FALSE
+ *   Can be:
+ *   - an array of permissions, along with the property(ies) of each permission.
+ *   - an array of all properties of a specific permission.
+ *   - a specific property of a specific permission.
+ *   - FALSE if the requested property or requested permission was not found.
+ *
+ * @since 1.24.0
+ */
+function user_permission_get_info($permission_name = NULL, $property = NULL) {
+  $all_permissions = array();
+
   foreach (module_implements('permission') as $module) {
-    $perms = module_invoke($module, 'permission');
-    foreach ($perms as $key => $value) {
-      $permissions[$key] = $module;
+    $permissions = module_invoke($module, 'permission');
+    foreach ($permissions as $permission => $permission_info) {
+      // Add the module that is providing this permission in the permission
+      // properties.
+      $permission_info['module'] = $module;
+
+      // Start compiling a list of permissions and all their properties.
+      if ($property == NULL) {
+        $all_permissions[$permission] = $permission_info;
+      }
+      // Specific permission property requested.
+      elseif (array_key_exists($property, $permission_info)) {
+        $all_permissions[$permission] = $permission_info[$property];
+      }
+
+      // Target permission found - no need to keep looking.
+      if ($permission_name != NULL && $permission == $permission_name) {
+        break 2;
+      }
     }
   }
-  return $permissions;
+
+  // No specific permission requested - return all of them.
+  if ($permission_name == NULL) {
+    ksort($all_permissions);
+    return $all_permissions;
+  }
+  else {
+    // Requested permission not found.
+    if (!array_key_exists($permission_name, $all_permissions)) {
+      return FALSE;
+    }
+
+    // Specific property of a permission requested.
+    if ($property != NULL) {
+      if (array_key_exists($property, $permission_info)) {
+        return $permission_info[$property];
+      }
+      // Requested property not found.
+      return FALSE;
+    }
+    // No specific property requested - return all permission properties as an
+    // array.
+    else {
+      return $permission_info;
+    }
+  }
 }
 
 /**
