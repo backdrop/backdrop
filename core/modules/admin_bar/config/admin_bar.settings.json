@@ -4,6 +4,7 @@
     "position_fixed": 1,
     "components": [
         "admin_bar.icon",
+        "admin_bar.back_to_site_link",
         "admin_bar.menu",
         "admin_bar.search",
         "admin_bar.page",
