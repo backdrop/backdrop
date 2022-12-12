@@ -2600,6 +2600,8 @@ function user_role_delete_access($role) {
  *
  * @return array
  *   An associative array in the format $permission => $module.
+ *
+ * @since 1.24.0 the array returned is sorted alphabetically by permission name.
  */
 function user_permission_get_modules() {
   return user_permission_get_info(NULL, 'module');
