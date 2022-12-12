@@ -331,7 +331,7 @@ function theme_file_formatter_table($variables) {
     );
   }
   $title = format_plural(count($rows), 'Attachment', 'Attachments');
-  $header = array(t($title), t('Size'));
+  $header = array($title, t('Size'));
 
   return empty($rows) ? '' : theme('table', array('header' => $header, 'rows' => $rows));
 }
