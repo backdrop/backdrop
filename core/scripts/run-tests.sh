@@ -1025,7 +1025,7 @@ function simpletest_script_color_code($status) {
  * Searches the provided array of string values for close matches based on the
  * Levenshtein algorithm.
  *
- * @see http://php.net/manual/en/function.levenshtein.php
+ * @see https://wwww.php.net/manual/function.levenshtein.php
  *
  * @param string $string
  *   A string to test.

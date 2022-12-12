@@ -1058,7 +1058,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
 
     // Skip the timeout tests when the testing environment is HTTPS because
     // stream_set_timeout() does not work for SSL connections.
-    // @link http://bugs.php.net/bug.php?id=47929
+    // @link https://bugs.php.net/bug.php?id=47929
     if (!$is_https) {
       // Test that timeout is respected. The test machine is expected to be able
       // to make the connection (i.e. complete the fsockopen()) in 2 seconds and

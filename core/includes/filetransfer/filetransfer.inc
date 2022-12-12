@@ -87,7 +87,7 @@ abstract class FileTransfer {
   }
 
   /**
-   * @see http://php.net/chmod
+   * @see https://wwww.php.net/chmod
    *
    * @param string $path
    * @param int $mode

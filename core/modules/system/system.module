@@ -3983,7 +3983,7 @@ function system_date_format_load($date_format_name, $include_hidden = TRUE) {
  *   - hidden: Optional. A boolean indicating whether or not this format should
  *     be configurable from the user interface.
  *
- * @see http://php.net/date
+ * @see https://wwww.php.net/date
  */
 function system_date_format_save($date_format) {
   $format = array(

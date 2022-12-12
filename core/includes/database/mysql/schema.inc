@@ -470,7 +470,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   }
 
   public function prepareComment($comment, $length = NULL) {
-    // Work around a bug in some versions of PDO, see http://bugs.php.net/bug.php?id=41125
+    // Work around a bug in some versions of PDO, see https://bugs.php.net/bug.php?id=41125
     $comment = str_replace("'", '’', $comment);
 
     // Prefix tables, but remove any back-ticks.

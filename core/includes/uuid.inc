@@ -108,7 +108,7 @@ class UuidPecl implements UuidInterface {
 /**
  * UUID implementation using the Windows internal GUID extension.
  *
- * @see http://php.net/com_create_guid
+ * @see https://wwww.php.net/com_create_guid
  */
 class UuidCom implements UuidInterface {
   public function generate() {

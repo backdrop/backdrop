@@ -64,9 +64,9 @@ define('CACHE_TEMPORARY', -1);
  * and "So the behavior you're seeing is perfectly normal."
  *
  * @see http://www.faqs.org/rfcs/rfc3164.html
- * @see http://bugs.php.net/bug.php?id=18090
- * @see http://php.net/manual/function.syslog.php
- * @see http://php.net/manual/network.constants.php
+ * @see https://bugs.php.net/bug.php?id=18090
+ * @see https://wwww.php.net/manual/function.syslog.php
+ * @see https://wwww.php.net/manual/network.constants.php
  * @see watchdog()
  * @see watchdog_severity_levels()
  */
@@ -228,8 +228,8 @@ define('LANGUAGE_RTL', 1);
  * since PHP 5.4.0. Float timestamps confuse most PHP functions
  * (including date_create()).
  *
- * @see http://php.net/manual/reserved.variables.server.php
- * @see http://php.net/manual/function.time.php
+ * @see https://wwww.php.net/manual/reserved.variables.server.php
+ * @see https://wwww.php.net/manual/function.time.php
  */
 define('REQUEST_TIME', (int) $_SERVER['REQUEST_TIME']);
 
@@ -250,7 +250,7 @@ define('PASS_THROUGH', -1);
 /**
  * Regular expression to match PHP function names.
  *
- * @see http://php.net/manual/language.functions.php
+ * @see https://wwww.php.net/manual/language.functions.php
  */
 define('BACKDROP_PHP_FUNCTION_PATTERN', '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*');
 
@@ -306,7 +306,7 @@ if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
  * error, and $var will be populated with the contents of $object['foo'], but
  * that data will be passed by value, not reference. For more information on
  * the PHP limitation, see the note in the official PHP documentation at·
- * http://php.net/manual/arrayaccess.offsetget.php on
+ * https://wwww.php.net/manual/arrayaccess.offsetget.php on
  * ArrayAccess::offsetGet().
  *
  * By default, the class accounts for caches where calling functions might
@@ -4131,8 +4131,8 @@ function backdrop_autoload($class) {
  * However, the above line of code does not work, because PHP only allows static
  * variables to be initializied by literal values, and does not allow static
  * variables to be assigned to references.
- * - http://php.net/manual/language.variables.scope.php#language.variables.scope.static
- * - http://php.net/manual/language.variables.scope.php#language.variables.scope.references
+ * - https://wwww.php.net/manual/language.variables.scope.php#language.variables.scope.static
+ * - https://wwww.php.net/manual/language.variables.scope.php#language.variables.scope.references
  * The example below shows the syntax needed to work around both limitations.
  * For benchmarks and more information, see http://drupal.org/node/619666.
  *
@@ -4413,7 +4413,7 @@ function backdrop_clear_opcode_cache($filepath) {
   if (function_exists('apc_delete_file')) {
     // apc_delete_file() throws a PHP warning in case the specified file was
     // not compiled yet.
-    // @see http://php.net/apc-delete-file
+    // @see https://wwww.php.net/apc-delete-file
     @apc_delete_file($filepath);
   }
 }

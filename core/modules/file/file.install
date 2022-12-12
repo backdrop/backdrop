@@ -255,12 +255,12 @@ function file_requirements($phase) {
       $severity = REQUIREMENT_INFO;
     }
     elseif ($implementation == 'apc') {
-      $value = t('Enabled (<a href="http://php.net/manual/en/apc.configuration.php#ini.apc.rfc1867">APC RFC1867</a>)');
-      $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommended to use the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> if possible.');
+      $value = t('Enabled (<a href="https://wwww.php.net/manual/apc.configuration.php#ini.apc.rfc1867">APC RFC1867</a>)');
+      $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommended to use the <a href="https://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> if possible.');
       $severity = REQUIREMENT_OK;
     }
     elseif ($implementation == 'uploadprogress') {
-      $value = t('Enabled (<a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>)');
+      $value = t('Enabled (<a href="https://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>)');
       $severity = REQUIREMENT_OK;
     }
     elseif ($implementation == 'client') {
