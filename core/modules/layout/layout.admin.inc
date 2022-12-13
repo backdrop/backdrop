@@ -19,26 +19,26 @@ function layout_list_page() {
   $path_groups_end = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
-     // Move admin layouts to the bottom of the list. Note that default layout
-     // has a NULL path, which path_is_admin() won't like in PHP 8.1.
-     if (is_null($path) || path_is_admin($path)) {
-       $path_groups_end[$path][$layout->name] = $layout;
-     }
-     else {
-       $path_groups[$path][$layout->name] = $layout;
-     }
-     // Build a list of all layout paths to check callbacks.
-     if ($path) {
-       $layout_paths[] = $path;
-     }
+    // Move admin layouts to the bottom of the list. Note that default layout
+    // has a NULL path, which path_is_admin() won't like in PHP 8.1.
+    if (is_null($path) || path_is_admin($path)) {
+      $path_groups_end[$path][$layout->name] = $layout;
+    }
+    else {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+    // Build a list of all layout paths to check callbacks.
+    if ($path) {
+      $layout_paths[] = $path;
+    }
   }
 
   // Put admin layouts at the bottom of the list.
-   foreach ($path_groups_end as $path => $name) {
-     foreach ($name as $layout) {
-       $path_groups[$path][$layout->name] = $layout;
-     }
-   }
+  foreach ($path_groups_end as $path => $name) {
+    foreach ($name as $layout) {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+  }
 
   if (!empty($layout_paths)) {
   $page_callbacks = db_query('
