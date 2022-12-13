@@ -5,27 +5,85 @@
  */
 
 /**
- * Menu callback: confirm wiping of the index.
+ * Menu callback: confirm rebuilding of the index.
  */
 function search_reindex_confirm() {
-  return confirm_form(array(),
-    t('Are you sure you want to invalidate the search index?'),
-    'admin/config/search/settings',
-    t('The search index is not cleared immediately but will be systematically updated. Search will continue to work but new content won\'t be indexed until all existing content has been re-indexed. This action cannot be undone.'),
-    t('Invalidate search index'),
-    t('Cancel'));
+
+  $index_stats = search_get_stats();
+
+  $form['#attributes'] = array(
+    'class' => array('confirmation'),
+  );
+
+  $form['index_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Items to index:'),
+    '#options' => array(
+      'total' => t('Re-index entire site (@total_items)', array('@total_items' => $index_stats['total'] . ' ' . format_plural($index_stats['total'], 'item', 'items'))),
+      'remaining' => t('Index only remaining items (@remaining)', array('@remaining' => $index_stats['remaining'] . ' ' . format_plural($index_stats['remaining'], 'item', 'items'))),
+    ),
+    '#default_value' => 'total',
+  );
+
+  $form['description'] = array(
+    '#type' => 'help',
+    '#markup' => t('This action will rebuild the search index. It may be a lengthy process.'),
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Rebuild search index'),
+    ),
+    'cancel' => array(
+      '#type' => 'link',
+      '#title' => t('Cancel'),
+      '#href' => 'admin/config/search/settings',
+      '#options' => array(
+        'path' => 'admin/config/search/settings',
+      ),
+    ),
+  );
+
+  return $form;
 }
 
 /**
- * Handler for wipe confirmation
+ * Handler for rebuild confirmation
  */
 function search_reindex_confirm_submit(&$form, &$form_state) {
-  if ($form['confirm']) {
+  $config = config('search.settings');
+  $limit_per_pass = $config->get('search_cron_limit');  
+
+  $index_stats = search_get_stats();
+
+  if ($form_state['values']['index_type'] == 'total') {
+    // Mark all content as needing to be re-indexed.
     search_reindex();
-    backdrop_set_message(t('The search index will be invalidated.'));
-    $form_state['redirect'] = 'admin/config/search/settings';
-    return;
   }
+
+  // Determine how many items need to be indexed.
+  $number_of_items = $index_stats[$form_state['values']['index_type']];
+
+  // Determine how many passes are needed to reindex.
+  $passes_needed = ceil($number_of_items / $limit_per_pass);
+  $search_active_modules = config_get('search.settings', 'search_active_modules');
+
+  // Create the batch if needed.
+  if ($passes_needed && isset($search_active_modules)) {
+    $batch = array(
+      'title' => t('Rebuilding search index'),
+      'operations' => array(
+        array('search_reindex_batch', array($passes_needed, $search_active_modules)),
+      ),
+      'progress_message' => '',
+      'finished' => 'search_reindex_batch_finished',
+    );
+    batch_set($batch);
+  }
+
+  $form_state['redirect'] = 'admin/config/search/settings';
 }
 
 /**
@@ -109,29 +167,21 @@ function search_admin_settings($form, &$form_state) {
   $form['indexing'] = array(
     '#type' => 'fieldset',
     '#title' => t('Indexing'),
-    '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
 
   // Collect some stats
-  $remaining = 0;
-  $total = 0;
-  foreach ($config->get('search_active_modules') as $module) {
-    if ($status = module_invoke($module, 'search_status')) {
-      $remaining += $status['remaining'];
-      $total += $status['total'];
-    }
-  }
+  $index_stats = search_get_stats();
 
-  $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
-  $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+  $count = format_plural($index_stats['remaining'], 'There is 1 item left to index.', 'There are @count items left to index.');
+  $percentage = ((int)min(100, 100 * ($index_stats['total'] - $index_stats['remaining']) / max(1, $index_stats['total']))) . '%';
   $status = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
 
   $form['indexing']['status'] = array('#markup' => $status);
   $form['indexing']['wipe'] = array(
     '#type' => 'submit',
-    '#value' => t('Invalidate search index'),
+    '#value' => t('Rebuild search index'),
     '#submit' => array('search_admin_reindex_submit'),
-    '#attributes' => array('class' => array('button-danger')),
+    '#attributes' => array('class' => array('button-secondary')),
   );
 
   $items = backdrop_map_assoc(array(10, 20, 50, 100, 200, 500));

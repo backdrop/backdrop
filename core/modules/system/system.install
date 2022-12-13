@@ -627,7 +627,7 @@ function system_requirements($phase) {
   // Warn the user if trusted hostnames have not been configured.
   if ($phase == 'runtime') {
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
-    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://api.backdropcms.org/documentation/trusted-host-settings'));
+    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://docs.backdropcms.org/documentation/trusted-host-settings'));
     // @todo: upgrade this to an error when we provide a way to configure
     // $trusted_host_patterns via the admin UI.
     if (empty($trusted_host_patterns)) {
@@ -689,7 +689,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://api.backdropcms.org/database-configuration';
+  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
   $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
@@ -2679,7 +2679,7 @@ function system_update_1039() {
 function system_update_1040() {
   $path = backdrop_get_path('module', 'ckeditor');
   if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://docs.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2689,7 +2689,7 @@ function system_update_1040() {
 function system_update_1041() {
   $path = backdrop_get_path('module', 'email');
   if ($path && strpos($path, 'core/modules/email') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://docs.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2699,7 +2699,7 @@ function system_update_1041() {
 function system_update_1042() {
   $path = backdrop_get_path('module', 'link');
   if ($path && strpos($path, 'core/modules/link') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://docs.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2740,7 +2740,7 @@ function system_update_1043() {
 function system_update_1044() {
   $path = backdrop_get_path('module', 'date');
   if ($path && strpos($path, 'core/modules/date') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://docs.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2839,7 +2839,7 @@ function system_update_1050() {
 function system_update_1051() {
   $path = backdrop_get_path('module', 'redirect');
   if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://docs.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -3340,6 +3340,23 @@ function system_update_1085() {
         backdrop_set_message(t('Unable to remove file %filename, which is no longer used in its current location. Please remove it from the file system.', array('filename' => $filename)), 'warning');
       }
     }
+  }
+}
+
+/**
+ * Preserve 4-byte UTF-8 database update value if set.
+ */
+function system_update_1086() {
+  $connection = Database::getConnection();
+  $utf8mb4_active = $connection->utf8mb4IsActive();
+  $utf8mb4_supported = $connection->utf8mb4IsSupported();
+  // This variable is set by Drupal 7 on new installations that support UTF8-MB4
+  // and when the update is performed by the "utf8mb4_convert" project.
+  $d7_utf8mb4_run = update_variable_get('drupal_all_databases_are_utf8mb4', FALSE);
+  $utf8mb4_state = state_get('database_utf8mb4_active', FALSE);
+  if ($utf8mb4_supported && $utf8mb4_active && $d7_utf8mb4_run && !$utf8mb4_state) {
+    state_set('database_utf8mb4_active', TRUE);
+    update_variable_del('drupal_all_databases_are_utf8mb4');
   }
 }
 

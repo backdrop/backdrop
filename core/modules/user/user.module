@@ -1371,20 +1371,19 @@ function user_menu() {
 
   $items['user/register'] = array(
     'title' => 'Create new account',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_register_form'),
+    'page callback' => 'user_register_page',
     'access callback' => 'user_register_access',
     'type' => MENU_LOCAL_TASK,
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_pass'),
+    'page callback' => 'user_pass_page',
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'file' => 'user.pages.inc',
   );
+
   $items['user/reset/%/%/%'] = array(
     'title' => 'Reset password',
     'page callback' => 'user_pass_reset',
@@ -1576,14 +1575,12 @@ function user_menu_alter(&$items) {
 }
 
 /**
- * Implements hook_admin_menu_output_alter().
+ * Implements hook_admin_bar_output_alter().
  */
-function user_admin_menu_output_alter(&$content) {
-  // Admin menu shows both the parent menu item and its children, remove the
-  // duplicate child element show "Manage fields" doesn't show up twice.
-  if (isset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields'])) {
-    unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields']);
-  }
+function user_admin_bar_output_alter(&$content) {
+  // Admin menu shows both the parent menu item and its children.
+  // Remove the duplicate child element so "Manage fields" doesn't show up twice.
+  unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage']['admin/config/people/manage/fields']);
 }
 
 /**
@@ -2481,7 +2478,7 @@ function user_role_load($role_name) {
 /**
  * Legacy wrapper function preserved for backwards-compatibility. This function
  * is no longer used by Backdrop core, since all roles are loaded by name now.
- * See https://api.backdropcms.org/change-records/converted-user-roles-cmi
+ * See https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi
  *
  * Do not call this function; use user_role_load() instead.
  *
@@ -2497,7 +2494,7 @@ function user_role_load($role_name) {
  * @deprecated since 1.0.0
  */
 function user_role_load_by_name($role_name) {
-  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://api.backdropcms.org/change-records/converted-user-roles-cmi', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi', array('attributes' => array('target' => '_blank'))));
   user_role_load($role_name);
 }
 
@@ -3111,6 +3108,19 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
   }
 }
 
+/** 
+ * Menu callback to create a new account. 
+ * 
+ * @since 1.23.1 Replaces user_register_form() as menu callback.
+ * 
+ * @see user_register_form()
+ */
+function user_register_page() {
+  // We need to set the page title because this menu entry is a local task.
+  backdrop_set_title(t('Create new account'));
+  return backdrop_get_form('user_register_form');
+}
+
 /**
  * Form builder; the user registration form.
  *
@@ -3121,9 +3131,6 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
  */
 function user_register_form($form, &$form_state) {
   global $user;
-  // We need to set the page title bc this menu entry is a local task.
-  backdrop_set_title(t('Create new account'));
-
   $admin = user_access('administer users');
 
   // Pass access information to the submit handler. Running an access check

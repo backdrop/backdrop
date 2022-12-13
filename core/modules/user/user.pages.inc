@@ -20,6 +20,18 @@ function user_autocomplete($string = '') {
   return $matches;
 }
 
+/** 
+ * Menu callback for reset password form.
+ * 
+ * @since 1.23.1 Replaces user_pass() as menu callback.
+ * 
+ * @see user_pass()
+ */
+function user_pass_page() {
+  backdrop_set_title(t('Reset password'));
+  return backdrop_get_form('user_pass');
+}
+
 /**
  * Form builder; request a password reset.
  *
@@ -29,8 +41,6 @@ function user_autocomplete($string = '') {
  */
 function user_pass() {
   global $user;
-
-  backdrop_set_title(t('Reset password'));
 
   $form['name'] = array(
     '#type' => 'textfield',
