@@ -578,7 +578,7 @@ function user_admin_roles($form, $form_state) {
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
