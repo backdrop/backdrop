@@ -196,7 +196,7 @@ function system_test_basic_auth_page() {
   }
   // Resemble PHP_AUTH_USER and PHP_AUTH_PW for a Basic authentication from
   // the HTTP_AUTHORIZATION header. See
-  // http://www.php.net/manual/features.http-auth.php
+  // https://www.php.net/manual/features.http-auth.php
   list($user, $pw) = explode(':', base64_decode(substr($authorization_header, 6)));
   $output = format_string('Username is @username.', array('@username' => $_SERVER['PHP_AUTH_USER']));
   $output .= format_string('Password is @password.', array('@password' => $_SERVER['PHP_AUTH_PW']));

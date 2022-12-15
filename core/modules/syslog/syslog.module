@@ -12,7 +12,7 @@ if (defined('LOG_LOCAL0')) {
    * check for availability. If LOG_LOCAL0 is defined by the PHP environment, we
    * set that as the default; if not, we use LOG_USER.
    *
-   * @see http://php.net/manual/function.syslog.php
+   * @see https://www.php.net/manual/function.syslog.php
    */
   define('DEFAULT_SYSLOG_FACILITY', LOG_LOCAL0);
 }

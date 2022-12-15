@@ -1136,8 +1136,8 @@ function backdrop_http_request($url, array $options = array()) {
     fwrite($fp, $request);
   }
 
-  // Fetch response. Due to PHP bugs like http://bugs.php.net/bug.php?id=43782
-  // and http://bugs.php.net/bug.php?id=46049 we can't rely on feof(), but
+  // Fetch response. Due to PHP bugs like https://bugs.php.net/bug.php?id=43782
+  // and https://bugs.php.net/bug.php?id=46049 we can't rely on feof(), but
   // instead must invoke stream_get_meta_data() each iteration.
   $info = stream_get_meta_data($fp);
   $alive = !$info['eof'] && !$info['timed_out'];
@@ -1358,7 +1358,7 @@ function _fix_gpc_magic(&$item) {
  * @param $key
  *   The key for the item within $_FILES.
  *
- * @see http://php.net/manual/features.file-upload.php#42280
+ * @see https://www.php.net/manual/features.file-upload.php#42280
  */
 function _fix_gpc_magic_files(&$item, $key) {
   if ($key != 'tmp_name') {
@@ -2411,7 +2411,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
  *   it does not get interpreted as date format characters.
  * @param $timezone
  *   (optional) Time zone identifier, as described at
- *   http://php.net/manual/timezones.php Defaults to the time zone used to
+ *   https://www.php.net/manual/timezones.php Defaults to the time zone used to
  *   display the page.
  * @param $langcode
  *   (optional) Language code to translate to. Defaults to the language used to
@@ -3243,7 +3243,7 @@ function backdrop_exit($destination = NULL) {
  */
 function backdrop_map_assoc($array, $function = NULL) {
   // array_combine() fails with empty arrays:
-  // http://bugs.php.net/bug.php?id=34857.
+  // https://bugs.php.net/bug.php?id=34857.
   $array = !empty($array) ? array_combine($array, $array) : array();
   if (is_callable($function)) {
     $array = array_map($function, $array);
@@ -4213,7 +4213,7 @@ function backdrop_load_stylesheet_content($contents, $optimize = FALSE) {
     // Remove certain whitespace.
     // There are different conditions for removing leading and trailing
     // whitespace.
-    // @see http://php.net/manual/regexp.reference.subpatterns.php
+    // @see https://www.php.net/manual/regexp.reference.subpatterns.php
     $contents = preg_replace('<
       # Strip leading and trailing whitespace.
         \s*([@{};,])\s*
@@ -6066,7 +6066,7 @@ function backdrop_page_set_cache() {
  * requested by a client without gzip support.
  *
  * Page compression requires the PHP zlib extension
- * (http://php.net/manual/ref.zlib.php).
+ * (https://www.php.net/manual/ref.zlib.php).
  *
  * @param $page_content
  *   The page content (HTML) that should be entered into a cache entry.
@@ -8226,7 +8226,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
     // However, if $object is an entity class instance, then class properties
     // always exist, as they cannot be unset. Therefore, if $field is a serial
     // type and the value is NULL, skip it.
-    // @see http://php.net/manual/en/function.property-exists.php
+    // @see https://www.php.net/manual/function.property-exists.php
     if ($info['type'] == 'serial' && !isset($object->$field)) {
       $default_fields[] = $field;
       continue;
