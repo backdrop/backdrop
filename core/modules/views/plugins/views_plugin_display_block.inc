@@ -432,6 +432,7 @@ class views_plugin_display_block extends views_plugin_display {
           'context_optional' => FALSE,
           'fixed' => '',
           'name' => $handler->ui_name(),
+          'position' => '',
         );
       }
       else {
