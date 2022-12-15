@@ -859,11 +859,10 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * @param $nids
  *   (optional) An array of node IDs.
  * @param $conditions
- *   (deprecated) An associative array of conditions on the {node}
- *   table, where the keys are the database fields and the values are the
- *   values those fields must have. Instead, it is preferable to use
- *   EntityFieldQuery to retrieve a list of entity IDs loadable by
- *   this function.
+ *   An associative array of conditions on the {node} table, where the keys are
+ *   the database fields and the values are the values those fields must have.
+ *   Instead, it is preferable to use EntityFieldQuery to retrieve a list of
+ *   entity IDs loadable by this function.
  * @param $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *

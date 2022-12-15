@@ -43,7 +43,7 @@ interface EntityControllerInterface {
    * @param $conditions
    *   An array of conditions. Keys are field names on the entity's base table.
    *   Values will be compared for equality. All the comparisons will be ANDed
-   *   together. This parameter is deprecated; use an EntityFieldQuery instead.
+   *   together. Instead of this parameter, use an EntityFieldQuery.
    *
    * @return
    *   An array of entity objects indexed by their ids.
