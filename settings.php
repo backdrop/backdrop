@@ -191,8 +191,10 @@ ini_set('session.cookie_lifetime', 2000000);
  * and increase the limits of these variables.  For more information, see
  * https://www.php.net/manual/pcre.configuration.php.
  */
+// phpcs:disable
 // ini_set('pcre.backtrack_limit', 200000);
 // ini_set('pcre.recursion_limit', 200000);
+// phpcs:enable
 
 /**
  * Backdrop automatically generates a unique session cookie name for each site
@@ -347,6 +349,7 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  *
  * To enable this functionality, uncomment the line below.
  */
+// phpcs:ignore
 // fast_404();
 
 /**
@@ -476,6 +479,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * variable, the result of which is that system_file_download() grants public
  * access to all files within that scheme.
  */
+// phpcs:ignore
 // $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
