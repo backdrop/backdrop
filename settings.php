@@ -439,8 +439,8 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * such as views, content types, vocabularies, etc. may not work as expected.
  * Use any available API functions for complex systems instead.
  */
-//$config['system.core']['site_name'] = 'My Backdrop site';
-//$config['system.core']['file_temporary_path'] = '/tmp';
+// $config['system.core']['site_name'] = 'My Backdrop site';
+// $config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
  * Add Permissions-Policy header to disable Google FLoC.
@@ -453,7 +453,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * If you don't wish to disable FLoC in Chrome, you can uncomment the following
  * setting, and make sure its value is set to "FALSE".
  */
-//$config['system.core']['block_interest_cohort'] = FALSE;
+// $config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
  * Additional public file schemes:
@@ -476,7 +476,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * variable, the result of which is that system_file_download() grants public
  * access to all files within that scheme.
  */
-//$config['system.core']['file_additional_public_schemes'] = array('example');
+// $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
  * Include a local settings file, if available.
