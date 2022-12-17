@@ -36,14 +36,14 @@
  * @copyright 1997-2010 The Authors
  * @license   http://www.opensource.org/licenses/bsd-license.php New BSD License
  * @version   CVS: $Id$
- * @link      https://pear.php.net/package/Archive_Tar
+ * @link      http://pear.php.net/package/Archive_Tar
  */
 
 /**
  * Backdrop-specific notes on this port from the original source.
  *
  * This file origin is Tar.php, release 1.4.9 (stable) with some code
- * from PEAR.php, release 1.10.10 (stable) both at http://pear.php.net/.
+ * from PEAR.php, release 1.10.10 (stable) both at http://pear.php.net.
  * To simplify future porting from pear of this file, you should not
  * do cosmetic or other non significant changes to this file.
  * The following changes have been done:
