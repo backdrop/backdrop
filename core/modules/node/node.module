@@ -2689,7 +2689,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * @param Node|string $node
  *   The node entity on which the operation is to be performed, or the node type
  *   (e.g., 'post') for the 'create' operation.
- * @param User $account
+ * @param object $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
@@ -2698,7 +2698,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  *
  * @see node_menu()
  */
-function node_access($op, $node, User $account = NULL) {
+function node_access($op, $node, $account = NULL) {
   if ($op == 'create') {
     // In some cases a node object, rather than a bundle string is provided.
     if (is_string($node)) {
@@ -2829,7 +2829,7 @@ function node_permissions_get_configured_types() {
  *
  * @param string $op
  *   The operation that the user is trying to perform.
- * @param User $account
+ * @param object $account
  *   (optional) The user object for the user performing the operation. If
  *   omitted, the current user is used.
  *
@@ -2837,7 +2837,7 @@ function node_permissions_get_configured_types() {
  *   An associative array in which the keys are realms, and the values are
  *   arrays of grants for those realms.
  */
-function node_access_grants($op, User $account = NULL) {
+function node_access_grants($op, $account = NULL) {
 
   if (!isset($account)) {
     $account = $GLOBALS['user'];
@@ -2863,7 +2863,7 @@ function node_access_grants($op, User $account = NULL) {
  * 'node_access'; when this function returns TRUE, no node access joins are
  * added to the query.
  *
- * @param User $account
+ * @param object $account
  *   (optional) The user object for the user whose access is being checked. If
  *   omitted, the current user is used.
  *
@@ -2873,7 +2873,7 @@ function node_access_grants($op, User $account = NULL) {
  * @see hook_node_grants()
  * @see _node_query_node_access_alter()
  */
-function node_access_view_all_nodes(User $account = NULL) {
+function node_access_view_all_nodes($account = NULL) {
   global $user;
   if (!$account) {
     $account = $user;
