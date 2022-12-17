@@ -30,7 +30,7 @@ class DefaultMailSystem implements MailSystemInterface {
   /**
    * Send an email message, using Backdrop variables and default settings.
    *
-   * @see http://php.net/manual/function.mail.php
+   * @see https://www.php.net/manual/function.mail.php
    * @see backdrop_mail()
    *
    * @param $message

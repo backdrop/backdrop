@@ -345,7 +345,7 @@ function image_gd_get_info(stdClass $image) {
       if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
         // Extend mapping of constants to extensions, as the PHP and GD
         // versions support WebP.
-        // @see https://www.php.net/manual/en/image.constants.php
+        // @see https://www.php.net/manual/image.constants.php
         $extensions['18'] = 'webp';
       }
     }

@@ -179,7 +179,7 @@
  * concrete implementation of it to support special handling required by that
  * database.
  *
- * @see http://php.net/manual/book.pdo.php
+ * @see https://www.php.net/manual/book.pdo.php
  */
 abstract class DatabaseConnection {
 
@@ -362,7 +362,7 @@ abstract class DatabaseConnection {
    *   PDO::FETCH_OBJ, PDO::FETCH_NUM, or a string representing the name of a
    *   class. If a string is specified, each record will be fetched into a new
    *   object of that class. The behavior of all other values is defined by PDO.
-   *   See http://php.net/manual/pdostatement.fetch.php
+   *   See https://www.php.net/manual/pdostatement.fetch.php
    * - return: Depending on the type of query, different return values may be
    *   meaningful. This directive instructs the system which type of return
    *   value is desired. The system will generally set the correct value
@@ -2053,7 +2053,7 @@ class DatabaseTransaction {
  * Some methods in that class are purposefully commented out. Due to a change in
  * how PHP defines PDOStatement, we can't define a signature for those methods
  * that will work the same way between versions older than 5.2.6 and later
- * versions.  See http://bugs.php.net/bug.php?id=42452 for more details.
+ * versions.  See https://bugs.php.net/bug.php?id=42452 for more details.
  *
  * Child implementations should either extend PDOStatement:
  * @code
@@ -2102,7 +2102,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Sets the default fetch mode for this statement.
    *
-   * See http://php.net/manual/pdo.constants.php for the definition of the
+   * See https://www.php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
    * @param $mode
@@ -2121,7 +2121,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Fetches the next row from a result set.
    *
-   * See http://php.net/manual/pdo.constants.php for the definition of the
+   * See https://www.php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
    * @param $mode
@@ -2245,7 +2245,7 @@ interface DatabaseStatementInterface extends Traversable {
  * driver needs to set a custom statement class, it may do so in its
  * constructor.
  *
- * @see http://us.php.net/pdostatement
+ * @see https://www.php.net/pdostatement
  */
 class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInterface {
 

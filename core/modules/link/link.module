@@ -676,7 +676,7 @@ function _link_parse_url($url) {
  * @return array
  *   Array of query parameters.
  *
- * @see http://php.net/manual/en/language.variables.external.php#81080
+ * @see https://www.php.net/manual/language.variables.external.php#81080
  */
 function _link_parse_str($query) {
   $query_array = array();

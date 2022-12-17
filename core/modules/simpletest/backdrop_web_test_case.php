@@ -1987,7 +1987,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $curl_options
    *   An associative array of cURL options to set, where the keys are constants
    *   defined by the cURL library. For a list of valid options, see
-   *   http://www.php.net/manual/function.curl-setopt.php
+   *   https://www.php.net/manual/function.curl-setopt.php
    * @param $redirect
    *   FALSE if this is an initial request, TRUE if this request is the result
    *   of a redirect.
@@ -2821,7 +2821,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return SimpleXmlElement[]|FALSE
    *   The return value of the xpath search. For details on the xpath string
    *   format and return values see the SimpleXML documentation,
-   *   http://us.php.net/manual/function.simplexml-element-xpath.php.
+   *   https://www.php.net/manual/function.simplexml-element-xpath.php.
    */
   protected function xpath($xpath, array $arguments = array()) {
     if ($this->parse()) {

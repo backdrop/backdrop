@@ -72,7 +72,7 @@ class ArchiverTar implements ArchiverInterface {
 /**
  * Archiver for .zip files.
  *
- * @link http://php.net/zip
+ * @link https://www.php.net/zip
  */
 class ArchiverZip implements ArchiverInterface {
 

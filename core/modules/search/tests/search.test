@@ -1817,7 +1817,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
    *
    * chr() only works for ASCII characters up to character 255. This function
    * converts a number to the corresponding unicode character. Adapted from
-   * functions supplied in comments on several functions on php.net.
+   * functions supplied in comments on several functions on php.net/.
    */
   function code2utf($num) {
     if ($num < 128) {
