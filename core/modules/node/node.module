@@ -2726,12 +2726,12 @@ function node_access($op, $node, User $account = NULL) {
  *   - view
  *   - update
  *   - delete.
- * @param User $account
+ * @param object $account
  *   The User account for the person performing the operation.
  *
  * @return string
  */
-function node_node_access($node, $op, User $account) {
+function node_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : $node->type;
 
   if (in_array($type, node_permissions_get_configured_types())) {
