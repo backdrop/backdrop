@@ -189,14 +189,16 @@ function system_token_info() {
   foreach ($date_format_types as $machine_name => $date_format_type_info) {
     if (!isset($date_format_type_info['hidden']) || $date_format_type_info['hidden'] == FALSE) {
       $date[$machine_name] = array(
-         'name' => check_plain($date_format_type_info['label']),
-         'description' => t("A date in '@type' format. (%date)", array('@type' => $machine_name, '%date' => format_date(REQUEST_TIME, $machine_name))),
-       );
+        'name' => check_plain($date_format_type_info['label']),
+        'description' => t("A date in '@type' format. (%date)", array('@type' => $machine_name, '%date' => format_date(REQUEST_TIME, $machine_name))),
+      );
     }
   }
   $date['custom'] = array(
     'name' => t('Custom format'),
-    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array(
+      '@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters',
+    )),
     'dynamic' => TRUE,
   );
   $date['since'] = array(

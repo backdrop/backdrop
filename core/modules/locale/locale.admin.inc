@@ -331,14 +331,18 @@ function locale_date_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array(
+      '@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters',
+    )),
   );
 
   $form['locales']['default'] = array(
     '#type' => 'item',
     '#title' => t('Default'),
     '#markup' => '<strong>' . check_plain($format['pattern']) . '</strong>',
-    '#field_suffix' => '<small>' . t('Displayed as %date_format' , array('%date_format' => format_date(REQUEST_TIME, 'custom', $format['pattern']))) . '</small>',
+    '#field_suffix' => '<small>' . t('Displayed as %date_format', array(
+      '%date_format' => format_date(REQUEST_TIME, 'custom', $format['pattern']),
+    )) . '</small>',
   );
 
   // Get the enabled languages only.

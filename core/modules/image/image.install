@@ -97,7 +97,9 @@ function image_requirements($phase) {
       $requirements['image_gd'] = array(
         'value' => t('Not installed'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => t('The GD library for PHP is missing or outdated. Check the <a href="@url">PHP image documentation</a> for information on how to correct this.', array('@url' => 'https://www.php.net/manual/book.image.php')),
+        'description' => t('The GD library for PHP is missing or outdated. Check the <a href="@url">PHP image documentation</a> for information on how to correct this.', array(
+          '@url' => 'https://www.php.net/manual/book.image.php',
+        )),
       );
     }
     $requirements['image_gd']['title'] = t('GD library rotate and desaturate effects');

@@ -1900,7 +1900,9 @@ function system_image_toolkit_settings() {
   if (count($toolkits_available) == 0) {
     config_set('system.core', 'image_toolkit', '');
     $form['image_toolkit_help'] = array(
-      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should enable them, or try using a third party toolkit.", array('gd-link' => url('https://www.php.net/gd'))),
+      '#markup' => t("No image toolkits were detected. Backdrop includes support for <a href='!gd-link'>PHP's built-in image processing functions</a> but they were not detected on this system. You should enable them, or try using a third party toolkit.", array(
+        'gd-link' => url('https://www.php.net/gd'),
+      )),
     );
     return $form;
   }
@@ -1910,7 +1912,7 @@ function system_image_toolkit_settings() {
       '#type' => 'radios',
       '#title' => t('Select an image processing toolkit'),
       '#default_value' => $current_toolkit,
-      '#options' => $toolkits_available
+      '#options' => $toolkits_available,
     );
   }
   else {
@@ -1975,7 +1977,9 @@ function system_rss_feeds_settings() {
     '#type' => 'select',
     '#title' => t('Number of items in each feed'),
     '#default_value' => $rss_config->get('rss_limit'),
-    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
+    '#options' => backdrop_map_assoc(array(
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30,
+    )),
     '#description' => t('Default number of items to include in each feed.')
   );
   $form['rss_viewmode'] = array(
@@ -2460,7 +2464,9 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array(
+      '@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters',
+    )),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',

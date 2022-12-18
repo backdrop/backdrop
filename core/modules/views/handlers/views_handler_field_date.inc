@@ -49,7 +49,9 @@ class views_handler_field_date extends views_handler_field {
     $form['custom_date_format'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom date format'),
-      '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for available options. Otherwise, enter the number of different time units to display, which defaults to 2.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+      '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for available options. Otherwise, enter the number of different time units to display, which defaults to 2.', array(
+        '@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters',
+      )),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
     );
     $form['timezone'] = array(
