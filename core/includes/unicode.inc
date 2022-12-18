@@ -465,7 +465,7 @@ function decode_entities($text) {
  *
  * This is less than or equal to the byte count.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return integer
@@ -475,6 +475,9 @@ function decode_entities($text) {
  */
 function backdrop_strlen($text) {
   global $multibyte;
+  if (!isset($text)) {
+    return 0;
+  }
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strlen($text);
   }
