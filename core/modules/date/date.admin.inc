@@ -207,7 +207,10 @@ function _date_field_instance_settings_form($field, $instance) {
     '#fieldset' => 'default_values',
   );
 
-  $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'https://www.php.net/manual/function.strtotime.php')));
+  $description = t(
+    "Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.",
+    array('!strtotime' => l(t('strtotime'), 'https://www.php.net/manual/function.strtotime.php'))
+  );
   $form['default_value_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Relative default value'),

@@ -110,7 +110,10 @@ function _unicode_check() {
 
   // Check for mbstring extension
   if (!function_exists('mb_strlen')) {
-    return array(UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array('@url' => 'https://www.php.net/mbstring')));
+    return array(UNICODE_SINGLEBYTE, $t(
+      'Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.',
+      array('@url' => 'https://www.php.net/mbstring')),
+    );
   }
 
   // Check mbstring configuration
