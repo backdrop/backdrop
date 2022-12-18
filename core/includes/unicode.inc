@@ -108,15 +108,14 @@ function _unicode_check() {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Check for mbstring extension
+  // Check for mbstring extension.
   if (!function_exists('mb_strlen')) {
-    return array(UNICODE_SINGLEBYTE, $t(
-      'Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.',
-      array('@url' => 'https://www.php.net/mbstring')),
-    );
+    return array(UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array(
+      '@url' => 'https://www.php.net/mbstring',
+    )));
   }
 
-  // Check mbstring configuration
+  // Check mbstring configuration.
   if (ini_get('mbstring.func_overload') != 0) {
     return array(UNICODE_ERROR, $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'https://www.php.net/mbstring')));
   }
