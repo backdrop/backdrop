@@ -175,10 +175,9 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       '#type' => 'textfield',
       '#title' => t('Custom summary date format'),
       '#default_value' => $this->options['title_format_custom'],
-      '#description' => t(
-        "A custom format for the title and summary date format. Define a php date format string like 'm-d-Y H:i' (see <a href=\"@link\">https://www.php.net/date</a> for more details).",
-        array('@link' => 'https://www.php.net/date')
-      ),
+      '#description' => t("A custom format for the title and summary date format. Define a php date format string like 'm-d-Y H:i' (see <a href=\"@link\">https://www.php.net/date</a> for more details).",array(
+        '@link' => 'https://www.php.net/date',
+      )),
       '#attributes' => array('class' => array('dependent-options')),
       '#states' => array(
         'visible' => array(
