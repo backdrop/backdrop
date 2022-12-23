@@ -7,8 +7,8 @@
 /**
  * Page callback: Displays a listing of database log messages.
  *
- * Messages are truncated at 56 chars. Full-length messages can be viewed on the
- * message details page.
+ * Messages are truncated at the length determined by the 'log_max_length'
+ * setting. Full-length messages can be viewed on the message details page.
  *
  * @see dblog_clear_log_form()
  * @see dblog_event()

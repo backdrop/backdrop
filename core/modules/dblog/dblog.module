@@ -152,9 +152,13 @@ function dblog_watchdog(array $log_entry) {
  */
 function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   $site_config = config('system.core');
-  $form['dblog_row_limit'] = array(
+  $form['dblog'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Database log'),
+  );
+  $form['dblog']['dblog_row_limit'] = array(
     '#type' => 'select',
-    '#title' => t('Database log messages to keep'),
+    '#title' => t('Messages to keep'),
     '#default_value' => $site_config->get('log_row_limit'),
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
@@ -164,7 +168,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   $pattern = isset($form_state['values']['dblog_date_format']) ? $form_state['values']['dblog_date_format'] : $format;
   $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
 
-  $form['dblog_date_format'] = array(
+  $form['dblog']['dblog_date_format'] = array(
     '#type' => 'textfield',
     '#title' => t('Date format for log messages'),
     '#maxlength' => 100,
@@ -183,14 +187,15 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     ),
   );
 
-  $form['dblog_max_length'] = array(
+  $form['dblog']['dblog_max_length'] = array(
     '#type' => 'number',
-    '#title' => t('Log message length'),
+    '#title' => t('Displayed message length'),
     '#default_value' => $site_config->get('log_max_length'),
-    '#description' => t('The maximum log message length before truncation.'),
+    '#description' => t('The maximum log message length displayed on the <a href="@url">recent log messages page</a>.', array('@url' => url('admin/reports/dblog'))),
     '#required' => TRUE,
     '#min' => 1,
     '#max' => 255,
+    '#field_suffix' => t('characters'),
   );
 
   $form['#submit'][] = 'dblog_logging_settings_submit';
