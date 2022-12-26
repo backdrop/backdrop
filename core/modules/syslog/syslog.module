@@ -67,7 +67,7 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
     '#type' => 'textarea',
     '#title' => t('Syslog entry format'),
     '#default_value' => $config->get('log_format'),
-    '#description' => t('For supported variables, refer to the "Available varaibles" fieldset below.'),
+    '#description' => t('For supported variables, refer to the "Available variables" fieldset below.'),
   );
   $form['syslog_entries']['variables_legend'] = array(
     '#type' => 'fieldset',
