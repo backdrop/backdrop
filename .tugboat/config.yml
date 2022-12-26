@@ -11,7 +11,6 @@ services:
         - a2enmod rewrite
         # Link the document root to the expected path.
         - ln -snf $TUGBOAT_ROOT $DOCROOT
-      update:
         # Use the Tugboat-specific Backdrop settings.
         - cp $TUGBOAT_ROOT/.tugboat/settings.local.php $TUGBOAT_ROOT/settings.local.php
         # Generate a unique hash_salt to secure the site.
@@ -20,6 +19,7 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config
         - mkdir $TUGBOAT_ROOT/files/config/active
         - mkdir $TUGBOAT_ROOT/files/config/staging
+      update:
         # Set appropriate file permissions/ownership.
         - chown -R www-data:www-data $TUGBOAT_ROOT
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
@@ -36,13 +36,15 @@ services:
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
+        # Set an expiration date/time for the preview.
+        - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
         # Post a comment in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./post-comment.sh
   mariadb:
     image: tugboatqa/mariadb:latest
     commands:
       init:
-        # Configure database for UTF-8: https://api.backdropcms.org/database-configuration#utf8mb4
+        # Configure database for UTF-8: https://docs.backdropcms.org/documentation/database-configuration#utf8mb4
         - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
       build:
         # Drop and re-create the database (needed when rebuilding/reinstalling).

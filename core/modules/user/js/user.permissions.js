@@ -68,4 +68,29 @@ Backdrop.behaviors.permissions = {
   }
 };
 
+/**
+ * Shows/hides warning descriptions on click.
+ */
+Backdrop.behaviors.permissionWarnings = {
+  attach: function(context, settings) {
+    var $table = $('table#permissions');
+
+    // Hide the warning description initially.
+    $table.find('.permission-warning-description').hide();
+
+    // Toggle the warning description.
+    $('a.warning-toggle').click(function(e) {
+      var $description = $(this).closest('.description').find('.permission-warning-description').toggle();
+      if ($description.is(':visible')) {
+        $(this).text(Backdrop.t('less'));
+      }
+      else {
+        $(this).text(Backdrop.t('more'));
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  }
+};
+
 })(jQuery);

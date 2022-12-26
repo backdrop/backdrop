@@ -1,7 +1,7 @@
-name = "Cron Queue test"
-description = "Support module for the cron queue runner."
-backdrop = 1.x
+name = Cron Queue test
+description = Support module for the cron queue runner.
 package = Testing
-version = BACKDROP_VERSION
-type = module
+version = VERSION
+backdrop = 1.x
 hidden = TRUE
+type = module
