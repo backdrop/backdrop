@@ -161,7 +161,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#title' => t('Messages to keep'),
     '#default_value' => $site_config->get('log_row_limit'),
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
-    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/config/system/cron')))
   );
 
   $format = $site_config->get('log_date_format');
