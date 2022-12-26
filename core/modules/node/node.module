@@ -2193,7 +2193,7 @@ function node_feed($nids = FALSE, $channel = array()) {
   if ($display_mode == 'fulltext') {
     $display_mode = 'full';
   }
-  
+
   $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
 
   // Load all nodes to be rendered.
