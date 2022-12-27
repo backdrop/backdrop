@@ -49,13 +49,13 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
   $form['syslog']['log_format'] = array(
     '#type' => 'textarea',
     '#title' => t('Log entry format'),
-    '#description' => t('Although it is possible for syslog entries to have multiple rows, it is not best practice. Try to keep each log entry a single row, to avoid issues when parsing the log.'),
+    '#description' => t('Although it is possible for syslog entries to have multiple rows, it is not best practice. Try to keep each log entry a single row, to avoid possible issues when parsing the log.'),
     '#default_value' => $config->get('log_format'),
     '#rows' => 1,
   );
   $form['syslog']['message_tokens'] = array(
     '#theme' => 'token_tree_link',
-    '#text' => t('Browse available syslog message variables'),
+    '#text' => t('Browse available tokens for the syslog entry'),
     '#token_types' => array('syslog'),
     '#global_types' => FALSE,
     '#click_insert' => TRUE,
