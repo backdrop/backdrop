@@ -9,7 +9,7 @@
 
 /**
  * Implements hook_token_info().
- * 
+ *
  * Note: no need to implement hook_tokens() - the tokens provided here are not
  * actual tokens, so they don't need to be replaced on save.
  */
