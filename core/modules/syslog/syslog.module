@@ -30,66 +30,36 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('System log'),
   );
-  $form['syslog']['syslog_identity'] = array(
+  $form['syslog']['log_identity'] = array(
     '#type' => 'textfield',
     '#title' => t('Syslog identity'),
     '#default_value' => $config->get('log_identity'),
-    '#description' => t('A string that will be prepended to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.'),
+    '#description' => t('A prefix added to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.'),
   );
   if (defined('LOG_LOCAL0')) {
-    $form['syslog']['syslog_facility'] = array(
+    $form['syslog']['log_facility'] = array(
       '#type' => 'select',
       '#title' => t('Syslog facility'),
       '#default_value' => $config->get('log_facility'),
       '#options' => syslog_facility_list(),
       '#description' => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.'),
-     );
+    );
   }
 
-  $syslog_format_variables = array(
-    '!base_url' => t('Base URL of the site.'),
-    '!timestamp' => t('Unix timestamp of the log entry.'),
-    '!type' => t('The category to which this message belongs.'),
-    '!ip' => t('The IP address of the user triggering the message.'),
-    '!uid' => t('The ID of the user triggering the message.'),
-    '!request_uri' => t('The requested URI.'),
-    '!referer' => t('The HTTP referer, if available.'),
-    '!link' => t('A link to associate with the message.'),
-    '!message' => t('The message to store in the log.'),
-  );
-
-  foreach($syslog_format_variables as $variable => $variable_description) {
-    $syslog_format_variables_list[] =  '<strong><code>' . $variable . '</code></strong> == ' . $variable_description;
-  }
-
-  $form['syslog']['syslog_format'] = array(
+  $form['syslog']['log_format'] = array(
     '#type' => 'textarea',
-    '#title' => t('Syslog entry format'),
+    '#title' => t('Log entry format'),
+    '#description' => t('Although it is possible for syslog entries to have multiple rows, it is not best practice. Try to keep each log entry a single row, to avoid issues when parsing the log.'),
     '#default_value' => $config->get('log_format'),
-    '#description' => t('For supported variables, refer to the "Available variables" fieldset below.'),
+    '#rows' => 1,
   );
-  $form['syslog']['variables_legend'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Available variables'),
-    '#description' => theme('item_list', array('items' => $syslog_format_variables_list)),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+  $form['syslog']['message_tokens'] = array(
+    '#theme' => 'token_tree_link',
+    '#text' => t('Browse available syslog message variables'),
+    '#token_types' => array('syslog'),
+    '#global_types' => FALSE,
+    '#click_insert' => TRUE,
   );
-
-  $form['#submit'][] = 'syslog_logging_settings_submit';
-}
-
-/**
- * Form submission handler for system_logging_settings().
- *
- * @see syslog_form_system_logging_settings_alter()
- */
-function syslog_logging_settings_submit($form, &$form_state) {
-  config('system.core')
-    ->set('log_identity', $form_state['values']['syslog_identity'])
-    ->set('log_facility', $form_state['values']['syslog_facility'])
-    ->set('log_format', $form_state['values']['syslog_format'])
-    ->save();
 }
 
 /**
