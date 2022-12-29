@@ -3367,7 +3367,9 @@ function system_update_1086() {
  * Set the message length for the database log.
  */
 function system_update_1087() {
-  config_set('system.core', 'log_max_length', 56);
+  if (config_get('system.core', 'log_max_length') === NULL) {
+    config_set('system.core', 'log_max_length', 56);
+  }
 }
 
 /**
