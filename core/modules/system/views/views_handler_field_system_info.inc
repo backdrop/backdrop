@@ -31,7 +31,7 @@ class views_handler_field_system_info extends views_handler_field {
   /**
    * {@inheritdoc}
    */
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
     $form['custom_label']['#type'] = 'radios';
@@ -45,7 +45,7 @@ class views_handler_field_system_info extends views_handler_field {
     $form['custom_label']['#default_value'] = $this->options['custom_label'];
     $form['label']['#states'] = array(
       'visible' => array(
-        ':input[name="options[custom_label]"]' => array('value' => 'custom')
+        ':input[name="options[custom_label]"]' => array('value' => 'custom'),
       ),
     );
     $form['label']['#title'] = t('Custom label');
@@ -70,7 +70,7 @@ class views_handler_field_system_info extends views_handler_field {
       '#default_value' => $this->options['other'],
       '#states' => array(
         'visible' => array(
-          ':input[name="options[info_property]"]' => array('value' => 'other')
+          ':input[name="options[info_property]"]' => array('value' => 'other'),
         ),
       ),
     );
@@ -86,9 +86,9 @@ class views_handler_field_system_info extends views_handler_field {
       '#default_value' => $this->options['dependencies_display'],
       '#states' => array(
         'visible' => array(
-          ':input[name="options[info_property]"]' => array('value' => 'dependencies')
+          ':input[name="options[info_property]"]' => array('value' => 'dependencies'),
         ),
-      ),      
+      ),
     );
 
     $form['multi_type'] = array(
@@ -143,8 +143,8 @@ class views_handler_field_system_info extends views_handler_field {
 
     switch ($info_property) {
       case 'tags':
-      case 'dependencies':  
-      case 'scripts':    
+      case 'dependencies':
+      case 'scripts':
         $items = $info_array[$info_property];
 
         if ($info_property == 'dependencies' && $this->options['dependencies_display'] == 'project_names' && ($info_array['type'] == 'module' || $info_array['type'] == 'profile')) {
@@ -166,7 +166,8 @@ class views_handler_field_system_info extends views_handler_field {
             break;
 
           default:
-            $output = theme('item_list', array('items' => $items, 'type' => $multi_type));
+            $output = theme('item_list', array('items' => $items,
+                                               'type' => $multi_type));
             break;
         }
         return $output;
@@ -175,9 +176,9 @@ class views_handler_field_system_info extends views_handler_field {
         $output = $info_array[$info_property];
         if (is_array($output)) {
           $output = theme('item_list', array('items' => $this->_array2list($output)));
-        } 
+        }
         return $output;
-    } 
+    }
   }
 
   /**
@@ -214,18 +215,18 @@ class views_handler_field_system_info extends views_handler_field {
     );
   }
 
-  /** 
+  /**
    * Helper to convert multilevel array to multilevel item list.
    */
   protected function _array2list($array) {
-    $return = array();  
+    $return = array();
     foreach ($array as $key => $item) {
       if (is_array($item)) {
         $return[] = array(
           'data' => $key,
-          'children' => $this->_array2list($item)
+          'children' => $this->_array2list($item),
         );
-      } 
+      }
       else {
         $return[] = array(
           'data' => $key . ' = ' . $item,
