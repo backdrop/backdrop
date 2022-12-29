@@ -471,8 +471,8 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
       '#attributes' => array('class' => array('role-' . $role_name)),
     );
     $form['role_names'][$role_name] = array(
-      '#markup' => check_plain($role->label),
-      '#description' => $role->description,
+      '#markup' => check_plain(t($role->label)),
+      '#description' => filter_xss_admin(t($role->description)),
       '#tree' => TRUE,
     );
   }

@@ -2503,12 +2503,11 @@ function user_role_load_by_name($role_name) {
 /**
  * Save a user role to the database.
  *
- * @param $role
+ * @param stdClass $role
  *   A role object to modify or add.
  * @return int
- *   Status constant indicating if role was created or updated.
- *   Failure to write the user role record will return FALSE. Otherwise.
- *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
+ *   Status constant indicating if role was created or updated. The constant
+ *   SAVED_NEW or SAVED_UPDATED will be returned depending on the operation
  *   performed.
  */
 function user_role_save($role) {

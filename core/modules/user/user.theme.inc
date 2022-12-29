@@ -130,11 +130,15 @@ function theme_user_admin_permissions($variables) {
   }
   $header[] = (t('Permission'));
   foreach (element_children($form['role_names']) as $role_name) {
-    $header[] = array(
+    $header_cell = array(
       'data' => backdrop_render($form['role_names'][$role_name]),
-      'title' => check_plain(strip_tags($form['role_names'][$role_name]['#description'])),
-      'class' => array('checkbox')
+      'class' => array('checkbox'),
     );
+    // Output a role description if present as a title attribute on the cell.
+    if (isset($form['role_names'][$role_name]['#description'])) {
+      $header_cell['title'] = check_plain(strip_tags($form['role_names'][$role_name]['#description']));
+    }
+    $header[] = $header_cell;
   }
   // Wrap the table in its own class so that we can make it horizontally
   // scrollable.
@@ -190,12 +194,15 @@ function theme_user_admin_roles($variables) {
 
   $header = array(
     array('data' => t('Name'), 'class' => array('role-name')),
-    array('data' => t('Description'),'class' => array('role-description', 'priority-low')),
+    array(
+      'data' => t('Description'),
+      'class' => array('role-description', 'priority-low'),
+    ),
     array('data' => t('Weight')),
     array('data' => t('Operations'), 'class' => array('role-operations')),
   );
   foreach (element_children($form['roles']) as $role_name) {
-    $label = $form['roles'][$role_name]['#role']->label;
+    $label = t($form['roles'][$role_name]['#role']->label);
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
       $label .= ' ' . t('(required)');
     }
