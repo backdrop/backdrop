@@ -1314,20 +1314,43 @@ function user_update_1022() {
  */
 function user_update_1023() {
   $config_names = config_get_names_with_prefix('user.role.');
-  $admin_role = config_get('system.core', 'user_admin_role');
+  $admin_role_name = config_get('system.core', 'user_admin_role');
+
+  // Use role_help module text as a default if available.
+  $role_help = array();
+  if (db_table_exists('role_help')) {
+    $role_help = db_query('SELECT role, summary FROM {role_help}')->fetchAllKeyed();
+    backdrop_set_message(t('Backdrop core now provides most of the functionality of Role Help module. See the <a href="!url">change record for more information</a>.', array('!url' => 'https://docs.backdropcms.org/change-records/user-roles-now-have-descriptions-role-help-module-in-core')), 'warning');
+  }
+
   foreach ($config_names as $config_name) {
     $config = config($config_name);
-    if ($config->get('description') === NULL) {
+    $role_name = $config->get('name');
+    if ($config->get('admin_description') === NULL) {
       $description = '';
-      if ($config_name === 'user.role.anonymous') {
-        $description = 'Special role assigned to any site visitor that has not signed into the site.';
+      $admin_description = '';
+
+      // Continue using description set by role_help module if available. The
+      // same description was used for both admin forms and account edit forms.
+      if (isset($role_help[$role_name])) {
+        $admin_description = $role_help[$role_name];
+        $description = $role_help[$role_name];
       }
-      elseif ($config_name === 'user.role.authenticated') {
-        $description = 'Special role assigned to all users who have signed into the site. Permissions assigned to this role are given to all other roles except the anonymous role.';
+      // Otherwise, use the default descriptions set by user module.
+      elseif ($role_name === 'anonymous') {
+        $admin_description = 'Special role assigned to any site visitor that has not signed into the site.';
       }
-      elseif ($config->get('name') === $admin_role) {
-        $description = 'This role receives all permissions on the site.';
+      elseif ($role_name === 'authenticated') {
+        $admin_description = 'Special role assigned to all users who have signed into the site. Permissions assigned to this role are given to all other roles except the anonymous role.';
       }
+      // Use the default descriptions set by the standard profile.
+      elseif ($role_name === 'editor') {
+        $admin_description = 'Role that can edit most content on the site, but cannot modify site configuration settings.';
+      }
+      elseif ($role_name === $admin_role_name) {
+        $admin_description = 'This role receives all permissions on the site.';
+      }
+      $config->set('admin_description', $admin_description);
       $config->set('description', $description);
       $config->save();
     }

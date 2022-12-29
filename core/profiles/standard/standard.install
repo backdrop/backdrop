@@ -512,7 +512,8 @@ function standard_install() {
   // content, but do not need to access advanced admin features.
   $editor_role = new stdClass();
   $editor_role->name = 'editor';
-  $editor_role->label = st('Editor');
+  $editor_role->label = 'Editor';
+  $editor_role->admin_description = 'Role that can edit most content on the site, but cannot modify site configuration settings.';
   $editor_role->weight = 2;
   user_role_save($editor_role);
 
@@ -560,7 +561,7 @@ function standard_install() {
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
   $admin_role->label = 'Administrator';
-  $admin_role->description = 'This role receives all permissions on the site.';
+  $admin_role->admin_description = 'This role receives all permissions on the site.';
   $admin_role->weight = 3;
   $admin_role->permissions = array_keys(module_invoke_all('permission'));
   user_role_save($admin_role);

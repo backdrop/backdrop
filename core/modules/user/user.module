@@ -931,14 +931,20 @@ function user_account_form(&$form, &$form_state) {
     '#access' => $admin_users,
   );
 
-  $roles = array_map('check_plain', user_roles(TRUE));
+  $roles = user_roles(TRUE, NULL, TRUE);
   $form['account_settings']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
     '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
-    '#options' => $roles,
-    '#access' => $roles && $admin_roles,
+    '#options' => array(),
+    '#access' => count($roles) && $admin_roles,
   );
+  foreach ($roles as $role_name => $role) {
+    $form['account_settings']['roles']['#options'][$role_name] = $role->label;
+    if (strlen($role->description)) {
+      $form['account_settings']['roles'][$role_name]['#description'] = filter_xss_admin($role->description);
+    }
+  }
   $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
@@ -2406,9 +2412,10 @@ function user_mail_tokens(&$replacements, $data, $options) {
  * @param $full_objects
  *   TRUE to return complete role objects; FALSE to return role labels.
  *
- * @return
+ * @return array
  *   An associative array of role objects (or role labels, depending on
- *   $full_objects) indexed by role names.
+ *   $full_objects) indexed by role names. Labels and descriptions will already
+ *   be translated in the returned values.
  */
 function user_roles($members_only = FALSE, $permission = NULL, $full_objects = FALSE) {
   $user_roles = &backdrop_static(__FUNCTION__);
@@ -2424,6 +2431,7 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
       $role_data = $config->get();
       $role_data += array(
         'weight' => 0,
+        'admin_description' => '',
         'description' => '',
         'permissions' => array(),
       );
@@ -2436,6 +2444,7 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
     foreach ($user_roles as $role_name => $role_data) {
       $user_roles[$role_name] = (object) $user_roles[$role_name];
       $user_roles[$role_name]->label = t($role_data['label']);
+      $user_roles[$role_name]->admin_description = t($role_data['admin_description']);
       $user_roles[$role_name]->description = t($role_data['description']);
     }
   }
@@ -2514,6 +2523,7 @@ function user_role_save($role) {
   // Trim spaces from names.
   $role->name = trim($role->name);
   $role->label = trim($role->label);
+  $role->admin_description = isset($role->admin_description) ? trim($role->admin_description) : '';
   $role->description = isset($role->description) ? trim($role->description) : '';
 
   if (!isset($role->weight)) {
@@ -2531,6 +2541,7 @@ function user_role_save($role) {
   $config = config('user.role.' . $role->name);
   $config->set('name', $role->name);
   $config->set('label', $role->label);
+  $config->set('admin_description', $role->admin_description);
   $config->set('description', $role->description);
   $config->set('weight', $role->weight);
   if (isset($role->permissions)) {
