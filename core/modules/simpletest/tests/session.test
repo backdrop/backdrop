@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides SimpleTests for core session handling functionality.

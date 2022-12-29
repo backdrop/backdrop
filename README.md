@@ -9,7 +9,7 @@ Backdrop aims to provide:
 
 Requirements
 ------------
-- PHP 5.3.2 or higher. Even if Backdrop can run on older versions of PHP, we
+- PHP 5.6.0 or higher. Even if Backdrop can run on older versions of PHP, we
   strongly recommend that you use a
   [supported version of PHP](https://secure.php.net/supported-versions.php).
 - MySQL 5.0.15 or higher with PDO enabled
@@ -53,9 +53,11 @@ value ease of use and speed of learning over architectural flexibility. You can
 join Backdrop's developer community by
 [forking Backdrop](https://github.com/backdrop/backdrop) on GitHub.
 
-When submitting a pull request, please make sure there is an open issue in the
-[issue tracker](https://github.com/backdrop/backdrop-issues/issues) and
-reference it in the description on the pull request.
+You can submit changes to Backdrop by creating a pull request that references an
+issue in the [issue tracker](https://github.com/backdrop/backdrop-issues/issues).
+Details about how to do this are in the
+[Contribute to Backdrop Core](https://docs.backdropcms.org/documentation/contribute-to-backdrop-core)
+documentation.
 
 Thanks to the following companies for providing sponsorship through services and
 products which may be used by Backdrop contributors to build and improve the
@@ -66,17 +68,38 @@ project:
   information.)*
 - [JetBrains](https://www.jetbrains.com/phpstorm) for use of the PHPStorm IDE
   for development. *(Contact info@backdropcms.org for a license.)*
+- [Fastly](https://fastly.com) for CDN services for all backdropcms.org properties.
 - [GitHub](https://github.com) for collaboration and code management tools.
 - [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
 - [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
+- [Linode](https://linode.com) for web hosting.
+- [1Password](https://1password.com) for keeping our passwords safe.
+- [SendGrid](https://sendgrid.com) for getting our emails into your inboxes.
 
 User Guide
 ----------
-Please see the the [Backdrop Handbook](https://backdropcms.org/handbook).
+Please see the [Backdrop Handbook](https://docs.backdropcms.org/documentation/getting-started).
 
 Developer Documentation
 -----------------------
-Please see the the [Backdrop API Documentation](https://api.backdropcms.org).
+Please see the [Backdrop API Documentation](https://docs.backdropcms.org/api/backdrop/groups).
+
+Code of Conduct
+---------------
+A primary goal of the Backdrop CMS community is to be inclusive to the largest
+number of contributors, with the most varied and diverse backgrounds possible.
+As such, we are committed to providing a friendly, safe and welcoming
+environment for all, regardless of ability, ethnicity, gender, sexual
+orientation, sexual preferences, socioeconomic status, geographic location, or
+religion (or lack thereof).
+
+Our
+[code of conduct](https://github.com/backdrop-ops/conduct/blob/main/code_of_conduct.md)
+outlines our expectations for all those who participate in our community, as
+well as the consequences for unacceptable behavior.
+
+We invite all those who participate in the Backdrop CMS community to help us
+create safe and positive experiences for everyone.
 
 License
 -------
@@ -84,7 +107,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2016 by the original authors.
+All Backdrop code is Copyright 2001 - 2022 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

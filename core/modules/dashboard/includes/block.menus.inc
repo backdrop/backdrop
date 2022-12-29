@@ -97,10 +97,10 @@ class DashboardMenuBlock extends Block {
     }
 
     if (empty($rows)) {
-      // If there are existing menuse, but user has no access to manage any
-      // of them, hide the block completely.
+      // If there are existing menus, but user has no access to manage any of
+      // them, hide the block completely.
       if (!empty($menus)) {
-        return array();
+        return;
       }
       $rows[] = array(
         array(

@@ -128,15 +128,12 @@
 }
 
 .vertical-tab-link strong,
-.vertical-tab-link .fieldset-legend,
-fieldset:not(.collapsible) .vertical-tab-link .fieldset-legend {
+.vertical-tab-link .fieldset-legend {
   position: static;
-  margin: 0;
-  padding: 0;
   font-weight: bold;
   color: #0074bd;
-  background: none;
-  border: none;
+  margin: 0;
+  padding: 0;
 }
 @media (min-width: 750px) {
   .vertical-tab-link strong,
@@ -144,9 +141,6 @@ fieldset:not(.collapsible) .vertical-tab-link .fieldset-legend {
     font-size: 0.923em;
   }
 }
-.vertical-tab-link:focus,
-.vertical-tab-link:active,
-.vertical-tab-link:hover,
 .vertical-tab-link:focus,
 .vertical-tab-link:active,
 .vertical-tab-link:hover {

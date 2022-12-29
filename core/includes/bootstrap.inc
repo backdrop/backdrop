@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.18.x-dev');
+define('BACKDROP_VERSION', '1.24.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.3.2');
+define('BACKDROP_MINIMUM_PHP', '5.6.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -272,7 +272,7 @@ if (!defined('DATE_RFC7231')) {
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP ' . BACKDROP_MINIMUM_PHP . '. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -373,6 +373,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetExists().
    */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     return $this->offsetGet($offset) !== NULL;
   }
@@ -380,6 +381,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetGet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     if (isset($this->storage[$offset]) || array_key_exists($offset, $this->storage)) {
       return $this->storage[$offset];
@@ -392,6 +394,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetSet().
    */
+  #[\ReturnTypeWillChange]
   public function offsetSet($offset, $value) {
     $this->storage[$offset] = $value;
   }
@@ -399,6 +402,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
   /**
    * Implements ArrayAccess::offsetUnset().
    */
+  #[\ReturnTypeWillChange]
   public function offsetUnset($offset) {
     unset($this->storage[$offset]);
   }
@@ -813,6 +817,19 @@ function backdrop_is_apache() {
 function backdrop_is_nginx() {
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/nginx/i", $server_software);
+}
+
+/**
+ * Checks whether Backdrop is running under LiteSpeed.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under LiteSpeed, FALSE if not.
+ *
+ * @since 1.21.4
+ */
+function backdrop_is_litespeed() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/litespeed/i", $server_software);
 }
 
 /**
@@ -1663,7 +1680,7 @@ function backdrop_page_header() {
   $headers_sent = TRUE;
 
   $default_headers = array(
-    'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
+    'Expires' => 'Fri, 16 Jan 2015 07:50:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
     'Cache-Control' => 'no-cache, must-revalidate',
     'X-Content-Type-Options' => 'nosniff',
@@ -1742,9 +1759,16 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
   $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-  if ($if_modified_since && $if_none_match
-      && $if_none_match == $etag // etag must match
-      && $if_modified_since == $cache->created) {  // if-modified-since must match
+  // Handle an exact match based on Etag. The If-None-Match header takes full
+  // precedence over If-Modified-Since header.
+  if ($if_none_match == $etag) {
+    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+    backdrop_send_headers($default_headers);
+    return;
+  }
+
+  // Handle a loose match based on date only, if no Etag was provided.
+  if (!$if_none_match && $if_modified_since && $if_modified_since >= $cache->created) {
     header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
     backdrop_send_headers($default_headers);
     return;
@@ -1761,7 +1785,7 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   // by sending an Expires date in the past. HTTP/1.1 clients ignores the
   // Expires header if a Cache-Control: max-age= directive is specified (see RFC
   // 2616, section 14.9.3).
-  $default_headers['Expires'] = 'Sun, 19 Nov 1978 05:00:00 GMT';
+  $default_headers['Expires'] = 'Fri, 16 Jan 2015 07:50:00 GMT';
 
   backdrop_send_headers($default_headers);
 
@@ -2044,14 +2068,13 @@ function format_string($string, array $args = array()) {
  *
  * @return string
  *   An HTML safe version of $text. If $text is not valid UTF-8, an empty string
- *   is returned and, on PHP < 5.4, a warning may be issued depending on server
- *   configuration (see @link https://bugs.php.net/bug.php?id=47494 @endlink).
+ *   is returned.
  *
  * @see backdrop_validate_utf8()
  * @ingroup sanitization
  */
 function check_plain($text) {
-  return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+  return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -2079,7 +2102,7 @@ function check_plain($text) {
  *   TRUE if the text is valid UTF-8, FALSE if not.
  */
 function backdrop_validate_utf8($text) {
-  if (strlen($text) == 0) {
+  if (strlen((string) $text) == 0) {
     return TRUE;
   }
   // With the PCRE_UTF8 modifier 'u', preg_match() fails silently on strings
@@ -2296,7 +2319,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
-  if (!$in_error_state && function_exists('module_implements')) {
+  if (!$in_error_state && function_exists('module_invoke_all')) {
     $in_error_state = TRUE;
 
     // The user object may not exist in all conditions, so 0 is substituted if needed.
@@ -2319,9 +2342,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     );
 
     // Call the logging hooks to log/process the message
-    foreach (module_implements('watchdog') as $module) {
-      module_invoke($module, 'watchdog', $log_entry);
-    }
+    module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
     // watchdog() call (not outside the loop), to prevent recursive execution.
@@ -2546,20 +2567,14 @@ function backdrop_base64_encode($string) {
  */
 function backdrop_random_bytes($count)  {
   // $random_state does not use backdrop_static as it stores random bytes.
-  static $random_state, $bytes, $has_openssl;
+  static $random_state, $bytes;
 
-  $missing_bytes = $count - strlen($bytes);
+  $missing_bytes = $count - strlen((string) $bytes);
 
   if ($missing_bytes > 0) {
-    // PHP versions prior 5.3.4 experienced openssl_random_pseudo_bytes()
-    // locking on Windows and rendered it unusable.
-    if (!isset($has_openssl)) {
-      $has_openssl = version_compare(PHP_VERSION, '5.3.4', '>=') && function_exists('openssl_random_pseudo_bytes');
-    }
-
     // openssl_random_pseudo_bytes() will find entropy in a system-dependent
     // way.
-    if ($has_openssl) {
+    if (function_exists('openssl_random_pseudo_bytes')) {
       $bytes .= openssl_random_pseudo_bytes($missing_bytes);
     }
 
@@ -2581,7 +2596,7 @@ function backdrop_random_bytes($count)  {
     // the microtime() - is prepended rather than appended. This is to avoid
     // directly leaking $random_state via the $output stream, which could
     // allow for trivial prediction of further "random" numbers.
-    if (strlen($bytes) < $count) {
+    if (empty($bytes) || strlen($bytes) < $count) {
       // Initialize on the first call. The contents of $_SERVER includes a mix of
       // user-specific and system information that varies a little with each page.
       if (!isset($random_state)) {
@@ -2941,9 +2956,9 @@ function backdrop_get_user_timezone() {
  *   An array that points to the active symbol table at the point the error
  *   occurred.
  */
-function _backdrop_error_handler($error_level, $message, $filename, $line, $context) {
+function _backdrop_error_handler($error_level, $message, $filename, $line) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-  _backdrop_error_handler_real($error_level, $message, $filename, $line, $context);
+  _backdrop_error_handler_real($error_level, $message, $filename, $line);
 }
 
 /**
@@ -3027,6 +3042,7 @@ function _backdrop_bootstrap_configuration() {
  */
 function _backdrop_bootstrap_page_cache() {
   global $user;
+  $site_config = config('system.core');
 
   // Allow specifying special cache handlers in settings.php, like
   // using memcached or files for storing cache information.
@@ -3036,7 +3052,7 @@ function _backdrop_bootstrap_page_cache() {
   }
 
   try {
-    $cache_enabled = config_get('system.core', 'cache') ? TRUE : FALSE;
+    $cache_enabled = $site_config->get('cache') ? TRUE : FALSE;
   }
   catch (ConfigException $e) {
     $cache_enabled = FALSE;
@@ -3052,7 +3068,7 @@ function _backdrop_bootstrap_page_cache() {
     // checked, hook_boot might check for anonymous user etc.
     $user = backdrop_anonymous_user();
     // Get the page from the cache.
-    $background_fetch_enabled = config_get('system.core', 'page_cache_background_fetch');
+    $background_fetch_enabled = $site_config->get('page_cache_background_fetch');
     $cache = backdrop_page_get_cache(FALSE, $background_fetch_enabled);
     // If there is a cached page, display it.
     if (is_object($cache)) {
@@ -3061,7 +3077,7 @@ function _backdrop_bootstrap_page_cache() {
       // Although a cached page was found, it may be expired if background
       // fetch is enabled. So we calculate if it is within the max age based
       // on its creation date.
-      $lifetime = config_get('system.core', 'page_cache_maximum_age');
+      $lifetime = $site_config->get('page_cache_maximum_age');
       $expires_on = $cache->created + $lifetime;
       $cache_expired = REQUEST_TIME > $expires_on;
 
@@ -3098,14 +3114,16 @@ function _backdrop_bootstrap_page_cache() {
         header('Connection: close');
       }
 
-      // End the request and send the response to the browser. This call has
-      // error suppression on it as some PHP versions may require it (PHP 5.3)
-      // but other PHP versions throw a warning (PHP 5.5).
-      @ob_end_flush();
+      // End the request and send the response to the browser.
+      ob_end_flush();
 
       // Flushing for PHP-FPM based installations.
       if (function_exists('fastcgi_finish_request')) {
         fastcgi_finish_request();
+      }
+      // Flushing for LiteSpeed servers.
+      elseif (function_exists('litespeed_finish_request')) {
+        litespeed_finish_request();
       }
       // Flushing for Apache mod_php installations.
       else {
@@ -3218,26 +3236,30 @@ function _backdrop_bootstrap_page_header() {
  */
 function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
-  $whitelist = settings_get('sanitize_input_whitelist', array());
+  $allowlist = settings_get('sanitize_input_allowlist', array());
+  if (empty($allowlist)) {
+    // Backwards compatible setting support. @todo Remove in 2.x.
+    $allowlist = settings_get('sanitize_input_whitelist', array());
+  }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
 
   // Process query string parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from query string parameters (GET): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request body parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from request body parameters (POST): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process cookie parameters.
-  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $whitelist);
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $allowlist);
   if ($sanitized_keys && $log_sanitized_keys) {
     trigger_error(format_string('Potentially unsafe keys removed from cookie parameters (COOKIE): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
   }
   // Process request global. No need to log; already logged in $_GET and $_POST.
-  _backdrop_bootstrap_sanitize_input($_REQUEST, $whitelist);
+  _backdrop_bootstrap_sanitize_input($_REQUEST, $allowlist);
 
   // Sanitize the destination parameter (which is often used for redirects) to
   // prevent open redirect attacks leading to other domains. Sanitize both
@@ -3263,7 +3285,7 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     if (!empty($destination_parts['query'])) {
-      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
+      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $allowlist);
     }
 
     if ($sanitized_keys) {
@@ -3281,23 +3303,23 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param mixed $input
  *   The input data array from a request to be sanitized.
- * @param string[] $whitelist
- *   Whitelist of input keys that are considered acceptable.
+ * @param string[] $allowlist
+ *   Allowed list of input keys that are considered acceptable.
  *
  * @return string[]
  *   The list of any input keys have been filtered out, if any.
  */
-function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
+function _backdrop_bootstrap_sanitize_input(&$input, $allowlist = array()) {
   $sanitized_keys = array();
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $allowlist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
       elseif (is_array($input[$key])) {
-        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $whitelist));
+        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $allowlist));
       }
     }
   }
@@ -3523,11 +3545,16 @@ function language_multilingual() {
  *   (optional) Whether to return a list of options instead of objects. This
  *   list is suitable for use in a select list #options array. This list is
  *   ordered by weight and then language name.
+ * @param bool $native_names
+ *   (optional) Whether the option_list labels should use the native name
+ *   instead of the English language name. Only applies if $option_list is TRUE.
  *
  * @return (stdClass|string)[]
  *   An associative array of languages, keyed by the language code.
+ *
+ * @since 1.18.2 Added $native_names parameter.
  */
-function language_list($only_enabled = FALSE, $option_list = FALSE) {
+function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
   // Initialize master language list.
   if (!isset($languages)) {
@@ -3560,6 +3587,7 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
       $languages['all']['en'] = (object) array(
         'langcode' => 'en',
         'name' => 'English',
+        'native' => 'English',
         'direction' => 0,
         'enabled' => TRUE,
         'weight' => 0,
@@ -3586,7 +3614,13 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
     require_once __DIR__ . '/common.inc';
     backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
     foreach ($this_list as $language) {
-      $list[$language->langcode] = $language->name;
+      if ($native_names && isset($language->native)) {
+        $label = $language->native;
+      }
+      else {
+        $label = $language->name;
+      }
+      $list[$language->langcode] = $label;
     }
     return $list;
   }
@@ -3684,9 +3718,9 @@ function language_default() {
  * - http://example.com/node/306 returns "node/306".
  * - http://example.com/backdropfolder/node/306 returns "node/306" while
  *   base_path() returns "/backdropfolder/".
- * - http://example.com/path/alias (which is a path alias for node/306) returns
+ * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
- * - http://example.com/index.php returns an empty string (meaning: front page).
+ * - http://example.com/index.php returns an empty string (meaning: home page).
  * - http://example.com/index.php?page=1 returns an empty string.
  *
  * @return
@@ -3718,13 +3752,13 @@ function request_path() {
     // If the path equals the script filename, either because 'index.php' was
     // explicitly provided in the URL, or because the server added it to
     // $_SERVER['REQUEST_URI'] even when it wasn't provided in the URL (some
-    // versions of Microsoft IIS do this), the front page should be served.
+    // versions of Microsoft IIS do this), the home page should be served.
     if ($path == basename($_SERVER['PHP_SELF'])) {
       $path = '';
     }
   }
   else {
-    // This is the front page.
+    // This is the home page.
     $path = '';
   }
 
@@ -3754,7 +3788,7 @@ function request_path() {
  * @param $path
  *   A path to break into components. Defaults to the path of the current page.
  *
- * @return string|NULL
+ * @return string|NULL|array
  *   The component specified by $index, or NULL if the specified component was
  *   not found. If called without arguments, it returns an array containing all
  *   the components of the current path.
@@ -3996,6 +4030,7 @@ function backdrop_autoload($class) {
     // module_invoke_all() because it uses array_merge_recursive(), which is an
     // expensive O(n^2) operation. Instead we use module_implements() and merge
     // the array manually, which is O(n).
+    include_once BACKDROP_ROOT . '/core/includes/module.inc';
     foreach (module_implements('autoload_info') as $module) {
       $module_classes = module_invoke($module, 'autoload_info');
       $module_path = backdrop_get_path('module', $module);

@@ -1,10 +1,46 @@
 <?php
-
 /**
  * @file
  * Class that holds information relating to a layouts context.
  */
 abstract class LayoutContext extends LayoutHandler {
+
+  /**
+   * Declares a LayoutContext to be a manually specified custom context.
+   */
+  const USAGE_TYPE_CUSTOM = 1;
+
+  /**
+   * Declares a LayoutContext to be provided based on a menu item or path.
+   */
+  const USAGE_TYPE_MENU = 2;
+
+  /**
+   * Declares a LayoutContext to be a system-wide context
+   *
+   * Examples include the "current_user" context and "overrides_path" context.
+   */
+  const USAGE_TYPE_SYSTEM = 4;
+
+  /**
+   * Declares a LayoutContext is provided by a relationship to another context.
+   */
+  const USAGE_TYPE_RELATIONSHIP = 8;
+
+  /**
+   * All possible context types.
+   *
+   * This is equivalent to the following bitwise addition of all the above:
+   *
+   * @code
+   *   self::USAGE_TYPE_CUSTOM | self::USAGE_TYPE_MENU | self::USAGE_TYPE_SYSTEM | self::USAGE_TYPE_RELATIONSHIP
+   * @endcode
+   *
+   * PHP 5.6 and higher is required to do this math in a constant however, so
+   * it is defined here as the equivalent integer value.
+   */
+  const USAGE_TYPE_ALL = 15;
+
   /**
    * The name of the plugin that provides this context.
    *
@@ -26,7 +62,7 @@ abstract class LayoutContext extends LayoutHandler {
   /**
    * Indicator as to whether this context is required and cannot be removed.
    *
-   * Required contexts typically are those provided by a menu path wildcard.
+   * Required contexts typically are those provided by a menu path placeholder.
    * While these contexts are required to exist, they can be changed to a
    * different type of context. e.g. A layout at path "foo/%" could have a
    * required context at position 1 with either a "node" or "string" plugin. The
@@ -111,6 +147,27 @@ abstract class LayoutContext extends LayoutHandler {
   var $storage = FALSE;
 
   /**
+   * Declares how this context is used by a Layout.
+   *
+   * For example a "user" context might be available in a Layout through
+   * multiple sources. If the layout overrides the path "user/%" one user
+   * context would have the $usageType LayoutContext::USAGE_TYPE_MENU.
+   *
+   * If the author of a node is added to a Layout through a relationship,
+   * a second context would be available with the $usageType
+   * LayoutContext::USAGE_TYPE_RELATIONSHIP.
+   *
+   * Checking a context's $usageType can help determine where and how a context
+   * was added to a Layout object.
+   *
+   * This value must be one of the USAGE_TYPE_* constants defined in the
+   * LayoutContext class.
+   *
+   * @var int
+   */
+  var $usageType = self::USAGE_TYPE_CUSTOM;
+
+  /**
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {
@@ -123,6 +180,7 @@ abstract class LayoutContext extends LayoutHandler {
       'name',
       'label',
       'storage',
+      'usageType',
     );
     foreach ($properties as $property) {
       if (isset($config[$property])) {
@@ -157,6 +215,49 @@ abstract class LayoutContext extends LayoutHandler {
    */
   function setData($data) {
     $this->data = $data;
+  }
+
+  /**
+   * Set the context data from the router item map.
+   *
+   * @param array $router_map
+   *   A router item map array.
+   */
+  function setDataFromRouterMap($router_map) {
+    if (isset($this->position) && !empty($router_map[$this->position])) {
+      // If the menu router set the data for a context object or a client did
+      // so via hook_layout_load_by_router_item_alter(), we don't need to do
+      // any setting here. But if $this->data is not an object, then it is
+      // either a raw string that must be converted to an object by a load
+      // callback or it is a string pass-through.
+      if (!is_object($this->data)) {
+        // If clients replaced any layout with one whose placeholders are in a
+        // new position, they need to have altered $context->position so that
+        // it points to the right place in the router item to get the data
+        // object.
+        $context_data = $router_map[$this->position];
+        // If the router item contains the context object in the right
+        // position, then we can just set the data from that.
+        if (is_object($context_data)) {
+          $this->setData($context_data);
+        }
+        else {
+          // If the context data was not an object, then we can try to set
+          // it using the plugin's load callback. If there is no callback,
+          // then it must be a string pass-through, so we leave it as is.
+          $context_info = layout_get_context_info($this->plugin);
+
+          // CHECK: the following 3 lines don't seem to be needed. By this point
+          // of the page request all context data is already loaded onto
+          // $router_item['map'].
+          // if (isset($context_info['load callback'])) {
+          //   $context_data = call_user_func_array($context_info['load callback'], array($router_item['original_map'][$this->position]));
+          // }
+
+          $this->setData($context_data);
+        }
+      }
+    }
   }
 
   /**
@@ -228,6 +329,7 @@ class LayoutContextBroken extends LayoutContext {
  * Pass-through context used when an unknown argument is encountered.
  */
 class LayoutOverridesPathContext extends LayoutContext {
+  var $usageType = LayoutContext::USAGE_TYPE_SYSTEM;
   function type() {
     return 'overrides_path';
   }
