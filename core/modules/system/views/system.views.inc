@@ -122,7 +122,7 @@ function system_views_data() {
 
   // - info
   $data['system']['info'] = array(
-    'title' => t('Module/Theme/Theme engine properties'),
+    'title' => t('Project properties'),
     'help' => t('Selected properties from the info file.'),
     'field' => array(
       'handler' => 'views_handler_field_system_info',
