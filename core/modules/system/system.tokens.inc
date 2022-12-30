@@ -52,7 +52,7 @@ function system_token_info() {
     'description' => t('The slogan of the site.'),
   );
   $site['logo'] = array(
-    'name' => t('Site Logo'),
+    'name' => t('Site logo'),
     'description' => t('The site logo.'),
   );
   $site['mail'] = array(
