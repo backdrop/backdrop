@@ -212,6 +212,7 @@ class views_handler_field_system_info extends views_handler_field {
       'required' => t('Required'),
       'base theme' => t('Base theme'),
       'scripts' => t('Scripts'),
+      'stylesheets' => t('Stylesheets'),
     );
   }
 
