@@ -189,9 +189,9 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
 
   $form['dblog']['dblog_max_length'] = array(
     '#type' => 'number',
-    '#title' => t('Displayed message length'),
+    '#title' => t('Abbreviated message length'),
     '#default_value' => $site_config->get('log_max_length'),
-    '#description' => t('The maximum log message length displayed on the <a href="@url">recent log messages page</a>.', array('@url' => url('admin/reports/dblog'))),
+    '#description' => t('The maximum log message length when abbreviated on the <a href="@url">recent log messages page</a>.', array('@url' => url('admin/reports/dblog'))),
     '#required' => TRUE,
     '#min' => 1,
     '#max' => 255,
