@@ -221,6 +221,63 @@ span.admin-missing {
 .system-status-report .report-error .status-summary {
   color: #EC351C;
 }
+
+.system-status-report .status-description .item-list h3 {
+  font-size: 1em;
+}
+.system-status-report ul.requirements {
+  margin-left: 0; /* LTR */
+  padding-left: 0; /* LTR */
+}
+[dir="rtl"] .system-status-report ul.requirements {
+  margin-right: 0;
+  padding-right: 0;
+}
+.system-status-report ul.requirements li.status-bullet {
+  list-style: none;
+  padding-left: 1em; /* LTR */
+  text-indent: -2ch;
+}
+[dir="rtl"] .system-status-report ul.requirements li.status-bullet {
+  padding-right: 1em;
+}
+.system-status-report ul.requirements li.status-ok:before {
+  content: "✓";
+  color: #006100;
+}
+.system-status-report ul.requirements li.status-info:before {
+  content: "ℹ";
+}
+.system-status-report ul.requirements li.status-warning:before {
+  content: "⚠";
+  color: #7A6E00;
+}
+.system-status-report ul.requirements li.status-error:before {
+  content: "✗";
+}
+.system-status-report ul.requirements li.status-bullet:before {
+  padding-right: 1ch; /* LTR */
+}
+[dir="rtl"] .system-status-report ul.requirements li.status-bullet:before {
+  padding-left: 1ch;
+}
+/**
+ * Color used to unset non-error bullets that are nested under an error parent
+ * bullet. #444 comes from .system-status-report .status-description in
+ * system.admin.css.
+ */
+.system-status-report ul.requirements {
+  color: #444;
+}
+/* Set the tex color for error bullets to red. */
+.system-status-report ul.requirements li.status-error {
+  color: #ad0000;
+}
+/* Reset the color for non-error bullets. */
+.system-status-report ul.requirements li.status-bullet:not(.status-error) {
+  color: unset;
+}
+
 @media all and (min-width: 721px) {
   .system-status-report .status-summary-mobile {
     display: none;
