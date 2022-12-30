@@ -2205,7 +2205,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test adding a role using the 'Save role' button.
     $role1_name = '123';
     $role1_admin_description = 'Admin description for 123 role.';
-    $role1_description = 'Help text for 456 role.';
+    $role1_description = 'Help text for 123 role.';
     $edit = array(
       'name' => $role1_name,
       'label' => $role1_name,
