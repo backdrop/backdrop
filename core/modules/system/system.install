@@ -113,7 +113,7 @@ function system_requirements($phase) {
   // Test PHP max_input_vars setting.
   $max_input_vars = ini_get('max_input_vars');
   $requirements['php_max_input_vars'] = array(
-    'title' => $t('PHP max_input_vars setting'),
+    'title' => $t('PHP <code>max_input_vars</code> setting'),
     'value' => $t('PHP limits the number of input variables in each form to @value items.', array('@value' => number_format($max_input_vars, 0, '.', ','))),
   );
   // 1000 is the default value and indicates potential issues.
