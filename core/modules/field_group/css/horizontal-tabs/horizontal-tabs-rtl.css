@@ -7,7 +7,7 @@ div.horizontal-tabs {
   border-left: 1px solid #dedede;
 }
 
-/* Layout of each tab */
+/* Layout of each tab. */
 .horizontal-tabs ul.horizontal-tabs-list li {
   border-right: 0;
   border-left: 1px solid #ccc;

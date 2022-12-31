@@ -1,6 +1,7 @@
+type = module
 name = "Field Group module tests"
 description = "Support module for field group testing."
 package = Testing
-type = module
+version = BACKDROP_VERSION
 backdrop = 1.x
 hidden = TRUE

@@ -238,7 +238,7 @@ Backdrop.behaviors.fieldGroup = {
       }
     });
 
-    // Fixes css for fieldgroups under vertical tabs.
+    // Fixes css for field groups under vertical tabs.
     $('.fieldset-wrapper .fieldset > legend').css({display: 'block'});
     $('.vertical-tabs fieldset.fieldset').addClass('default-fallback');
 

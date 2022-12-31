@@ -30,7 +30,7 @@ fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane > legend {
   display: none;
 }
 
-/* Layout of each tab */
+/* Layout of each tab. */
 .horizontal-tabs ul.horizontal-tabs-list li {
   background: #eee;
   border-right: 1px solid #ccc; /* LTR */
@@ -71,7 +71,7 @@ fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane > legend {
   display: block;
   text-decoration: none;
   padding: 0.5em 0.6em 0.3em 0.6em;
-  position:relative;
+  position: relative;
   top: 0px;
 }
 .horizontal-tabs ul.horizontal-tabs-list .selected strong {
@@ -86,13 +86,13 @@ fieldset.vertical-tabs-pane fieldset.horizontal-tabs-pane > legend {
 }
 
 /**
- * tab content
+ * Tab content.
  */
 div.field-group-htabs-wrapper .field-group-format-wrapper {
   clear: both;
   padding: 0 0 0.6em;
 }
-/*hide*/
+/* Hidden tab. */
 .horizontal-tabs .horizontal-tab-hidden {
   display: block;
   position: absolute;

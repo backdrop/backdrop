@@ -1,0 +1,26 @@
+<?php
+/**
+ * @file
+ * Test file for field group.
+ */
+
+/**
+ * Provides common functionality for the Field Group UI test classes.
+ */
+class FieldGroupTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+
+  function setUp() {
+    $modules[] = 'node';
+    $modules[] = 'field_ui';
+    $modules[] = 'field_test';
+    $modules[] = 'field_group';
+    $modules[] = 'field_group_tests';
+    parent::setUp($modules);
+
+    // Create test user.
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+}

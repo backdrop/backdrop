@@ -1,14 +1,12 @@
 <?php
-
 /**
  * @file
- * Field_group.field_ui.inc is a file that contains most functions
- * needed on the Fields UI Manage forms (display and fields).
+ * Contains most functions needed for the Field UI forms (display and fields).
  */
 
 /**
- * Helper function to get the form parameters to use while
- * building the fields and display overview form.
+ * Helper function to get the form parameters to use while building the fields
+ * and display overview form.
  */
 function field_group_field_ui_form_params($form, $display_overview) {
 
@@ -42,9 +40,9 @@ function field_group_field_ui_form_params($form, $display_overview) {
 
 /**
  * Function to alter the fields overview and display overview screen.
+ * Does not implement a hook.
  */
 function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display_overview = FALSE) {
-
   // Only start altering the form if we need to.
   if ($display_overview && empty($form['#fields']) && empty($form['#extra'])) {
     return;
@@ -85,13 +83,23 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     $table[$name]['parent_wrapper']['parent']['#options'] = $table['#parent_options'];
     // Inherit the value of the parent when default value is empty.
     if (empty($table[$name]['parent_wrapper']['parent']['#default_value'])) {
-      $table[$name]['parent_wrapper']['parent']['#default_value'] = isset($params->parents[$name]) ? $params->parents[$name] : '';
+      $default = '';
+      if (isset($params->parents[$name])) {
+        $default = $params->parents[$name];
+      }
+      $table[$name]['parent_wrapper']['parent']['#default_value'] = $default;
     }
   }
 
   $formatter_options = field_group_field_formatter_options($display_overview ? 'display' : 'form');
 
-  $refresh_rows = isset($form_state['values']['refresh_rows']) ? $form_state['values']['refresh_rows'] : (isset($form_state['input']['refresh_rows']) ? $form_state['input']['refresh_rows'] : NULL);
+  $refresh_rows = NULL;
+  if (isset($form_state['values']['refresh_rows'])) {
+    $refresh_rows = $form_state['values']['refresh_rows'];
+  }
+  elseif (isset($form_state['input']['refresh_rows'])) {
+    $refresh_rows = $form_state['input']['refresh_rows'];
+  }
 
   // Create the group rows and check actions.
   foreach (array_keys($params->groups) as $name) {
@@ -99,19 +107,25 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     // Play around with form_state so we only need to hold things
     // between requests, until the save button was hit.
     if (isset($form_state['field_group'][$name])) {
-      $group = & $form_state['field_group'][$name];
+      $group = &$form_state['field_group'][$name];
     }
     else {
-      $group = & $params->groups[$name];
+      $group = &$params->groups[$name];
     }
 
     // Check the currently selected formatter, and merge persisted values for
-    // formatter settings for the group.
-    // This needs to be done first, so all fields are updated before creating form elements.
+    // formatter settings for the group. This needs to be done first, so that
+    // all fields are updated before creating form elements.
     if (isset($refresh_rows) && $refresh_rows == $name) {
-      $settings = isset($form_state['values']['fields'][$name]) ? $form_state['values']['fields'][$name] : (isset($form_state['input']['fields'][$name]) ? $form_state['input']['fields'][$name] : NULL);
+      $settings = NULL;
+      if (isset($form_state['values']['fields'][$name])) {
+        $settings = $form_state['values']['fields'][$name];
+      }
+      elseif (isset($form_state['input']['fields'][$name])) {
+        $settings = $form_state['input']['fields'][$name];
+      }
+
       if (array_key_exists('settings_edit', $settings)) {
-        //$group->format_type = $form_state['field_group'][$name]->format_type;
         $group = $form_state['field_group'][$name];
       }
       field_group_formatter_row_update($group, $settings);
@@ -119,20 +133,24 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 
     // Save the group when the configuration is submitted.
     if (!empty($form_state['values'][$name . '_formatter_settings_update'])) {
-      field_group_formatter_settings_update($group, $form_state['values']['fields'][$name]);
+      $group_name = $form_state['values']['fields'][$name];
+      field_group_formatter_settings_update($group, $group_name);
     }
     // After all updates are finished, let the form_state know.
     $form_state['field_group'][$name] = $group;
-
-    $settings = field_group_format_settings_form($group);
 
     $id = strtr($name, '_', '-');
     $js_rows_data[$id] = array('type' => 'group', 'name' => $name);
     // A group cannot be selected as its own parent.
     $parent_options = $table['#parent_options'];
     unset($parent_options[$name]);
+    $parent_default = '';
+    if (isset($params->parents[$name])) {
+      $parent_default = $params->parents[$name];
+    }
+    $table_classes = array('draggable', 'field-group');
     $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'field-group'), 'id' => $id),
+      '#attributes' => array('class' => $table_classes, 'id' => $id),
       '#row_type' => 'group',
       '#region_callback' => $params->region_callback,
       '#js_settings' => array('rowHandler' => 'group'),
@@ -152,7 +170,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
           '#type' => 'select',
           '#options' =>  $parent_options,
           '#empty_value' => '',
-          '#default_value' => isset($params->parents[$name]) ? $params->parents[$name] : '',
+          '#default_value' => $parent_default,
           '#attributes' => array('class' => array('field-parent')),
           '#parents' => array('fields', $name, 'parent'),
         ),
@@ -189,17 +207,21 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
 
     if ($form_state['formatter_settings_edit'] == $name) {
-      $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 2);
+      $type = '<span class="formatter-name">' . $group->format_type . '</span>';
+      $cols = 2;
+      if ($display_overview) {
+        $cols = 3;
+      }
+      $class = 'field-formatter-settings-edit-form';
+      $table[$name]['format']['#cell_attributes'] = array('colspan' => $cols);
       $table[$name]['format']['format_settings'] = array(
         '#type' => 'container',
-        '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
+        '#attributes' => array('class' => array($class)),
         '#parents' => array('fields', $name, 'format_settings'),
         '#weight' => -5,
         'label' => array(
-          '#markup' => t('Field group format:') . ' <span class="formatter-name">' . $group->format_type . '</span>',
+          '#markup' => t('Field group format:') . ' ' . $type,
         ),
-        // Create a settings form where hooks can pick in.
-        'settings' => $settings,
         'actions' => array(
           '#type' => 'actions',
           'save_settings' => $base_button + array(
@@ -226,31 +248,40 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       // the element for the table cell.
       $table[$name]['settings_summary'] = array('#markup' => '');
       if (!empty($group->format_settings)) {
-        $table[$name]['settings_summary'] = field_group_format_settings_summary($name, $group);
+        $summary = field_group_format_settings_summary($name, $group);
+        $table[$name]['settings_summary'] = $summary;
       }
-      // Add the configure button.
-      $table[$name]['settings_edit'] = array(
-        '#type' => 'container',
-        '#attributes' => array('class' => array('field-formatter-settings-edit-wrapper')),
+
+      $destination = _field_ui_bundle_admin_path($form['#entity_type'], $form['#bundle']);
+      $path_stem = $params->admin_path . '/groups/' . $name;
+      $operations = array(
+        'configure' => array(
+          'title' => t('Configure'),
+          'href' =>  $path_stem . '/configure/form',
+          'query' => array('destination' => $destination . '/fields'),
+        ),
+        'delete' => array(
+          'title' => t('Delete'),
+          'href' => $path_stem . '/delete/form',
+          'query' => array('destination' => $destination . '/fields'),
+        ),
       );
-      $table[$name]['settings_edit']['edit'] = $base_button + array(
-        '#type' => 'submit',
-        '#name' => $name . '_group_settings_edit',
-        '#value' => t('Configure'),
-        '#attributes' => array('class' => array('field-formatter-settings-edit button-secondary'), 'alt' => t('Configure')),
-        '#op' => 'edit',
-        // Do not check errors for the 'Configure' button.
-        '#limit_validation_errors' => array(),
-      );
+
       if ($display_overview) {
-        $table[$name]['settings_edit']['delete'] = array(
-          '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode),
-        );
+        $configure_href = $path_stem . '/configure/' . $params->mode;
+        $delete_href = $path_stem . '/delete/' . $params->mode;
+        $destination = $destination . '/display/' . $params->mode;
+
+        $operations['configure']['href'] = $configure_href;
+        $operations['configure']['query']['destination'] = $destination;
+        $operations['delete']['href'] = $delete_href;
+        $operations['delete']['query']['destination'] = $destination;
       }
-    }
-    if (!$display_overview) {
-      $table[$name]['settings_edit']['delete'] = array(
-        '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
+
+      // Add the operations.
+      $table[$name]['operations'] = array(
+        '#type' => 'dropbutton',
+        '#links' => $operations,
       );
     }
   }
@@ -258,7 +289,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
   // Additional row: add new group.
   $parent_options = $table['#parent_options'];
   unset($parent_options['_add_new_group']);
-  $table['_add_new_group'] = field_group_add_row('_add_new_group', $parent_options, $params);
+  $new_row = field_group_add_row('_add_new_group', $parent_options, $params);
+  $table['_add_new_group'] = $new_row;
 
   $table['_add_new_group'] += array(
     'format' => array(
@@ -291,14 +323,12 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
-  $form['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/js/field_group.field_ui.js';
+  $path = backdrop_get_path('module', 'field_group');
+  $form['#attached']['css'][] = $path . '/css/field_group.field_ui.css';
+  $form['#attached']['js'][] = $path . '/js/field_group.field_ui.js';
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
-
-  // Create the settings for fieldgroup as vertical tabs (merged with DS).
-  field_group_field_ui_create_vertical_tabs($form, $form_state, $params);
 
   // Show a warning if the user has not set up required containers
   if ($form['#groups']) {
@@ -326,11 +356,14 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       );
     }
 
+    // Print warning messages for missing parent elements.
     foreach ($form['#groups'] as $group_name) {
       $group_check = field_group_load_field_group($group_name, $params->entity_type, $params->bundle, $params->mode);
       if (isset($parent_requirements[$group_check->format_type])) {
-        if (!$group_check->parent_name || field_group_load_field_group($group_check->parent_name, $params->entity_type, $params->bundle, $params->mode)->format_type != $parent_requirements[$group_check->format_type]['parent']) {
-          backdrop_set_message(t($parent_requirements[$group_check->format_type]['message']), 'warning', FALSE);
+        $parent_check = field_group_load_field_group($group_check->parent_name, $params->entity_type, $params->bundle, $params->mode);
+        if (!$group_check->parent_name || $parent_check->format_type != $parent_requirements[$group_check->format_type]['parent']) {
+          $message = t($parent_requirements[$group_check->format_type]['message']);
+          backdrop_set_message($message, 'warning', FALSE);
         }
       }
     }
@@ -338,7 +371,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
 }
 
 /**
- * Return an array of field_group_formatter options.
+ * Helper function to return an array of field_group_formatter options.
  */
 function field_group_field_formatter_options($type) {
   $options = &backdrop_static(__FUNCTION__);
@@ -357,8 +390,14 @@ function field_group_field_formatter_options($type) {
  * Helper function to add a row in the overview forms.
  */
 function field_group_add_row($name, $parent_options, $params) {
+  $row_classes = array('draggable', 'field-group', 'add-new');
+  $label_prefix  = '<div class="add-new-placeholder">';
+  $label_prefix .= t('Add new group');
+  $label_prefix .= '</div>';
+  $weight_default = field_info_max_weight($params->entity_type, $params->bundle, $params->mode) + 3;
+
   return array(
-    '#attributes' => array('class' => array('draggable', 'field-group', 'add-new')),
+    '#attributes' => array('class' => $row_classes),
     '#row_type' => 'add_new_group',
     '#js_settings' => array('rowHandler' => 'group'),
     '#region_callback' => $params->region_callback,
@@ -368,12 +407,12 @@ function field_group_add_row($name, $parent_options, $params) {
       '#type' => 'textfield',
       '#size' => 15,
       '#description' => t('Label'),
-      '#prefix' => '<div class="label-input"><div class="add-new-placeholder">' . t('Add new group') . '</div>',
+      '#prefix' => '<div class="label-input">' . $label_prefix,
       '#suffix' => '</div>',
     ),
     'weight' => array(
       '#type' => 'textfield',
-      '#default_value' => field_info_max_weight($params->entity_type, $params->bundle, $params->mode) + 3,
+      '#default_value' => $weight_default,
       '#size' => 3,
       '#title_display' => 'invisible',
       '#title' => t('Weight for new group'),
@@ -422,49 +461,9 @@ function field_group_add_row($name, $parent_options, $params) {
 }
 
 /**
- * Creates a form for field_group formatters.
- * @param Object $group The FieldGroup object.
- */
-function field_group_format_settings_form(&$group) {
-  $form = array();
-  $form['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Field group label'),
-    '#default_value' => $group->label,
-    '#weight' => -5,
-    '#element_validate' => array('field_group_format_settings_label_validate'),
-  );
-  $addition = module_invoke_all('field_group_format_settings', $group);
-  $form += $addition;
-  // Give fieldgroup implementations the chance to alter the description.
-  if (!empty($addition['label']['#description'])) {
-    $form['label']['#description'] = $addition['label']['#description'];
-  }
-  $form['#validate'] = array('field_group_format_settings_form_validate');
-  return $form;
-}
-
-/**
- * Validate the label. Label is required for fieldsets that are collapsible.
- */
-function field_group_format_settings_label_validate($element, &$form_state) {
-
-  $group = $form_state['values']['fields'][$element['#parents'][1]];
-  $settings = $group['format_settings']['settings'];
-  $name = $form_state['formatter_settings_edit'];
-  $form_state['values']['fields'][$name]['settings_edit_form']['settings'] = $settings;
-  if ($group['format']['type'] == 'fieldset' && ($settings['formatter'] == 'collapsed' || $settings['formatter'] == 'collapsible') && empty($settings['label'])) {
-    form_error($element, t('The label is required when formatter is collapsible or collapsed'));
-  }
-  if ($group['format']['type'] == 'details' && empty($settings['label'])) {
-    form_error($element, t('The label is required'));
-  }
-
-}
-
-/**
  * Update the row so that the group variables are updated.
  * The rendering of the elements needs the updated defaults.
+ *
  * @param Object $group
  * @param array $settings
  */
@@ -478,11 +477,11 @@ function field_group_formatter_row_update(& $group, $settings) {
 
 /**
  * Update handler for field_group configuration settings.
+ *
  * @param Object $group The group object
  * @param Array $settings Configuration settings
  */
 function field_group_formatter_settings_update(& $group, $settings) {
-
   // for format changes we load the defaults.
   if (empty($settings['format_settings']['settings'])) {
     $mode = $group->mode == 'form' ? 'form' : 'display';
@@ -497,12 +496,14 @@ function field_group_formatter_settings_update(& $group, $settings) {
 
 /**
  * Creates a summary for the field format configuration summary.
+ *
  * @param String $group_name The name of the group
  * @param Object $group The group object
  * @return Array ready to be rendered.
  */
 function field_group_format_settings_summary($group_name, $group) {
-  $summary = implode('<br />', module_invoke_all('field_group_format_summary', $group));
+  $summaries = module_invoke_all('field_group_format_summary', $group);
+  $summary = implode('<br />', $summaries);
   return array(
     '#markup' => '<div class="field-formatter-summary">' . $summary . '</div>',
     '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
@@ -511,6 +512,7 @@ function field_group_format_settings_summary($group_name, $group) {
 
 /**
  * Returns the region to which a row in the 'Manage fields' screen belongs.
+ *
  * @param Array $row A field or field_group row
  * @return String the current region.
  */
@@ -530,6 +532,7 @@ function field_group_field_overview_row_region($row) {
 
 /**
  * Returns the region to which a row in the 'Manage display' screen belongs.
+ *
  * @param Array $row A field or field_group row
  * @return String the current region.
  */
@@ -558,7 +561,7 @@ function field_group_display_overview_row_region($row) {
  *
  * @todo
  *   This callback can only check the name globally without context.
- *   Field group names, however, can be the same in different view modes and
+ *   Field group names, however, can be the same in different display modes and
  *   content types. See field_group_field_overview_validate() for current
  *   approach to validating the group name.
  */
@@ -568,6 +571,7 @@ function field_group_display_overview_row_region($row) {
 
 /**
  * Validate handler for the overview screens.
+ *
  * @param Array $form The complete form.
  * @param Array $form_state The state of the form.
  */
@@ -614,6 +618,7 @@ function field_group_field_overview_validate($form, &$form_state) {
 
 /**
  * Submit handler for the overview screens.
+ *
  * @param Array $form The complete form.
  * @param Array $form_state The state of the form.
  */
@@ -711,28 +716,6 @@ function field_group_field_overview_submit($form, &$form_state) {
 }
 
 /**
- * Validate the entered css class from the submitted format settings.
- * @param Array $element The validated element
- * @param Array $form_state The state of the form.
- */
-function field_group_validate_css_class($element, &$form_state) {
-  if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes']) && !preg_match('!^[A-Za-z0-9-_ ]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['classes'])) {
-    form_error($element, t('The css class must include only letters, numbers, underscores and dashes.'));
-  }
-}
-
-/**
- * Validate the entered id attribute from the submitted format settings.
- * @param Array $element The validated element
- * @param Array $form_state The state of the form.
- */
-function field_group_validate_id($element, &$form_state) {
-  if (!empty($form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['id']) && !preg_match('!^[A-Za-z0-9-_]+$!', $form_state['values']['fields'][$form_state['formatter_settings_edit']]['format_settings']['settings']['instance_settings']['id'])) {
-    form_error($element, t('The id must include only letters, numbers, underscores and dashes.'));
-  }
-}
-
-/**
  * Implements hook_field_info_max_weight().
  */
 function field_group_field_info_max_weight($entity_type, $bundle, $context) {
@@ -744,18 +727,79 @@ function field_group_field_info_max_weight($entity_type, $bundle, $context) {
 }
 
 /**
- * Menu callback; present a form for removing a group.
+ * Menu callback: present a form for configuring a group.
+ */
+function field_group_configure_form($form, &$form_state, $group, $view_mode = 'form') {
+  $form['#group'] = $group;
+  $form_state['#group'] = $group;
+  $form['#entity_type'] = $group->entity_type;
+  $form['#bundle'] = $group->bundle;
+  $form['#view_mode'] = $view_mode;
+
+  $format_settings = module_invoke_all('field_group_format_settings', $group);
+  $form['instance_settings'] = $format_settings['instance_settings'];
+
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Field group label'),
+    '#default_value' => $group->label,
+    '#required' => TRUE,
+    '#weight' => -5,
+  );
+  // Give fieldgroup implementations the chance to alter the description.
+  if (!empty($format_settings['label']['#description'])) {
+    $form['label']['#description'] = $format_settings['label']['#description'];
+  }
+
+  // Check the currently selected formatter and merge values.
+  if (isset($format_settings['formatter'])) {
+    $form['formatter'] = $format_settings['formatter'];
+  }
+  if (isset($group->format_settings['formatter'])) {
+    $form['formatter']['#default_value'] = $group->format_settings['formatter'];
+  }
+
+  $form['actions'] = array(
+    '#type' => 'actions'
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => 'Cancel',
+    '#href' => _field_group_get_admin_path($group->entity_type, $group->bundle, $view_mode),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for field_group_configure_form().
+ */
+function field_group_configure_form_submit($form, &$form_state) {
+  $instance_settings = $form_state['values']['instance_settings'];
+
+  $group = $form['#group'];
+  $group->mode = $form['#view_mode'];
+  $group->label = $form_state['values']['label'];
+  $group->format_settings['formatter'] = $form_state['values']['formatter'];
+  $group->format_settings['instance_settings'] = $instance_settings;
+
+  field_group_group_save($group, FALSE);
+  cache_clear_all('field_groups', 'cache_field');
+
+  $admin_path = _field_group_get_admin_path($form['#entity_type'], $form['#bundle'], $form['#view_mode']);
+  $form_state['redirect'] = $admin_path;
+}
+
+/**
+ * Menu callback: present a form for removing a group.
  */
 function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form') {
-
   $form['#group'] = $group;
-  $admin_path = _field_ui_bundle_admin_path($group->entity_type, $group->bundle);
-  if ($view_mode == 'form') {
-    $admin_path .= '/fields';
-  }
-  else {
-    $admin_path .= '/display/' . $view_mode;
-  }
+  $admin_path = _field_group_get_admin_path($group->entity_type, $group->bundle, $view_mode);
   $form['#redirect'] = array($admin_path);
   $output = confirm_form($form,
     t('Are you sure you want to delete the group %group?', array('%group' => t($group->label))),
@@ -768,9 +812,29 @@ function field_group_delete_form($form, &$form_state, $group, $view_mode = 'form
 }
 
 /**
- * Remove group from bundle.
+ * Helper function to return the admin path for field UI.
  *
- * @todo we'll have to reset all view mode settings - that will be fun :)
+ * @param string $entity_type
+ * @param string $bundle
+ * @param string $view_mode
+ *
+ * @return string
+ *   System path pointing to the field listing for the requsted view mode.
+ */
+function _field_group_get_admin_path($entity_type, $bundle, $view_mode) {
+  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+  if ($view_mode == 'form') {
+    $admin_path .= '/fields';
+  }
+  else {
+    $admin_path .= '/display/' . $view_mode;
+  }
+
+  return $admin_path;
+}
+
+/**
+ * Submit handler to remove group from bundle.
  */
 function field_group_delete_form_submit($form, &$form_state) {
 
@@ -788,137 +852,4 @@ function field_group_delete_form_submit($form, &$form_state) {
 
   // Redirect.
   $form_state['redirect'] = $form['#redirect'];
-}
-
-
-/**
- * Create vertical tabs.
- */
-function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params) {
-
-  $form_state['field_group_params'] = $params;
-
-  $entity_info = entity_get_info($params->entity_type);
-  $view_modes = array();
-  if ($params->mode != 'default') {
-    $view_modes['default'] = t('Default');
-  }
-  if ($params->mode != 'form') {
-    $view_modes['0'] = t('Form');
-  }
-  foreach ($entity_info['view modes'] as $view_mode => $data) {
-    if ($data['custom settings'] && $params->mode != $view_mode) {
-      $view_modes[$view_mode] = $data['label'];
-    }
-  }
-
-  // Add additional settings vertical tab.
-  if (!isset($form['additional_settings'])) {
-    $form['additional_settings'] = array(
-      '#type' => 'vertical_tabs',
-      '#theme_wrappers' => array('vertical_tabs'),
-      '#prefix' => '<div>',
-      '#suffix' => '</div>',
-      '#tree' => TRUE,
-    );
-    $form['#attached']['js'][] = 'core/misc/form.js';
-    $form['#attached']['js'][] = 'core/misc/collapse.js';
-  }
-
-  // Add extra guidelines for webmaster.
-  $form['additional_settings']['field_group'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Fieldgroups'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-    '#parents' => array('additional_settings'),
-  );
-  $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
-    '#title' => t('Clone Fieldgroups'),
-    '#description' => t('Select source view mode or form.'),
-    '#type' => 'select',
-    '#options' => $view_modes,
-    '#default_value' => 'none'
-  );
-  $form['additional_settings']['field_group']['fieldgroup_submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Clone'),
-    '#validate' => array('field_group_field_ui_clone_field_groups_validate'),
-    '#submit' => array('field_group_field_ui_clone_field_groups')
-  );
-  $form['additional_settings']['field_group']['help_title'] = array(
-    '#type' => 'item',
-    '#title' => t('Configuring fieldgroups'),
-  );
-  $form['additional_settings']['field_group']['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('<p>Fields can be dragged into groups with unlimited nesting. Each Fieldgroup format comes with a configuration form, specific for that format type.</p><p>Some formats come in pairs. These types have an HTML wrapper to nest its fieldgroup children. For example, place accordion items into the accordion; vertical tabs into the vertical tab group; and horizontal tabs into the horizontal tab group. There is one exception to this rule: you can use a vertical tab without a wrapper when the additional settings tabs are available, such as with content type forms.</p>'),
-  );
-
-}
-
-/**
- * Validate handler to validate saving existing fieldgroups from one view mode or form to another.
- */
-function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
-
-  $source_mode = $form_state['#source_mode'] = $form_state['values']['additional_settings']['fieldgroup_clone'] == '0' ? 'form' : $form_state['values']['additional_settings']['fieldgroup_clone'];
-  $groups_to_clone = $form_state['#groups_to_clone'] = field_group_read_groups(array('bundle' => $form_state['field_group_params']->bundle, 'entity_type' => $form_state['field_group_params']->entity_type));
-
-  $form_state['#source_groups'] = array();
-  if (!empty($groups_to_clone) && isset($groups_to_clone[$form_state['field_group_params']->entity_type], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle], $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode])) {
-    $form_state['#source_groups'] = $groups_to_clone[$form_state['field_group_params']->entity_type][$form_state['field_group_params']->bundle][$source_mode];
-  }
-
-  // Check for types are not known in current mode.
-  if ($form_state['field_group_params']->mode != 'form') {
-    $non_existing_types = array('multipage', 'multipage-group');
-  }
-  else {
-    $non_existing_types = array('div');
-  }
-
-  foreach ($form_state['#source_groups'] as $key => $group) {
-    if (in_array($group->format_type, $non_existing_types)) {
-      unset($form_state['#source_groups'][$key]);
-      backdrop_set_message(t('Skipping @group because this type does not exist in current mode', array('@group' => $group->label)), 'warning');
-    }
-  }
-
-  if (empty($form_state['#source_groups'])) {
-    // Report error found with selection.
-    form_set_error('additional_settings][fieldgroup_clone', t('No field groups were found in selected view mode.'));
-    return;
-  }
-
-}
-
-/**
- * Submit handler to save existing fieldgroups from one view mode or form to another.
- */
-function field_group_field_ui_clone_field_groups($form, &$form_state) {
-
-  $source_mode = $form_state['#source_mode'];
-  $groups_to_clone = $form_state['#groups_to_clone'];
-
-  $fields = array_keys($form_state['values']['fields']);
-  if (!empty($form_state['#source_groups'])) {
-
-    foreach ($form_state['#source_groups'] as $source_group) {
-      if (in_array($source_group->group_name, $fields)) {
-        backdrop_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
-        continue;
-      }
-
-      // Reset
-      $source_group->mode = $form_state['field_group_params']->mode;
-      $source_group->children = array();
-
-      field_group_group_save($source_group, TRUE);
-
-      backdrop_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
-
-    }
-  }
-
 }

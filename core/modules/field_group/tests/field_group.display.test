@@ -1,8 +1,452 @@
 <?php
-
 /**
  * @file
- * Test file for fieldgroup display.
+ * Test file for field group display.
  */
 
+require_once BACKDROP_ROOT . '/core/modules/field_group/tests/field_group.test';
 
+/**
+ * Tests the functionality of the 'Manage display' screens.
+ */
+class FieldGroupDisplayTestCase extends FieldGroupTestCase {
+  protected $node;
+
+  function setUp() {
+    parent::setUp();
+
+    $node = entity_create('node', array ('type' => 'post'));
+    $node->uid = $this->admin_user->uid;
+    $node->title = $this->randomName();
+    $node->status = 1;
+
+    // Create test fields.
+    $test_fields = array('field_test', 'field_test_2', 'field_no_access');
+    foreach ($test_fields as $field_name) {
+
+      $field = array(
+        'field_name' => $field_name,
+        'type' => 'test_field',
+        'cardinality' => 1,
+      );
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'bundle' => 'post',
+        'label' => $this->randomName(),
+        'display' => array(
+          'default' => array(
+            'type' => 'field_test_default',
+            'settings' => array(
+              'test_formatter_setting' => $this->randomName(),
+            ),
+          ),
+          'teaser' => array(
+            'type' => 'field_test_default',
+            'settings' => array(
+              'test_formatter_setting' => $this->randomName(),
+            ),
+          ),
+        ),
+      );
+      field_create_field($field);
+      field_create_instance($instance);
+
+      $node->{$field_name}[LANGUAGE_NONE][0]['value'] = mt_rand(1, 127);
+    }
+
+    $node->save();
+    $this->node = $node;
+  }
+
+  /**
+   * Create a new group.
+   * @param array $data
+   *   Data for the field group.
+   */
+  function createDisplayGroup($mode, array $data) {
+
+    $group_name = 'group_' . backdrop_strtolower($this->randomName(8));
+
+    $field_group = new stdClass;
+    $field_group->group_name = $group_name;
+    $field_group->entity_type = 'node';
+    $field_group->bundle = 'post';
+    $field_group->mode = $mode;
+    $field_group->parent_name = '';
+    $field_group->children = $data['children'];
+    $field_group->label = $data['label'];
+    $field_group->weight = $data['weight'];
+    $field_group->format_type = $data['format_type'];
+    $field_group->format_settings = $data['format_settings'];
+    field_group_group_save($field_group);
+
+    return $field_group;
+  }
+
+  /**
+   * Test if an empty formatter.
+   */
+  function testFieldAccess() {
+
+    $data = array(
+      'label' => 'Wrapper',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_no_access',
+      ),
+      'format_type' => 'div',
+      'format_settings' => array(
+        'label' => 'Link',
+        'instance_settings' => array(
+          'required_fields' => 0,
+          'id' => 'wrapper-id',
+          'classes' => 'test-class',
+          'description' => '',
+          'show_label' => FALSE,
+          'label_element' => 'h3',
+          'effect' => 'blind',
+          'speed' => 'fast',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $group = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test if group is not shown.
+    $this->assertNoFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, 'Div that contains fields with no access is not shown.');
+  }
+
+  /**
+   * Test the div formatter.
+   */
+  function testDiv() {
+
+    $data = array(
+      'label' => 'Wrapper',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'div',
+      'format_settings' => array(
+        'label' => 'Link',
+        'instance_settings' => array(
+          'required_fields' => 0,
+          'id' => 'wrapper-id',
+          'classes' => 'test-class',
+          'description' => '',
+          'show_label' => 0,
+          'label_element' => 'h3',
+          'effect' => 'blind',
+          'speed' => 'fast',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $group = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test group ids and classes.
+    $this->assertFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, 'Wrapper id set on wrapper div');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, 'Test class set on wrapper div' . ' class="' . $group->group_name . ' test-class');
+
+    // Test group label.
+    $this->assertNoRaw('<h3><span>' . $data['label'] . '</span></h3>', 'Label is not shown');
+
+    // Set show label to true.
+    $group->format_settings['instance_settings']['show_label'] = 1;
+
+    //backdrop_write_record('field_group', $group, array('identifier'));
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertRaw('<h3><span>' . $data['label'] . '</span></h3>', 'Label is shown');
+
+    // Change to collapsible
+    $group->format_settings['formatter'] = 'collapsible';
+    //backdrop_write_record('field_group', $group, array('identifier'));
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertFieldByXPath("//div[contains(@class, 'speed-fast')]", NULL, 'Speed class is set');
+    $this->assertFieldByXPath("//div[contains(@class, 'effect-blind')]", NULL, 'Effect class is set');
+  }
+
+  /**
+   * Test the horizontal tabs formatter.
+   */
+  function testHorizontalTabs() {
+
+    $data = array(
+      'label' => 'Tab 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'htab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+          'description' => '',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $first_tab = $this->createDisplayGroup('default', $data);
+
+    $data = array(
+      'label' => 'Tab 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'htab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+          'description' => 'description of second tab',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $second_tab = $this->createDisplayGroup('default', $data);
+
+    $data = array(
+      'label' => 'Tabs',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_tab->group_name,
+        1 => $second_tab->group_name,
+      ),
+      'format_type' => 'htabs',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+        ),
+      ),
+    );
+    $tabs = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, 'Test class set on tabs wrapper');
+    $this->assertFieldByXPath("//fieldset[contains(@class, 'test-class-2')]", NULL, 'Test class set on second tab');
+    $this->assertRaw('<div class="fieldset-description">description of second tab</div>', 'Description of tab is shown');
+    $this->assertRaw('class="collapsible collapsed test-class-2', 'Second tab is default collapsed');
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class')]", NULL, 'First tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@class, 'test-class-2')]", NULL, 'Second tab is displayed as child of the wrapper.');
+
+  }
+
+  /**
+   * Test the vertical tabs formatter.
+   */
+  function testVerticalTabs() {
+
+    $data = array(
+      'label' => 'Tab 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'tab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+          'description' => '',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $first_tab = $this->createDisplayGroup('default', $data);
+    $first_tab_id = 'edit-' . $first_tab->group_name;
+
+    $data = array(
+      'label' => 'Tab 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'tab',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+          'description' => 'description of second tab',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $second_tab = $this->createDisplayGroup('default', $data);
+    $second_tab_id = 'edit-' . $second_tab->group_name;
+
+    $data = array(
+      'label' => 'Tabs',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_tab->group_name,
+        1 => $second_tab->group_name,
+      ),
+      'format_type' => 'tabs',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+        ),
+      ),
+    );
+    $tabs = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, 'Test class set on tabs wrapper');
+    $this->assertFieldByXPath("//fieldset[contains(@class, 'test-class-2')]", NULL, 'Test class set on second tab');
+    $this->assertRaw('<div class="fieldset-description">description of second tab</div>', 'Description of tab is shown');
+    $this->assertRaw('class="collapsible collapsed test-class-2', 'Second tab is default collapsed');
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$first_tab_id')]", NULL, 'First tab is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//fieldset[contains(@id, '$second_tab_id')]", NULL, 'Second tab is displayed as child of the wrapper.');
+  }
+
+  /**
+   * Test the accordion formatter.
+   */
+  function testAccordion() {
+
+    $data = array(
+      'label' => 'Accordion item 1',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'accordion-item',
+      'format_settings' => array(
+        'label' => 'Accordion item 1',
+        'instance_settings' => array(
+          'classes' => 'test-class',
+        ),
+        'formatter' => 'closed',
+      ),
+    );
+    $first_item = $this->createDisplayGroup('default', $data);
+    $first_item_id = 'node_post_full_' . $first_item->group_name;
+
+    $data = array(
+      'label' => 'Accordion item 2',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test_2',
+      ),
+      'format_type' => 'accordion-item',
+      'format_settings' => array(
+        'label' => 'Tab 2',
+        'instance_settings' => array(
+          'classes' => 'test-class-2',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $second_item = $this->createDisplayGroup('default', $data);
+    $second_item_id = 'node_post_full_' . $second_item->group_name;
+
+    $data = array(
+      'label' => 'Accordion',
+      'weight' => '1',
+      'children' => array(
+        0 => $first_item->group_name,
+        1 => $second_item->group_name,
+      ),
+      'format_type' => 'accordion',
+      'format_settings' => array(
+        'label' => 'Tab 1',
+        'instance_settings' => array(
+          'classes' => 'test-class-wrapper',
+          'effect' => 'bounceslide'
+        ),
+      ),
+    );
+    $accordion = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test properties.
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, 'Test class set on tabs wrapper');
+    $this->assertFieldByXPath("//div[contains(@class, 'effect-bounceslide')]", NULL, 'Correct effect is set on the accordion');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class')]", NULL, 'Accordion item with test-class is shown');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-2')]", NULL, 'Accordion item with test-class-2 is shown');
+    $this->assertFieldByXPath("//h3[contains(@class, 'field-group-accordion-active')]", NULL, 'Accordion item 2 was set active');
+
+    // Test if correctly nested
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class')]", NULL, 'First item is displayed as child of the wrapper.');
+    $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]//div[contains(@class, 'test-class-2')]", NULL, 'Second item is displayed as child of the wrapper.');
+  }
+
+  /**
+   * Test the details formatter.
+   */
+  function testDetails() {
+
+    $data = array(
+      'label' => 'Wrapper',
+      'weight' => '1',
+      'children' => array(
+        0 => 'field_test',
+      ),
+      'format_type' => 'details',
+      'format_settings' => array(
+        'label' => 'Link',
+        'instance_settings' => array(
+          'required_fields' => 0,
+          'id' => 'detail-id',
+          'classes' => 'test-class',
+          'description' => 'description of details',
+        ),
+        'formatter' => 'open',
+      ),
+    );
+    $group = $this->createDisplayGroup('default', $data);
+
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    // Test group ids and classes.
+    $this->assertFieldByXPath("//details[contains(@id, 'detail-id')]", NULL, 'Detail id set on detail');
+    $this->assertFieldByXPath("//details[contains(@class, 'test-class')]", NULL, 'Test class set on details' . ' class="' . $group->group_name . ' test-class');
+
+    // Test group label.
+    $this->assertRaw('<summary><span><span>' . $data['label'] . '</span></span></summary>', 'Label is shown');
+    $this->assertRaw('<div class="details-content-wrapper">description of details</div>', 'Description of details is shown');
+
+    $this->assertFieldByXPath("//details[contains(@open, '1')]", NULL, 'Open attribute is set');
+
+    // Change to closed
+    $group->format_settings['formatter'] = 'closed';
+
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
+
+    $this->assertNoFieldByXPath("//details[contains(@open, '1')]", NULL, 'Open attribute is not set');
+  }
+}

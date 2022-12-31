@@ -1,11 +1,7 @@
 <?php
-
 /**
  * @file
- * Fieldgroup module.
- *
- * For an overview of all php and javascript hooks, see field_group.api.php.
- *
+ * Field group module.
  */
 
 /**
@@ -24,12 +20,23 @@ function field_group_config_info() {
  * Given a bundle config file, display a unique label.
  */
 function field_group_config_label($config, $config_name) {
-  list($entity_type_name, $bundle, $mode, $group_name) = explode('.', str_replace('field_group.field_group.', '', $config_name));
+  $suffix = str_replace('field_group.field_group.', '', $config_name);
+  list($entity_type_name, $bundle, $mode, $group_name) = explode('.', $suffix);
   $entity_type = entity_get_info($entity_type_name);
   $entity_label = $entity_type['label'];
-  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+  if (isset($entity_type['bundles'][$bundle]['label'])) {
+    $bundle_label = $entity_type['bundles'][$bundle]['label'];
+  }
+  else {
+    $bundle_label = $bundle;
+  }
 
-  return $entity_label . ' - ' . $bundle_label . ' - Mode: ' . $mode . ' - ' . $group_name;
+  $config_label  = $entity_label . ' - ';
+  $config_label .= $bundle_label . ' - ';
+  $config_label .= 'Mode: ' . $mode . ' - ';
+  $config_label .= $group_name;
+
+  return $config_label;
 }
 
 /**
@@ -52,8 +59,8 @@ function field_group_menu() {
           // Extract path information from the bundle.
           $path = $bundle_info['admin']['path'];
           // Different bundles can appear on the same path (e.g. %node_type and
-          // %comment_node_type). To allow field_group_menu_load() to extract the
-          // actual bundle object from the translated menu router path
+          // %comment_node_type). To allow field_group_menu_load() to extract
+          // the actual bundle object from the translated menu router path
           // arguments, we need to identify the argument position of the bundle
           // name string ('bundle argument') and pass that position to the menu
           // loader. The position needs to be casted into a string; otherwise it
@@ -73,11 +80,22 @@ function field_group_menu() {
           $group_position = count(explode('/', $path)) + 1;
 
           // Extract access information, providing defaults.
-          $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
+          $access_properties = array('access callback', 'access arguments');
+          $access_info = backdrop_map_assoc($access_properties);
+          $access = array_intersect_key($bundle_info['admin'], $access_info);
           $access += array(
             'access callback' => 'user_access',
             'access arguments' => array('administer site configuration'),
           );
+
+          $items["$path/groups/%field_group_menu/configure"] = array(
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'title' => 'Configure',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_group_configure_form', $group_position),
+            'type' => MENU_CALLBACK,
+            'file' => 'field_group.field_ui.inc',
+          ) + $access;
 
           $items["$path/groups/%field_group_menu/delete"] = array(
             'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
@@ -111,8 +129,8 @@ function field_group_menu() {
 function field_group_permission() {
   return array(
     'administer fieldgroups' => array(
-      'title' => t('Administer fieldgroups'),
-      'description' => t('Display the administration for fieldgroups.'),
+      'title' => t('Administer field groups'),
+      'description' => t('Access the configuration settings for field group.'),
     ),
   );
 }
@@ -132,7 +150,6 @@ function field_group_permission() {
  *   The translated menu router path argument map.
  */
 function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
-
   if ($bundle_pos > 0) {
     $bundle = $map[$bundle_pos];
     $bundle_name = field_extract_bundle($entity_type, $bundle);
@@ -159,8 +176,13 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
  *   The view mode to load.
  */
 function field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode) {
+  $config_name  = 'field_group.field_group.';
+  $config_name .= $entity_type . '.';
+  $config_name .= $bundle_name . '.';
+  $config_name .= $mode . '.';
+  $config_name .= $group_name;
 
-  $config = config('field_group.field_group.' . $entity_type . '.' . $bundle_name . '.' . $mode . '.' . $group_name);
+  $config = config($config_name);
   $object = (object) $config->get();
 
   return $object;
@@ -190,15 +212,17 @@ function field_group_theme() {
  * Implements hook_theme_registry_alter().
  */
 function field_group_theme_registry_alter(&$theme_registry) {
-
   // Inject field_group_build_entity_groups in all entity theming functions.
   $entity_info = entity_get_info();
   $entities = array();
-  foreach ($entity_info as $entity => $info) {
-    if (isset($entity_info[$entity]['fieldable']) && $entity_info[$entity]['fieldable']) {
+  foreach ($entity_info as $entity_type => $info) {
+    $entity = $entity_info[$entity_type]; // Nice shorthand.
+    if (isset($entity['fieldable']) && !empty($entity['fieldable'])) {
       // User uses user_profile for theming.
-      if ($entity == 'user') $entity = 'user_profile';
-      $entities[] = $entity;
+      if ($entity_type == 'user') {
+        $entity_type = 'user_profile';
+      }
+      $entities[] = $entity_type;
     }
   }
 
@@ -215,21 +239,12 @@ function field_group_theme_registry_alter(&$theme_registry) {
   foreach ($entities as $entity) {
     if (isset($theme_registry[$entity])) {
       $theme_registry[$entity]['preprocess functions'][] = 'field_group_build_entity_groups';
-      // DS support, make sure it comes after field_group.
-      if ($key = array_search('ds_entity_variables', $theme_registry[$entity]['preprocess functions'])) {
-        unset($theme_registry[$entity]['preprocess functions'][$key]);
-        $theme_registry[$entity]['preprocess functions'][] = 'ds_entity_variables';
-      }
     }
   }
-
 }
 
 /**
  * Implements hook_field_attach_delete_bundle().
- *
- * @param String $entity_type
- * @param String $bundle
  */
 function field_group_field_attach_delete_bundle($entity_type, $bundle) {
 
@@ -239,27 +254,31 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
   if (isset($list[$entity_type], $list[$entity_type][$bundle])) {
     foreach ($list[$entity_type][$bundle] as $group_mode => $groups) {
       foreach ($groups as $group) {
-        $config = config('field_group.field_group.' . $entity_type . '.' . $bundle . '.' . $group_mode . '.' . $group->group_name);
+        $config_filename  = 'field_group.field_group.';
+        $config_filename .= $entity_type . '.';
+        $config_filename .= $bundle . '.';
+        $config_filename .= $group_mode . '.';
+        $config_filename .= $group->group_name;
+
+        $config = config($config_filename);
         $config->delete();
       }
     }
   }
-
 }
 
 /**
  * Implements hook_field_attach_form().
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-
-  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
+  $path = backdrop_get_path('module', 'field_group');
+  $form['#attached']['css'][] = $path . '/css/field_group.field_ui.css';
   field_group_attach_groups($form, 'form', $form_state);
   $form['#pre_render'][] = 'field_group_form_pre_render';
 }
 
 /**
  * Implements hook_form_FORM_ID_alter().
- * Using hook_form_field_ui_field_overview_form_alter.
  */
 function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
   form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
@@ -268,7 +287,6 @@ function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_stat
 
 /**
  * Implements hook_form_FORM_ID_alter().
- * Using hook_form_field_ui_display_form_alter.
  */
 function field_group_form_field_ui_display_form_alter(&$form, &$form_state) {
   form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
@@ -279,12 +297,17 @@ function field_group_form_field_ui_display_form_alter(&$form, &$form_state) {
  * Implements hook_field_attach_view_alter().
  */
 function field_group_field_attach_view_alter(&$element, $context) {
-  // Check whether the view mode uses custom display settings or the 'default' mode.
+  // Check if the display mode is 'default' or uses custom display settings.
   $actual_mode = 'default';
   if (isset($element['#entity_type']) && isset($element['#bundle'])) {
     $view_mode_settings = field_view_mode_settings($element['#entity_type'], $element['#bundle']);
     $view_mode = $context['view_mode'];
-    $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
+    if (!empty($view_mode_settings[$view_mode]['custom_settings'])) {
+      $actual_mode = $view_mode;
+    }
+    else {
+      $actual_mode = 'default';
+    }
     field_group_attach_groups($element, $actual_mode);
   }
 }
@@ -296,151 +319,226 @@ function field_group_field_group_formatter_info() {
 
   return array(
     'form' => array(
-      'html-element' => array(
-        'label' => t('HTML element'),
-        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
-      ),
-      'div' => array(
-        'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'required_fields' => 1, 'id' => ''),
-        'default_formatter' => 'open',
-      ),
-      'html5' => array(
-        'label' => t('HTML5'),
-        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
-        'instance_settings' => array('wrapper' => '', 'classes' => '', 'id' => ''),
-      ),
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
+        'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'description' => '',
+          'classes' => '',
+          'required_fields' => 1,
+          'id' => '',
+        ),
         'default_formatter' => 'collapsible',
       ),
       'details' => array(
         'label' => t('Details'),
-        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'description' => t('This field group renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => '', 'label_element' => 'span'),
+        'instance_settings' => array(
+          'description' => '',
+          'classes' => '',
+          'required_fields' => 1,
+          'id' => '',
+          'label_element' => 'span',
+        ),
         'default_formatter' => 'closed',
+      ),
+      'div' => array(
+        'label' => t('Div'),
+        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
+        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array(
+          'description' => '',
+          'show_label' => 1,
+          'label_element' => 'h3',
+          'effect' => 'none',
+          'speed' => 'fast',
+          'classes' => '',
+          'required_fields' => 1,
+          'id' => '',
+        ),
+        'default_formatter' => 'open',
+      ),
+      'html-element' => array(
+        'label' => t('HTML element'),
+        'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
+        'instance_settings' => array(
+          'element' => 'div',
+          'show_label' => 0,
+          'label_element' => 'div',
+          'classes' => '',
+          'attributes' => '',
+          'required_fields' => 1,
+          'id' => '',
+        ),
+      ),
+      'html5' => array(
+        'label' => t('HTML5'),
+        'description' => t('This field group renders the inner content in a semantic HTML5 wrapper'),
+        'instance_settings' => array(
+          'wrapper' => '',
+          'classes' => '',
+          'id' => '',
+        ),
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own vertical tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array(
+          'required_fields' => 1,
+          'description' => '',
+          'classes' => '',
+        ),
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
         'label' => t('Horizontal tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own horizontal tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab'),
         'format_types' => array('open', 'closed'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of horizontal tabs group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array(
+          'required_fields' => 1,
+          'description' => '',
+          'classes' => '',
+        ),
       ),
       'multipage-group' => array(
         'label' => t('Multipage group'),
-        'description' => t('This fieldgroup renders groups on separate pages.'),
-        'instance_settings' => array('classes' => '', 'page_header' => 3, 'move_additional' => 1, 'page_counter' => 1, 'move_button' => 0),
+        'description' => t('This field group renders groups on separate pages.'),
+        'instance_settings' => array(
+          'classes' => '',
+          'page_header' => 3,
+          'move_additional' => 1,
+          'page_counter' => 1,
+          'move_button' => 0,
+        ),
       ),
       'multipage' => array(
         'label' => t('Multipage'),
         'format_types' => array('start', 'no-start'),
-        'description' => t('This fieldgroup renders the content in a page.'),
+        'description' => t('This field group renders the content in a page.'),
         'default_formatter' => 'no-start',
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array(
+          'required_fields' => 1,
+          'description' => '',
+          'classes' => '',
+        ),
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
-        'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
-        'instance_settings' => array('effect' => 'none', 'classes' => '', 'id' => ''),
+        'description' => t('This field group renders child groups as jQuery accordion.'),
+        'instance_settings' => array(
+          'effect' => 'none',
+          'classes' => '', '
+          id' => '',
+        ),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
         'format_types' => array('open', 'closed'),
-        'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
+        'description' => t('This field group renders the content in a div, part of accordion group.'),
         'default_formatter' => 'closed',
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1),
+        'instance_settings' => array(
+          'required_fields' => 1,
+          'description' => '',
+          'classes' => '',
+        ),
       ),
     ),
     'display' => array(
-      'html-element' => array(
-        'label' => t('HTML element'),
-        'description' => t('This fieldgroup renders the inner content in a HTML element with classes and attributes.'),
-        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
-      ),
-      'div' => array(
-        'label' => t('Div'),
-        'description' => t('This fieldgroup renders the inner content in a simple div with the title as legend.'),
-        'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'show_label' => 1, 'label_element' => 'h3', 'effect' => 'none', 'speed' => 'fast', 'classes' => '', 'id' => ''),
-        'default_formatter' => 'collapsible',
-      ),
-      'html5' => array(
-        'label' => t('HTML5'),
-        'description' => t('This fieldgroup renders the inner content in a semantic HTML5 wrapper'),
-        'instance_settings' => array('wrapper' => '', 'classes' => '', 'id' => ''),
-      ),
       'fieldset' => array(
         'label' => t('Fieldset'),
-        'description' => t('This fieldgroup renders the inner content in a fieldset with the title as legend.'),
+        'description' => t('This field group renders the inner content in a fieldset with the title as legend.'),
         'format_types' => array('open', 'collapsible', 'collapsed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
+        'instance_settings' => array(
+          'description' => '',
+          'classes' => '',
+          'id' => '',
+        ),
         'default_formatter' => 'collapsible',
       ),
       'details' => array(
         'label' => t('Details'),
-        'description' => t('This fieldgroup renders the inner content in a Details element with the title as summary.'),
+        'description' => t('This field group renders the inner content in a Details element with the title as summary.'),
         'format_types' => array('open', 'closed'),
-        'instance_settings' => array('description' => '', 'classes' => '', 'required_fields' => 1, 'id' => ''),
+        'instance_settings' => array(
+          'required_fields' => 1,
+          'description' => '',
+          'classes' => '',
+          'id' => '',
+        ),
         'default_formatter' => 'closed',
+      ),
+      'div' => array(
+        'label' => t('Div'),
+        'description' => t('This field group renders the inner content in a simple div with the title as legend.'),
+        'format_types' => array('open', 'collapsible', 'collapsed'),
+        'instance_settings' => array(
+          'description' => '',
+          'show_label' => 1,
+          'label_element' => 'h3',
+          'effect' => 'none',
+          'speed' => 'fast',
+          'classes' => '',
+          'id' => '',
+        ),
+        'default_formatter' => 'collapsible',
+      ),
+      'html-element' => array(
+        'label' => t('HTML element'),
+        'description' => t('This field group renders the inner content in a HTML element with classes and attributes.'),
+        'instance_settings' => array('element' => 'div', 'show_label' => 0, 'label_element' => 'div', 'classes' => '', 'attributes' => '', 'required_fields' => 1, 'id' => ''),
+      ),
+      'html5' => array(
+        'label' => t('HTML5'),
+        'description' => t('This field group renders the inner content in a semantic HTML5 wrapper'),
+        'instance_settings' => array('wrapper' => '', 'classes' => '', 'id' => ''),
       ),
       'tabs' => array(
         'label' => t('Vertical tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own vertical tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own vertical tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'tab' => array(
         'label' => t('Vertical tab'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of vertical tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of vertical tabs group.'),
         'format_types' => array('open', 'closed'),
         'instance_settings' => array('description' => '', 'classes' => ''),
         'default_formatter' => 'closed',
       ),
       'htabs' => array(
         'label' => t('Horizontal tabs group'),
-        'description' => t('This fieldgroup renders child groups in its own horizontal tabs wrapper.'),
+        'description' => t('This field group renders child groups in its own horizontal tabs wrapper.'),
         'instance_settings' => array('classes' => '', 'id' => ''),
       ),
       'htab' => array(
         'label' => t('Horizontal tab item'),
         'format_types' => array('open', 'closed'),
-        'description' => t('This fieldgroup renders the content in a fieldset, part of horizontal tabs group.'),
+        'description' => t('This field group renders the content in a fieldset, part of horizontal tabs group.'),
         'instance_settings' => array('description' => '', 'classes' => '', 'id' => ''),
         'default_formatter' => 'closed',
       ),
       'accordion' => array(
         'label' => t('Accordion group'),
-        'description' => t('This fieldgroup renders child groups as jQuery accordion.'),
+        'description' => t('This field group renders child groups as jQuery accordion.'),
         'instance_settings' => array('description' => '', 'classes' => '', 'effect' => 'bounceslide', 'id' => ''),
       ),
       'accordion-item' => array(
         'label' => t('Accordion item'),
         'format_types' => array('open', 'closed'),
-        'description' => t('This fieldgroup renders the content in a div, part of accordion group.'),
+        'description' => t('This field group renders the content in a div, part of accordion group.'),
         'instance_settings' => array('classes' => ''),
         'default_formatter' => 'closed',
       ),
@@ -450,9 +548,14 @@ function field_group_field_group_formatter_info() {
 
 /**
  * Implements hook_field_group_format_settings().
+ *
  * If the group has no format settings, default ones will be added.
- * @params Object $group The group object.
- * @return Array $form The form element for the format settings.
+ *
+ * @param Object $group
+ *   The group object.
+ *
+ * @return Array $form
+ *   The form element for the format settings.
  */
 function field_group_field_group_format_settings($group) {
   // Add a wrapper for extra settings to use by others.
@@ -466,43 +569,54 @@ function field_group_field_group_format_settings($group) {
   $field_group_types = field_group_formatter_info();
   $mode = $group->mode == 'form' ? 'form' : 'display';
   $formatter = $field_group_types[$mode][$group->format_type];
+  $instance_settings = $group->format_settings['instance_settings'];
 
   // Add the required formatter type selector.
   if (isset($formatter['format_types'])) {
+    $format_types_default = $formatter['default_formatter'];
+    if (isset($group->format_settings['formatter'])) {
+      $format_types_default = $group->format_settings['formatter'];
+    }
     $form['formatter'] = array(
-      '#title' => t('Fieldgroup settings'),
+      '#title' => t('Field group settings'),
       '#type' => 'select',
       '#options' => backdrop_map_assoc($formatter['format_types']),
-      '#default_value' => isset($group->format_settings['formatter']) ? $group->format_settings['formatter'] : $formatter['default_formatter'],
+      '#default_value' => $format_types_default,
       '#weight' => -4,
     );
   }
 
   if (isset($formatter['instance_settings']['required_fields']) && $mode == 'form') {
+    $required_default = '';
+    if (isset($instance_settings['required_fields'])) {
+      $required_default = $instance_settings['required_fields'];
+    }
+    elseif (isset($formatter['instance_settings']['required_fields'])) {
+      $required_default = $formatter['instance_settings']['required_fields'];
+    }
     $form['instance_settings']['required_fields'] = array(
       '#type' => 'checkbox',
       '#title' => t('Mark group as required if it contains required fields.'),
-      '#default_value' => isset($group->format_settings['instance_settings']['required_fields']) ? $group->format_settings['instance_settings']['required_fields'] : (isset($formatter['instance_settings']['required_fields']) ? $formatter['instance_settings']['required_fields'] : ''),
+      '#default_value' => $required_default,
       '#weight' => 2,
     );
   }
 
   if (isset($formatter['instance_settings']['id'])) {
     $form['instance_settings']['id'] = array(
-      '#title' => t('ID'),
+      '#title' => t('ID attribute'),
       '#type' => 'textfield',
-      '#default_value' => isset($group->format_settings['instance_settings']['id']) ? $group->format_settings['instance_settings']['id'] : (isset($formatter['instance_settings']['id']) ? $formatter['instance_settings']['id'] : ''),
+      '#default_value' => isset($instance_settings['id']) ? $instance_settings['id'] : (isset($formatter['instance_settings']['id']) ? $formatter['instance_settings']['id'] : ''),
       '#weight' => 10,
-      '#element_validate' => array('field_group_validate_id'),
     );
   }
   if (isset($formatter['instance_settings']['classes'])) {
     $form['instance_settings']['classes'] = array(
       '#title' => t('Extra CSS classes'),
       '#type' => 'textfield',
-      '#default_value' => isset($group->format_settings['instance_settings']['classes']) ? $group->format_settings['instance_settings']['classes'] : (isset($formatter['instance_settings']['classes']) ? $formatter['instance_settings']['classes'] : ''),
+      '#default_value' => isset($instance_settings['classes']) ? $instance_settings['classes'] : (isset($formatter['instance_settings']['classes']) ? $formatter['instance_settings']['classes'] : ''),
+      '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
       '#weight' => 11,
-      '#element_validate' => array('field_group_validate_css_class'),
     );
   }
 
@@ -510,7 +624,7 @@ function field_group_field_group_format_settings($group) {
     $form['instance_settings']['description'] = array(
       '#title' => t('Description'),
       '#type' => 'textarea',
-      '#default_value' => isset($group->format_settings['instance_settings']['description']) ? $group->format_settings['instance_settings']['description'] : (isset($formatter['instance_settings']['description']) ? $formatter['instance_settings']['description'] : ''),
+      '#default_value' => isset($instance_settings['description']) ? $instance_settings['description'] : (isset($formatter['instance_settings']['description']) ? $formatter['instance_settings']['description'] : ''),
       '#weight' => 0,
     );
   }
@@ -521,7 +635,7 @@ function field_group_field_group_format_settings($group) {
       $form['instance_settings']['element'] = array(
         '#title' => t('Element'),
         '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : $formatter['instance_settings']['element'],
+        '#default_value' => isset($instance_settings['element']) ? $instance_settings['element'] : $formatter['instance_settings']['element'],
         '#description' => t('E.g. div, section, aside etc.'),
         '#weight' => 1,
       );
@@ -530,21 +644,21 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('Show label'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
+        '#default_value' => isset($instance_settings['show_label']) ? $instance_settings['show_label'] : $formatter['instance_settings']['show_label'],
         '#weight' => 2,
       );
 
       $form['instance_settings']['label_element'] = array(
         '#title' => t('Label element'),
         '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#default_value' => isset($instance_settings['label_element']) ? $instance_settings['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 3,
       );
 
       $form['instance_settings']['attributes'] = array(
         '#title' => t('Attributes'),
         '#type' => 'textfield',
-        '#default_value' => isset($group->format_settings['instance_settings']['attributes']) ? $group->format_settings['instance_settings']['attributes'] : $formatter['instance_settings']['attributes'],
+        '#default_value' => isset($instance_settings['attributes']) ? $instance_settings['attributes'] : $formatter['instance_settings']['attributes'],
         '#description' => t('E.g. name="anchor"'),
         '#weight' => 4,
       );
@@ -555,28 +669,28 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('Show label'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#default_value' => isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : $formatter['instance_settings']['show_label'],
+        '#default_value' => isset($instance_settings['show_label']) ? $instance_settings['show_label'] : $formatter['instance_settings']['show_label'],
         '#weight' => 2,
       );
       $form['instance_settings']['label_element'] = array(
         '#title' => t('Label element'),
         '#type' => 'select',
         '#options' => array('h2' => t('Header 2'), 'h3' => t('Header 3')),
-        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#default_value' => isset($instance_settings['label_element']) ? $instance_settings['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 2,
       );
       $form['instance_settings']['effect'] = array(
         '#title' => t('Effect'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'blind' => t('Blind')),
-        '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
+        '#default_value' => isset($instance_settings['effect']) ? $instance_settings['effect'] : $formatter['instance_settings']['effect'],
         '#weight' => 3,
       );
       $form['instance_settings']['speed'] = array(
         '#title' => t('Speed'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'slow' => t('Slow'), 'fast' => t('Fast')),
-        '#default_value' => isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : $formatter['instance_settings']['speed'],
+        '#default_value' => isset($instance_settings['speed']) ? $instance_settings['speed'] : $formatter['instance_settings']['speed'],
         '#weight' => 3,
       );
       break;
@@ -585,7 +699,7 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('HTML5 wrapper'),
         '#type' => 'select',
         '#options' => array('section' => t('Section'), 'article' => t('Article'), 'header' => t('Header'), 'footer' => t('Footer'), 'aside' => t('Aside')),
-        '#default_value' => isset($group->format_settings['instance_settings']['wrapper']) ? $group->format_settings['instance_settings']['wrapper'] : 'section',
+        '#default_value' => isset($instance_settings['wrapper']) ? $instance_settings['wrapper'] : 'section',
       );
       break;
     case 'fieldset':
@@ -597,7 +711,7 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('Label element'),
         '#type' => 'select',
         '#options' => array('span' => t('Span'), 'strong' => t('Strong'),  'em' => t('Emphasis'), 'h2' => t('Header 2'), 'h3' => t('Header 3')),
-        '#default_value' => isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : $formatter['instance_settings']['label_element'],
+        '#default_value' => isset($instance_settings['label_element']) ? $instance_settings['label_element'] : $formatter['instance_settings']['label_element'],
         '#weight' => 2,
       );
       break;
@@ -606,28 +720,28 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('Format page title'),
         '#type' => 'select',
         '#options' => array(0 => t('None'), 1 => t('Label only'), 2 => t('Step 1 of 10'), 3 => t('Step 1 of 10 [Label]'),),
-        '#default_value' => isset($group->format_settings['instance_settings']['page_header']) ? $group->format_settings['instance_settings']['page_header'] : $formatter['instance_settings']['page_header'],
+        '#default_value' => isset($instance_settings['page_header']) ? $instance_settings['page_header'] : $formatter['instance_settings']['page_header'],
         '#weight' => 1,
       );
       $form['instance_settings']['page_counter'] = array(
         '#title' => t('Add a page counter at the bottom'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only')),
-        '#default_value' => isset($group->format_settings['instance_settings']['page_counter']) ? $group->format_settings['instance_settings']['page_counter'] : $formatter['instance_settings']['page_counter'],
+        '#default_value' => isset($instance_settings['page_counter']) ? $instance_settings['page_counter'] : $formatter['instance_settings']['page_counter'],
         '#weight' => 2,
       );
       $form['instance_settings']['move_button'] = array(
         '#title' => t('Move submit button to last multipage'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#default_value' => isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : $formatter['instance_settings']['move_button'],
+        '#default_value' => isset($instance_settings['move_button']) ? $instance_settings['move_button'] : $formatter['instance_settings']['move_button'],
         '#weight' => 3,
       );
       $form['instance_settings']['move_additional'] = array(
         '#title' => t('Move additional settings to last multipage (if available)'),
         '#type' => 'select',
         '#options' => array(0 => t('No'), 1 => t('Yes')),
-        '#default_value' => isset($group->format_settings['instance_settings']['move_additional']) ? $group->format_settings['instance_settings']['move_additional'] : $formatter['instance_settings']['move_additional'],
+        '#default_value' => isset($instance_settings['move_additional']) ? $instance_settings['move_additional'] : $formatter['instance_settings']['move_additional'],
         '#weight' => 4,
       );
     case 'tabs':
@@ -638,7 +752,7 @@ function field_group_field_group_format_settings($group) {
         '#title' => t('Effect'),
         '#type' => 'select',
         '#options' => array('none' => t('None'), 'bounceslide' => t('Bounce slide')),
-        '#default_value' => isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : $formatter['instance_settings']['effect'],
+        '#default_value' => isset($instance_settings['effect']) ? $instance_settings['effect'] : $formatter['instance_settings']['effect'],
         '#weight' => 2,
       );
       break;
@@ -660,21 +774,24 @@ function field_group_field_group_format_settings($group) {
  * other implementations of hook_field_group_pre_render().
  */
 function field_group_pre_render_prepare(&$group) {
+  $instance_settings = $group->format_settings['instance_settings'];
 
   $classes = _field_group_get_html_classes($group);
 
-  $group->classes = implode(' ', $classes->required);
-  $group->description = !empty($group->format_settings['instance_settings']['description']) ? filter_xss_admin(t($group->format_settings['instance_settings']['description'])) : '';
+  $description = '';
+  if (!empty($instance_settings['description'])) {
+    $description = filter_xss_admin(t($instance_settings['description']));
+  }
 
+  $group->classes = implode(' ', $classes->required);
+  $group->description = $description;
 }
 
 /**
  * Implements hook_field_group_pre_render().
- *
- * @param Array $elements by address.
- * @param Object $group The Field group info.
  */
-function field_group_field_group_pre_render(&$element, &$group, & $form) {
+function field_group_field_group_pre_render(&$element, &$group, &$form) {
+  $instance_settings = $group->format_settings['instance_settings'];
 
   field_group_pre_render_prepare($group);
 
@@ -686,8 +803,8 @@ function field_group_field_group_pre_render(&$element, &$group, & $form) {
     'type' => 'setting',
   );
 
-  if (isset($group->format_settings['instance_settings']['id']) && !empty($group->format_settings['instance_settings']['id'])) {
-    $element['#id'] = backdrop_html_id($group->format_settings['instance_settings']['id']);
+  if (isset($instance_settings['id']) && !empty($instance_settings['id'])) {
+    $element['#id'] = backdrop_html_id($instance_settings['id']);
   }
 
   $element['#weight'] = $group->weight;
@@ -697,19 +814,13 @@ function field_group_field_group_pre_render(&$element, &$group, & $form) {
   if (function_exists($function)) {
     $function($element, $group, $form);
   }
-
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Fieldset.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_fieldset(&$element, $group, &$form) {
-
   $element += array(
     '#type' => 'fieldset',
     '#title' => check_plain(t($group->label)),
@@ -728,13 +839,14 @@ function field_group_pre_render_fieldset(&$element, $group, &$form) {
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Details.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_details(&$element, $group, &$form) {
-  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'span';
+  $instance_settings = $group->format_settings['instance_settings'];
+
+  $label_element = 'span';
+  if (isset($instance_settings['label_element'])) {
+    $label_element = $instance_settings['label_element'];
+  }
   $element += array(
     '#type' => 'details',
     '#summary' => '<' . $label_element . '>' . check_plain(t($group->label)) . '</' . $label_element . '>',
@@ -752,16 +864,13 @@ function field_group_pre_render_details(&$element, $group, &$form) {
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: HTML element.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_html_element(&$element, $group, &$form) {
-  $html_element = isset($group->format_settings['instance_settings']['element']) ? $group->format_settings['instance_settings']['element'] : 'div';
-  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
-  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'div';
-  $configured_attributes = isset($group->format_settings['instance_settings']['attributes']) ? ' ' . $group->format_settings['instance_settings']['attributes'] : '';
+  $instance_settings = $group->format_settings['instance_settings'];
+  $html_element = isset($instance_settings['element']) ? $instance_settings['element'] : 'div';
+  $show_label = isset($instance_settings['show_label']) ? $instance_settings['show_label'] : 0;
+  $label_element = isset($instance_settings['label_element']) ? $instance_settings['label_element'] : 'div';
+  $configured_attributes = isset($instance_settings['attributes']) ? ' ' . $instance_settings['attributes'] : '';
   $group->classes = trim($group->classes);
 
   // This regex split the attributes string so that we can pass that
@@ -800,16 +909,12 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Div.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_div(&$element, $group, &$form) {
-
-  $show_label = isset($group->format_settings['instance_settings']['show_label']) ? $group->format_settings['instance_settings']['show_label'] : 0;
-  $label_element = isset($group->format_settings['instance_settings']['label_element']) ? $group->format_settings['instance_settings']['label_element'] : 'h2';
-  $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+  $instance_settings = $group->format_settings['instance_settings'];
+  $show_label = isset($instance_settings['show_label']) ? $instance_settings['show_label'] : 0;
+  $label_element = isset($instance_settings['label_element']) ? $instance_settings['label_element'] : 'h2';
+  $effect = isset($instance_settings['effect']) ? $instance_settings['effect'] : 'none';
 
   $element['#type'] = 'markup';
   $id = isset($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
@@ -837,34 +942,26 @@ function field_group_pre_render_div(&$element, $group, &$form) {
   if ($effect == 'blind') {
     $element['#attached']['library'][] = array('system', 'effects.blind');
   }
-
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: HTML5.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_html5(&$element, $group, &$form) {
+  $instance_settings = $group->format_settings['instance_settings'];
   $id = !empty($element['#id']) ? ' id="' . $element['#id'] . '"' : '';
   $class = !empty($group->classes) ? ' class="' . $group->classes . '"' : '';
   $element += array(
     '#type' => 'markup',
-    '#prefix' => '<' . $group->format_settings['instance_settings']['wrapper'] . $id . $class . '>',
-    '#suffix' => '</' . $group->format_settings['instance_settings']['wrapper'] . '>',
+    '#prefix' => '<' . $instance_settings['wrapper'] . $id . $class . '>',
+    '#suffix' => '</' . $instance_settings['wrapper'] . '>',
   );
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Accordion.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_accordion(&$element, $group, &$form) {
 
@@ -883,10 +980,6 @@ function field_group_pre_render_accordion(&$element, $group, &$form) {
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Accordion item.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_accordion_item(&$element, $group, &$form) {
 
@@ -900,16 +993,11 @@ function field_group_pre_render_accordion_item(&$element, $group, &$form) {
   if (!empty($group->description)) {
     $element['#prefix'] .= '<div class="description">' . $group->description . '</div>';
   }
-
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Horizontal tabs group.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_htabs(&$element, $group, &$form) {
 
@@ -944,10 +1032,6 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Horizontal tab.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_htab(&$element, $group, &$form) {
 
@@ -962,19 +1046,14 @@ function field_group_pre_render_htab(&$element, $group, &$form) {
     '#parents' => array($group->parent_name),
     '#description' => $group->description,
   );
-
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Multipage group.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
-
+  $instance_settings = $group->format_settings['instance_settings'];
   $multipage_element = array(
     '#type' => 'multipage',
     '#theme_wrappers' => array('multipage'),
@@ -984,8 +1063,8 @@ function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
 
   $element += $multipage_element;
 
-  $move_additional = isset($group->format_settings['instance_settings']['move_additional']) ? ($group->format_settings['instance_settings']['move_additional'] && isset($form['additional_settings'])) : isset($form['additional_settings']);
-  $move_button = isset($group->format_settings['instance_settings']['move_button']) ? $group->format_settings['instance_settings']['move_button'] : 0;
+  $move_additional = isset($instance_settings['move_additional']) ? ($instance_settings['move_additional'] && isset($form['additional_settings'])) : isset($form['additional_settings']);
+  $move_button = isset($instance_settings['move_button']) ? $instance_settings['move_button'] : 0;
 
   backdrop_add_js(array(
     'field_group' => array(
@@ -993,16 +1072,11 @@ function field_group_pre_render_multipage_group(&$element, &$group, &$form) {
       'multipage_move_additional' => (bool) $move_additional
     )
   ), 'setting');
-
 }
 
 /**
  * Implements field_group_pre_render_<format-type>.
  * Format type: Multipage.
- *
- * @param $element The field group form element.
- * @param $group The Field group object prepared for pre_render.
- * @param $form The root element or form.
  */
 function field_group_pre_render_multipage(&$element, $group, &$form) {
 
@@ -1097,7 +1171,7 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     $add['#parents'] = array($add['#group']);
     $element += $add;
   }
-  // Form fieldgroups which are nested into a vertical tab group
+  // Form field groups which are nested into a vertical tab group
   // are handled a little different.
   elseif (!empty($group->parent_name)) {
     $add['#group'] = $group->parent_name;
@@ -1106,7 +1180,7 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
   // Forms "can" have additional settins. We'll try to locate it first, if not
   // exists, field_group will create a parallel additional settings entry.
   else {
-    // Create the fieldgroup element.
+    // Create the field group element.
     $add['#parents'] = array('additional_settings');
     $add['#group'] = 'additional_settings';
     $add['#weight'] = -30 + $group->weight; // hardcoded to bring our extra additional vtabs on top.
@@ -1114,7 +1188,7 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
     // Check if the additional_settings exist for this type of form.
     if (isset($form['additional_settings']['group']['#groups']['additional_settings'])) {
 
-      // Merge fieldgroups with the core additional settings.
+      // Merge field groups with the core additional settings.
       $form['additional_settings']['group']['#groups']['additional_settings'][$group->group_name] = $add;
       $form['additional_settings']['group']['#groups'][$group->group_name] = array('#group_exists' => TRUE);
       // Nest the fields inside the appropriate structure.
@@ -1144,14 +1218,14 @@ function field_group_pre_render_tab(&$element, $group, &$form) {
       }
     }
   }
-
 }
 
 /**
  * Implements hook_field_group_build_pre_render_alter().
+ *
  * @param Array $elements by address.
  */
-function field_group_field_group_build_pre_render_alter(& $element) {
+function field_group_field_group_build_pre_render_alter(&$element) {
 
   // Someone is doing a node view, in a node view. Reset content.
   // TODO Check if this breaks something else.
@@ -1162,7 +1236,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   $display = isset($element['#view_mode']);
   $groups = array_keys($element['#groups']);
 
-  // Dish the fieldgroups with no fields for non-forms.
+  // Dish the field groups with no fields for non-forms.
   if ($display) {
     field_group_remove_empty_display_groups($element, $groups);
   }
@@ -1188,7 +1262,6 @@ function field_group_field_group_build_pre_render_alter(& $element) {
       unset($element['additional_settings']);
     }
   }
-
 }
 
 /**
@@ -1234,7 +1307,6 @@ function field_group_remove_empty_form_groups($name, & $element, $groups, &$form
     $element['#access'] = FALSE;
 
   }
-
 }
 
 /**
@@ -1271,11 +1343,11 @@ function _field_group_is_empty_element($element, $entity, $childname, $groups) {
   }
 
   return FALSE;
-
 }
 
 /**
  * Remove empty groups on entity display.
+ *
  * @param array $element
  *   The element to check the empty state.
  * @param array $groups
@@ -1309,37 +1381,26 @@ function field_group_remove_empty_display_groups(& $element, $groups) {
   }
 
   return $empty_group;
-
 }
 
 /**
  * Implements hook_field_group_format_summary().
  */
 function field_group_field_group_format_summary($group) {
-
-  $group_form = module_invoke_all('field_group_format_settings', $group);
+  $instance_settings = $group->format_settings['instance_settings'];
   $output = '';
   if (isset($group->format_settings['formatter'])) {
     $output .= '<strong>' . $group->format_type . '</strong> ' . $group->format_settings['formatter'] . '';
   }
-  if (isset($group->format_settings['instance_settings'])) {
-    $last = end($group->format_settings['instance_settings']);
+  if (isset($instance_settings)) {
+    $last = end($instance_settings);
     $output .= '<br />';
-    foreach ($group->format_settings['instance_settings'] as $key => $value) {
+    foreach ($instance_settings as $key => $value) {
       if (empty($value)) {
         continue;
       }
 
       $output .= '<strong>' . $key . '</strong> ';
-
-      if (isset($group_form['instance_settings'], $group_form['instance_settings'][$key]['#options'])) {
-        if (is_array($value)) {
-          $value = implode(', ', array_filter($value));
-        }
-        else {
-          $value = $group_form['instance_settings'][$key]['#options'][$value];
-        }
-      }
 
       // Shorten the string.
       if (backdrop_strlen($value) > 38) {
@@ -1457,15 +1518,6 @@ function field_group_field_extra_fields() {
     );
   }
 
-  // Field to integrate with the wysiwyg module on user settings.
-  if (module_exists('wysiwyg')) {
-    $extra['user']['user']['form']['wysiwyg'] = array(
-      'label' => t('Wysiwyg status'),
-      'description' => t('Text formats enabled for rich-text editing'),
-      'weight' => 5,
-    );
-  }
-
   return $extra;
 }
 
@@ -1501,6 +1553,7 @@ function field_group_field_attach_rename_bundle($entity_type, $bundle_old, $bund
  *   fieldset.
  * @param $form_state
  *   The $form_state array for the form this horizontal tab widget belongs to.
+ *
  * @return
  *   The processed element.
  */
@@ -1536,10 +1589,10 @@ function form_process_horizontal_tabs($element, &$form_state) {
  * modules using #type multipage will have the benefit of this processor.
  *
  * @param $element
- *   An associative array containing the properties and children of the
- *   fieldset.
+ *   An array containing the properties and children of the fieldset.
  * @param $form_state
  *   The $form_state array for the form this multipage tab widget belongs to.
+ *
  * @return
  *   The processed element.
  */
@@ -1570,7 +1623,7 @@ function form_process_multipage($element, &$form_state) {
 }
 
 /**
- * Get all groups that match.
+ * Get the groups for a given entity type, bundle and view mode.
  *
  * @param $entity_type
  *   The name of the entity.
@@ -1580,6 +1633,8 @@ function form_process_multipage($element, &$form_state) {
  *   The view mode.
  * @param $reset.
  *   Whether to reset the cache or not.
+ *
+ * @see field_group_read_groups()
  */
 function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
   static $groups = FALSE;
@@ -1604,16 +1659,19 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
 }
 
 /**
- * Read all groups.
+ * Get the groups for the given parameters, uncached.
  *
  * @param array $conditions
  *   Parameters for the query, as elements of the $conditions array.
- *   'entity_type' The name of the entity type.
- *   'bundle' The name of the bundle.
- *   'mode' The view mode.
+ *     'entity_type' The name of the entity type.
+ *     'bundle' The name of the bundle.
+ *     'mode' The view mode.
  *
  * @return array
  *   Array of groups.
+ *
+ * @see field_group_info_groups()
+ * @see ctools_export_load_object()
  */
 function field_group_read_groups($conditions = array()) {
 
@@ -1679,9 +1737,7 @@ function field_group_group_delete($group) {
 }
 
 /**
- * field_group_group_save().
- *
- * Saves a group definition.
+ * Save a group definition.
  *
  * @param $group
  *   A group definition.
@@ -1706,7 +1762,7 @@ function field_group_group_save(& $group, $new = TRUE) {
 }
 
 /**
- * Function to retrieve all format possibilities for the fieldgroups.
+ * Helper function to retrieve all format possibilities for the field groups.
  */
 function field_group_formatter_info($display_overview = FALSE) {
   $cache = &backdrop_static(__FUNCTION__, array());
@@ -1766,8 +1822,10 @@ function field_group_attach_groups(&$element, $view_mode, $form_state = array())
 
 /**
  * Pre render callback for rendering groups.
- * @see field_group_field_attach_form
+ *
  * @param $element Form that is being rendered.
+ *
+ * @see field_group_field_attach_form
  */
 function field_group_form_pre_render(&$element) {
   return field_group_build_entity_groups($element, 'form');
@@ -1776,12 +1834,17 @@ function field_group_form_pre_render(&$element) {
 /**
  * Preprocess/ Pre-render callback.
  *
+ * @param $vars
+ *   preprocess vars or form element.
+ * @param $type
+ *   The type of object being rendered.
+ *
+ * @return $element
+ *   Array with re-arranged fields in forms.
+ *
  * @see field_group_form_pre_render()
  * @see field_group_theme_registry_alter
  * @see field_group_fields_nest()
- * @param $vars preprocess vars or form element
- * @param $type The type of object being rendered
- * @return $element Array with re-arranged fields in forms.
  */
 function field_group_build_entity_groups(&$vars, $type) {
 
@@ -1833,9 +1896,10 @@ function field_group_build_entity_groups(&$vars, $type) {
  * Recursive function to nest fields in the field groups.
  *
  * This function will take out all the elements in the form and
- * place them in the correct container element, a fieldgroup.
+ * place them in the correct container element, a field group.
  * The current group element in the loop is passed recursively so we can
  * stash fields and groups in it while we go deeper in the array.
+ *
  * @param Array $element
  *   The current element to analyse for grouping.
  * @param Array $vars
@@ -1914,17 +1978,16 @@ function field_group_fields_nest(&$element, &$vars = NULL) {
   foreach ($element['#fieldgroups'] as $group_name => $group) {
     field_group_pre_render($group_references[$group_name], $group, $element);
   }
-
 }
 
 /**
  * Function to pre render the field group element.
  *
- * @see field_group_fields_nest()
- *
  * @param $element Array of group element that needs to be created!
  * @param $group Object with the group information.
  * @param $form The form object itself.
+ *
+ * @see field_group_fields_nest()
  */
 function field_group_pre_render(& $element, $group, & $form) {
 
@@ -1982,7 +2045,7 @@ function field_group_hide_field_groups(&$element, $group_names) {
  * Calculates html classes for a group.
  */
 function _field_group_get_html_classes(&$group) {
-
+  $instance_settings = $group->format_settings['instance_settings'];
   if (isset($group->format_settings['formatter'])) {
     $group->collapsible = in_array($group->format_settings['formatter'], array('collapsible', 'collapsed'));
     // Open or closed horizontal or vertical tabs will be collapsible by default.
@@ -2011,26 +2074,26 @@ function _field_group_get_html_classes(&$group) {
     }
   }
 
-  if (isset($group->format_settings['instance_settings'])) {
+  if (isset($instance_settings)) {
 
     // Add a required-fields class to trigger the js.
-    if (!empty($group->format_settings['instance_settings']['required_fields'])) {
+    if (!empty($instance_settings['required_fields'])) {
       $required[] = 'required-fields';
     }
 
     // Add user selected classes.
-    if (!empty($group->format_settings['instance_settings']['classes'])) {
-      $required[] = check_plain($group->format_settings['instance_settings']['classes']);
+    if (!empty($instance_settings['classes'])) {
+      $required[] = check_plain($instance_settings['classes']);
     }
 
     // Extra required classes for div.
     if ($group->format_type == 'div') {
       if ($group->format_settings['formatter'] != 'open') {
 
-        $speed = isset($group->format_settings['instance_settings']['speed']) ? $group->format_settings['instance_settings']['speed'] : 'none';
+        $speed = isset($instance_settings['speed']) ? $instance_settings['speed'] : 'none';
         $required[] = 'speed-' . $speed;
 
-        $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+        $effect = isset($instance_settings['effect']) ? $instance_settings['effect'] : 'none';
         $required[] = 'effect-' . $effect;
       }
     }
@@ -2038,7 +2101,7 @@ function _field_group_get_html_classes(&$group) {
     // Extra required classes for accordions.
     elseif ($group->format_type == 'accordion') {
       $required[] = 'field-group-' . $group->format_type . '-wrapper';
-      $effect = isset($group->format_settings['instance_settings']['effect']) ? $group->format_settings['instance_settings']['effect'] : 'none';
+      $effect = isset($instance_settings['effect']) ? $instance_settings['effect'] : 'none';
       $required[] = 'effect-' . $effect;
     }
 
