@@ -636,14 +636,15 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
-  $info = node_type_get_type($type);
-  $config = config('node.type.' . $type);
-  $config->delete();
-  field_attach_delete_bundle('node', $type);
-  module_invoke_all('node_type_delete', $info);
+  if ($info = node_type_get_type($type)) {
+    $config = config('node.type.' . $type);
+    $config->delete();
+    field_attach_delete_bundle('node', $type);
+    module_invoke_all('node_type_delete', $info);
 
-  // Clear the node type cache.
-  node_type_cache_reset();
+    // Clear the node type cache.
+    node_type_cache_reset();
+  }
 }
 
 /**
@@ -2414,7 +2415,7 @@ function _node_index_node(Node $node) {
 
   // Save the changed time of the most recent indexed node, for the search
   // results half-life calculation.
-  state_set('node_cron_last', $node->changed);
+  state_set('node_cron_last', (int) $node->changed);
 
   // Render the node.
   $build = node_view($node, 'search_index');

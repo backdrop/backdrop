@@ -1384,13 +1384,30 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->backdropGet('admin/config/search/settings');
     $this->assertText(t('There are @count items left to index.', array('@count' => 0)));
 
-    // Test the Invalidate search index button.
-    $this->backdropPost('admin/config/search/settings', array(), t('Invalidate search index'));
-    $this->assertText(t('Are you sure you want to invalidate the search index?'));
-    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Invalidate search index'));
-    $this->assertText(t('The search index will be invalidated'));
+    // Reset indexes and verify the count of items left to index is correct.
+    search_reindex();
+
+    // Create a new node to test index rebuilding.
+    $body_text = 'Gluten-free.';
+    $this->backdropCreateNode(array(
+      'body' => array(LANGUAGE_NONE => array(array('value' => $body_text))),
+    ));
+
     $this->backdropGet('admin/config/search/settings');
-    $this->assertText(t('There is 1 item left to index.'));
+    $this->assertText(t('There are @count items left to index.', array('@count' => 2)));
+
+    // Test the Rebuild search index button.
+    $this->backdropPost('admin/config/search/settings', array(), t('Rebuild search index'));
+    $this->assertText(t('This action will rebuild the search index. It may be a lengthy process.'));
+    $this->backdropPost('admin/config/search/settings/reindex', array(), t('Rebuild search index'));
+
+    // Test that there are no items left to index.
+    $this->backdropGet('admin/config/search/settings');
+    $this->assertText(t('There are 0 items left to index.'));
+
+    // Test that the new node was correctly indexed.
+    $this->backdropGet('search/node/' . rawurlencode($body_text));
+    $this->assertText($body_text, t('New node was correctly indexed after rebuilding'));
 
     // Test that the form saves with the default values.
     $this->backdropPost('admin/config/search/settings', array(), t('Save configuration'));

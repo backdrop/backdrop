@@ -429,6 +429,15 @@ function file_menu() {
     'file' => 'file.pages.inc',
   );
 
+  $items['admin/structure/file-types/classify'] = array(
+    'title' => 'Classify file types',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_type_classify_confirm'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'file' => 'file.admin.inc',
+  );
+
   return $items;
 }
 
@@ -2614,16 +2623,6 @@ function _file_sort_array_by_weight(&$a) {
 }
 
 /*
- * Implements hook_cron_queue_info().
- */
-function file_cron_queue_info() {
-  $queues['file_type_determine'] = array(
-    'worker callback' => 'file_type_determine',
-  );
-  return $queues;
-}
-
-/*
  * Determines file type for a given file ID and saves the file.
  *
  * @param $fid
@@ -2894,7 +2893,7 @@ function file_access($op, $file = NULL, $account = NULL) {
  * @deprecated since 1.14.0
  */
 function file_entity_access($op, $file = NULL, $account = NULL) {
-  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://api.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://docs.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
   return file_access($op, $file, $account);
 }
 
@@ -3397,4 +3396,85 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   );
 
   return $element;
+}
+
+
+/**
+ * Toggles or reads the value of a flag for classifying the file types.
+ *
+ * When the flag is set, a message is displayed to users with 'access
+ * administration pages' permission, pointing to the 'classify' confirm form.
+ * That form will trigger the type classification of managed files that do not
+ * currently have a type. This is often the case after upgrading from Drupal 7.
+ *
+ * @param $classify
+ *   (optional) The boolean value to be written.
+ *
+ * @return bool|NULL
+ *   The current value of the flag if no value was provided for $rebuild.
+ *
+ * @see 
+ */
+function file_needs_type_classification($rebuild = NULL) {
+  if (!isset($rebuild)) {
+    return state_get('file_needs_classification', FALSE);
+  }
+  elseif ($rebuild) {
+    state_set('file_needs_classification', TRUE);
+  }
+  else {
+    state_del('file_needs_classification');
+  }
+}
+
+/**
+ * Batch operation callback to classify the types of managed files.
+ *
+ * Unlike Drupal 7, the file_managed table in Backdrop contains a type column. 
+ * This process classifies the file types when upgrading from a D7 site.  
+ *
+ * @see file_needs_type_classification()
+ */
+function file_type_classify_batch($fids, &$context) {
+  if (!isset($context['sandbox']['current_item'])) {
+    $context['sandbox']['current_item'] = 0;
+    $context['sandbox']['count'] = count($fids);
+  }
+
+  // Process 15 files at a time.
+  $limit = min($context['sandbox']['current_item'] + 15, $context['sandbox']['count']);
+  while ($context['sandbox']['current_item'] < $limit) {
+    $fid = $fids[$context['sandbox']['current_item']];
+    file_type_determine($fid);
+    $context['results'][] = $fid;
+    $context['message'] = t('Now processing file ID %fid', array('%fid' => $fid));
+    $context['sandbox']['current_item']++;
+  }
+  $context['finished'] = $context['sandbox']['current_item'] / $context['sandbox']['count'];
+}
+
+/**
+ * Batch 'finished' callback.
+ * 
+ * @see file_type_classify_batch()
+ * @see file_needs_type_classification()
+ */
+function file_type_classify_finished($success, $results, $operations) {
+  if ($success) {
+    $message = format_plural(count($results), 'One file processed.', '@count files processed.');
+    backdrop_set_message($message);
+    file_needs_type_classification(FALSE);
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    backdrop_set_message(
+      t('An error occurred while processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      )
+    );
+  }
 }
