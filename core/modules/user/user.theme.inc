@@ -104,21 +104,39 @@ function theme_user_admin_permissions($variables) {
 
   $roles = user_roles();
   foreach (element_children($form['permission']) as $key) {
-    $row = array();
-    // Module name
+    $row = array(
+      'data' => array(),
+    );
+
+    // Hide the permission (or module) name and description element, since the
+    // individual properties will be pulled out in each row.
+    hide($form['permission'][$key]);
+
+    // Module name row.
     if (is_numeric($key)) {
-      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['roles']['#value']) + 1);
+      $module_text = '<div class="permission-module-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
+      $row['class'] = array('module-row');
+      $row['data'][] = array(
+        'data' => $module_text,
+        'class' => array('module'),
+        'id' => 'module-' . $form['permission'][$key]['#id'],
+        'colspan' => count($form['roles']['#value']) + 1,
+      );
     }
+    // Permission row.
     else {
-      // Permission row.
-      $row[] = array(
-        'data' => backdrop_render($form['permission'][$key]),
-        'class' => array('permission'),
+      $permission_text = '<div class="permission-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
+      $permission_text .= '<div class="permission-description">' . $form['permission'][$key]['#description'] . '</div>';
+
+      $row['data'][] = array(
+        'data' => $permission_text,
+        'class' => array('permission', 'table-filter-text'),
+        'id' => 'module-' . $form['permission'][$key]['#id'],
       );
       foreach (element_children($form['checkboxes']) as $role_name) {
         $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
-        $row[] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
+        $row['data'][] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
       }
     }
     $rows[] = $row;
@@ -127,9 +145,11 @@ function theme_user_admin_permissions($variables) {
   foreach (element_children($form['role_names']) as $role_name) {
     $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
   }
+
+  $output = backdrop_render($form['filter']);
   // Wrap the table in its own class so that we can make it horizontally
   // scrollable.
-  $output = '<div class="permissions-matrix">';
+  $output .= '<div class="permissions-matrix">';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= '</div>';
   $output .= backdrop_render_children($form);
@@ -153,7 +173,7 @@ function theme_user_permission_description($variables) {
   $description = array();
   $permission_item = $variables['permission_item'];
   if (!empty($permission_item['description'])) {
-    $description[] = $permission_item['description'];
+    $description[] = '<div class="table-filter-text-source">' . $permission_item['description'] . '</div>';
   }
   if (!empty($permission_item['restrict access'])) {
     $description[] = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';

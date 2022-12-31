@@ -421,6 +421,36 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     '#value' => $roles,
   );
 
+  // JS-only table filters.
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('table-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the module name or description to filter.'),
+    ),
+    '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
+  );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => 'admin/config/people/permissions',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
+  );
+
   // Render role/permission overview:
   $options = array();
   $module_info = system_get_info('module');
@@ -453,7 +483,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
         foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
+          // Build arrays for checked boxes for each role.
           if (in_array($perm, $role->permissions)) {
             $status[$role_name][] = $perm;
           }
@@ -462,7 +492,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Build the checkboxes here after the role arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -495,6 +525,14 @@ function user_admin_permissions_submit($form, &$form_state) {
   }
 
   backdrop_set_message(t('The changes have been saved.'));
+
+  // Check if a previous search is present and preserve it on redirect.
+  if (!empty($form_state['values']['search'])) {
+    $form_state['redirect'] = array(
+      'admin/config/people/permissions',
+      array('query' => array('search' => $form_state['values']['search']))
+    );
+  }
 }
 
 /**
