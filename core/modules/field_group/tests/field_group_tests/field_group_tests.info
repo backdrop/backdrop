@@ -1,0 +1,6 @@
+name = "Field Group module tests"
+description = "Support module for field group testing."
+package = Testing
+type = module
+backdrop = 1.x
+hidden = TRUE

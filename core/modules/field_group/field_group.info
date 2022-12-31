@@ -1,0 +1,6 @@
+name = Field Group
+description = "Provides the ability to group your fields on both form and display."
+package = Fields
+backdrop = 1.x
+type = module
+dependencies[] = field

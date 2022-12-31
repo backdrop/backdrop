@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Field group module install file.
+ */
+
+/**
+ * Implements hook_update_last_removed().
+ */
+function field_group_update_last_removed() {
+  return 7008;
+}
+
+/**
+ * Migrate field groups from table to config.
+ */
+function field_group_update_1000() {
+  if (db_table_exists('field_group')) {
+    // Only upgrade active fields. As we no longer support multiple fields with
+    // the same name, this prevents upgrading deleted fields that would conflict
+    // with active fields with the same name.
+    $result = db_query('SELECT * FROM {field_group}');
+    foreach ($result as $row) {
+      $field_group = (array) $row;
+      $field_group += unserialize($field_group['data']);
+      unset($field_group['id']);
+      unset($field_group['identifier']);
+      unset($field_group['data']);
+      unset($field_group['export_type']);
+      unset($field_group['disabled']);
+
+      $config = config('field_group.field_group.' . $field_group['entity_type'] . '.' . $field_group['bundle'] . '.' . $field_group['mode'] . '.' . $field_group['group_name']);
+      $config->setData($field_group);
+      $config->save();
+    }
+    db_drop_table('field_group');
+  }
+}
