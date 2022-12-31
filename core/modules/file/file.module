@@ -2809,13 +2809,16 @@ function file_access($op, $file = NULL, $account = NULL) {
     // In some cases a File object, a bundle string, or NULL is provided.
     if ($file == NULL) {
       $bundle = NULL;
-    } elseif (is_string($file)) {
+    }
+    elseif (is_string($file)) {
       $bundle = $file;
-    } else {
+    }
+    else {
       $bundle = $file->bundle();
     }
     return File::createAccess($bundle, $account);
-  } elseif ($file instanceof File) {
+  }
+  elseif ($file instanceof File) {
     return $file->access($op, $account);
   }
   return FALSE;
