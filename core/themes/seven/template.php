@@ -96,12 +96,9 @@ function seven_admin_page($variables) {
   );
   foreach ($blocks as $key => $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (($key+1) < count($blocks)/2) {
-        $container['left'] .= $block_output;
-      }
-      else {
-        $container['right'] .= $block_output;
-      }
+      $default_position = (($key + 1) < count($blocks) / 2) ? 'left' : 'right';
+      $position = !empty($block['position']) ? $block['position'] : $default_position;
+      $container[$position] .= $block_output;
     }
   }
 
