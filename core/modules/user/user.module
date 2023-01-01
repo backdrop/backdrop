@@ -939,16 +939,18 @@ function user_account_form(&$form, &$form_state) {
     '#options' => array(),
     '#access' => count($roles) && $admin_roles,
   );
+  // Lock the authenticated role, which cannot be removed.
+  $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
+    '#disabled' => TRUE,
+    '#value' => 'authenticated',
+  );
+  // Add each role as a checkbox option with a description.
   foreach ($roles as $role_name => $role) {
     $form['account_settings']['roles']['#options'][$role_name] = $role->label;
     if (strlen($role->description)) {
       $form['account_settings']['roles'][$role_name]['#description'] = filter_xss_admin($role->description);
     }
   }
-  $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
-    '#disabled' => TRUE,
-    '#value' => 'authenticated',
-  );
 
   $form['personalization'] = array(
     '#type' => 'fieldset',

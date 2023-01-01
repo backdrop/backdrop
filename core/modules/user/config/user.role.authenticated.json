@@ -2,8 +2,8 @@
     "_config_name": "user.role.authenticated",
     "name": "authenticated",
     "label": "Authenticated",
-    "admin_description": "Special role assigned to all users who have signed into the site. Permissions assigned to this role are given to all other roles except the anonymous role.",
-    "description": "",
+    "admin_description": "Special role assigned to all accounts. Permissions assigned to this role are given to all other roles except the anonymous role.",
+    "description": "Automatically assigned role to all accounts.",
     "weight": "1",
     "permissions": []
 }

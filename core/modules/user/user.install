@@ -1350,13 +1350,16 @@ function user_update_1023() {
         $admin_description = 'Special role assigned to any site visitor that has not signed into the site.';
       }
       elseif ($role_name === 'authenticated') {
-        $admin_description = 'Special role assigned to all users who have signed into the site. Permissions assigned to this role are given to all other roles except the anonymous role.';
+        $description = 'Automatically assigned role to all accounts.';
+        $admin_description = 'Special role assigned to all accounts. Permissions assigned to this role are given to all other roles except the anonymous role.';
       }
       // Use the default descriptions set by the standard profile.
       elseif ($role_name === 'editor') {
+        $description = 'Permission to create and edit content.';
         $admin_description = 'Role that can edit most content on the site, but cannot modify site configuration settings.';
       }
       elseif ($role_name === $admin_role_name) {
+        $description = 'All permissions, including the ability to assign roles.';
         $admin_description = 'This role receives all permissions on the site.';
       }
       $config->set('admin_description', $admin_description);
