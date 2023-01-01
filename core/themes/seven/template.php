@@ -94,13 +94,53 @@ function seven_admin_page($variables) {
     'left' => '',
     'right' => '',
   );
-  foreach ($blocks as $key => $block) {
-    if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (($key+1) < count($blocks)/2) {
-        $container['left'] .= $block_output;
+
+  $respect_position = theme_get_setting('respect_position');
+  if (!$respect_position) {
+    // Gather height information about the blocks. Estimate the height of each
+    // block from the number of non-% menu items that have the block's menu as a
+    // parent.
+    $est_height = array();
+    $total_height = 0;
+    foreach ($blocks as $key => $block) {
+      if (isset($block['mlid'])) {
+        $est_height[$key] = 1 + db_query('
+          SELECT COUNT(mlid)
+          FROM {menu_links}
+          WHERE plid = :plid
+          AND link_path NOT LIKE \'%\\\\%%\'
+          ', array(':plid' => $block['mlid']))
+          ->fetchField();
       }
       else {
-        $container['right'] .= $block_output;
+        $est_height[$key] = 0;
+      }
+      $total_height += $est_height[$key];
+    }
+    $target_height = $total_height / 2;
+    $running_height = 0;
+  }
+
+  foreach ($blocks as $key => $block) {
+    if ($block_output = theme('admin_block', array('block' => $block))) {
+
+      if ($respect_position) {
+        // Use the position in the block's menu_item if it exists. If it
+        // doesn't, assign left or right depending on its order in the list.
+        $default_position = (($key + 1) < count($blocks) / 2) ? 'left' : 'right';
+        $position = !empty($block['position']) ? $block['position'] : $default_position;
+        $container[$position] .= $block_output;
+      }
+      else {
+        // Assign our own positions, attempting to balance the total height of
+        // the left and right columns.
+         if ($running_height + $est_height[$key] / 2 < $target_height) {
+          $container['left'] .= $block_output;
+        }
+        else {
+          $container['right'] .= $block_output;
+        }
+        $running_height += $est_height[$key];
       }
     }
   }
