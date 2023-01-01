@@ -913,7 +913,6 @@ function user_account_form(&$form, &$form_state) {
     '#title' => t('Account settings'),
     '#weight' => 1,
     '#access' => $admin_users || $admin_roles,
-    '#collapsible' => TRUE,
     '#group' => 'additional_settings',
   );
 
@@ -989,7 +988,6 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
     '#weight' => 6,
-    '#collapsible' => TRUE,
     '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
   );
