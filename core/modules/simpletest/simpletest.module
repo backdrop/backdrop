@@ -370,10 +370,9 @@ function simpletest_test_get_all() {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
         // Error messages are translated as they are created below, but the
         // variable substitutions are not passed in. This is done so that the
-        // same error message can to be output to watchdog(), which needs an
-        // unstranslated string and the variables separately, and to
-        // backdrop_set_message(), which needs a translated string with
-        // substitutions already made.
+        // same error message can to be output to watchdog(), which needs its
+        // variables separately, and to backdrop_set_message(), which needs a
+        // translated string with substitutions already made.
         $error = '';
         $variables = array('@uri' => $file->uri);
         if (empty($classes)) {
@@ -437,6 +436,8 @@ function simpletest_test_get_all() {
             exit(1);
           }
           else {
+            // Pass the substitution variables into the already-translated
+            // string for backdrop_set_message().
             backdrop_set_message(format_string($error, $variables), 'error');
             watchdog('simpletest', $error, $variables, WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
             continue;
