@@ -368,6 +368,12 @@ function simpletest_test_get_all() {
       $check_keys = array('name', 'description', 'group', 'file');
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
+        // Error messages are translated as they are created below, but the
+        // variable substitutions are not passed in. This is done so that the
+        // same error message can to be output to watchdog(), which needs an
+        // unstranslated string and the variables separately, and to
+        // backdrop_set_message(), which needs a translated string with
+        // substitutions already made.
         $error = '';
         $variables = array('@uri' => $file->uri);
         if (empty($classes)) {
