@@ -4064,6 +4064,7 @@ function system_autoload_info() {
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+    'views_handler_field_system_info' => 'views/views_handler_field_system_info.inc',
   );
 }
 
