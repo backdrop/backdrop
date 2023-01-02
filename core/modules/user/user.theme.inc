@@ -136,7 +136,10 @@ function theme_user_admin_permissions($variables) {
       foreach (element_children($form['checkboxes']) as $role_name) {
         $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
-        $row['data'][] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
+        $row['data'][] = array(
+          'data' => backdrop_render($form['checkboxes'][$role_name][$key]),
+          'class' => array('checkbox'),
+        );
       }
     }
     $rows[] = $row;

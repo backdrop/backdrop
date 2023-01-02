@@ -530,7 +530,7 @@ function user_admin_permissions_submit($form, &$form_state) {
   if (!empty($form_state['values']['search'])) {
     $form_state['redirect'] = array(
       'admin/config/people/permissions',
-      array('query' => array('search' => $form_state['values']['search']))
+      array('query' => array('search' => $form_state['values']['search'])),
     );
   }
 }
