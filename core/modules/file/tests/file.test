@@ -320,7 +320,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param int $nid
    *   Node ID.
    * @param bool $new_revision
-   *   If True, create a new revision.
+   *   If TRUE, create a new revision.
    */
   function removeNodeFile($nid, $new_revision = TRUE) {
     $edit = array(
@@ -341,7 +341,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param int $nid
    *   Node ID.
    * @param bool $new_revision
-   *   If True, create a new revision.
+   *   If TRUE, create a new revision.
    */
   function replaceNodeFile($file, $field_name, $nid, $new_revision = TRUE) {
     $edit = array(
@@ -3399,8 +3399,7 @@ class FileAccessFunctionsAlignedTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp()
-  {
+  protected function setUp() {
     parent::setUp();
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array(
       'create files',

@@ -252,7 +252,8 @@ class File extends Entity {
         }
 
         // For private files, users can view their own private files if the
-        // user is not anonymous, and has the 'view own private files' permission.
+        // user is not anonymous, and has the 'view own private files'
+        // permission.
         if (!empty($account->uid) && $this->uid == $account->uid && user_access('view own private files', $account)) {
           return $rights[$account->uid][$cid][$op] = TRUE;
         }
