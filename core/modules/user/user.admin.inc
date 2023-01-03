@@ -436,7 +436,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     '#attributes' => array(
       'class' => array('table-filter-text'),
       'autocomplete' => 'off',
-      'title' => t('Enter a part of the module name or description to filter.'),
+      'title' => t('Enter a part of the permission name, module name, or description to filter.'),
     ),
     '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
   );
