@@ -45,6 +45,13 @@
 }
 
 /**
+ * Roles page.
+ */
+#user-roles .role-name {
+  white-space: nowrap;
+}
+
+/**
  * Site-wide account configuration.
  */
 #user-admin-settings fieldset .fieldset-description {
