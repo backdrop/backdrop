@@ -66,6 +66,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * Create file
    *
    * @param array $settings
+   *   File settings.
    *
    * @return File
    *   A file object.
@@ -123,8 +124,10 @@ class FileTestHelper extends BackdropWebTestCase {
    * Create file type
    *
    * @param array $overrides
+   *   File settings overrides.
    *
-   * @return object $type
+   * @return object
+   *   File type object.
    */
   protected function createFileType($overrides = array()) {
     $type = new stdClass();
@@ -156,7 +159,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Retrieves a sample file of the specified type.
    *
    * @param string $type_name
+   *   File type.
    * @param mixed $size
+   *   File size.
    * @return EntityInterface
    */
   function getTestFile($type_name, $size = NULL) {
@@ -173,6 +178,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * Retrieves the fid of the last inserted file.
    *
    * @return int
+   *   File fid.
    */
   function getLastFileId() {
     return (int) db_query('SELECT MAX(fid) FROM {file_managed}')->fetchField();
@@ -218,8 +224,6 @@ class FileTestHelper extends BackdropWebTestCase {
    *   The entity type this field will be added to.
    * @param string $bundle
    *   The bundle this field will be added to.
-   * @param array $field_settings
-   *   A list of field settings that will be added to the defaults.
    * @param array $instance_settings
    *   A list of instance settings that will be added to the instance defaults.
    * @param array $widget_settings
@@ -247,9 +251,13 @@ class FileTestHelper extends BackdropWebTestCase {
    * Updates an existing file field with new settings.
    *
    * @param string $name
+   *   Field name.
    * @param string $type_name
+   *   Name of the bundle.
    * @param array $instance_settings
+   *   A list of instance settings that will be added to the instance defaults.
    * @param array $widget_settings
+   *   A list of widget settings that will be added to the widget defaults.
    */
   function updateFileField($name, $type_name, $instance_settings = array(), $widget_settings = array()) {
     $instance = field_info_instance('node', $name, $type_name);
@@ -263,12 +271,18 @@ class FileTestHelper extends BackdropWebTestCase {
    * Uploads a file to a node.
    *
    * @param File $file
+   *   File object.
    * @param string $field_name
+   *   The field name.
    * @param mixed $nid_or_type
+   *   If Node ID, update existing or create a new of node type.
    * @param bool $new_revision
+   *   If true, create a new revision.
    * @param array $extras
+   *   Extra settings for the new node.
    *
    * @return int
+   *   Node ID.
    */
   function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
     $langcode = LANGUAGE_NONE;
@@ -304,7 +318,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Note that if replacing a file, it must first be removed then added again.
    *
    * @param int $nid
+   *   Node ID.
    * @param bool $new_revision
+   *   If True, create a new revision.
    */
   function removeNodeFile($nid, $new_revision = TRUE) {
     $edit = array(
@@ -319,9 +335,13 @@ class FileTestHelper extends BackdropWebTestCase {
    * Replaces a file within a node.
    *
    * @param File $file
+   *   File entity.
    * @param string $field_name
+   *   Name of the field.
    * @param int $nid
+   *   Node ID.
    * @param bool $new_revision
+   *   If True, create a new revision.
    */
   function replaceNodeFile($file, $field_name, $nid, $new_revision = TRUE) {
     $edit = array(
@@ -337,7 +357,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Asserts that a file exists physically on disk.
    *
    * @param File $file
+   *   File entity.
    * @param string $message
+   *   Message to display.
    */
   function assertFileExists($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file exists on the disk.', array('%file' => $file->uri));
@@ -348,7 +370,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Asserts that a file exists in the database.
    *
    * @param File $file
+   *   File entity.
    * @param string $message
+   *   Message to display.
    */
   function assertFileEntryExists($file, $message = NULL) {
     entity_get_controller('file')->resetCache();
@@ -361,7 +385,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Asserts that a file does not exist on disk.
    *
    * @param File $file
+   *   File entity.
    * @param string $message
+   *   Message to display.
    */
   function assertFileNotExists($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file exists on the disk.', array('%file' => $file->uri));
@@ -372,7 +398,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Asserts that a file does not exist in the database.
    *
    * @param File $file
+   *   File entity.
    * @param string $message
+   *   Message to display.
    */
   function assertFileEntryNotExists($file, $message) {
     entity_get_controller('file')->resetCache();
@@ -384,7 +412,9 @@ class FileTestHelper extends BackdropWebTestCase {
    * Asserts that a file's status is set to permanent in the database.
    *
    * @param File $file
+   *   File entity.
    * @param string $message
+   *   Message to display.
    */
   function assertFileIsPermanent($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file is permanent.', array('%file' => $file->uri));
