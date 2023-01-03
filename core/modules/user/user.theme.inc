@@ -107,7 +107,12 @@ function theme_user_admin_permissions($variables) {
     $row = array();
     // Module name
     if (is_numeric($key)) {
-      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['roles']['#value']) + 1);
+      $row[] = array(
+        'data' => backdrop_render($form['permission'][$key]),
+        'class' => array('module'),
+        'id' => 'module-' . $form['permission'][$key]['#id'],
+        'colspan' => count($form['roles']['#value']) + 1,
+      );
     }
     else {
       // Permission row.
@@ -125,7 +130,15 @@ function theme_user_admin_permissions($variables) {
   }
   $header[] = (t('Permission'));
   foreach (element_children($form['role_names']) as $role_name) {
-    $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
+    $header_cell = array(
+      'data' => backdrop_render($form['role_names'][$role_name]),
+      'class' => array('checkbox'),
+    );
+    // Output a role description if present as a title attribute on the cell.
+    if (isset($form['role_names'][$role_name]['#description'])) {
+      $header_cell['title'] = check_plain(strip_tags($form['role_names'][$role_name]['#description']));
+    }
+    $header[] = $header_cell;
   }
   // Wrap the table in its own class so that we can make it horizontally
   // scrollable.
@@ -179,7 +192,15 @@ function theme_user_permission_description($variables) {
 function theme_user_admin_roles($variables) {
   $form = $variables['form'];
 
-  $header = array(t('Name'), t('Weight'), t('Operations'));
+  $header = array(
+    array('data' => t('Name'), 'class' => array('role-name')),
+    array(
+      'data' => t('Description'),
+      'class' => array('role-description', 'priority-low'),
+    ),
+    array('data' => t('Weight')),
+    array('data' => t('Operations'), 'class' => array('role-operations')),
+  );
   foreach (element_children($form['roles']) as $role_name) {
     $label = $form['roles'][$role_name]['#role']->label;
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
@@ -187,12 +208,24 @@ function theme_user_admin_roles($variables) {
     }
 
     $row = array();
-    $row[] = theme('label_machine_name__role', array(
-      'label' => $label,
-      'machine_name' => $form['roles'][$role_name]['#role']->name,
-    ));
-    $row[] = backdrop_render($form['roles'][$role_name]['weight']);
-    $row[] = backdrop_render($form['roles'][$role_name]['operations']);
+    $row[] = array(
+      'data' => theme('label_machine_name__role', array(
+        'label' => $label,
+        'machine_name' => $form['roles'][$role_name]['#role']->name,
+      )),
+      'class' => array('role-name'),
+    );
+    $row[] = array(
+      'data' => filter_xss_admin($form['roles'][$role_name]['#role']->admin_description),
+      'class' => array('role-description', 'priority-low'),
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['roles'][$role_name]['weight']),
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['roles'][$role_name]['operations']),
+      'class' => array('role-operations'),
+    );
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
 
