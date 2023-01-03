@@ -559,6 +559,7 @@ function user_admin_roles($form, $form_state) {
     '#weight' => -20,
   );
   $roles = user_roles();
+  $anonymous_label = $roles[BACKDROP_ANONYMOUS_ROLE];
   // Do not allow the anonymous or authenticated roles to be set as the
   // administrator.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
@@ -578,17 +579,17 @@ function user_admin_roles($form, $form_state) {
   // Settings for anonymous users.
   $form['anonymous_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Anonymous visitors name'),
+    '#title' => t('Anonymous authors'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -10,
   );
   $form['anonymous_settings']['anonymous'] = array(
     '#type' => 'textfield',
-    '#title' => t('The name that will be used for anonymous visitors:'),
+    '#title' => t('Name to be used for anonymous authors:'),
     '#default_value' => $system_config->get('anonymous'),
     '#required' => TRUE,
-    '#description' => t('Not to be confused with the <em>Anonymous</em> user role. This setting controls what is shown as username in the "Submitted by" area (author and date information) of content and comments.'),
+    '#description' => t('Username to be shown in the "Submitted by" section (author and date information) for content and comments. Not to be confused with the %anonymous user role.', array('%anonymous' => $anonymous_label)),
   );
 
   $form['roles'] = array(
