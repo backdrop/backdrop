@@ -126,12 +126,12 @@ function theme_user_admin_permissions($variables) {
     // Permission row.
     else {
       $permission_text = '<div class="permission-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
-      $permission_text .= '<div class="permission-description">' . $form['permission'][$key]['#description'] . '</div>';
+      $permission_text .= $form['permission'][$key]['#description'];
 
       $row['data'][] = array(
         'data' => $permission_text,
         'class' => array('permission', 'table-filter-text'),
-        'id' => 'module-' . $form['permission'][$key]['#id'],
+        'id' => $form['permission'][$key]['#id'],
       );
       foreach (element_children($form['checkboxes']) as $role_name) {
         $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
@@ -176,7 +176,7 @@ function theme_user_permission_description($variables) {
   $description = array();
   $permission_item = $variables['permission_item'];
   if (!empty($permission_item['description'])) {
-    $description[] = '<div class="table-filter-text-source">' . $permission_item['description'] . '</div>';
+    $description[] = '<div class="permission-description description table-filter-text-source">' . $permission_item['description'] . '</div>';
   }
   if (!empty($permission_item['restrict access'])) {
     $description[] = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
