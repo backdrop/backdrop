@@ -443,7 +443,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   $form['filter']['reset'] = array(
     '#theme' => 'link',
     '#text' => t('Reset'),
-    '#path' => 'admin/config/people/permissions',
+    '#path' => $_GET['q'],
     '#options' => array(
       'attributes' => array(
         'class' => array('button', 'button-secondary', 'search-reset'),
@@ -530,7 +530,7 @@ function user_admin_permissions_submit($form, &$form_state) {
   // Check if a previous search is present and preserve it on redirect.
   if (!empty($form_state['values']['search'])) {
     $form_state['redirect'] = array(
-      'admin/config/people/permissions',
+      $_GET['q'],
       array('query' => array('search' => $form_state['values']['search'])),
     );
   }
