@@ -237,9 +237,6 @@ function theme_filter_format_editor_image_form($variables) {
   $output .= backdrop_render_children($form);
   $output .= '</div>';
 
-  $output .= '<div class="editor-image-library">';
-  $output .= '</div>';
-
   $output .= '</div>';
 
   $output .= $actions;
