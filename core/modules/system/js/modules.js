@@ -35,7 +35,7 @@ Backdrop.behaviors.moduleFilter = {
       $fieldset.toggle($visibleRows.length > 0);
     }
 
-    // Fliter the list of modules by provided search string.
+    // Filter the list of modules by provided search string.
     function filterModuleList() {
       var query = $input.val().toLowerCase();
 

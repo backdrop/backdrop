@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper functions and form handlers used for the authorize.php script.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handling of universally unique identifiers.

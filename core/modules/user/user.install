@@ -39,7 +39,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => "User's e-mail address.",
+        'description' => "User's email address.",
       ),
       'signature' => array(
         'type' => 'varchar',
@@ -103,7 +103,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => 'E-mail address used for initial account creation.',
+        'description' => 'Email address used for initial account creation.',
       ),
       'data' => array(
         'type' => 'blob',
@@ -155,6 +155,10 @@ function user_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_user'] = $cache_schema;
+  $schema['cache_entity_user']['description'] = "Cache table used to store Users entity records.";
+
   return $schema;
 }
 
@@ -189,10 +193,14 @@ function user_install() {
 /**
  * Implements hook_update_dependencies().
  */
-function system_update_dependencies() {
+function user_update_dependencies() {
   // Ensure layouts have been converted before renaming our user roles.
   $dependencies['user'][1007] = array(
     'system' => 1025,
+  );
+  // Ensure the 'auto' column already exists in url_alias table.
+  $dependencies['user'][1021] = array(
+    'system' => 1039,
   );
   return $dependencies;
 }
@@ -310,7 +318,7 @@ function user_update_1005() {
   $config->set('register_admin_created_subject', update_variable_get('register_admin_created_subject', 'An administrator created an account for you at [site:name]'));
   $config->set('register_admin_created_body', update_variable_get('register_admin_created_body', '[user:name],\n\nA site administrator at [site:name] has created an account for you. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('register_pending_approval_subject', update_variable_get('register_pending_approval_subject', 'Account details for [user:name] at [site:name] (pending admin approval)'));
-  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another e-mail containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
+  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
   $config->set('register_no_approval_required_subject', update_variable_get('register_no_approval_required_subject', 'Account details for [user:name] at [site:name]'));
   $config->set('register_no_approval_required_body', update_variable_get('register_no_approval_required_body', '[user:name],\n\nThank you for registering at [site:name]. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('password_reset_subject', update_variable_get('password_reset_subject', 'Password reset information for [user:name] at [site:name]'));
@@ -1190,6 +1198,175 @@ function user_update_1015() {
     $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
   }
   $config->save();
+}
+
+/**
+ * Creates the table to enable caching of User entities.
+ */
+function user_update_1016() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store User entity records.";
+  if (db_table_exists('cache_entity_user')) {
+    db_drop_table('cache_entity_user');
+  }
+  db_create_table('cache_entity_user', $table);
+}
+
+/**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
+  $config->save();
+}
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1018() {
+  $config = config('system.core');
+  $config->set('user_password_reject_weak', FALSE);
+  $config->set('user_password_strength_threshold', 50);
+  $config->save();
+}
+
+/**
+ * Set the "user_admin_role" attribute to "0" (disabled) if it's missing.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  if ($config->get('user_admin_role') == NULL) {
+    $config->set('user_admin_role', 0);
+    $config->save();
+  }
+}
+
+/**
+ * Make sure that all config translatables are set for user mails.
+ */
+function user_update_1020() {
+  $mail_config = config('user.mail');
+  $available = $mail_config->get('_config_translatables');
+  if ($available === NULL || count($available) < 18 ) {
+    // @see core/modules/user/config/user.mail.json
+    $mail_translatables = array(
+      'cancel_confirm_body',
+      'cancel_confirm_subject',
+      'password_reset_body',
+      'password_reset_subject',
+      'register_admin_created_body',
+      'register_admin_created_subject',
+      'register_no_approval_required_body',
+      'register_no_approval_required_subject',
+      'register_pending_approval_body',
+      'register_pending_approval_subject',
+      'register_pending_approval_admin_body',
+      'register_pending_approval_admin_subject',
+      'status_activated_body',
+      'status_activated_subject',
+      'status_blocked_body',
+      'status_blocked_subject',
+      'status_canceled_body',
+      'status_canceled_subject',
+    );
+    if (is_array($available)) {
+      // Consider other values than the default ones from core.
+      $mail_translatables = array_merge($available, $mail_translatables);
+      $mail_translatables = array_values(array_unique($mail_translatables));
+    }
+    $mail_config->set('_config_translatables', $mail_translatables);
+    $mail_config->save();
+  }
+}
+
+/**
+ * Make sure that generation of automatic path alias is enabled for user 1.
+ */
+function user_update_1021() {
+  if (module_exists('path') && config_get('path.settings', 'user_pattern')) {
+    $admin_user = user_load(1);
+    if ($admin_user->path['auto'] == FALSE) {
+      $admin_user->path['auto'] = TRUE;
+      user_save($admin_user);
+    }
+  }
+}
+
+/**
+ * Moves the "log_user_flood_control" variable to config.
+ */
+function user_update_1022() {
+  $config = config('user.flood');
+  $config->set('flood_log_failed_attempts', update_variable_get('log_user_flood_control', TRUE));
+  $config->save();
+
+  update_variable_del('log_user_flood_control');
+}
+
+/**
+ * Add default descriptions to user roles.
+ */
+function user_update_1023() {
+  $config_names = config_get_names_with_prefix('user.role.');
+  $admin_role_name = config_get('system.core', 'user_admin_role');
+
+  // Use role_help module text as a default if available.
+  $role_help = array();
+  if (db_table_exists('role_help')) {
+    $role_help = db_query('SELECT role, summary FROM {role_help}')->fetchAllKeyed();
+    backdrop_set_message(t('Backdrop core now provides most of the functionality of Role Help module. See the <a href="!url">change record for more information</a>.', array('!url' => 'https://docs.backdropcms.org/change-records/user-roles-now-have-descriptions-role-help-module-in-core')), 'warning');
+    // Convert numeric anonymous and authenticated role IDs to string versions.
+    if (isset($role_help['1'])) {
+      $role_help['anonymous'] = $role_help['1'];
+      unset($role_help['1']);
+    }
+    if (isset($role_help['2'])) {
+      $role_help['authenticated'] = $role_help['2'];
+      unset($role_help['2']);
+    }
+  }
+
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $role_name = $config->get('name');
+    if ($config->get('admin_description') === NULL) {
+      $description = '';
+      $admin_description = '';
+
+      // Continue using description set by role_help module if available. The
+      // same description was used for both admin forms and account edit forms.
+      if (isset($role_help[$role_name])) {
+        $description = $role_help[$role_name];
+        $admin_description = $role_help[$role_name];
+      }
+      // Otherwise, use the default descriptions set by user module.
+      elseif ($role_name === 'anonymous') {
+        $admin_description = 'Special role assigned to any site visitor that has not signed into the site.';
+      }
+      elseif ($role_name === 'authenticated') {
+        $description = 'Automatically assigned to all accounts.';
+        $admin_description = 'Special role assigned to all accounts. Permissions assigned to this role are given to all other roles except the anonymous role.';
+      }
+      // Use the default descriptions set by the standard profile.
+      elseif ($role_name === 'editor') {
+        $description = 'Can create and edit content.';
+        $admin_description = 'Role that can edit most content on the site, but cannot modify site configuration settings.';
+      }
+      elseif ($role_name === $admin_role_name) {
+        $description = 'Can manage content and configuration, including the ability to assign roles.';
+        $admin_description = 'This role receives all permissions on the site.';
+      }
+      $config->set('admin_description', $admin_description);
+      $config->set('description', $description);
+      $config->save();
+    }
+  }
 }
 
 /**
