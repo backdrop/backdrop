@@ -3,7 +3,7 @@
     "name": "authenticated",
     "label": "Authenticated",
     "admin_description": "Special role assigned to all accounts. Permissions assigned to this role are given to all other roles except the anonymous role.",
-    "description": "Automatically assigned role to all accounts.",
+    "description": "Automatically assigned to all accounts.",
     "weight": "1",
     "permissions": []
 }
