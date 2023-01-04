@@ -236,8 +236,35 @@ function path_action_info() {
  */
 function path_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
+
+  // Get the alias pattern.
+  $config = config_get('path.settings');
+  if (!empty($config['node_' . $node->type . '_pattern'])) {
+    $pattern = $config['node_' . $node->type . '_pattern'];
+  }
+  else {
+    $pattern = $config['node_pattern'];
+  }
+
   $form['path'] = path_form_element($node);
-  $form['path']['alias']['#description'] = t('The alternative URL for this content. Use a relative path without a trailing slash. For example, enter <code>about</code> for the about page.');
+  $form['path']['alias_description_enabled'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="description">' . t('The alternative URL for this content. Use a relative path without a trailing slash. For example, enter <code>about</code> for the about page.') . '</div>',
+    '#states' => array(
+      'visible' => array(
+        'input.automatic-alias' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['path']['alias_description_disabled'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="description">' . t('The alternative URL for this content, generated automatically based on the pattern: <code>@pattern</code>', array('@pattern' => $pattern)) . '</div>',
+    '#states' => array(
+      'visible' => array(
+        'input.automatic-alias' => array('checked' => TRUE),
+      ),
+    ),
+  );
 }
 
 /**
