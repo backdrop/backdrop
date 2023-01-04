@@ -464,7 +464,7 @@ function taxonomy_vocabulary_overview_access() {
   }
 
   // Check access for each create/update (edit)/delete operation for terms
-  // in all vocabularies and return TRUE if any of them are allowed.
+  // in all vocabularies, and return TRUE if any of them are allowed.
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $operations = array('create', 'edit', 'delete');
   foreach ($vocabularies as $vocabulary) {
@@ -475,7 +475,7 @@ function taxonomy_vocabulary_overview_access() {
     }
   }
 
-  // Deny access if the user doesn't have any permissions for any vocabularies.
+  // Deny access if the user doesn't have any permissions for any vocabulary.
   return FALSE;
 }
 
@@ -508,8 +508,8 @@ function taxonomy_vocabulary_access($op, $vocabulary) {
     return TRUE;
   }
 
-  // Even though "edit" is deprecated it's still in the permissions
-  // so log it as deprecated but still use it.
+  // Even though "edit" is deprecated, it's still in the permissions; so still
+  // use it, but log it as deprecated.
   if ($op == 'edit') {
     $message = 'The function taxonomy_vocabulary_access() was called with the operation <em>edit</em>. This operation is now named <em>update</em>. The <em>edit</em> operation will be removed in the next major release of Backdrop.';
     $variables = array();
@@ -523,7 +523,7 @@ function taxonomy_vocabulary_access($op, $vocabulary) {
   }
   else {
     // Check access for each create/update (edit)/delete operation for terms
-    // in the vocabulary and return TRUE if any of them are allowed.
+    // in the vocabulary, and return TRUE if any of them are allowed.
     $operations = array('create', 'edit', 'delete');
     foreach ($operations as $operation) {
       if (user_access("$operation terms in $vocabulary->machine_name")) {
@@ -537,7 +537,8 @@ function taxonomy_vocabulary_access($op, $vocabulary) {
 }
 
 /**
- * Access callback: Checks a user's permission for performing a taxonomy term operation.
+ * Access callback: Checks a user's permission for performing a taxonomy term
+ * operation.
  *
  * @param string $op
  *   The operation to be performed on the taxonomy term. Possible values are:
