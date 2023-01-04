@@ -3070,6 +3070,13 @@ function user_action_info() {
     );
   }
 
+  $actions['user_save_user_action'] = array(
+    'label' => t('Save user(s)'),
+    'type' => 'user',
+    'callback' => 'user_save_user_action',
+    'file' => 'user.actions.inc',
+  );
+
   return $actions;
 }
 
