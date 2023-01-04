@@ -70,25 +70,28 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#default_value' => $this->options['offset'],
     );
 
-    $form['id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Pager ID'),
-      '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
-      '#default_value' => $this->options['id'],
-    );
-
     $form['total_pages'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => t('Number of pages'),
       '#description' => t('The total number of pages. Leave empty to show all pages.'),
       '#default_value' => $this->options['total_pages'],
     );
 
     $form['quantity'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => t('Number of pager links visible'),
       '#description' => t('Specify the number of links to pages to display in the pager.'),
       '#default_value' => $this->options['quantity'],
+    );
+
+    $form['id'] = array(
+      '#type' => 'number',
+      '#min' => '0',
+      '#title' => t('Pager ID'),
+      '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
+      '#default_value' => $this->options['id'],
     );
 
     $form['tags'] = array (
