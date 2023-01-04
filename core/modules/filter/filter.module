@@ -1310,7 +1310,7 @@ function filter_process_format($element) {
   }
 
   // Remove the Plain text format if not set and other options are available.
-  $fallback_format = config_get('system.core', 'filter_fallback_format');
+  $fallback_format = filter_fallback_format();
   if (($element['#format'] != $fallback_format) && (count($formats) > 1) && array_key_exists($fallback_format, $formats)) {
     unset($formats[$fallback_format]);
   }
@@ -1383,9 +1383,10 @@ function filter_process_format($element) {
     $element['format']['format']['#access'] = TRUE;
   }
   // Disable this widget, if the user is not allowed to use the stored format,
-  // or if the stored format does not exist. The 'administer filters' permission
-  // only grants access to the filter administration, not to all formats.
-  elseif (!$user_has_access || !$format_exists) {
+  // or if the stored format does not exist, and only if the field is not empty.
+  // The 'administer filters' permission only grants access to the filter
+  // administration, not to all formats.
+  elseif ((!$user_has_access || !$format_exists) && !empty($element['#default_value'])) {
     // Overload default values into #value to make them unalterable.
     $element['value']['#value'] = $element['value']['#default_value'];
     $element['format']['format']['#value'] = $element['format']['format']['#default_value'];
