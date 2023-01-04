@@ -1158,7 +1158,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that saving a comment produces a success message.
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Save'));
-    $this->assertText(t('Your comment has been posted.'), 'Comment posted.');
+    $this->assertText(t('Your comment has been updated.'), 'Comment posted.');
 
     // Check that the comment fields are correct after loading the saved comment.
     $this->backdropGet('comment/' . $comment->id . '/edit');
