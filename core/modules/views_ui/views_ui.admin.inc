@@ -3771,13 +3771,26 @@ function views_ui_add_item_form($form, &$form_state) {
   $form['#title'] = t('Add @type', array('@type' => $ltitle));
   $form['#section'] = $display_id . 'add-item';
 
-
   // Add the display override dropdown.
   views_ui_standard_display_dropdown($form, $form_state, $section);
 
-  // Figure out all the base tables allowed based upon what the relationships provide.
+  // Figure out all the base tables allowed, based upon what the relationships
+  // provide.
   $base_tables = $view->get_base_tables();
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
+
+  // Get the sort criteria for the current display. If the sort criteria for the
+  // display have not been overridden, then get the sort criteria specified in
+  // the Master (default) display.
+  $display_sorts = $display->display_options['sorts'] ? $display->display_options['sorts'] : $view->display['default']->display_options['sorts'];
+  if ($display_sorts) {
+    // Go through all the sort criteria that have already been added to the
+    // current display, and remove them from the list of available criteria.
+    foreach ($display_sorts as $display_sort) {
+      $option_to_remove = $display_sort['table'] . '.' . $display_sort['id'];
+      unset($options[$option_to_remove]);
+    }
+  }
 
   if (!empty($options)) {
     $form['options']['controls'] = array(
