@@ -11,10 +11,15 @@
  */
 class views_plugin_pager_mini extends views_plugin_pager_full {
   function summary_title() {
-    if (!empty($this->options['offset'])) {
-      return format_plural($this->options['items_per_page'], 'Mini pager, @count item, skip @skip', 'Mini pager, @count items, skip @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
+    $settings_summary = format_plural($this->options['items_per_page'], '1 item per page', '@count items per page', array('@count' => $this->options['items_per_page']));
+    if (!empty($this->options['total_pages'])) {
+      $settings_summary = format_plural($this->options['total_pages'], '1 page', '@count pages', array('@count' => $this->options['total_pages'])) . ', ' . $settings_summary;
     }
-      return format_plural($this->options['items_per_page'], 'Mini pager, @count item', 'Mini pager, @count items', array('@count' => $this->options['items_per_page']));
+    if (!empty($this->options['offset'])) {
+      $settings_summary .= ', ' . t('skip the first @skip items', array('@skip' => $this->options['offset']));
+    }
+
+    return $settings_summary;
   }
 
   /**

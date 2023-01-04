@@ -437,7 +437,8 @@ function views_views_plugins() {
         'parent' => '',
       ),
       'none' => array(
-        'title' => t('Display all items'),
+        'title' => t('No pager, display all items'),
+        'short title' => t('No pager'),
         'help' => t("Display all items that this view might find"),
         'handler' => 'views_plugin_pager_none',
         'help topic' => 'pager-none',
@@ -445,7 +446,8 @@ function views_views_plugins() {
         'type' => 'basic',
       ),
       'some' => array(
-        'title' => t('Display a specified number of items'),
+        'title' => t('No pager, display a specified number of items'),
+        'short title' => t('No pager'),
         'help' => t('Display a limited number items that this view might find.'),
         'handler' => 'views_plugin_pager_some',
         'help topic' => 'pager-some',
@@ -454,7 +456,7 @@ function views_views_plugins() {
       ),
       'full' => array(
         'title' => t('Paged output, full pager'),
-        'short title' => t('Full'),
+        'short title' => t('Full pager'),
         'help' => t('Paged output, full Backdrop style'),
         'handler' => 'views_plugin_pager_full',
         'help topic' => 'pager-full',
@@ -462,7 +464,7 @@ function views_views_plugins() {
       ),
       'mini' => array(
         'title' => t('Paged output, mini pager'),
-        'short title' => t('Mini'),
+        'short title' => t('Mini pager'),
         'help' => t('Use the mini pager output.'),
         'handler' => 'views_plugin_pager_mini',
         'help topic' => 'pager-mini',

@@ -19,10 +19,12 @@ class views_plugin_pager_none extends views_plugin_pager {
   }
 
   function summary_title() {
+    $settings_summary = t('Display all items');
     if (!empty($this->options['offset'])) {
-      return t('All items, skip @skip', array('@skip' => $this->options['offset']));
+      $settings_summary .= ', ' . t('skip the first @skip', array('@skip' => $this->options['offset']));
     }
-    return t('All items');
+
+    return $settings_summary;
   }
 
   function option_definition() {
