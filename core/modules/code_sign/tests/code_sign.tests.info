@@ -1,0 +1,5 @@
+[CodeSignTestCase]
+name = Code Sign functionality
+description = Test the basic signing and verification features of Code Sign.
+group = Code Sign
+file = code_sign.test

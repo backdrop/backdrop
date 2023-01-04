@@ -1,0 +1,10 @@
+name = Hashing Code Sign
+description = Sample module to demonstrate Code Sign engine modules.
+package = Security
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = module
+dependencies[] = code_sign
+
+; This module is intended for testing and demostration purposes.
+hidden = true

@@ -1,0 +1,89 @@
+<?php
+
+/**
+ * @file
+ * Tests for code_sign.module.
+ */
+
+/**
+ * Tests the functionality of the Code Sign module.
+ */
+class CodeSignTestCase extends BackdropWebTestCase {
+  /**
+   * A user with permission to use the admin interface.
+   *
+   * @var object
+   */
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('code_sign', 'code_sign_hash'));
+
+    $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
+  }
+
+  function testCodeSignSignature() {
+    $test_data = $this->randomString(1024);
+    $good_sig = 'sha256:' . hash('sha256', $test_data);
+    $bad_sig = 'sha256:' . hash('sha256', $good_sig);
+
+    $signature = code_sign_sign('hash', 'default', $test_data);
+    $this->assertIdentical($signature, $good_sig, 'Valid signature.');
+
+    // Test verification of both a good and a bad signature.
+    $this->assertTrue(code_sign_verify('hash', $test_data, $signature), 'Verified signature.');
+    $this->assertIdentical(code_sign_verify('hash', $test_data, $bad_sig), FALSE, 'Invalid signature.');
+    $this->assertIdentical(code_sign_verify('hash', $this->randomString(1024), $signature), FALSE, 'Mismatched signature and data.');
+
+    // Test bad input to code_sign_sign();
+    $this->assertNull(code_sign_sign('bogus', 'default', $test_data), 'Invalid engine.');
+    $this->assertNull(code_sign_sign('hash', 'bad_profile', $test_data), 'Invalid profile.');
+  }
+
+  function testCodeSignKeychains() {
+    $hashes = hash_algos();
+    $this->assertIdentical(code_sign_get_public_keychain('hash'), array_combine($hashes, $hashes), 'Public keychain list.');
+  }
+
+  function testCodeSignAdminInterface() {
+    $this->backdropGet('admin/config/system/code-sign');
+    $this->assertText('You are not authorized to access this page.', 'Access to code sign admin.');
+
+    $this->backdropGet('admin/config/system/code-sign/hash');
+    $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash admin.');
+
+    $this->backdropLogin($this->admin_user);
+
+    $this->backdropGet('admin/config/system/code-sign');
+    $this->assertText('A dummy admin page', 'Dummy admin page is present.');
+    $this->assertText('Hash Signing', 'Hash signing module.');
+
+    $this->backdropGet('admin/config/system/code-sign/hash');
+    $this->assertText('Default', 'Default signing algorithm is present.');
+    $this->assertText('sha256', 'Hash algorithm.');
+    $this->assertLinkByHref('admin/config/system/code-sign/hash/default/edit');
+    $this->assertLinkByHref('admin/config/system/code-sign/hash/default/delete');
+  }
+
+  function testCodeSignAddDeleteHash() {
+    $this->backdropGet('admin/config/system/code-sign/hash/add');
+    $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash add hash.');
+
+    $this->backdropLogin($this->admin_user);
+
+    // Create a hash
+    $new_hash = array(
+        'profile[name]' => $this->randomString(),
+        'profile[machine_name]' => strtolower($this->randomName()),
+        'profile[hash_algorithm]' => 'md5',
+    );
+    $this->backdropGet('admin/config/system/code-sign/hash');
+    $this->assertNoText($new_hash['profile[name]']);
+    $this->backdropPost('admin/config/system/code-sign/hash/add', $new_hash, t('Save profile'));
+    $this->assertText($new_hash['profile[name]'], 'New hash added.');
+
+    // And delete it.
+    $this->backdropPost('admin/config/system/code-sign/hash/' . $new_hash['profile[machine_name]'] . '/delete', array(), t('Delete'));
+    $this->assertNoText($new_hash['profile[name]']);
+  }
+}
