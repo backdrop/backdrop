@@ -88,11 +88,31 @@ function theme_system_themes_page($variables) {
 
   $output = '<div id="system-themes-page">';
 
+  // @todo Remove check for on admin_bar. https://github.com/backdrop/backdrop-issues/issues/5664
+  if (module_exists('admin_bar')) {
+    // If we have a cached menu for the current user, only output the hash
+    // for the client-side HTTP cache callback URL.
+    global $user, $language;
+    $cid = 'admin_bar:' . $user->uid . ':' . session_id() . ':' . $language->langcode;
+    if ($hash = admin_bar_cache_get($cid)) {
+      $options = array(
+        'attributes' => array('class' => array('button')),
+        'query' => array('token' => $hash, backdrop_get_destination()),
+      );
+      $output .= '<div class="system-themes-cache-buttons message-info">';
+      $output .= '<p>' . t('Not seeing theme changes? Clear the CSS/JS cache if existing files have changed. Rebuild the theme registry if new files or functions have been added to your theme.') . '</p>';
+      $output .= l(t('Flush CSS/JS cache'), 'admin_bar/flush-cache/assets', $options);
+      $output .= l(t('Rebuild theme registry'), 'admin_bar/flush-cache/theme', $options);
+      $output .= '</div>';
+    }
+  }
+
   foreach ($variables['theme_group_titles'] as $state => $title) {
     if (!count($theme_groups[$state])) {
       // Skip this group of themes if no theme is there.
       continue;
     }
+
     // Start new theme group.
     $output .= '<div class="system-themes-list system-themes-list-'. $state .' clearfix"><h2>'. $title .'</h2>';
 
@@ -121,8 +141,9 @@ function theme_system_themes_page($variables) {
         $output .= '<div class="incompatible">' . t('This theme requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $theme->info['php'], '!php_version' => phpversion())) . '</div>';
       }
       else {
-        $output .= theme('links', array('links' => $theme->operations, 'attributes' => array('class' => array('operations', 'clearfix'))));
+        $output .= theme('links', array('links' => $theme->operations, 'attributes' => array('class' => array('operations'))));
       }
+
       $output .= '</div></div>';
     }
     $output .= '</div>';

@@ -266,6 +266,19 @@ table.screenshot {
 .theme-info p {
   margin-top: 0;
 }
+.system-themes-cache-buttons {
+  text-align: right;
+  border-bottom: 1px solid #cdcdcd;
+}
+[dir="rtl"] .system-themes-cache-buttons {
+  text-align: left;
+}
+.system-themes-cache-buttons p {
+  text-align: left;
+}
+[dir="rtl"] .system-themes-cache-buttons p {
+  text-align: right;
+}
 .system-themes-list {
   margin-bottom: 20px;
 }
@@ -375,8 +388,8 @@ table.screenshot {
   padding: 0;
 }
 .theme-selector .operations li {
-  float: left; /* LTR */
-  margin: 0;
+  display: inline-block;
+  margin: .5em 0 1em 0;
   padding: 0 0.7em;
   list-style-type: none;
   border-right: 1px solid #cdcdcd;  /* LTR */
@@ -384,7 +397,6 @@ table.screenshot {
 [dir="rtl"] .theme-selector .operations li {
   border-right: none;
   border-left: 1px solid #cdcdcd;
-  float: right;
 }
 .theme-selector .operations li.last {
   padding: 0 0 0 0.7em; /* LTR */
