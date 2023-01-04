@@ -934,7 +934,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertEqual((string) $display_links[0], t('Page'));
     $this->assertEqual((string) $display_links[1], t('Block'));
 
-    $this->clickLink('reorder displays');
+    $this->clickLink('Reorder displays');
 
     $edit = array(
       'page[weight]' => 1,
