@@ -2443,8 +2443,17 @@ function form_type_checkbox_value($element, $input = FALSE) {
  */
 function form_type_checkboxes_value($element, $input = FALSE) {
   if ($input === FALSE) {
+    // If #default_value was not set, set it to an empty array.
+    if (!isset($element['#default_value'])) {
+      $element['#default_value'] = array();
+    }
+    // If #default_value was not provided in the form of an array, convert it to
+    // one.
+    if (!is_array($element['#default_value'])) {
+      $element['#default_value'] = array($element['#default_value']);
+    }
+
     $value = array();
-    $element += array('#default_value' => array());
     foreach ($element['#default_value'] as $key) {
       $value[$key] = $key;
     }
