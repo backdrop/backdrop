@@ -1358,19 +1358,11 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       $children = $parent_block->getChildren();
       if (is_array($children)) {
         foreach ($children as $child_id => $child_info) {
-          // Skip blocks that don't have context requirements met.
-          $required_contexts = isset($child_info['required contexts']) ? $child_info['required contexts'] : array();
-          if ($layout->hasContexts($required_contexts)) {
-            $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
-          }
+          $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
         }
       }
       else {
-        $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
-        // Skip blocks that don't have context requirements met.
-        if ($layout->hasContexts($required_contexts)) {
-          $block_list[$module . ':' . $delta] = $block_info;
-        }
+        $block_list[$module . ':' . $delta] = $block_info;
       }
     }
   }
@@ -1402,9 +1394,10 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   );
 
   foreach ($block_list as $key => $block_info) {
-    $output['block_list']['block_list_inner'][$key] = array(
-      '#type' => 'item',
-      '#markup' => l(
+    $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
+    $description = isset($block_info['description']) ? $block_info['description'] : NULL;
+    if ($layout->hasContexts($required_contexts)) {
+      $link = l(
         $block_info['info'],
         'admin/structure/layouts/manage/' . $layout->name . '/add-block/' . $renderer_name . '/' . $region_name . '/' . $key,
         array(
@@ -1414,11 +1407,49 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
             'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
           )
         )
-      ),
-      '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
-      '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
+      );
+      $requirements_class = 'has-required-contexts';
+    }
+    else {
+      // Remove the main page content block since it's special.
+      if ($block_info['info'] == 'Main page content') {
+        continue;
+      }
+
+      $link = $block_info['info'];
+      $requirements_class = 'missing-required-contexts';
+
+      if (count($required_contexts) == 1) {
+        $required_context = reset($required_contexts);
+        $context_info = layout_get_context_info($required_context);
+        // Grab the first value in the menu paths, to use as an example.
+        $example_path = isset($context_info['menu paths']) ? $context_info['menu paths'][0] : FALSE;
+
+        if ($example_path) {
+          $required_contexts[$required_context] .= ' (' . t('for example: on the path <code>@example_path</code>', array('@example_path' => $example_path)) . ')';
+        }
+      }
+      else {
+        // Multiple contexts required.
+        $required_contexts = array_keys($block_info['required contexts']);
+      }
+      $requirements_info = '<span class="requirement-prefix">' . t('Requires') . ':</span>';
+      $requirements_info .= ' ' . t('A layout with the following contexts available:');
+      $requirements_info .= theme('item_list', array('items' => $required_contexts));
+      $description .= '<div class="requirement">' . $requirements_info . '</div>';
+    }
+
+    $output['block_list']['block_list_inner'][$key] = array(
+      '#type' => 'item',
+      '#markup' => $link,
+      '#description' => $description,
+      '#wrapper_attributes' => array('class' => array('layout-block-add-row', $requirements_class))
     );
   }
+
+  // Ensure that layout-specific styles are loaded when there is no JavaScript
+  // available.
+  $output['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
 
   return $output;
 }
