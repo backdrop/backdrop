@@ -11,9 +11,9 @@
   margin-right: .8em; /* LTR */
   margin: 0.1em;
   /**
-   * In Opera 9, DOM elements with the property of "overflow: auto"
-   * will partially hide its contents with unnecessary scrollbars when
-   * its immediate child is floated without an explicit width set.
+   * In Opera 9, DOM elements with the property of "overflow: auto" will
+   * partially hide its contents with unnecessary scrollbars when its immediate
+   * child is floated without an explicit width set.
    */
   width: 15em;
 }
@@ -34,6 +34,17 @@
 [dir="rtl"] .locale-translation-filter-form .form-actions {
   float: right;
   padding: 3ex 1em 0 0;
+}
+.language-switcher.links.inline li {
+  padding: 0;
+}
+.language-switcher.links.inline li:after {
+  content: attr(data-list-delimiter);
+  padding: 0 0.6em;
+  color: gray;
+}
+.language-switcher.links.inline li:last-child:after {
+  content: '';
 }
 .language-switcher-locale-session a.active {
   color: #0062a0;
