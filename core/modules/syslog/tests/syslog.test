@@ -19,7 +19,7 @@ class SyslogTestCase extends BackdropWebTestCase {
     $edit = array();
     // If we're on Windows, there is no configuration form.
     if (defined('LOG_LOCAL6')) {
-      $this->backdropPost('admin/config/development/logging', array('syslog_facility' => LOG_LOCAL6), t('Save configuration'));
+      $this->backdropPost('admin/config/development/logging', array('log_facility' => LOG_LOCAL6), t('Save configuration'));
       $this->assertText(t('The configuration options have been saved.'));
 
       $this->backdropGet('admin/config/development/logging');

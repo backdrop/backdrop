@@ -25,42 +25,41 @@ else {
  */
 function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
   $config = config('system.core');
-  $help = module_exists('help') ? ' ' . l(t('More information'), 'admin/help/syslog') . '.' : NULL;
-  $form['syslog_identity'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Syslog identity'),
+
+  $form['syslog'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('System log'),
+  );
+  $form['syslog']['log_identity'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Syslog identity'),
     '#default_value' => $config->get('log_identity'),
-    '#description'   => t('A string that will be prepended to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.') . $help,
+    '#description' => t('A prefix added to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.'),
   );
   if (defined('LOG_LOCAL0')) {
-    $form['syslog_facility'] = array(
-      '#type'          => 'select',
-      '#title'         => t('Syslog facility'),
+    $form['syslog']['log_facility'] = array(
+      '#type' => 'select',
+      '#title' => t('Syslog facility'),
       '#default_value' => $config->get('log_facility'),
-      '#options'       => syslog_facility_list(),
-      '#description'   => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.') . $help,
-     );
+      '#options' => syslog_facility_list(),
+      '#description' => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.'),
+    );
   }
-  $form['syslog_format'] = array(
-    '#type'          => 'textarea',
-    '#title'         => t('Syslog format'),
-    '#default_value' => $config->get('log_format'),
-    '#description'   => t('Specify the format of the syslog entry. Available variables are: <dl><dt><code>!base_url</code></dt><dd>Base URL of the site.</dd><dt><code>!timestamp</code></dt><dd>Unix timestamp of the log entry.</dd><dt><code>!type</code></dt><dd>The category to which this message belongs.</dd><dt><code>!ip</code></dt><dd>IP address of the user triggering the message.</dd><dt><code>!request_uri</code></dt><dd>The requested URI.</dd><dt><code>!referer</code></dt><dd>HTTP Referer if available.</dd><dt><code>!uid</code></dt><dd>User ID.</dd><dt><code>!link</code></dt><dd>A link to associate with the message.</dd><dt><code>!message</code></dt><dd>The message to store in the log.</dd></dl>'),
-  );
-  $form['#submit'][] = 'syslog_logging_settings_submit';
-}
 
-/**
- * Form submission handler for system_logging_settings().
- *
- * @see syslog_form_system_logging_settings_alter()
- */
-function syslog_logging_settings_submit($form, &$form_state) {
-  config('system.core')
-    ->set('log_identity', $form_state['values']['syslog_identity'])
-    ->set('log_facility', $form_state['values']['syslog_facility'])
-    ->set('log_format', $form_state['values']['syslog_format'])
-    ->save();
+  $form['syslog']['log_format'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Log entry format'),
+    '#description' => t('Although it is possible for syslog entries to have multiple rows, it is not best practice. Try to keep each log entry a single row, to avoid possible issues when parsing the log.'),
+    '#default_value' => $config->get('log_format'),
+    '#rows' => 1,
+  );
+  $form['syslog']['message_tokens'] = array(
+    '#theme' => 'token_tree_link',
+    '#text' => t('Browse available tokens for the syslog entry'),
+    '#token_types' => array('syslog'),
+    '#global_types' => FALSE,
+    '#click_insert' => TRUE,
+  );
 }
 
 /**
@@ -101,15 +100,15 @@ function syslog_watchdog(array $log_entry) {
   }
 
   $message = strtr($config->get('log_format'), array(
-    '!base_url'    => $base_url,
-    '!timestamp'   => $log_entry['timestamp'],
-    '!type'        => $log_entry['type'],
-    '!ip'          => $log_entry['ip'],
+    '!base_url' => $base_url,
+    '!timestamp' => $log_entry['timestamp'],
+    '!type' => $log_entry['type'],
+    '!ip' => $log_entry['ip'],
     '!request_uri' => $log_entry['request_uri'],
-    '!referer'     => $log_entry['referer'],
-    '!uid'         => $log_entry['uid'],
-    '!link'        => strip_tags((string) $log_entry['link']),
-    '!message'     => strip_tags((string) (!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']))),
+    '!referer' => $log_entry['referer'],
+    '!uid' => $log_entry['uid'],
+    '!link' => strip_tags((string) $log_entry['link']),
+    '!message' => strip_tags(!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables'])),
   ));
 
   syslog($log_entry['severity'], $message);
