@@ -235,7 +235,7 @@
                         "relationship": "uid",
                         "group_type": "group",
                         "ui_name": "",
-                        "label": "Name",
+                        "label": "Author",
                         "exclude": 0,
                         "element_type": "",
                         "element_class": "",
