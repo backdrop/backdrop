@@ -110,6 +110,10 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     if ($install_profile_module_exists) {
       module_enable(array($this->profile), FALSE);
     }
+
+    // Reset/rebuild all data structures.
+    $this->resetAll();
+
     return TRUE;
   }
 
