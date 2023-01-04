@@ -532,9 +532,13 @@ function user_access($permission_name, $account = NULL) {
  */
 function user_is_blocked($name) {
   return db_select('users')
-    ->fields('users', array('name'))
-    ->condition('name', db_like($name), 'LIKE')
+    ->fields('users', array('name', 'mail'))
     ->condition('status', 0)
+    ->condition(
+      db_or()
+        ->condition('name', db_like($name), 'LIKE')
+        ->condition('mail', db_like($name), 'LIKE')
+    )
     ->execute()->fetchObject();
 }
 
