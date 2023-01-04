@@ -32,8 +32,14 @@ function admin_bar_output($complete = FALSE) {
 
   // Rebuild the output.
   if (!isset($content)) {
-    // Retrieve enabled components to display and make them available for others.
+    // Retrieve all admin bar components.
     $components = $config->get('components');
+    // Remove any disabled components.
+    foreach ($components as $component => $value) {
+      if ($value === 0) {
+        unset($components[$component]);
+      }
+    }
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
