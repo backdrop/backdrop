@@ -2708,6 +2708,10 @@ function node_access($op, $node, $account = NULL) {
  * @return string
  */
 function node_node_access($node, $op, $account) {
+  if (!isset($node) && user_access('administer nodes', $account)) {
+    return NODE_ACCESS_ALLOW;
+  } 
+
   $type = is_string($node) ? $node : $node->type;
 
   if (in_array($type, node_permissions_get_configured_types())) {
