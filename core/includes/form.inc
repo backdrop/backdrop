@@ -2822,6 +2822,9 @@ function form_process_select($element) {
 function theme_select($variables) {
   $element = $variables['element'];
   element_set_attributes($element, array('id', 'name', 'size'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-select'));
 
   return '<select' . backdrop_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
@@ -3198,6 +3201,9 @@ function theme_html_date($variables) {
   $attributes['type'] = 'date';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
+  if (!empty($element['#required'])) {
+    $attributes['required'] = 'required';
+  }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
@@ -3225,6 +3231,9 @@ function theme_html_time($variables) {
     if ($element['#attributes']['step'] == 60) {
       $attributes['step'] = 60;
     }
+  }
+  if (!empty($element['#required'])) {
+    $attributes['required'] = 'required';
   }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
@@ -3417,6 +3426,9 @@ function theme_checkbox($variables) {
   // Unchecked checkbox has #value of integer 0.
   if (!empty($element['#checked'])) {
     $element['#attributes']['checked'] = 'checked';
+  }
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
   }
   _form_set_class($element, array('form-checkbox'));
 
@@ -4321,6 +4333,9 @@ function theme_textfield($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'text';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-text'));
 
   $extra = '';
@@ -4357,6 +4372,9 @@ function theme_email($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'email';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-email'));
 
   $extra = '';
@@ -4407,6 +4425,9 @@ function theme_search($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'search';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-search'));
 
   $extra = '';
@@ -4443,6 +4464,9 @@ function theme_tel($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'tel';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-tel'));
 
   $extra = '';
@@ -4479,6 +4503,9 @@ function theme_url($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'url';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-url'));
 
   $extra = '';
@@ -4570,6 +4597,9 @@ function theme_number($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'number';
   element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-number'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />' . backdrop_render_children($element);
@@ -4683,6 +4713,9 @@ function theme_form($variables) {
 function theme_textarea($variables) {
   $element = $variables['element'];
   element_set_attributes($element, array('id', 'name', 'rows', 'cols', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-textarea'));
 
   $wrapper_attributes = array(
@@ -4716,6 +4749,9 @@ function theme_password($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'password';
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-text'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
@@ -4765,6 +4801,9 @@ function theme_file($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'file';
   element_set_attributes($element, array('id', 'name', 'size'));
+  if (!empty($element['#required'])) {
+    $element['#attributes']['required'] = 'required';
+  }
   _form_set_class($element, array('form-file'));
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
@@ -4838,6 +4877,14 @@ function theme_form_element($variables) {
     if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
       $attributes['class'][] = 'form-error';
     }
+
+    // Make sure that groups of radios are announced as "radiogroup".
+    if ($element['#type'] == 'radios') {
+      $attributes['role'] = 'radiogroup';
+      if (!empty($element['#required'])) {
+        $attributes['aria-required'] = 'true';
+      }
+    }
   }
   if (!empty($element['#name'])) {
     $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
@@ -4895,11 +4942,14 @@ function theme_form_element($variables) {
 function theme_form_required_marker($variables) {
   // This is also used in the installer, pre-database setup.
   $t = get_t();
+  $title = $t('This field is required.');
   $attributes = array(
     'class' => 'form-required',
-    'title' => $t('This field is required.'),
+    'title' => $title,
+    'aria-hidden' => 'true',
   );
-  return '<abbr' . backdrop_attributes($attributes) . '>*</abbr>';
+  $invisible = '<span class="element-invisible">' . $title . '</span>';
+  return '<abbr' . backdrop_attributes($attributes) . '>*</abbr>' . $invisible;
 }
 
 /**
