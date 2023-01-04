@@ -1,4 +1,4 @@
-name = Locale
+name = Interface Translation
 description = Provides language negotiation functionality and user interface translation to languages other than English.
 package = Translation
 tags[] = Language
