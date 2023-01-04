@@ -122,6 +122,7 @@ function standard_install() {
       'description' => st("Add a page with static content, like the 'About' page."),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
+        'scheduling_enabled' => FALSE,
         'promote_enabled' => FALSE,
         'node_preview' => TRUE,
         'promote_default' => FALSE,
