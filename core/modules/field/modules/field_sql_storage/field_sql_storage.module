@@ -12,6 +12,7 @@ function field_sql_storage_field_storage_info() {
     'field_sql_storage' => array(
       'label' => t('Default SQL storage'),
       'description' => t('Stores fields in the local SQL database, using per-field tables.'),
+      'validate' => 'db_table_exists',
     ),
   );
 }
