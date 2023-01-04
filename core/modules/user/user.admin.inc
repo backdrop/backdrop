@@ -235,7 +235,8 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_picture_default'),
     '#size' => 30,
     '#maxlength' => 255,
-    '#description' => t('URL of picture to display for users with no custom picture selected. Leave blank for none.'),
+    '#description' => t('URL of picture to display for users with no custom picture selected. If URL starts with Backdrop-provided scheme like
+<code>public://</code> or <code>private://</code>, the picture display style below will be used.'),
   );
   if (module_exists('image')) {
     $form['personalization']['pictures']['settings']['user_picture_style'] = array(
