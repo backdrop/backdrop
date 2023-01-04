@@ -1829,7 +1829,7 @@ function user_login_authenticate_validate($form, &$form_state) {
   $name = trim($form_state['values']['name']);
   $password = trim($form_state['values']['pass']);
   $flood_config = config('user.flood');
-  if (strlen($name) && strlen($password)) {
+  if (strlen($name)) {
     // Do not allow any login from the current user's IP if the limit has been
     // reached. Default is 50 failed attempts allowed in one hour. This is
     // independent of the per-user limit to catch attempts from one IP to log
