@@ -24,6 +24,10 @@
 fieldset.date-combo .container-inline-date > .form-item {
   margin-bottom: 10px;
 }
+fieldset.date-combo .fieldset-wrapper > .form-item {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .container-inline-date .form-item {
   display: inline-block;
   vertical-align: baseline;
