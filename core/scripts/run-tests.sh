@@ -60,6 +60,19 @@
  *
  *  --verbose   Output detailed assertion messages in addition to summary.
  *
+ *  --skip <class[::test]>[,class[::test],...]
+ *
+ *              Skip the listed tests and/or classes, comma delimited.  With just a
+ *              test class (e.g., TaxonomyTermTestCase), all the tests in that class
+ *              will be skipped.  A specific test in the test class can be specified
+ *              with TestClass::testName. To skip testTaxonomyGetTermByName, use
+ *              "--skip TaxonomyTermTestCase::testTaxonomyGetTermByName".
+ *
+ *  --skip-file <file>
+ *
+ *              Skip the tests and/or classes listed in <file>, one test per line. The
+ *              file .simpletestignore follows the same format and is always read.
+ *
  *  --summary [file]
  *
  *              Output errors and exception messages to summary file.
@@ -77,12 +90,14 @@
  *  @code
  *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ --all
  *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ BlockTestCase
+ *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ --all --skip BlockTestCase
  *  @endcode
  */
 
 define('SIMPLETEST_SCRIPT_COLOR_PASS', 32);
 define('SIMPLETEST_SCRIPT_COLOR_FAIL', 31);
 define('SIMPLETEST_SCRIPT_COLOR_EXCEPTION', 33);
+define('SIMPLETEST_SCRIPT_COLOR_SKIP', 36);
 
 // Set defaults and get overrides.
 list($args, $count) = simpletest_script_parse_args();
@@ -301,6 +316,19 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
+  --skip <class[::test]>[,class[::test],...]
+
+              Skip the listed tests and/or classes, comma delimited.  With just a
+              test class (e.g., TaxonomyTermTestCase), all the tests in that class
+              will be skipped.  A specific test in the test class can be specified
+              with TestClass::testName. To skip testTaxonomyGetTermByName, use
+              "--skip TaxonomyTermTestCase::testTaxonomyGetTermByName".
+
+  --skip-file <file>
+
+              Skip the tests and/or classes listed in <file>, one test per line. The
+              file .simpletestignore follows the same format and is always read.
+
   --cache     Generate cache for instalation profiles to boost tests speed.
 
   --myisam-convert
@@ -355,6 +383,8 @@ function simpletest_script_parse_args() {
     'color' => FALSE,
     'verbose' => FALSE,
     'test_names' => array(),
+    'skip' => '',
+    'skip-file' => '',
     // Used internally.
     'test-id' => 0,
     'execute-test' => '',
@@ -566,12 +596,15 @@ function simpletest_script_run_one_test($test_id, $test_class) {
     $info = simpletest_test_get_by_class($test_class);
     include_once BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
     $test = new $test_class($test_id);
+    $test->skipTests = simpletest_skip_list($test_class);
     $test->run();
 
     $had_fails = (isset($test->results['#fail']) && $test->results['#fail'] > 0);
     $had_exceptions = (isset($test->results['#exception']) && $test->results['#exception'] > 0);
-    $status = ($had_fails || $had_exceptions ? 'fail' : 'pass');
-    simpletest_script_print($info['group'] . ': ' . $info['name'] . ' (' . $test_class . ') ' . _simpletest_format_summary_line($test->results) . "\n", $status);
+    $had_skipped = (!$had_fails && !$had_exceptions && $test->results['#skip'] > 0);
+    $status = ($had_fails || $had_exceptions ? 'fail' : ($had_skipped ? 'skip' : 'pass'));
+    $summary = _simpletest_format_summary_line($test->results);
+    simpletest_script_print($info['group'] . ': ' . $info['name'] . ' (' . $test_class . ') ' . $summary . "\n", $status);
 
     // Finished, kill this runner.
     exit(0);
@@ -596,6 +629,12 @@ function simpletest_script_command($test_id, $test_class) {
   $command = escapeshellarg($php) . ' ' . escapeshellarg('./core/scripts/' . $args['script']) . ' --url ' . escapeshellarg($args['url']);
   if ($args['color']) {
     $command .= ' --color';
+  }
+  if ($args['skip']) {
+    $command .= ' --skip ' . $args['skip'];
+  }
+  if ($args['skip-file']) {
+    $command .= ' --skip-file ' . $args['skip-file'];
   }
   $command .= " --php " . escapeshellarg($php) . " --test-id $test_id --execute-test $test_class";
   return $command;
@@ -717,6 +756,66 @@ function simpletest_script_get_test_list() {
 }
 
 /**
+ * Maintain a list of tests to skip.
+ *
+ * The skip list is pulled from up to three places, a `.simpletestignore
+ * file in the directory the tests are being run, usually BACKDROP_ROOT,
+ * the --skip command line option, and the --skip-file command line
+ * option.
+ *
+ * The `.simpletestignore` file and the file specified by --skip-file
+ * should have one test class per line.  The command line option should
+ * be comma delimited.
+ *
+ * @param $test_class
+ *  The name of the test class to check.  If NULL, return the full list of
+ *  tests to skip, indexed by test class name.
+ *
+ * @return
+ *  TRUE if the entire test class should be skipped or an array of
+ *  tests to skip, which may be an empty array.
+ */
+function simpletest_skip_list($test_class=NULL) {
+  static $skip_list = NULL;
+  global $args;
+
+  if ($skip_list === NULL) {
+    // Collect the raw list of tests to skip.
+    $skip_list_raw = array();
+    if ($args['skip']) {
+      $skip_list_raw = array_merge($skip_list_raw, explode(',', $args['skip']));
+    }
+    if (file_exists('.simpletestignore')) {
+      $skip_list_raw = array_merge($skip_list_raw, file('.simpletestignore'));
+    }
+    if (file_exists($args['skip-file'])) {
+      $skip_list_raw = array_merge($skip_list_raw, file($args['skip-file']));
+    }
+    $skip_list_raw = array_map('trim', $skip_list_raw);
+
+    // Process the raw list to a keyed array that looks like
+    // 'TestClass1' => array( 'testCase1', 'testCase2' ), 'TestClass2' => TRUE.
+    $skip_list = array();
+    foreach ($skip_list_raw as $value) {
+      if (strpos($value, '::')) {
+        list($test_case, $test_name) = explode('::', $value, 2);
+        if (!array_key_exists($test_case, $skip_list) || is_array($skip_list[$test_case])) {
+          $skip_list[$test_case][] = $test_name;
+        }
+      }
+      else {
+        $skip_list[$value] = TRUE;
+      }
+    }
+  }
+
+  if ($test_class === NULL) {
+    return $skip_list;
+  }
+  return array_key_exists($test_class, $skip_list) ? $skip_list[$test_class] : array();
+}
+
+/**
  * Initialize the reporter.
  */
 function simpletest_script_reporter_init() {
@@ -725,8 +824,10 @@ function simpletest_script_reporter_init() {
   $results_map = array(
     'pass' => 'Pass',
     'fail' => 'Fail',
+    'skip' => 'Skipped',
     'exception' => 'Exception'
   );
+  $skip_list = array();
 
   echo "\n";
   echo "Backdrop test run\n";
@@ -735,18 +836,57 @@ function simpletest_script_reporter_init() {
 
   // Tell the user about what tests are to be run.
   if ($args['all']) {
+    $skip_list = simpletest_skip_list();
     $part_message = '';
     if ($args['split']) {
       list($part, $total) = explode('/', $args['split']);
       $part_message = " (part $part of $total)";
     }
-    echo "All tests will run$part_message.\n\n";
+    if ($skip_list) {
+      echo "All tests will run, except: $part_message\n";
+    }
+    else {
+      echo "All tests will run$part_message.\n\n";
+    }
   }
   else {
     echo "Tests to be run:\n";
     foreach ($test_list as $class_name) {
       $info = simpletest_test_get_by_class($class_name);
+      $skipped_tests = simpletest_skip_list($class_name);
+      if ($skipped_tests === TRUE) {
+        // If skipping all the tests, don't list in the "to be run" list.
+        // Instead, put it in a separate "to be skipped" list below.
+        $skip_list[$class_name] = TRUE;
+        continue;
+      }
       echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
+      if ($skipped_tests && is_array($skipped_tests)) {
+        echo "     except " . implode(', ', $skipped_tests) . "\n";
+      }
+    }
+    echo "\n";
+  }
+
+  if ($skip_list) {
+    if (!$args['all']) {
+      // When running all tests, we already say "except" above.
+      // When running a list of tests, we need a "to be skipped" header.
+      echo "Tests to be skipped:\n";
+    }
+    foreach ($skip_list as $class_name => $tests) {
+      if (in_array($class_name, $test_list)) {
+        $info = simpletest_test_get_by_class($class_name);
+        if ($tests === TRUE) {
+          echo " - " . $info['name'] . ' (' . $class_name . ')' . ": All\n";
+        }
+        else {
+          echo " - " . $info['name'] . ' (' . $class_name . ')' . "\n";
+          foreach ($tests as $test_func) {
+            echo "   - " . $test_func . "\n";
+          }
+        }
+      }
     }
     echo "\n";
   }
@@ -797,7 +937,7 @@ function simpletest_script_write_summary($summary_file) {
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
 
-  $total_count = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN ('fail', 'pass')", array(':test_id' => $test_id))->fetchField();
+  $total_count = simpletest_get_test_count_by_status(array('fail', 'pass'));
   if(!empty($summary)){
     $summary = format_plural($count, '1 of !total_count tests failed', '@count of !total_count tests failed.', array('!total_count' => $total_count)) . "\n" . $summary;
   }
@@ -929,6 +1069,47 @@ function simpletest_script_reporter_display_results() {
       }
     }
   }
+
+  // Always print the summary at the end.
+  $errors = simpletest_get_test_count_by_status(array('fail','exception'));
+  $skipped = simpletest_get_test_count_by_status('skip');
+
+  if ($skipped) {
+    $message = format_plural($skipped, '1 test skipped.', '@count tests skipped.') ."\n";
+    simpletest_script_print($message, 'skip');
+  }
+  if ($errors) {
+    $message = "\n" . format_plural($errors, '1 test with errors.', '@count tests with errors.') . "\n";
+    simpletest_script_print($message, 'fail');
+  }
+  else {
+    simpletest_script_print("All tests passed.\n", 'pass');
+  }
+}
+
+/**
+ * Get a count of simpletest records for the current test_id that have
+ * a specified status.
+ *
+ * Valid status options are:
+ *
+ * - pass
+ * - fail
+ * - exception
+ * - skip
+ *
+ * @param $status
+ *   A string with a single status, or an array of strings.
+ * @return
+ *   The number of test results with the specified class or classes.
+ */
+function simpletest_get_test_count_by_status($status) {
+  global $test_id;
+
+  if (!is_array($status)) {
+    $status = array($status);
+  }
+  return db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN (:status)", array(':test_id' => $test_id, ':status' => $status))->fetchField();
 }
 
 /**
@@ -1015,6 +1196,8 @@ function simpletest_script_color_code($status) {
       return SIMPLETEST_SCRIPT_COLOR_FAIL;
     case 'exception':
       return SIMPLETEST_SCRIPT_COLOR_EXCEPTION;
+    case 'skip':
+      return SIMPLETEST_SCRIPT_COLOR_SKIP;
   }
   return 0; // Default formatting.
 }
