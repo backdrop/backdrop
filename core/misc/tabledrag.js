@@ -633,6 +633,12 @@ Backdrop.tableDrag.prototype.pointerCoords = function (event) {
     return { x: event.pageX, y: event.pageY };
   }
 
+  // If pageX and pageY are defined in the event.originalEvent, use them instead
+  // of clientX and clientY to avoid potentially faulty pointer position calculations 
+  if (event.originalEvent.pageX || event.originalEvent.pageY) {
+    return { x: event.originalEvent.pageX, y: event.originalEvent.pageY };
+  }
+
   return {
     x: clientX + document.body.scrollLeft - document.body.clientLeft,
     y: clientY + document.body.scrollTop  - document.body.clientTop
