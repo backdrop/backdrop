@@ -46,7 +46,7 @@ class BookTestCase extends BackdropWebTestCase {
     // Create users.
     $this->book_author = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books'));
     $this->web_user = $this->backdropCreateUser(array('node test view'));
-    $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
+    $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books','create page content', 'edit own page content', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
 
     // Disable default path patterns for nodes.
     config_set('path.settings', 'node_pattern', '');
@@ -188,6 +188,20 @@ class BookTestCase extends BackdropWebTestCase {
     $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
 
     $number++;
+  }
+
+  /**
+   * Test add to book outline access
+   */
+  function testBookAddToOutlineAccess() {
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('node/add/page');
+    $this->assertText('Book outline', 'Can add page to book outline.');
+
+    config_set('book.settings', 'book_allowed_all', 0);
+
+    $this->backdropGet('node/add/page');
+    $this->assertNoText('Book outline', 'Cannot add page to book outline.');
   }
 
   /**
