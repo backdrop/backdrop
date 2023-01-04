@@ -1104,3 +1104,47 @@ function file_get_upload_validators(array $options = array()) {
 
   return $validators;
 }
+
+
+/**
+ * Page callback to show detailed file information.
+ */
+function file_details_page($file) {
+  $rows = array();
+
+  foreach ($file as $fieldname => $info) {
+    switch ($fieldname) {
+      case "timestamp":
+        $info = date('Y-m-d H:i:s', $info);
+        break;
+      case "filesize":
+        $info = format_size($info);
+        break;
+      case "width":
+        $info .= " px";
+        break;
+      case "height":
+        $info .= " px";
+        break;
+      case "status":
+        $info == 1 ? $info = "permanent" : $info = "temporary";
+        break;
+    }
+    $rows[] = array($fieldname, check_plain($info));
+  }
+
+  $header = array(t('Property'), t('Value'));
+  $build['caption'] = array(
+    '#type' => 'help',
+    '#markup' => t('This table lists details for @filename.', array('@filename' => $file->filename)),
+  );
+  $build['values_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('This file is not currently used.'),
+  );
+
+  return $build;
+}
+
