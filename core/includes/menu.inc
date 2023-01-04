@@ -465,6 +465,15 @@ function menu_get_item($path = NULL, $router_item = NULL) {
 
     $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
     $ancestors = menu_get_ancestors($parts);
+
+    // Allow for wildcard characters at the end of paths.
+    $count_parts = count($parts);
+    while ($count_parts > 1) {
+      array_pop($parts);
+      $ancestors[] = implode('/', $parts) . '/*';
+      $count_parts--;
+    }
+
     $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
 
     if ($router_item) {
