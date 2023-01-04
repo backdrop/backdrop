@@ -265,7 +265,7 @@ class views_handler_field extends views_handler {
   function get_elements() {
     static $elements = NULL;
     if (!isset($elements)) {
-      $elements = config_get('views.settings', 'field_rewrite_elements');
+      $elements = views_field_rewrite_elements();
     }
 
     return $elements;
