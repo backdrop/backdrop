@@ -564,24 +564,40 @@ function timer_stop($name) {
  * @param bool $reset
  *   Force a full search for matching directories even if one had been
  *   found previously. Defaults to FALSE.
+ * @param array $server_override
+ *   Override the $_SERVER 'HTTP_HOST' and 'SCRIPT_NAME' or 'SCRIPT_FILENAME'
+ *   with $server_override['hostname'] and $server_override['root_path'] when
+ *   looking for the conf path.
  *
  * @return
  *   The path of the matching directory.
  *
  * @see settings.php
  */
-function conf_path($require_settings = TRUE, $reset = FALSE) {
+function conf_path($require_settings = TRUE, $reset = FALSE, $server_override = array()) {
   $conf = &backdrop_static(__FUNCTION__, '');
 
   if ($conf && !$reset) {
     return $conf;
   }
 
-  $script_name = $_SERVER['SCRIPT_NAME'];
-  if (!$script_name) {
-    $script_name = $_SERVER['SCRIPT_FILENAME'];
+  // Override $_SERVER
+  if ($server_override) {
+    if (array_key_exists('hostname', $server_override)) {
+      $http_host = $server_override['hostname'];
+    }
+    if (array_key_exists('root_path', $server_override)) {
+      $script_name = $server_override['root_path'];
+    }
   }
-  $http_host = $_SERVER['HTTP_HOST'];
+  else {
+    $script_name = $_SERVER['SCRIPT_NAME'];
+    if (!$script_name) {
+      $script_name = $_SERVER['SCRIPT_FILENAME'];
+    }
+    $http_host = $_SERVER['HTTP_HOST'];
+  }
+
   $conf = find_conf_path($http_host, $script_name, $require_settings);
   return $conf;
 }
