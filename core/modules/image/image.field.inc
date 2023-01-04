@@ -315,12 +315,16 @@ function image_field_presave($entity_type, $entity, $field, $instance, $langcode
 
   // Determine the dimensions if necessary.
   foreach ($items as &$item) {
-    if (!isset($item['width']) || !isset($item['height'])) {
+    if (!isset($item['width']) || !isset($item['height']) || empty($item['width']) || empty($item['height'])) {
       $info = image_get_info(file_load($item['fid'])->uri);
 
       if (is_array($info)) {
         $item['width'] = $info['width'];
         $item['height'] = $info['height'];
+      }
+      else {
+        // Width and height need to be NULL when image_get_info() fails.
+        $item['width'] = $item['height'] = NULL;
       }
     }
   }
