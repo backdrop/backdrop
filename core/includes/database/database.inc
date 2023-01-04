@@ -1794,7 +1794,22 @@ abstract class Database {
     require_once BACKDROP_ROOT . '/core/includes/database/' . $driver . '/database.inc';
 
     /* @var DatabaseConnection $new_connection */
-    $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
+    try {
+      $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
+    }
+    catch (PDOException $e) {
+      // If the password is incorrect, try re-encoding the password and signing
+      // in again. This can occur because the password string needs to be
+      // urlencoded for PHP 7 and higher, but Backdrop versions prior to 1.9 did
+      // not require this encoding.
+      if ($e->getCode() === 1045) {
+        self::$databaseInfo[$key][$target]['password'] = urlencode(self::$databaseInfo[$key][$target]['password']);
+        $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
+      }
+      else {
+        throw $e;
+      }
+    }
     $new_connection->setTarget($target);
     $new_connection->setKey($key);
 
