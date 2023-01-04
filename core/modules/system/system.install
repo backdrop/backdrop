@@ -3389,6 +3389,260 @@ function system_update_1087() {
 }
 
 /**
+ * Activate the views admin listing of enabled modules.
+ */
+function system_update_1088() {
+  $view_config = array(
+    'name' => 'list_modules',
+    'description' => 'Administrative listing of enabled modules.',
+    'module' => 'system',
+    'storage' => 4,
+    'tag' => 'default',
+    'disabled' => FALSE,
+    'base_table' => 'system',
+    'human_name' => 'List of modules',
+    'core' => '1.24.0',
+    'display' => array(
+      'default' => array(
+        'display_title' => 'Master',
+        'display_plugin' => 'default',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(),
+          ),
+          'access' => array(
+            'type' => 'perm',
+            'perm' => 'administer modules',
+          ),
+          'cache' => array(
+            'type' => 'none',
+          ),
+          'exposed_form' => array(
+            'type' => 'basic',
+          ),
+          'pager' => array(
+            'type' => 'none',
+            'options' => array(
+              'items_per_page' => '',
+            ),
+          ),
+          'style_plugin' => 'list',
+          'row_plugin' => 'fields',
+          'fields' => array(
+            'name' => array(
+              'id' => 'name',
+              'table' => 'system',
+              'field' => 'name',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 0,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+            ),
+          ),
+          'filters' => array(
+            'status' => array(
+              'id' => 'status',
+              'table' => 'system',
+              'field' => 'status',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => '=',
+              'value' => '1',
+              'group' => '1',
+              'exposed' => FALSE,
+              'expose' => array(
+                'operator_id' => FALSE,
+                'label' => '',
+                'description' => '',
+                'use_operator' => FALSE,
+                'operator' => '',
+                'identifier' => '',
+                'required' => FALSE,
+                'remember' => FALSE,
+                'multiple' => FALSE,
+                'remember_roles' => array(
+                  'authenticated' => 'authenticated',
+                ),
+              ),
+              'is_grouped' => FALSE,
+              'group_info' => array(
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => TRUE,
+                'widget' => 'select',
+                'multiple' => FALSE,
+                'remember' => 0,
+                'default_group' => 'All',
+                'default_group_multiple' => array(),
+                'group_items' => array(),
+              ),
+            ),
+            'type' => array(
+              'id' => 'type',
+              'table' => 'system',
+              'field' => 'type',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => 'in',
+              'value' => array(
+                'module' => 'module',
+              ),
+              'group' => '1',
+              'exposed' => FALSE,
+              'expose' => array(
+                'operator_id' => FALSE,
+                'label' => '',
+                'description' => '',
+                'use_operator' => FALSE,
+                'operator' => '',
+                'identifier' => '',
+                'required' => FALSE,
+                'remember' => FALSE,
+                'multiple' => FALSE,
+                'remember_roles' => array(
+                  'authenticated' => 'authenticated',
+                ),
+                'reduce' => FALSE,
+              ),
+              'is_grouped' => FALSE,
+              'group_info' => array(
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => TRUE,
+                'widget' => 'select',
+                'multiple' => FALSE,
+                'remember' => 0,
+                'default_group' => 'All',
+                'default_group_multiple' => array(),
+                'group_items' => array(),
+              ),
+            ),
+          ),
+          'sorts' => array(
+            'name' => array(
+              'id' => 'name',
+              'table' => 'system',
+              'field' => 'name',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'order' => 'ASC',
+              'exposed' => FALSE,
+              'expose' => array(
+                'label' => '',
+              ),
+            ),
+          ),
+          'title' => 'List of enabled modules',
+          'style_options' => array(
+            'grouping' => array(),
+            'row_class' => '',
+            'default_row_class' => 0,
+            'row_class_special' => 0,
+            'type' => 'ul',
+            'wrapper_class' => 'item-list',
+            'class' => '',
+          ),
+          'row_options' => array(
+            'default_field_elements' => 0,
+            'inline' => array(),
+            'separator' => '',
+            'hide_empty' => 0,
+          ),
+          'header' => array(
+            'area_text_custom' => array(
+              'id' => 'area_text_custom',
+              'table' => 'views',
+              'field' => 'area_text_custom',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'empty' => 0,
+              'content' => 'Provide this list in case you report problems and this info is necessary for analysis.',
+              'tokenize' => 0,
+            ),
+          ),
+          'footer' => array(),
+          'css_class' => 'enabled-module-list',
+        ),
+      ),
+      'page' => array(
+        'display_title' => 'Page',
+        'display_plugin' => 'page',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(),
+          ),
+          'path' => 'admin/reports/enabled-modules',
+          'menu' => array(
+            'type' => 'normal',
+            'title' => 'Enabled modules',
+            'description' => '',
+            'name' => 'management',
+            'weight' => '0',
+            'context' => 0,
+            'context_only_inline' => 0,
+          ),
+        ),
+      ),
+    ),
+  );
+  $config = config('views.view.list_modules');
+  if ($config->isNew()) {
+    $config->setData($view_config);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
