@@ -1,0 +1,148 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function devel_enable() {
+  // New module weights in core: put devel as the very last in the chain.
+  db_update('system')
+    ->fields(array(
+      'weight' => 88,
+    ))
+    ->condition('type', 'module')
+    ->condition('name', 'devel')
+    ->execute();
+}
+
+/**
+ * Implements hook_disable().
+ */
+function devel_disable() {
+  // Disable theme debug if enabled (restore default).
+  config_set('system.core', 'theme_debug', 0);
+}
+
+/**
+ * Convert devel settings to config.
+ */
+function devel_update_1000() {
+  $config = config('devel.settings');
+
+  // Set static_cache to TRUE to save disk reads.
+  $config->set('_config_static', TRUE);
+
+  // SQL Query display.
+  $config->set('query_display', FALSE);
+  $config->set('query_sort', update_variable_get('devel_query_sort', 0) ? 'duration' : 'source');
+  $config->set('query_slow_limit', (int) update_variable_get('devel_execution', 5));
+  update_variable_del('devel_query_display');
+  update_variable_del('devel_query_sort');
+  update_variable_del('devel_execution');
+
+  // XHProf settings.
+  $config->set('xhprof_enabled', (bool) update_variable_get('devel_xhprof_enabled', FALSE));
+  $config->set('xhprof_directory', update_variable_get('devel_xhprof_directory', ''));
+  $config->set('xhprof_url', update_variable_get('devel_xhprof_url', ''));
+  update_variable_del('devel_xhprof_enabled');
+  update_variable_del('devel_xhprof_directory');
+  update_variable_del('devel_xhprof_url');
+
+  // API URL, not upgraded since it needs to point to a Backdrop code base.
+  $config->set('api_url', 'api.backdropcms.org');
+  update_variable_del('devel_api_url');
+
+  // Page statistic options.
+  $config->set('timer_display', (bool) update_variable_get('dev_timer', 0));
+  $config->set('memory_display', (bool) update_variable_get('dev_mem', 0));
+  $config->set('query_display', update_variable_get('devel_query_display'));
+  update_variable_del('dev_timer');
+  update_variable_del('dev_mem');
+  update_variable_del('devel_query_display');
+
+  // Redirects and permissions.
+  $config->set('redirect_page', (bool) update_variable_get('devel_redirect_page', 0));
+  $config->set('permission_raw_names', (bool) update_variable_get('devel_raw_names', FALSE));
+  update_variable_del('devel_redirect_page');
+  update_variable_del('devel_raw_names');
+
+  // Error handling.
+  $config->set('error_handlers', array('standard'));
+  $config->set('krumo_skin', update_variable_get('krumo_skin', 'default'));
+  update_variable_del('error_handlers');
+  update_variable_del('krumo_skin');
+
+  // Mail settings.
+  $config->set('debug_mail_file_format', update_variable_get('devel_debug_mail_file_format', '%to-%subject-%datetime.mail.txt'));
+  $config->set('debug_mail_directory', update_variable_get('devel_debug_mail_file_format', 'temporary://devel-mails'));
+  update_variable_del('debug_mail_file_format');
+  update_variable_del('debug_mail_file_format');
+
+  // Features that have been deleted from Backdrop devel module.
+  update_variable_del('devel_page_alter');
+  update_variable_del('devel_use_uncompressed_jquery');
+
+  $config->save();
+}
+
+/**
+ * Enable static caching for the Devel config file.
+ */
+function devel_update_1001() {
+  config('devel.settings')
+    ->set('_config_static', TRUE)
+    ->save();
+}
+
+/**
+ * Delete the Development menu and just put menu items in the Admin Bar.
+ */
+function devel_update_1002() {
+  config('menu.menu.devel')->delete();
+  db_query("DELETE FROM {menu_links} WHERE menu_name = 'devel'");
+}
+
+/**
+ * Remove option for Krumo skin.
+ */
+function devel_update_1003() {
+  config('devel.settings')->clear('krumo_skin')->save();
+}
+
+/**
+ * Convert the devel_show_query_args_first variable to config.
+ */
+function devel_update_1004() {
+  $config = config('devel.settings');
+  $config->set('show_query_args_first', update_variable_get('devel_show_query_args_first', FALSE));
+  $config->save();
+
+  update_variable_del('devel_show_query_args_first');
+}
+
+/**
+ * Convert renamed 7.x variables to config.
+ */
+function devel_update_1005() {
+  $config = config('devel.settings');
+  // These variables were renamed from `dev_timer` and `dev_mem` in the 7.x
+  // version of devel. In devel_update_1000(), we only account for the former
+  // names of these variables; they may still exist in the db with their newer
+  // names though.
+  $config->set('timer_display', (bool) update_variable_get('devel_timer', 0));
+  $config->set('memory_display', (bool) update_variable_get('devel_mem', 0));
+  $config->save();
+
+  update_variable_del('devel_query_sort');
+  update_variable_del('devel_execution');
+}
+
+/**
+ * Delete 'devel_xhprof_*' config settings, as they were removed from code.
+ */
+function devel_update_1006() {
+  $config = config('devel.settings');
+  $config->clear('xhprof_directory');
+  $config->clear('xhprof_enabled');
+  $config->clear('xhprof_url');
+  $config->save();
+}
