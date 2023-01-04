@@ -1493,6 +1493,13 @@ function user_menu() {
     'access arguments' => array('administer permissions'),
     'type' => MENU_CALLBACK,
   );
+  $items['admin/config/people/roles/clone/%user_role'] = array(
+    'title' => 'Clone role',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_admin_role_clone', 5),
+    'access arguments' => array('administer permissions'),
+    'file' => 'user.admin.inc',
+  );
   $items['admin/config/people/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
     'page callback' => 'backdrop_get_form',

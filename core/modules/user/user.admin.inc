@@ -508,7 +508,16 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   }
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save permissions')
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
@@ -615,7 +624,10 @@ function user_admin_roles($form, $form_state) {
     $links['permissions'] = array(
       'title' => t('Set permissions'),
       'href' => 'admin/config/people/permissions/' . $role_name,
-      'weight' => 5,
+    );
+    $links['clone'] = array(
+      'title' => t('Clone role'),
+      'href' => 'admin/config/people/roles/clone/' . $role_name,
     );
     if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -631,7 +643,6 @@ function user_admin_roles($form, $form_state) {
       $links['delete'] = array(
         'title' => t('Delete role'),
         'href' => 'admin/config/people/roles/delete/' . $role_name,
-        'weight' => 0,
       );
     }
     $form['roles'][$role_name]['operations'] = array(
@@ -739,7 +750,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#type' => 'link',
     '#href' => 'admin/config/people/roles',
     '#title' => t('Cancel'),
-    '#options' => array('attributes' => array('class' => array('form-cancel'))),
+    '#attributes' => array('class' => array('form-cancel')),
   );
 
   return $form;
@@ -779,6 +790,84 @@ function user_admin_role_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = $redirect;
+}
+
+/**
+ * Form to clone a role.
+ *
+ * @ingroup forms
+ * @see user_admin_role_clone_submit()
+ */
+function user_admin_role_clone($form, &$form_state, $role) {
+  backdrop_set_title(t('Clone %source_role role', array('%source_role' => $role->label)), PASS_THROUGH);
+  $form_state['source_role'] = $role;
+
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cloned role name'),
+    '#default_value' => 'Copy of ' . $role->label,
+    '#size' => 30,
+    '#required' => TRUE,
+    '#maxlength' => 64,
+    '#description' => t('The name for the cloned role. Example: "moderator", "editorial board", "site architect".'),
+  );
+  $form['name'] = array(
+    '#type' => 'machine_name',
+    '#required' => TRUE,
+    '#size' => 32,
+    '#maxlength' => 64,
+    '#machine_name' => array(
+      'source' => array('label'),
+      'exists' => 'user_role_load',
+      'standalone' => TRUE,
+    ),
+    '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['clone'] = array(
+    '#type' => 'submit',
+    '#name' => 'clone',
+    '#value' => t('Clone role'),
+  );
+  $form['actions']['clone_and_edit_permissions'] = array(
+    '#type' => 'submit',
+    '#name' => 'clone_edit_permissions',
+    '#value' => t('Clone and configure permissions'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => 'admin/config/people/roles',
+    '#title' => t('Cancel'),
+  );
+  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
+
+  return $form;
+}
+
+/**
+ * Form submit handler for the user_admin_role_clone() form.
+ */
+function user_admin_role_clone_submit($form, &$form_state) {
+  $source_role = $form_state['source_role'];
+  $clicked_button = $form_state['clicked_button']['#name'];
+
+  $cloned_role = (object) array(
+    'name' => $form_state['values']['name'],
+    'label' => $form_state['values']['label'],
+    'permissions' => $source_role->permissions,
+  );
+  user_role_save($cloned_role);
+
+  $substitutions = array('%source_role' => $source_role->label, '%cloned_role' => $cloned_role->label);
+  backdrop_set_message(t('The %cloned_role role has been created as a clone of the %source_role role.', $substitutions));
+  backdrop_set_message(t('All permissions have been copied from the %source_role role to the %cloned_role role.', $substitutions));
+
+  if ($clicked_button == 'clone') {
+    $form_state['redirect'] = 'admin/config/people/roles';
+  }
+  elseif ($clicked_button == 'clone_edit_permissions') {
+    $form_state['redirect'] = 'admin/config/people/permissions/' . $cloned_role->name;
+  }
 }
 
 /**
