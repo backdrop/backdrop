@@ -40,7 +40,7 @@
     "punctuation_question_mark": 0,
     "punctuation_less_than": 0,
     "punctuation_greater_than": 0,
-    "punctuation_slash": 0,
+    "punctuation_slash": 1,
     "punctuation_back_slash": 0,
     "node_pattern": "[node:content-type]/[node:title]",
     "taxonomy_term_pattern": "[term:vocabulary]/[term:name]",
