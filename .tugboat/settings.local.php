@@ -17,3 +17,4 @@ $settings['telemetry_enabled'] = FALSE;
 $config['system.core']['error_level'] = 'all';
 
 // Miscellaneous.
+$config['system.core']['error_level'] = 'all';
