@@ -308,8 +308,20 @@ function link_field_update($entity_type, $entity, $field, $instance, $langcode, 
  */
 function link_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
   foreach ($items as $entity_id => $entity_items) {
-    foreach ($entity_items as $delta => $value) {
-      _link_sanitize($items[$entity_id][$delta], $delta, $field, $instances[$entity_id], $entities[$entity_id]);
+    $settings = $instances[$entity_id]['settings'];
+    $trimTitle = trim($settings['title_value']);
+
+    if (empty($entity_items) && !empty($trimTitle) && $settings['title'] == 'value') {
+      $token_value = token_replace($settings['title_value'], array($entity_type => $entities[$entity_id]));
+      $display_title = htmlspecialchars_decode($token_value, ENT_QUOTES);
+      $items[$entity_id][0]['url'] = NULL;
+      $items[$entity_id][0]['title'] = $display_title;
+      $items[$entity_id][0]['attributes'] = array();
+    }
+    else {
+      foreach ($entity_items as $delta => $value) {
+        _link_sanitize($items[$entity_id][$delta], $delta, $field, $instances[$entity_id], $entities[$entity_id]);
+      }
     }
   }
 }
