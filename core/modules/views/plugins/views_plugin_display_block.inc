@@ -413,8 +413,7 @@ class views_plugin_display_block extends views_plugin_display {
   /**
    * Adjust the array of argument input to match the current list of
    * arguments available for this display. This ensures that changing
-   * the arguments doesn't cause the argument input field to just
-   * break.
+   * the arguments doesn't cause the argument input field to break.
    */
   function get_argument_input() {
     $arguments = $this->get_option('argument_input');

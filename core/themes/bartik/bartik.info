@@ -12,6 +12,6 @@ stylesheets[print][] = css/print.css
 ckeditor_stylesheets[] = css/editor.css
 
 ; We need at least one setting for the theme settings page to appear in the
-; menu. Color module provides our defaults, so we just register a dummy setting.
+; menu. Color module provides our defaults, so we register a dummy setting.
 settings[color] = true
 settings[main_menu_tabs] = no-tabs
