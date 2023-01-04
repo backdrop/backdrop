@@ -54,6 +54,11 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    * from the condition criteria.
    */
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
+    // Ensure the table name is not surrounded with quotes as that is not
+    // appropriate for schema queries.
+    $quote_char = MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT;
+    $table_name = str_replace($quote_char, '', $table_name);
+
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
 
     $condition = new DatabaseCondition('AND');
@@ -473,12 +478,10 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     // Work around a bug in some versions of PDO, see http://bugs.php.net/bug.php?id=41125
     $comment = str_replace("'", '’', $comment);
 
-    // Prefix tables, but remove any back-ticks.
-    $comment = str_replace('`', '', $this->connection->prefixTables($comment));
-
     // Truncate comment to maximum comment length.
     if (isset($length)) {
-      $comment = truncate_utf8($comment, $length, TRUE, TRUE);
+      // Add table prefixes before truncating.
+      $comment = truncate_utf8($this->connection->prefixTables($comment), $length, TRUE, TRUE);
     }
 
     return $this->connection->quote($comment);
@@ -493,11 +496,11 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       $condition->condition('column_name', $column);
       $condition->compile($this->connection, $this);
       // Don't use {} around information_schema.columns table.
-      return $this->connection->query("SELECT column_comment FROM information_schema.columns WHERE " . (string) $condition, $condition->arguments())->fetchField();
+      return $this->connection->query("SELECT column_comment AS column_comment FROM information_schema.columns WHERE " . (string) $condition, $condition->arguments())->fetchField();
     }
     $condition->compile($this->connection, $this);
     // Don't use {} around information_schema.tables table.
-    $comment = $this->connection->query("SELECT table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
+    $comment = $this->connection->query("SELECT table_comment AS table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
     // Work-around for MySQL 5.0 bug http://bugs.mysql.com/bug.php?id=11379
     return preg_replace('/; InnoDB free:.*$/', '', $comment);
   }
@@ -517,14 +520,6 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     catch (Exception $e) {
       return FALSE;
     }
-  }
-
-  public function findTables($table_expression) {
-    // Back-ticks need to be removed when selecting from the information_schema
-    // table. These may be added if using DatabaseConnection::prefixTables() on
-    // a table name.
-    $table_expression = str_replace('`', '', $table_expression);
-    return parent::findTables($table_expression);
   }
 
   public function fieldExists($table, $column) {

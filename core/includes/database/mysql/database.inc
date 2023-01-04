@@ -5,6 +5,11 @@
  */
 
 /**
+ * The default character for quoting identifiers in MySQL.
+ */
+define('MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT', '`');
+
+/**
  * @addtogroup database
  * @{
  */
@@ -23,6 +28,277 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    * @var boolean
    */
   protected $utf8mb4Supported;
+
+  /**
+   * The list of MySQL reserved key words.
+   *
+   * @link https://dev.mysql.com/doc/refman/8.0/en/keywords.html
+   */
+  private $reservedKeyWords = array(
+    'accessible',
+    'add',
+    'admin',
+    'all',
+    'alter',
+    'analyze',
+    'and',
+    'as',
+    'asc',
+    'asensitive',
+    'before',
+    'between',
+    'bigint',
+    'binary',
+    'blob',
+    'both',
+    'by',
+    'call',
+    'cascade',
+    'case',
+    'change',
+    'char',
+    'character',
+    'check',
+    'collate',
+    'column',
+    'condition',
+    'constraint',
+    'continue',
+    'convert',
+    'create',
+    'cross',
+    'cube',
+    'cume_dist',
+    'current_date',
+    'current_time',
+    'current_timestamp',
+    'current_user',
+    'cursor',
+    'database',
+    'databases',
+    'day_hour',
+    'day_microsecond',
+    'day_minute',
+    'day_second',
+    'dec',
+    'decimal',
+    'declare',
+    'default',
+    'delayed',
+    'delete',
+    'dense_rank',
+    'desc',
+    'describe',
+    'deterministic',
+    'distinct',
+    'distinctrow',
+    'div',
+    'double',
+    'drop',
+    'dual',
+    'each',
+    'else',
+    'elseif',
+    'empty',
+    'enclosed',
+    'escaped',
+    'except',
+    'exists',
+    'exit',
+    'explain',
+    'false',
+    'fetch',
+    'first_value',
+    'float',
+    'float4',
+    'float8',
+    'for',
+    'force',
+    'foreign',
+    'from',
+    'fulltext',
+    'function',
+    'generated',
+    'get',
+    'grant',
+    'group',
+    'grouping',
+    'groups',
+    'having',
+    'high_priority',
+    'hour_microsecond',
+    'hour_minute',
+    'hour_second',
+    'if',
+    'ignore',
+    'in',
+    'index',
+    'infile',
+    'inner',
+    'inout',
+    'insensitive',
+    'insert',
+    'int',
+    'int1',
+    'int2',
+    'int3',
+    'int4',
+    'int8',
+    'integer',
+    'interval',
+    'into',
+    'io_after_gtids',
+    'io_before_gtids',
+    'is',
+    'iterate',
+    'join',
+    'json_table',
+    'key',
+    'keys',
+    'kill',
+    'lag',
+    'last_value',
+    'lead',
+    'leading',
+    'leave',
+    'left',
+    'like',
+    'limit',
+    'linear',
+    'lines',
+    'load',
+    'localtime',
+    'localtimestamp',
+    'lock',
+    'long',
+    'longblob',
+    'longtext',
+    'loop',
+    'low_priority',
+    'master_bind',
+    'master_ssl_verify_server_cert',
+    'match',
+    'maxvalue',
+    'mediumblob',
+    'mediumint',
+    'mediumtext',
+    'middleint',
+    'minute_microsecond',
+    'minute_second',
+    'mod',
+    'modifies',
+    'natural',
+    'not',
+    'no_write_to_binlog',
+    'nth_value',
+    'ntile',
+    'null',
+    'numeric',
+    'of',
+    'on',
+    'optimize',
+    'optimizer_costs',
+    'option',
+    'optionally',
+    'or',
+    'order',
+    'out',
+    'outer',
+    'outfile',
+    'over',
+    'partition',
+    'percent_rank',
+    'persist',
+    'persist_only',
+    'precision',
+    'primary',
+    'procedure',
+    'purge',
+    'range',
+    'rank',
+    'read',
+    'reads',
+    'read_write',
+    'real',
+    'recursive',
+    'references',
+    'regexp',
+    'release',
+    'rename',
+    'repeat',
+    'replace',
+    'require',
+    'resignal',
+    'restrict',
+    'return',
+    'revoke',
+    'right',
+    'rlike',
+    'row',
+    'rows',
+    'row_number',
+    'schema',
+    'schemas',
+    'second_microsecond',
+    'select',
+    'sensitive',
+    'separator',
+    'set',
+    'show',
+    'signal',
+    'smallint',
+    'spatial',
+    'specific',
+    'sql',
+    'sqlexception',
+    'sqlstate',
+    'sqlwarning',
+    'sql_big_result',
+    'sql_calc_found_rows',
+    'sql_small_result',
+    'ssl',
+    'starting',
+    'stored',
+    'straight_join',
+    'system',
+    'table',
+    'terminated',
+    'then',
+    'tinyblob',
+    'tinyint',
+    'tinytext',
+    'to',
+    'trailing',
+    'trigger',
+    'true',
+    'undo',
+    'union',
+    'unique',
+    'unlock',
+    'unsigned',
+    'update',
+    'usage',
+    'use',
+    'using',
+    'utc_date',
+    'utc_time',
+    'utc_timestamp',
+    'values',
+    'varbinary',
+    'varchar',
+    'varcharacter',
+    'varying',
+    'virtual',
+    'when',
+    'where',
+    'while',
+    'window',
+    'with',
+    'write',
+    'xor',
+    'year_month',
+    'zerofill',
+  );
 
   public function __construct(array $connection_options = array()) {
     // This driver defaults to transaction support, except if explicitly passed FALSE.
@@ -96,9 +372,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     $connection_options += array(
       'init_commands' => array(),
     );
+
+    $sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO';
+    // NO_AUTO_CREATE_USER was removed in MySQL 8.0.11
+    // https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-11.html#mysqld-8-0-11-deprecation-removal
+    if (version_compare($this->getAttribute(PDO::ATTR_SERVER_VERSION), '8.0.11', '<')) {
+      $sql_mode .= ',NO_AUTO_CREATE_USER';
+    }
     $connection_options['init_commands'] += array(
-      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
+      'sql_mode' => "SET sql_mode = '$sql_mode'",
     );
+
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
       $this->pdo->exec($sql);
@@ -106,34 +390,25 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   }
 
   /**
-   * {@inheritdoc}
+   * {@inheritdoc}}
    */
   protected function setPrefix($prefix) {
-    if (is_array($prefix)) {
-      $this->prefixes = $prefix + array('default' => '');
-    }
-    else {
-      $this->prefixes = array('default' => $prefix);
-    }
-
-    // This differs from the parent class implementation in that all tables
-    // are escaped with back-ticks. First, do table-specific replacements.
-    $this->prefixSearch = array();
-    $this->prefixReplace = array();
-    foreach ($this->prefixes as $key => $val) {
-      if ($key != 'default') {
-        $this->prefixSearch[] = '{' . $key . '}';
-        // Add backticks around the entire table name to avoid MySQL keywords,
-        // but also add backticks within the prefix value, in the event
-        // different database names are used as a prefix.
-        $this->prefixReplace[] = '`' . str_replace('.', '`.`', $val) . $key . '`';
+    parent::setPrefix($prefix);
+    // Successive versions of MySQL have become increasingly strict about the
+    // use of reserved keywords as table names. Drupal 7 uses at least one such
+    // table (system). Therefore we surround all table names with quotes.
+    $quote_char = MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT;
+    foreach ($this->prefixSearch as $i => $prefixSearch) {
+      if (substr($prefixSearch, 0, 1) === '{') {
+        // If the prefix already contains one or more quotes remove them.
+        // This can happen when - for example - DrupalUnitTestCase sets up a
+        // "temporary prefixed database".
+        $this->prefixReplace[$i] = $quote_char . str_replace($quote_char, '', $this->prefixReplace[$i]);
+      }
+      if (substr($prefixSearch, -1) === '}') {
+        $this->prefixReplace[$i] .= $quote_char;
       }
     }
-    // Then replace remaining tables with the default prefix.
-    $this->prefixSearch[] = '{';
-    $this->prefixReplace[] = '`' . $this->prefixes['default'];
-    $this->prefixSearch[] = '}';
-    $this->prefixReplace[] = '`';
   }
 
   /**
@@ -142,6 +417,13 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   public function escapeField($field) {
     $field = parent::escapeField($field);
     return $this->quoteIdentifier($field);
+  }
+
+  public function escapeFields(array $fields) {
+    foreach ($fields as &$field) {
+      $field = $this->escapeField($field);
+    }
+    return $fields;
   }
 
   /**
@@ -153,30 +435,27 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   }
 
   /**
-   * Quotes an identifier with backticks for MySQL 8 compatibility.
-   *
-   * Not all identifiers need quotes, only keywords, but we add them on all
-   * fields and table names for consistency and to ease compatibility in the
-   * future.
+   * Quotes an identifier if it matches a MySQL reserved keyword.
    *
    * @param string $identifier
    *   The field to check.
    *
    * @return string
-   *   The identifier, quoted with backticks.
+   *   The identifier, quoted if it matches a MySQL reserved keyword.
    */
   private function quoteIdentifier($identifier) {
-    // Some identifiers are empty, such as when doing expressions.
-    if (strlen($identifier) === 0) {
-      return $identifier;
-    }
-    // Identifiers that have both a table and field should quote both.
-    elseif (strpos($identifier, '.') !== FALSE) {
+    // Quote identifiers so that MySQL reserved words like 'function' can be
+    // used as column names. Sometimes the 'table.column_name' format is passed
+    // in. For example, menu_load_links() adds a condition on "ml.menu_name".
+    if (strpos($identifier, '.') !== FALSE) {
       list($table, $identifier) = explode('.', $identifier, 2);
-      return "`$table`" . '.' . "`$identifier`";
     }
-    // Otherwise quote just the field name.
-    return "`$identifier`";
+    if (in_array(strtolower($identifier), $this->reservedKeyWords, TRUE)) {
+      // Quote the string for MySQL reserved keywords.
+      $quote_char = variable_get('mysql_identifier_quote_character', MYSQL_IDENTIFIER_QUOTE_CHARACTER_DEFAULT);
+      $identifier = $quote_char . $identifier . $quote_char;
+    }
+    return isset($table) ? $table . '.' . $identifier : $identifier;
   }
 
   public function __destruct() {
