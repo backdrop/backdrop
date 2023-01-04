@@ -1,0 +1,212 @@
+<?php
+/**
+ * Test for _link_sanitize().
+ *
+ * @todo Rewrite as a unit test once _link_sanitize() is refactored.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+class LinkSanitizeTest extends LinkBaseTestClass {
+
+  /**
+   * Backup of $_GET['q'] to be able to revert it to its original state.
+   *
+   * @var string
+   */
+  protected $q;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp(array $modules = array()) {
+    $modules[] = 'node';
+    parent::setUp($modules);
+    $this->q = $_GET['q'];
+    $_GET['q'] = 'test-path';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tearDown(array $modules = array()) {
+    $_GET['q'] = $this->q;
+    parent::tearDown();
+  }
+
+  /**
+   * Generate parameters for testing _link_sanitize().
+   */
+  protected function generateParams($settings = array()) {
+    $field = array();
+    $instance['entity_type'] = 'node';
+    $defaults['attributes'] = array();
+    $defaults['display']['url_cutoff'] = 20;
+    $defaults['title'] = 'Test title';
+    $defaults['enable_tokens'] = 0;
+    $settings += $defaults;
+    $settings['display'] += $defaults['display'];
+    $instance['settings'] = $settings;
+    $entity = NULL;
+    return array($field, $instance, $entity);
+  }
+
+  /**
+   * Test that relative hash URLs are returned as is.
+   */
+  public function testRelativeHash() {
+    $item['url'] = '#hash-only';
+    list($field, $instance, $entity) = $this->generateParams();
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->assertEqual('#hash-only', $item['url']);
+  }
+
+  /**
+   * Test that relative hash URLs can be turned into absolute URLs.
+   */
+  public function testAbsoluteHash() {
+    $item['url'] = '#hash-only';
+    list($field, $instance, $entity) = $this->generateParams(array(
+      'absolute_url' => TRUE,
+    ));
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->assertEqual('test-path', $item['url']);
+    $this->assertEqual(NULL, $item['query']);
+    $this->assertEqual('hash-only', $item['fragment']);
+  }
+
+  /**
+   * Test that relative query URLs are returned as is.
+   */
+  public function testRelativeQuery() {
+    $item['url'] = '?query=only';
+    list($field, $instance, $entity) = $this->generateParams();
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->assertEqual('?query=only', $item['url']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testAbsoluteQuery() {
+    $item['url'] = '?query=only';
+    list($field, $instance, $entity) = $this->generateParams(array(
+      'absolute_url' => TRUE,
+    ));
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->assertEqual('test-path', $item['url']);
+    $this->assertEqual(array('query' => 'only'), $item['query']);
+    $this->assertEqual(NULL, $item['fragment']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitle() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('https://www.backdropcms.org/', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+    $this->assertEqual(array(), $item['query']);
+    $this->assertEqual(NULL, $item['fragment']);
+  }
+
+  /**
+   * Test that unwanted HTML in titles is removed.
+   */
+  public function testHtmlTitle() {
+    $item['title'] = '<script>alert("hi");</script>';
+    $item['url'] = 'https://www.backdropcms.org/';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('alert("hi");', $item['title']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithQuery() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('https://www.backdropcms.org/?page=42', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+    $this->assertTrue(is_array($item['query']));
+    $this->assertEqual(array('page' => 42), $item['query']);
+    $this->assertEqual(NULL, $item['fragment']);
+  }
+
+  /**
+   * Test that multiple query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithMultipleQueries() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42&mango=thebest';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('https://www.backdropcms.org/?page=42&mango=thebest', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+    $this->assertTrue(is_array($item['query']));
+    $this->assertTrue(isset($item['query']['page']));
+    $this->assertEqual($item['query']['page'], 42);
+    $this->assertTrue(isset($item['query']['page']));
+    $this->assertEqual($item['query']['mango'], 'thebest');
+
+    // Make sure there aren't any other items in the 'query' array.
+    unset($item['query']['mango']);
+    unset($item['query']['page']);
+    $this->assertEqual(array(), $item['query']);
+
+    $this->assertEqual(NULL, $item['fragment']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithFragment() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/#something';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('https://www.backdropcms.org/#something', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+    $this->assertEqual(array(), $item['query']);
+    $this->assertEqual('something', $item['fragment']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithQueryAndFragment() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42#something';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, NULL, $field, $instance, $entity);
+    $this->verbose('<pre>' . print_r($item, TRUE) . '</pre>');
+    $this->assertEqual('https://www.backdropcms.org/?page=42#something', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+    $this->assertEqual(array('page' => 42), $item['query']);
+    $this->assertEqual('something', $item['fragment']);
+  }
+
+}
