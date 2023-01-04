@@ -11,6 +11,7 @@
  * - $action_links: Array of actions local to the page, such as 'Add menu' on
  *   the menu administration interface.
  * - $classes: Array of CSS classes to be added to the layout wrapper.
+ * - $contextual_region_class: String for the contextual-links-region class.
  * - $attributes: Array of additional HTML attributes to be added to the layout
  *     wrapper. Flatten using backdrop_attributes().
  * - $content: An array of content, each item in the array is keyed to one
@@ -39,7 +40,7 @@
   <?php endif; ?>
 
   <div class="l-wrapper">
-    <div class="l-wrapper-inner container container-fluid">
+    <div class="l-wrapper-inner container container-fluid <?php if (isset($contextual_region_class)) : print $contextual_region_class; endif;?>">
 
       <?php if ($messages): ?>
         <div class="l-messages" role="status" aria-label="<?php print t('Status messages'); ?>">

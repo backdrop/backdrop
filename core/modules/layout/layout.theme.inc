@@ -295,6 +295,16 @@ function layout_preprocess_layout(&$variables) {
     'title' => NULL,
   );
 
+  // Add a variable $contextual_region_class in order to put a contextual-links-region class, 
+  // within the layout, wherever it's best, not just at the outermost wrapper, which might not be appropriate
+  if (module_exists("contextual")) {
+    $k = array_search('contextual-links-region', $variables['classes']);
+    if (isset($k)) {
+      unset($variables['classes'][$k]);
+      $variables['contextual_region_class'] = 'contextual-links-region';
+    }
+  }  
+
   if (!$variables['admin']) {
     if (!isset($variables['title']) && !$block_exists['title']) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
