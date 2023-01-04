@@ -3018,6 +3018,7 @@ function _system_rebuild_module_data() {
   if (isset($modules[$profile])) {
     // The installation profile is required, if it's a valid module.
     $modules[$profile]->info['required'] = TRUE;
+    $modules[$profile]->type = 'profile';
     // Add a default distribution name if the profile did not provide one. This
     // matches the default value used in install_profile_info().
     if (!isset($modules[$profile]->info['distribution_name'])) {
