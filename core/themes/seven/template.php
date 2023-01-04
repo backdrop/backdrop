@@ -5,11 +5,39 @@
  */
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function seven_form_user_login_alter(&$form, &$form_state) {
+  $links = seven_get_tabs_as_links();
+  $form['actions']['#suffix'] = backdrop_render($links);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function seven_form_user_pass_alter(&$form, &$form_state) {
+  $links = seven_get_tabs_as_links();
+  $form['actions']['#suffix'] = backdrop_render($links);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function seven_form_user_register_form_alter(&$form, &$form_state) {
+  $links = seven_get_tabs_as_links();
+  $form['actions']['#suffix'] = backdrop_render($links);
+}
+
+/**
  * Implements hook_preprocess_page().
  */
 function seven_preprocess_page(&$variables) {
   // Add the OpenSans font from core on every page of the site.
   backdrop_add_library('system', 'opensans', TRUE);
+
+  if (user_login_admin_theme()) {
+    $variables['classes'][] = 'login-page';
+  }
 }
 
 /**
@@ -17,6 +45,9 @@ function seven_preprocess_page(&$variables) {
  */
 function seven_preprocess_layout(&$variables) {
   // Don't modify layouts that are being edited.
+  if (user_login_admin_theme()) {
+    $variables['tabs'] = '';
+  }
   if (!$variables['admin']) {
     // Move the page title and tabs into the "header" area, to fit with Seven's
     // markup requirements.
@@ -33,6 +64,7 @@ function seven_preprocess_layout(&$variables) {
       }
     }
   }
+
 }
 
 /**
@@ -179,4 +211,31 @@ function seven_breadcrumb($variables) {
 
 function seven_preprocess_maintenance_page(&$variables) {
   $variables['html_attributes']['class'][] = 'maintenance-page-wrapper';
+}
+
+/**
+ * Renders menu local tasks as links instead of tabs.
+ *
+ * @return array renderable array containing links.
+ */
+function seven_get_tabs_as_links() {
+  $tasks = menu_local_tasks();
+  foreach ($tasks['tabs']['output'] as $task) {
+    if (!$task['#active']) {
+      if ($task['#link']['title'] == 'Reset password') {
+        $task['#link']['title'] = t('Forgot your password?');
+        $task['#link']['weight'] = -1;
+      }
+      $options = $task['#link']['options'];
+      $options['attributes']['class'][] = 'login-link';
+      $links[] = array(
+        '#theme' => 'link',
+        '#text' => $task['#link']['title'],
+        '#path' => $task['#link']['path'],
+        '#options' => $options,
+        '#weight' => $task['#link']['weight'],
+      );
+    }
+  }
+  return $links;
 }
