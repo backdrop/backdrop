@@ -188,23 +188,33 @@ function dashboard_user_login(&$edit, $account) {
     return;
   }
 
-  // Don't redirect if no permission to access dashboard.
+  // Don't redirect if no permission to access any dashboard.
   if (!user_access('access dashboard', $account)) {
     return;
   }
 
-  // Don't redirect if redirect setting is not set.
-  if (config_get('dashboard.settings', 'dashboard_login_redirect') != 1) {
-    return;
-  }
-
-  // Check access to any dashboard layouts, and redirect.
+  // Find all dashboard layouts.
   $router_item = menu_get_item('admin/dashboard');
   $dashboard_layouts = layout_load_multiple_by_router_item($router_item);
   foreach ($dashboard_layouts as $dashboard_layout) {
+    // At last one enabled dashboard layout that the user has access to was
+    // found.
     if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
-      $_GET['destination'] = 'admin/dashboard';
-      break;
+      // If the redirect setting is enabled, then redirect and break.
+      if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
+        $_GET['destination'] = 'admin/dashboard';
+        break;
+      }
+      // Otherwise, don't redirect...
+      else {
+        // ...but if this is the first time the user has logged into the site,
+        // show a message to help them find the Dashboard.
+        if(!$account->access) {
+          $message = t('Welcome! It seems that this is the first time you are logging into this site. The <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@dashboard' => url('admin/dashboard')));
+          Backdrop_set_message($message);
+        }
+        return;
+      }
     }
   }
 }

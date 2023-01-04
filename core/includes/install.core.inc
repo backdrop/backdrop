@@ -1712,13 +1712,7 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $profile = backdrop_install_profile_distribution_name();
-  $message = st('Thank you for installing @profile!', array('@profile' => $profile));
-
-  // Confirming that the Dashboard module is enabled. 
-  if (module_exists('dashboard')) {
-    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
-  }
+  $message = st('Thank you for installing @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
