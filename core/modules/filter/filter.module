@@ -1931,7 +1931,7 @@ function filter_filter_info() {
     'weight' => -10,
   );
   $filters['filter_autop'] = array(
-    'title' => t('Convert line breaks into HTML (i.e. <code>&lt;br&gt;</code> and <code>&lt;p&gt;</code>)'),
+    'title' => t('Convert line breaks into HTML <bdi>(i.e. <code>&lt;br&gt;</code> and <code>&lt;p&gt;</code>)</bdi>'),
     'process callback' => '_filter_autop',
     'tips callback' => '_filter_autop_tips',
   );
