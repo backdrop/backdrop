@@ -140,6 +140,19 @@ class Block extends LayoutHandler {
   }
 
   /**
+   * Attempt to get a default title for this block for administrators
+   *
+   * @return string
+   */
+  function getDefaultTitle(){
+    $block_view = module_invoke($this->module, 'block_view', $this->delta);
+    if (!empty($block_view['subject'])){
+      return $block_view['subject'];
+    }
+    return '';
+  }
+
+  /**
    * Return an administrative title that will always have a value.
    */
   function getAdminTitle() {
@@ -238,6 +251,7 @@ class Block extends LayoutHandler {
     $contexts = $layout->getContexts();
 
     $block_info = $this->getBlockInfo();
+    $default_title = $this->getDefaultTitle();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
 
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $block_info);
@@ -252,6 +266,18 @@ class Block extends LayoutHandler {
         LAYOUT_TITLE_NONE => t('None'),
       ),
       '#default_value' => $this->settings['title_display'],
+    );
+    $form['title_display']['default_title'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $default_title,
+      '#title' => t('Default title'),
+      '#disabled' => TRUE,
+      '#states' => array(
+        'visible' => array(
+          'form.layout-block-configure-form :input[name="title_display"]' => array('value' => LAYOUT_TITLE_DEFAULT),
+        ),
+      ),
+      '#maxlength' => 255,
     );
     $form['title_display']['title'] = array(
       '#type' => 'textfield',
