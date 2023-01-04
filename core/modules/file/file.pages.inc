@@ -102,17 +102,17 @@ function file_add_upload_step_filetype($form, &$form_state, array $options = arr
  * Generate form fields for the third step in the add file wizard.
  */
 function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
-  backdrop_set_title(t('Configure file scheme'));
+  backdrop_set_title(t('Select upload destination'));
   $file = file_load($form_state['storage']['upload']);
 
-  $schemes = array();
-  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-    $schemes[$scheme] = check_plain($info['description']);
+  $scheme_options = array();
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $stream_wrapper) {
+    $scheme_options[$scheme] = check_plain($stream_wrapper['name']);
   }
 
   // Remove any schemes not found in the instance settings.
   if (!empty($options['schemes'])) {
-    $schemes = array_intersect_key($schemes, array_flip($options['schemes']));
+    $scheme_options = array_intersect_key($scheme_options, array_flip($options['schemes']));
   }
 
   // Determine which scheme to use as the default value.
@@ -129,10 +129,16 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
   $form['scheme'] = array(
     '#type' => 'radios',
     '#title' => t('Destination'),
-    '#options' => $schemes,
+    '#options' => $scheme_options,
     '#default_value' => $fallback_scheme,
     '#required' => TRUE,
   );
+  if (isset($scheme_options['public'])) {
+    $form['scheme']['public']['#description'] = t('Select this option if there is no need for access control for the uploaded file(s).');
+  }
+  if (isset($scheme_options['private'])) {
+    $form['scheme']['private']['#description'] = t('Select this option if there is need to restrict access to the uploaded file(s).');
+  }
 
   $form['actions']['previous'] = array(
     '#type' => 'submit',
@@ -555,6 +561,26 @@ function file_manage_form($form, &$form_state, File $file) {
     '#options' => $options,
     '#default_value' => file_uri_scheme($file->uri),
   );
+  if (isset($options['public'])) {
+    $form['destination']['scheme']['public']['#description'] = t('Select this option if there is no need for access control for the uploaded file(s).');
+  }
+  if (isset($options['private'])) {
+    $form['destination']['scheme']['private']['#description'] = t('Select this option if there is need to restrict access to the uploaded file(s).');
+  }
+  // If the private files path has not been configured, still add it as an
+  // option, but disabled.
+  else {
+    $private_wrapper_info = _system_get_private_stream_wrapper_info();
+    $form['destination']['scheme']['#options'] += array('private' => $private_wrapper_info['name']);
+    $form['destination']['scheme']['private']['#disabled'] = TRUE;
+    if (user_access('administer site configuration')) {
+      $description = t('For this option to be enabled, a valid path needs to be provided for private files in the <a href="@file-system" target="_blank">File system setttings</a>.', array('@file-system' => url('admin/config/media/file-system')));
+    }
+    else {
+      $description = t('No private files directory configured.');
+    }
+    $form['destination']['scheme']['private']['#description'] = $description;
+  }
 
   // File user information for administrators.
   $anonymous = config_get_translated('system.core', 'anonymous');
