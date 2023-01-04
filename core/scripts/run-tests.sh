@@ -1081,7 +1081,7 @@ function simpletest_script_clean_profile_cache_folders(){
     'testing',
   );
 
-  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+  $file_public_path = config_get('system.core', 'file_public_path');
 
   foreach($profiles as $profile) {
     // Delete temporary files directory.

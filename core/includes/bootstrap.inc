@@ -4103,7 +4103,7 @@ function backdrop_autoload($class) {
  *   // $stack tracks the number of recursive calls.
  *   static $stack;
  *   $stack++;
- *   if ($stack > config_get('system.core', 'action_recursion_limit', 35)) {
+ *   if ($stack > config_get('system.core', 'action_recursion_limit')) {
  *     ...
  *     return;
  *   }

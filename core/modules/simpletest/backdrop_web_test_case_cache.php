@@ -28,7 +28,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
    *   TRUE if cache exists, FALSE if no cache for current profile.
    */
   public function isCached(){
-    $file_public_path = config_get('system.core', 'file_public_path', 'files');
+    $file_public_path = config_get('system.core', 'file_public_path');
     $cache_dir = $file_public_path . '/simpletest/' . $this->fileDirectoryName;
     if (is_dir($cache_dir)) {
       return TRUE;
