@@ -1796,6 +1796,8 @@ function field_ui_field_delete_form($form, &$form_state, $instance) {
   $bundle = $instance['bundle'];
   $entity_type = $instance['entity_type'];
   $field = field_info_field($instance['field_name']);
+  $entity_info = entity_get_info($entity_type);
+  $bundle_label = $entity_info['bundles'][$bundle]['label'];
 
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
 
@@ -1804,7 +1806,10 @@ function field_ui_field_delete_form($form, &$form_state, $instance) {
   $form['field_name'] = array('#type' => 'value', '#value' => $instance['field_name']);
 
   $output = confirm_form($form,
-    t('Are you sure you want to delete the field %field?', array('%field' => $instance['label'])),
+    t('Are you sure you want to delete the field %field from %bundle?', array(
+      '%field' => $instance['label'],
+      '%bundle' => $bundle_label,
+    )),
     $admin_path . '/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Delete'), t('Cancel'),
