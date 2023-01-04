@@ -765,7 +765,7 @@ function comment_node_page_additions(Node $node) {
       }
       elseif ($node->comment_count > 0) {
         // Comment count has got out of line, update it.
-        db_update('node_comment_statistics')
+        db_merge('node_comment_statistics')
           ->fields(array(
             'cid' => 0,
             'comment_count' => 0,
@@ -773,7 +773,7 @@ function comment_node_page_additions(Node $node) {
             'last_comment_name' => '',
             'last_comment_uid' => $node->uid,
           ))
-          ->condition('nid', $node->nid)
+          ->key(array('nid' => $node->nid))
           ->execute();
       }
     }
