@@ -1557,6 +1557,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
       'theme_arguments',
       'type',
       'description',
+      'include_file',
     ));
     for ($i = 1; $i <= MENU_MAX_DEPTH; $i++) {
       $query->orderBy('p' . $i, 'ASC');
