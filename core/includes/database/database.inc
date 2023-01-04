@@ -1780,6 +1780,12 @@ abstract class Database {
       self::parseConnectionInfo();
     }
 
+    // Open a dedicated connection for watchdog entries, to ensure that entries
+    // are written even if other tables are locked.
+    if ('dedicated_watchdog_connection' == $key) {
+      $key = 'default';
+    }
+
     // If the requested database does not exist then it is an unrecoverable
     // error.
     if (!isset(self::$databaseInfo[$key])) {

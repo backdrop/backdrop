@@ -560,6 +560,34 @@ class DBLogTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests logging of connection failures.
+   */
+  protected function testConnectionFailureLogging() {
+    Database::closeConnection();
+  
+    $log = array(
+      'type' => 'custom',
+      'message' => 'testConnectionFailureLogging',
+      'variables' => array(),
+      'severity' => WATCHDOG_ERROR,
+      'link' => NULL,
+      'user' => $this->big_user,
+      'uid' => isset($this->big_user->uid) ? $this->big_user->uid : 0,
+      'request_uri' => request_uri(),
+      'referer' => $_SERVER['HTTP_REFERER'],
+      'ip' => ip_address(),
+      'timestamp' => REQUEST_TIME,
+    );
+    dblog_watchdog($log);
+
+    $key = Database::getConnection()->getKey();
+    $target = Database::getConnection()->getTarget();
+    Database::getConnection($target, $key);
+    $wid = db_query("SELECT MAX(wid) FROM {watchdog} WHERE message = 'testConnectionFailureLogging'")->fetchField();
+    $this->assertTrue($wid, 'Watchdog entry has been stored in database.');
+  }
+
+  /**
    * Gets the database log event information from the browser page.
    *
    * @return array

@@ -124,8 +124,13 @@ function dblog_watchdog(array $log_entry) {
   if (!function_exists('backdrop_substr')) {
     require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   }
+  $key = Database::getConnection()->getKey();
+  $info = Database::getConnectionInfo($key);
+  Database::addConnectionInfo($key, 'dedicated_watchdog_connection', $info['default']);
+  $connection = Database::getConnection('dedicated_watchdog_connection', $key);
+
   try {
-    Database::getConnection('default', 'default')->insert('watchdog')
+    $connection->insert('watchdog')
       ->fields(array(
         'uid' => $log_entry['uid'],
         'type' => backdrop_substr($log_entry['type'], 0, 64),
