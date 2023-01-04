@@ -279,7 +279,6 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
 
     // Verify nested item lists.
     $variables = array();
-    $variables['title'] = 'Some title';
     $variables['attributes'] = array(
       'id' => 'parentlist',
     );
@@ -289,7 +288,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'data' => 'b',
         'children' => array(
           'c',
-          // Nested children may use additional attributes.
+          // Nested children may have additional attributes.
           array(
             'data' => 'd',
             'class' => array('dee'),
@@ -305,20 +304,44 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'id' => 'E',
       ),
     );
-    $inner = '<div class="item-list"><ul id="childlist">';
-    $inner .= '<li class="odd first">c</li>';
-    $inner .= '<li class="dee even last">d</li>';
-    $inner .= '</ul></div>';
 
-    $expected = '<div class="item-list">';
-    $expected .= '<h3>Some title</h3>';
-    $expected .= '<ul id="parentlist">';
-    $expected .= '<li class="odd first">a</li>';
-    $expected .= '<li id="bee" class="even">b' . $inner . '</li>';
-    $expected .= '<li id="E" class="odd last">e</li>';
-    $expected .= '</ul></div>';
+    $list_types = array('ul', 'ol');
+    // Generate the various possible combinations of inner/outer list types.
+    $combinations = array();
+    foreach ($list_types as $inner_type) {
+      foreach ($list_types as $outer_type) {
+        $combinations[] = array(
+          'inner' => $inner_type,
+          'outer' => $outer_type
+        );
+      }
+    }
 
-    $this->assertThemeOutput('item_list', $variables, $expected);
+    // Test the output of each combination.
+    foreach ($combinations as $combination) {
+      $inner_type = $combination['inner'];
+      $outer_type = $combination['outer'];
+      $list_title = $inner_type . ' inside ' . $outer_type;
+
+      $variables['items'][1]['type'] = $inner_type;
+      $variables['type'] = $outer_type;
+      $variables['title'] = $list_title
+
+      $inner = '<div class="item-list"><' . $inner_type . ' id="childlist">';
+      $inner .= '<li class="odd first">c</li>';
+      $inner .= '<li class="dee even last">d</li>';
+      $inner .= '</' . $inner_type . '></div>';
+
+      $expected = '<div class="item-list">';
+      $expected .= '<h3>' . $list_title . '</h3>';
+      $expected .= '<' . $outer_type . ' id="parentlist">';
+      $expected .= '<li class="odd first">a</li>';
+      $expected .= '<li id="bee" class="even">b' . $inner . '</li>';
+      $expected .= '<li id="E" class="odd last">e</li>';
+      $expected .= '</' . $outer_type . '></div>';
+
+      $this->assertThemeOutput('item_list', $variables, $expected);
+    }
   }
 
   /**
