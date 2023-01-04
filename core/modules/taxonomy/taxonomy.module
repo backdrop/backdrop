@@ -1480,7 +1480,7 @@ function taxonomy_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  */
 function taxonomy_options_list($field, $instance, $entity_type, $entity) {
   $function = !empty($field['settings']['options_list_callback']) ? $field['settings']['options_list_callback'] : 'taxonomy_allowed_values';
-  return $function($field);
+  return $function($field, $instance, $entity_type, $entity);
 }
 
 /**
