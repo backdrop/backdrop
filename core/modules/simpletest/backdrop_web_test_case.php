@@ -3672,33 +3672,43 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that a checkbox field in the current page is checked.
+   * Asserts that a checkbox/radio field in the current page is checked.
    *
-   * @param $id
-   *   Id of field to assert.
-   * @param $message
+   * @param string $id
+   *   ID attribute of field to assert.
+   * @param string $message
    *   Message to display.
-   * @return
+   * @param string $group
+   *   The group this message belongs to.
+   *
+   * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertFieldChecked($id, $message = '') {
+  protected function assertFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is checked.', array('@id' => $id)), t('Browser'));
+    $message = $message ? $message : format_string('@type field @id is checked/selected.', array('@type' => $elements[0]['type'], '@id' => $id));
+
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message, $group);
   }
 
   /**
-   * Asserts that a checkbox field in the current page is not checked.
+   * Asserts that a checkbox/radio field in the current page is not checked.
    *
-   * @param $id
-   *   Id of field to assert.
-   * @param $message
+   * @param string $id
+   *   ID attribute of field to assert.
+   * @param string $message
    *   Message to display.
-   * @return
+   * @param string $group
+   *   The group this message belongs to.
+   *
+   * @return boolean
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertNoFieldChecked($id, $message = '') {
+  protected function assertNoFieldChecked($id, $message = '', $group = 'Browser') {
     $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is not checked.', array('@id' => $id)), t('Browser'));
+    $message = $message ? $message : format_string('@type field @id is not checked/selected.', array('@type' => $elements[0]['type'], '@id' => $id));
+
+    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message , $group);
   }
 
   /**
