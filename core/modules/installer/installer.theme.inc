@@ -59,49 +59,48 @@ function template_preprocess_installer_browser_block(&$variables) {
  * @param $variables
  *   An associative array containing:
  *     - projects_list : array of all projects.
+ *     - type : the type of projects (module/theme/layout).
  */
 function template_preprocess_installer_browser_list(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
   backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
 
+  switch ($variables['type']) {
+    case 'module':
+      $title = t('Modules');
+      break;
+    case 'theme':
+      $title = t('Themes');
+      break;
+    case 'layout':
+      $title = t('Layouts');
+      break;
+    default:
+      $title = t('Projects');
+      break;
+  }
+  $headers = array(
+    $title,
+  );
+  $content = '';
+  $rows = array();
+
   if (is_array($variables['projects_list']) && !empty($variables['projects_list'])) {
-    $content = '';
-    $rows = array();
-    switch ($variables['type']) {
-      case 'module':
-        $title = t('Modules');
-        break;
-      case 'theme':
-        $title = t('Themes');
-        break;
-      case 'layout':
-        $title = t('Layouts');
-        break;
-      default:
-        $title = t('Projects');
-        break;
-    }
-    $headers = array(
-      $title,
-    );
     // Theme each individual project and add to the list.
     foreach ($variables['projects_list'] as $project) {
       $row = array();
       $row[] = theme('installer_browser_project', array('project' => $project, 'first' => NULL));
       $rows[] = $row;
     }
-    $content .= theme('table', array('header' => $headers, 'rows' => $rows));
   }
-  else {
-    $content = t('No results found.');
-  }
+  $content .= theme('table', array('header' => $headers, 'rows' => $rows, 'empty' => t('No results found.')));
 
   $variables['main_content'] = render($content);
 
   // Add the pager.
   $variables['pager'] = theme('pager', array('tags' => NULL));
 
-  // Add the install list.
+  // Add the installation queue block.
   $install_list['installer_browser_install_list_block'] = array(
     '#theme' => 'installer_browser_block',
     '#title' => t('Installation queue'),

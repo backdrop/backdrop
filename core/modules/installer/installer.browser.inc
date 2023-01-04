@@ -252,8 +252,8 @@ function installer_browser_fetch_results($filters) {
     $results = backdrop_json_decode($response->data);
   }
   else {
-    backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-      array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
+    backdrop_set_message(t('Encountered an error when trying to fetch projects from %installer_server. Error @code : @message',
+      array('%installer_server' => check_plain($server['name']), '@code' => $response->code, '@message' => $response->error)), 'error');
     return array();
   }
 
@@ -266,8 +266,6 @@ function installer_browser_fetch_results($filters) {
 /**
  * Gets the server to use for fetching results.
  *
- * The installer_browser_fetch_results($filters) call returns an array with the
- * following keys:
  * @return
  *   Returns an array representing the active server with the following keys:
  *     - url: The absolute url to the server without query parameters.
