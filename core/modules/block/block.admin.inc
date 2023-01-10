@@ -10,6 +10,11 @@
 function block_admin_list() {
   $custom_blocks_info = block_block_info();
 
+  $help_text = array(
+    '#theme' => 'help',
+    '#markup' => t('Custom blocks allow placing arbitrary text in layout regions. Blocks created here become available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => 'admin/structure/layouts')),
+  );
+
   $header = array(
     t('Block'),
     array('data' => t('Description'), 'class' => array('priority-low')),
@@ -59,12 +64,15 @@ function block_admin_list() {
     $rows[] = $row;
   }
 
-  return array(
+  $block_admin_list = array(
     '#theme' => 'table__block_admin_list',
-    '#rows' => $rows,
     '#header' => $header,
+    '#rows' => $rows,
     '#empty' => t('No custom blocks have been created yet.'),
   );
+
+  // return $block_admin_list;
+  return render($help_text) . render($block_admin_list);
 }
 
 /**
