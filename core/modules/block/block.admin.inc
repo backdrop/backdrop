@@ -71,7 +71,6 @@ function block_admin_list() {
     '#empty' => t('No custom blocks have been created yet.'),
   );
 
-  // return $block_admin_list;
   return render($help_text) . render($block_admin_list);
 }
 
