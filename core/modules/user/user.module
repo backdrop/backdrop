@@ -946,8 +946,23 @@ function user_account_form(&$form, &$form_state) {
   // Add each role as a checkbox option with a description.
   foreach ($roles as $role_name => $role) {
     $form['account_settings']['roles']['#options'][$role_name] = $role->label;
+    $description = '';
     if (strlen($role->description)) {
-      $form['account_settings']['roles'][$role_name]['#description'] = filter_xss_admin($role->description);
+      $description .= filter_xss_admin($role->description);
+    }
+    // Add quick links to manage roles and they permissions.
+    if (user_access('administer permissions')) {
+      // Make sure that links open in new tabs, to prevent any current edits
+      // from being lost.
+      $open_in_tab = array('attributes' => array('target' => '_blank'));
+      $configure_role_link = l('Configure role', 'admin/config/people/roles/configure/' . $role_name, $open_in_tab);
+      $manage_permissions_link = l('Manage permissions', 'admin/config/people/permissions/' . $role_name, $open_in_tab);
+      // Add the links in a new line if there is a text description.
+      $description .= strlen($description) ? '<br>' : '';
+      $description .= $configure_role_link . ' | ' . $manage_permissions_link;
+    }
+    if (strlen($description)) {
+      $form['account_settings']['roles'][$role_name]['#description'] = $description;
     }
   }
 
