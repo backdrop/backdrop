@@ -474,10 +474,12 @@ function decode_entities($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strlen($text) {
-  global $multibyte;
-  if (!isset($text)) {
+  // Bail early if no string provided (if $text is NULL for example).
+  if (!is_string($text)) {
     return 0;
   }
+
+  global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strlen($text);
   }
