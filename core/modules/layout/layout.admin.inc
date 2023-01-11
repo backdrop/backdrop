@@ -1234,7 +1234,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
 }
 
 /**
- * Validate the layout templates form.
+ * Validate the layout settings form.
  */
 function layout_content_form_validate($form, &$form_state) {
   /* @var Layout $layout */
@@ -2930,7 +2930,7 @@ function layout_contexts_form_element(array $available_contexts, array $current_
 /**
  * AJAX handler that opens a form in a dialog.
  *
- * This AJAX handler is used both on the layout templates form and the layout
+ * This AJAX handler is used both on the layout settings form and the layout
  * content form.
  *
  * @see layout_settings_form()
@@ -3127,7 +3127,7 @@ function layout_ajax_form_update($form, $form_state) {
 }
 
 /**
- * Administrative form for layout templates.
+ * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
   $header = array(
@@ -3189,9 +3189,8 @@ function layout_settings_page($form, &$form_state) {
   return $form;
 }
 
-
 /**
- * Validation for layout templates page.
+ * Validation for layout settings page.
  *
  * Ensures that active layouts are not disabled while in use.
  */
