@@ -6,6 +6,7 @@ services:
     commands:
       init:
         # Install PHP 'zip' extension to allow installing Backdrop modules.
+        - docker-php-ext-configure zip --with-libzip
         - docker-php-ext-install zip
         # Enable Apache 'rewrite' module for clean URLs.
         - a2enmod rewrite
