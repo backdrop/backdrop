@@ -467,6 +467,7 @@ class views_plugin_display extends views_plugin {
       'defaults' => array(
         'default' => array(
           'access' => TRUE,
+          'access_options' => TRUE,
           'cache' => TRUE,
           'query' => TRUE,
           'title' => TRUE,
