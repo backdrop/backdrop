@@ -10,11 +10,13 @@
  * safety, all methods operate only inside a "jail", by default the Backdrop
  * root.
  */
+#[AllowDynamicProperties]
 abstract class FileTransfer {
   protected $username;
   protected $password;
   protected $hostname = 'localhost';
   protected $port;
+  protected $jail;
 
   /**
    * The constructor for the UpdateConnection class. This method is also called
