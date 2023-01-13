@@ -10,6 +10,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_string extends views_handler_argument {
   function init(&$view, &$options) {
     parent::init($view, $options);

@@ -9,6 +9,7 @@
  *
  * @ingroup views_access_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_access_role extends views_plugin_access {
   function access($account) {
     return views_check_roles(array_filter($this->options['role']), $account);

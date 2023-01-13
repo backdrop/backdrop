@@ -464,7 +464,7 @@ class views_plugin_style extends views_plugin {
             if ($rendered) {
               $grouping = $group_content;
               if ($rendered_strip) {
-                $group_content = $grouping = strip_tags(htmlspecialchars_decode($group_content));
+                $group_content = $grouping = strip_tags(htmlspecialchars_decode((string) $group_content));
               }
             }
             else {

@@ -8,6 +8,7 @@
  * Filter handler to accept a user id to check for nodes that
  * user posted or created a revision on.
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_uid_revision extends views_handler_argument_comment_user_uid {
   function query($group_by = FALSE) {
     $this->ensure_my_table();

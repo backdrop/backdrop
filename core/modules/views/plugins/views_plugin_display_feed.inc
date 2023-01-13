@@ -11,6 +11,7 @@
  *
  * @ingroup views_display_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_display_feed extends views_plugin_display_page {
   function init(&$view, &$display, $options = NULL) {
     parent::init($view, $display, $options);

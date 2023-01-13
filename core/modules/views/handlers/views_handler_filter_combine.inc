@@ -9,6 +9,7 @@
  *
  * @ingroup views_field_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_combine extends views_handler_filter_string {
   /**
    * @var views_plugin_query_default

@@ -9,6 +9,7 @@
  *
  * @ingroup views_localization_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_localization_none extends views_plugin_localization {
 
   /**

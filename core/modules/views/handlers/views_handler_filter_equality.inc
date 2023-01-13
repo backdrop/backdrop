@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_equality extends views_handler_filter {
   // exposed filter options
   var $always_multiple = TRUE;

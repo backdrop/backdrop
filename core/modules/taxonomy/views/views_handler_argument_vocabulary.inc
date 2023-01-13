@@ -4,6 +4,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_vocabulary extends views_handler_argument_numeric {
   /**
    * Override the behavior of title(). Get the name of the vocabulary.

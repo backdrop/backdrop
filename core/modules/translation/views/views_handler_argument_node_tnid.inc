@@ -9,6 +9,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_tnid extends views_handler_argument_numeric {
   /**
    * Override the behavior of title(). Get the title of the node.

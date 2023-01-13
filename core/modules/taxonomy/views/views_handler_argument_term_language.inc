@@ -7,6 +7,7 @@
 /**
  * Argument handler to accept a language.
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_term_language extends views_handler_argument {
   function construct() {
     parent::construct('langcode');

@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_date extends views_handler_filter_numeric {
   function option_definition() {
     $options = parent::option_definition();

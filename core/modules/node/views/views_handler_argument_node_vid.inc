@@ -7,6 +7,7 @@
 /**
  * Argument handler to accept a node revision id.
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_vid extends views_handler_argument_numeric {
   // No constructor is necessary.
 

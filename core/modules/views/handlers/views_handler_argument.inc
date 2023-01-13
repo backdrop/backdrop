@@ -1173,6 +1173,7 @@ class views_handler_argument extends views_handler {
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_broken extends views_handler_argument {
   function ui_name($short = FALSE) {
     return t('Broken/missing handler');

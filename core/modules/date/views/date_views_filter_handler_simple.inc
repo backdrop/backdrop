@@ -4,6 +4,7 @@
  * A standard Views filter for a single date field,
  * using Date API form selectors and sql handling.
  */
+#[\AllowDynamicProperties]
 class date_views_filter_handler_simple extends views_handler_filter_date {
   /**
    * @var date_sql_handler

@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_node_tnid_child extends views_handler_filter {
   function admin_summary() { }
   function operator_form(&$form, &$form_state) { }

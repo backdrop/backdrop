@@ -15,6 +15,7 @@
 /**
  * The base plugin to handle localization of Views strings.
  */
+#[\AllowDynamicProperties]
 class views_plugin_localization extends views_plugin {
 
   /**

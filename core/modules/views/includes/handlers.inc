@@ -30,6 +30,7 @@
  *                    control is provided.
  * - access arguments: An array of arguments for the access callback.
  */
+#[\AllowDynamicProperties]
 class views_handler extends views_object {
   /**
    * The top object of a view.
@@ -639,6 +640,7 @@ class views_handler extends views_object {
  *            queries.
  *
  */
+#[\AllowDynamicProperties]
 class views_many_to_one_helper {
   /**
    * Contains possible existing placeholders used by the query.
@@ -999,6 +1001,7 @@ class views_many_to_one_helper {
  *   - - numeric: If true, the value will not be surrounded in quotes.
  *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
+#[\AllowDynamicProperties]
 class views_join {
   var $table = NULL;
   var $left_table = NULL;
@@ -1163,6 +1166,7 @@ class views_join {
  *   same as views_join class above, except:
  *   - left_query: The subquery to use in the left side of the join clause.
  */
+#[\AllowDynamicProperties]
 class views_join_subquery extends views_join {
   function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = array(), $type = 'LEFT') {
     parent::construct($table, $left_table, $left_field, $field, $extra, $type);

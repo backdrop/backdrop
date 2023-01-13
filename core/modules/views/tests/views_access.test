@@ -9,6 +9,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 /**
  * Basic test for pluggable access.
  */
+#[\AllowDynamicProperties]
 class ViewsAccessTest extends ViewsSqlTest {
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);

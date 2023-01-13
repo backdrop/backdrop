@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_group_by_numeric extends views_handler_filter_numeric {
   function query() {
     $this->ensure_my_table();

@@ -12,6 +12,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_term_node_tid_depth extends views_handler_argument {
   function option_definition() {
     $options = parent::option_definition();

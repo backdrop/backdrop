@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_field_list extends views_handler_filter_many_to_one {
 
   function init(&$view, &$options) {

@@ -12,6 +12,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_term_node_tid_depth extends views_handler_filter_term_node_tid {
   function operator_options($which = 'title') {
     return array(

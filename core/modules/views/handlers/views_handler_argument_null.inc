@@ -9,6 +9,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_null extends views_handler_argument {
   function option_definition() {
     $options = parent::option_definition();

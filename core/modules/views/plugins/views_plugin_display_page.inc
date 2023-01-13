@@ -9,6 +9,7 @@
  *
  * @ingroup views_display_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_display_page extends views_plugin_display {
   /**
    * The page display has a path.

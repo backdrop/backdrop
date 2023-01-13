@@ -7,6 +7,7 @@
 /**
  * Argument handler to accept a node type.
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_type extends views_handler_argument_string {
   function construct() {
     parent::construct('type');

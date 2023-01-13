@@ -9,6 +9,7 @@
  *
  * @ingroup views_access_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_access_none extends views_plugin_access {
   function summary_title() {
     return t('Unrestricted');

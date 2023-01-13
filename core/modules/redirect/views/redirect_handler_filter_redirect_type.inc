@@ -3,7 +3,7 @@
  * @file
  * Filter by redirect type.
  */
-
+#[\AllowDynamicProperties]
 class redirect_handler_filter_redirect_type extends views_handler_filter_in_operator {
   function get_value_options() {
     if (!isset($this->value_options)) {

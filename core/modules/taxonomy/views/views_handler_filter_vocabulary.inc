@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_vocabulary extends views_handler_filter_in_operator {
   function get_value_options() {
     if (isset($this->value_options)) {

@@ -12,6 +12,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_term_node_tid_depth_modifier extends views_handler_argument {
   function options_form(&$form, &$form_state) { }
   function query($group_by = FALSE) { }

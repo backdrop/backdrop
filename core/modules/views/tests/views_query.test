@@ -7,6 +7,7 @@
 /**
  * Abstract class for views testing.
  */
+#[\AllowDynamicProperties]
 abstract class ViewsTestCase extends BackdropWebTestCase {
   /**
    * Helper function: verify a result set returned by view.

@@ -10,6 +10,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_comment_user_uid extends views_handler_filter_user_name {
   function query() {
     $this->ensure_my_table();

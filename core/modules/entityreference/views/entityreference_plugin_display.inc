@@ -4,6 +4,7 @@
  * @file
  * Handler for entityreference_plugin_display.
  */
+#[\AllowDynamicProperties]
 class entityreference_plugin_display extends views_plugin_display {
 
   public $id_field_alias;

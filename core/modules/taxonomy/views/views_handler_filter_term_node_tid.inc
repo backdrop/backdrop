@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_term_node_tid extends views_handler_filter_many_to_one {
   // Stores the exposed input for this filter.
   var $validated_exposed_input = NULL;

@@ -15,6 +15,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_boolean_operator_string extends views_handler_filter_boolean_operator {
   function query() {
     $this->ensure_my_table();

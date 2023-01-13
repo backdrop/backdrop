@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_node_uid_revision extends views_handler_filter_user_name {
   function query($group_by = FALSE) {
     $this->ensure_my_table();

@@ -9,6 +9,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_file_fid extends views_handler_argument_numeric {
   /**
    * Override the behavior of title_query(). Get the filenames.

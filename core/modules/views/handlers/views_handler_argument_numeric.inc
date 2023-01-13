@@ -10,6 +10,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_numeric extends views_handler_argument {
   /**
    * The operator used for the query: or|and.

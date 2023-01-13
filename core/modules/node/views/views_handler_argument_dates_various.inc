@@ -9,6 +9,7 @@
 /**
  * Argument handler for a full date (CCYYMMDD)
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_fulldate extends views_handler_argument_date {
   /**
    * Constructor implementation
@@ -39,6 +40,7 @@ class views_handler_argument_node_created_fulldate extends views_handler_argumen
 /**
  * Argument handler for a year (CCYY)
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_year extends views_handler_argument_date {
   /**
    * Constructor implementation
@@ -53,6 +55,7 @@ class views_handler_argument_node_created_year extends views_handler_argument_da
 /**
  * Argument handler for a year plus month (CCYYMM)
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_year_month extends views_handler_argument_date {
   /**
    * Constructor implementation
@@ -83,6 +86,7 @@ class views_handler_argument_node_created_year_month extends views_handler_argum
 /**
  * Argument handler for a month (MM)
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_month extends views_handler_argument_date {
   /**
    * Constructor implementation
@@ -119,6 +123,7 @@ class views_handler_argument_node_created_month extends views_handler_argument_d
 /**
  * Argument handler for a day (DD)
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_day extends views_handler_argument_date {
   /**
    * Constructor implementation
@@ -156,6 +161,7 @@ class views_handler_argument_node_created_day extends views_handler_argument_dat
 /**
  * Argument handler for a week.
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_node_created_week extends views_handler_argument_date {
   /**
    * Constructor implementation

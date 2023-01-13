@@ -10,6 +10,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_comment_user_uid extends views_handler_argument {
   function title() {
     if (!$this->argument) {

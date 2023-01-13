@@ -14,6 +14,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_many_to_one extends views_handler_filter_in_operator {
   /**
    * @var views_many_to_one_helper

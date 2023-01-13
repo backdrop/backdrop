@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_ncs_last_updated extends views_handler_filter_date {
   function query() {
     $this->ensure_my_table();

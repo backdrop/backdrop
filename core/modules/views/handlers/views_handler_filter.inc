@@ -1407,6 +1407,7 @@ class views_handler_filter extends views_handler {
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_broken extends views_handler_filter {
   function ui_name($short = FALSE) {
     return t('Broken/missing handler');

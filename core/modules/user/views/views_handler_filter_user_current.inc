@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_user_current extends views_handler_filter_boolean_operator {
   function construct() {
     parent::construct();

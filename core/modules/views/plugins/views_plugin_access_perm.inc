@@ -9,6 +9,7 @@
  *
  * @ingroup views_access_plugins
  */
+#[\AllowDynamicProperties]
 class views_plugin_access_perm extends views_plugin_access {
   function access($account) {
     return views_check_perm($this->options['perm'], $account);

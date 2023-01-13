@@ -9,7 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
-
+#[\AllowDynamicProperties]
 class views_handler_filter_fields_compare extends views_handler_filter {
 
   function can_expose() {

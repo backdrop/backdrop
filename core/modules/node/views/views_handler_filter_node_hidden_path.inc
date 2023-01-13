@@ -9,6 +9,7 @@
  *
  * @ingroup views_filter_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_filter_node_hidden_path extends views_handler_filter_boolean_operator {
 
   /**

@@ -10,6 +10,7 @@
  *
  * @ingroup views_argument_handlers
  */
+#[\AllowDynamicProperties]
 class views_handler_argument_field_list extends views_handler_argument_numeric {
   /**
    * Stores the allowed values of this field.
