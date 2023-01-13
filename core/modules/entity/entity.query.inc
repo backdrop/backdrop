@@ -190,7 +190,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::execute().
    */
-  public $orderedResults = array();
+  public $ordered_results = array();
 
   /**
    * The method executing the query, if it is overriding the default.
@@ -733,7 +733,7 @@ class EntityFieldQuery {
   /**
    * Executes the query.
    *
-   * After executing the query, $this->orderedResults will contain a list of
+   * After executing the query, $this->ordered_results will contain a list of
    * the same entity ids in the order returned by the query. This is only
    * relevant if there are multiple entity types in the returned value and
    * a field ordering was requested. In every other case, the returned value
@@ -947,7 +947,7 @@ class EntityFieldQuery {
       return $select_query->countQuery()->execute()->fetchField();
     }
     $return = array();
-    $this->orderedResults = array();
+    $this->ordered_results = array();
     foreach ($select_query->execute() as $ids) {
       if (!isset($ids->bundle)) {
         $ids->bundle = NULL;
