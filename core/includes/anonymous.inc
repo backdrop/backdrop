@@ -12,7 +12,7 @@
 class AnonymousUser implements UserInterface {
   public $uid = 0;
   public $name = NULL;
-  public $email = NULL;
+  public $mail = NULL;
   public $hostname = NULL;
   public $roles = array(BACKDROP_ANONYMOUS_ROLE);
   public $status = 1;
