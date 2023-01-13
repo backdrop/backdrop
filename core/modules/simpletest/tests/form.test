@@ -1207,6 +1207,7 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
  */
 class FormsFormStorageTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+  protected $web_user;
 
   function setUp() {
     parent::setUp('form_test');
@@ -1668,6 +1669,8 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
  * @todo Add tests for other aspects of form rebuilding.
  */
 class FormsRebuildTestCase extends BackdropWebTestCase {
+  protected $web_user;
+
   function setUp() {
     parent::setUp('form_test');
 

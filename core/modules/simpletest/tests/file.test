@@ -355,10 +355,10 @@ class FileSpaceUsedTest extends FileTestCase {
  *  This will run tests against the file validation functions (file_validate_*).
  */
 class FileValidatorTest extends BackdropWebTestCase {
-  protected $profile = 'testing';
+  protected $file;
   protected $image;
   protected $non_image;
-  protected $file;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp(array('file'));

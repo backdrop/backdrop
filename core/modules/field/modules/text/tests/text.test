@@ -5,8 +5,10 @@
  */
 
 class TextFieldTestCase extends BackdropWebTestCase {
-  protected $instance;
   protected $admin_user;
+  protected $field;
+  protected $field_name;
+  protected $instance;
   protected $web_user;
 
   function setUp() {
@@ -230,6 +232,8 @@ class TextFieldTestCase extends BackdropWebTestCase {
 }
 
 class TextSummaryTestCase extends BackdropWebTestCase {
+  protected $post_creator;
+
   function setUp() {
     parent::setUp();
     $this->post_creator = $this->backdropCreateUser(array('create post content', 'edit own post content'));
@@ -389,6 +393,10 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 }
 
 class TextTranslationTestCase extends BackdropWebTestCase {
+  protected $admin;
+  protected $format;
+  protected $translator;
+
   function setUp() {
     parent::setUp('locale', 'translation');
 

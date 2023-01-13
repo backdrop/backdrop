@@ -623,6 +623,8 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+
   /**
    * Attempt to cancel account without permission.
    */
@@ -1600,6 +1602,8 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
  * Test user autocompletion.
  */
 class UserAutocompleteTestCase extends BackdropWebTestCase {
+  protected $unprivileged_user;
+  protected $privileged_user;
   protected $profile = 'testing';
 
   function setUp() {
@@ -2042,6 +2046,11 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $full_html_format;
+  protected $plain_text_format;
+  protected $web_user;
+
   function setUp() {
     parent::setUp('comment');
 
@@ -2177,6 +2186,7 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
  * Test case to test adding, editing and deleting roles.
  */
 class UserRoleAdminTestCase extends BackdropWebTestCase {
+  protected $admin_user;
   protected $profile = 'testing';
 
   function setUp() {

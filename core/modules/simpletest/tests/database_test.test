@@ -11,6 +11,7 @@
  * rather than just a stdClass or array. This class is for testing that
  * functionality. (See testQueryFetchClass() below)
  */
+#[AllowDynamicProperties]
 class FakeRecord { }
 
 /**
@@ -3902,12 +3903,11 @@ class DatabaseEmptyStatementTestCase extends BackdropWebTestCase {
  * Tests management of database connections.
  */
 class ConnectionUnitTest extends BackdropUnitTestCase {
-
   protected $key;
-  protected $target;
-
   protected $monitor;
   protected $originalCount;
+  protected $originalTarget;
+  protected $target;
 
   function setUp() {
     parent::setUp();

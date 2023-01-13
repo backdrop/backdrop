@@ -1,7 +1,14 @@
 <?php
 
 class BootstrapIPAddressTestCase extends BackdropWebTestCase {
+  protected $cluster_ip;
+  protected $forwarded_ip;
+  protected $oldserver;
   protected $profile = 'testing';
+  protected $proxy_ip;
+  protected $proxy2_ip;
+  protected $remote_ip;
+  protected $untrusted_ip;
 
   function setUp() {
     $this->oldserver = $_SERVER;

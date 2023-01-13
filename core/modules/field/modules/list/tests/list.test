@@ -10,6 +10,10 @@ require_once BACKDROP_ROOT . '/core/modules/field/tests/field.test';
  * Tests for the 'List' field types.
  */
 class ListFieldTestCase extends FieldTestCase {
+  protected $field;
+  protected $field_name;
+  protected $instance;
+
   function setUp() {
     parent::setUp('field_test');
 
@@ -110,6 +114,12 @@ class ListFieldTestCase extends FieldTestCase {
  * Sets up a List field for testing allowed values functions.
  */
 class ListDynamicValuesTestCase extends FieldTestCase {
+  protected $entity;
+  protected $field;
+  protected $field_name;
+  protected $instance;
+  protected $test;
+
   function setUp() {
     parent::setUp(array('list', 'field_test', 'list_test'));
 
@@ -184,6 +194,11 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
  * List module UI tests.
  */
 class ListFieldUITestCase extends FieldTestCase {
+  protected $admin_path;
+  protected $field_name;
+  protected $hyphen_type;
+  protected $type;
+
   function setUp() {
     parent::setUp('field_test', 'field_ui');
 

@@ -11,6 +11,12 @@
  * Tests field storage.
  */
 class FieldSqlStorageTestCase extends BackdropWebTestCase {
+  protected $field;
+  protected $field_name;
+  protected $instance;
+  protected $revision_table;
+  protected $table;
+
   function setUp() {
     parent::setUp('field_sql_storage', 'field', 'field_test', 'text');
     $this->field_name = strtolower($this->randomName());

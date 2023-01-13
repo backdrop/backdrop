@@ -45,6 +45,9 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
  * Tests the taxonomy vocabulary interface.
  */
 class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
+  protected $vocabulary;
+  protected $admin_user;
+
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));
@@ -470,6 +473,8 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
  * Test for legacy node bug.
  */
 class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
@@ -501,6 +506,10 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
  * Tests for taxonomy term functions.
  */
 class TaxonomyTermTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $instance;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -947,6 +956,10 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
  * Tests the rendering of term reference fields in RSS feeds.
  */
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $instance;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields', 'administer view modes'));
@@ -1031,6 +1044,15 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
  * Tests the hook implementations that maintain the taxonomy index.
  */
 class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $field_1;
+  protected $field_2;
+  protected $field_name_1;
+  protected $field_name_2;
+  protected $instance_1;
+  protected $instance_2;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('taxonomy');
 
@@ -1346,6 +1368,8 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
  * Tests for taxonomy term field and formatter.
  */
 class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
+  protected $field;
+  protected $field_name;
   protected $instance;
   protected $vocabulary;
 
@@ -1456,6 +1480,8 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
  * Tests a taxonomy term reference field that allows multiple vocabularies.
  */
 class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
+  protected $field;
+  protected $field_name;
   protected $instance;
   protected $vocabulary1;
   protected $vocabulary2;
@@ -1569,6 +1595,11 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
  * Test taxonomy token replacement in strings.
  */
 class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $instance;
+  protected $langcode;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -1853,6 +1884,9 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
  * Tests the functionality of EntityFieldQuery for taxonomy entities.
  */
 class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));

@@ -8,6 +8,8 @@
  * Unit tests for the module API.
  */
 class ModuleUnitTest extends BackdropWebTestCase {
+  protected $user;
+
   /**
    * The basic functionality of module_list().
    */

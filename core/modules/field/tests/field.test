@@ -53,9 +53,14 @@ class FieldTestCase extends BackdropWebTestCase {
 }
 
 class FieldAttachTestCase extends FieldTestCase {
-  protected $field_name;
   protected $field;
+  protected $field_2;
+  protected $field_id;
+  protected $field_id_2;
+  protected $field_name;
+  protected $field_name_2;
   protected $instance;
+  protected $instance_2;
 
   function setUp() {
     // Since this is a base class for many test cases, support the same
@@ -669,8 +674,8 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
  * Unit test class for non-storage related field_attach_* functions.
  */
 class FieldAttachOtherTestCase extends FieldAttachTestCase {
-  protected $field_name_2;
   protected $field_2;
+  protected $field_name_2;
   protected $instance_2;
 
   /**
@@ -1442,11 +1447,11 @@ class FieldInfoTestCase extends FieldTestCase {
 
 class FieldFormTestCase extends FieldTestCase {
   protected $field;
-  protected $field_name;
-  protected $instance;
-  protected $field_single;
   protected $field_multiple;
+  protected $field_name;
+  protected $field_single;
   protected $field_unlimited;
+  protected $instance;
 
   function setUp() {
     parent::setUp('field_test');
@@ -1992,15 +1997,14 @@ class FieldFormTestCase extends FieldTestCase {
 }
 
 class FieldDisplayAPITestCase extends FieldTestCase {
-  protected $field_name;
-  protected $field;
-  protected $instance;
-
   protected $cardinality;
-  protected $label;
-  protected $is_new;
-  protected $values;
   protected $entity;
+  protected $field;
+  protected $field_name;
+  protected $instance;
+  protected $is_new;
+  protected $label;
+  protected $values;
 
   function setUp() {
     parent::setUp('field_test');
@@ -2185,9 +2189,12 @@ class FieldDisplayAPITestCase extends FieldTestCase {
 }
 
 class FieldCrudTestCase extends FieldTestCase {
-  protected $field_name;
+  protected $another_field;
+  protected $another_instance_definition;
   protected $field;
+  protected $field_name;
   protected $instance;
+  protected $instance_definition;
 
   function setUp() {
     // field_update_field() tests use number.module
@@ -2601,6 +2608,7 @@ class FieldCrudTestCase extends FieldTestCase {
 class FieldInstanceCrudTestCase extends FieldTestCase {
   protected $field;
   protected $instance_definition;
+  protected $another_instance_definition;
 
   function setUp() {
     parent::setUp('field_test');
@@ -2823,10 +2831,10 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
  * that only the correct values are returned by field_available_languages().
  */
 class FieldTranslationsTestCase extends FieldTestCase {
-  protected $field_name;
-  protected $field;
-  protected $instance;
   protected $entity_type;
+  protected $field;
+  protected $field_name;
+  protected $instance;
 
   function setUp() {
     parent::setUp('locale', 'field_test');
@@ -3174,12 +3182,13 @@ class FieldTranslationsTestCase extends FieldTestCase {
  * Unit test class for field bulk delete and batch purge functionality.
  */
 class FieldBulkDeleteTestCase extends FieldTestCase {
-  protected $entity_type;
-  protected $fields;
-  protected $instances;
   protected $bundles;
   protected $entities;
   protected $entities_by_bundles;
+  protected $entity_type;
+  protected $field;
+  protected $fields;
+  protected $instances;
 
   /**
    * Converts the passed entities to partially created ones.

@@ -9,6 +9,7 @@
  */
 class PagerFunctionalWebTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+  protected $admin_user;
 
   function setUp() {
     parent::setUp(array('dblog'));

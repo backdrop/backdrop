@@ -1,11 +1,11 @@
 <?php
 
-
 class FileTranferTest extends BackdropWebTestCase {
   protected $hostname = 'localhost';
   protected $username = 'backdrop';
   protected $password = 'password';
   protected $port = '42';
+  protected $testConnection;
 
   function setUp() {
     parent::setUp();

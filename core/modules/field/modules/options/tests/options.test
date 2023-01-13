@@ -8,6 +8,11 @@ require_once BACKDROP_ROOT . '/core/modules/field/tests/field.test';
 require_once BACKDROP_ROOT . '/core/modules/field/modules/list/tests/list.test';
 
 class OptionsWidgetsTestCase extends FieldTestCase {
+  protected $bool;
+  protected $card_1;
+  protected $card_2;
+  protected $web_user;
+
   function setUp() {
     parent::setUp('field_test', 'list_test');
 

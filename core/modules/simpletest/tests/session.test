@@ -5,6 +5,8 @@
  */
 
 class SessionTestCase extends BackdropWebTestCase {
+  protected $_logged_in;
+
   function setUp() {
     parent::setUp('session_test');
 

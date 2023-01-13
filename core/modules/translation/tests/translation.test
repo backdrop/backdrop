@@ -8,7 +8,9 @@
  * Functional tests for the Translation module.
  */
 class TranslationTestCase extends BackdropWebTestCase {
+  protected $admin_user;
   protected $book;
+  protected $translator;
 
   function setUp() {
     parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');

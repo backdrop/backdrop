@@ -676,7 +676,10 @@ class SearchExactTestCase extends BackdropWebTestCase {
  * Test integration searching comments.
  */
 class SearchCommentTestCase extends BackdropWebTestCase {
+  protected $admin_role;
   protected $admin_user;
+  protected $comment_subject;
+  protected $node;
   protected $profile = 'testing';
 
   function setUp() {
@@ -1145,6 +1148,8 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
  * Tests keywords and conditions.
  */
 class SearchKeywordsConditions extends BackdropWebTestCase {
+  protected $searching_user;
+
   function setUp() {
     parent::setUp('search', 'search_extra_type');
     // Create searching user.
