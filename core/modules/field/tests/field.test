@@ -3594,13 +3594,19 @@ class FieldBlockTestCase extends FieldTestCase {
  * Test field_get_value().
  */
 class FieldGetValueTestCase extends FieldTestCase {
-  protected $profile = 'testing';
+  protected $admin_user;
   protected $content_type;
   protected $field_name;
   protected $field;
   protected $instance;
-  protected $admin_user;
   protected $node;
+  protected $test_field_name;
+  protected $test_email_field_name;
+  protected $profile = 'testing';
+  protected $value1;
+  protected $value2;
+  protected $value_email1;
+  protected $value_email2;
 
   function setUp() {
     parent::setUp(array('node', 'field', 'field_test', 'email'));
@@ -3709,11 +3715,12 @@ class FieldGetValueTestCase extends FieldTestCase {
  * Test fields with token display mode.
  */
 class FieldTokenTestCase extends FieldTestCase {
-  protected $profile = 'testing';
-  protected $test_field_name;
-  protected $test_date_field_name;
   protected $admin_user;
+  protected $content_type;
   protected $node;
+  protected $profile = 'testing';
+  protected $test_date_field_name;
+  protected $test_field_name;
 
   function setUp() {
     parent::setUp(array('node', 'field', 'field_ui', 'field_test', 'date', 'path'));
