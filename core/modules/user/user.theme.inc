@@ -234,7 +234,7 @@ function theme_user_admin_roles($variables) {
       'class' => array('role-name'),
     );
     $row[] = array(
-      'data' => filter_xss_admin($form['roles'][$role_name]['#role']->admin_description),
+      'data' => filter_xss_admin($form['roles'][$role_name]['#role']->description),
       'class' => array('role-description', 'priority-low'),
     );
     $row[] = array(
