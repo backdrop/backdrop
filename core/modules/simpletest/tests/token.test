@@ -795,6 +795,7 @@ class TokenUserTestCase extends TokenTestHelper {
 }
 
 class TokenEntityTestCase extends TokenTestHelper {
+  protected $vocab;
 
   public function setUp($modules = array()) {
     $modules[] = 'taxonomy';

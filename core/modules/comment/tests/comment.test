@@ -342,8 +342,9 @@ class CommentHelperCase extends BackdropWebTestCase {
 }
 
 class CommentInterfaceTest extends CommentHelperCase {
-  protected $web_user;
   protected $comment;
+  protected $web_user;
+  protected $web_user2;
 
   /**
    * Tests the comment interface.

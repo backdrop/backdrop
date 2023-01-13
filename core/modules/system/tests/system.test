@@ -2754,6 +2754,8 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
  * Test menu block settings.
  */
 class MenuBlockTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('menu');
 

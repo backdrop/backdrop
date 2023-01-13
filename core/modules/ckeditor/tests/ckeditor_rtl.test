@@ -25,6 +25,8 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
    * Set up environment.
    */
   public function setUp() {
+    protected $admin_user;
+
     parent::setUp('ckeditor', 'language', 'locale');
     // Add RTL language.
     $arabic = (object) array(

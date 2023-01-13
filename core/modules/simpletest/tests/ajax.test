@@ -569,6 +569,7 @@ class AJAXElementValidation extends AJAXTestCase {
  * Tests use of dialogs as wrappers for Ajax responses.
  */
 class AJAXDialogTest extends AJAXTestCase {
+  protected $web_user;
   protected $profile = 'testing';
 
   function setUp() {

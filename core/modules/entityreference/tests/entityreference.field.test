@@ -16,6 +16,8 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
+    protected $admin_user;
+
     parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.

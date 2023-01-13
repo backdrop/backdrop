@@ -2048,7 +2048,7 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
 class UserSignatureTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $full_html_format;
-  protected $plain_text_format;
+  protected $filtered_html_format;
   protected $web_user;
 
   function setUp() {
@@ -2631,6 +2631,8 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
  * Test user entity callbacks.
  */
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
+  protected $account;
+  protected $anonymous;
   protected $profile = 'testing';
 
   function setUp() {

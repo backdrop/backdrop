@@ -3906,7 +3906,9 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
   protected $key;
   protected $monitor;
   protected $originalCount;
+  protected $originalLanguage;
   protected $originalTarget;
+  protected $skipTest
   protected $target;
 
   function setUp() {

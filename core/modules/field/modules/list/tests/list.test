@@ -455,6 +455,11 @@ class ListFieldUITestCase extends FieldTestCase {
  * Tests that formatters are working properly.
  */
 class ListFieldDisplayTestCase extends FieldTestCase {
+  protected $admin_path;
+  protected $field_name;
+  protected $hyphen_type;
+  protected $type;
+
   function setUp() {
     parent::setUp('field_test', 'field_ui');
 

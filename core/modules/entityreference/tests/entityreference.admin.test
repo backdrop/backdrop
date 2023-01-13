@@ -11,6 +11,10 @@
 class EntityReferenceAdminTestCase extends BackdropWebTestCase {
 
   public function setUp() {
+    protected $admin_user;
+    protected $hyphen_type;
+    protected $type;
+
     parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.

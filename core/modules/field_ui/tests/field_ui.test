@@ -932,6 +932,7 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
  * Tests display mode functionality.
  */
 class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
+  protected $admin_user;
 
   /**
    * Tests display mode functionality.
