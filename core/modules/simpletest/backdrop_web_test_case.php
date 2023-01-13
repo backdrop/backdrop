@@ -1076,16 +1076,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalLanguageUrl;
 
   /**
-   * The original active installation profile.
-   */
-  protected $originalProfile;
-
-  /**
-   * The original clean_url variable value.
-   */
-  protected $originalCleanUrl;
-
-  /**
    * The public files directory created for testing purposes.
    */
   protected $public_files_directory;
