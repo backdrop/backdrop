@@ -17,6 +17,7 @@ class AnonymousUser implements UserInterface {
   public $status = 1;
   public $cache = 0;
   public $session = '';
+  public $timestamp = '';
 
   /**
    * Constructor for an anonymous user object.

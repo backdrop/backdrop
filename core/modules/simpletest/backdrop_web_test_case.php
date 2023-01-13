@@ -1065,9 +1065,40 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected $redirect_count;
 
-  public $public_files_directory;
-  public $private_files_directory;
-  public $temp_files_directory;
+  /**
+   * The original language.
+   */
+  protected $originalLanguage;
+
+  /**
+   * The original language URL.
+   */
+  protected $originalLanguageUrl;
+
+  /**
+   * The original active installation profile.
+   */
+  protected $originalProfile;
+
+  /**
+   * The original clean_url variable value.
+   */
+  protected $originalCleanUrl;
+
+  /**
+   * The public files directory created for testing purposes.
+   */
+  protected $public_files_directory;
+
+  /**
+   * The private files directory created for testing purposes.
+   */
+  protected $private_files_directory;
+
+  /**
+   * The temporary files directory created for testing purposes.
+   */
+  protected $temp_files_directory;
 
   /**
    * Constructor for BackdropWebTestCase.
