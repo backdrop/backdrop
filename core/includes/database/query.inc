@@ -1284,6 +1284,20 @@ class MergeQuery extends Query implements QueryConditionInterface {
   protected $table;
 
   /**
+   * The table or subquery to be used for the condition.
+   */
+  protected $conditionTable;
+
+  /**
+   * The condition object for this query.
+   *
+   * Condition handling is handled via composition.
+   *
+   * @var DatabaseCondition
+   */
+  protected $condition;
+
+  /**
    * An array of fields on which to insert.
    *
    * @var array
@@ -1358,6 +1372,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
+    $this->conditionTable = $table;
     $this->condition = new DatabaseCondition('AND');
   }
 
