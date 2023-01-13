@@ -972,14 +972,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $alterTags = array();
+  public $alterTags = array();
 
   /**
    * A list of arbitrary metadata that may be attached to the query.
    *
    * @var array
    */
-  protected $alterMetaData = array();
+  public $alterMetaData = array();
 
   /**
    * The FOR UPDATE status
