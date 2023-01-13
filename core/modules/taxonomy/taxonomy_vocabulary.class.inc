@@ -5,10 +5,11 @@
  * This class is responsible for saving and storing configuration files for
  * vocabularies.
  */
+#[\AllowDynamicProperties]
 class TaxonomyVocabulary {
 
   /**
-   * Human-readable of the vocabulary.
+   * Human-readable name of the vocabulary.
    *
    * @var string
    */
@@ -46,7 +47,6 @@ class TaxonomyVocabulary {
    * @var integer
    */
   public $language = 0;
-
 
   /**
    * (optional) The weight of this vocabulary in relation to other vocabularies.
