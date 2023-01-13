@@ -12,12 +12,13 @@
 class AnonymousUser implements UserInterface {
   public $uid = 0;
   public $name = NULL;
+  public $email = NULL;
   public $hostname = NULL;
   public $roles = array(BACKDROP_ANONYMOUS_ROLE);
   public $status = 1;
   public $cache = 0;
-  public $session = '';
-  public $timestamp = '';
+  public $session = NULL;
+  public $timestamp = NULL;
 
   /**
    * Constructor for an anonymous user object.

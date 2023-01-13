@@ -136,6 +136,8 @@ class LinkValidateTest extends LinkBaseTestClass {
  * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738!
  */
 class LinkValidateUnitTest extends BackdropUnitTestCase {
+  protected $originalLanguage;
+
   function setUp() {
     parent::setUp();
     backdrop_load('module', 'link');

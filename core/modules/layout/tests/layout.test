@@ -12,6 +12,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $profile = 'minimal';
   protected $admin_user;
   protected $web_user;
+  protected $is_new;
+  protected $original_name;
   protected $test_node1;
   protected $test_node2;
   protected $orphaned_blocks = FALSE;

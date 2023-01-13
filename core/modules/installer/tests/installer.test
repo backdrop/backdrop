@@ -196,6 +196,8 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
 }
 
 class InstallerTestUploadCase extends BackdropWebTestCase {
+  protected $name;
+  protected $title;
   protected $profile = 'testing';
 
   public function setUp() {

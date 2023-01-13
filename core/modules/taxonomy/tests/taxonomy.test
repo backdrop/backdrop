@@ -265,6 +265,11 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
  * Tests for taxonomy vocabulary functions.
  */
 class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
+  protected $field;
+  protected $field_name;
+  protected $instance;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('taxonomy', 'field_test');
     $admin_user = $this->backdropCreateUser(array('create post content', 'administer taxonomy'));
@@ -1255,6 +1260,8 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
  * Test the taxonomy_term_load_multiple() function.
  */
 class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
+  protected $taxonomy_admin;
+
   function setUp() {
     parent::setUp();
     $this->taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
@@ -1737,6 +1744,9 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests setting languages for taxonomy.
  */
 class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
+  protected $admin_user;
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('node', 'language');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer languages', 'administer content types', 'administer fields'));

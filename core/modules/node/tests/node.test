@@ -814,6 +814,8 @@ class PagePreviewTestCase extends BackdropWebTestCase {
  * Tests that the correct layout is used for node previews.
  */
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $content_type;
 
   function setUp() {
     parent::setUp('node_layout_preview_test');
@@ -1600,6 +1602,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
  * Tests node save related functionality, including import-save.
  */
 class NodeSaveTestCase extends BackdropWebTestCase {
+  protected $web_user;
   protected $profile = 'testing';
 
   function setUp() {
@@ -2080,6 +2083,8 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -2103,6 +2108,11 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  * Tests node administration page functionality.
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $base_user_1;
+  protected $base_user_2;
+  protected $base_user_3;
+  protected $base_user_4;
   protected $profile = 'testing';
 
   function setUp() {
@@ -2360,6 +2370,8 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('node', 'system');
 
@@ -2399,6 +2411,8 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node', 'block');
@@ -3207,6 +3221,8 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+  protected $web_user;
+
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
@@ -3251,6 +3267,12 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+  protected $admin_user;
+  protected $content_admin_user;
+  protected $field;
+  protected $field_name;
+  protected $instance;
+
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
@@ -3492,6 +3514,7 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  * node instances.
  */
 class NodePublishScheduling extends BackdropWebTestCase {
+  protected $admin_user;
 
   function testNodeTypeCreateDefaultDraft() {
     // Create a content type of fooba via the user interface.
