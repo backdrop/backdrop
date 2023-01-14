@@ -474,8 +474,9 @@ function decode_entities($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strlen($text) {
-  // Bail early if no string provided (if $text is NULL for example).
-  if (!is_string($text)) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
     return 0;
   }
 
@@ -492,7 +493,7 @@ function backdrop_strlen($text) {
 /**
  * Uppercase a UTF-8 string.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return string
@@ -501,6 +502,12 @@ function backdrop_strlen($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strtoupper($text) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text) {
+    return "";
+  }
+
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtoupper($text);
@@ -517,7 +524,7 @@ function backdrop_strtoupper($text) {
 /**
  * Lowercase a UTF-8 string.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return string
@@ -526,6 +533,12 @@ function backdrop_strtoupper($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strtolower($text) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text) {
+    return "";
+  }
+
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtolower($text);
@@ -577,19 +590,25 @@ function backdrop_ucfirst($text) {
  * cutting off a string at a known character/substring location, the usage of
  * PHP's normal strpos/substr is safe and much faster.
  *
- * @param $text
+ * @param string $text
  *   The input string.
- * @param $start
+ * @param int $start
  *   The position at which to start reading.
- * @param $length
+ * @param int $length
  *   The number of characters to read.
  *
- * @return
+ * @return string
  *   The shortened string.
  *
  * @ingroup php_wrappers
  */
 function backdrop_substr($text, $start, $length = NULL) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
+    return "";
+  }
+
   global $multibyte;
   $text = (string) $text;
   if ($multibyte == UNICODE_MULTIBYTE) {
