@@ -504,7 +504,7 @@ function backdrop_strlen($text) {
 function backdrop_strtoupper($text) {
   // Bail early if $text is NULL.
   // @todo Remove this in 2.x.
-  if (is_null($text) {
+  if (is_null($text)) {
     return "";
   }
 
@@ -535,7 +535,7 @@ function backdrop_strtoupper($text) {
 function backdrop_strtolower($text) {
   // Bail early if $text is NULL.
   // @todo Remove this in 2.x.
-  if (is_null($text) {
+  if (is_null($text)) {
     return "";
   }
 
