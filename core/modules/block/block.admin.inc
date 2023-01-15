@@ -12,7 +12,7 @@ function block_admin_list() {
 
   $help_text = array(
     '#theme' => 'help',
-    '#markup' => t('Custom blocks allow placing arbitrary text in layout regions. Blocks created here become available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => 'admin/structure/layouts')),
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
   );
 
   $header = array(
