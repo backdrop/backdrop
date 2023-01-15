@@ -79,7 +79,8 @@ function layout_list_page() {
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }
       $row[] = array('data' => $path_link, 'class' => $class);
-      // Empty columns are intentional.
+      // Empty columns are intentional so that they may be hidden with
+      // priority-low class on the $header array.
       $row[] = '';
       $row[] = '';
       $row[] = '';
