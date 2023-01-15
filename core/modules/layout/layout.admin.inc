@@ -221,7 +221,6 @@ function layout_list_page() {
     '#header' => $header,
     '#rows' => $default_rows,
     '#attributes' => array('class' =>   array('layout-list')),
-    // '#empty' => t('No layout overrides have been created yet.'),
     '#weight' => 5,
   );
   return $page;
