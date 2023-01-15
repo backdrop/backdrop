@@ -6,8 +6,9 @@
 Backdrop.behaviors.permissionsFilter = {
   attach: function(context, settings) {
     var $input = $('input.table-filter-text').once('table-filter-text');
-    var $form = $('table#permissions');
+    var $form = $('#user-admin-permissions');
     var $rows = $form.find('tbody tr');
+    var $resetLink = $form.find('.search-reset');
 
     // Filter the list of modules by provided search string.
     function filterPermissionsList() {
@@ -46,9 +47,16 @@ Backdrop.behaviors.permissionsFilter = {
       }
     }
 
+    // Clear out the input field when clicking the reset button.
+    function resetPermissionsList(e) {
+      $input.val('').triggerHandler('keyup');
+      e.preventDefault();
+    }
+
     if ($form.length) {
       $input.focus().on('keyup', filterPermissionsList);
       $input.triggerHandler('keyup');
+      $resetLink.on('click', resetPermissionsList);
     }
   }
 };
