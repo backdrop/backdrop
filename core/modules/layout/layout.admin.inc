@@ -94,10 +94,10 @@ function layout_list_page() {
     }
     // Add the heading row to the non-default layout path groups.
     if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
-      $stand_alone_rows[] = array('data' => $row, 'class' => array('layout-group'));
+      $stand_alone_rows[$path . '-layout-group'] = array('data' => $row, 'class' => array('layout-group'));
     }
-    else {
-      $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
+    elseif ($path !=='') {
+      $override_rows[$path . '-layout-group'] = array('data' => $row, 'class' => array('layout-group'));
     }
 
     foreach ($group as $layout) {
