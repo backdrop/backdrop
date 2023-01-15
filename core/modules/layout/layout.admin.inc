@@ -194,7 +194,7 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $stand_alone_rows,
-     '#attributes' => array('class' =>   array('layout-list')),
+     '#attributes' => array('class' => array('layout-list')),
      '#empty' => t('No layout pages have been created yet.'),
      '#weight' => 1,
    );
@@ -207,7 +207,7 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $override_rows,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
     '#empty' => t('No layout overrides have been created yet.'),
     '#weight' => 3,
   );
@@ -220,7 +220,7 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $default_rows,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
     '#weight' => 5,
   );
   return $page;
