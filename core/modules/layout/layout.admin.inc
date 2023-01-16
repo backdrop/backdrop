@@ -2477,7 +2477,7 @@ function layout_reorder_form($form, &$form_state) {
  *
  * @see layout_menu()
  */
-function layout_reorder_form_title() {
+function layout_reorder_title() {
   if (isset($_GET['layout_path'])) {
     return t('Reorder layouts under path @path', array('@path' => $_GET['layout_path']));
   }
