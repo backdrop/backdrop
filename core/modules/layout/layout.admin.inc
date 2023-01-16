@@ -2435,6 +2435,16 @@ function layout_reorder_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save order'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/structure/layouts',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('form-cancel')
+      ),
+    ),
+  );
 
   return $form;
 }
