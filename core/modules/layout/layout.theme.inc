@@ -9,6 +9,7 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
+  $layouts = element_children($element);
   $rows = array();
 
   // Assemble the data for a table from everything in $form['handlers']
@@ -19,18 +20,28 @@ function theme_layout_reorder_layouts($variables) {
         'data' => render($element[$layout_name]['title']),
         'class' => array('layout-name'),
       );
-      $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
-      $row[] = render($element[$layout_name]['weight']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+      // Only add the weight column if there are at least two layouts.
+      if (count($layouts) > 1) {
+        $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
+        $row[] = render($element[$layout_name]['weight']);
+        $rows[] = array('data' => $row, 'class' => array('draggable'));
+      }
+      else {
+        unset($element[$layout_name]['weight']);
+        $rows[] = array('data' => $row);
+      }
     }
   }
 
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-name')),
-    t('Weight'),
   );
-
-  backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
+  // if there are at least two layouts to reorder, add tabledrag and the table
+  // header for the weight column.
+  if (count($layouts) > 1) {
+    $header[] = t('Weight');
+    backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
+  }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'layout-reorder')));
   $output .= backdrop_render_children($element);
