@@ -36,7 +36,7 @@ function theme_layout_reorder_layouts($variables) {
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-name')),
   );
-  // if there are at least two layouts to reorder, add tabledrag and the table
+  // If there are at least two layouts to reorder, add tabledrag and the table
   // header for the weight column.
   if (count($layouts) > 1) {
     $header[] = t('Weight');
