@@ -198,8 +198,8 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(
+    'title' => 'Reorder layouts',
     'title callback' => 'layout_reorder_title',
-    'title arguments' => array(),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_reorder_form'),
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
