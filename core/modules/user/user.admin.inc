@@ -567,10 +567,11 @@ function user_admin_roles($form, $form_state) {
   // this is the selected option if the role that was previously set as admin is
   // deleted).
   $roles = array(0 => t('disabled')) + $roles;
+  $user_admin_role = $system_config->get('user_admin_role');
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
+    '#default_value' => $user_admin_role ? $user_admin_role : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
@@ -598,6 +599,10 @@ function user_admin_roles($form, $form_state) {
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
     $form['roles'][$role_name]['#weight'] = $order;
+    if ($role_name == $user_admin_role) {
+      $admin_role_info = ' <strong>' . t('This role receives all new permissions by default.') . '</strong>';
+      $form['roles'][$role_name]['#role']->description .= $admin_role_info;
+    }
     $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
       '#title' => t('Weight for @title', array('@title' => check_plain($role->label))),
@@ -640,6 +645,7 @@ function user_admin_roles($form, $form_state) {
     );
     $order++;
   }
+
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
