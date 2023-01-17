@@ -94,7 +94,7 @@ class LanguageListTest extends BackdropWebTestCase {
 
     // Ensure 'delete' link works.
     $this->backdropGet('admin/config/regional/language');
-    $this->clickLink(t('Delete language'));
+    $this->clickLink(t('Delete'));
     $this->assertText(t('Are you sure you want to delete the language'), t('"delete" link is correct.'));
     // Delete an enabled language.
     $this->backdropGet('admin/config/regional/language/delete/' . $langcode);
@@ -104,7 +104,7 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->assertRaw($name, t('The language was not deleted.'));
     // Delete the language for real. This a confirm form, we do not need any
     // fields changed.
-    $this->backdropPost('admin/config/regional/language/delete/' . $langcode, array(), t('Delete'));
+    $this->backdropPost('admin/config/regional/language/delete/' . $langcode, array(), t('Delete language'));
     // We need raw here because %language and %langcode will add HTML.
     $t_args = array('%language' => $name, '%langcode' => $langcode);
     $this->assertRaw(t('The %language (%langcode) language has been removed.', $t_args), t('The test language has been removed.'));
@@ -127,7 +127,7 @@ class LanguageListTest extends BackdropWebTestCase {
     backdrop_static_reset('language_list');
     $enabled_languages = language_list(TRUE);
     // Delete the disabled language.
-    $this->backdropPost('admin/config/regional/language/delete/fr', array(), t('Delete'));
+    $this->backdropPost('admin/config/regional/language/delete/fr', array(), t('Delete language'));
     // We need raw here because %language and %langcode will add HTML.
     $t_args = array('%language' => 'French', '%langcode' => 'fr');
     $this->assertRaw(t('The %language (%langcode) language has been removed.', $t_args), t('Disabled language has been removed.'));
