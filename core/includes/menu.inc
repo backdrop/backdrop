@@ -2969,6 +2969,7 @@ function _menu_link_build($item) {
   // Suggested items are disabled by default.
   if ($item['type'] == MENU_SUGGESTED_ITEM) {
     $item['hidden'] = 1;
+    $item['menu_name'] = 'main-menu';
   }
   // Hide all items that are not visible in the tree.
   elseif (!($item['type'] & MENU_VISIBLE_IN_TREE)) {

@@ -2887,8 +2887,11 @@ function system_update_1052() {
  * Remove unnecessary items from the "main-menu" menu.
  */
 function system_update_1053() {
-  db_query("DELETE FROM {menu_links} WHERE link_path LIKE '%/\%%' AND module = 'system' AND menu_name = 'main-menu'");
-  db_query("DELETE FROM {menu_links} WHERE link_path LIKE 'search/%' AND module = 'system' AND menu_name = 'main-menu'");
+  db_delete('menu_links')
+    ->condition('menu_name', 'main-menu')
+    ->condition('link_path', '%/\%%', 'LIKE')
+    ->condition('link_path', 'search%', 'NOT LIKE')
+    ->execute();
 
   // Move the 404 redirect link (if present) to the internal menu.
   $add_redirect_path = config_get('system.core', 'site_404');

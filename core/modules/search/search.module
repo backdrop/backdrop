@@ -263,7 +263,9 @@ function search_menu() {
         'type' => MENU_LOCAL_TASK,
         'file' => 'search.pages.inc',
         'weight' => $module == $default_info['module'] ? -10 : 0,
-        'menu_name' => 'internal',
+        // This item is supposed to be a child of the suggested menu item, so it
+        // has to go to the same menu.
+        'menu_name' => 'main-menu',
       );
       $items["$path/%menu_tail"] = array(
         'title' => $search_info['title'],
@@ -281,7 +283,7 @@ function search_menu() {
         'tab_root' => 'search/' . $default_info['path'] . '/%',
         // These tabs need to display at the same level.
         'tab_parent' => 'search/' . $default_info['path'],
-        'menu_name' => 'internal',
+        'menu_name' => 'main-menu',
       );
     }
   }
