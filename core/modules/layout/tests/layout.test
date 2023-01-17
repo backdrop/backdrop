@@ -1155,14 +1155,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertText('Generic node title', 'The generic layout is used when there is not a more specific layout.');
 
-    // Check the weights of the layout to ensure they have the correct defaults,
-    // then rearrange and check the paths again.
-    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('layout_path' => array('node/%'))));
+    // Check the weights of the layout to ensure they have the correct defaults.
+    $this->backdropGet('admin/structure/layouts/reorder', array('query' => array('layout_path' => array(backdrop_encode_path('node/%')))));
     $this->assertFieldByXPath('//select[@name="layouts[' . $clone_layout_name . '][weight]"]', '-1');
     $this->assertFieldByXPath('//select[@name="layouts[' . $layout_name . '][weight]"]', '0');
-
+    // Rearrange the layouts and check the paths again.
     $edit = array(
-      'layouts[node_post][weight]' => 1,
+      'layouts[' . $clone_layout_name . '][weight]' => 1,
     );
     $this->backdropPost(NULL, $edit, t('Save order'));
 
