@@ -323,7 +323,9 @@ function language_admin_edit_form_submit($form, &$form_state) {
  * User interface for the language deletion confirmation screen.
  */
 function language_admin_delete_form($form, &$form_state, $language) {
+  $languages = language_list();
   $langcode = $language->langcode;
+  $language_name = $languages[$langcode]->name;
 
   if (language_default()->langcode == $langcode) {
     backdrop_set_message(t('The default language cannot be deleted.'));
@@ -331,15 +333,24 @@ function language_admin_delete_form($form, &$form_state, $language) {
   }
 
   // For other languages, warn user that data loss is ahead.
-  $languages = language_list();
-
   if (!isset($languages[$langcode])) {
     backdrop_not_found();
     backdrop_exit();
   }
   else {
     $form['langcode'] = array('#type' => 'value', '#value' => $langcode);
-    return confirm_form($form, t('Are you sure you want to delete the language %language?', array('%language' => $languages[$langcode]->name)), 'admin/config/regional/language', t('Deleting a language will remove all interface translations associated with it, and posts in this language will be set to be language neutral. This action cannot be undone.'), t('Delete'), t('Cancel'));
+
+    $question = t('Are you sure you want to delete the %language language?', array('%language' => $language_name));
+    $confirm_form = confirm_form($form, $question, 'admin/config/regional/language', NULL, t('Delete language'));
+
+    $warnings[] = t('All %language language interface translations will be deleted.', array('%language' => $language_name));
+    $warnings[] = t('All content in the %language language will be set to be language-neutral.', array('%language' => $language_name));
+    // Add the default "This action cannot be undone!" warning from
+    // confirm_form().
+    $warnings[] = $confirm_form['message_wrapper']['warning']['#markup'];
+    $confirm_form['message_wrapper']['warning']['#markup'] = theme('item_list', array('items' => $warnings));
+
+    return $confirm_form;
   }
 }
 

@@ -457,18 +457,33 @@ function file_type_delete_confirm($form, &$form_state, $type) {
   $type = (array) $type;
   $form['type'] = array('#type' => 'value', '#value' => $type['type']);
   $form['name'] = array('#type' => 'value', '#value' => $type['name']);
+  $form['files'] = array();
 
-  $message = t('Are you sure you want to delete the file type %type?', array('%type' => $type['name']));
-  $caption = '';
-
+  // Check if files of this file type exist.
   $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type['type']))->fetchField();
+
+  $question = t('Are you sure you want to delete the file type %type?', array('%type' => $type['name']));
+  $confirm_form = confirm_form($form, $question, 'admin/structure/file-types', NULL, t('Delete file type'));
+
   if ($num_files) {
-    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', array('%type' => $type['name'])) . '</p>';
+    $warnings[] = '<strong>' . t('You will not be able to edit files of this type, and they may not display correctly.') . '</strong>';
+    $warnings[] = $confirm_form['message_wrapper']['warning']['#markup'];
+    $confirm_form['message_wrapper']['warning']['#markup'] = theme('item_list', array('items' => $warnings));
+
+    $file_summary = format_plural(
+      $num_files,
+      'There is <a href="@link">1 file of type %type</a> in use on your site.',
+      'There are <a href="@link">@count files of type %type</a> in use on your site.',
+       array('@link' => url('admin/content/files', array('query' => array('type' => $type['type']))), '%type' => $type['name'])
+     );
+  }
+  else {
+    $file_summary = t('There are no files of type %type on your site.', array('%type' => $type['name']));
   }
 
-  $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
+  $confirm_form['files'] = array('#markup' => $file_summary, '#weight' => 10);
 
-  return confirm_form($form, $message, 'admin/structure/file-types', $caption, t('Delete'));
+  return $confirm_form;
 }
 
 /**

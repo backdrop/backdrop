@@ -3296,7 +3296,8 @@ function _system_sort_requirements($a, $b) {
  *   If the 'destination' query parameter is set in the URL when viewing a
  *   confirmation form, that value will be used instead of $path.
  * @param $description
- *   Additional text to display. Defaults to t('This action cannot be undone.').
+ *   Additional text to display. Defaults to a 'This action cannot be undone!'
+ *   warning (set via backdrop_set_message()).
  * @param $yes
  *   A caption for the button that confirms the action (e.g. "Delete",
  *   "Replace", ...). Defaults to t('Confirm').
@@ -3329,7 +3330,13 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
     $form['description'] = array('#markup' => $description);
   }
   else {
-    backdrop_set_message(t('This action cannot be undone!'), 'warning');
+    $form['message_wrapper'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'warning')),
+    );
+    $form['message_wrapper']['warning'] = array(
+      '#markup' => t('This action cannot be undone!'),
+    );
   }
 
   $form[$name] = array('#type' => 'hidden', '#value' => 1);

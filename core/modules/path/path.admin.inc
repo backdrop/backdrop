@@ -866,40 +866,50 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
  */
-function path_admin_bulk_delete_confirm($form, $form_state) {
-  $all_path_info = path_get_info();
-  $delete_list = array();
-
-  foreach ($form_state['values']['update'] as $key => $value) {
-    $value = array_filter($value);
-    if ($value) {
-      if (isset($value['base'])) {
-        $delete_list[] = t('All %type aliases', array('%type' => $all_path_info[$key]['label']));
-      }
-      else {
-        foreach (array_keys($value) as $type) {
-          $delete_list[] = $all_path_info[$key]['pattern items'][$type];
-        }
-      }
-    }
-  }
-
+function path_admin_bulk_delete_confirm($form, &$form_state) {
   $form['delete'] = array(
     '#type' => 'value',
     '#value' => $form_state['values']['update'],
   );
-  $form['delete_list'] = array(
-    '#markup' => theme('item_list', array('items' => $delete_list)),
-  );
-
   $form['#submit'][] = 'path_bulk_update_form_bulk_delete_submit';
 
   $question = t('Delete all the following URL aliases?');
-  $path = 'admin/config/urls/path/bulk-update';
-  $description = t('This action cannot be undone.');
-  $yes = t('Delete URL aliases');
+  $confirm_form = confirm_form($form, $question, 'admin/config/urls/path/bulk-update', NULL, t('Delete URL aliases'));
 
-  return confirm_form($form, $question, $path, $description, $yes);
+  return $confirm_form;
+}
+
+/**
+ * Implements HOOK_form_alter(), to provide a list of aliases that are about to
+ * be deleted.
+ *
+ * @see path_admin_bulk_delete_confirm()
+ */
+function path_form_path_bulk_update_form_alter(&$form, &$form_state, $form_id) {
+  $bulk_operation = isset($form_state['values']['operations']['operation']) ? $form_state['values']['operations']['operation'] : '';
+
+  if ($bulk_operation == 'delete') {
+    $all_path_info = path_get_info();
+    $delete_list = array();
+
+    foreach ($form_state['values']['update'] as $key => $value) {
+      $value = array_filter($value);
+      if ($value) {
+        if (isset($value['base'])) {
+          $delete_list[] = t('All %type aliases', array('%type' => $all_path_info[$key]['label']));
+        }
+        else {
+          foreach (array_keys($value) as $type) {
+            $delete_list[] = $all_path_info[$key]['pattern items'][$type];
+          }
+        }
+      }
+    }
+
+    $form['delete_list'] = array(
+      '#markup' => theme('item_list', array('items' => $delete_list)),
+    );
+  }
 }
 
 /**

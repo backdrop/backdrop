@@ -433,7 +433,15 @@ function locale_translate_delete_page($lid) {
  */
 function locale_translate_delete_form($form, &$form_state, $source) {
   $form['lid'] = array('#type' => 'value', '#value' => $source->lid);
-  return confirm_form($form, t('Are you sure you want to delete the string "%source"?', array('%source' => $source->source)), 'admin/config/regional/translate/translate', t('Deleting the string will remove all translations of this string in all languages. This action cannot be undone.'), t('Delete'), t('Cancel'));
+
+  $question = t('Are you sure you want to delete the string %source?', array('%source' => $source->source));
+  $confirm_form = confirm_form($form, $question, 'admin/config/regional/translate/translate', NULL, t('Delete string'));
+
+  $warnings[] = t('Deleting the string will remove all translations of this string in all languages.');
+  $warnings[] = $confirm_form['message_wrapper']['warning']['#markup'];
+  $confirm_form['message_wrapper']['warning']['#markup'] = theme('item_list', array('items' => $warnings));
+
+  return $confirm_form;
 }
 
 /**
