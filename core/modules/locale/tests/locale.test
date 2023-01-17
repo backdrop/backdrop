@@ -295,7 +295,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $this->backdropLogin($admin_user);
     $path = 'admin/config/regional/language/delete/' . $langcode;
     // This a confirm form, we do not need any fields changed.
-    $this->backdropPost($path, array(), t('Delete'));
+    $this->backdropPost($path, array(), t('Delete language'));
     // We need raw here because %language and %langcode will add HTML.
     $t_args = array('%language' => $name, '%langcode' => $langcode);
     $this->assertRaw(t('The %language (%langcode) language has been removed.', $t_args), 'The test language has been removed.');
@@ -314,7 +314,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/regional/translate/translate', $search, t('Filter'));
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('Delete'));
+    $this->clickLink(t('Delete string'));
     $this->assertText(t('Are you sure you want to delete the string'), '"delete" link is correct.');
     // Delete the string.
     $path = 'admin/config/regional/translate/delete/' . $lid;

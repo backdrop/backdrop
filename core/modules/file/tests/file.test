@@ -3003,7 +3003,7 @@ class FileTypeTestCase extends FileTestHelper {
     // Delete newly created type.
     $this->backdropGet('admin/structure/file-types/manage/' . $edit['type'] . '/delete');
     $this->assertText(t('Are you sure you want to delete the file type @type?', array('@type' => $edit['name'])), 'Delete confirmation page found.');
-    $this->backdropPost(NULL, array(), t('Delete'));
+    $this->backdropPost(NULL, array(), t('Delete file type'));
     $this->assertRaw(t('The file type %type has been deleted.', array('%type' => $edit['name'])), 'Delete confirmation message found.');
     $this->backdropGet('admin/structure/file-types');
     $this->assertNoText($edit['name'], 'File type successfully deleted.');

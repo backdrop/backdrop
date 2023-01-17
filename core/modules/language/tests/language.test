@@ -94,7 +94,7 @@ class LanguageListTest extends BackdropWebTestCase {
 
     // Ensure 'delete' link works.
     $this->backdropGet('admin/config/regional/language');
-    $this->clickLink(t('Delete'));
+    $this->clickLink(t('Delete language'));
     $this->assertText(t('Are you sure you want to delete the language'), t('"delete" link is correct.'));
     // Delete an enabled language.
     $this->backdropGet('admin/config/regional/language/delete/' . $langcode);
