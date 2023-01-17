@@ -115,6 +115,11 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This page allows you to add or remove rows, and change the order of rows by dragging them up and down. You can also change the number of regions within each row, and adjust the width of each region.'),
+  );
+
   $messages = array();
   $form['messages'] = array(
     '#theme' => 'status_messages',
@@ -162,7 +167,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
-    '#attributes' => array('class' => array('flexible-layout-add-row')),
+    '#attributes' => array('class' => array('layout-flexible-add-row', 'button-secondary')),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),
@@ -483,7 +488,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_names'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Region names'),
+    '#title' => t('Regions'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
     '#tree' => TRUE,
@@ -491,16 +496,62 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
-    $form['region_names']['region_name_' . $i] = array(
+    $form['region_names']['region_' . $i] = array(
+      '#type' => 'container',
+    );
+    if (isset($row_data['region_names']['region_' . $i]['label'])) {
+      $region_name = $row_data['region_names']['region_' . $i]['label'];
+    }
+    $form['region_names']['region_' . $i]['label'] = array(
       '#type' => 'textfield',
-      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
-      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+      '#title' => t('Region name') . ' ' . ($i + 1),
+      '#default_value' => !empty($region_name) ? $region_name : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+    );
+    $form['region_names']['region_' . $i]['name'] = array(
+      '#type' => 'machine_name',
+      '#description' => t('A machine name to be used as the default CSS class. It must only contain uppercase letters, lowercase letters, numbers, hyphens and underscores.'),
+      '#default_value' => !empty($row_data['region_names']['region_' . $i]['name']) ? $row_data['region_names']['region_' . $i]['name'] : '',
+      '#maxlength' => 255,
+      '#field_prefix' => '<span dir="ltr">l-region--',
+      '#field_suffix' => '</span>&lrm;',
+      '#size' => 15,
+      '#disabled' => FALSE,
+      '#machine_name' => array(
+        'exists' => '_layout_flexible_template_region_name_exists',
+        'source' => array('region_names', 'region_' . $i, 'label'),
+        'standalone' => TRUE,
+        'label' => t('Name'),
+        'replace_pattern' => '[^a-z0-9-]+',
+        'replace' => '-',
+      ),
+    );
+    if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])){
+      $region_class_enable = $row_data['region_names']['region_' . $i]['region_class_enable'];
+    }
+    $form['region_names']['region_' . $i]['region_class_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add CSS classes'),
+      '#default_value' => !empty($region_class_enable) ? $region_class_enable : 0,
+    );
+    if (isset($row_data['region_names']['region_' . $i]['classes'])) {
+      $classes = $row_data['region_names']['region_' . $i]['classes'];
+    }
+    $form['region_names']['region_' . $i]['classes'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Additional region CSS classes'),
+      '#description' => t('Separate multiple classes with spaces.'),
+      '#default_value' => !empty($classes) ? $classes : '',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="region_names[region_' . $i . '][region_class_enable]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
   }
 
   $form['region_styles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Style'),
+    '#title' => t('Row Style'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
   );
@@ -536,9 +587,10 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   $form['region_styles']['container']['no_container']['#description'] = t('No container-related classes added to the row (e.g. for Hero blocks).');
 
   $form['region_styles']['row_classes'] = array(
-    '#title' => t('Additional row classes'),
+    '#title' => t('Additional row CSS classes'),
     '#type' => 'textfield',
     '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
+    '#description' => t('Separate multiple classes with spaces.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -573,19 +625,51 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 }
 
 /**
+ * Callback: Check if machine_name is unique.
+ *
+ * Even though callback is required for the Form API machine_name field type,
+ * the region classes are not required to be unique. It will accept any
+ * machine_name.
+ *
+ * @param $machine_name
+ *   The machine name for a region.
+ *
+ * @return
+ *   Whether or not the region name is taken.
+ *
+ * @see layout_flexible_template_edit_row_form()
+ * @see form_validate_machine_name()
+ */
+function _layout_flexible_template_region_name_exists($machine_name, $element, $form_state) {
+  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
+  foreach ($flexible_template->rows as $row) {
+    foreach ($row['region_names'] as $region_name) {
+      if ($region_name['name'] == $machine_name) {
+        return TRUE;
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+/**
  * Returns the last number of all regions named "Region X" where X is a number.
  */
 function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
   $last = 0;
+  $region_names = array();
   if ($form_state) {
-    $region_names = array_filter($form_state['values']['region_names']);
+    $regions = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
+    foreach ($regions as $key => $region) {
+      $region_names[] = $region['label'];
+    }
   }
   else {
-    $region_names = array();
     foreach ($flexible_template->rows as $row) {
-      foreach ($row['region_names'] as $name) {
-        $region_names[] = $name;
+      foreach ($row['region_names'] as $key => $region) {
+        $region_names[] = $region['label'];
       }
     }
   }
@@ -633,9 +717,10 @@ function layout_flexible_template_region_count_load(&$form, &$form_state) {
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
   $last_region_number = layout_flexible_template_get_last_region_number($form_state['flexible_template'], $form_state);
 
-  foreach ($form_state['values']['region_names'] as $key => $region_name) {
-    if (empty($region_name)) {
-      $form_state['values']['region_names'][$key] = t('Region') . ' ' . ($last_region_number + $key + 1);
+  foreach ($form_state['values']['region_names'] as $key => $region) {
+    if (empty($region)) {
+      $number = str_replace('region_', '', $key);
+      $form_state['values']['region_names'][$key]['label'] = t('Region') . ' ' . ($last_region_number + $number + 1);
       $last_region_number++;
     }
   }

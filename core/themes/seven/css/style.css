@@ -290,7 +290,7 @@ ul.primary li.active a,
   border: none;
   overflow: visible;
   line-height: 1;
-  color: #757575;
+  color: #606060;
   font-weight: normal;
   background-color: #DBDBD9;
   transition:
@@ -431,8 +431,8 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
-main {
-  margin-bottom: 20px;
+.l-wrapper {
+  padding-bottom: 80px;
 }
 
 /* Administration page listings. */
@@ -632,6 +632,11 @@ tr.selected td {
     display: none;
   }
 }
+@media screen and (min-width: 721px) {
+  .tableresponsive-toggle-columns {
+    display: none;
+  }
+}
 
 /**
  * Fieldsets.
@@ -652,38 +657,44 @@ tr.selected td {
  *   to apply all padding to the inner .fieldset-wrapper instead.
  */
 fieldset {
+  position: relative;
   max-width: 100%;
   margin: 1em 0;
   padding: 0;
+  border-radius: 4px;
   background-color: #fff;
-  border: none;
+  border: 2px solid #eaeaea;
   min-width: 0;
 }
 fieldset .fieldset-legend {
+  position: relative;
+  left: 0; /* LTR */
+  top: 0;
   display: block;
+  width: 100%;
+  padding-left: 15px; /* LTR */
   box-sizing: border-box;
-  border: 2px solid #EAEAEA;
-  border-radius: 4px;
-  background-color: #fff;
 }
-fieldset:not(.collapsible) .fieldset-legend {
-  padding: .3em .3em .3em 1em; /* LTR */
+fieldset:not(.collapsible) > legend > .fieldset-legend {
+  margin-top: .35em;
+  margin-bottom: .35em;
 }
-[dir="rtl"] fieldset:not(.collapsible) .fieldset-legend {
-  padding: .3em 1em .3em .3em;
+[dir="rtl"] fieldset .fieldset-legend {
+  right: 0;
+  padding-right: 15px;
+  padding-left: 0;
 }
-fieldset:not(.collapsible) .fieldset-legend,
-fieldset.collapsible:not(.collapsed) .fieldset-legend {
-  border-bottom: none;
-}
-
 legend {
   font-size: 120%;
-  font-weight: normal;
+  float: left;
   width: 100%;
 }
-.fieldset-description {
-  margin-bottom: 1em;
+[dir="rtl"] legend {
+  float: right;
+}
+.fieldset-description,
+.fieldset-description p {
+  margin: .5em 0;
 }
 fieldset fieldset {
   background-color: #fff;
@@ -694,36 +705,43 @@ fieldset fieldset fieldset {
 /**
  * Collapsible Fieldsets
  */
+.js fieldset.collapsible {
+  position: relative;
+}
 fieldset .fieldset-wrapper {
-  padding: 15px 13px 13px 15px; /* LTR */
-  border-radius: 0 0 4px 4px;
-  border: 2px solid #EAEAEA;
-  border-top: none;
-  margin-top: -2px;
+  padding: 0 13px 13px 15px; /* LTR */
+  clear: both;
 }
 [dir="rtl"] fieldset .fieldset-wrapper {
-  padding: 15px 15px 13px 13px;
+  padding: 0 15px 13px 13px;
+}
+fieldset .fieldset-wrapper::before {
+  content: "";
+  display: block;
+  height: 1px;
 }
 .js fieldset.collapsible .fieldset-title {
   position: relative;
   z-index: 1;
   display: block;
   padding: .3em .3em .3em 1.8em;
+  margin: 0 0 0 -.5em;
+  border-radius: 4px;
   background: transparent;
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-title {
   background-image: none;
   padding: .3em 1.8em .3em .3em;
+  margin: 0 -.5em 0 0;
 }
 .js fieldset.collapsible .fieldset-legend {
-  border-radius: 4px 4px 0 0;
   font-size: 1em;
 }
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
-  left: .8em;
-  top: .9em;
+  left: .6em;
+  top: .8em;
   width: 0;
   height: 0;
   border: .32em solid transparent;
@@ -732,12 +750,14 @@ fieldset .fieldset-wrapper {
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   left: auto;
-  right: .8em;
+  right: .6em;
 }
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
+  /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 .fieldset-legend span.summary:not(:empty):before {
@@ -748,27 +768,44 @@ fieldset .fieldset-wrapper {
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
-.js fieldset.collapsed {
-  padding: 0;
-}
-.js fieldset.collapsed .fieldset-legend {
-  border-radius: 4px;
-}
 .js fieldset.collapsed .fieldset-legend a:before {
-  left: 1em;
+  left: .8em;
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
   left: auto;
-  right: 1em;
+  right: .8em;
   border-left-color: transparent;
   border-right-color: black;
+}
+
+/**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
 }
 
 /**
@@ -876,22 +913,18 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  padding: 10px 2px;
+  padding: 0;
   background-color: #f8f8f8;
   border: 1px #d1d1d1;
   border-style: none solid solid solid;
   border-radius: 0;
-}
-.js fieldset.filter-wrapper.collapsed {
-  padding: 1.2em 0;
 }
 .js fieldset.filter-wrapper.collapsible .fieldset-legend {
   font-size: .8333em;
   text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: .6em 2.3em;
-  margin-top: 30px;
+  padding: 0 2.3em 2em;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
@@ -935,6 +968,7 @@ a.button {
   text-align: center;
   text-transform: uppercase;
   color: #444b53;
+  cursor: pointer;
   background: #e5e5e6;
   letter-spacing: 0.4px;
   line-height: 43px;
@@ -1015,6 +1049,22 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
@@ -1127,6 +1177,27 @@ textarea.form-textarea:focus {
   color: #000;
   border-color: #43afe4;
 }
+input.form-color {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input.form-color::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input.form-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input.form-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
 ul.action-links {
   margin: 1em 0;
   padding: 0 20px 0 20px; /* LTR */
@@ -1207,6 +1278,14 @@ div.filter-options select {
   .admin-panel h3 {
     margin: 15px;
   }
+}
+
+.block-dashboard-welcome h3 {
+  margin: 4px 0;
+  padding: 6px 0;
+  font-size: 1.154em;
+  text-transform: none;
+  background: none;
 }
 
 /* Add special icons for admin/config */
@@ -1294,7 +1373,8 @@ div.filter-options select {
   margin: 0;
   background: none;
 }
-#layout-edit-main .l-header:before {
+#layout-edit-main .l-header:before,
+#layout-flexible-edit-main .l-header:before {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1702,6 +1782,7 @@ div.add-or-remove-shortcuts {
   background: #e9e8e8;
 }
 .ui-dialog {
+  position: absolute;
   border: 1px solid #d0d0d0;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -1883,4 +1964,22 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+
+/**
+ * Labels & machine names in admin listing tables.
+ */
+table .label {
+  font-weight: bold;
+}
+table .machine-name {
+  color: #666;
+}
+.tabledrag-handles-shown .label,
+.tabledrag-handles-shown .machine-name {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .tabledrag-handles-shown .label,
+[dir="rtl"] .tabledrag-handles-shown .machine-name {
+  padding-right: 28px;
 }

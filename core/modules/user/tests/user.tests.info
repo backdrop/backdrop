@@ -5,7 +5,7 @@ group = User
 file = user.test
 
 [UserValidationTestCase]
-name = Username/e-mail validation
+name = Username/email validation
 description = Verify that username/email validity checks behave as designed.
 group = User
 file = user.test

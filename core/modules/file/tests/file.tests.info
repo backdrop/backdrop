@@ -52,6 +52,12 @@ description = Uploads a test to a private node and checks access.
 group = File
 file = file.test
 
+[FileFieldAnonymousSubmission]
+name = File field anonymous submission
+description = Test anonymous file field submission.
+group = File
+file = file.test
+
 [FileUploadWizardTestCase]
 name = File upload wizard
 description = Upload a file using the multi-step wizard.
@@ -115,6 +121,12 @@ file = file.test
 [FileAccessTestCase]
 name = File access
 description = Test the access aspects of file entity.
+group = File
+file = file.test
+
+[FileAccessFunctionsAlignedTestCase]
+name = File access functions aligned
+description = Test that file access functions return consistent values.
 group = File
 file = file.test
 
