@@ -209,7 +209,7 @@ function entityreference_get_selection_handler($field, $instance = NULL, $entity
   $handler = $field['settings']['handler'];
   $class = ctools_plugin_load_class('entityreference', 'selection', $handler, 'class');
 
-  if (class_exists($class)) {
+  if ($class && class_exists($class)) {
     return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
   }
   else {
