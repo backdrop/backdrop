@@ -432,7 +432,7 @@ function locale_translate_delete_page($lid) {
  * @ingroup forms
  */
 function locale_translate_delete_form($form, &$form_state, $source) {
-  $form['lid'] = array('#type' => 'value', '#value' => $source->lid);
+  $form_state['source'] = &$source;
 
   $question = t('Are you sure you want to delete the string %source?', array('%source' => $source->source));
   $confirm_form = confirm_form($form, $question, 'admin/config/regional/translate/translate', NULL, t('Delete string'));
@@ -449,16 +449,18 @@ function locale_translate_delete_form($form, &$form_state, $source) {
  */
 function locale_translate_delete_form_submit($form, &$form_state) {
   require_once BACKDROP_ROOT . '/core/includes/locale.inc';
+  $lid = $form_state['source']->lid;
+  $string = $form_state['source']->source;
 
   db_delete('locales_source')
-    ->condition('lid', $form_state['values']['lid'])
+    ->condition('lid', $lid)
     ->execute();
   db_delete('locales_target')
-    ->condition('lid', $form_state['values']['lid'])
+    ->condition('lid', $lid)
     ->execute();
   // Force JavaScript translation file recreation for all languages.
   _locale_invalidate_js();
   cache()->deletePrefix('locale:');
-  backdrop_set_message(t('The string has been removed.'));
+  backdrop_set_message(t('The string %string has been deleted.', array('%string' => $string)));
   $form_state['redirect'] = 'admin/config/regional/translate/translate';
 }

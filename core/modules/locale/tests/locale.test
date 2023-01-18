@@ -314,8 +314,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/regional/translate/translate', $search, t('Filter'));
     // Assume this is the only result, given the random name.
-    $this->clickLink(t('Delete string'));
-    $this->assertText(t('Are you sure you want to delete the string'), '"delete" link is correct.');
+    $this->clickLink(t('Delete'));
+    $this->assertRaw(t('Are you sure you want to delete the string %string', array('%string' => $name)), '"delete" link is correct.');
     // Delete the string.
     $path = 'admin/config/regional/translate/delete/' . $lid;
     $this->backdropGet($path);
@@ -324,8 +324,8 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $this->assertEqual($this->getUrl(), url('admin/config/regional/translate/translate', array('absolute' => TRUE)), 'Correct page redirection.');
     $this->assertRaw($name, 'The string was not deleted.');
     // Delete the name string.
-    $this->backdropPost('admin/config/regional/translate/delete/' . $lid, array(), t('Delete'));
-    $this->assertText(t('The string has been removed.'), 'The string has been removed message.');
+    $this->backdropPost('admin/config/regional/translate/delete/' . $lid, array(), t('Delete string'));
+    $this->assertRaw(t('The string %string has been deleted.', array('%string' => $name)), 'The string has been deleted message is shown.');
     $this->assertEqual($this->getUrl(), url('admin/config/regional/translate/translate', array('absolute' => TRUE)), 'Correct page redirection.');
     $this->backdropPost('admin/config/regional/translate/translate', $search, t('Filter'));
     $this->assertNoText($name, 'Search now can not find the name.');

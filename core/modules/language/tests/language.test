@@ -93,9 +93,10 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
 
     // Ensure 'delete' link works.
+    $t_args = array('%language' => $name, '%langcode' => $langcode);
     $this->backdropGet('admin/config/regional/language');
     $this->clickLink(t('Delete'));
-    $this->assertText(t('Are you sure you want to delete the language'), t('"delete" link is correct.'));
+    $this->assertRaw(t('Are you sure you want to delete the %language language', $t_args), t('"delete" link is correct.'));
     // Delete an enabled language.
     $this->backdropGet('admin/config/regional/language/delete/' . $langcode);
     // First test the 'cancel' link.
@@ -106,7 +107,6 @@ class LanguageListTest extends BackdropWebTestCase {
     // fields changed.
     $this->backdropPost('admin/config/regional/language/delete/' . $langcode, array(), t('Delete language'));
     // We need raw here because %language and %langcode will add HTML.
-    $t_args = array('%language' => $name, '%langcode' => $langcode);
     $this->assertRaw(t('The %language (%langcode) language has been removed.', $t_args), t('The test language has been removed.'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
     // Verify that language is no longer found.
@@ -166,7 +166,7 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-site-default-en', t('Default language updated.'));
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
 
-    $this->backdropPost('admin/config/regional/language/delete/en', array(), t('Delete'));
+    $this->backdropPost('admin/config/regional/language/delete/en', array(), t('Delete language'));
     // We need raw here because %language and %langcode will add HTML.
     $t_args = array('%language' => 'English', '%langcode' => 'en');
     $this->assertRaw(t('The %language (%langcode) language has been removed.', $t_args), t('The English language has been removed.'));
