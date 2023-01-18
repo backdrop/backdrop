@@ -857,6 +857,7 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
  * @ingroup forms
  */
 function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
+  $form_state['flexible_template'] = &$flexible_template;
   $question = t('Delete flexible template %title?', array('%title' => $flexible_template->title));
   $confirm_form = confirm_form($form, $question, 'admin/structure/layouts/settings', NULL, t('Delete layout template'));
 
@@ -873,13 +874,13 @@ function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibl
     // Replace the default "This action cannot be undone!" warning with an
     // error.
     $confirm_form['message_wrapper']['#attributes'] = array('class' => array('messages', 'error'));
-    $confirm_form['message_wrapper']['warning'] = array(
-      '#markup' => t('The %title layout template may not be deleted, as it is currently in use in the following layouts: !list', array('%title' => $flexible_template->  title, '!list' => theme('item_list', array('items' => $layout_list)))),
-    );
+    $error = t('The %title layout template is currently in use and cannot not be deleted.', array('%title' => $flexible_template->title));
+    $confirm_form['message_wrapper']['warning']['#markup'] = $error;
+    $layouts = t('To be able to delete this template, you will need to select another template for the following layouts:');
+    $layouts .= theme('item_list', array('items' => $layout_list));
+    $confirm_form['layout_list']['#markup'] = $layouts;
     // Disable the "Delete layout template" submit button.
-    $confirm_form['actions']['submit'] += array(
-      '#disabled' => TRUE,
-    );
+    $confirm_form['actions']['submit']['#disabled'] = TRUE;
   }
 
   return $confirm_form;
