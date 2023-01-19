@@ -502,7 +502,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->admin_description),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -704,20 +704,12 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
-  $form['admin_description'] = array(
-    '#type' => 'textarea',
-    '#rows' => 3,
-    '#title' => t('Admin description'),
-    '#default_value' => isset($role->admin_description) ? $role->admin_description : '',
-    '#description' => t('Summary of this role\'s purpose, shown on the role listing page.'),
-  );
   $form['description'] = array(
     '#type' => 'textarea',
     '#rows' => 3,
-    '#title' => t('Help text'),
+    '#title' => t('Description'),
     '#default_value' => isset($role->description) ? $role->description : '',
-    '#description' => t('Description to present when assigning this role on the account edit form.'),
-    '#access' => !isset($role->name) || $role->name !== BACKDROP_ANONYMOUS_ROLE,
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
   );
   $form['weight'] = array(
     '#type' => 'value',
@@ -757,7 +749,6 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
-      'admin_description' => $form_state['values']['admin_description'],
       'description' => $form_state['values']['description'],
     );
     user_role_save($role);
@@ -772,7 +763,6 @@ function user_admin_role_submit($form, &$form_state) {
     // Update existing role.
     $role = $form_state['role'];
     $role->label = $form_state['values']['label'];
-    $role->admin_description = $form_state['values']['admin_description'];
     $role->description = $form_state['values']['description'];
     user_role_save($role);
     backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));
