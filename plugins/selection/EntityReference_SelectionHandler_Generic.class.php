@@ -8,6 +8,11 @@
  */
 class EntityReference_SelectionHandler_Generic implements EntityReference_SelectionHandler {
 
+  public $field;
+  public $instance;
+  public $entity_type;
+  public $entity;
+
   /**
    * Implements EntityReferenceHandler::getInstance().
    */

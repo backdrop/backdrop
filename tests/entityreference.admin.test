@@ -9,6 +9,10 @@
  * Test for Entity Reference admin UI.
  */
 class EntityReferenceAdminTestCase extends DrupalWebTestCase {
+  public $admin_user;
+  public $type;
+  public $hyphen_type;
+
   public static function getInfo() {
     return array(
       'name' => 'Entity Reference UI',

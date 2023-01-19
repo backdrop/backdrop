@@ -6,6 +6,12 @@
 class EntityReferenceFieldTestCase extends DrupalWebTestCase {
 
   /**
+   * The admin user that the test runs under.
+   *
+   * @var Drupal\user\Entity
+   */
+  public $admin_user;
+  /**
    * The content type that is created.
    *
    * @var string
