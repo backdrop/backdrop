@@ -143,8 +143,6 @@ interface EntityReference_BehaviorHandler {
  * An abstract implementation of EntityReference_BehaviorHandler.
  */
 abstract class EntityReference_BehaviorHandler_Abstract implements EntityReference_BehaviorHandler {
-  public $behavior;
-  public $plugin;
 
   /**
    * The name of the behavior plugin.
@@ -207,6 +205,9 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
  * A broken implementation of EntityReference_BehaviorHandler.
  */
 class EntityReference_BehaviorHandler_Broken extends EntityReference_BehaviorHandler_Abstract {
+  public $behavior;
+  public $plugin;
+
   public function settingsForm($field, $instance) {
     $form['behavior_handler'] = array(
       '#markup' => t('The selected behavior handler is broken.'),
