@@ -2554,12 +2554,12 @@ function layout_delete_form($form, &$form_state, $layout) {
   $form_state['layout'] = $layout;
 
   if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
-    $question = t('Are you sure you want to delete the @title layout?', array('@title' => $layout->title));
+    $question = t('Are you sure you want to delete the %title layout?', array('%title' => $layout->title));
     $description = NULL;
     $yes = t('Delete layout');
   }
   else {
-    $question = t('Revert layout @title?', array('@title' => $layout->title));
+    $question = t('Are you sure you want to revert the %title layout?', array('%title' => $layout->title));
     $description = t('Reverting the layout will delete any changes, reverting it to the original default layout provided by the %module module.', array('%module' => $layout->module));
     $yes = t('Revert layout');
   }

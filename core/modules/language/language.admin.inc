@@ -363,7 +363,7 @@ function language_admin_delete_form($form, &$form_state, $language) {
     $warnings[] = t('All %language language interface translations will be deleted.', array('%language' => $language_name));
     $warnings[] = t('All content in the %language language will be set to be language-neutral.', array('%language' => $language_name));
     // Add the default "This action cannot be undone!" warning from
-    // confirm_form().
+    // confirm_form() to the list of previous warnings.
     $warnings[] = $confirm_form['message_wrapper']['warning']['#markup'];
     $confirm_form['message_wrapper']['warning']['#markup'] = theme('item_list', array('items' => $warnings));
 

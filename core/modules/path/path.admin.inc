@@ -875,7 +875,7 @@ function path_admin_bulk_delete_confirm($form, &$form_state) {
   );
   $form['#submit'][] = 'path_bulk_update_form_bulk_delete_submit';
 
-  $question = t('Delete all the following URL aliases?');
+  $question = t('Are you sure you want to delete all the following URL aliases?');
   $confirm_form = confirm_form($form, $question, 'admin/config/urls/path/bulk-update', NULL, t('Delete URL aliases'));
 
   return $confirm_form;

@@ -858,7 +858,7 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
  */
 function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   $form_state['flexible_template'] = &$flexible_template;
-  $question = t('Delete flexible template %title?', array('%title' => $flexible_template->title));
+  $question = t('Are you sure you want to delete the flexible template %title?', array('%title' => $flexible_template->title));
   $confirm_form = confirm_form($form, $question, 'admin/structure/layouts/settings', NULL, t('Delete layout template'));
 
   // Check if this template is in use.
