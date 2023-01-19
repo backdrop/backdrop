@@ -18,6 +18,7 @@ function entityreference_migrate_api() {
  * Extended class for handling entityreference fields.
  */
 class MigrateEntityReferenceFieldHandler extends MigrateSimpleFieldHandler {
+  public $registerTypes;
 
   /**
    * Constructor.

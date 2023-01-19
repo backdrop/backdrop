@@ -5,6 +5,11 @@
  */
 class EntityReference_SelectionHandler_Views implements EntityReference_SelectionHandler {
 
+  public $field;
+  public $instance;
+  public $entity;
+  public $view;
+
   /**
    * Implements EntityReferenceHandler::getInstance().
    */

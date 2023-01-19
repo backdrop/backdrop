@@ -143,6 +143,8 @@ interface EntityReference_BehaviorHandler {
  * An abstract implementation of EntityReference_BehaviorHandler.
  */
 abstract class EntityReference_BehaviorHandler_Abstract implements EntityReference_BehaviorHandler {
+  public $behavior;
+  public $plugin;
 
   /**
    * The name of the behavior plugin.
