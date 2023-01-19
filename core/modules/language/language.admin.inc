@@ -283,7 +283,7 @@ function language_admin_add_custom_form_submit($form, &$form_state) {
     'direction' => $form_state['values']['direction'],
   );
   language_save($language);
-  backdrop_set_message(t('The language %language has been created and can now be used.', array('%language' => $form_state['values']['name'])));
+  backdrop_set_message(t('The custom language %language has been created and can now be used.', array('%language' => $form_state['values']['name'])));
   $form_state['redirect'] = 'admin/config/regional/language';
 }
 
@@ -299,7 +299,7 @@ function language_admin_add_predefined_form_submit($form, &$form_state) {
     'langcode' => $langcode,
   );
   language_save($language);
-  backdrop_set_message(t('The language %language has been created and can now be used.', array('%language' => t($predefined[$langcode][0]))));
+  backdrop_set_message(t('The language %language has been added and can now be used.', array('%language' => t($predefined[$langcode][0]))));
   $form_state['redirect'] = 'admin/config/regional/language';
 }
 

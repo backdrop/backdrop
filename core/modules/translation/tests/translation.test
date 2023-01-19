@@ -293,7 +293,7 @@ class TranslationTestCase extends BackdropWebTestCase {
       $this->assertTrue(array_key_exists($language_code, $languages), 'Language was installed successfully.');
 
       if (array_key_exists($language_code, $languages)) {
-        $this->assertRaw(t('The language %language has been created and can now be used.', array('%language' => $languages[$language_code]->name)), 'Language has been created.');
+        $this->assertRaw(t('The language %language has been added and can now be used.', array('%language' => $languages[$language_code]->name)), 'Language has been added.');
       }
     }
     elseif ($this->xpath('//input[@type="checkbox" and @name=:name and @checked="checked"]', array(':name' => 'languages[' . $language_code . '][enabled]'))) {
