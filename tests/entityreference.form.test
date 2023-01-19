@@ -1,0 +1,275 @@
+<?php
+
+/**
+ * @file
+ * Contains EntityReferenceFormTestCase.
+ */
+
+/**
+ * Test for Entity Reference form.
+ */
+class EntityReferenceFormTestCase extends DrupalWebTestCase {
+  public $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Entity Reference Form',
+      'description' => 'Tests Entity Reference form widgets.',
+      'group' => 'Entity Reference',
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    // Enable entityreference module after views module is enabled to load
+    // the selection plugin EntityReference_SelectionHandler_Views.
+    parent::setUp(array('entity', 'ctools', 'views'));
+    module_enable(array('entityreference'));
+
+    // Create test user.
+    $this->admin_user = $this->drupalCreateUser(array('bypass node access'));
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the Generic autocomplete widget validates the value properly.
+   */
+  public function testAutocompleteValidationWithGenericSelectionHandler() {
+    $type_referenced = $this->drupalCreateContentType();
+    $type_referencing = $this->drupalCreateContentType();
+
+    $field_name = 'field_' . $type_referenced->type;
+    $field = array(
+      'field_name' => $field_name,
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array($type_referenced->type),
+        ),
+      ),
+    );
+    $field_instance = array(
+      'field_name' => $field_name,
+      'bundle' => $type_referencing->type,
+    );
+    $this->createEntityReferenceFieldForNode($field, $field_instance);
+
+    $node = $this->drupalCreateNode(array('type' => $type_referenced->type));
+    $title_valid = $node->title;
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_valid);
+    $this->assertNoText('There are no entities matching "' . $title_valid . '"',
+      'No validation error occurs for a valid title.');
+
+    $title_invalid = $this->randomName();
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_invalid);
+    $this->assertText('There are no entities matching "' . $title_invalid . '"',
+      'A validation error occurs for an invalid title.');
+
+    $title_many_nodes_has = $this->randomName();
+    for ($i = 0; $i < 6; $i++) {
+      $node = $this->drupalCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_many_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_many_nodes_has);
+    $this->assertText('Many entities are called ' . $title_many_nodes_has . '.',
+      'A validation error occurs for a title shared by too many nodes.');
+
+    $title_several_nodes_has = $this->randomName();
+    for ($i = 0; $i < 2; $i++) {
+      $node = $this->drupalCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_several_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_several_nodes_has);
+    $this->assertText('Multiple entities match this reference; ',
+      'A validation error occurs for a title shared by several nodes.');
+  }
+
+  /**
+   * Test that the Views autocomplete widget validates the value properly.
+   */
+  public function testAutocompleteValidationWithViewsSelectionHandler() {
+    list($view_name, $display_name) = $this->createNodeEntityReferenceView();
+
+    $type_referenced = $this->drupalCreateContentType();
+    $type_referencing = $this->drupalCreateContentType();
+
+    $field_name = 'field_' . $type_referenced->type;
+    $field = array(
+      'field_name' => $field_name,
+      'settings' => array(
+        "handler" => "views",
+        "target_type" => "node",
+        "handler_settings" => array(
+          "view" => array(
+            "view_name" => $view_name,
+            "display_name" => $display_name,
+            "args" => array(),
+          ),
+          "behaviors" => array(
+            "views-select-list" => array(
+              "status" => 0,
+            ),
+          ),
+        ),
+      ),
+    );
+    $field_instance = array(
+      'field_name' => $field_name,
+      'bundle' => $type_referencing->type,
+    );
+    $this->createEntityReferenceFieldForNode($field, $field_instance);
+
+    $node = $this->drupalCreateNode(array('type' => $type_referenced->type));
+    $title_valid = $node->title;
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_valid);
+    $this->assertNoText('No items found for ' . $field_name,
+      'No validation error occurs for a valid title.');
+
+    $title_invalid = $this->randomName();
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_invalid);
+    $this->assertText('No items found for ' . $field_name,
+      'A validation error occurs for an invalid title.');
+
+    $title_many_nodes_has = $this->randomName();
+    for ($i = 0; $i < 6; $i++) {
+      $node = $this->drupalCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_many_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_many_nodes_has);
+    $this->assertText('Too many items found for ' . $field_name . '.',
+      'A validation error occurs for a title shared by too many nodes.');
+
+    $title_several_nodes_has = $this->randomName();
+    for ($i = 0; $i < 2; $i++) {
+      $node = $this->drupalCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_several_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_several_nodes_has);
+    $this->assertText('Multiple items found for ' . $field_name . ':',
+      'A validation error occurs for a title shared by several nodes.');
+  }
+
+  /**
+   * Helper method to create a base field and field instance.
+   *
+   * @param array $field
+   *   The field to be created.
+   * @param array $field_instance
+   *   The field instance to be created.
+   */
+  protected function createEntityReferenceFieldForNode($field, $field_instance) {
+
+    // Add the common settings.
+    $field += array(
+      'type' => 'entityreference',
+      'translatable' => FALSE,
+      'entity_types' => array('node'),
+    );
+    $field_instance += array(
+      'entity_type' => 'node',
+      'widget' => array(
+        'type' => 'entityreference_autocomplete',
+        'module' => 'entityreference',
+      ),
+    );
+
+    $field = field_create_field($field);
+    field_create_instance($field_instance);
+  }
+
+  /**
+   * Hepler method to submit node creation form.
+   *
+   * @param object $type
+   *   Node type object.
+   * @param string $field_name
+   *   Name of the Entity Reference field.
+   * @param string $title
+   *   The node title to enter into the Entity Reference field.
+   */
+  protected function postNodeFormWithEntityReference($type, $field_name, $title) {
+    $type_path = 'node/add/' . str_replace('_', '-', $type->type);
+    $edit = array(
+      $field_name . '[und][0][target_id]' => $title,
+    );
+
+    $this->drupalPost($type_path, $edit, t('Save'));
+  }
+
+  /**
+   * Create an Entity Reference Views view for node list.
+   *
+   * @return view
+   *   A Views view with a node Entity Reference display.
+   */
+  protected function createNodeEntityReferenceView() {
+    $view_name = 'test_entityreference_select_node';
+    $display_name = 'entityreference_1';
+
+    $view = new view();
+    $view->name = $view_name;
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = $view_name;
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE;
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 1;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+
+    /* Display: Entity Reference */
+    $handler = $view->new_display('entityreference', 'Entity Reference', $display_name);
+    $handler->display->display_options['defaults']['title'] = FALSE;
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+    $handler->display->display_options['style_plugin'] = 'entityreference_style';
+    $handler->display->display_options['style_options']['search_fields'] = array('title' => 'title');
+    $handler->display->display_options['defaults']['style_options'] = FALSE;
+    $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+    $handler->display->display_options['row_plugin'] = 'entityreference_fields';
+    $handler->display->display_options['defaults']['row_options'] = FALSE;
+
+    $view->save();
+
+    return array($view_name, $display_name);
+  }
+
+}
