@@ -149,23 +149,34 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('When an email address is used as username, require a matching email address.'),
     '#default_value' => $config->get('user_email_match'),
   );
+
   module_load_include('inc', 'user', 'user.pages');
-  $form['registration_cancellation']['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling a user account'),
-    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer user accounts'), '@permissions-url' => url('admin/config/people/permissions'))),
+  $form['registration_cancellation'] += user_cancel_methods();
+
+  $user_permissions = module_invoke('user', 'permission');
+  $cancel_method_description = t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.',
+    array(
+      '%select-cancel-method' => $user_permissions['select account cancellation method']['title'],
+      '%administer-users' => $user_permissions['administer users']['title'],
+      '@permissions-url' => url('admin/config/people/permissions')
+    )
   );
-  $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
-  foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
+
+  $form['registration_cancellation']['user_cancel_method']['#title'] = t('When cancelling a user account');
+  $form['registration_cancellation']['user_cancel_method']['#default_value'] = $config->get('user_cancel_method');
+  $form['registration_cancellation']['user_cancel_method']['#description'] = $cancel_method_description;
+
+  foreach ($form['registration_cancellation']['user_cancel_method']['#options'] as $method => $method_description) {
     // Remove all account cancellation methods that have #access defined, as
-    // those cannot be configured as default method.
-    if (isset($form['registration_cancellation']['user_cancel_method'][$element]['#access'])) {
-      $form['registration_cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
+    // those cannot be configured as the default method.
+    if (isset($form['registration_cancellation']['user_cancel_method'][$method]['#access'])) {
+      $form['registration_cancellation']['user_cancel_method'][$method]['#access'] = FALSE;
     }
-    // Remove the description (only displayed on the confirmation form).
-    else {
-      unset($form['registration_cancellation']['user_cancel_method'][$element]['#description']);
-    }
+    // Remove the descriptions from the cancelation methods. These are displayed
+    // only on the confirmation form in user_cancel_confirm_form() (and only if
+    // the user is not allowed to select the cancelation method for their
+    // account).
+    unset($form['registration_cancellation']['user_cancel_method'][$method]['#description']);
   }
 
   // Password settings.
@@ -193,7 +204,7 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable signatures.'),
+    '#title' => t('Enable signatures'),
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
@@ -208,7 +219,7 @@ function user_admin_settings($form, &$form_state) {
   $picture_support = $config->get('user_pictures');
   $form['personalization']['user_pictures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable user pictures.'),
+    '#title' => t('Enable user pictures'),
     '#default_value' => $picture_support,
   );
   backdrop_add_js(backdrop_get_path('module', 'user') . '/js/user.js');

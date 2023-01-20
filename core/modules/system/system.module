@@ -3416,6 +3416,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
     $form['message_wrapper'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('messages', 'warning')),
+      '#weight' => -99,
     );
     $form['message_wrapper']['warning'] = array(
       '#markup' => t('This action cannot be undone!'),
