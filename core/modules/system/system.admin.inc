@@ -793,7 +793,7 @@ function _system_modules_build_row($info, $extra) {
   if (!empty($info['project'])) {
     $form['#project'] = $info['project'];
   }
-  
+
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
@@ -1046,7 +1046,7 @@ function system_modules_submit($form, &$form_state) {
     $parameter = $form_state['values']['search'];
     $form_state['redirect'] = array(
       'admin/modules',
-      array('query' => array('search' => $parameter))
+      array('query' => array('search' => $parameter)),
     );
   }
   else {
