@@ -2181,7 +2181,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users', 'assign roles'));
   }
 
   /**
@@ -2204,7 +2204,12 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Test adding a role using the 'Save role' button.
     $role1_name = '123';
-    $edit = array('name' => $role1_name, 'label' => $role1_name);
+    $role1_description = 'Help text for 123 role.';
+    $edit = array(
+      'name' => $role1_name,
+      'label' => $role1_name,
+      'description' => $role1_description,
+    );
     $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the "Save role" button.');
@@ -2223,7 +2228,12 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Test adding a role using the 'Save and set permissions' button.
     $role2_name = '456';
-    $edit = array('name' => $role2_name, 'label' => $role2_name);
+    $role2_description = 'Description for 456 role.';
+    $edit = array(
+      'name' => $role2_name,
+      'label' => $role2_name,
+      'description' => $role2_description,
+    );
     $this->backdropPost('admin/config/people/roles/add', $edit, t('Save and set permissions'));
     $this->assertText(t('The 456 role has been added.'), 'The role has been added.');
     $this->assertUrl('admin/config/people/permissions', array(), 'Redirected to correct URL after clicking the "Save and set permissions" button.');
@@ -2241,20 +2251,33 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test renaming an existing role.
     $old_label = $role1->label;
     $new_label = '789';
-    $edit = array('label' => $new_label);
+    $new_description = 'Help text for 789 role. <strong>Bold text.</strong>. <xss>Stripped tag</xss>.';
+    $edit = array(
+      'label' => $new_label,
+      'description' => $new_description,
+    );
     $this->backdropPost("admin/config/people/roles/configure/$role1_name", $edit, t('Save role'));
-    $this->assertText(t('The 123 role has been renamed to 789.'), 'The role has been renamed.');
+    $this->assertText(t('The 789 role has been saved.'), 'The role has been renamed.');
     $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the renaming the role.');
     backdrop_static_reset('user_roles');
     $role1 = user_role_load($role1_name);
     $this->assertFalse($role1->label === $old_label, 'The role has had its label changed.');
     $this->assertTrue($role1->label === $new_label, 'The role has the new label.');
+    $this->assertTrue($role1->description === $new_description, 'The role has the new description (help text).');
+
+    // Confirm description (help text) is shown editing a user.
+    $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
+    $this->assertRaw(filter_xss_admin($new_description));
 
     // Make sure that the system-defined roles can still be edited, to adjust
-    // their labels.
+    // their labels and descriptions.
     $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
+    $this->assertText(t('Description'));
+    // Help text is hidden for the anonymous role, since it is never assigned.
+    $this->assertNoText(t('Help text'));
     $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_AUTHENTICATED_ROLE);
+    $this->assertText(t('Description'));
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
 
     // Create a default role for site administrators, with all available

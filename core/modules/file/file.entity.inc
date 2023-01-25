@@ -142,15 +142,55 @@ class File extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    $rights = &backdrop_static('file_access', array());
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    // If we've already checked access for this file, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
+    }
+
+    if (user_access('bypass file access', $account)) {
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
+    }
+    if (user_access('create files', $account)) {
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
+    }
+
+    // We grant access to the file if both of the following conditions are met:
+    // - No modules say to deny access.
+    // - At least one module says to grant access.
+    $access = module_invoke_all('file_access', $bundle, 'create', $account);
+    if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
+      $rights[$account->uid][$bundle] = FALSE;
+      return $rights[$account->uid][$bundle];
+    } elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
+    }
+
+    $rights[$account->uid][$bundle] = FALSE;
+    return $rights[$account->uid][$bundle];
+  }
+
+  /**
    * Overrides Entity::access().
-   *
-   * The "view" operation is not supported on the File Entity itself because it
-   * has no page callback (yet), but there is separately file_download_access()
-   * to check if a file is downloadable.
    *
    * @param string $op
    *   The operation to be performed on the file. Possible values are:
    *   - create
+   *   - view
+   *   - download
    *   - update
    *   - delete
    * @param User|AnonymousUser|object $account
@@ -161,10 +201,12 @@ class File extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
+    $rights = &backdrop_static('file_access', array());
+
     if ($op == 'create') {
-      return self::createAccess(NULL, $account);
+      return self::createAccess($this->bundle(), $account);
     }
-    elseif (!in_array($op, array('update', 'delete'), TRUE)) {
+    elseif (!in_array($op, array('view', 'update', 'delete', 'download'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -174,11 +216,57 @@ class File extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    if ($op == 'update') {
-      return user_access('manage files', $account);
+    $cid = $this->id();
+
+    // If we've already checked access for this file, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
     }
-    elseif ($op == 'delete') {
-      return user_access('delete files', $account);
+
+    if (user_access('bypass file access', $account)) {
+      return $rights[$account->uid][$cid][$op] = TRUE;
+    }
+
+    // We grant access to the file if both of the following conditions are met:
+    // - No modules say to deny access.
+    // - At least one module says to grant access.
+    $access = module_invoke_all('file_access', $op, $this, $account);
+    if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
+      return $rights[$account->uid][$cid][$op] = FALSE;
+    }
+    elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
+      return $rights[$account->uid][$cid][$op] = TRUE;
+    }
+
+    // Fall back to default behaviors on view.
+    if ($op == 'view') {
+      $scheme = file_uri_scheme($this->uri);
+      $wrapper = file_get_stream_wrapper($scheme);
+
+      if (!empty($wrapper['private'])) {
+        // For private files, users can view private files if the
+        // user has the 'view private files' permission.
+        if (user_access('view private files', $account)) {
+          return $rights[$account->uid][$cid][$op] = TRUE;
+        }
+
+        // For private files, users can view their own private files if the
+        // user is not anonymous, and has the 'view own private files'
+        // permission.
+        if (!empty($account->uid) && $this->uid == $account->uid && user_access('view own private files', $account)) {
+          return $rights[$account->uid][$cid][$op] = TRUE;
+        }
+      }
+      elseif ($this->status == FILE_STATUS_PERMANENT && $this->uid == $account->uid && user_access('view own files', $account)) {
+        // For non-private files, allow to see if user owns the file.
+        return $rights[$account->uid][$cid][$op] = TRUE;
+      }
+      elseif ($this->status == FILE_STATUS_PERMANENT && user_access('view files', $account)) {
+        // For non-private files, users can view if they have the 'view files'
+        // permission.
+        return $rights[$account->uid][$cid][$op] = TRUE;
+      }
     }
 
     return FALSE;
