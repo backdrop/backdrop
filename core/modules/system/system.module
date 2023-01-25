@@ -2487,7 +2487,7 @@ function system_user_timezone(&$form, &$form_state) {
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
-    '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
+    '#description' => t("This account's preferred time zone for date and time display throughout the site."),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
     $form['region_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
@@ -4064,6 +4064,7 @@ function system_autoload_info() {
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+    'views_handler_field_system_info' => 'views/views_handler_field_system_info.inc',
   );
 }
 
