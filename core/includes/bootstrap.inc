@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.23.x-dev');
+define('BACKDROP_VERSION', '1.25.x-dev');
 
 /**
  * Core API compatibility.
@@ -2559,7 +2559,7 @@ function backdrop_base64_encode($string) {
  * function because it can return a long string of bytes (compared to < 4 bytes
  * normally from mt_rand()), and uses the best available pseudo-random source.
  *
- * @param $count
+ * @param int $count
  *   The number of characters (bytes) to return in the string.
  *
  * @return string
@@ -2572,10 +2572,9 @@ function backdrop_random_bytes($count)  {
   $missing_bytes = $count - strlen((string) $bytes);
 
   if ($missing_bytes > 0) {
-    // openssl_random_pseudo_bytes() will find entropy in a system-dependent
-    // way.
-    if (function_exists('openssl_random_pseudo_bytes')) {
-      $bytes .= openssl_random_pseudo_bytes($missing_bytes);
+    // Available since PHP 7.
+    if (function_exists('random_bytes')) {
+      $bytes .= random_bytes($missing_bytes);
     }
 
     // Else, read directly from /dev/urandom, which is available on many *nix
@@ -2588,6 +2587,12 @@ function backdrop_random_bytes($count)  {
       fclose($fh);
     }
 
+    // openssl_random_pseudo_bytes() will find entropy in a system-dependent
+    // way.
+    elseif (function_exists('openssl_random_pseudo_bytes')) {
+      $bytes .= openssl_random_pseudo_bytes($missing_bytes);
+    }
+
     // If we couldn't get enough entropy, this simple hash-based PRNG will
     // generate a good set of pseudo-random bytes on any system.
     // Note that it may be important that our $random_state is passed
@@ -2596,11 +2601,12 @@ function backdrop_random_bytes($count)  {
     // the microtime() - is prepended rather than appended. This is to avoid
     // directly leaking $random_state via the $output stream, which could
     // allow for trivial prediction of further "random" numbers.
-    if (strlen($bytes) < $count) {
-      // Initialize on the first call. The contents of $_SERVER includes a mix of
-      // user-specific and system information that varies a little with each page.
+    if (empty($bytes) || strlen($bytes) < $count) {
+      // Initialize on the first call. The contents of $_SERVER includes a mix
+      // of user-specific and system information that varies a little with each
+      // page.
       if (!isset($random_state)) {
-        $random_state = print_r($_SERVER, TRUE);
+        $random_state = print_r($_SERVER, TRUE); // phpcs:ignore
         if (function_exists('getmypid')) {
           // Further initialize with the somewhat random PHP process ID.
           $random_state .= getmypid();
@@ -4215,7 +4221,7 @@ function backdrop_static_reset($name = NULL) {
  * Detects whether the current script is running in a command-line environment.
  */
 function backdrop_is_cli() {
-  return (!isset($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
+  return (empty($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
 }
 
 /**
