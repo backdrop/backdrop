@@ -308,6 +308,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }

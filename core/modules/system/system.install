@@ -110,6 +110,22 @@ function system_requirements($phase) {
     $requirements['php_register_globals']['value'] = $t('Disabled');
   }
 
+  // Test PHP max_input_vars setting.
+  $max_input_vars = ini_get('max_input_vars');
+  $requirements['php_max_input_vars'] = array(
+    'title' => $t('PHP <code>max_input_vars</code> setting'),
+    'value' => $t('PHP limits the number of input variables in each form to @value items.', array('@value' => number_format($max_input_vars, 0, '.', ','))),
+  );
+  // 1000 is the default value and indicates potential issues.
+  // @see https://www.php.net/manual/en/info.configuration.php
+  if ($max_input_vars <= 1000) {
+    $requirements['php_max_input_vars']['description'] = $t('When set too low, the <code>max_input_vars</code> PHP setting can cause silent failures on large forms, such as the permissions page. A value of <code>10000</code> is recommended. <a href="@documentation" target="_blank">Read more about increasing the <code>max_input_vars</code> PHP setting</a>.', array('@documentation' => 'https://docs.backdropcms.org/max-input-vars'));
+    $requirements['php_max_input_vars']['severity'] = REQUIREMENT_WARNING;
+    if ($phase == 'install' || $phase == 'update') {
+      $requirements['php_max_input_vars']['severity'] = REQUIREMENT_INFO;
+    }
+  }
+
   // Test for PHP extensions.
   $requirements['php_extensions'] = array(
     'title' => $t('PHP extensions'),
@@ -469,7 +485,10 @@ function system_requirements($phase) {
         // Check for an incompatible version.
         $required_file = $files[$required_module];
         $required_name = $required_file->info['name'];
-        $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
+        $version = '';
+        if (!empty($required_file->info['version'])) {
+          $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
+        }
         $compatibility = backdrop_check_incompatibility($requirement, $version);
         if ($compatibility) {
           $compatibility = rtrim(substr($compatibility, 2), ')');
@@ -574,7 +593,10 @@ function system_requirements($phase) {
             break;
         }
         if ($change_notice) {
-          $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array('@name' => $file->info['name'], '%path' => $path, '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
+          $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
+            '@name' => $file->info['name'],
+            '%path' => $path,
+            '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
         }
 
         $requirements['multiple_' . $file->name] = array(
@@ -3357,6 +3379,15 @@ function system_update_1086() {
   if ($utf8mb4_supported && $utf8mb4_active && $d7_utf8mb4_run && !$utf8mb4_state) {
     state_set('database_utf8mb4_active', TRUE);
     update_variable_del('drupal_all_databases_are_utf8mb4');
+  }
+}
+
+/**
+ * Set the message length for the database log.
+ */
+function system_update_1087() {
+  if (config_get('system.core', 'log_max_length') === NULL) {
+    config_set('system.core', 'log_max_length', 56);
   }
 }
 
