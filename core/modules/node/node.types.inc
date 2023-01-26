@@ -591,7 +591,7 @@ function node_type_form_permissions($type) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->admin_description),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }

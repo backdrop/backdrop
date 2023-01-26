@@ -2431,7 +2431,6 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
       $role_data = $config->get();
       $role_data += array(
         'weight' => 0,
-        'admin_description' => '',
         'description' => '',
         'permissions' => array(),
       );
@@ -2444,7 +2443,6 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
     foreach ($user_roles as $role_name => $role_data) {
       $user_roles[$role_name] = (object) $user_roles[$role_name];
       $user_roles[$role_name]->label = t($role_data['label']);
-      $user_roles[$role_name]->admin_description = t($role_data['admin_description']);
       $user_roles[$role_name]->description = t($role_data['description']);
     }
   }
@@ -2523,7 +2521,6 @@ function user_role_save($role) {
   // Trim spaces from names.
   $role->name = trim($role->name);
   $role->label = trim($role->label);
-  $role->admin_description = isset($role->admin_description) ? trim($role->admin_description) : '';
   $role->description = isset($role->description) ? trim($role->description) : '';
 
   if (!isset($role->weight)) {
@@ -2541,7 +2538,6 @@ function user_role_save($role) {
   $config = config('user.role.' . $role->name);
   $config->set('name', $role->name);
   $config->set('label', $role->label);
-  $config->set('admin_description', $role->admin_description);
   $config->set('description', $role->description);
   $config->set('weight', $role->weight);
   if (isset($role->permissions)) {
