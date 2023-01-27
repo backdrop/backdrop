@@ -14,7 +14,7 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version
+  // Report Backdrop version.
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
@@ -23,8 +23,8 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
@@ -50,7 +50,7 @@ function system_requirements($phase) {
     'severity' => REQUIREMENT_INFO,
   );
 
-  // Test PHP version and show link to phpinfo() if it's available
+  // Test PHP version and show link to phpinfo() if it's available.
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
@@ -75,8 +75,8 @@ function system_requirements($phase) {
   }
 
   // Minimum recommended PHP version can be incremented when deprecating older
-  // versions of PHP but while they are still supported. This does not throw
-  // a warning or error on updates to keep upgrade tests compatible.
+  // versions of PHP but while they are still supported. This does not throw a
+  // warning or error on updates to keep upgrade tests compatible.
   $minimum_recommended_version = '5.6.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
   if (version_compare($phpversion, $minimum_recommended_version) < 0) {
@@ -96,11 +96,11 @@ function system_requirements($phase) {
     'title' => $t('PHP register globals'),
   );
   $register_globals = trim(ini_get('register_globals'));
-  // Unfortunately, ini_get() may return many different values, and we can't
-  // be certain which values mean 'on', so we instead check for 'not off'
-  // since we never want to tell the user that their site is secure
-  // (register_globals off), when it is in fact on. We can only guarantee
-  // register_globals is off if the value returned is 'off', '', or 0.
+  // ini_get() may return many different values, and we can't be certain which
+  // values mean 'on'. So we instead check for 'not off' since we never want to
+  // tell the user that their site is secure (register_globals off), when it is
+  // in fact on. We can only guarantee register_globals is off if the value
+  // returned is 'off', '', or 0.
   if (!empty($register_globals) && strtolower($register_globals) != 'off') {
     $requirements['php_register_globals']['description'] = $t('<em>register_globals</em> is enabled. Backdrop requires this configuration directive to be disabled. Your site may not be secure when <em>register_globals</em> is enabled. The PHP manual has instructions for <a href="http://php.net/configuration.changes">how to change configuration settings</a>.');
     $requirements['php_register_globals']['severity'] = REQUIREMENT_ERROR;
@@ -180,7 +180,7 @@ function system_requirements($phase) {
     }
     else {
       // Make sure the native PDO extension is available, not the older PEAR
-      // version. (See install_verify_pdo() for details.)
+      // version (see install_verify_pdo() for details).
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
         $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link" target="_blank">System Requirements</a> page for more information.');
       }
@@ -226,7 +226,7 @@ function system_requirements($phase) {
     );
   }
 
-  // Test PHP memory_limit
+  // Test PHP memory_limit.
   $memory_limit = ini_get('memory_limit');
   $requirements['php_memory_limit'] = array(
     'title' => $t('PHP memory limit'),
@@ -380,13 +380,14 @@ function system_requirements($phase) {
       else {
         $error .= $t('The directory %directory is not writable.', array('%directory' => $directory)) . ' ';
       }
-      // The files directory requirement check is done only during install and runtime.
+      // The files directory requirement check is done only during install and
+      // runtime.
       if ($phase == 'runtime') {
         $description = $error . $t('You may need to set the correct directory at the <a href="@admin-file-system">file system settings page</a> or change the current directory\'s permissions so that it is writable.', array('@admin-file-system' => url('admin/config/media/file-system')));
       }
       elseif ($phase == 'install') {
-        // For the installer UI, we need different wording. 'value' will
-        // be treated as version, so provide none there.
+        // For the installer UI, we need different wording. 'value' will be
+        // treated as version, so provide none there.
         if ($is_directory && !$is_writable) {
           $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server.');
         }
@@ -436,7 +437,7 @@ function system_requirements($phase) {
     }
   }
 
-  // Verify the update.php access setting
+  // Verify the update.php access setting.
   if ($phase == 'runtime') {
     if (!empty($GLOBALS['settings']['update_free_access'])) {
       $requirements['update access'] = array(
@@ -453,7 +454,8 @@ function system_requirements($phase) {
     $requirements['update access']['title'] = $t('Access to update.php');
   }
 
-  // Display an error if a newly introduced dependency in a module is not resolved.
+  // Display an error if a newly-introduced dependency in a module is not
+  // resolved.
   if ($phase == 'update') {
     $profile = backdrop_get_profile();
     $files = system_rebuild_module_data();
@@ -504,7 +506,7 @@ function system_requirements($phase) {
     }
   }
 
-  // Test Unicode library
+  // Test Unicode library.
   include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   $requirements = array_merge($requirements, unicode_requirements());
 
@@ -633,8 +635,8 @@ function system_requirements($phase) {
     );
   }
 
+  // Inform the user if theme_debug is enabled.
   if ($phase == 'runtime') {
-    // Inform the user if theme_debug is enabled.
     $theme_debug_enabled = $site_config->get('theme_debug');
     if ($theme_debug_enabled) {
       $requirements['theme_debug'] = array(
@@ -683,6 +685,29 @@ function system_requirements($phase) {
     }
   }
 
+  // Warn the user if either of the "installer_disable_ssl_verification" or
+  // "update_fetch_with_http" settings have been enabled in settings.php.
+  if ($phase == 'runtime') {
+    $insecure_settings = array();
+    if (settings_get('installer_disable_ssl_verification', FALSE)) {
+      $insecure_settings[] = 'installer_disable_ssl_verification';
+    }
+    if (settings_get('update_fetch_with_http', FALSE)) {
+      $insecure_settings[] = 'update_fetch_with_http';
+    }
+    if (!empty($insecure_settings)) {
+      $singular_warning = $t('This setting is meant to be used as a temporary workaround. Keeping this setting enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable this setting in settings.php.');
+      $plural_warning = $t('These settings are meant to be used as temporary workarounds. Keeping any of these two settings enabled opens your site up to potential man-in-the-middle attacks! It is strongly advised that you instead attempt to resolve any underlying SSL issues, and disable these settings in settings.php.');
+      $security_warning = format_plural(count($insecure_settings), $singular_warning, $plural_warning);
+      $requirements['insecure_connection_settings'] = array(
+        'title' => $t('Insecure connection settings'),
+        'value' => $t('Insecure connection settings detected in settings.php'),
+        'description' => theme('item_list', array('items' => $insecure_settings)) . $security_warning,
+        'severity' => REQUIREMENT_WARNING,
+      );
+    }
+  }
+
   return $requirements;
 }
 
@@ -719,8 +744,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
   if ($utf8mb4_active) {
     if ($utf8mb4_supported) {
       if ($phase != 'install' && $phase != 'update' && !state_get('database_utf8mb4_active', FALSE)) {
-        // Supported, active, and configurable, but not all database tables
-        // have been converted yet.
+        // Supported, active, and configurable, but not all database tables have
+        // been converted yet.
         $requirements['value'] = l($t('Database tables need conversion'), $upgrade_path);
         $requirements['description'] .= ' ' . $t('Your server supports this feature but not all tables have been converted to use it.');
         if ($_GET['q'] !== $upgrade_path) {
@@ -796,9 +821,9 @@ function system_install() {
   $cron_key = backdrop_random_key();
   state_set('cron_key', $cron_key);
 
-  // Set the site_mail to a sensible default. Note that installs via the
-  // command line will not have a SERVER_NAME, and so the site mail must be
-  // specified manually via the install.sh script --site-mail option.
+  // Set the site_mail to a sensible default. Note that installs via the command
+  // line will not have a SERVER_NAME, and so the site mail must be specified
+  // manually via the install.sh script --site-mail option.
   $site_mail = 'noreply@' . backdrop_get_bare_domain($_SERVER['SERVER_NAME']);
   if (valid_email_address($site_mail)) {
     config_set('system.core', 'site_mail', $site_mail);
