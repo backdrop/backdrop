@@ -22,6 +22,8 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
     // Check if the entity type does exist and has a base table.
     $entity_info = entity_get_info($target_entity_type);
     if (empty($entity_info['base table'])) {
+      // Make sure the EntityReference_SelectionHandler_Broken class is available.
+      include_once(dirname(__FILE__) . '/abstract.inc');
       return EntityReference_SelectionHandler_Broken::getInstance($field, $instance);
     }
 

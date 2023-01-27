@@ -194,7 +194,12 @@ function _entityreference_get_behavior_handler($behavior) {
     ctools_include('plugins');
     $class = ctools_plugin_load_class('entityreference', 'behavior', $behavior, 'class');
 
-    $class = class_exists($class) ? $class : 'EntityReference_BehaviorHandler_Broken';
+    // Ensure the class is available, setting it as broken if it isn't.
+    if (!$class || !class_exists($class)) {
+      include_once(dirname(__FILE__) . '/plugins/behavior/abstract.inc');
+      $class = 'EntityReference_BehaviorHandler_Broken';
+    }
+
     $object_cache[$behavior] = new $class($behavior);
   }
 
