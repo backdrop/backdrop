@@ -331,8 +331,7 @@ function node_last_viewed($nid) {
   $history = &backdrop_static(__FUNCTION__, array());
 
   if (!isset($history[$nid])) {
-    $history[$nid] = db_query(
-      "SELECT timestamp FROM {history} WHERE uid = :uid AND nid = :nid",
+    $history[$nid] = db_query("SELECT timestamp FROM {history} WHERE uid = :uid AND nid = :nid",
       array(':uid' => $user->uid, ':nid' => $nid)
     )->fetchObject();
   }
@@ -1169,13 +1168,8 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
  */
 function node_show(Node $node, $message = FALSE) {
   if ($message) {
-    backdrop_set_title(t(
-      'Revision of %title from %date',
-      array(
-        '%title' => $node->title,
-        '%date' => format_date($node->revision_timestamp),
-      )
-    ), PASS_THROUGH);
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title,
+      '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
 
   // For markup consistency with other pages, use node_view_multiple() rather
@@ -2084,12 +2078,8 @@ function node_block_configure($delta = '', $settings = array()) {
       '#type' => 'select',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => $settings['node_count'],
-      '#options' => backdrop_map_assoc(
-        array(
-          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-          25, 30,
-        )
-      ),
+      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        25, 30)),
     );
   }
   if ($delta == 'syndicate') {
@@ -3245,10 +3235,8 @@ function _node_access_write_grants(Node $node, array $grants, $realm = NULL, $de
   // Only perform work when node_access modules are active.
   if (!empty($grants) && count(module_implements('node_grants'))) {
     $query = db_insert('node_access')
-      ->fields(
-        array('nid', 'realm', 'gid', 'grant_view', 'grant_update',
-          'grant_delete')
-      );
+      ->fields(array('nid', 'realm', 'gid', 'grant_view', 'grant_update',
+        'grant_delete'));
     foreach ($grants as $grant) {
       if ($realm && $realm != $grant['realm']) {
         continue;
