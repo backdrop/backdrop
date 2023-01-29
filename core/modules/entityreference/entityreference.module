@@ -1258,11 +1258,12 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
       $target_entities = entity_load_multiple($target_type, $target_ids);
     }
     else {
-      watchdog('entityreference', 
+      watchdog(
+        'entityreference',
         'The field %field_label references entities of type %entity_type, but that entity type does not exist.',
         array(
           '%field_label' => $field['field_name'],
-          '%entity_type' => $target_type
+          '%entity_type' => $target_type,
         ),
         WATCHDOG_ERROR
       );
