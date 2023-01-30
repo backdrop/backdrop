@@ -896,7 +896,7 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
 
   /**
-   * Setup test case.
+   * Sets up test case.
    */
   public function setUp() {
     parent::setUp('node_layout_preview_test');
