@@ -888,6 +888,81 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests that the correct layout is used for node revisions.
+ */
+class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('node_layout_preview_test');
+
+    // Create and login user.
+    $web_user = $this->backdropCreateUser(array(
+      'view revisions',
+    ));
+    $this->backdropLogin($web_user);
+    $nodes = array();
+
+    // Create initial node.
+    $node = $this->backdropCreateNode();
+    $settings = get_object_vars($node);
+    $settings['revision'] = 1;
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    // Create a revision with random title and body and update variables.
+    $this->backdropCreateNode($settings);
+    // Make sure we get revision information.
+    $node = node_load($node->nid);
+    $settings = get_object_vars($node);
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    $this->nodes = $nodes;
+  }
+
+  /**
+   * Tests that the correct layout is used for node revisions.
+   */
+  function testNodeLayoutRevisions() {
+    $nodes = $this->nodes;
+
+    // Get the initial node and confirm that our layout shows up on it.
+    $node = $nodes[0];
+    $body = $node->body[LANGUAGE_NONE][0]['value'];
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+    $this->assertText($body, 'Correct body text displays for version.');
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+
+    // Get the revised node and confirm that our layout shows up on it.
+    $node = $nodes[1];
+    $body = $node->body[LANGUAGE_NONE][0]['value'];
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+    $this->assertText($body, 'Correct body text displays for version.');
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+  }
+}
+
+/**
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {
