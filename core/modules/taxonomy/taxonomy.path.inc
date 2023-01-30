@@ -35,9 +35,11 @@ function taxonomy_path_info() {
         foreach ($languages as $langcode => $language) {
           $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('URL alias pattern for all %vocab-name URLs in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
         }
+        $info['taxonomy_term'][$vocabulary_name . '-human'] = $vocabulary->name;
       }
       else {
         $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term'][$vocabulary_name . '-human'] = $vocabulary->name;
       }
     }
   }
