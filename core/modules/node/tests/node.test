@@ -892,7 +892,10 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
  */
 class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
 
-  function setUp() {
+  /**
+   * Setup test case.
+   */
+  public function setUp() {
     parent::setUp('node_layout_preview_test');
 
     // Create and login user.
@@ -923,7 +926,7 @@ class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
   /**
    * Tests that the correct layout is used for node revisions.
    */
-  function testNodeLayoutRevisions() {
+  public function testNodeLayoutRevisions() {
     $nodes = $this->nodes;
 
     // Get the initial node and confirm that our layout shows up on it.
