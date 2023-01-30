@@ -206,6 +206,9 @@ abstract class EntityReferenceBehaviorHandler implements EntityReferenceBehavior
  * A broken implementation of EntityReferenceBehaviorHandler.
  */
 class EntityReferenceBehaviorHandlerBroken extends EntityReferenceBehaviorHandler {
+  public $behavior;
+  public $plugin;
+
   public function settingsForm($field, $instance) {
     $form['behavior_handler'] = array(
       '#markup' => t('The selected behavior handler is broken.'),

@@ -9,6 +9,9 @@
  * Test for Entity Reference admin UI.
  */
 class EntityReferenceAdminTestCase extends BackdropWebTestCase {
+  public $admin_user;
+  public $type;
+  public $hyphen_type;
 
   public function setUp() {
     parent::setUp(array('field_ui', 'entity', 'entityreference'));
