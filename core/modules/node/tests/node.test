@@ -932,39 +932,25 @@ class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
   public function testNodeLayoutRevisions() {
     $nodes = $this->nodes;
 
-    // Get the initial node and confirm that our layout shows up on it.
-    $node = $nodes[0];
-    $body = $node->body[LANGUAGE_NONE][0]['value'];
-    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
-    $this->assertText($body, 'Correct body text displays for version.');
+    // Confirm that our layout shows up on both the original node and its
+    // revision.
+    foreach ($nodes as $node) {
+      $node = $nodes[0];
+      $body = $node->body[LANGUAGE_NONE][0]['value'];
+      $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+      $this->assertText($body, 'Correct body text displays for version.');
 
-    // Look for the taylor template (only exists in our layout).
-    $this->assertText('taylor', 'Layout template "taylor" found.');
+      // Look for the taylor template (only exists in our layout).
+      $this->assertText('taylor', 'Layout template "taylor" found.');
 
-    // Look for the heading of the field body block that exists only in our
-    // layout.
-    $this->assertText('Node body field', '"Node body field" found.');
+      // Look for the heading of the field body block that exists only in our
+      // layout.
+      $this->assertText('Node body field', '"Node body field" found.');
 
-    // Look for the body text, which appears only in that field if the context
-    // was set properly.
-    $this->assertText($body, "\"{$body}\" found.");
-
-    // Get the revised node and confirm that our layout shows up on it.
-    $node = $nodes[1];
-    $body = $node->body[LANGUAGE_NONE][0]['value'];
-    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
-    $this->assertText($body, 'Correct body text displays for version.');
-
-    // Look for the taylor template (only exists in our layout).
-    $this->assertText('taylor', 'Layout template "taylor" found.');
-
-    // Look for the heading of the field body block that exists only in our
-    // layout.
-    $this->assertText('Node body field', '"Node body field" found.');
-
-    // Look for the body text, which appears only in that field if the context
-    // was set properly.
-    $this->assertText($body, "\"{$body}\" found.");
+      // Look for the body text, which appears only in that field if the context
+      // was set properly.
+      $this->assertText($body, "\"{$body}\" found.");
+    }
   }
 }
 
