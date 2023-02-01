@@ -935,7 +935,6 @@ class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
     // Confirm that our layout shows up on both the original node and its
     // revision.
     foreach ($nodes as $node) {
-      $node = $nodes[0];
       $body = $node->body[LANGUAGE_NONE][0]['value'];
       $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
       $this->assertText($body, 'Correct body text displays for version.');
