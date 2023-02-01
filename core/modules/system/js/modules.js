@@ -90,10 +90,19 @@ Backdrop.behaviors.moduleFilter = {
       }
     }
 
-    // Clear out the input field when clicking the reset button.
+    // Clear out the input field and search query when clicking the reset
+    // button.
     function resetModuleList(e) {
+      // Clear input field.
       $input.val('').triggerHandler('keyup');
       e.preventDefault();
+
+      // Clear search query.
+      var uri = window.location.toString();
+      if (uri.indexOf("?") > 0) {
+          var clean_uri = uri.substring(0, uri.indexOf("?"));
+          window.history.replaceState({}, document.title, clean_uri);
+      }
     }
 
     if ($form.length) {
