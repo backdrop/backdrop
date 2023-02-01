@@ -60,6 +60,12 @@ function user_schema() {
         'default' => 0,
         'description' => 'Timestamp for when user was created.',
       ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for when user was changed.',
+      ),
       'access' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -116,6 +122,7 @@ function user_schema() {
     'indexes' => array(
       'access' => array('access'),
       'created' => array('created'),
+      'changed' => array('changed'),
       'mail' => array('mail'),
       'picture' => array('picture'),
     ),
@@ -184,6 +191,7 @@ function user_install() {
       'name' => 'placeholder-for-uid-1',
       'mail' => 'placeholder-for-uid-1',
       'created' => REQUEST_TIME,
+      'changed' => REQUEST_TIME,
       'status' => 1,
       'data' => NULL,
     ))
@@ -1341,6 +1349,45 @@ function user_update_1023() {
       $config->set('description', $description);
       $config->save();
     }
+  }
+}
+
+/**
+ * Add changed field to users table.
+ */
+function user_update_1024() {
+  // The "changed" column was renamed to "access" in system_update_136(), and
+  // the "changed" index on "access" column may persist on old MySQL databases.
+  if (db_index_exists('users', 'changed')) {
+    if (!db_index_exists('users', 'access')) {
+      db_add_index('users', 'access', array('access'));
+    }
+    db_drop_index('users', 'changed');
+  }
+
+  $spec = array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'Timestamp for when user was changed.',
+  );
+  $keys = array(
+    'indexes' => array(
+      'changed' => array('changed'),
+    ),
+  );
+
+  // In some cases sites have added the changed field themselves e.g. via a
+  // contrib or custom module. Ensure the field uses core's new schema.
+  if (db_field_exists('users', 'changed')) {
+    db_change_field('users', 'changed', 'changed', $spec, $keys);
+  }
+  else {
+    db_add_field('users', 'changed', $spec, $keys);
+    // Set the initial value for existing users.
+    db_update('users')
+      ->expression('changed', 'created')
+      ->execute();
   }
 }
 

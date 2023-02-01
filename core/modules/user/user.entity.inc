@@ -59,6 +59,13 @@ class User extends Entity implements UserInterface {
   public $created;
 
   /**
+   * The timestamp when the user was changed.
+   *
+   * @var integer
+   */
+  public $changed;
+
+  /**
    * The timestamp when the user last accessed the site. A value of 0 means the
    * user has never accessed the site.
    *
@@ -322,6 +329,8 @@ class UserStorageController extends EntityDatabaseStorageController {
     if (!isset($values['created'])) {
       $values['created'] = REQUEST_TIME;
     }
+    $values['changed'] = REQUEST_TIME;
+
     // Users always have the authenticated user role.
     $values['roles'][] = BACKDROP_AUTHENTICATED_ROLE;
 
@@ -440,6 +449,9 @@ class UserStorageController extends EntityDatabaseStorageController {
   protected function postSave(EntityInterface $entity, $update) {
 
     if ($update) {
+      // Save current time as last changed time.
+      $entity->changed = REQUEST_TIME;
+
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
       if ($entity->pass != $entity->original->pass) {
