@@ -153,7 +153,6 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           $replacements[$original] = !empty($account->changed) ? format_date($account->changed, 'medium', '', NULL, $language_code) : t('not yet created');
           break;
 
-
         // These tokens are default variations on the chained tokens handled below.
         case 'last-login':
           $replacements[$original] = !empty($account->login) ? format_date($account->login, 'medium', '', NULL, $language_code) : t('never');
