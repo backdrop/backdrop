@@ -1463,6 +1463,16 @@ class PageTitleFiltering extends BackdropWebTestCase {
   }
 
   /**
+   * Reset page title.
+   */
+  function tearDown() {
+    // Restore the page title.
+    backdrop_set_title($this->saved_title, PASS_THROUGH);
+
+    parent::tearDown();
+  }
+
+  /**
    * Tests the handling of HTML by backdrop_set_title() and backdrop_get_title()
    */
   function testTitleTags() {
