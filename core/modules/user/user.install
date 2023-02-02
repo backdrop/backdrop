@@ -1353,11 +1353,14 @@ function user_update_1023() {
 }
 
 /**
- * Add changed field to users table.
+ * Add a "changed" column to the "users" table.
  */
 function user_update_1024() {
-  // The "changed" column was renamed to "access" in system_update_136(), and
-  // the "changed" index on "access" column may persist on old MySQL databases.
+  // On older databases originating from Drupal 5, the "changed" column was
+  // renamed to "access" in system_update_136(), and the "changed" index on the
+  // "access" column may still persist. That column index needs to be removed
+  // before adding the new "changed" column.
+  // See: https://api.drupal.org/api/drupal/modules%21system%21system.install/function/system_update_136/5.x
   if (db_index_exists('users', 'changed')) {
     if (!db_index_exists('users', 'access')) {
       db_add_index('users', 'access', array('access'));
