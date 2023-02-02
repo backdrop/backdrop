@@ -1406,46 +1406,37 @@ function users_update_2025() {
     return;
   }
 
-  $data = array (
+  $data = array(
     '_config_name' => 'views.view.user_admin',
     'name' => 'user_admin',
     'description' => 'Manage user accounts, roles, and permissions.',
     'module' => 'user',
     'storage' => 4,
     'tag' => 'default',
-    'disabled' => false,
+    'disabled' => FALSE,
     'base_table' => 'users',
     'human_name' => 'Administer user accounts',
     'core' => '1.0-dev',
-    'display' =>
-    array (
-      'default' =>
-      array (
+    'display' => array(
+      'default' => array(
         'display_title' => 'Master',
         'display_plugin' => 'default',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array(
+          'query' => array(
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array(
             ),
           ),
-          'access' =>
-          array (
+          'access' => array(
             'type' => 'perm',
             'perm' => 'administer users',
           ),
-          'cache' =>
-          array (
+          'cache' => array(
             'type' => 'none',
           ),
-          'exposed_form' =>
-          array (
+          'exposed_form' => array(
             'type' => 'basic',
-            'options' =>
-            array (
+            'options' => array(
               'submit_button' => 'Filter',
               'reset_button' => 0,
               'reset_button_label' => 'Reset',
@@ -1457,25 +1448,21 @@ function users_update_2025() {
               'autosubmit_hide' => 1,
             ),
           ),
-          'pager' =>
-          array (
+          'pager' => array(
             'type' => 'full',
-            'options' =>
-            array (
+            'options' => array(
               'items_per_page' => '50',
               'offset' => '0',
               'id' => '0',
               'total_pages' => '',
               'quantity' => '9',
-              'tags' =>
-              array (
+              'tags' => array(
                 'first' => '« first',
                 'previous' => '‹ previous',
                 'next' => 'next ›',
                 'last' => 'last »',
               ),
-              'expose' =>
-              array (
+              'expose' => array(
                 'items_per_page' => 0,
                 'items_per_page_label' => 'Items per page',
                 'items_per_page_options' => '5, 10, 20, 40, 60',
@@ -1488,10 +1475,8 @@ function users_update_2025() {
           ),
           'style_plugin' => 'table',
           'row_plugin' => 'fields',
-          'fields' =>
-          array (
-            'bulk_form' =>
-            array (
+          'fields' => array(
+            'bulk_form' => array(
               'id' => 'bulk_form',
               'table' => 'users',
               'field' => 'bulk_form',
@@ -1500,8 +1485,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Operations',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1542,12 +1526,10 @@ function users_update_2025() {
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
               'include_exclude' => 'exclude',
-              'selected_actions' =>
-              array (
+              'selected_actions' => array(
               ),
             ),
-            'name' =>
-            array (
+            'name' => array(
               'id' => 'name',
               'table' => 'users',
               'field' => 'name',
@@ -1556,8 +1538,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Username',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1602,8 +1583,7 @@ function users_update_2025() {
               'anonymous_text' => '',
               'format_username' => 1,
             ),
-            'status' =>
-            array (
+            'status' => array(
               'id' => 'status',
               'table' => 'users',
               'field' => 'status',
@@ -1612,8 +1592,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Status',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1658,8 +1637,7 @@ function users_update_2025() {
               'type_custom_false' => '',
               'not' => 0,
             ),
-            'role' =>
-            array (
+            'role' => array(
               'id' => 'role',
               'table' => 'users_roles',
               'field' => 'role',
@@ -1668,8 +1646,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Roles',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1712,8 +1689,7 @@ function users_update_2025() {
               'type' => 'ul',
               'separator' => ', ',
             ),
-            'created' =>
-            array (
+            'created' => array(
               'id' => 'created',
               'table' => 'users',
               'field' => 'created',
@@ -1722,8 +1698,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Member for',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1767,8 +1742,7 @@ function users_update_2025() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'changed' =>
-            array (
+            'changed' => array(
               'id' => 'changed',
               'table' => 'users',
               'field' => 'changed',
@@ -1777,8 +1751,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Changed',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1822,8 +1795,7 @@ function users_update_2025() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'access' =>
-            array (
+            'access' => array(
               'id' => 'access',
               'table' => 'users',
               'field' => 'access',
@@ -1832,8 +1804,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Last access',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1877,8 +1848,7 @@ function users_update_2025() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'edit_node' =>
-            array (
+            'edit_node' => array(
               'id' => 'edit_node',
               'table' => 'users',
               'field' => 'edit_node',
@@ -1887,8 +1857,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Edit',
               'exclude' => 1,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1930,8 +1899,7 @@ function users_update_2025() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'cancel_node' =>
-            array (
+            'cancel_node' => array(
               'id' => 'cancel_node',
               'table' => 'users',
               'field' => 'cancel_node',
@@ -1940,8 +1908,7 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Cancel',
               'exclude' => 1,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1983,8 +1950,7 @@ function users_update_2025() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'dropbutton' =>
-            array (
+            'dropbutton' => array(
               'id' => 'dropbutton',
               'table' => 'views',
               'field' => 'dropbutton',
@@ -1993,34 +1959,33 @@ function users_update_2025() {
               'ui_name' => '',
               'label' => 'Operations',
               'exclude' => 0,
-              'alter' =>
-              array (
-                'alter_text' => false,
+              'alter' => array(
+                'alter_text' => FALSE,
                 'text' => '',
-                'make_link' => false,
+                'make_link' => FALSE,
                 'path' => '',
-                'absolute' => false,
-                'external' => false,
-                'replace_spaces' => false,
+                'absolute' => FALSE,
+                'external' => FALSE,
+                'replace_spaces' => FALSE,
                 'path_case' => 'none',
-                'trim_whitespace' => false,
+                'trim_whitespace' => FALSE,
                 'alt' => '',
                 'rel' => '',
                 'link_class' => '',
                 'prefix' => '',
                 'suffix' => '',
                 'target' => '',
-                'nl2br' => false,
+                'nl2br' => FALSE,
                 'max_length' => '',
-                'word_boundary' => true,
-                'ellipsis' => true,
-                'more_link' => false,
+                'word_boundary' => TRUE,
+                'ellipsis' => TRUE,
+                'more_link' => FALSE,
                 'more_link_text' => '',
                 'more_link_path' => '',
-                'strip_tags' => false,
-                'trim' => false,
+                'strip_tags' => FALSE,
+                'trim' => FALSE,
                 'preserve_tags' => '',
-                'html' => false,
+                'html' => FALSE,
               ),
               'element_type' => '',
               'element_class' => '',
@@ -2034,8 +1999,7 @@ function users_update_2025() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'fields' =>
-              array (
+              'fields' => array(
                 'edit_node' => 'edit_node',
                 'cancel_node' => 'cancel_node',
                 'bulk_form' => 0,
@@ -2048,10 +2012,8 @@ function users_update_2025() {
               'destination' => 1,
             ),
           ),
-          'filters' =>
-          array (
-            'uid_raw' =>
-            array (
+          'filters' => array(
+            'uid_raw' => array(
               'id' => 'uid_raw',
               'table' => 'users',
               'field' => 'uid_raw',
@@ -2059,51 +2021,44 @@ function users_update_2025() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => '!=',
-              'value' =>
-              array (
+              'value' => array(
                 'min' => '',
                 'max' => '',
                 'value' => '0',
               ),
               'group' => 1,
-              'exposed' => false,
-              'expose' =>
-              array (
-                'operator_id' => false,
+              'exposed' => FALSE,
+              'expose' => array(
+                'operator_id' => FALSE,
                 'label' => '',
                 'description' => '',
-                'use_operator' => false,
+                'use_operator' => FALSE,
                 'operator' => '',
                 'identifier' => '',
-                'required' => false,
-                'remember' => false,
-                'multiple' => false,
-                'remember_roles' =>
-                array (
+                'required' => FALSE,
+                'remember' => FALSE,
+                'multiple' => FALSE,
+                'remember_roles' => array(
                   'authenticated' => 'authenticated',
                 ),
               ),
-              'is_grouped' => false,
-              'group_info' =>
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array(
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' =>
-                array (
+                'default_group_multiple' => array(
                 ),
-                'group_items' =>
-                array (
+                'group_items' => array(
                 ),
               ),
             ),
-            'status' =>
-            array (
+            'status' => array(
               'id' => 'status',
               'table' => 'users',
               'field' => 'status',
@@ -2113,46 +2068,40 @@ function users_update_2025() {
               'operator' => '=',
               'value' => 'All',
               'group' => 1,
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => '',
                 'label' => 'Status',
                 'description' => '',
-                'use_operator' => false,
+                'use_operator' => FALSE,
                 'operator' => 'status_op',
                 'identifier' => 'status',
                 'required' => 0,
                 'remember' => 0,
-                'multiple' => false,
-                'remember_roles' =>
-                array (
+                'multiple' => FALSE,
+                'remember_roles' => array(
                   'authenticated' => 'authenticated',
                   'anonymous' => 0,
                   'administrator' => 0,
                 ),
               ),
-              'is_grouped' => false,
-              'group_info' =>
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array(
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' =>
-                array (
+                'default_group_multiple' => array(
                 ),
-                'group_items' =>
-                array (
+                'group_items' => array(
                 ),
               ),
             ),
-            'role' =>
-            array (
+            'role' => array(
               'id' => 'role',
               'table' => 'users_roles',
               'field' => 'role',
@@ -2160,13 +2109,11 @@ function users_update_2025() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => 'or',
-              'value' =>
-              array (
+              'value' => array(
               ),
               'group' => 1,
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => 'role_op',
                 'label' => 'Role',
                 'description' => '',
@@ -2176,36 +2123,31 @@ function users_update_2025() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => 0,
-                'remember_roles' =>
-                array (
+                'remember_roles' => array(
                   'authenticated' => 'authenticated',
                   'anonymous' => 0,
                   'administrator' => 0,
                 ),
                 'reduce' => 0,
               ),
-              'is_grouped' => false,
-              'group_info' =>
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array(
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' =>
-                array (
+                'default_group_multiple' => array(
                 ),
-                'group_items' =>
-                array (
+                'group_items' => array(
                 ),
               ),
               'reduce_duplicates' => 0,
             ),
-            'name' =>
-            array (
+            'name' => array(
               'id' => 'name',
               'table' => 'users',
               'field' => 'name',
@@ -2215,9 +2157,8 @@ function users_update_2025() {
               'operator' => 'contains',
               'value' => '',
               'group' => '1',
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => 'name_op',
                 'label' => 'Username',
                 'description' => '',
@@ -2226,48 +2167,40 @@ function users_update_2025() {
                 'identifier' => 'username',
                 'required' => 0,
                 'remember' => 0,
-                'multiple' => false,
-                'remember_roles' =>
-                array (
+                'multiple' => FALSE,
+                'remember_roles' => array(
                   'authenticated' => 'authenticated',
                   'anonymous' => 0,
                   'administrator' => 0,
                 ),
               ),
-              'is_grouped' => false,
-              'group_info' =>
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array(
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' =>
-                array (
+                'default_group_multiple' => array(
                 ),
-                'group_items' =>
-                array (
+                'group_items' => array(
                 ),
               ),
             ),
           ),
-          'sorts' =>
-          array (
-            'created' =>
-            array (
+          'sorts' => array(
+            'created' => array(
               'id' => 'created',
               'table' => 'users',
               'field' => 'created',
               'order' => 'DESC',
             ),
           ),
-          'style_options' =>
-          array (
-            'grouping' =>
-            array (
+          'style_options' => array(
+            'grouping' => array(
             ),
             'row_class' => '',
             'default_row_class' => 0,
@@ -2276,8 +2209,7 @@ function users_update_2025() {
             'sticky' => 0,
             'caption' => '',
             'summary' => '',
-            'columns' =>
-            array (
+            'columns' => array(
               'bulk_form' => 'bulk_form',
               'name' => 'name',
               'status' => 'status',
@@ -2289,74 +2221,63 @@ function users_update_2025() {
               'cancel_node' => 'cancel_node',
               'dropbutton' => 'dropbutton',
             ),
-            'info' =>
-            array (
-              'bulk_form' =>
-              array (
+            'info' => array(
+              'bulk_form' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'name' =>
-              array (
+              'name' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'status' =>
-              array (
+              'status' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'role' =>
-              array (
+              'role' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'created' =>
-              array (
+              'created' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'desc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'changed' =>
-              array (
+              'changed' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'desc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'access' =>
-              array (
+              'access' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'edit_node' =>
-              array (
+              'edit_node' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'cancel_node' =>
-              array (
+              'cancel_node' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'dropbutton' =>
-              array (
+              'dropbutton' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
@@ -2365,14 +2286,11 @@ function users_update_2025() {
             'default' => 'created',
             'empty_table' => 1,
           ),
-          'header' =>
-          array (
+          'header' => array(
           ),
           'title' => 'Manage user accounts',
-          'empty' =>
-          array (
-            'area_text_custom' =>
-            array (
+          'empty' => array(
+            'area_text_custom' => array(
               'id' => 'area_text_custom',
               'table' => 'views',
               'field' => 'area_text_custom',
@@ -2380,37 +2298,30 @@ function users_update_2025() {
               'group_type' => 'group',
               'ui_name' => '',
               'label' => '',
-              'empty' => true,
+              'empty' => TRUE,
               'content' => 'No accounts found.',
               'tokenize' => 0,
             ),
           ),
-          'filter_groups' =>
-          array (
+          'filter_groups' => array(
             'operator' => 'AND',
-            'groups' =>
-            array (
+            'groups' => array(
               1 => 'AND',
             ),
           ),
         ),
       ),
-      'page' =>
-      array (
+      'page' => array(
         'display_title' => 'Page',
         'display_plugin' => 'page',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array(
+          'query' => array(
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array(
             ),
           ),
           'path' => 'admin/people/list',
-          'menu' =>
-          array (
+          'menu' => array(
             'type' => 'default tab',
             'title' => 'Manage user accounts',
             'description' => '',
@@ -2419,8 +2330,7 @@ function users_update_2025() {
             'context' => 0,
             'context_only_inline' => 0,
           ),
-          'tab_options' =>
-          array (
+          'tab_options' => array(
             'type' => 'normal',
             'title' => 'User accounts',
             'description' => 'Manage user accounts, roles, and permissions.',
