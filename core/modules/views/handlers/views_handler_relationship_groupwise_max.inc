@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Relationship for groupwise maximum handler.

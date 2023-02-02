@@ -1646,6 +1646,32 @@ class FieldFormTestCase extends FieldTestCase {
   }
 
   /**
+   * Tests the position of the "required" symbol and the validation error text.
+   */
+  public function testFieldFormUnlimitedRequired() {
+    $this->field = $this->field_unlimited;
+    $this->field_name = $this->field['field_name'];
+    $this->instance['field_name'] = $this->field_name;
+    $this->instance['required'] = TRUE;
+    field_create_field($this->field);
+    field_create_instance($this->instance);
+    $instance = field_read_instance('test_entity', $this->instance['field_name'], $this->instance['bundle']);
+
+    // Display creation form -> 1 widget.
+    $this->backdropGet('test-entity/add/test-bundle');
+    $result = $this->xpath("//label[not(contains(@class, 'element-invisible')) and contains(text(), :label)]/abbr/text()", array(':label' => $this->instance['label']));
+    $this->assertEqual($result[0], '*', t('Required symbol added to field label.'));
+    // Check that the label of the field input is visually hidden and contains
+    // the field title and an indication of the delta for a11y.
+    $result = $this->xpath("//label[contains(@class, 'element-invisible') and contains(text(), :label)]/abbr/text()", array(':label' => $this->instance['label']));
+    $this->assertEqual($result[0], '*', t('Required symbol and field label are visually hidden.'));
+
+    // Click "Add another" button
+    $this->backdropPost(NULL, array(), t('Add another'));
+    $this->assertText(t('@name field is required.', array('@name' => $instance['label'])), t('Validation error for required unlimited field includes the name of the field.'));
+  }
+
+  /**
    * Tests widget handling of multiple required radios.
    */
   function testFieldFormMultivalueWithRequiredRadio() {

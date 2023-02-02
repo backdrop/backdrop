@@ -30,7 +30,7 @@ function filter_admin_overview($form) {
       'href' => "admin/config/content/formats/$id",
       'weight' => 0,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',

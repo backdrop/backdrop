@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -290,7 +289,13 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    // This method may be called more than once. When called for the first time,
+    // it receives a string from the form element. That string must be exploded
+    // into an array before setting the form value. 
+    if (is_string($value)) {
+      $value = explode(',', $value);
+    }
     $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
@@ -1369,6 +1374,16 @@ class views_plugin_query_default extends views_plugin_query {
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
+    if (!$get_count) {
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large
+        // limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
+      }
+    }
+
     return $query;
   }
 
@@ -1473,15 +1488,7 @@ class views_plugin_query_default extends views_plugin_query {
           $this->pager->execute_count_query($count_query);
         }
 
-        // Let the pager modify the query to add limits.
         $this->pager->pre_execute($query);
-
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
 
         $result = $query->execute();
 
