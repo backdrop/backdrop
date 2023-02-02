@@ -139,8 +139,8 @@ class BlockText extends Block {
     parent::formValidate($form, $form_state);
 
     if (module_exists('block')) {
-      $admin_label = trim($form_state['values']['admin_label']);
-      $delta = trim($form_state['values']['delta']);
+      $admin_label = $form_state['values']['admin_label'];
+      $delta = $form_state['values']['delta'];
       if ($form_state['values']['reusable']) {
         if (empty($admin_label)) {
           form_error($form['admin_label']['admin_label'], t('Admin label is required when making a block reusable.'));

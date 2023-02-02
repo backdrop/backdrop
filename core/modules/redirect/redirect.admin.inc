@@ -194,7 +194,7 @@ function redirect_list_filter_form($filter_value = '') {
  * Process filter form submission when the Filter button is pressed.
  */
 function redirect_list_filter_form_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/urls/redirect/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/redirect/list/' . $form_state['values']['filter'];
 }
 
 /**

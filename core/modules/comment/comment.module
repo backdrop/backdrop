@@ -2100,11 +2100,12 @@ function comment_submit($comment) {
     $comment->name = config_get('system.core', 'anonymous');
   }
 
-  // Validate the comment's subject. If not specified, extract from comment body.
-  if (trim($comment->subject) == '') {
+  // Validate the comment's subject. If not specified, extract from comment
+  // body.
+  if (strlen($comment->subject) == 0) {
     // The body may be in any format, so:
-    // 1) Filter it into HTML
-    // 2) Strip out all HTML tags
+    // 1) Filter it into HTML.
+    // 2) Strip out all HTML tags.
     // 3) Convert entities back to plain-text.
     $comment_text = '';
     if (isset($comment->comment_body) && !empty($comment->comment_body[LANGUAGE_NONE][0])) {
@@ -2119,7 +2120,7 @@ function comment_submit($comment) {
     $comment->subject = truncate_utf8(trim(decode_entities(strip_tags($comment_text))), 29, TRUE);
     // Edge cases where the comment body is populated only by HTML tags will
     // require a default subject.
-    if (trim($comment->subject) == '') {
+    if (strlen($comment->subject) == 0) {
       $comment->subject = t('(No subject)');
     }
   }

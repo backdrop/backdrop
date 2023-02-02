@@ -463,7 +463,7 @@ function menu_edit_item_validate($form, &$form_state) {
       $item['link_path'] = $parsed_link['path'];
     }
   }
-  if (!trim($item['link_path']) || !backdrop_valid_path($item['link_path'], TRUE)) {
+  if (!$item['link_path'] || !backdrop_valid_path($item['link_path'], TRUE)) {
     form_set_error('link_path', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $item['link_path'])));
   }
 }

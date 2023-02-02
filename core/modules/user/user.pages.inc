@@ -86,7 +86,7 @@ function user_pass_validate($form, &$form_state) {
   // Always register a per-IP event.
   flood_register_event('pass_reset_ip', $config->get('flood_ip_window'));
 
-  $name = trim($form_state['values']['name']);
+  $name = $form_state['values']['name'];
   // Try to load by email.
   $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
   $account = reset($users);

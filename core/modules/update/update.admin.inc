@@ -123,7 +123,7 @@ function update_settings_validate($form, &$form_state) {
   if (!empty($form_state['values']['update_notify_emails'])) {
     $valid = array();
     $invalid = array();
-    foreach (explode("\n", trim($form_state['values']['update_notify_emails'])) as $email) {
+    foreach (explode("\n", $form_state['values']['update_notify_emails']) as $email) {
       $email = trim($email);
       if (!empty($email)) {
         if (valid_email_address($email)) {

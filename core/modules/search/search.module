@@ -144,13 +144,13 @@ function search_block_configure($delta = '', $settings = array()) {
     $form['search']['placeholder'] = array(
       '#type' => 'textfield',
       '#title' => t('Placeholder text'),
-      '#default_value' => check_plain(trim($search_settings['placeholder'])),
+      '#default_value' => check_plain($search_settings['placeholder']),
       '#description' => t('This text will appear in the search box until text is entered.'),
     );
     $form['search']['button_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Button text'),
-      '#default_value' => check_plain(trim($search_settings['button_text'])),
+      '#default_value' => check_plain($search_settings['button_text']),
       '#description' => t('Leave this field empty to hide the submit button.'),
     );
   }
@@ -183,7 +183,7 @@ function search_block_view($delta = '', $settings = array(), $contexts = array()
 
     // Add a placeholder.
     if ($search_settings['placeholder'] != '') {
-      $form['search_block_form']['#attributes']['placeholder'] = t(trim($search_settings['placeholder']));
+      $form['search_block_form']['#attributes']['placeholder'] = t($search_settings['placeholder']);
     }
 
     // Change the button text.
@@ -192,7 +192,7 @@ function search_block_view($delta = '', $settings = array(), $contexts = array()
         $form['actions']['submit']['#access'] = FALSE;
       }
       else {
-        $form['actions']['submit']['#value'] = t(check_plain(trim($search_settings['button_text'])));
+        $form['actions']['submit']['#value'] = t(check_plain($search_settings['button_text']));
       }
     }
 
@@ -1091,10 +1091,12 @@ function search_box_form_submit($form, &$form_state) {
     unset($_GET['destination']);
   }
 
-  // Check to see if the form was submitted empty.
-  // If it is empty, display an error message.
-  // This method is used instead of the #required property so that the user
-  // will be taken to the search page before the error is shown.
+  // Check to see if the form was submitted empty. If it is empty, display an
+  // error message.
+  // This method is used instead of setting #required to TRUE for this field
+  // because that results in a confusing error message. It would say a plain
+  // "field is required" because the search keywords field has no title.
+  // The error message would also complain about a missing #title field.
   if ($form_state['values']['search_block_form'] == '') {
     form_set_error('keys', t('Please enter some keywords.'));
   }
@@ -1102,7 +1104,7 @@ function search_box_form_submit($form, &$form_state) {
   $form_id = $form['form_id']['#value'];
   $info = search_get_default_module_info();
   if ($info) {
-    $form_state['redirect'] = 'search/' . $info['path'] . '/' . trim($form_state['values'][$form_id]);
+    $form_state['redirect'] = 'search/' . $info['path'] . '/' . $form_state['values'][$form_id];
   }
   else {
     form_set_error(NULL, t('Search is currently disabled.'), 'error');

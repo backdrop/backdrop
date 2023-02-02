@@ -328,7 +328,7 @@ function path_admin_filter_form($form, &$form_state, $keys = '') {
  * @see path_admin_filter_form_submit_reset()
  */
 function path_admin_filter_form_submit_filter($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/urls/path/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/path/list/' . $form_state['values']['filter'];
 }
 
 /**

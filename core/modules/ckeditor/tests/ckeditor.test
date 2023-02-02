@@ -71,7 +71,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
 
     $this->backdropPost(NULL, array(
       'editor_settings[toolbar]' => json_encode($toolbar),
-      'editor_settings[plugins][style][style_list]' => "h1.title|Title\np.custom-class|Custom class\n",
+      'editor_settings[plugins][style][style_list]' => "h1.title|Title\np.custom-class|Custom class",
       'filters[filter_autop][status]' => TRUE,
       'filters[filter_image_align][status]' => TRUE,
       'filters[filter_image_caption][status]' => TRUE,
