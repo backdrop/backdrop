@@ -270,9 +270,9 @@ function user_views_data() {
 
   // Changed field.
   $data['users']['changed'] = array(
-    // The item it appears as on the UI,
+    // The item it appears as on the UI.
     'title' => t('Changed date'),
-    // The help that appears on the UI,
+    // The help that appears on the UI.
     'help' => t('The date the user was changed.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
