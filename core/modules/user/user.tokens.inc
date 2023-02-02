@@ -64,8 +64,8 @@ function user_token_info() {
     'type' => 'date',
   );
   $user['changed'] = array(
-    'name' => t("Changed"),
-    'description' => t("The date the user account was changed."),
+    'name' => t('Changed'),
+    'description' => t('The date the user account was changed.'),
     'type' => 'date',
   );
   $user['url'] = array(
