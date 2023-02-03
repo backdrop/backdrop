@@ -358,6 +358,9 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
+    // Save current time as last changed time.
+    $entity->changed = REQUEST_TIME;
+
     // Update the user password if it has changed.
     $new_pass = isset($entity->pass) && strlen(trim($entity->pass)) > 0 ? trim($entity->pass) : NULL;
     if ($entity->isNew() || !is_null($new_pass) && $new_pass !== $entity->original->pass) {
@@ -447,11 +450,7 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity that has just been saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
-
     if ($update) {
-      // Save current time as last changed time.
-      $entity->changed = REQUEST_TIME;
-
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
       if ($entity->pass != $entity->original->pass) {
