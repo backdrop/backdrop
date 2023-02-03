@@ -1397,7 +1397,7 @@ function user_update_1024() {
 /**
  * Add a "changed" column to the user_admin View.
  */
-function users_update_2025() {
+function user_update_1025() {
   // See if the content admin view has been modified on this site.
   $config = config('views.view.user_admin');
 
