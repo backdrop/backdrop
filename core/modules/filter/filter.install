@@ -486,7 +486,8 @@ function filter_update_1004() {
   // See if the image_library view has been modified on this site.
   $config = config('views.view.image_library');
 
-  // Only update if view isn't overridden
+  // Only update if view isn't overridden.
+  require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'views') . '/views.module';
   if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
     $view_config = $config->get();
     $view_config['display']['default']['display_options']['exposed_form'] = array(
