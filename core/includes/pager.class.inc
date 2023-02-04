@@ -175,7 +175,7 @@ class PagerDefault extends SelectQueryExtender {
    * The element is used to differentiate different pager queries on the same
    * page so that they may be operated independently.
    *
-   * @return
+   * @return int
    *   Element ID that is used to differentiate between different pager
    *   queries.
    */
