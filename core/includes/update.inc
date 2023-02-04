@@ -146,10 +146,12 @@ function update_prepare_bootstrap() {
       // process.
       backdrop_bootstrap(BACKDROP_BOOTSTRAP_VARIABLES);
 
-      // Change language column to langcode in url_alias.
+      // Rename the "language" column in the "url_alias" table to "langcode".
       if (db_table_exists('url_alias') && db_field_exists('url_alias', 'language')) {
+        // Drop the 2 indices that are based on the field we are renaming.
         db_drop_index('url_alias', 'alias_language_pid');
         db_drop_index('url_alias', 'source_language_pid');
+
         $langcode_spec = array(
           'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Backdrop path can have an alias for each supported language.",
           'type' => 'varchar',
@@ -157,13 +159,18 @@ function update_prepare_bootstrap() {
           'not null' => TRUE,
           'default' => '',
         );
-        $langcode_indexes = array('indexes' =>
-          array(
-            'alias_langcode_pid' => array('alias', 'langcode', 'pid'),
-            'source_langcode_pid' => array('source', 'langcode', 'pid'),
-          ),
-        );
-        db_change_field('url_alias', 'language', 'langcode', $langcode_spec, $langcode_indexes);
+        // Althought we could be re-adding the indices we have removed earlier
+        // as part of this db_change_field() call (using the optional $keys_new
+        // parameter), we are intentionally not doing it here, since that seems
+        // to be causing issues in certain cases, which usually results in the
+        // 'url_alias' table ending up with an incorrect key file.
+        // See https://github.com/backdrop/backdrop-issues/issues/5496.
+        // Simply rename the "language" column to "langcode".
+        db_change_field('url_alias', 'language', 'langcode', $langcode_spec);
+
+        // Re-add the 2 indices separately here.
+        db_add_index('url_alias', 'alias_langcode_pid', array('alias', 'langcode', 'pid'));
+        db_add_index('url_alias', 'source_langcode_pid', array('source', 'langcode', 'pid'));
       }
 
       // Create the state table.
