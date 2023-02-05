@@ -170,6 +170,17 @@ function user_schema() {
 }
 
 /**
+ * Implements hook_schema_alter().
+ */
+function user_schema_alter(&$schema) {
+  // Prevent fatal error if someone clears cache before running the update.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5944#issuecomment-1416900861
+  if (backdrop_get_installed_schema_version('user') < 1025) {
+    unset($schema['users']['fields']['changed']);
+  }
+}
+
+/**
  * Implements hook_install().
  */
 function user_install() {
