@@ -3343,13 +3343,13 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
  * That form will trigger the type classification of managed files that do not
  * currently have a type. This is often the case after upgrading from Drupal 7.
  *
- * @param $classify
+ * @param bool|NULL $rebuild
  *   (optional) The boolean value to be written.
  *
  * @return bool|NULL
  *   The current value of the flag if no value was provided for $rebuild.
  *
- * @see 
+ * @see file_type_classify_batch()
  */
 function file_needs_type_classification($rebuild = NULL) {
   if (!isset($rebuild)) {
@@ -3367,7 +3367,7 @@ function file_needs_type_classification($rebuild = NULL) {
  * Batch operation callback to classify the types of managed files.
  *
  * Unlike Drupal 7, the file_managed table in Backdrop contains a type column. 
- * This process classifies the file types when upgrading from a D7 site.  
+ * This process classifies the file types when upgrading from a D7 site.
  *
  * @see file_needs_type_classification()
  */
@@ -3391,7 +3391,7 @@ function file_type_classify_batch($fids, &$context) {
 
 /**
  * Batch 'finished' callback.
- * 
+ *
  * @see file_type_classify_batch()
  * @see file_needs_type_classification()
  */
