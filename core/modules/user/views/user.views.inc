@@ -304,7 +304,6 @@ function user_views_data() {
     ),
   );
 
-  $data['users']['timestamp_year']['moved to'] = array('users', 'changed_year');
   $data['users']['changed_year'] = array(
     'title' => t('Changed year'),
     'help' => t('Date in the form of YYYY.'),
