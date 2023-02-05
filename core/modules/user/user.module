@@ -946,6 +946,9 @@ function user_account_form(&$form, &$form_state) {
   // Add each role as a checkbox option with a description.
   foreach ($roles as $role_name => $role) {
     $form['account_settings']['roles']['#options'][$role_name] = $role->label;
+    if ($site_config->get('user_admin_role') == $role_name) {
+      $role->description .= ' ' . _user_admin_admin_role_description();
+    }
     if (strlen($role->description)) {
       $form['account_settings']['roles'][$role_name]['#description'] = filter_xss_admin($role->description);
     }
@@ -1001,6 +1004,19 @@ function user_account_form(&$form, &$form_state) {
   );
   // See system_user_timezone() and locale_language_selector_form() for the form
   // items displayed here.
+}
+
+/**
+ * Returns text to be used as description for whichever role has been set as
+ * admin role.
+ *
+ * @return string
+ *
+ * @see user_admin_roles()
+ * @see user_account_form()
+ */
+function _user_admin_admin_role_description() {
+  return '<strong>' . t('This role receives all new permissions by default.') . '</strong>';
 }
 
 /**
