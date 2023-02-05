@@ -554,6 +554,7 @@ function user_admin_roles($form, $form_state) {
   $form['admin_role'] = array(
     '#type' => 'fieldset',
     '#title' => t('Administrator role'),
+    '#description' => _user_admin_admin_role_description(),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -20,
@@ -569,7 +570,8 @@ function user_admin_roles($form, $form_state) {
   $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#title' => t('Administrator role'),
+    '#title_display' => 'invisible',
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
@@ -653,6 +655,20 @@ function user_admin_roles($form, $form_state) {
 }
 
 /**
+ * Returns text to be used as description for whichever role has been set as
+ * admin role.
+ *
+ * @return string
+ *
+ * @see user_admin_roles()
+ * @see theme_user_admin_roles()
+ * @see user_account_form()
+ */
+function _user_admin_admin_role_description() {
+  return t('This role will be automatically assigned any new permissions whenever a module is enabled.');
+}
+
+/**
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
@@ -680,7 +696,16 @@ function user_admin_roles_order_submit($form, &$form_state) {
 function user_admin_role($form, &$form_state, $role = NULL) {
   $form_state['role'] = $role;
   if (empty($role)) {
-    backdrop_set_title('Add role');
+    backdrop_set_title(t('Add role'));
+  }
+  elseif (isset($role->name)) {
+    backdrop_set_title(t('Configure %role_name role', array('%role_name' => filter_xss_admin($role->label))), PASS_THROUGH);
+
+    $admin_role = config_get('system.core', 'user_admin_role');
+    if ($role->name == $admin_role) {
+      $message = _user_admin_admin_role_description();
+      backdrop_set_message($message, 'info');
+    }
   }
 
   $form['label'] = array(
@@ -709,7 +734,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#rows' => 3,
     '#title' => t('Description'),
     '#default_value' => isset($role->description) ? $role->description : '',
-    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
+    '#description' => t("Summary of this role's purpose, shown on the role listing page and when assigning this role on user account forms."),
   );
   $form['weight'] = array(
     '#type' => 'value',
