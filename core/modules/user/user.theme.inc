@@ -240,7 +240,6 @@ function theme_user_admin_roles($variables) {
     if ($name == $admin_role) {
       $description .= ' <strong>' . _user_admin_admin_role_description() . '</strong>';
     }
-    $something = t('something');
     $row[] = array(
       'data' => $description,
       'class' => array('role-description', 'priority-low'),

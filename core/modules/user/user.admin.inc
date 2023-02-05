@@ -661,8 +661,8 @@ function user_admin_roles($form, $form_state) {
  * @return string
  *
  * @see user_admin_roles()
- * @see theme_user_admin_roles()
  * @see user_account_form()
+ * @see theme_user_admin_roles()
  */
 function _user_admin_admin_role_description() {
   return t('This role will be automatically assigned any new permissions whenever a module is enabled.');
