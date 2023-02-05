@@ -563,9 +563,12 @@ class FileTaxonomyTermTestCase extends BackdropWebTestCase {
  *   that aren't related to fields into it.
  */
 class FileManagedFileElementTestCase extends FileTestHelper {
-  
+
   protected $originalDisplayErrorsValue;
-  
+
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
 
@@ -574,6 +577,9 @@ class FileManagedFileElementTestCase extends FileTestHelper {
     $this->originalDisplayErrorsValue = ini_set('display_errors', '0');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function tearDown() {
     ini_set('display_errors', $this->originalDisplayErrorsValue);
 
@@ -708,7 +714,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Tests uploading a file that exceeds the maximum file size.
    */
-  function testManagedFileExceedMaximumFileSize() {
+  public function testManagedFileExceedMaximumFileSize() {
     $path = 'file/test/0/0';
     $this->backdropGet($path);
 
@@ -728,7 +734,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Converts php.ini post_max_size value to integer.
    *
-   * @param $string
+   * @param string $string
    *   The value from php.ini.
    *
    * @return int
