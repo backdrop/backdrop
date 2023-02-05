@@ -1143,6 +1143,9 @@ function file_ajax_upload() {
     $commands = array();
     $commands[] = ajax_command_remove('.file-ajax-messages');
     $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
+    $field_name = (string) reset($form_parents);
+    $wrapper_id = backdrop_html_id('edit-' . $field_name);
+    $commands[] = ajax_command_invoke('#' . $wrapper_id . ' .form-type-managed-file input[type="file"]', 'val', array(''));
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
