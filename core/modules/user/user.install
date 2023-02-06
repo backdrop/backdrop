@@ -173,8 +173,8 @@ function user_schema() {
  * Implements hook_schema_alter().
  */
 function user_schema_alter(&$schema) {
-  // Prevent fatal error for missing "changed" column in users table if someone clears cache 
-  // before running user_update_1025().
+  // Prevent fatal error for missing "changed" column in users table if someone
+  // clears cache before running user_update_1025().
   // @see https://github.com/backdrop/backdrop-issues/issues/5944#issuecomment-1416900861
   if (backdrop_get_installed_schema_version('user') < 1025) {
     unset($schema['users']['fields']['changed']);
