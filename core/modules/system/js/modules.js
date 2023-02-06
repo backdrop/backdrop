@@ -98,7 +98,9 @@ Backdrop.behaviors.moduleFilter = {
       e.preventDefault();
 
       // Clear the search query.
-      window.location.href = window.location.origin + window.location.pathname;
+      var currentUrl = new URL(window.location);
+      currentUrl.searchParams.delete('search');
+      window.history.replaceState({}, '', currentUrl);
     }
 
     if ($form.length) {
