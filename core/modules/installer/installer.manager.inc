@@ -54,7 +54,22 @@
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state) {
+function installer_manager_update_form($form, $form_state, $context) {
+  switch ($context) {
+    case 'module':
+      backdrop_set_title('Update modules');
+      break;
+    case 'theme':
+      backdrop_set_title('Update themes');
+      break;
+    case 'layout':
+      backdrop_set_title('Update projects');
+      break;
+    case 'report':
+      backdrop_set_title('Update projects');
+      break;
+  }
+
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
