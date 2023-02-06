@@ -177,6 +177,7 @@ function user_schema_alter(&$schema) {
   // @see https://github.com/backdrop/backdrop-issues/issues/5944#issuecomment-1416900861
   if (backdrop_get_installed_schema_version('user') < 1025) {
     unset($schema['users']['fields']['changed']);
+    watchdog('user', 'Database updates are waiting: a new "changed" column in the users table needs to be created.', WATCHDOG_WARNING);
   }
 }
 
