@@ -1165,7 +1165,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
     $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on HTTPS downgrade.');
   }
 
-  /** 
+  /**
    * Tests HTTP redirect without downgrade.
    */
   public function testNoHttpsDowngrade() {
@@ -1174,7 +1174,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
     $this->assertFalse(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are not stripped without HTTPS downgrade.');
   }
 
-  /** 
+  /**
    * Tests HTTP redirect with host change.
    */
   public function testHostChange() {
@@ -1183,7 +1183,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
     $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on change of host.');
   }
 
-  /** 
+  /**
    * Tests HTTP redirect without downgrade and host change.
    */
   public function testNoHostChange() {

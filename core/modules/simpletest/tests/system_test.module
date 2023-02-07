@@ -252,6 +252,9 @@ function system_test_redirect_noscheme() {
   exit;
 }
 
+/**
+ * Redirects to protocol-relative URL.
+ */
 function system_test_redirect_protocol_relative() {
   header("Location: //example.com/path", TRUE, 301);
   exit;
