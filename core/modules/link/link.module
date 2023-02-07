@@ -79,15 +79,16 @@ function link_field_instance_settings_form($field, $instance) {
 
   $form['type'] = array(
     '#type' => 'radios',
-    '#title' => t('URL type'),
+    '#title' => t('Allowed URL types'),
     '#default_value' => $instance['settings']['type'],
     '#options' => array(
       LINK_INTERNAL => t('Internal only'),
       LINK_EXTERNAL => t('External only'),
       LINK_BOTH => t('Both (internal and external)'),
     ),
-    '#description' => t('The type of URLs this field will allow. Internal URLs point to pages on this website; an autocomplete displays matching pages to select from. External URLs point to other websites; no autocomplete is used.'),
   );
+  $form['type'][LINK_INTERNAL]['#description'] = t('Internal URLs point to pages on this website; an autocomplete displays matching pages to select from.');
+  $form['type'][LINK_EXTERNAL]['#description'] = t('External URLs point to other websites; no autocomplete is used.');
 
   $title_options = array(
     'optional' => t('Optional Title'),
@@ -349,11 +350,6 @@ function link_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     '#type' => $instance['widget']['type'],
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
   );
-  if ($instance['settings']['type'] != LINK_BOTH) {
-    $element['#description'] .= ' ' . t('Only %type URLs are allowed.', array(
-      '%type' => $instance['settings']['type'],
-    ));
-  }
   return $element;
 }
 
@@ -443,12 +439,10 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     if ($instance['settings']['type'] != LINK_BOTH) {
       $url_type = link_validate_url(trim($item['url']));
       if (($instance['settings']['type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($instance['settings']['type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
+        $field_label = array('%field' => $instance['label']);
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'link_required',
-          'message' => t('Only %type URLs are allowed in %field.', array(
-            '%type' => $instance['settings']['type'],
-            '%field' => $instance['label'],
-          )),
+          'message' => ($instance['settings']['type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label),
           'error_element' => array('url' => TRUE, 'title' => FALSE),
         );
       }
