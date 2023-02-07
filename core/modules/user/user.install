@@ -178,7 +178,6 @@ function user_schema_alter(&$schema) {
   // @see https://github.com/backdrop/backdrop-issues/issues/5944#issuecomment-1416900861
   if (backdrop_get_installed_schema_version('user') < 1025) {
     unset($schema['users']['fields']['changed']);
-    watchdog('user', 'The user module has database schema updates to install. You should run the database update script immediately.', array(), WATCHDOG_WARNING);
   }
 }
 
