@@ -1096,19 +1096,19 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertFalse(isset($redirect_301->redirect_code), 'backdrop_http_request does not follow 301 redirect if max_redirects = 0.');
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-protocol-relative', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to protocol-relative URL returned with error code !error.', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to protocol-relative URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'missing schema', format_string('301 redirect to protocol-relative URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-noscheme', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to invalid URL returned with error code !error.', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1002, format_string('301 redirect to invalid URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'missing schema', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-noparse', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1001, format_string('301 redirect to invalid URL returned with error message code "!error".', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1001, format_string('301 redirect to invalid URL returned with error message code "!code".', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'unable to parse URL', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_invalid = backdrop_http_request(url('system-test/redirect-invalid-scheme', array('absolute' => TRUE)), array('max_redirects' => 1));
-    $this->assertEqual($redirect_invalid->code, -1003, format_string('301 redirect to invalid URL returned with error code !error.', array('!error' => $redirect_invalid->error)));
+    $this->assertEqual($redirect_invalid->code, -1003, format_string('301 redirect to invalid URL returned with error code !code.', array('!code' => $redirect_invalid->code)));
     $this->assertEqual($redirect_invalid->error, 'invalid schema ftp', format_string('301 redirect to invalid URL returned with error message "!error".', array('!error' => $redirect_invalid->error)));
 
     $redirect_302 = backdrop_http_request(url('system-test/redirect/302', array('absolute' => TRUE)), array('max_redirects' => 1));

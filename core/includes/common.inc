@@ -1314,7 +1314,7 @@ function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $locati
   if ($strip_on_host_change && strcasecmp($url_parsed['host'], $location_parsed['host']) !== 0) {
     return TRUE;
   }
-  if ($strip_on_https_downgrade && $url_parsed['scheme'] !== $location_parsed['scheme'] && 'https' !== $location_parsed['scheme']) {
+  if ($strip_on_https_downgrade && $url_parsed['scheme'] !== $location_parsed['scheme'] && $location_parsed['scheme'] !== 'https') {
     return TRUE;
   }
   return FALSE;
@@ -8756,7 +8756,7 @@ function backdrop_parse_dependency($dependency) {
             if ($op == '=' || $op == '==') {
               $value['versions'][] = array(
                 'op' => '<',
-                'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x'
+                'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x',
               );
               $op = '>=';
             }
