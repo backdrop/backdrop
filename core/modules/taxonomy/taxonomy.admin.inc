@@ -108,7 +108,7 @@ function _vocabulary_get_operations($vocabulary) {
       'weight' => 10,
       );
     }
-  if (user_access('synchronize configuration')) {
+  if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
       'href' => 'admin/config/development/configuration/single/export',
@@ -308,6 +308,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }

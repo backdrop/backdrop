@@ -1458,6 +1458,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
     $theme = !empty($GLOBALS['theme_key']) ? $GLOBALS['theme_key'] : '';
   }
 
+  if (empty($theme)) {
+    return;
+  }
+
   if (empty($configs[$theme])) {
     $configs[$theme] = config($theme . '.settings');
     $configs[$theme]->load();
@@ -2035,10 +2039,7 @@ function theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav class="breadcrumb">';
-    // Provide a navigational heading to give context for breadcrumb links to
-    // screen-reader users. Make the heading invisible with .element-invisible.
-    $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
+    $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
     $output .= '<ol><li>' . implode(' » </li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }

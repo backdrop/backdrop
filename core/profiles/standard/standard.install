@@ -114,7 +114,7 @@ function standard_install() {
 
   // Create default pre-defined node types. For a complete list of available
   // node type attributes please refer to the node type API documentation at:
-  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
+  // https://docs.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
   $types = array(
     array(
       'type' => 'page',
@@ -248,7 +248,7 @@ function standard_install() {
 
   // Create an image field named "Image", enabled for the 'post' content type.
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See https://api.backdropcms.org/api/function/field_create_field/1
+  // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_field/1
 
   $field = array(
     'field_name' => 'field_image',
@@ -269,7 +269,7 @@ function standard_install() {
 
 
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
-  // See https://api.backdropcms.org/api/function/field_create_instance/1
+  // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_instance/1
   $instance = array(
     'field_name' => 'field_image',
     'entity_type' => 'node',
@@ -512,7 +512,8 @@ function standard_install() {
   // content, but do not need to access advanced admin features.
   $editor_role = new stdClass();
   $editor_role->name = 'editor';
-  $editor_role->label = st('Editor');
+  $editor_role->label = 'Editor';
+  $editor_role->description = 'Can edit most content on the site, but cannot modify site configuration settings.';
   $editor_role->weight = 2;
   user_role_save($editor_role);
 
@@ -559,7 +560,8 @@ function standard_install() {
   // permissions assigned.
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
-  $admin_role->label = st('Administrator');
+  $admin_role->label = 'Administrator';
+  $admin_role->description = 'Can manage content and configuration, including the ability to assign roles.';
   $admin_role->weight = 3;
   $admin_role->permissions = array_keys(module_invoke_all('permission'));
   user_role_save($admin_role);

@@ -193,10 +193,14 @@ function user_install() {
 /**
  * Implements hook_update_dependencies().
  */
-function system_update_dependencies() {
+function user_update_dependencies() {
   // Ensure layouts have been converted before renaming our user roles.
   $dependencies['user'][1007] = array(
     'system' => 1025,
+  );
+  // Ensure the 'auto' column already exists in url_alias table.
+  $dependencies['user'][1021] = array(
+    'system' => 1039,
   );
   return $dependencies;
 }
@@ -1303,6 +1307,41 @@ function user_update_1022() {
   $config->save();
 
   update_variable_del('log_user_flood_control');
+}
+
+/**
+ * Add default descriptions to user roles.
+ */
+function user_update_1023() {
+  $config_names = config_get_names_with_prefix('user.role.');
+  $admin_role_name = config_get('system.core', 'user_admin_role');
+
+  // Use role_help module description text as a default, if available.
+  $role_help = array();
+  if (db_table_exists('role_help')) {
+    $role_help = db_query('SELECT role, summary FROM {role_help}')->fetchAllKeyed();
+    backdrop_set_message(t('Backdrop core now provides most of the functionality of Role Help module. See the <a href="!url">change record for more information</a>.', array('!url' => 'https://docs.backdropcms.org/change-records/user-roles-now-have-descriptions-role-help-module-in-core')), 'warning');
+
+    // Convert numeric anonymous and authenticated role IDs to string versions.
+    if (isset($role_help['1'])) {
+      $role_help['anonymous'] = $role_help['1'];
+      unset($role_help['1']);
+    }
+    if (isset($role_help['2'])) {
+      $role_help['authenticated'] = $role_help['2'];
+      unset($role_help['2']);
+    }
+  }
+
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $role_name = $config->get('name');
+    if ($config->get('description') === NULL && isset($role_help[$role_name])) {
+      $description = $role_help[$role_name];
+      $config->set('description', $description);
+      $config->save();
+    }
+  }
 }
 
 /**

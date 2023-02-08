@@ -110,6 +110,22 @@ function system_requirements($phase) {
     $requirements['php_register_globals']['value'] = $t('Disabled');
   }
 
+  // Test PHP max_input_vars setting.
+  $max_input_vars = ini_get('max_input_vars');
+  $requirements['php_max_input_vars'] = array(
+    'title' => $t('PHP <code>max_input_vars</code> setting'),
+    'value' => $t('PHP limits the number of input variables in each form to @value items.', array('@value' => number_format($max_input_vars, 0, '.', ','))),
+  );
+  // 1000 is the default value and indicates potential issues.
+  // @see https://www.php.net/manual/en/info.configuration.php
+  if ($max_input_vars <= 1000) {
+    $requirements['php_max_input_vars']['description'] = $t('When set too low, the <code>max_input_vars</code> PHP setting can cause silent failures on large forms, such as the permissions page. A value of <code>10000</code> is recommended. <a href="@documentation" target="_blank">Read more about increasing the <code>max_input_vars</code> PHP setting</a>.', array('@documentation' => 'https://docs.backdropcms.org/max-input-vars'));
+    $requirements['php_max_input_vars']['severity'] = REQUIREMENT_WARNING;
+    if ($phase == 'install' || $phase == 'update') {
+      $requirements['php_max_input_vars']['severity'] = REQUIREMENT_INFO;
+    }
+  }
+
   // Test for PHP extensions.
   $requirements['php_extensions'] = array(
     'title' => $t('PHP extensions'),
@@ -469,7 +485,10 @@ function system_requirements($phase) {
         // Check for an incompatible version.
         $required_file = $files[$required_module];
         $required_name = $required_file->info['name'];
-        $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
+        $version = '';
+        if (!empty($required_file->info['version'])) {
+          $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
+        }
         $compatibility = backdrop_check_incompatibility($requirement, $version);
         if ($compatibility) {
           $compatibility = rtrim(substr($compatibility, 2), ')');
@@ -568,9 +587,16 @@ function system_requirements($phase) {
           case 'redirect':
             $change_notice = 43994;
             break;
+
+          case 'entityreference':
+            $change_notice = 47321;
+            break;
         }
         if ($change_notice) {
-          $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array('@name' => $file->info['name'], '%path' => $path, '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
+          $description .= $t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
+            '@name' => $file->info['name'],
+            '%path' => $path,
+            '!url' => 'https://docs.backdropcms.org/node/' . $change_notice));
         }
 
         $requirements['multiple_' . $file->name] = array(
@@ -623,7 +649,7 @@ function system_requirements($phase) {
   // Warn the user if trusted hostnames have not been configured.
   if ($phase == 'runtime') {
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
-    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://api.backdropcms.org/documentation/trusted-host-settings'));
+    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://docs.backdropcms.org/documentation/trusted-host-settings'));
     // @todo: upgrade this to an error when we provide a way to configure
     // $trusted_host_patterns via the admin UI.
     if (empty($trusted_host_patterns)) {
@@ -685,7 +711,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://api.backdropcms.org/database-configuration';
+  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
   $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
@@ -1943,13 +1969,25 @@ function system_update_1016() {
  * Moves system logging settings from variables to config.
  */
 function system_update_1017() {
+  // Convert error levels.
+  switch ((int) update_variable_get('error_level', '2')) {
+    case 0:
+      $error_level = 'hide';
+      break;
+    case 1:
+      $error_level = 'some';
+      break;
+    default:
+      $error_level = 'all';
+  }
+
   // Migrate variables to config.
   $config = config('system.core');
   $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
   $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
   $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
   $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
-  $config->set('error_level', update_variable_get('error_level', 'all'));
+  $config->set('error_level', $error_level);
   $config->save();
 
   // Delete variables.
@@ -2461,6 +2499,7 @@ function system_update_1025() {
  */
 function system_update_1026() {
   $config = config('system.core');
+  $config->set('file_additional_public_schemes', update_variable_get('file_additional_public_schemes', array()));
   $config->set('file_default_scheme', update_variable_get('file_default_scheme', 'public'));
   $config->set('file_public_path', update_variable_get('file_public_path', 'files'));
   $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
@@ -2662,7 +2701,7 @@ function system_update_1039() {
 function system_update_1040() {
   $path = backdrop_get_path('module', 'ckeditor');
   if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://docs.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2672,7 +2711,7 @@ function system_update_1040() {
 function system_update_1041() {
   $path = backdrop_get_path('module', 'email');
   if ($path && strpos($path, 'core/modules/email') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://docs.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2682,7 +2721,7 @@ function system_update_1041() {
 function system_update_1042() {
   $path = backdrop_get_path('module', 'link');
   if ($path && strpos($path, 'core/modules/link') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://docs.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2723,7 +2762,7 @@ function system_update_1043() {
 function system_update_1044() {
   $path = backdrop_get_path('module', 'date');
   if ($path && strpos($path, 'core/modules/date') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://docs.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2822,7 +2861,7 @@ function system_update_1050() {
 function system_update_1051() {
   $path = backdrop_get_path('module', 'redirect');
   if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://docs.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -3272,6 +3311,84 @@ function system_update_1081() {
   $components[] = 'admin_bar.page';
   $config->set('components', array_unique($components));
   $config->save();
+}
+
+/**
+ * Previous check for Entity Reference module.
+ */
+function system_update_1082() {
+  // Update moved to system_update_1084(). See core issue #5694.
+}
+
+/**
+ * Set the default value for "file_additional_public_schemes" setting.
+ */
+function system_update_1083() {
+  $config = config('system.core');
+  if ($config->get('file_additional_public_schemes') == NULL) {
+    $config->set('file_additional_public_schemes', array());
+    $config->save();
+  }
+}
+
+/**
+ * Notify if a non-core version of Entity Reference module is present.
+ */
+function system_update_1084() {
+  $path = backdrop_get_path('module', 'entityreference');
+  if ($path && strpos($path, 'core/modules/entityreference') === FALSE) {
+    backdrop_set_message(t('Backdrop core provides a bundled @name module. A different copy of @name module is at %path. Remove this module from your installation to use the core @name module. For more information see the <a href="!url" target="_blank">@name change notice</a>.', array(
+      '@name' => t('Entity Reference'),
+      '%path' => $path,
+      '!url' => 'https://docs.backdropcms.org/node/47321',
+    )), 'warning');
+  }
+}
+
+/**
+ * Remove superfluous test files if they are present.
+ */
+function system_update_1085() {
+  // Crufty files that may have been left behind after PR 3911.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5465
+  $base = BACKDROP_ROOT . '/core/modules/system/tests/';
+  $filenames = array(
+    $base . 'cron_queue_test.module',
+    $base . 'system_cron_test.module',
+  );
+  foreach ($filenames as $filename) {
+    if (file_exists($filename)) {
+      if (!unlink($filename)) {
+        backdrop_set_message(t('Unable to remove file %filename, which is no longer used in its current location. Please remove it from the file system.', array('filename' => $filename)), 'warning');
+      }
+    }
+  }
+}
+
+/**
+ * Preserve 4-byte UTF-8 database update value if set.
+ */
+function system_update_1086() {
+  $connection = Database::getConnection();
+  $utf8mb4_active = $connection->utf8mb4IsActive();
+  $utf8mb4_supported = $connection->utf8mb4IsSupported();
+  // This variable is set by Drupal 7 on new installations that support UTF8-MB4
+  // and when the update is performed by the "utf8mb4_convert" project.
+  $d7_utf8mb4_run = update_variable_get('drupal_all_databases_are_utf8mb4', FALSE);
+  $utf8mb4_state = state_get('database_utf8mb4_active', FALSE);
+  if ($utf8mb4_supported && $utf8mb4_active && $d7_utf8mb4_run && !$utf8mb4_state) {
+    state_set('database_utf8mb4_active', TRUE);
+    update_variable_del('drupal_all_databases_are_utf8mb4');
+  }
+}
+
+/**
+ * Set the message length for the database log.
+ */
+function system_update_1087() {
+  if (config_get('system.core', 'log_max_length') === NULL) {
+    config_set('system.core', 'log_max_length', 56);
+  }
 }
 
 /**

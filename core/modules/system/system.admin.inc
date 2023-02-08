@@ -397,7 +397,7 @@ function system_theme_default() {
 }
 
 /**
- * Form builder; display theme configuration for entire site and individual themes.
+ * Form builder; display configuration for individual themes.
  *
  * @param $key
  *   A theme name.
@@ -627,8 +627,12 @@ function system_modules($form, $form_state = array()) {
         $requires_name = $files[$requires]->info['name'];
 
         // Disable this module if it is incompatible with the dependency's version.
-        $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
-        if ($incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
+        $version_string = FALSE;
+        // Make sure the version string of the dependency is available.
+        if (!empty($files[$requires]->info['version'])) {
+          $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
+        }
+        if ($version_string && $incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
             '@module' => $requires_name . ' ' . $incompatible_version,
             '@version' => $version_string,
@@ -789,7 +793,7 @@ function _system_modules_build_row($info, $extra) {
   if (!empty($info['project'])) {
     $form['#project'] = $info['project'];
   }
-  
+
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
@@ -1042,7 +1046,7 @@ function system_modules_submit($form, &$form_state) {
     $parameter = $form_state['values']['search'];
     $form_state['redirect'] = array(
       'admin/modules',
-      array('query' => array('search' => $parameter))
+      array('query' => array('search' => $parameter)),
     );
   }
   else {
@@ -1386,7 +1390,8 @@ function system_site_information_settings_validate($form, &$form_state) {
   // Handle file uploads.
   $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
-  // Check for a new uploaded logo.
+  // Check for a new uploaded logo, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_logo_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1400,7 +1405,8 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for a new uploaded favicon.
+  // Check for a new uploaded favicon, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_favicon_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1499,6 +1505,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   if ($form_state['values']['site_logo_path']) {
@@ -1522,6 +1530,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   // If the user entered a path relative to the system files directory for
