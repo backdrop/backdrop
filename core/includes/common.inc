@@ -2889,6 +2889,10 @@ function backdrop_attributes(array $attributes = array()) {
 function l($text, $path, array $options = array()) {
   global $language_url;
 
+  // Sanitize the path to remove malicious use of javascript: and other
+  // dangerous protocols.
+  $path = backdrop_strip_dangerous_protocols((string) $path);
+
   // Build a variables array to keep the structure of the alter consistent with
   // theme_link().
   $variables = array(
