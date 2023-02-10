@@ -4972,24 +4972,25 @@ function theme_form_element_label($variables) {
 }
 
 /**
- * Sets a form element's class attribute.
+ * Sets a form element's 'class' attribute.
  *
  * Also adds 'required' and 'error' classes/attributes as needed.
  *
- * @param $element
+ * @param array $element
  *   The form element.
- * @param $name
- *   Array of new class names to be added.
+ * @param array $classes
+ *   Array of new CSS class names to be added.
  *
- * @since 1.??.? function renamed from _form_set_class() to
- *   _form_set_attributes() since we're setting non-class attributes too.
+ * @since 1.25.0 function renamed from _form_set_class() to
+ *   _form_set_attributes() since we are using it to set attributes other than
+ *   just CSS classes.
  */
-function _form_set_attributes(&$element, $class = array()) {
-  if (!empty($class)) {
+function _form_set_attributes(&$element, $classes = array()) {
+  if (!empty($classes)) {
     if (!isset($element['#attributes']['class'])) {
       $element['#attributes']['class'] = array();
     }
-    $element['#attributes']['class'] = array_merge($element['#attributes']['class'], $class);
+    $element['#attributes']['class'] = array_merge($element['#attributes']['class'], $classes);
   }
   // This function is invoked from form element theme functions, but the
   // rendered form element may not necessarily have been processed by
