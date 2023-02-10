@@ -31,7 +31,7 @@ function installer_browser_page($type) {
 
   switch($type) {
     case 'layout':
-      backdrop_set_title(t('Install layouts'));
+      backdrop_set_title(t('Install layout templates'));
       break;
     case 'module':
       backdrop_set_title(t('Install modules'));
@@ -654,7 +654,8 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
           continue;
         }
-        // The type key is required, skip over the violating module.
+        // The "type" key is required. Skip over any (sub)module not specifying
+        // it in its .info file.
         if (!isset($module->info['type'])) {
           continue;
         }
@@ -695,19 +696,25 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
             $dependencies[] = $dependency_name . ' (<span class="admin-missing">' . t('missing') . '</span>)';
           }
         }
-        if ($dependency_check) {
-          $options[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
-        }
-        else {
-          $missing[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
+        // Build the list of options, but only include (sub)modules that are not
+        // hidden. This check also helps with the rare case where the main
+        // module within a project needs to be hidden, and submodules enabled
+        // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
+        if (empty($modules[$project['name']]->info['hidden'])) {
+          if ($dependency_check) {
+            $options[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
+          else {
+            $missing[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
         }
       }
       else {
@@ -1016,11 +1023,9 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
         backdrop_set_message(t('Error: The project was not found.'), 'error');
       }
       break;
-
     case 'remove':
       installer_browser_install_queue_remove($project_name);
       break;
-
     default:
       return MENU_NOT_FOUND;
   }

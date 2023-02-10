@@ -1,15 +1,13 @@
 <?php
-
-/**
- * @addtogroup database
- * @{
- */
-
 /**
  * @file
  * Query code for MySQL embedded database engine.
  */
 
+/**
+ * @addtogroup database
+ * @{
+ */
 
 class InsertQuery_mysql extends InsertQuery {
 
