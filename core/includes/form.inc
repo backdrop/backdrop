@@ -4673,6 +4673,11 @@ function theme_form($variables) {
   if (empty($element['#attributes']['accept-charset'])) {
     $element['#attributes']['accept-charset'] = "UTF-8";
   }
+
+  // Disable client-side HTML5 validation, since it is not fully accessible.
+  // See https://github.com/backdrop/backdrop-issues/issues/5346.
+  $element['#attributes']['novalidate'] = TRUE;
+
   // Anonymous DIV to satisfy XHTML compliance.
   return '<form' . backdrop_attributes($element['#attributes']) . '><div>' . $element['#children'] . '</div></form>';
 }
