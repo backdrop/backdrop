@@ -3597,7 +3597,7 @@ function form_process_button($element, &$form_state) {
   // (e.g., a "Previous" or "Add another item" button), then also skip
   // client-side validation.
   if (isset($element['#limit_validation_errors']) && $element['#limit_validation_errors'] !== FALSE) {
-    $element['#attributes']['formnovalidate'] = 'formnovalidate';
+    $element['#attributes']['novalidate'] = 'novalidate';
   }
 
   return $element;
