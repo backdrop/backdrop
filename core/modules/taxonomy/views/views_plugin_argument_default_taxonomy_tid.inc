@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_argument_default_taxonomy_tid.

@@ -456,7 +456,10 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
     if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
       return backdrop_chmod($directory);
     }
-    return FALSE;
+    // Race conditions could lead to the directory having been created by
+    // another request. Check if the directory exists again after failing.
+    // See https://github.com/backdrop/backdrop-issues/issues/5631
+    return is_dir($directory) && is_writable($directory);
   }
   // The directory exists, so check to see if it is writable.
   $writable = is_writable($directory);
@@ -524,6 +527,9 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
  *
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
+ *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
@@ -553,6 +559,10 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php7.c>
   php_flag engine off
 </IfModule>
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+
 EOF;
 
   if ($private) {
@@ -872,9 +882,6 @@ function file_valid_uri($uri) {
  * - If the $source and $destination are equal, the behavior depends on the
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
- * - Works around a PHP 5.3 bug where copy() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1139,9 +1146,6 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
- * - Works around a PHP 5.3 bug where rename() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -2528,10 +2532,12 @@ function backdrop_dirname($uri) {
 /**
  * Gets the filename from a given path.
  *
- * PHP's basename() does not properly support streams or filenames beginning
- * with a non-US-ASCII character.
+ * Similar to PHP's basename() with the following differences:
+ *   - Any trailing slashes are automatically trimmed.
+ *   - Is not locale-aware, and works with all UTF-8 characters. Where PHP might
+ *     not process file paths with non-Latin characters unless allowed through
+ *     setlocale(), this function will remove the extensions from any string.
  *
- * @see http://bugs.php.net/bug.php?id=37738
  * @see basename()
  *
  * @ingroup php_wrappers

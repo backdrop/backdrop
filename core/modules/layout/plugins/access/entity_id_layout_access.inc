@@ -26,7 +26,7 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
     parent::form($form, $form_state);
 
     $form['entity_id'] = array(
-      '#title' => t('@entity @entity_id_key is', array(
+      '#title' => t('@entity @entity_id_key', array(
         '@entity' => $this->entity_info['label'],
         '@entity_id_key' => strtoupper($this->entity_info['entity keys']['id']),
       )),

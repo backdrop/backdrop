@@ -50,7 +50,6 @@ function dashboard_permission() {
   return array(
     'access dashboard' => array(
       'title' => t('Access Dashboard'),
-      'description' => t('Access the dashboard.'),
     ),
     'administer dashboard' => array(
       'title' => t('Administer Dashboard'),

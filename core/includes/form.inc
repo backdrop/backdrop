@@ -563,7 +563,7 @@ function form_get_cache($form_build_id, &$form_state) {
  */
 function form_set_cache($form_build_id, $form, $form_state) {
   $site_config = config('system.core');
-  
+
   // Try to read the 'form_cache_expiration' setting from settings.php. If not
   // set in settings.php, then default to the value set in 'system.core' config
   // (via system_update_1067 - setting not exposed in the admin UI currently).
@@ -1469,11 +1469,15 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       $is_empty_value = ($elements['#value'] === 0);
       $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
-        // Although discouraged, a #title is not mandatory for form elements. In
-        // case there is no #title, we cannot set a form error message.
-        // Instead of setting no #title, form constructors are encouraged to set
-        // #title_display to 'invisible' to improve accessibility.
-        if (isset($elements['#title'])) {
+        // Use a custom required message if provided.
+        if (isset($elements['#required_message'])) {
+          form_error($elements, $elements['#required_message']);
+        }
+        // A #title is not mandatory for form elements, but without it we cannot
+        // set a form error message. So when a visible title is undesirable,
+        // form constructors are encouraged to set #title anyway, and then set
+        // #title_display to 'invisible'. This improves accessibility.
+        elseif (isset($elements['#title'])) {
           form_error($elements, $t('!name field is required.', array('!name' => $elements['#title'])));
         }
         else {
@@ -1493,6 +1497,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         call_user_func_array($function, array(&$elements, &$form_state, $form_state['complete_form']));
       }
     }
+
     $elements['#validated'] = TRUE;
   }
 
@@ -2123,7 +2128,7 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
   // #access=FALSE on an element usually allow access for some users, so forms
   // submitted with backdrop_form_submit() may bypass access restriction and be
   // treated as high-privilege users instead.
-  $process_input = empty($element['#disabled']) && (($form_state['programmed'] && $form_state['programmed_bypass_access_check']) || ($form_state['process_input'] && (!isset($element['#access']) || $element['#access'])));
+  $process_input = empty($element['#disabled']) && ($element['#type'] !== 'value') && (($form_state['programmed'] && $form_state['programmed_bypass_access_check']) || ($form_state['process_input'] && (!isset($element['#access']) || $element['#access'])));
 
   // Set the element's #value property.
   if (!isset($element['#value']) && !array_key_exists('#value', $element)) {
@@ -4383,7 +4388,7 @@ function form_validate_email(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   if ($value !== '' && !valid_email_address($value)) {
-    form_error($element, t('The e-mail address %mail is not valid.', array('%mail' => $value)));
+    form_error($element, t('The email address %mail is not valid.', array('%mail' => $value)));
   }
 }
 
@@ -4583,20 +4588,22 @@ function form_validate_number(&$element, &$form_state) {
 
   $name = empty($element['#title']) ? $element['#parents'][0] : $element['#title'];
 
-  // Ensure the input is numeric.
+  // Ensure the input is numeric. Browser validation of <input type="number">
+  // should prevent this but themers could override element implementation. Same
+  // goes for min/max/step validation below.
   if (!is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $name)));
+    form_error($element, t('The value for %name must be numeric.', array('%name' => $name)));
     return;
   }
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('%name must be higher or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('The value for %name must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('%name must be below or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('The value for %name must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4605,7 +4612,13 @@ function form_validate_number(&$element, &$form_state) {
     $offset = isset($element['#min']) ? $element['#min'] : 0.0;
 
     if (!valid_number_step($value, $element['#step'], $offset)) {
-      form_error($element, t('%name is not a valid number.', array('%name' => $name)));
+      // Integer steps are the most common use case, so give a specific message.
+      if ($element['#step'] == 1 && is_numeric($offset) && $offset == round($offset)) {
+        form_error($element, t('The value for %name must be a whole number.', array('%name' => $name)));
+      }
+      else {
+        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+      }
     }
   }
 }

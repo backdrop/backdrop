@@ -54,6 +54,13 @@ class DashboardUpdateBlock extends Block {
   /**
    * {@inheritdoc}
    */
+  function checkAccess() {
+    return user_access('access site reports');
+  }
+  
+  /**
+   * {@inheritdoc}
+   */
   function getContent() {
     $panel = array(
       '#theme' => 'dashboard_panel__update',
@@ -223,7 +230,7 @@ class DashboardUpdateBlock extends Block {
         'core' => t('Backdrop core'),
         'module' => t('Modules'),
         'theme' => t('Themes'),
-        'layout' => t('Layouts'),
+        'layout' => t('Layout templates'),
       ),
       '#default_value' => $this->settings['project_types'],
     );
