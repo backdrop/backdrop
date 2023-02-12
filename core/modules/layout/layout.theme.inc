@@ -530,9 +530,10 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes'] = array(
-    'class' => $title_classes,
-  );
+  $variables['title_attributes'] = array();
+  if (!empty($title_classes)) {
+    $variables['title_attributes']['class'] = $title_classes;
+  }
 
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
@@ -541,7 +542,8 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes'] = array(
-    'class' => $content_classes,
-  );
+  $variables['content_attributes'] = array();
+  if (!empty($content_classes)) {
+    $variables['content_attributes']['class'] = $content_classes;
+  }
 }

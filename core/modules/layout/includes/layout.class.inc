@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Class for loading, modifying, and executing a layout.
@@ -788,6 +787,11 @@ class Layout {
    * @return LayoutContext[]
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
+    $contexts_cache = &backdrop_static(__METHOD__, array());
+    if (isset($contexts_cache[$this->name])) {
+      return $this->getContextsByType($contexts_cache[$this->name], $include_types);
+    }
+
     // Initialize a list of contexts if not defined.
     if (is_null($this->contexts)) {
       $this->contexts = array();
@@ -805,12 +809,14 @@ class Layout {
       }
     }
 
-    // Load contexts from paths and menu items.
-    if ($this->menu_item) {
-      $this->contexts += $this->menu_item->getContexts();
-    }
-    elseif ($this->path) {
-      $this->contexts += layout_context_required_by_path($this->path);
+    // Load contexts from paths or menu items if available.
+    if ($this->menu_item || $this->path) {
+      if ($this->menu_item) {
+        $this->contexts += $this->menu_item->getContexts();
+      }
+      else {
+        $this->contexts += layout_context_required_by_path($this->path);
+      }
     }
 
     // Load contexts from relationships.
@@ -831,14 +837,29 @@ class Layout {
       ));
     }
 
+    $contexts_cache[$this->name] = $this->contexts;
+
+    return $this->getContextsByType($this->contexts, $include_types);
+  }
+
+  /**
+   * Return an array of contexts filtered by types specified.
+   *
+   * @param array $contexts
+   *   The array of contexts to be filtered.
+   * @var int $include_types
+   *   Include a specific list of contexts based on how they are used.
+   * @return LayoutContext[]
+   */
+  private function getContextsByType($contexts, $include_types = LayoutContext::USAGE_TYPE_ALL) {
     // Return all contexts if requested.
     if ($include_types === LayoutContext::USAGE_TYPE_ALL) {
-      return $this->contexts;
+      return $contexts;
     }
 
     // Otherwise filter down the list of contexts to only those requested.
     $return_contexts = array();
-    foreach ($this->contexts as $key => $context) {
+    foreach ($contexts as $key => $context) {
       if ($context->usageType & $include_types) {
         $return_contexts[$key] = $context;
       }
@@ -859,6 +880,7 @@ class Layout {
    */
   function clearContexts($key) {
     unset($this->contexts[$key]);
+    backdrop_static_reset('Layout::getContexts');
   }
 
   /**

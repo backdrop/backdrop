@@ -440,7 +440,7 @@ function _date_field_widget_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('If using simple inputs such a a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#description' => t('If using simple inputs such as a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
   );
 
   $context = array(
@@ -448,6 +448,76 @@ function _date_field_widget_settings_form($field, $instance) {
     'instance' => $instance,
   );
   backdrop_alter('date_field_widget_settings_form', $form, $context);
+
+  return $form;
+}
+
+/**
+ * Custom callback to provide the HTML5 widget settings form.
+ *
+ * @param array $instance
+ *   Field instance definition.
+ *
+ * @return array
+ *   Widget settings form structure.
+ */
+function _date_html5_field_widget_settings_form(array $instance) {
+  $settings = $instance['widget']['settings'];
+  $form = array();
+
+  $form['limits'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Date input limits'),
+    '#description' => t('Applies to start and end if enabled and is relative to the current date.'),
+    '#weight' => -2,
+  );
+  $form['limits']['mode'] = array(
+    '#type' => 'radios',
+    '#title' => t('Limits'),
+    '#options' => array(
+      'none' => t('No limit'),
+      'byyear' => t('By year'),
+    ),
+    '#default_value' => $settings['limits']['mode'],
+  );
+  $form['limits']['years_back'] = array(
+    '#type' => 'number',
+    '#title' => t('Starting year'),
+    '#min' => -9999,
+    '#max' => 0,
+    '#default_value' => $settings['limits']['years_back'],
+    '#description' => t('Empty value for no limit.'),
+    '#field_suffix' => t('from current year'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[widget][settings][limits][mode]"]' => array('value' => 'byyear'),
+      ),
+    ),
+  );
+  $form['limits']['years_forward'] = array(
+    '#type' => 'number',
+    '#title' => t('Ending year'),
+    '#min' => 0,
+    '#max' => 9999,
+    '#default_value' => $settings['limits']['years_forward'],
+    '#description' => t('Empty value for no limit.'),
+    '#field_suffix' => t('from current year'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[widget][settings][limits][mode]"]' => array('value' => 'byyear'),
+      ),
+    ),
+  );
+
+  $form['no_fieldset'] = array(
+    '#type' => 'checkbox',
+    '#title'  => t('Exclude wrapping fieldset'),
+    '#default_value' => !empty($settings['no_fieldset']),
+    '#description' => t('If using simple inputs such as a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#weight' => -1,
+  );
+
+  backdrop_alter('date_html5_field_widget_settings_form', $form, $context);
 
   return $form;
 }
