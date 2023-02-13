@@ -198,13 +198,13 @@ function file_add_form_validate($form, &$form_state) {
  *
  * Only filetypes for which the user has access to create entities are returned.
  *
- * @param array $file
+ * @param File $file
  *   An upload file array from form_state.
  *
  * @return array
  *   An array of file type bundles that support the file's mime type.
  */
-function file_get_filetype_candidates($file, $selected_files = array()) {
+function file_get_filetype_candidates(File $file, $selected_files = array()) {
   $types = module_invoke_all('file_type', $file);
   backdrop_alter('file_type', $types, $file);
 
@@ -437,12 +437,9 @@ function file_download_page($file) {
   if (!is_file($file->uri)) {
     return MENU_NOT_FOUND;
   }
-  // @todo Remove this once backdrop_basename is fixed for PHP versions greater
-  //  than '5.3.29'.
-  $basename_function = version_compare(PHP_VERSION,'5.3.29','>') ? 'basename' : 'backdrop_basename';
   $headers = array(
     'Content-Type' => mime_header_encode($file->filemime),
-    'Content-Disposition' => 'attachment; filename="' . mime_header_encode($basename_function($file->uri)) . '"',
+    'Content-Disposition' => 'attachment; filename="' . mime_header_encode(basename($file->uri)) . '"',
     'Content-Length' => $file->filesize,
     'Content-Transfer-Encoding' => 'binary',
     'Pragma' => 'no-cache',
@@ -1023,16 +1020,7 @@ function file_usage_page($file) {
 
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
-          // Unlike Node or Term entities File entities have a stream wrapper
-          // to the file set as their path, but the path to the entities' page
-          // is "path/[fid]".
-          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
-          if ($entity_type == 'file') {
-            $uri = 'file/' . $entity_id;
-          }
-          else {
-            $uri = $entity_uri['path'];
-          }
+          $uri = $entity_uri['path'];
           $entity_label = l($label, $uri);
         }
         else {

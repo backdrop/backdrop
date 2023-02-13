@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Basis' theme implementation for comments.
@@ -18,6 +17,7 @@
  *   desired parameters on the $comment->changed variable.
  * - $new: New comment marker.
  * - $permalink: Comment permalink.
+ * - $permalink_path: Available to build your own permalink.
  * - $submitted: Submission information created from $author and $created during
  *   template_preprocess_comment().
  * - $picture: Authors picture.
@@ -25,12 +25,18 @@
  * - $status: Comment status. Possible values are:
  *   comment-unpublished, comment-published or comment-preview.
  * - $title: Linked title.
+ * - $title_display: Should the title be displayed (TRUE or FALSE).
+ * - $title_classes: Specific classes for the title. Default is:
+ *   - comment-title: Title of the specific comment.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
  *   - comment: The current template type, i.e., "theme hook".
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
+ *   - comment-title-hidden: Comment titles should be hidden.
+ *   - comment-title-auto: Comment titles are automatically generated.
+ *   - commet-title-custom: Comment titles are custom for each comment.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
@@ -66,14 +72,19 @@
 
   <div class="comment-text">
 
-    <div class="comment-title">
-      <?php print render($title_prefix); ?>
-      <h3><?php print $title; ?></h3>
-      <?php print render($title_suffix); ?>
+    <div class="<?php print implode(' ', $title_classes); ?>">
+      <?php if ($title_display): ?>
+        <?php print render($title_prefix); ?>
+        <h3><?php print $title; ?></h3>
+        <?php print render($title_suffix); ?>
+      <?php endif; ?>
       <?php if ($new): ?>
         <span class="marker"><?php print $new; ?></span>
       <?php endif; ?>
       <span class="comment-time"><?php print $created; ?></span>
+      <?php if (!$title_display):  ?>
+        <a class="comment-permalink" href="/<?php print $permalink_path; ?>"></a>
+      <?php endif; ?>
     </div>
 
     <div class="content"<?php print backdrop_attributes($content_attributes); ?>>

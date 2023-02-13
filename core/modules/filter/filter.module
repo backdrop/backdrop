@@ -636,6 +636,7 @@ function filter_permission() {
     'title' => t('Administer text formats and filters'),
     'description' => t('Define how text is handled by combining filters into <a href="@url">text formats</a>.', array('@url' => url('admin/config/content/formats'))),
     'restrict access' => TRUE,
+    'warning' => t('Permit any HTML tag in content (e.g.: <code>&lt;script&gt;</code>) and/or allow file uploads of any filetype via CKEditor.'),
   );
 
   $perms['upload editor images'] = array(
@@ -2177,7 +2178,7 @@ function _filter_url_js_settings($filter, $format) {
  *
  * This filter identifies and makes clickable three types of "links".
  * - URLs like http://example.com.
- * - E-mail addresses like name@example.com.
+ * - email addresses like name@example.com.
  * - Web addresses without the "http://" protocol defined, like www.example.com.
  * Each type must be processed separately, as there is no one regular
  * expression that could possibly match all of the cases in one pass.
@@ -2227,7 +2228,7 @@ function _filter_url($text, $filter) {
   $pattern = "`((?:$protocols)(?:$url_pattern))($punctuation)`";
   $tasks['_filter_url_parse_full_links'] = $pattern;
 
-  // Match e-mail addresses.
+  // Match email addresses.
   $url_pattern = "[A-Za-z0-9._+-]{1,254}@(?:$domain)";
   $pattern = "`($url_pattern)`";
   $tasks['_filter_url_parse_email_links'] = $pattern;
@@ -2322,7 +2323,7 @@ function _filter_url_parse_full_links($match) {
 }
 
 /**
- * Makes links out of e-mail addresses.
+ * Makes links out of email addresses.
  *
  * Callback for preg_replace_callback() within _filter_url().
  */
@@ -2416,7 +2417,7 @@ function _filter_url_trim($text, $length = NULL) {
  * @see filter_filter_info()
  */
 function _filter_url_tips($filter, $format, $long = FALSE) {
-  return t("Web page addresses and e-mail addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
+  return t("Web page addresses and email addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
 }
 
 /**

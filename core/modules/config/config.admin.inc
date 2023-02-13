@@ -19,7 +19,7 @@ function config_sync_form(array $form, array &$form_state) {
 
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://api.backdropcms.org/documentation/working-with-configuration'))),
+    '#markup' => t('This form allows you to synchronize configuration between sites, such as in development, staging, and production servers. This page shows you the current differences between your current configuration and changes that have been staged for deployment.') . '</p></p>' . t('When the configuration files are in version control, it may be preferable to not empty the staging directory after each sync. The <code>config_sync_clear_staging</code> setting can be disabled in <code>settings.php</code>. Read more about <a href="!url" target="_blank">managing configuration</a>.', array('!url' => url('https://docs.backdropcms.org/documentation/working-with-configuration'))),
   );
 
   if ($changed_config_count === 0) {
@@ -309,8 +309,17 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   $default_type = isset($form_state['values']['config_group']) ? $form_state['values']['config_group'] : $config_group;
   $config_names = array();
   if ($default_type) {
-    $config_names = $form_state['config_groups'][$default_type];
-    natsort($config_names);
+    // Prevent fatal errors if the key is not available in the select list.
+    if (isset($form_state['config_groups'][$default_type])) {
+      $config_names = $form_state['config_groups'][$default_type];
+      natsort($config_names);
+    }
+    else {
+      $config_names = array();
+      backdrop_set_message(t('Configuration group %type not available.', array(
+        '%type' => $default_type,
+      )), 'warning');
+    }
   }
   $form['config_name'] = array(
     '#title' => t('Configuration name'),
