@@ -474,10 +474,10 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
      $this->assertEqual($text, '', 'check_plain() casts null to string');
      $text = check_plain(FALSE);
      $this->assertEqual($text, '', 'check_plain() casts boolean to string');
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
+     // Ignore invalid multibyte sequence warning.
      $text = @check_plain("Foo\xC0barbaz");
      $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
+     // Ignore invalid multibyte sequence warning.
      $text = @check_plain("\xc2\"");
      $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
      $text = check_plain("Fooÿñ");

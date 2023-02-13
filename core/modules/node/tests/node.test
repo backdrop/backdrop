@@ -2412,12 +2412,13 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
 
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
   }
 
   /**
-   * Tests the recent comments block.
+   * Tests the recent content block.
    */
   function testRecentNodeBlock() {
     $this->backdropLogin($this->admin_user);
