@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Implements hook_admin_bar_map() on behalf of core modules.

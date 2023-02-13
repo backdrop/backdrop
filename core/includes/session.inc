@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User session handling functions.

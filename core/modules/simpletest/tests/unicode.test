@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Various unicode handling tests.

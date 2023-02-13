@@ -269,12 +269,13 @@ function hook_element_info_alter(&$type) {
  * the browser.
  *
  * This hook by default is not called on pages served by the default page cache,
- * but can be enabled through the $settings['invoke_page_cache_hooks'] option in
+ * but can be enabled through the $settings['page_cache_invoke_hook'] option in
  * settings.php.
  *
  * @param $destination
- *   If this hook is invoked as part of a backdrop_goto() call, then this argument
- *   will be a fully-qualified URL that is the destination of the redirect.
+ *   If this hook is invoked as part of a backdrop_goto() call, then this
+ *   argument will be a fully-qualified URL that is the destination of the
+ *   redirect.
  */
 function hook_exit($destination = NULL) {
   db_update('counter')
@@ -1347,7 +1348,7 @@ function hook_forms($form_id, $args) {
  * hook_init() instead. In hook_boot(), only the most basic APIs are available
  * and not all modules have been loaded. This hook by default is not called on
  * pages served by the default page cache, but can be enabled through the
- * $settings['invoke_page_cache_hooks'] option in settings.php.
+ * $settings['page_cache_invoke_hook'] option in settings.php.
  *
  * @see hook_init()
  */
@@ -2634,10 +2635,15 @@ function hook_schema() {
 /**
  * Perform alterations to existing database schemas.
  *
- * When a module modifies the database structure of another module (by
- * changing, adding or removing fields, keys or indexes), it should
- * implement hook_schema_alter() to update the default $schema to take its
- * changes into account.
+ * When a module modifies the database structure of another module (by changing,
+ * adding or removing fields, keys or indexes), it should implement
+ * hook_schema_alter() to update the default $schema to take its changes into
+ * account.
+ *
+ * Note that when a module is installed, schema alterations are not applied (see
+ * backdrop_install_schema()), so it should also implement hook_install() (and
+ * possibly hook_uninstall()) to perform the alterations there. See
+ * comment.install for an example.
  *
  * See hook_schema() for details on the schema definition structure.
  *
@@ -3122,7 +3128,7 @@ function hook_disable() {
  * or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
- * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
+ * @link https://docs.backdropcms.org/php-standards Backdrop Coding Standards @endlink
  *
  * The contents of this hook are not cached. Because of this, absolutely no
  * logic should be included in this hook. Do not do any database queries or
