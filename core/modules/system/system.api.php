@@ -1588,7 +1588,7 @@ function hook_system_info_alter(&$info, $file, $type) {
  */
 function hook_permission() {
   return array(
-    'configure my module' =>  array(
+    'configure my module' => array(
       'title' => t('Configure my module'),
       'description' => t('Configure settings for my module.'),
     ),
@@ -2938,7 +2938,6 @@ function hook_update_N(&$sandbox) {
 
   // However, for more complex operations that may take a long time, you may
   // hook into Batch API as in the following example.
-
   // Update 3 users at a time to have an exclamation point after their names.
   // (They're really happy that we can do batch API in this hook!)
   if (!isset($sandbox['progress'])) {
