@@ -2003,8 +2003,6 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#type' => 'item',
     // Reset #parents to 'field', so the additional container does not appear.
     '#parents' => array('field'),
-    '#field_prefix' => '<div class="container-inline">',
-    '#field_suffix' => '</div>',
     '#title' => t('Number of values'),
   );
 
@@ -2015,6 +2013,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
       FIELD_CARDINALITY_UNLIMITED => t('Unlimited'),
     ),
     '#default_value' => ($cardinality == FIELD_CARDINALITY_UNLIMITED) ? FIELD_CARDINALITY_UNLIMITED : 'number',
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
   $form['field']['cardinality_container']['cardinality_number'] = array(
     '#type' => 'number',
@@ -2028,6 +2027,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
         ':input[name="field[cardinality]"]' => array('value' => 'number'),
       ),
     ),
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
   $description = t('Maximum number of values users can enter for this field.');
   if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {

@@ -97,8 +97,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum image dimensions'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.1,
-    '#field_prefix' => '<div class="container-inline">',
-    '#field_suffix' => '</div>',
     '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
@@ -109,6 +107,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
   $form['max_dimensions']['y'] = array(
     '#type' => 'number',
@@ -118,6 +117,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
 
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
@@ -128,8 +128,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Minimum image dimensions'),
     '#element_validate' => array('_image_field_resolution_validate'),
     '#weight' => 4.2,
-    '#field_prefix' => '<div class="container-inline">',
-    '#field_suffix' => '</div>',
     '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
@@ -140,6 +138,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
   $form['min_dimensions']['y'] = array(
     '#type' => 'number',
@@ -149,6 +148,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
 
   // Remove the description option.

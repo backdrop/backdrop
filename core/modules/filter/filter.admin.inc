@@ -875,8 +875,6 @@ function filter_editor_image_upload_settings_form($format) {
   $form['max_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum dimensions'),
-    '#field_prefix' => '<div class="container-inline clearfix">',
-    '#field_suffix' => '</div>',
     '#description' => t('Images larger than these dimensions will be scaled down.'),
     '#states' => $show_if_image_uploads_enabled,
   );
@@ -892,6 +890,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#placeholder' => 'width',
     '#field_suffix' => ' x ',
     '#states' => $show_if_image_uploads_enabled,
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
   $form['max_dimensions']['height'] = array(
     '#title' => t('Height'),
@@ -905,6 +904,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#placeholder' => 'height',
     '#field_suffix' => 'pixels',
     '#states' => $show_if_image_uploads_enabled,
+    '#wrapper_attributes' => array('class' => array('item-inline')),
   );
 
   return $form;
