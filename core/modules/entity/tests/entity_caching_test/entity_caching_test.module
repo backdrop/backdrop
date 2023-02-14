@@ -1,0 +1,80 @@
+<?php
+/**
+ * @file
+ * Test module for the entity API providing an entity type for testing.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function entity_caching_test_entity_info() {
+  $return = array(
+    'test_cacheable' => array(
+      'label' => t('Test cacheable entity'),
+      'entity class' => 'TestCacheable',
+      'controller class' => 'EntityDatabaseStorageController',
+      'base table' => 'test_cacheable',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+      ),
+    ),
+    'test_disable_cache' => array(
+      'label' => t('Test disabled cache entity'),
+      'entity class' => 'TestCacheable',
+      'controller class' => 'EntityDatabaseStorageController',
+      'base table' => 'test_disable_cache',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+      ),
+    ),
+    'test_multibundle' => array(
+      'label' => t('Test multiple bundle entity'),
+      'entity class' => 'TestMultiBundle',
+      'controller class' => 'EntityDatabaseStorageController',
+      'base table' => 'test_multibundle',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+        'bundle' => 'type',
+      ),
+      'bundles' => array(
+        'docache' => array(
+          'label' => 'Do Cache',
+        ),
+        'nocache' => array(
+          'label' => 'No Cache',
+        ),
+      ),
+    ),
+  );
+  return $return;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function entity_caching_test_entity_info_alter(&$entity_info) {
+  // Enable caching on the 'test_disable_cache' entity at the entity level.
+  $entity_info['test_cacheable']['entity cache'] = TRUE;
+
+  // Disable caching on the 'test_disable_cache' entity at the entity level.
+  $entity_info['test_disable_cache']['entity cache'] = FALSE;
+
+  // Enable caching on the 'test_multibundle' entity at the entity level, but
+  // disable caching on one of the bundles  at the bundle level.
+  $entity_info['test_multibundle']['entity cache'] = TRUE;
+  $entity_info['test_multibundle']['bundles']['nocache']['bundle cache'] = FALSE;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function entity_caching_test_autoload_info() {
+  return array(
+    'TestCacheable' => 'test_cacheable.entity.inc',
+    'TestDisableCache' => 'test_disable_cache.entity.inc',
+    'TestMultiBundle' => 'test_multibundle.entity.inc',
+  );
+}

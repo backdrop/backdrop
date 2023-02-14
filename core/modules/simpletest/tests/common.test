@@ -469,10 +469,15 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
    * Check that invalid multi-byte sequences are rejected.
    */
   function testInvalidMultiByte() {
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
+     // Ignore PHP 8.0+ null deprecatations.
+     $text = check_plain(NULL);
+     $this->assertEqual($text, '', 'check_plain() casts null to string');
+     $text = check_plain(FALSE);
+     $this->assertEqual($text, '', 'check_plain() casts boolean to string');
+     // Ignore invalid multibyte sequence warning.
      $text = @check_plain("Foo\xC0barbaz");
      $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
+     // Ignore invalid multibyte sequence warning.
      $text = @check_plain("\xc2\"");
      $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
      $text = check_plain("Fooÿñ");
@@ -876,6 +881,30 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test CSS Styles with attributes rendering.
+   */
+  function testRenderStylesAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_css', 0);
+
+    // Add internal and external CSS files that add custom attributes, and
+    // check that these attributes appear on the <link> tags.
+    $css_internal = 'core/misc/print.css';
+    $css_external = 'http://example.com/styles.css';
+    backdrop_add_css($css_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_css($css_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'type' => 'external',
+    ));
+    $css = backdrop_get_css();
+    $this->backdropSetContent($css);
+    $this->assertTrue($this->xpath('//link[starts-with(@href, "' . file_create_url($css_internal) . '") and @custom="foo"]'), 'Rendered internal CSS with correct custom attribute.');
+    $this->assertTrue($this->xpath('//link[@href="' . $css_external . '" and @custom="foo"]'), 'Rendered external CSS with correct custom attribute.');
+  }
+
+  /**
    * Tests that the query string remains intact when adding CSS files that have
    * query string parameters.
    */
@@ -1008,9 +1037,16 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertEqual($unable_to_parse->code, -1001, 'Returned with "-1001" error code.');
     $this->assertEqual($unable_to_parse->error, 'unable to parse URL', 'Returned with "unable to parse URL" error message.');
 
-    // Fetch page.
-    $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
+    // Fetch page, and check that the data parameter works with both array and
+    // string.
+    $data_array = array($this->randomName() => $this->randomString() . ' "\'');
+    $data_string = backdrop_http_build_query($data_array);
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_array));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using an array.');
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_string));
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using a string.');
+
     $this->backdropSetContent($result->data);
     $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
@@ -1106,7 +1142,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     );
     language_save($language);
 
-    // Request front page in French and check for matching Content-language.
+    // Request home page in French and check for matching Content-language.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE, 'language' => $language)));
     $this->assertEqual($request->headers['content-language'], 'fr', t('Content-Language HTTP header is French.'));
   }
@@ -1300,8 +1336,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Test adding settings.
    */
   function testAddSetting() {
-    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'dries' => 280342800), 'setting');
-    $this->assertEqual(280342800, $javascript['settings']['data'][2]['dries'], 'JavaScript setting is set correctly.');
+    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'v1.0.0' => 1421394600), 'setting');
+    $this->assertEqual(1421394600, $javascript['settings']['data'][2]['v1.0.0'], 'JavaScript setting is set correctly.');
     $this->assertEqual('rocks', $javascript['settings']['data'][2]['backdrop'], 'The other JavaScript setting is set correctly.');
   }
 
@@ -2366,13 +2402,21 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
 
     // Valid float steps.
     $this->assertTrue(valid_number_step(42, 10.5));
-    $this->assertTrue(valid_number_step(1, 1/3));
-    $this->assertTrue(valid_number_step(-100, 100/7));
     $this->assertTrue(valid_number_step(1000, -10));
 
     // Valid and very small float steps.
     $this->assertTrue(valid_number_step(1000.12345, 1e-10));
+    $this->assertTrue(valid_number_step(1936.5, 3e-8));
     $this->assertTrue(valid_number_step(3.9999999999999, 1e-13));
+
+    // Valid and confirmed to fail with the former approach.
+    $this->assertTrue(valid_number_step(20.123456789, 1.0E-10));
+    $this->assertTrue(valid_number_step(9999.1933172003, 1.0E-10));
+    $this->assertTrue(valid_number_step(199.200001, 1.0E-10));
+    $this->assertTrue(valid_number_step(1109.87, 1.0E-10));
+    $this->assertTrue(valid_number_step(41239412.55, 1.0E-2));
+    $this->assertTrue(valid_number_step(13517282.20, 1.0E-2));
+    $this->assertTrue(valid_number_step(12345678.12, 1.0E-2));
 
     // Invalid integer steps.
     $this->assertFalse(valid_number_step(100, 30));
@@ -2381,10 +2425,14 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     // Invalid float steps.
     $this->assertFalse(valid_number_step(6, 5/7));
     $this->assertFalse(valid_number_step(10.3, 10.25));
+    $this->assertFalse(valid_number_step(1, 1/3));
+    $this->assertFalse(valid_number_step(-100, 100/7));
 
     // Step mismatches very close to beeing valid.
     $this->assertFalse(valid_number_step(70 + 9e-7, 10 + 9e-7));
-    $this->assertFalse(valid_number_step(1936.5, 3e-8));
+    $this->assertFalse(valid_number_step(1109.87, 0.07));
+    $this->assertFalse(valid_number_step(41239412.11, 2));
+    $this->assertFalse(valid_number_step(13517283.0001, 3));
   }
 
   /**
@@ -2394,14 +2442,13 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     // Try obvious fits.
     $this->assertTrue(valid_number_step(11.3, 10.3, 1));
     $this->assertTrue(valid_number_step(100, 10, 50));
-    $this->assertTrue(valid_number_step(-100, 90/7, -10));
-    $this->assertTrue(valid_number_step(2/7 + 5/9, 1/7, 5/9));
 
     // Ensure a small offset is still invalid.
     $this->assertFalse(valid_number_step(10.3, 10.3, 0.0001));
     $this->assertFalse(valid_number_step(1/5, 1/7, 1/11));
 
     // Try negative values and offsets.
+    $this->assertFalse(valid_number_step(-100, 90/7, -10));
     $this->assertFalse(valid_number_step(1000, 10, -5));
     $this->assertFalse(valid_number_step(-10, 4, 0));
     $this->assertFalse(valid_number_step(-10, 4, -4));
@@ -2564,8 +2611,8 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
     $this->assertEqual(count($this->collectedErrors), 3, 'Three errors were collected');
 
     if (count($this->collectedErrors) == 3) {
-      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Undefined variable: bananas');
-      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', 'Division by zero');
+      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Object of class stdClass could not be converted to int');
+      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', \PHP_VERSION_ID < 80000 ? 'Invalid argument supplied for foreach()' : 'foreach() argument must be of type array|object, string given');
       $this->assertError($this->collectedErrors[2], 'User warning', 'error_test_generate_warnings()', 'error_test.module', 'Backdrop is awesome');
     }
     else {
@@ -2740,6 +2787,10 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
     $this->assertText(t('Date format updated.'));
 
+    // Reset the statically cached date formats so that these calls to
+    // format_date() will pick up the newly created date formats from config.
+    backdrop_static_reset('system_get_date_formats');
+
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');
     $this->assertIdentical(format_date($timestamp, 'example_style_uppercase', '', 'America/Los_Angeles'), '9 Mar 2007', 'Test format_date() using an admin-defined date type with different case.');
@@ -2767,6 +2818,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => self::LANGCODE,
       'name' => self::LANGCODE,
+      'native' => self::LANGCODE,
       'direction' => LANGUAGE_LTR,
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -2792,7 +2844,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     date_default_timezone_set(backdrop_get_user_timezone());
 
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'America/Los_Angeles', 'en'), 'Sunday, 25-Mar-07 17:00:00 PDT', 'Test a different language.');
-    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
+    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London', 'en'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T'), 'domingo, 25-Mar-07 17:00:00 PDT', 'Test custom date format.');
     $this->assertIdentical(format_date($timestamp, 'long'), 'domingo, 25. marzo 2007 - 17:00', 'Test long date format.');
     $this->assertIdentical(format_date($timestamp, 'medium'), '25. marzo 2007 - 17:00', 'Test medium date format.');
@@ -3368,6 +3420,50 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
   }
 
+}
+
+/**
+ * Test for block_interest_cohort.
+ */
+class BlockInterestCohortTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('common_test');
+  }
+
+  /**
+   * Tests that FLoC is blocked by default.
+   */
+  function testDefaultBlocking() {
+    $this->backdropGet('node');
+    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=()', 'FLoC is blocked by default.');
+  }
+
+  /**
+   * Tests that an existing interest-cohort policy is not overwritten.
+   */
+  function testExistingInterestCohortPolicy() {
+    $this->backdropGet('common-test/existing_interest_cohort_policy');
+    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=*', 'Existing interest-cohort policy is not overwritten.');
+  }
+
+  /**
+   * Tests that an existing header is appended to correctly.
+   */
+  function testExistingPolicyHeader() {
+    $this->backdropGet('common-test/existing_permissions_policy_header');
+    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=(),interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
+  }
+
+  /**
+   * Tests that FLoC blocking can be disabled.
+   */
+  function testDisableBlocking() {
+    config_set('system.core', 'block_interest_cohort', FALSE);
+    $this->backdropGet('node');
+    $this->assertFalse($this->backdropGetHeader('Permissions-Policy'), 'FLoC blocking can be disabled.');
+  }
 }
 
 /**

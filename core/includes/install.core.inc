@@ -1585,10 +1585,11 @@ function install_import_translations(&$install_state) {
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
-    // our best guess. The user will be able to edit afterwards.
+    // our best guess. If required, this can be edited post-installation.
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);
@@ -1711,7 +1712,13 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $profile = backdrop_install_profile_distribution_name();
+  $message = st('Thank you for installing @profile!', array('@profile' => $profile));
+
+  // Confirming that the Dashboard module is enabled. 
+  if (module_exists('dashboard')) {
+    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
+  }
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
@@ -1854,7 +1861,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
 
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => st('E-mail address'),
+    '#title' => st('Email address'),
     '#required' => TRUE,
     '#weight' => -5,
   );
@@ -1898,7 +1905,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#type' => 'checkboxes',
     '#options' => array(
       1 => st('Check for updates automatically'),
-      2 => st('Receive e-mail notifications'),
+      2 => st('Receive email notifications'),
     ),
     '#default_value' => array(1, 2),
     '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),
@@ -1940,14 +1947,26 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
+  $timezone = $form_state['values']['date_default_timezone'];
+  $timezone_country = _install_get_timezone_country($timezone);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->set('default_timezone', $timezone)
+    ->set('default_country', $timezone_country)
     ->save();
+
+  // Update the default date/time formats for different regions.
+  if ($timezone_country == 'US') {
+    config('system.date')
+      ->set('formats.long.pattern', 'l, F j, Y - g:ia')
+      ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
+      ->set('formats.short.pattern', 'm/d/Y - g:ia')
+      ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
@@ -1966,7 +1985,7 @@ function install_configure_form_submit($form, &$form_state) {
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();
   $account->status = 1;
-  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->timezone = $timezone;
   $account->pass = $form_state['values']['account']['pass'];
   $account->name = $form_state['values']['account']['name'];
   $account->save();
