@@ -305,7 +305,7 @@ function update_info_page() {
   $db_name = $databases['default']['default']['database'];
 
   // Get the config path
-  $config_dir = config_get_config_directory('active');
+  $config_dir = backdrop_dirname(config_get_config_directory('active'));
 
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
