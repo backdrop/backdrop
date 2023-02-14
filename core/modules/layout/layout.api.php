@@ -545,6 +545,8 @@ function hook_block_info_alter(&$blocks) {
  *
  * @see hook_block_info()
  * @see hook_block_save()
+ *
+ * @since 1.0.6 $settings parameter added.
  */
 function hook_block_configure($delta = '', $settings = array()) {
   // This example comes from node.module.
