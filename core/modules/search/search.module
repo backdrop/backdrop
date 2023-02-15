@@ -1424,18 +1424,35 @@ function search_config_info() {
 }
 
 /** 
- * Gets stats for total and remaining items to be indexed.
- * 
+ * Gets stats for total, indexed, and left to be indexed items.
+ *
+ * Also includes text that is reused in the admin UI wherever stats need to be
+ * displayed. Having the text in this function reduces the instances of strings
+ * that need to be translated. Although percentage and indexed can be deducted
+ * from the amounts of total and remaining items, explicitly providing them here
+ * reduces the amount of code required to do the math each time.
+ *
  * @param array $modules
- *  An array of module names whose index stats we are getting.
- * 
+ *   An array of module names whose index stats we are getting.
+ *
  * @return array
- *  An array with the following keys:
- *  - remaining: The number of remaining items to be indexed.
- *  - total: The total number of indexable items. 
+ *   An array with the following keys:
+ *   - total: (int) The total number of indexable items.
+ *   - indexed: (int) The number of already indexed items.
+ *   - remaining: (int) The number of remaining items to be indexed.
+ *   - percentage: (int) The percentage of indexed items.
+ *   - count: (string) Textual status of how many items are left to index.
+ *   - status: (string) Textual status of how many items have been indexed.
+ *
+ * @see search_admin_settings()
+ * @see search_reindex_confirm()
+ * @see search_reindex_confirm_submit()
+ *
+ * @since 1.24.1 'indexed', 'percentage', 'count', 'status' added to the keys
+ *   of the returned array.
  */
 function search_get_stats($modules = array()) {
-  if (empty($module)) {
+  if (empty($modules)) {
     $modules = config_get('search.settings', 'search_active_modules');
   }
   $remaining = 0;
@@ -1446,10 +1463,21 @@ function search_get_stats($modules = array()) {
       $total += $status['total'];
     }
   }
+  $indexed = $total - $remaining;
+
+  // Translatable string reused in various places in the admin UI.
+  $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
+  $percentage = ((int)min(100, 100 * ($indexed) / max(1, $total)));
+  // $status = t('%percentage% of the site has been indexed.', array('%percentage' => $percentage));
+  $status = t('@indexed of @total items indexed', array('@indexed' => $indexed, '@total' => $total));
 
   return array(
-    'remaining' => $remaining,
     'total' => $total,
+    'indexed' => $indexed,
+    'remaining' => $remaining,
+    'percentage' => $percentage,
+    'count' => $count,
+    'status' => $status,
   );
 }
 
@@ -1483,21 +1511,18 @@ function search_reindex_batch($passes_needed, $search_active_modules, &$context)
  * @see search_reindex_batch()
  */
 function search_reindex_batch_finished($success, $results, $operations) {
+  // Remove any lingering messages from search_reindex_confirm_submit().
+  backdrop_get_messages();
+
   if ($success) {
-    $config = config('search.settings');
-    // Collect some stats
-    $remaining = 0;
-    $total = 0;
-    foreach ($config->get('search_active_modules') as $module) {
-      if ($status = module_invoke($module, 'search_status')) {
-        $remaining += $status['remaining'];
-        $total += $status['total'];
-      }
+    $stats = search_get_stats();
+    if ($stats['remaining'] == 0) {
+      backdrop_set_message(t('Indexing complete. The site is now fully indexed.'));
     }
-    $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
-    $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
-    $message = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
-    backdrop_set_message($message);
+    else {
+      backdrop_set_message($stats['status']);
+      backdrop_set_message($stats['count'], 'warning');
+    }
   }
   else {
     // An error occurred.

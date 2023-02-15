@@ -1501,6 +1501,7 @@ input.form-button-disabled:active,
   background: #ededed;
   border-color: #bbb;
   color: #717171;
+  cursor: not-allowed;
 }
 .form-disabled .grippie {
   background-color: #ededed;

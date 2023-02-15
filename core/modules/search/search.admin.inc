@@ -8,20 +8,30 @@
  * Menu callback: confirm rebuilding of the index.
  */
 function search_reindex_confirm() {
-
   $index_stats = search_get_stats();
+  $total = $index_stats['total'];
+  $remaining = $index_stats['remaining'];
+  $indexed = $index_stats['indexed'];
+  $percentage = $index_stats['percentage'];
+
+  // Make the $index_stats array available in search_reindex_confirm_submit().
+  $form['index_stats'] = array(
+    '#type' => 'value',
+    '#value' => $index_stats,
+  );
 
   $form['#attributes'] = array(
     'class' => array('confirmation'),
   );
 
+  $options = array(
+    'total' => format_plural($total, 'Reindex the entire site (@total item)', 'Reindex the entire site (@total items)', array('@total' => $total)),
+    'remaining' => format_plural($remaining, 'Index only remaining items (@remaining item)', 'Index only remaining items (@remaining items)', array('@remaining' => $remaining)),
+  );
   $form['index_type'] = array(
     '#type' => 'radios',
-    '#title' => t('Items to index:'),
-    '#options' => array(
-      'total' => t('Re-index entire site (@total_items)', array('@total_items' => $index_stats['total'] . ' ' . format_plural($index_stats['total'], 'item', 'items'))),
-      'remaining' => t('Index only remaining items (@remaining)', array('@remaining' => $index_stats['remaining'] . ' ' . format_plural($index_stats['remaining'], 'item', 'items'))),
-    ),
+    '#title' => t('Items to index'),
+    '#options' => $options,
     '#default_value' => 'total',
   );
 
@@ -32,19 +42,50 @@ function search_reindex_confirm() {
 
   $form['actions'] = array(
     '#type' => 'actions',
-    'submit' => array(
-      '#type' => 'submit',
-      '#value' => t('Rebuild search index'),
-    ),
-    'cancel' => array(
-      '#type' => 'link',
-      '#title' => t('Cancel'),
-      '#href' => 'admin/config/search/settings',
-      '#options' => array(
-        'path' => 'admin/config/search/settings',
-      ),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Rebuild search index'),
+  );
+  // $form['actions']['submit_remaining'] = array(
+  //   '#type' => 'submit',
+  //   '#value' => t('Index remaining items'),
+  //   '#disabled' => TRUE,
+  // );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/config/search/settings',
+    '#options' => array(
+      'path' => 'admin/config/search/settings',
     ),
   );
+
+  if ($remaining == 0) {
+    backdrop_set_message(t('The site is already fully indexed.'));
+    // Hide the "Items to index" radio options, since in this case there is no
+    // point in offering an option to "index 0 remaining items".
+    $form['index_type']['#access'] = FALSE;
+    // Dummy checkbox - only used to provide a #states target for the submit
+    // button.
+    $form['reindex_confirm'] = array(
+      '#type' => 'checkbox',
+      '#title' => format_plural($total, 'Reindex the entire site anyway (@total item)', 'Reindex the entire site anyway (@total items)', array('@total' => $total)),
+      '#weight' => -10,
+    );
+    $form['actions']['submit']['#states'] = array(
+      'enabled' => array(
+        ':input[name="reindex_confirm"]' => array('checked' => TRUE),
+      ),
+    );
+  }
+  if ($indexed == 0) {
+    backdrop_set_message(t('The entire site needs to be indexed (@status).', array('@status' => $index_stats['status'])), 'info');
+    // Hide the "Items to index" radio options, since both the "renidex the
+    // entire site" and "index remaining items" options are the same thing.
+    $form['index_type']['#access'] = FALSE;
+    $form['actions']['submit']['#value'] = t('Index the entire site');
+  }
 
   return $form;
 }
@@ -56,7 +97,7 @@ function search_reindex_confirm_submit(&$form, &$form_state) {
   $config = config('search.settings');
   $limit_per_pass = $config->get('search_cron_limit');  
 
-  $index_stats = search_get_stats();
+  $index_stats = $form_state['values']['index_stats'];
 
   if ($form_state['values']['index_type'] == 'total') {
     // Mark all content as needing to be re-indexed.
@@ -150,7 +191,7 @@ function search_admin_settings($form, &$form_state) {
   $form['#validate'][] = 'search_admin_settings_validate';
   $form['#submit'][] = 'search_admin_settings_submit';
 
-  // Per module settings
+  // Per module settings.
   foreach ($config->get('search_active_modules') as $module) {
     $added_form = module_invoke($module, 'search_admin');
     if (is_array($added_form)) {
@@ -163,37 +204,66 @@ function search_admin_settings($form, &$form_state) {
     '#value' => t('Save configuration')
   );
 
-  // Indexing settings:
+  // Indexing settings.
   $form['indexing'] = array(
     '#type' => 'fieldset',
     '#title' => t('Indexing'),
   );
 
-  // Collect some stats
   $index_stats = search_get_stats();
+  $index_status = theme('progress_bar', array(
+    'percent' => $index_stats['percentage'],
+    'message' => $index_stats['status'],
+    'animate' => FALSE,
+  ));
+  $form['indexing']['status'] = array(
+    '#type' => 'item',
+    '#title' => t('Idexing status'),
+    '#markup' => $index_status,
+    '#description' => t('The search index is being systematically updated during cron runs. Searching will continue to work, but unindexed content will be missing from the search results. You can manually trigger the indexing of remaining items below.'),
+  );
 
-  $count = format_plural($index_stats['remaining'], 'There is 1 item left to index.', 'There are @count items left to index.');
-  $percentage = ((int)min(100, 100 * ($index_stats['total'] - $index_stats['remaining']) / max(1, $index_stats['total']))) . '%';
-  $status = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
-
-  $form['indexing']['status'] = array('#markup' => $status);
-  $form['indexing']['wipe'] = array(
+  $form['indexing']['manual_reindex'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Manual indexing'),
+    '#description' => t('Use this option to index remaining items <em>immediately</em> (instead of waiting for content to be automatically indexed during cron runs), or to rebuild the entire site index.') . "<br>",
+  );
+  $form['indexing']['manual_reindex']['wipe'] = array(
     '#type' => 'submit',
     '#value' => t('Rebuild search index'),
     '#submit' => array('search_admin_reindex_submit'),
     '#attributes' => array('class' => array('button-secondary')),
   );
 
+  $form['indexing']['cron_reindex'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Cron indexing settings'),
+  );
+  $cron_interval = config_get('system.core', 'cron_safe_threshold');
+  $cron_status = t('Cron last run: %cron-last ago (configured to run every %cron_interval).', array(
+    '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),
+    '%cron_interval' => format_interval($cron_interval),
+  ));
+  $cron_status .= user_access('administer site configuration') ? ' ' . l(t('Configure or run cron'), 'admin/config/system/cron') . '.' : '';
+  $form['indexing']['cron_reindex']['status'] = array(
+    '#markup' => '<p>' . $cron_status . '</p>',
+  );
   $items = backdrop_map_assoc(array(10, 20, 50, 100, 200, 500));
-  $form['indexing']['search_cron_limit'] = array(
+  $description = t('The maximum number of items indexed in each pass of a cron maintenance task.', );
+  $description .= '<br><strong>' . t('Setting this to high numbers may cause timeouts and memory errors while indexing') . '</strong>.';
+  $form['indexing']['cron_reindex']['search_cron_limit'] = array(
     '#type' => 'select',
-    '#title' => t('Number of items to index during cron runs:'),
+    '#title' => t('Number of items to index during cron runs'),
     '#default_value' => $config->get('search_cron_limit'),
     '#options' => $items,
-    '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce this number to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
+    '#description' => $description,
   );
 
-  $form['indexing']['search_minimum_word_size'] = array(
+  $form['indexing']['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Indexing settings'),
+  );
+  $form['indexing']['settings']['search_minimum_word_size'] = array(
     '#type' => 'number',
     '#title' => t('Minimum word length to index'),
     '#default_value' => $config->get('search_minimum_word_size'),
@@ -201,17 +271,17 @@ function search_admin_settings($form, &$form_state) {
     '#max' => 10000,
     '#description' => t('The number of characters a word has to be to be indexed. A lower setting means better search result ranking, but also a larger database. Each search query must contain at least one keyword that is this size (or longer). <strong>Changing this setting will invalidate the search index.</strong>'),
   );
-  $form['indexing']['transliteration'] = array(
+  $form['indexing']['settings']['transliteration'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Transliterate search index and searched strings.'),
+    '#title' => t('Transliterate search index and searched strings'),
     '#description' => t('Enable to allow searching and indexing using US-ASCII character set, i.e. to treat accented and unaccented letters the same.'),
     '#default_value' => $config->get('transliteration'),
   );
-  $form['indexing']['search_overlap_cjk'] = array(
+  $form['indexing']['settings']['search_overlap_cjk'] = array(
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
     '#default_value' => $config->get('search_overlap_cjk'),
-    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
+    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>'),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -282,6 +352,6 @@ function search_admin_settings_submit($form, &$form_state) {
  * Form submission handler for reindex button on search_admin_settings_form().
  */
 function search_admin_reindex_submit($form, &$form_state) {
-  // send the user to the confirmation page
+  // Send the user to the confirmation page.
   $form_state['redirect'] = 'admin/config/search/settings/reindex';
 }

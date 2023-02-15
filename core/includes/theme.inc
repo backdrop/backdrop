@@ -2555,11 +2555,22 @@ function theme_more_link($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - percent: The percentage of the progress.
- *   - message: A string containing information to be displayed.
+ *   - percent: (int) The percentage of the progress.
+ *   - message: (string) Textual information to be displayed.
+ *   - animate: (bool) Whether the progress bar should be animated or not.
+ *     Defaults to TRUE ('animated' class added to the wrapper div).
+ *
+ * @since 1.24.1 'animate' variable added.
  */
 function theme_progress_bar($variables) {
-  $output = '<div id="progress" class="progress">';
+  $classes = array('progress');
+  $animate = isset($variables['animate']) ? $variables['animate'] : TRUE;
+
+  if ($animate) {
+    $classes[] = 'animated';
+  }
+
+  $output = '<div id="progress" class="' . implode(' ', $classes) . '">';
   $output .= '<div class="bar"><div class="filled" style="width: ' . $variables['percent'] . '%"></div></div>';
   $output .= '<div class="percentage">' . $variables['percent'] . '%</div>';
   $output .= '<div class="message">' . $variables['message'] . '</div>';
