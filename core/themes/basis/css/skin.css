@@ -686,6 +686,7 @@ textarea.form-textarea[disabled],
 select.form-select[disabled] {
   background-color: #eeeeee;
   color: #bbbbbb;
+  cursor: not-allowed;
 }
 
 .form-error input.form-autocomplete,

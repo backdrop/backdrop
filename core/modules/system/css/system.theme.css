@@ -121,6 +121,9 @@ input.form-radio {
 .form-required {
   color: #e60000;
 }
+input.form-disabled {
+  cursor: not-allowed;
+}
 .marker{
   font-size: 0.9em;
   color: #234600;

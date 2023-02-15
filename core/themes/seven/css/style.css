@@ -1095,6 +1095,7 @@ input.form-disabled:focus {
   border-color: #eee;
   text-shadow: none;
   color: #999;
+  cursor: not-allowed;
   box-shadow: none;
   transition-property: none;
 }
@@ -1911,7 +1912,7 @@ div.add-or-remove-shortcuts {
   overflow: hidden;
   border-radius: 3px;
 }
-.progress .filled:after {
+.progress.animated .filled:after {
   content: '';
   position: absolute;
   top: 0;
@@ -1947,7 +1948,7 @@ div.add-or-remove-shortcuts {
   -webkit-transition: width 0.5s ease-out;
   transition: width 0.5s ease-out;
 }
-[dir="rtl"] .progress .filled:after {
+[dir="rtl"] .progress.animated .filled:after {
   animation-direction: reverse;
   -webkit-animation-direction: reverse;
   -moz-animation-direction: reverse;
