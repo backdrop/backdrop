@@ -44,37 +44,7 @@ function telemetry_telemetry_data($key) {
     case 'php_version':
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
-      $version = Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
-      // Backdrop core only supports MySQL and MariaDB. If there is no "maria"
-      // in the version string, assume it is MySQL.
-      $type = strpos(strtolower($version), 'maria') !== FALSE ? 'MariaDB' : 'MySQL';
-      // MariaDB version strings tend to have 2 versions, one for the equivalent
-      // MySQL version + another for the actual MariaDB version. For example, in
-      // 5.5.5-10.5.11-MariaDB:
-      // - 5.5.5 would denote the MySQL equivalency
-      // - 10.5.11 would be the actual MariaDB version.
-      // Grab all strings within the version that are a sequence of numbers and
-      // dots.
-      preg_match_all('/[\d\.]+/', $version, $versions);
-      if (count($versions[0]) == 1) {
-        $version = $versions[0][0];
-      }
-      else {
-        // Some variations of the MariaDB version string contain the version
-        // number more than once. For example:
-        // 5.5.5-10.5.11-MariaDB-1:10.5.11+maria~focal-log.
-        $versions = array_unique($versions[0]);
-        // Sort versions in reverse (descending) order.
-        rsort($versions, SORT_NATURAL);
-        // Get the greatest version (or the only version).
-        $version = $versions[0];
-      }
-      // Trim the version number to only major + minor, otherwise we'd flood the
-      // table with dozens of bug fix versions.
-      $version = explode(".", $version);
-      $version = array_slice($version, 0, 2);
-      $version = implode('.', $version);
-      return $type . ' v' . $version;
+      return _system_get_database_version();
     case 'server_os':
       return PHP_OS;
     case 'web_server':
