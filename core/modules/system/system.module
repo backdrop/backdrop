@@ -1122,7 +1122,7 @@ function _system_batch_theme() {
 }
 
 /**
- * Helper function to determine the type and version the databaser server.
+ * Helper function to determine the type and version of the databaser server.
  *
  * @return array
  *   An array with the following two keys:
