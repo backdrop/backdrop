@@ -44,7 +44,13 @@ function telemetry_telemetry_data($key) {
     case 'php_version':
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
-      return _system_get_database_version();
+      // Trim the version number to only major + minor, otherwise we'd flood the
+      // table with dozens of bug fix versions.
+      $db_info = _system_get_database_version();
+      $version = explode('.', $db_info['version']);
+      $version = array_slice($version, 0, 2);
+      $version = implode('.', $version);
+      return $db_info['type'] . ' ' . $version;
     case 'server_os':
       return PHP_OS;
     case 'web_server':

@@ -1122,7 +1122,12 @@ function _system_batch_theme() {
 }
 
 /**
- * Helper function to deterine the MySQL or MariaDB versionl
+ * Helper function to determine the type and version of the databaser server.
+ *
+ * @return array
+ *   An array with the following two keys:
+ *   - 'type': (string) Either "MariaDB" or "MySQL".
+ *   - 'version': (string) The semantic version of the database server.
  *
  * @see system_requirements().
  * @see telemetry_telemetry_data().
@@ -1153,12 +1158,8 @@ function _system_get_database_version() {
     // Get the greatest version (or the only version).
     $version = $versions[0];
   }
-  // Trim the version number to only major + minor, otherwise we'd flood the
-  // table with dozens of bug fix versions.
-  $version = explode(".", $version);
-  $version = array_slice($version, 0, 2);
-  $version = implode('.', $version);
-  return $type . ' v' . $version;
+
+  return array('type' => $type, 'version' => $version);
 }
 
 /**
