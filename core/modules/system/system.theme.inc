@@ -178,6 +178,9 @@ function theme_system_modules_fieldset($variables) {
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
     }
+    if (isset($module['#project']) && $module['#project'] != 'backdrop') {
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $module['#project']) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $module['#project']) . '</div>';
+    }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
 
@@ -797,4 +800,25 @@ function system_preprocess_page_components(&$variables) {
   $variables['theme_hook_suggestions'] = array(
     'page_components__' . $child_delta,
   );
+}
+
+/**
+ * Returns HTML for the display of a label and its machine name.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - label: The human-readable label.
+ *   - machine_name: (optional) The machine-safe name.
+ *
+ * @ingroup themeable
+ */
+function theme_label_machine_name($variables) {
+  $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
+
+  if (!empty($variables['machine_name'])) {
+    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
 }

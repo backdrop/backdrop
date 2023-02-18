@@ -1,7 +1,7 @@
 {
     "_config_name": "views.view.promoted",
     "name": "promoted",
-    "description": "Provides a list of promoted content. Used by default on the front page.",
+    "description": "Provides a list of promoted content. Used by default on the home page.",
     "module": "node",
     "storage": 4,
     "tag": "default",
@@ -119,7 +119,7 @@
                 "defaults": {
                     "title": false
                 },
-                "title": "Front page feed",
+                "title": "Home page feed",
                 "pager": {
                     "type": "some"
                 },

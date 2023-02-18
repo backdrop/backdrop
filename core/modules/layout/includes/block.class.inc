@@ -6,6 +6,17 @@
 class Block extends LayoutHandler {
 
   /**
+   * The block disabled status indicator.
+   *
+   * Disabled blocks are not visible at the layout path, but remain on the
+   * layout block add page.
+   * The value is either BLOCK_ENABLED or BLOCK_DISABLED.
+   *
+   * @var integer
+   */
+  var $status;
+
+  /**
    * The module that provides this block.
    *
    * @var string
@@ -86,10 +97,11 @@ class Block extends LayoutHandler {
       'contexts' => array(),
     );
 
-    // Initialize basics, module, delta, UUID, and childDelta.
+    // Initialize basics, module, delta, UUID, status, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
+    $this->status = isset($data['status']) ? $data['status'] : BLOCK_ENABLED;
     $parts = explode(':', $this->plugin, 3);
     $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
@@ -131,11 +143,15 @@ class Block extends LayoutHandler {
    * Return an administrative title that will always have a value.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     $title = $this->getTitle();
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
       $info = $this->getBlockInfo();
-      $title = $info['info'];
+      $title = check_plain($info['info']);
     }
     return $title;
   }
@@ -153,10 +169,14 @@ class Block extends LayoutHandler {
    * Return a preview for this block.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     $info = $this->getBlockInfo();
     $preview = '';
     if (isset($info['description'])) {
-      $preview .= '<p>' . $info['description'] . '</p>';
+      $preview .= '<p>' . filter_xss($info['description']) . '</p>';
     }
     $preview .= $this->getAdminConditionsPreview();
 
@@ -175,7 +195,7 @@ class Block extends LayoutHandler {
     // If this is a child block, merge in its child-specific data.
     if ($this->childDelta) {
       $children_blocks = $this->getChildren();
-      $block_info = array_merge($block_info, $children_blocks[$this->childDelta]);
+      $block_info = isset($children_blocks) ? array_merge($block_info, $children_blocks[$this->childDelta]) : NULL;
     }
 
     return $block_info;
@@ -213,8 +233,10 @@ class Block extends LayoutHandler {
    * Build the settings form for editing this block.
    */
   function form(&$form, &$form_state) {
+    /* @var Layout $layout */
     $layout = $form_state['layout'];
     $contexts = $layout->getContexts();
+
     $block_info = $this->getBlockInfo();
     $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
 
@@ -242,6 +264,30 @@ class Block extends LayoutHandler {
       ),
       '#maxlength' => 255,
     );
+    $actions_weight = $form['actions']['#weight'];
+    $form['admin_label'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Admin label'),
+      '#tree' => FALSE,
+      '#collapsed' => empty($this->settings['admin_label']),
+      '#collapsible' => TRUE,
+      '#weight' => $actions_weight - 1,
+      '#access' => $this->module != 'block',
+    );
+    $form['admin_label']['admin_label'] = array(
+      '#type' => 'textfield',
+      '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
+      '#title' => t('Admin label'),
+      '#description' => t('Used to identify the block on layout pages.'),
+      '#maxlength' => 255,
+    );
+    $form['admin_label']['admin_description'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Admin description'),
+      '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
+      '#maxlength' => 128,
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+    );
   }
 
   /**
@@ -257,6 +303,8 @@ class Block extends LayoutHandler {
   function formSubmit($form, &$form_state) {
     $this->settings['title_display'] = $form_state['values']['title_display'];
     $this->settings['title'] = $form_state['values']['title'];
+    $this->settings['admin_label'] = $form_state['values']['admin_label'];
+    $this->settings['admin_description'] = $form_state['values']['admin_description'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {
       $this->settings['contexts'] = $form_state['values']['contexts'];
@@ -283,6 +331,7 @@ class Block extends LayoutHandler {
    */
   function toArray() {
     $array = array(
+      'status' => $this->status,
       'module' => $this->module,
       'delta' => $this->delta,
       'settings' => $this->settings,

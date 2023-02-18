@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -117,7 +116,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid', $options) {
+  function init($base_table, $base_field, $options) {
     parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
@@ -290,7 +289,13 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    // This method may be called more than once. When called for the first time,
+    // it receives a string from the form element. That string must be exploded
+    // into an array before setting the form value. 
+    if (is_string($value)) {
+      $value = explode(',', $value);
+    }
     $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
@@ -890,17 +895,17 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Add a complex WHERE clause to the query.
    *
-   * The caller is reponsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table already exists in the query.
-   * Internally the dbtng method "where" is used.
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table already exists in the query. Internally,
+   * the dbtng method "where" is used.
    *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
    * @param $snippet
-   *   The snippet to check. This can be either a column or
-   *   a complex expression like "UPPER(table.field) = 'value'"
+   *   The snippet to check. This can be either a column or a complex expression
+   *   like "UPPER(table.field) = 'value'".
    * @param $args
    *   An associative array of arguments.
    *
@@ -1369,6 +1374,16 @@ class views_plugin_query_default extends views_plugin_query {
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
 
+    if (!$get_count) {
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large
+        // limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
+      }
+    }
+
     return $query;
   }
 
@@ -1473,15 +1488,7 @@ class views_plugin_query_default extends views_plugin_query {
           $this->pager->execute_count_query($count_query);
         }
 
-        // Let the pager modify the query to add limits.
         $this->pager->pre_execute($query);
-
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
 
         $result = $query->execute();
 

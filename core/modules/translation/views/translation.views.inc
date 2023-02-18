@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for translation.module.
@@ -51,7 +50,7 @@ function translation_views_data_alter(&$data) {
     ),
   );
 
-  // The source translation.
+  // All translations.
   $data['node']['translation'] = array(
     'group' => t('Content translation'),
     'title' => t('Translations'),
@@ -62,7 +61,7 @@ function translation_views_data_alter(&$data) {
       'base' => 'node',
       'base field' => 'tnid',
       'relationship table' => 'node',
-      'relationship field' => 'nid',
+      'relationship field' => 'tnid',
       'handler' => 'views_handler_relationship_translation',
       'label' => t('Translations'),
     ),
@@ -78,7 +77,7 @@ function translation_views_data_alter(&$data) {
     ),
   );
 
-  // The source translation.
+  // Child translation.
   $data['node']['child_translation'] = array(
     'group' => t('Node translation'),
     'title' => t('Child translation'),

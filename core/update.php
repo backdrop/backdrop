@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
@@ -30,8 +29,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '5.6.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -208,27 +207,28 @@ function update_results_page() {
   update_task_list();
   // Report end result.
   if (module_exists('dblog') && user_access('access site reports')) {
-    $log_message = ' All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
+    $log_message = 'All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
   }
   else {
-    $log_message = ' All errors have been logged.';
+    $log_message = 'All errors have been logged.';
   }
 
+  $output = '';
   if ($_SESSION['update_success']) {
-    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . $log_message . '</p>';
+    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
     $updates_remaining = reset($_SESSION['updates_remaining']);
     list($module, $version) = array_pop($updates_remaining);
-    $output = '<p class="error">The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . $log_message;
+    $message = 'The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . ' ' . $log_message;
     if (module_exists('dblog')) {
-      $output .= ' You may need to check the <code>watchdog</code> database table manually.';
+      $message .= ' ' . 'You may need to check the <code>watchdog</code> database table manually.';
     }
-    $output .= '</p>';
+    backdrop_set_message($message, 'error');
   }
 
   if (settings_get('update_free_access')) {
-    $output .= "<p><strong>Reminder: Don't forget to set the <code>\$settings[&#39;update_free_access&#39;]</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
+    backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
   }
 
   $output .= theme('links', array('links' => update_helpful_links()));
@@ -319,6 +319,33 @@ function update_info_page() {
   }
 
   update_task_list('info');
+  backdrop_set_title('Backdrop database update');
+  $token = backdrop_get_token('update');
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
+  $output .= '<p>Before running updates, the following steps are recommended.</p>';
+  $output .= "<ol>\n";
+  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
+  $output .= "<ul>\n";
+  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
+  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
+  $output .= "</ul>\n";
+  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
+  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
+  $output .= "</ol>\n";
+  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
+  $module_status_report = update_upgrade_check_dependencies();
+	if (!empty($module_status_report)) {
+    $output .= $module_status_report;
+  }
+  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
+  $output .= '<form method="post" action="' . $form_action . '">
+  <div class="form-actions">
+    <input type="submit" value="Continue" class="form-submit button-primary" />
+    <a href="' . base_path() . '">Cancel</a>
+  </div>
+  </form>';
+  $output .= "\n";
 
   return $output;
 }
@@ -400,14 +427,22 @@ function update_script_overview_form_submit($form, &$form_state) {
 function update_access_denied_page() {
   backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'update.php', NULL, WATCHDOG_WARNING);
-  backdrop_set_title('Access denied');
-  return '<p>Access denied. You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:</p>
-<ol>
- <li>With a text editor find the settings.php file on your system and open it.</li>
- <li>There is a line inside your settings.php file that says <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>. Change it to <code>$settings[&#39;update_free_access&#39;] = TRUE;</code>.</li>
- <li>As soon as the update.php script is done, you must change the settings.php file back to its original form with <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>.</li>
- <li>To avoid having this problem in the future, remember to log in to your website using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation) before you backup your database at the beginning of the update process.</li>
-</ol>';
+  backdrop_set_title(t('Access denied'));
+
+  $output = '';
+  $steps = array();
+
+  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output = '<p>' . $output . '</p>';
+
+  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
+  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
+  $steps[] = t('Reload this page. The database update script should be able to run now.');
+  $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
+
+  $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+
+  return $output;
 }
 
 /**
@@ -527,6 +562,7 @@ if (empty($op) && update_access_allowed()) {
 
   // Load module basics.
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
   backdrop_load('module', 'system');
@@ -592,7 +628,8 @@ if (update_access_allowed()) {
         break;
       }
 
-    case 'Apply pending updates':
+    case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
