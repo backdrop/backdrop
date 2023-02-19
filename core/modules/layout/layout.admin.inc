@@ -19,26 +19,26 @@ function layout_list_page() {
   $path_groups_end = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
-     // Move admin layouts to the bottom of the list. Note that default layout
-     // has a NULL path, which path_is_admin() won't like in PHP 8.1.
-     if (is_null($path) || path_is_admin($path)) {
-       $path_groups_end[$path][$layout->name] = $layout;
-     }
-     else {
-       $path_groups[$path][$layout->name] = $layout;
-     }
-     // Build a list of all layout paths to check callbacks.
-     if ($path) {
-       $layout_paths[] = $path;
-     }
+    // Move admin layouts to the bottom of the list. Note that default layout
+    // has a NULL path, which path_is_admin() won't like in PHP 8.1.
+    if (is_null($path) || path_is_admin($path)) {
+      $path_groups_end[$path][$layout->name] = $layout;
+    }
+    else {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+    // Build a list of all layout paths to check callbacks.
+    if ($path) {
+      $layout_paths[] = $path;
+    }
   }
 
   // Put admin layouts at the bottom of the list.
-   foreach ($path_groups_end as $path => $name) {
-     foreach ($name as $layout) {
-       $path_groups[$path][$layout->name] = $layout;
-     }
-   }
+  foreach ($path_groups_end as $path => $name) {
+    foreach ($name as $layout) {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+  }
 
   if (!empty($layout_paths)) {
   $page_callbacks = db_query('
@@ -222,7 +222,7 @@ function _layout_get_operations(Layout $layout) {
   $links = array();
   if ($layout->disabled && !$layout->isDefault()) {
     $links['enable'] = array(
-      'title' => t('Enable Layout'),
+      'title' => t('Enable layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/enable',
       'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
     );
@@ -232,17 +232,17 @@ function _layout_get_operations(Layout $layout) {
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
   );
   $links['settings'] = array(
-    'title' => t('Configure Layout'),
+    'title' => t('Configure layout'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
   );
   if (!$layout->isDefault()) {
     $links['clone'] = array(
-      'title' => t('Clone Layout'),
+      'title' => t('Clone layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
     if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
-        'title' => t('Export Layout'),
+        'title' => t('Export layout'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
           'group' => 'Layouts',
@@ -252,14 +252,14 @@ function _layout_get_operations(Layout $layout) {
     }
     if (!$layout->disabled) {
       $links['disable'] = array(
-        'title' => t('Disable Layout'),
+        'title' => t('Disable layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/disable',
         'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
       );
     }
     if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
       $links['delete'] = array(
-        'title' => t('Delete Layout'),
+        'title' => t('Delete layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
       );
     }
@@ -267,7 +267,7 @@ function _layout_get_operations(Layout $layout) {
 
   if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
     $links['revert'] = array(
-      'title' => t('Revert Layout'),
+      'title' => t('Revert layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
     );
   }
@@ -3136,7 +3136,7 @@ function layout_settings_page($form, &$form_state) {
     'operations' => t('Operations'),
   );
 
-  backdrop_set_title(t('Layout settings'));
+  backdrop_set_title(t('Layout templates'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
   $rows = array();
@@ -3188,7 +3188,6 @@ function layout_settings_page($form, &$form_state) {
 
   return $form;
 }
-
 
 /**
  * Validation for layout settings page.

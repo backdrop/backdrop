@@ -304,7 +304,6 @@ function contact_form_user_profile_form_alter(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Contact form'),
     '#weight' => 5,
-    '#collapsible' => TRUE,
     '#group' => 'additional_settings',
   );
   $account = $form['#user'];

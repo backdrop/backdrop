@@ -368,18 +368,25 @@ function simpletest_test_get_all() {
       $check_keys = array('name', 'description', 'group', 'file');
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
+        // Error messages are translated as they are created below, but the
+        // variable substitutions are not passed in. This is done so that the
+        // same error message can to be output to watchdog(), which needs its
+        // variables separately, and to backdrop_set_message(), which needs a
+        // translated string with substitutions already made.
         $error = '';
+        $variables = array('@uri' => $file->uri);
         if (empty($classes)) {
-          $error = 'File %uri contains no testing classes.';
+          $error = t('File @uri contains no testing classes.');
         }
         else {
+          // If the .tests.info file is malformed, it puts a slew of
+          // hard-to-diagnose errors into the watchdog log when the testing page
+          // is loaded. So we'll check for various malformalities and put a more
+          // informative error.
           foreach ($classes as $class => $info) {
-            // If the .tests.info file is malformed, it puts a slew of
-            // hard-to-diagnose errors into the watchdog log when the testing page
-            // is loaded. So we'll check for various malformalities and put a more
-            // informative error.
             if (!is_array($info) || empty($info)) {
-              $error = format_string('File %uri contains a definition for %class that is not an array of testing class fields.', array('%class' => $class));
+              $error = t('File @uri contains a definition for @class that is not an array of testing class fields.');
+              $variables += array('@class' => $class);
               continue;
             }
             else {
@@ -391,13 +398,24 @@ function simpletest_test_get_all() {
               }
               if (!empty($missing_keys)) {
                 $keys = implode(', ', $missing_keys);
-                $error = format_plural(count($missing_keys), 'File %uri contains a definition for %class that is missing field %keys.','File %uri contains a definition for %class that is missing fields %keys.', array('%class' => $class, '%keys' => $keys));
+                $error = format_plural(count($missing_keys), 'File @uri contains a definition for @class that is missing field @keys.', 'File @uri contains a definition for @class that is missing fields @keys.');
+                $variables += array('@class' => $class, '@keys' => $keys);
+                continue;
+              }
+            }
+            // Verify that the test file is present in the same directory as
+            // specified in the .tests.info file.
+            if (empty($error)) {
+              $info['file path'] = dirname($file->uri);
+              $test_file_full = BACKDROP_ROOT . '/' . $info['file path'] . '/' . $info['file'];
+              if (!file_exists($test_file_full)) {
+                $error = t('File @uri specifies a non-existent file @test_file_full. Please verify that the test file exists in the location specified in @uri.');
+                $variables += array('@test_file_full' => $test_file_full);
                 continue;
               }
             }
             if (empty($error)) {
-            // If the format passed, build the rest of the groups information.
-              $info['file path'] = dirname($file->uri);
+              // If the format passed, build the rest of the groups information.
               // If this test class requires a non-existing module, skip it.
               if (!empty($info['dependencies'])) {
                 foreach ($info['dependencies'] as $module) {
@@ -411,8 +429,19 @@ function simpletest_test_get_all() {
           }
         }
         if (!empty($error)) {
-          watchdog('simpletest', $error, array('%uri' => $file->uri), WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
-          continue;
+          if (backdrop_is_cli()) {
+            // If running in CLI, then we're probably about to run some
+            // automated tests, so we need a hard fail.
+            print format_string($error, $variables) . "\n";
+            exit(1);
+          }
+          else {
+            // Pass the substitution variables into the already-translated
+            // string for backdrop_set_message().
+            backdrop_set_message(format_string($error, $variables), 'error');
+            watchdog('simpletest', $error, $variables, WATCHDOG_WARNING, l(t('See the Testing Framework documentation.'), 'https://docs.backdropcms.org/documentation/testing-framework'));
+            continue;
+          }
         }
       }
 
