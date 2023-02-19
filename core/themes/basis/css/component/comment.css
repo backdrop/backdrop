@@ -163,3 +163,16 @@
 [dir="rtl"] .comment-footer {
   float: left;
 }
+
+a.comment-permalink  {
+  width: .7em;
+  height: .7em;
+  padding: .1em;
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: url("../../images/link-icon.svg");
+  mask-image: url("../../images/link-icon.svg");
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  margin: 0 0 0 0.5em;
+}

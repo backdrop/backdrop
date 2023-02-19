@@ -898,10 +898,10 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
       '[current-page:page-number]' => 1,
       '[current-page:query:foo]' => 'bar',
       '[current-page:query:bar]' => NULL,
-      '[current-page:query:q]' => 'node/3',
+      '[current-page:query:q]' => 'node/' . $node->nid,
       // Deprecated tokens
       '[current-page:arg:0]' => 'node',
-      '[current-page:arg:1]' => 3,
+      '[current-page:arg:1]' => $node->nid,
       '[current-page:arg:2]' => NULL,
     );
     $this->assertPageTokens("node/{$node->nid}", $tokens, array(), array('url_options' => array('query' => array('foo' => 'bar'))));

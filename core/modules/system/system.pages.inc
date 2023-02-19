@@ -24,7 +24,7 @@ function system_token_output() {
       'dialogClass' => 'token-dialog',
       'modal' => FALSE,
       'draggable' => TRUE,
-      'resizeable' => TRUE,
+      'resizable' => TRUE,
       'autoResize' => FALSE,
       'width' => '800',
       'height' => '600',

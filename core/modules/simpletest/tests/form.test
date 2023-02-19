@@ -147,7 +147,12 @@ class FormsTestCase extends BackdropWebTestCase {
     // messages for each field.
     $expected = array();
     foreach (array('textfield', 'checkboxes', 'select', 'radios') as $key) {
-      $expected[] = t('!name field is required.', array('!name' => $form[$key]['#title']));
+      if (isset($form[$key]['#required_message'])) {
+        $expected[] = $form[$key]['#required_message'];
+      }
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $expected[] = $form[$key]['#form_test_expected_message'];
+      }
     }
 
     // Check the page for error messages.
@@ -180,6 +185,19 @@ class FormsTestCase extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-radios-optional-bar');
     $this->assertNoFieldChecked('edit-radios-optional-default-value-false-foo');
     $this->assertNoFieldChecked('edit-radios-optional-default-value-false-bar');
+
+    // Verify that the #element_validate handler on the select list did not
+    // fire when the field was left empty.
+    $this->assertNoRaw('Please select the "foo" option.');
+
+    // Submit again with required fields missing but a value in the select
+    // field, which will fire its #element_validate handler while other required
+    // fields are not completed.
+    $edit = array(
+      'select' => 'bar',
+    );
+    $this->backdropPost(NULL, $edit, 'Submit');
+    $this->assertRaw('Please select the "foo" option.');
 
     // Submit again with required fields set and verify that there are no
     // error messages.
@@ -364,20 +382,22 @@ class FormsTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/number');
 
     // Array with all the error messages to be checked.
+    // @see form_validate_number() for the messages.
     $error_messages = array(
-      'no_number' => '%name must be a number.',
-      'too_low' => '%name must be higher or equal to %min.',
-      'too_high' => '%name must be below or equal to %max.',
-      'step_mismatch' => '%name is not a valid number.',
+      'no_number' => 'The value for %name must be numeric.',
+      'too_low' => 'The value for %name must be greater than or equal to %min.',
+      'too_high' => 'The value for %name must be less than or equal to %max.',
+      'step_mismatch_integer' => 'The value for %name must be a whole number.',
+      'step_mismatch_general' => 'The value for %name must be a whole number of steps of size %step, starting from %offset.',
     );
 
     // The expected errors.
     $expected = array(
       'integer_no_number' => 'no_number',
       'integer_no_step' => 0,
-      'integer_no_step_step_error' => 'step_mismatch',
+      'integer_no_step_step_error' => 'step_mismatch_integer',
       'integer_step' => 0,
-      'integer_step_error' => 'step_mismatch',
+      'integer_step_error' => 'step_mismatch_general',
       'integer_step_min' => 0,
       'integer_step_min_error' => 'too_low',
       'integer_step_max' => 0,
@@ -385,12 +405,12 @@ class FormsTestCase extends BackdropWebTestCase {
       'integer_step_min_border' => 0,
       'integer_step_max_border' => 0,
       'integer_step_based_on_min' => 0,
-      'integer_step_based_on_min_error' => 'step_mismatch',
+      'integer_step_based_on_min_error' => 'step_mismatch_general',
       'float_small_step' => 0,
       'float_step_no_error' => 0,
-      'float_step_error' => 'step_mismatch',
+      'float_step_error' => 'step_mismatch_general',
       'float_step_hard_no_error' => 0,
-      'float_step_hard_error' => 'step_mismatch',
+      'float_step_hard_error' => 'step_mismatch_general',
       'float_step_any_no_error' => 0,
     );
 
@@ -403,8 +423,11 @@ class FormsTestCase extends BackdropWebTestCase {
         // Create placeholder array.
         $placeholders = array(
           '%name' => $form[$element]['#title'],
+          '%value' => $form[$element]['#default_value'],
           '%min' => isset($form[$element]['#min']) ? $form[$element]['#min'] : '0',
           '%max' => isset($form[$element]['#max']) ? $form[$element]['#max'] : '0',
+          '%step' => isset($form[$element]['#step']) ? $form[$element]['#step'] : '1',
+          '%offset' => isset($form[$element]['#min']) ? $form[$element]['#min'] : 0.0,
         );
 
         foreach ($error_messages as $id => $message) {
@@ -800,6 +823,50 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertFieldByXpath('//input[@id="edit-name" and contains(@class, "error")]', NULL, 'Error input form element class found for first element.');
     $this->assertNoFieldByXpath('//input[@id="edit-name--2" and contains(@class, "error")]', NULL, 'No error input form element class found for second element.');
+  }
+
+  /**
+   * Tests #required with custom validation errors.
+   *
+   * @see form_test_validate_required_form()
+   */
+  function testCustomRequiredMessage() {
+    $form = $form_state = array();
+    $form = form_test_validate_required_form($form, $form_state);
+
+    // Verify that a custom #required error can be set.
+    $edit = array();
+    $this->backdropPost('form-test/validate-required', $edit, 'Submit');
+
+    foreach (element_children($form) as $key) {
+      if (isset($form[$key]['#required_message'])) {
+        $this->assertNoText(t('!name field is required.', array('!name' => $form[$key]['#title'])));
+        $this->assertText($form[$key]['#required_message']);
+      }
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $this->assertText($form[$key]['#form_test_expected_message']);
+      }
+    }
+    $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
+
+    // Verify that no custom validation error appears with valid values.
+    $edit = array(
+      'textfield' => $this->randomString(),
+      'checkboxes[foo]' => TRUE,
+      'select' => 'foo',
+      'radios' => 'foo',
+    );
+    $this->backdropPost('form-test/validate-required', $edit, 'Submit');
+
+    foreach (element_children($form) as $key) {
+      if (isset($form[$key]['#required_message'])) {
+        $this->assertNoText($form[$key]['#required_message']);
+      }
+      elseif (isset($form[$key]['#form_test_expected_message'])) {
+        $this->assertNoText($form[$key]['#form_test_expected_message']);
+      }
+    }
+    $this->assertNoText(t('An illegal choice has been detected. Please contact the site administrator.'));
   }
 }
 
@@ -2023,7 +2090,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests loading a custom specified inlcude.
+   * Tests loading a custom specified include.
    */
   function testLoadCustomInclude() {
     $this->backdropPost('form-test/load-include-custom', array(), t('Save'));
@@ -2161,7 +2228,7 @@ class FormEmailTestCase extends BackdropWebTestCase {
     $edit['email'] = 'invalid';
     $edit['email_required'] = ' ';
     $this->backdropPost('form-test/email', $edit, 'Submit');
-    $this->assertRaw(t('The e-mail address %mail is not valid.', array('%mail' => 'invalid')));
+    $this->assertRaw(t('The email address %mail is not valid.', array('%mail' => 'invalid')));
     $this->assertRaw(t('!name field is required.', array('!name' => 'Address')));
 
     $edit = array();

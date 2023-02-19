@@ -13,27 +13,17 @@
  * Retrieve settings for the GD2 toolkit.
  */
 function image_gd_settings() {
-  if (image_gd_check_settings()) {
-    $form['status'] = array(
-      '#markup' => t('The GD toolkit is installed and working properly.')
-    );
+  $form['image_jpeg_quality'] = array(
+    '#type' => 'number',
+    '#title' => t('JPEG quality'),
+    '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
+    '#min' => 0,
+    '#max' => 100,
+    '#default_value' => config_get('system.core', 'image_jpeg_quality'),
+    '#field_suffix' => t('%'),
+  );
 
-    $form['image_jpeg_quality'] = array(
-      '#type' => 'number',
-      '#title' => t('JPEG quality'),
-      '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
-      '#min' => 0,
-      '#max' => 100,
-      '#default_value' => config_get('system.core', 'image_jpeg_quality'),
-      '#field_suffix' => t('%'),
-    );
-
-    return $form;
-  }
-  else {
-    form_set_error('image_toolkit', t('The GD image toolkit requires that the GD module for PHP be installed and configured properly. For more information see <a href="@url">PHP\'s image documentation</a>.', array('@url' => 'http://php.net/image')));
-    return FALSE;
-  }
+  return $form;
 }
 
 /**
