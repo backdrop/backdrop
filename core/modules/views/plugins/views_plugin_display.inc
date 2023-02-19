@@ -1749,7 +1749,7 @@ class views_plugin_display extends views_plugin {
         }
         break;
       case 'row_plugin':
-        $form['#title'] .= t('How should each row in this view be styled');
+        $form['#title'] .= t('How should each row in this view be output');
         $form['#help_topic'] = 'style-row';
         $form['row_plugin'] =  array(
           '#type' => 'radios',
