@@ -315,7 +315,7 @@ function update_info_page($updates = TRUE) {
     backdrop_flush_all_caches();
   }
   else {
-    backdrop_set_message('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://docs.backdropcms.org/backup'))), 'warning';
+    backdrop_set_message('Back up your database and site before you continue. <a href="https://docs.backdropcms.org/backup">Learn how</a>.', 'warning');
 
     $elements = backdrop_get_form('update_script_overview_form');
     $output .= backdrop_render($elements);
