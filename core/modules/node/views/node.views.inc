@@ -702,7 +702,7 @@ function node_views_plugins() {
     'module' => 'views', // This just tells our themes are elsewhere.
     'row' => array(
       'node' => array(
-        'title' => t('Content View Mode'),
+        'title' => t('Content Display Mode'),
         'help' => t('Display the content with standard node view.'),
         'handler' => 'views_plugin_row_node_view',
         'path' => backdrop_get_path('module', 'node') . '/views', // not necessary for most modules
