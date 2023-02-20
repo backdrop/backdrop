@@ -755,7 +755,7 @@ function node_type_cache_reset() {
 /**
  * Sets the default values for a node type.
  *
- * The defaults are appropriate for a type defined through hook_node_info(),
+ * The defaults are appropriate for a type defined through node_type_save(),
  * since 'custom' is TRUE for types defined in the user interface, and FALSE
  * for types defined by modules. (The 'module' flag prevents types from being
  * deleted through the user interface.) Also, the default for 'locked' is TRUE,
@@ -763,7 +763,7 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   See node_type_save() for details on what the array elements mean. Defaults
  *   to an empty array.
  *
  * @return
