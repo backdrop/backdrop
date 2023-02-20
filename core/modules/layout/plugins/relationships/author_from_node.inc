@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides relationship to relate the Author from a piece of content (node).

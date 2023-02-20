@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Update Manager module.

@@ -1,12 +1,12 @@
 <?php
 /**
- * @addtogroup database
- * @{
+ * @file
+ * Non-specific Database query code. Used by all engines.
  */
 
 /**
- * @file
- * Non-specific Database query code. Used by all engines.
+ * @addtogroup database
+ * @{
  */
 
 /**
@@ -1922,7 +1922,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
   public function __toString() {
     // If the caller forgot to call compile() first, refuse to run.
     if ($this->changed) {
-      return NULL;
+      return '';
     }
     return $this->stringVersion;
   }

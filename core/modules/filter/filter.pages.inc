@@ -656,20 +656,25 @@ function _filter_url_has_protocol($url) {
 function _filter_get_file_id($href) {
   $result = 0;
 
-  // Check URI for valid file scheme.
-  if (!file_valid_uri($href)){
+  // Make sure this is a file, either in public or in private path.
+  global $base_path;
+  $public_path = config_get('system.core', 'file_public_path');
+  // Private files have "system/files/" in their URL.
+  // @see BackdropPrivateStreamWrapper::getExternalUrl()
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/' . ')#';
+  if (preg_match($pattern, $href) === FALSE) {
     return $result;
   }
 
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
-  $filename = substr($href,$pos + 1);
+  $filename = substr($href, $pos + 1);
 
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
       ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%' . $filename, 'LIKE')
+      ->condition('uri', '%/' . $filename, 'LIKE')
       ->orderBy('fid', 'DESC')
       ->execute();
 

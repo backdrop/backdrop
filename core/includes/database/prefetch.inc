@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database interface code for engines that need complete control over their
