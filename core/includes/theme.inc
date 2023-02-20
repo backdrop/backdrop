@@ -917,10 +917,10 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @subsection sub_preprocess_templates Preprocessing for Template Files
  * If the implementation is a template file, several functions are called
  * before the template file is invoked, to modify the $variables array. These
- * fall into the "preprocessing" phase, and are executed (if they exist), in the
- * following order (note that in the following list, HOOK indicates the theme
+ * fall into the "preprocessing" phase, and are executed (if they exist) in the
+ * following order: (Note that in the following list, HOOK indicates the theme
  * hook name, MODULE indicates a module name, THEME indicates a theme name, and
- * ENGINE indicates a theme engine name):
+ * ENGINE indicates a theme engine name.)
  * - template_preprocess(&$variables, $hook): Creates a default set of
  *   variables for all theme hooks with template implementations.
  * - template_preprocess_HOOK(&$variables): Should be implemented by the module
