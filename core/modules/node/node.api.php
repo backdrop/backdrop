@@ -18,7 +18,7 @@
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ * - Node-type-specific hooks: When defining a node type, node_type_save()
  *   returns a 'base' component. Node-type-specific hooks are named
  *   base_hookname() instead of mymodule_hookname() (in a module called
  *   'mymodule' for example). Only the node type's corresponding implementation
