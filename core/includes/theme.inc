@@ -591,7 +591,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
 
       // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
-      // Check for existing variable preprocessors. Ensure arrays.
+      // Check for existing variable preprocessors.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
         $info['preprocess functions'] = array();
         $prefixes = array();

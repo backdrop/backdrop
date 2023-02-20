@@ -21,7 +21,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
     }
   }
 
-  protected function assertReferencable($field, $tests, $handler_name) {
+  protected function assertReferenceable($field, $tests, $handler_name) {
     $handler = entityreference_get_selection_handler($field);
 
     foreach ($tests as $test) {
@@ -164,7 +164,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'Node handler');
+    $this->assertReferenceable($field, $referenceable_tests, 'Node handler');
 
     // Test as an admin.
     $admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
@@ -194,7 +194,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'Node handler (admin)');
+    $this->assertReferenceable($field, $referenceable_tests, 'Node handler (admin)');
 
     // Verify autocomplete input validation.
     $handler = entityreference_get_selection_handler($field);
@@ -303,7 +303,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         'result' => array(),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'User handler');
+    $this->assertReferenceable($field, $referenceable_tests, 'User handler');
 
     $GLOBALS['user'] = $users['admin'];
     $referenceable_tests = array(
@@ -342,7 +342,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'User handler (admin)');
+    $this->assertReferenceable($field, $referenceable_tests, 'User handler (admin)');
   }
 
   /**
@@ -462,7 +462,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         'result' => array(),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'Comment handler');
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler');
 
     // Test as a comment admin.
     $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments'));
@@ -480,7 +480,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'Comment handler (comment admin)');
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler (comment admin)');
 
     // Test as a node and comment admin.
     $admin_user = $this->backdropCreateUser(array('access content', 'access comments', 'administer comments', 'bypass node access'));
@@ -499,7 +499,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $this->assertReferencable($field, $referenceable_tests, 'Comment handler (comment + node admin)');
+    $this->assertReferenceable($field, $referenceable_tests, 'Comment handler (comment + node admin)');
   }
 
   /**
