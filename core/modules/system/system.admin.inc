@@ -1644,7 +1644,7 @@ function system_logging_settings($form, &$form_state) {
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_CRITICAL => t('Critical'),
       WATCHDOG_ERROR => t('Error'),
       WATCHDOG_WARNING => t('Warning'),
       WATCHDOG_NOTICE => t('Notice'),
@@ -2844,4 +2844,3 @@ function system_transliterate_ajax_access() {
   $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
-

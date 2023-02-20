@@ -159,7 +159,9 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Alter tables to MyISAM engine to speed up tests.
    *
-   * MyISAM is faster to delete and copy tables. It gives small adventage when /var/lib/mysql on SHM (memory) device, but much bigger when tests run on regular device.
+   * MyISAM is faster to delete and copy tables. It gives small advantage when
+   * /var/lib/mysql on SHM (memory) device, but much bigger when tests run on
+   * regular device.
    */
   protected function alterToMyISAM() {
     if (Database::getConnection()->driver() != 'mysql') {

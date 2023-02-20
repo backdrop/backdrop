@@ -726,7 +726,7 @@ function backdrop_environment_initialize() {
 
   // When clean URLs are enabled, emulate ?q=foo/bar using REQUEST_URI. It is
   // not possible to append the query string using mod_rewrite without the B
-  // flag (this was added in Apache 2.2.8), because mod_rewrite unescapes the
+  // flag (this was added in Apache 2.2.8), because mod_rewrite un-escapes the
   // path before passing it on to PHP. This is a problem when the path contains
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
@@ -4135,7 +4135,7 @@ function backdrop_autoload($class) {
  * static $foo = &backdrop_static(__FUNCTION__);
  * @endcode
  * However, the above line of code does not work, because PHP only allows static
- * variables to be initializied by literal values, and does not allow static
+ * variables to be initialized by literal values, and does not allow static
  * variables to be assigned to references.
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.static
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.references

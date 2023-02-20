@@ -188,7 +188,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
 
     // Check that a warning is caught by simpletest.
     // The exact error message differs between PHP versions so we check only
-    // the presense of the 'foreach' statement.
+    // the presence of the 'foreach' statement.
     $this->assertAssertion('foreach()', 'Warning', 'Fail', 'simpletest.test', 'SimpleTestFunctionalTest->stubTest()');
 
     // Check that the backtracing code works for specific assert function.
@@ -234,7 +234,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    * @param string $type Assertion type.
    * @param string $status Assertion status.
    * @param string $file File where the assertion originated.
-   * @param string $functuion Function where the assertion originated.
+   * @param string $function Function where the assertion originated.
    * @return Assertion result.
    */
   function assertAssertion($message, $type, $status, $file, $function) {

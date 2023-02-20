@@ -582,7 +582,7 @@ function filter_format_allowed_html($format) {
     }
   }
 
-  // Simplification: if we have both a (intersected) allowlist and a (unioned)
+  // Simplification: if we have both an (intersected) allowlist and a (unioned)
   // denylist, then remove any tags from the allowlist that also exist in the
   // denylist. Now the allowlist alone expresses all tag-level restrictions,
   // and we can delete the denylist.
@@ -2376,7 +2376,7 @@ function _filter_url_escape_comments($match, $escape = NULL) {
     return;
   }
 
-  // Replace all HTML coments with a '<!-- [hash] -->' placeholder.
+  // Replace all HTML comments with a '<!-- [hash] -->' placeholder.
   if ($mode) {
     $content = $match[1];
     $hash = hash('sha256', $content);
@@ -2669,4 +2669,3 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
-

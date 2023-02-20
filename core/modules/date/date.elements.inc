@@ -1788,8 +1788,9 @@ function date_date_popup_pre_validate_alter(&$element, &$form_state, &$input) {
  * Helper function to clear out end date when not being used.
  */
 function date_empty_end_date(&$element, &$form_state, &$input) {
-  // If this is the end date and the option to show an end date has not been selected,
-  // empty the end date to surpress validation errors and stop further processing.
+  // If this is the end date and the option to show an end date has not been
+  // selected, empty the end date to suppress validation errors and stop further
+  // processing.
   $parents = $element['#parents'];
   $parent = array_pop($parents);
   if ($parent == 'value2') {
@@ -1895,7 +1896,7 @@ function date_html5_element_validate(array $element, array &$form_state) {
       $values[$delta]['timezone'] = $timezone;
 
       $string = implode(' ', array_values($date_values['value']));
-      // The validation of inner form items has happended, so we can rely on the
+      // The validation of inner form items has happened, so we can rely on the
       // given values to construct a valid date.
       $date = new BackdropDateTime($string, $timezone);
 
@@ -2160,7 +2161,7 @@ function _date_html5_get_date_limits(array $limit_settings) {
 /**
  * Helper function to construct form item attributes.
  *
- * Takes care of nested (html_datetime) and unnested (html_date) form items.
+ * Takes care of nested (html_datetime) and un-nested (html_date) form items.
  *
  * @param array $date_limits
  *   Array keyed by min/max.

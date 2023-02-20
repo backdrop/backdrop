@@ -1703,8 +1703,8 @@ class NodeSaveTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests determing changes in hook_node_presave() and verifies the static node
-   * load cache is cleared upon save.
+   * Tests determining changes in hook_node_presave() and verifies the static
+   * node load cache is cleared upon save.
    */
   function testDeterminingChanges() {
     // Initial creation.
@@ -1742,7 +1742,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    * @see node_test_node_insert()
    */
   function testNodeSaveOnInsert() {
-    // node_test_node_insert() tiggers a save on insert if the title equals
+    // node_test_node_insert() triggers a save on insert if the title equals
     // 'new'.
     $node = $this->backdropCreateNode(array('title' => 'new'));
     $this->assertEqual($node->title, 'Node ' . $node->nid, 'Node saved on node insert.');
@@ -1770,7 +1770,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
 
-    // Create a content type programmaticaly.
+    // Create a content type programmatically.
     $type = $this->backdropCreateContentType();
 
     $config = config('node.type.' . $type->type);
@@ -2032,7 +2032,7 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
     $this->assertFalse($config->isNew(), 'Test node type found in config.');
     $this->assertEqual($config->get('disabled'), 0, 'Test node type is not disabled');
 
-    // Check that test node type (uncustomized) shows up.
+    // Check that test node type (un-customized) shows up.
     $this->backdropGet('node/add');
     $this->assertText('test', 'Test type is found on node/add');
 
@@ -2273,7 +2273,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
     }
 
-    // Verify 'view any unpubished content' allows view but not edit or delete.
+    // Verify 'view any unpublished content' allows view but not edit or delete.
     $this->backdropLogout();
     $this->backdropLogin($this->base_user_4);
     $this->backdropGet('admin/content');

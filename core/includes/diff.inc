@@ -144,16 +144,16 @@ class DiffOpChange extends DiffOp {
  *
  * The algorithm used here is mostly lifted from the perl module
  * Algorithm::Diff (version 1.06) by Ned Konz, which is available at:
- *     http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
+ * http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
  *
  * More ideas are taken from:
- *     http://www.ics.uci.edu/~eppstein/161/960229.html
+ * http://www.ics.uci.edu/~eppstein/161/960229.html
  *
- * Some ideas are (and a bit of code) are from from analyze.c, from GNU
- * diffutils-2.7, which can be found at:
- *     ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
+ * Some ideas (and a bit of code) are from analyze.c, from GNU diffutils-2.7,
+ * which can be found at:
+ * ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
  *
- * closingly, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
+ * Finally, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
  * are my own.
  *
  * Line length limits for robustness added by Tim Starling, 2005-08-31
@@ -507,7 +507,7 @@ class DiffEngine {
       }
     }
     else {
-      // Use the partitions to split this problem into subproblems.
+      // Use the partitions to split this problem into sub-problems.
       reset($seps);
       $pt1 = $seps[0];
       while ($pt2 = next($seps)) {
@@ -774,9 +774,8 @@ class MappedDiff extends Diff {
    *
    * Computes diff between sequences of strings.
    *
-   * This can be used to compute things like
-   * case-insensitve diffs, or diffs which ignore
-   * changes in white-space.
+   * This can be used to compute things like case-insensitive diffs, or diffs
+   * which ignore changes in white-space.
    *
    * @param $from_lines array An array of strings.
    *   Typically these are lines from a file.

@@ -252,7 +252,7 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
   }
 
   /**
-   * Build an EntityFieldQuery to get referencable entities.
+   * Build an EntityFieldQuery to get referenceable entities.
    */
   protected function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = new EntityFieldQuery();

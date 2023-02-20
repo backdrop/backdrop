@@ -881,7 +881,7 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test form elements, labels, title attibutes and required marks output
+   * Test form elements, labels, title attributes and required marks output
    * correctly and have the correct label option class if needed.
    */
   function testFormLabels() {
@@ -1201,7 +1201,7 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
  *
  * The tested form puts data into the storage during the initial form
  * construction. These tests verify that there are no duplicate form
- * constructions, with and without manual form caching activiated. Furthermore
+ * constructions, with and without manual form caching activated. Furthermore
  * when a validation error occurs, it makes sure that changed form element
  * values aren't lost due to a wrong form rebuild.
  */
@@ -1408,7 +1408,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
     $status = (bool) db_query_range('SELECT 1 FROM {watchdog} WHERE message = :message', 0, 1, array(':message' => 'Form build-id mismatch detected while attempting to store a form in the cache.'));
     $this->assert($status, 'A watchdog message was logged by form_set_cache');
 
-    // Ensure that the form state was not poisoned by the preceeding call.
+    // Ensure that the form state was not poisoned by the preceding call.
     $original = $this->backdropGetAJAX('form_test/form-storage-legacy/' . $build_id);
     $this->assertEqual($original['form']['#build_id_old'], $build_id, 'Original build_id was recorded');
     $this->assertNotEqual($original['form']['#build_id'], $build_id, 'New build_id was generated');
@@ -2386,7 +2386,7 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
         '#config_name' => 'simpletest.testconfig',
         '#config_key' => 'def',
       ),
-      // Test single-element overrrides
+      // Test single-element overrides.
       'rss_description' => array(
         '#value' => $this->randomString(),
         '#config_name' => 'system.core',

@@ -428,7 +428,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   function resultsHandler(e) {
     var $this = $(this);
     var show = e.type === 'mouseenter' || e.type === 'focusin' || e.type === 'touchstart';
-    // Supress the normal click handling on first touch, only highlighting.
+    // Suppress the normal click handling on first touch, only highlighting.
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
