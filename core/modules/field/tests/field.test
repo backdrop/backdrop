@@ -1409,7 +1409,7 @@ class FieldInfoTestCase extends FieldTestCase {
     );
     field_create_instance($instance_definition);
 
-    // Disable the comment module. This clears field_info cache.
+    // Disable the Comment module. This clears field_info cache.
     module_disable(array('comment'));
     $this->assertNull(field_info_instance('comment', 'field', 'comment_node_post'), 'No instances are returned on disabled entity types.');
   }
@@ -1587,7 +1587,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertFieldByName("{$this->field_name}[$langcode][1][value]", '', 'New widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
-    // TODO : check that non-field inputs are preserved ('title')...
+    // @todo: Check that non-field inputs are preserved ('title').
 
     // Yet another time so that we can play with more values -> 3 widgets.
     $this->backdropPost(NULL, array(), t('Add another'));

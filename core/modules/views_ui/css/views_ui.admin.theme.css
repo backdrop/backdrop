@@ -776,7 +776,7 @@ td.group-title {
 
 /* @group Attachment bucket overridden
  *
- * Applies a overridden (italics) font style to overridden buckets.
+ * Applies an overridden font style (italics) to overridden buckets.
  * The better way to implement this would be to add the overridden class
  * to the bucket header when the bucket is overridden and style it as a
  * generic icon classed element. For the moment, we'll style the bucket
