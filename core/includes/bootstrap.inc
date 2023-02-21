@@ -726,7 +726,7 @@ function backdrop_environment_initialize() {
 
   // When clean URLs are enabled, emulate ?q=foo/bar using REQUEST_URI. It is
   // not possible to append the query string using mod_rewrite without the B
-  // flag (this was added in Apache 2.2.8), because mod_rewrite un-escapes the
+  // flag (this was added in Apache 2.2.8), because mod_rewrite unescapes the
   // path before passing it on to PHP. This is a problem when the path contains
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();

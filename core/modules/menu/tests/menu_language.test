@@ -89,7 +89,7 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
     // First remove all existing menu links.
     db_truncate('menu_links')->execute();
 
-    // Add some (un-nested) items to main menu.
+    // Add some (unnested) items to main menu.
     foreach ($this->langcodes as $langcode) {
       $item = array(
         'menu_name' => 'main-menu',

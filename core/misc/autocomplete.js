@@ -145,7 +145,7 @@ Backdrop.jsAC.prototype.selectUp = function () {
  * Highlights a suggestion.
  */
 Backdrop.jsAC.prototype.highlight = function (node) {
-  // Un-highlights a suggestion for "keyup" and "keydown" events.
+  // Unhighlights a suggestion for "keyup" and "keydown" events.
   if (this.selected !== false) {
     $(this.selected).removeClass('selected');
   }
@@ -155,7 +155,7 @@ Backdrop.jsAC.prototype.highlight = function (node) {
 };
 
 /**
- * Un-highlights a suggestion.
+ * Unhighlights a suggestion.
  */
 Backdrop.jsAC.prototype.unhighlight = function (node) {
   $(node).removeClass('selected');

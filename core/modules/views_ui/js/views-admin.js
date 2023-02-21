@@ -367,7 +367,7 @@ $.extend(Backdrop.viewsUi.OptionsSearch.prototype, {
     words = search.split(' ');
     wordsLength = words.length;
 
-    // Start the counter for re-striping rows.
+    // Start the counter for restriping rows.
     zebraCounter = 0;
 
     // Search through the search texts in the form for matching text.

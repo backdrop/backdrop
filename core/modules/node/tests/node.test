@@ -2032,7 +2032,7 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
     $this->assertFalse($config->isNew(), 'Test node type found in config.');
     $this->assertEqual($config->get('disabled'), 0, 'Test node type is not disabled');
 
-    // Check that test node type (un-customized) shows up.
+    // Check that test node type (uncustomized) shows up.
     $this->backdropGet('node/add');
     $this->assertText('test', 'Test type is found on node/add');
 

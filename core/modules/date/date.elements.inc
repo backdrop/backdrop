@@ -2161,7 +2161,7 @@ function _date_html5_get_date_limits(array $limit_settings) {
 /**
  * Helper function to construct form item attributes.
  *
- * Takes care of nested (html_datetime) and un-nested (html_date) form items.
+ * Takes care of nested (html_datetime) and unnested (html_date) form items.
  *
  * @param array $date_limits
  *   Array keyed by min/max.

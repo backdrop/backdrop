@@ -5829,7 +5829,7 @@ function backdrop_json_decode_unicode($json) {
     }
     return $match[1] . $string;
   };
-  // To prevent unintentionally un-escaping the string "\u", be sure that the
+  // To prevent unintentionally unescaping the string "\u", be sure that the
   // the backslash itself is not also escaped. Note that because the replacement
   // may include part of a 4-digit code for a previous Unicode character, this
   // will only escape every-other Unicode character if they are next to each

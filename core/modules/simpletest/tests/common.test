@@ -1500,7 +1500,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
       '<script src="' . file_create_url('core/misc/ajax.js') . '?' . $default_query_string . '"></script>',
       '<script src="' . file_create_url('core/misc/autocomplete.js') . '?' . $default_query_string . '"></script>',
     ));
-    $this->assertTrue(strpos($javascript, $expected) > 0, t('Un-aggregated JavaScript is added in the expected group order.'));
+    $this->assertTrue(strpos($javascript, $expected) > 0, t('Unaggregated JavaScript is added in the expected group order.'));
 
     // Now ensure that with aggregation on, one file is made for the
     // 'every_page' files, and one file is made for the others.

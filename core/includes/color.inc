@@ -47,7 +47,7 @@ class Color {
     // Ignore '#' prefixes.
     $hex = ltrim($hex, '#');
 
-    // Convert shorthand colors, for example '#abc', to '#aabbcc'.
+    // Expand shorthand colors; for example '#abc' to '#aabbcc'.
     if (strlen($hex) == 3) {
       $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
     }

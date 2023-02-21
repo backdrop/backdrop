@@ -772,7 +772,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     $this->assertMenuLinkParents($links, $expected_hierarchy);
 
     // Now delete 'child-2' directly from the database, simulating a database
-    // crash. 'child-1-2' will get re-parented under 'child-1' based on its
+    // crash. 'child-1-2' will get reparented under 'child-1' based on its
     // path.
     // Don't do that at home.
     db_delete('menu_links')

@@ -822,7 +822,7 @@ file = file.test
 
 [FileNameMungingTest]
 name = File naming
-description = Test filename munging and un-munging.
+description = Test filename munging and unmunging.
 group = File API
 file = file.test
 
