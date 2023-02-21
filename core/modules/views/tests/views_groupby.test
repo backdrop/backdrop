@@ -288,7 +288,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['type']['hide_empty'] = 0;
     $handler->display->display_options['fields']['type']['empty_zero'] = 0;
     $handler->display->display_options['fields']['type']['link_to_node'] = 0;
-    /* Filter: Node: Nid */
+    // Filter: Node: NID.
     $handler->display->display_options['filters']['nid']['id'] = 'nid';
     $handler->display->display_options['filters']['nid']['table'] = 'node';
     $handler->display->display_options['filters']['nid']['field'] = 'nid';
