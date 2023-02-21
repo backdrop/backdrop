@@ -185,7 +185,7 @@ class Archive_Tar
                     if ($data == "\37\213") {
                         $this->_compress = true;
                         $this->_compress_type = 'gz';
-                        // No sure it's enough for a magic code ....
+                        // Not sure it's enough for a magic code.
                     } elseif ($data == "BZ") {
                         $this->_compress = true;
                         $this->_compress_type = 'bz2';
