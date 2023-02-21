@@ -53,9 +53,8 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
       'skip comment approval',
     ));
 
-    // Add two users, create a node with the user1 as author and another node
-    // with user2 as author.
-    // For the second node add a comment from user1.
+    // Add two users, create a node with user1 as author and another node with
+    // user2 as author. For the second node, add a comment from user1.
     $this->account = $this->backdropCreateUser();
     $this->account2 = $this->backdropCreateUser();
     $this->backdropLogin($this->account);
