@@ -758,7 +758,7 @@ function admin_bar_links_locale() {
       '#title' => $language_link['language']->name,
       '#href' => url($language_link['href'], array(
         'language' => $language_link['language'],
-        'absolute' => TRUE
+        'absolute' => TRUE,
       )),
       '#below' => array(),
       '#original_link' => array(),
