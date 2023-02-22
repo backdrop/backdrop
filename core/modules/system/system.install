@@ -3413,6 +3413,20 @@ function system_update_1087() {
 }
 
 /**
+ * Enable Admin Bar's Language Switcher component.
+ */
+function system_update_1088() {
+  if (!module_exists('locale')) {
+    return;
+  }
+  $config = config('admin_bar.settings');
+  $components = $config->get('components');
+  $components[] = 'admin_bar.locale';
+  $config->set('components', array_unique($components));
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

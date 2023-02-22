@@ -742,7 +742,7 @@ function admin_bar_links_locale() {
   );
 
   $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
-  $language_links = language_negotiation_get_switch_links('language', $path);
+  $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
 
   if (!isset($language_links->links)) {
     return array();
@@ -756,8 +756,11 @@ function admin_bar_links_locale() {
     $links['locale'][$language_link['language']->langcode] = array(
       '#attributes' => array('class' => array('locale')),
       '#title' => $language_link['language']->name,
-      '#href' => url($language_link['href'], array('language' => $language_link['language'], 'absolute' => TRUE)),
-      '#below' =>  array(),
+      '#href' => url($language_link['href'], array(
+        'language' => $language_link['language'],
+        'absolute' => TRUE
+      )),
+      '#below' => array(),
       '#original_link' => array(),
     );
   }
@@ -841,10 +844,11 @@ function admin_bar_theme_settings() {
       'admin_bar.page' => t('Page links'),
       'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
+      'admin_bar.locale' => t('Language switcher'),
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
-    'admin_bar.back_to_site_link' => array (
+    'admin_bar.back_to_site_link' => array(
       '#states' => array(
         'visible' => array(
           ':input[name="components[admin_bar.icon]"]' => array('checked' => TRUE),
@@ -858,6 +862,9 @@ function admin_bar_theme_settings() {
         ),
       ),
     ),
+    'admin_bar.locale' => array(
+      '#disabled' => TRUE,
+    ),
   );
 
   $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
@@ -867,10 +874,10 @@ function admin_bar_theme_settings() {
   $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
   $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
   $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+  $form['components']['admin_bar.locale']['#description'] = t('Links to switch the language of the user interface. This option is available only when the Locale module is enabled.');
 
   if (module_exists('locale')) {
-    $form['components']['#options']['admin_bar.locale'] = t('Locale links');
-    $form['components']['admin_bar.locale']['#description'] = t('Links to switch the language of the user interface.');
+    $form['components']['admin_bar.locale']['#disabled'] = FALSE;
   }
 
   $form['actions'] = array(
