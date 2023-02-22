@@ -306,8 +306,9 @@ function views_views_plugins() {
     ),
     'row' => array(
       'fields' => array(
-        'title' => t('Fields'),
-        'help' => t('Displays the fields with an optional template.'),
+        'title' => t('Views-managed fields'),
+        // 'help' => t('Displays the fields with an optional template.'),
+        'help' => t('The fields for each view result can be managed directly within this view.'),
         'handler' => 'views_plugin_row_fields',
         'theme' => 'views_view_fields',
         'uses fields' => TRUE,

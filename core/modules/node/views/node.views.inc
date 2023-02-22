@@ -699,14 +699,18 @@ function node_views_data() {
  */
 function node_views_plugins() {
   return array(
-    'module' => 'views', // This just tells our themes are elsewhere.
+    // This just tells our themes are elsewhere.
+    'module' => 'views',
     'row' => array(
       'node' => array(
-        'title' => t('Content'),
-        'help' => t('Display the content with standard node view.'),
+        'title' => t('Content display mode'),
+        // 'help' => t('Display the content with standard node view.'),
+        'help' => t('The fields rendered in each view result can only be managed in the selected content display mode.'),
         'handler' => 'views_plugin_row_node_view',
-        'path' => backdrop_get_path('module', 'node') . '/views', // not necessary for most modules
-        'base' => array('node'), // only works with 'node' as base.
+        // Not necessary for most modules.
+        'path' => backdrop_get_path('module', 'node') . '/views',
+        // Only works with 'node' as base.
+        'base' => array('node'),
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-node',
@@ -715,9 +719,11 @@ function node_views_plugins() {
         'title' => t('Content'),
         'help' => t('Display the content with standard node view.'),
         'handler' => 'views_plugin_row_node_rss',
-        'path' => backdrop_get_path('module', 'node') . '/views', // not necessary for most modules
+        // Not necessary for most modules.
+        'path' => backdrop_get_path('module', 'node') . '/views',
         'theme' => 'views_view_row_rss',
-        'base' => array('node'), // only works with 'node' as base.
+        // Only works with 'node' as base.
+        'base' => array('node'),
         'uses options' => TRUE,
         'type' => 'feed',
         'help topic' => 'style-node-rss',
