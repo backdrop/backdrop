@@ -73,6 +73,9 @@ function admin_bar_output($complete = FALSE) {
     if (in_array('admin_bar.search', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_search();
     }
+    if (in_array('admin_bar.locale', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_locale();
+    }
     if (in_array('admin_bar.page', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_page();
     }
@@ -721,6 +724,54 @@ function admin_bar_links_page() {
 }
 
 /**
+ * Build Locale links.
+ *
+ * @see theme_admin_bar_links()
+ */
+function admin_bar_links_locale() {
+  if (!module_exists('locale') || !language_multilingual()) {
+    return array();
+  }
+
+  global $language;
+  $language_default = $language;
+
+  $links['locale'] = array(
+    '#title' => theme('admin_bar_icon_locale'),
+    '#attributes' => array('class' => array('admin-bar-locale-links')),
+  );
+
+  $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
+  $language_links = language_negotiation_get_switch_links('language', $path);
+
+  if (!isset($language_links->links)) {
+    return array();
+  }
+
+  foreach ($language_links->links as $language_link) {
+    if ($language_link['language']->langcode == $language_default->langcode) {
+      continue;
+    }
+
+    $links['locale'][$language_link['language']->langcode] = array(
+      '#attributes' => array('class' => array('locale')),
+      '#title' => $language_link['language']->name,
+      '#href' => url($language_link['href'], array('language' => $language_link['language'], 'absolute' => TRUE)),
+      '#below' =>  array(),
+      '#original_link' => array(),
+    );
+  }
+
+  // Don't display an empty menu.
+  $locale_links = element_children($links['locale']);
+  if (empty($locale_links)) {
+    return array();
+  }
+
+  return $links;
+}
+
+/**
  * Build alert indicator.
  */
 function admin_bar_links_alert() {
@@ -816,6 +867,11 @@ function admin_bar_theme_settings() {
   $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
   $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
   $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+
+  if (module_exists('locale')) {
+    $form['components']['#options']['admin_bar.locale'] = t('Locale links');
+    $form['components']['admin_bar.locale']['#description'] = t('Links to switch the language of the user interface.');
+  }
 
   $form['actions'] = array(
     '#type' => 'actions',
