@@ -1039,6 +1039,17 @@ function system_modules_submit($form, &$form_state) {
   if ($pre_install_list != $post_install_list) {
     backdrop_flush_all_caches();
     backdrop_set_message(t('The configuration options have been saved.'));
+
+    // Display reminder about uninstalling disabled modules.
+    if (!empty($actions['disable'])) {
+      $disabled_modules = array();
+      foreach ($actions['disable'] as $module) {
+        $disabled_modules[] = $files[$module]->info['name'];
+      }
+      $disabled_message = t('The following modules have been disabled. If they are no longer required, please <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
+      $disabled_message .= theme('item_list', array('items' => $disabled_modules));
+      backdrop_set_message($disabled_message, 'warning');
+    }
   }
 
   // Check if a previous search is present and preserve it on redirect.
@@ -2844,4 +2855,3 @@ function system_transliterate_ajax_access() {
   $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
-
