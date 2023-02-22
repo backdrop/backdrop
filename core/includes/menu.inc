@@ -749,12 +749,26 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
       if (!empty($item['include_file']) && !function_exists($callback)) {
         require_once BACKDROP_ROOT . '/' . $item['include_file'];
       }
-      if (empty($item['title_arguments'])) {
-        $item['title'] = $callback($item['title']);
+      // The check above should be enough to load the include file for the menu
+      // item. However, that is not the case for some menu items with
+      // 'type' => MENU_VISIBLE_IN_BREADCRUMB - I suspect that it happens only
+      // when no 'title arguments' has been provided (or even an empty array).
+      // It appears that the 'include_file' key is missing from the $item array,
+      // so "call to undefined function" is being thrown for the function
+      // specified in their 'title callback', and the error points to
+      // _menu_item_localize().
+      // Need to figure out why and what is exactly happening, but this fixes
+      // the issue for now. Not confident that this won't break other things. It
+      // mostlikely does!
+      if (function_exists($callback)) {
+        if (empty($item['title_arguments'])) {
+          $item['title'] = $callback($item['title']);
+        }
+        else {
+          $item['title'] = call_user_func_array($callback, menu_unserialize($item['title_arguments'], $map));
+        }
       }
-      else {
-        $item['title'] = call_user_func_array($callback, menu_unserialize($item['title_arguments'], $map));
-      }
+
       // Avoid calling check_plain again on l() function.
       if ($callback == 'check_plain') {
         $item['localized_options']['html'] = TRUE;
