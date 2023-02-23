@@ -159,7 +159,7 @@ class views_plugin_query_default extends views_plugin_query {
    * based on $pure_distinct.
    *
    * @param bool $value
-   *   Should the view by distinct.
+   *   Should the view be distinct?
    * @param bool $pure_distinct
    *   Should only the sql keyword be added.
    */
