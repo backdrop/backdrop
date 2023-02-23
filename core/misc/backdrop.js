@@ -760,7 +760,7 @@ Backdrop.featureDetect.flexbox = function() {
  * Example use:
  * @code
  *   Backdrop.optimizedResize.add(function() {
- *     console.log('Smooth AND resource efficient!');
+ *     console.log('Smooth AND resource-efficient!');
  *   });
  * @endcode
  */
