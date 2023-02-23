@@ -23,7 +23,7 @@ class views_handler_field_entity extends views_handler_field {
   public $entity_type;
 
   /**
-   * Stores all entities which are in the result.
+   * Stores all entities that are in the result.
    */
   public $entities;
 
