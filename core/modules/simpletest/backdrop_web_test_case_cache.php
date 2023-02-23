@@ -159,7 +159,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Alter tables to MyISAM engine to speed up tests.
    *
-   * MyISAM is faster to delete and copy tables. It gives small advantage when
+   * MyISAM is faster to delete and copy tables. Its advantage is small when
    * /var/lib/mysql on SHM (memory) device, but much bigger when tests run on
    * regular device.
    */
