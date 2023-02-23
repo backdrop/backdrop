@@ -5,7 +5,7 @@
  */
 
 /**
- * Field handler which allows showing machine name content as human names.
+ * Field handler that allows showing machine name content as human names.
  * @ingroup views_field_handlers
  *
  * Definition items:
