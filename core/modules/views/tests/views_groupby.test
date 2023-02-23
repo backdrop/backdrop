@@ -235,8 +235,8 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   public function testGroupByCountOnlyFilters() {
-    // Check if GROUP BY and HAVING are included when a view.
-    // Doesn't display SUM, COUNT, MAX... functions in SELECT statement.
+    // Check if GROUP BY and HAVING are included when a view doesn't display
+    // SUM, COUNT, MAX... functions in SELECT statement.
 
     $type1 = $this->backdropCreateContentType();
 
