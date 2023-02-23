@@ -1232,7 +1232,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
         $more_link_path = $this->options['alter']['more_link_path'];
         $more_link_path = strip_tags(decode_entities(strtr($more_link_path, $tokens)));
 
-        // Make sure that the path which was run through url() works as well.
+        // Make sure that the path that was run through url() works as well.
         $base_path = base_path();
         // Checks whether the path starts with the base_path.
         if (strpos($more_link_path, $base_path) === 0) {
