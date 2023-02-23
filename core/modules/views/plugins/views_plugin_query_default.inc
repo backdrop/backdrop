@@ -161,7 +161,7 @@ class views_plugin_query_default extends views_plugin_query {
    * @param bool $value
    *   Should the view be distinct?
    * @param bool $pure_distinct
-   *   Should only the sql keyword be added.
+   *   Should only the SQL keyword be added?
    */
   function set_distinct($value = TRUE, $pure_distinct = FALSE) {
     if (!(isset($this->no_distinct) && $value)) {
