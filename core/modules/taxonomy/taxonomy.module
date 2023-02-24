@@ -1747,18 +1747,20 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
 /**
  * Returns the set of valid terms for a taxonomy field.
  *
- * @param $field
+ * @param array $field
  *   The field definition.
- * @return
+ * @param bool $indent
+ *   Whether to add indentation dots to the terms based on their depth.
+ * @return array
  *   The array of valid terms for this field, keyed by term id.
  */
-function taxonomy_allowed_values($field) {
+function taxonomy_allowed_values($field, $indent = TRUE) {
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+          $options[$term->tid] = ($indent ? str_repeat('· ', $term->depth) : '') . $term->name;
         }
       }
     }
@@ -1850,6 +1852,29 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
   );
 
   return $element;
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
+  if ($context['field']['type'] == 'taxonomy_term_reference' && in_array($element['#type'], array('checkboxes', 'radios'))) {
+    $option_extras = array();
+    foreach ($context['field']['settings']['allowed_values'] as $tree) {
+      if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+        if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
+          foreach ($terms as $term) {
+            $option_extras[$term->tid] = array('#attributes' => array('class' => array('taxonomy-term-depth-' . $term->depth)));
+          }
+        }
+      }
+    }
+    $element += $option_extras;
+    $element['#attached'] = array(
+      'css' => array(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css'),
+    );
+    $element['#options'] = taxonomy_allowed_values($context['field'], FALSE);
+  }
 }
 
 /**
