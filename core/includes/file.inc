@@ -196,7 +196,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @see file_uri_target()
  */
 function file_uri_scheme($uri) {
-  $position = strpos($uri, '://');
+  $position = strpos((string) $uri, '://');
   return $position ? substr($uri, 0, $position) : FALSE;
 }
 
@@ -456,7 +456,10 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
     if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
       return backdrop_chmod($directory);
     }
-    return FALSE;
+    // Race conditions could lead to the directory having been created by
+    // another request. Check if the directory exists again after failing.
+    // See https://github.com/backdrop/backdrop-issues/issues/5631
+    return is_dir($directory) && is_writable($directory);
   }
   // The directory exists, so check to see if it is writable.
   $writable = is_writable($directory);
@@ -524,6 +527,9 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
  *
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
+ *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
@@ -532,7 +538,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  * @return
  *   A string representing the desired contents of the .htaccess file.
  *
- * @see file_create_htaccess()
+ * @see file_save_htaccess()
  */
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
@@ -548,6 +554,12 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 
 # If we know how to do it safely, disable the PHP engine entirely.
 <IfModule mod_php5.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
   php_flag engine off
 </IfModule>
 
@@ -870,9 +882,6 @@ function file_valid_uri($uri) {
  * - If the $source and $destination are equal, the behavior depends on the
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
- * - Works around a PHP 5.3 bug where copy() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1137,9 +1146,6 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
- * - Works around a PHP 5.3 bug where rename() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1199,8 +1205,8 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  * exploit.php_.pps.
  *
  * Specifically, this function adds an underscore to all extensions that are
- * between 2 and 5 characters in length, internal to the file name, and not
- * included in $extensions.
+ * between 2 and 5 characters in length, internal to the file name, and either
+ * included in the list of unsafe extensions, or not included in $extensions.
  *
  * Function behavior is also controlled by the Backdrop variable
  * 'allow_insecure_uploads'. If 'allow_insecure_uploads' evaluates to TRUE, no
@@ -1209,7 +1215,8 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  * @param $filename
  *   File name to modify.
  * @param $extensions
- *   A space-separated list of extensions that should not be altered.
+ *   A space-separated list of extensions that should not be altered. Note that
+ *   extensions that are unsafe will be altered regardless of this parameter.
  * @param $alerts
  *   If TRUE, backdrop_set_message() will be called to display a message if the
  *   file name was changed.
@@ -1225,7 +1232,11 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
-    $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
+    $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
+
+    // Remove unsafe extensions from the list of allowed extensions. The list is
+    // copied from file_save_upload().
+    $allowlist = array_diff($allowlist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1238,7 +1249,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // of allowed extensions.
     foreach ($filename_parts as $filename_part) {
       $new_filename .= '.' . $filename_part;
-      if (!in_array(strtolower($filename_part), $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
+      if (!in_array(strtolower($filename_part), $allowlist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
         $new_filename .= '_';
       }
     }
@@ -1573,25 +1584,36 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $validators['file_validate_extensions'][0] = $extensions;
   }
 
-  if (!empty($extensions)) {
-    // Munge the filename to protect against possible malicious extension hiding
-    // within an unknown file type (ie: filename.html.foo).
-    $file->filename = file_munge_filename($file->filename, $extensions);
-  }
 
-  // Rename potentially executable files, to help prevent exploits (i.e. will
-  // rename filename.php.foo and filename.php to filename.php.foo.txt and
-  // filename.php.txt, respectively). Don't rename if 'allow_insecure_uploads'
-  // evaluates to TRUE.
-  if (!settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
-    $file->filemime = 'text/plain';
-    // The destination filename will also later be used to create the URI.
-    $file->filename .= '.txt';
-    // The .txt extension may not be in the allowed list of extensions. We have
-    // to add it here or else the file upload will fail.
+  if (!settings_get('allow_insecure_uploads', 0)) {
     if (!empty($extensions)) {
-      $validators['file_validate_extensions'][0] .= ' txt';
-      backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+      // Munge the filename to protect against possible malicious extension hiding
+      // within an unknown file type (ie: filename.html.foo).
+      $file->filename = file_munge_filename($file->filename, $extensions);
+    }
+
+    // Rename potentially executable files, to help prevent exploits (i.e. will
+    // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
+    // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
+    // evaluates to TRUE.
+    if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
+      // If the file will be rejected anyway due to a disallowed extension, it
+      // should not be renamed; rather, we'll let file_validate_extensions()
+      // reject it below.
+      if (!isset($validators['file_validate_extensions']) || !file_validate_extensions($file, $extensions)) {
+        $file->filemime = 'text/plain';
+        if (substr($file->filename, -4) != '.txt') {
+          // The destination filename will also later be used to create the URI.
+          $file->filename .= '.txt';
+        }
+        $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
+        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+        // The .txt extension may not be in the allowed list of extensions. We have
+        // to add it here or else the file upload will fail.
+        if (!empty($validators['file_validate_extensions'][0])) {
+          $validators['file_validate_extensions'][0] .= ' txt';
+        }
+      }
     }
   }
 
@@ -1751,7 +1773,18 @@ function file_validate(File $file, $validators = array()) {
   }
 
   // Let other modules perform validation on the new file.
-  return array_merge($errors, module_invoke_all('file_validate', $file));
+  $errors = array_merge($errors, module_invoke_all('file_validate', $file));
+
+  // Ensure the file does not contain a malicious extension. At this point
+  // file_save_upload() will have munged the file so it does not contain a
+  // malicious extension. Contributed and custom code that calls this method
+  // needs to take similar steps if they need to permit files with malicious
+  // extensions to be uploaded.
+  if (empty($errors) && !settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
+    $errors[] = t('For security reasons, your upload has been rejected.');
+  }
+
+  return $errors;
 }
 
 /**
@@ -2499,10 +2532,12 @@ function backdrop_dirname($uri) {
 /**
  * Gets the filename from a given path.
  *
- * PHP's basename() does not properly support streams or filenames beginning
- * with a non-US-ASCII character.
+ * Similar to PHP's basename() with the following differences:
+ *   - Any trailing slashes are automatically trimmed.
+ *   - Is not locale-aware, and works with all UTF-8 characters. Where PHP might
+ *     not process file paths with non-Latin characters unless allowed through
+ *     setlocale(), this function will remove the extensions from any string.
  *
- * @see http://bugs.php.net/bug.php?id=37738
  * @see basename()
  *
  * @ingroup php_wrappers
@@ -2637,7 +2672,8 @@ function backdrop_tempnam($directory, $prefix) {
  * Gets the path of system-appropriate temporary directory.
  */
 function file_directory_temp() {
-  $temporary_directory = config_get('system.core', 'file_temporary_path');
+  $site_config = config('system.core');
+  $temporary_directory = $site_config->get('file_temporary_path');
 
   if (empty($temporary_directory)) {
     $directories = array();
@@ -2667,7 +2703,7 @@ function file_directory_temp() {
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
-      $temporary_directory = config_get('system.core', 'file_public_path') . '/tmp';
+      $temporary_directory = $site_config->get('file_public_path') . '/tmp';
 
       // Windows accepts paths with either slash (/) or backslash (\), but will
       // not accept a path which contains both a slash and a backslash. Since

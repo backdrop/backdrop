@@ -1,11 +1,11 @@
 <?php
-
 /**
  * @file
  * Default theme implementation for comments.
  *
  * Available variables:
  * - $author: Comment author. Can be link or plain text.
+ * - $bundle: The bundle the comment belongs to, e.g. 'comment_node_post'.
  * - $content: An array of comment items. Use render($content) to print them
  *   all, or print a subset such as render($content['field_example']). Use
  *   hide($content['field_example']) to temporarily suppress the printing of a
@@ -18,6 +18,7 @@
  *   desired parameters on the $comment->changed variable.
  * - $new: New comment marker.
  * - $permalink: Comment permalink.
+ * - $permalink_path: Available to build your own permalink.
  * - $submitted: Submission information created from $author and $created during
  *   template_preprocess_comment().
  * - $user_picture: The comment author's picture from user-picture.tpl.php.
@@ -25,12 +26,18 @@
  * - $status: Comment status. Possible values are:
  *   comment-unpublished, comment-published or comment-preview.
  * - $title: Linked title.
+ * - $title_display: Should the title be displayed (TRUE or FALSE).
+ * - $title_classes: Specific classes for the title. Default is:
+ *   - comment-title: Title of the specific comment.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
  *   - comment: The current template type, i.e., "theme hook".
  *   - comment-by-anonymous: Comment by an unregistered user.
  *   - comment-by-node-author: Comment by the author of the parent node.
  *   - comment-preview: When previewing a new or edited comment.
+ *   - comment-title-hidden: Comment titles should be hidden.
+ *   - comment-title-auto: Comment titles are automatically generated.
+ *   - commet-title-custom: Comment titles are custom for each comment.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to
  *     administrators.
@@ -44,6 +51,7 @@
  * - $title_suffix (array): An array containing additional output populated by
  *   modules, intended to be displayed after the main title tag that appears in
  *   the template.
+ * - $view_mode: Display mode, e.g. 'full', or 'default'.
  *
  * These two variables are provided for context:
  * - $comment: Full comment object.
@@ -58,12 +66,14 @@
 ?>
 <article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
-  <?php print render($title_prefix); ?>
   <?php if ($new): ?>
     <mark class="new"><?php print $new; ?></mark>
   <?php endif; ?>
-  <h3><?php print $title; ?></h3>
-  <?php print render($title_suffix); ?>
+  <?php if ($title_display): ?>
+    <?php print render($title_prefix); ?>
+    <h3 class="<?php print implode(' ', $title_classes); ?>"><?php print $title; ?></h3>
+    <?php print render($title_suffix); ?>
+  <?php endif; ?>
 
   <footer>
     <?php print $user_picture; ?>

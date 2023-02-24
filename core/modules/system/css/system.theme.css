@@ -12,12 +12,12 @@ fieldset {
   margin-bottom: 1em;
   padding: 0.5em;
 }
-@-moz-document url-prefix() {
-  /* Firefox fix, see stackoverflow.com/questions/17408815 */
-  fieldset {
-    display: table-cell;
-    vertical-align: top;
-  }
+details summary {
+  display: list-item;
+  cursor: pointer;
+}
+details summary:focus:not(:focus-visible) {
+  outline: none;
 }
 form {
   margin: 0;
@@ -119,7 +119,7 @@ input.form-radio {
   vertical-align: middle;
 }
 .form-required {
-  color: #f00;
+  color: #e60000;
 }
 .marker{
   font-size: 0.9em;
@@ -243,7 +243,7 @@ abbr.ajax-changed {
   background-repeat: no-repeat;
 }
 .fieldset-legend span.summary {
-  color: #999;
+  color: #707070;
   font-size: 0.9em;
   margin-left: 0.5em; /* LTR */
 }
@@ -550,4 +550,11 @@ img.align-right {
   content: '';
   display: table;
   clear: both;
+}
+
+/**
+ * Labels & machine names.
+ */
+.machine-name {
+  font-size: smaller;
 }

@@ -8,58 +8,63 @@
     "user_empty_timezone_message": 0,
     "formats": {
         "long": {
-            "label": "Long Date",
-            "pattern": "l, F j, Y - g:ia",
+            "label": "Long",
+            "pattern": "l, j F, Y - g:ia",
             "module": "system"
         },
         "medium": {
-            "label": "Medium Date",
-            "pattern": "D, m/d/Y - g:ia",
+            "label": "Medium",
+            "pattern": "D, d/m/Y - g:ia",
             "module": "system"
         },
         "short": {
-            "label": "Short Date",
-            "pattern": "m/d/Y - g:ia",
+            "label": "Short",
+            "pattern": "d/m/Y - g:ia",
+            "module": "system"
+        },
+        "date_only": {
+            "label": "Date only",
+            "pattern": "d/m/Y",
             "module": "system"
         },
         "html_datetime": {
-            "label": "HTML Datetime",
+            "label": "HTML datetime",
             "pattern": "Y-m-d\\TH:i:sO",
             "module": "system",
             "hidden": 1
         },
         "html_date": {
-            "label": "HTML Date",
+            "label": "HTML date",
             "pattern": "Y-m-d",
             "module": "system",
             "hidden": 1
         },
         "html_time": {
-            "label": "HTML Time",
+            "label": "HTML time",
             "pattern": "H:i:s",
             "module": "system",
             "hidden": 1
         },
         "html_yearless_date": {
-            "label": "HTML Yearless date",
+            "label": "HTML yearless date",
             "pattern": "m-d",
             "module": "system",
             "hidden": 1
         },
         "html_week": {
-            "label": "HTML Week",
+            "label": "HTML week",
             "pattern": "Y-\\WW",
             "module": "system",
             "hidden": 1
         },
         "html_month": {
-            "label": "HTML Month",
+            "label": "HTML month",
             "pattern": "Y-m",
             "module": "system",
             "hidden": 1
         },
         "html_year": {
-            "label": "HTML Year",
+            "label": "HTML year",
             "pattern": "Y",
             "module": "system",
             "hidden": 1

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File type editing user interface.
+ * Admin page callbacks for the File module.
  */
 
 /**
@@ -12,7 +12,7 @@ function file_list_types_page() {
   $types = file_type_get_types();
   $names = file_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Storage state'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Storage state'), t('Operations'));
   $rows_enabled = array();
   $rows_disabled = array();
   $weight = 0;
@@ -26,13 +26,12 @@ function file_list_types_page() {
     $weight++;
     $row = array(
       array(
-        'data' => theme('file_type_overview',
-          array(
-            'name' => $type->name,
-            'description' => $type->description,
-          )
-        ),
+        'data' => theme('label_machine_name__file', array(
+          'label' => $type->name,
+          'machine_name' => $type->type,
+        )),
       ),
+      filter_xss_admin($type->description),
     );
 
 
@@ -174,6 +173,7 @@ function file_type_form($form, &$form_state, $type = NULL) {
     '#description' => t('This is the human readable name of the file type.'),
     '#required' => TRUE,
     '#default_value' => $type->name,
+    '#size' => 30,
   );
 
   $form['type'] = array(
@@ -195,10 +195,16 @@ function file_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->description,
   );
 
+  $mimetypes_description = t('The media (MIME) type(s) to be associated with this file type. When uploading a file, Backdrop automatically identifies the file type based on its media type. If multiple file types have the same media type, you will be prompted to manually select the file type.');
+  $mimetypes_description .= ' ' . l(t('More information about media types'), 'https://en.wikipedia.org/wiki/Media_type') . '.';
+  $mimetypes_description .= theme('item_list', array('items' => array(
+    t('Enter one media type per line'),
+    t('Asterisks can be used as wildcards (e.g.: !example)', array('!example' => '<code>image/*</code>')),
+  )));
   $form['mimetypes'] = array(
     '#type' => 'textarea',
     '#title' => t('Media types'),
-    '#description' => t("This is the list of media types (MIME types) which will be aassociated with this file type. When files with these media types are uploaded, Backdrop will identify the file type based on its media type. You should not use the same media types in more than one file type. Enter one media type per line. <br/><a href='@media_types_info'>More information about media types</a>.", array('@media_types_info' => 'https://en.wikipedia.org/wiki/Media_type')),
+    '#description' => $mimetypes_description,
     '#default_value' => implode("\n", $type->mimetypes),
   );
 
@@ -369,10 +375,13 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
+  $formatter = $form_state['values']['display']['formatter'];
+  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : array();
+
 
   $display = array(
-    'formatter' => $form_state['values']['display']['formatter'],
-    'settings' => $form_state['values']['display']['settings'],
+    'formatter' => $formatter,
+    'settings' => $settings,
   );
 
   file_display_save($form['#file_type'], $form['#view_mode'], $display);
@@ -509,20 +518,16 @@ function file_settings_form($form, &$form_state) {
   $form['default_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Default file directory'),
-    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.'),
+    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.') . ' ' . theme('token_tree_link'),
     '#default_value' => $config->get('default_file_directory'),
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
   );
-  $form['default_file_directory']['tokens'] = array(
-    '#theme' => 'token_tree',
-    '#dialog' => TRUE,
-  );
 
-  $form['default_allowed_extensions('] = array(
+  $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => $config->get('default_allowed_extensions('),
+    '#default_value' => $config->get('default_allowed_extensions'),
     '#description' => t('Separate extensions with a space and do not include the leading dot.'),
     '#maxlength' => NULL,
   );
@@ -678,4 +683,52 @@ function _file_sort_weight_label($a, $b) {
   else {
     return $a_weight < $b_weight ? -1 : 1;
   }
+}
+
+/**
+ * Confirm form for file type classification process.
+ *
+ * @see file_type_classify_confirm_submit()
+ * @see file_menu()
+ *
+ * @ingroup forms
+ */
+function file_type_classify_confirm($form, $form_state) {
+  $form = confirm_form(
+    array(),
+    t('Are you sure you want to classify the file types?'),
+    'admin/reports/status',
+    t('This action will classify all files that are missing a type, and may be a lengthy process.'),
+    t('Classify file types'),
+    t('Cancel')
+  );
+  // Change the css class of the submit button to something less scary.
+  $form['actions']['submit']['#attributes']['class'][0] = 'button-primary';
+  return $form;
+}
+
+/**
+ * Submit handler for file type classification confirmation form.
+ * 
+ * @see file_type_classify_confirm()
+ */
+function file_type_classify_confirm_submit($form, &$form_state) {
+  $result = db_query('SELECT fid FROM {file_managed} WHERE `type` = :db_condition_placeholder', array(':db_condition_placeholder' => 'undefined'));
+  $fids = $result->fetchCol();
+  if (!empty($fids)) {
+    $batch = array(
+      'title' => t('Classifying files'),
+      'operations' => array(
+        array('file_type_classify_batch', array($fids)),
+      ),
+      'progress_message' => '',
+      'finished' => 'file_type_classify_finished',
+    );
+    batch_set($batch);
+  }
+  else {
+    file_needs_type_classification(FALSE);
+  }
+
+  $form_state['redirect'] = 'admin/reports/status';
 }
