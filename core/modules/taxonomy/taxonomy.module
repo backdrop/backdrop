@@ -1858,7 +1858,10 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  * Implements hook_field_widget_form_alter().
  */
 function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
-  if ($context['field']['type'] == 'taxonomy_term_reference' && in_array($element['#type'], array('checkboxes', 'radios'))) {
+  if ($context['field']['type'] == 'taxonomy_term_reference' && in_array($element['#type'], array(
+    'checkboxes',
+    'radios',
+  ))) {
     $option_extras = array();
     foreach ($context['field']['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
