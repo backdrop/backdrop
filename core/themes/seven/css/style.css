@@ -890,7 +890,14 @@ div.teaser-checkbox .form-item,
 .form-item input.form-radio,
 .form-item input.form-checkbox {
   vertical-align: middle;
+}
+[dir="ltr"] .form-item input.form-radio,
+[dir="ltr"] .form-item input.form-checkbox {
   margin-right: 5px;
+}
+[dir="rtl"] .form-item input.form-radio,
+[dir="rtl"] .form-item input.form-checkbox {
+  margin-left: 5px;
 }
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
