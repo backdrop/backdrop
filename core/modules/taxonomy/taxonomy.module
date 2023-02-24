@@ -1751,6 +1751,9 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
  *   The field definition.
  * @param bool $indent
  *   Whether to add indentation dots to the terms based on their depth.
+ *
+ * @since 1.x.x Added $indent parameter.
+ *
  * @return array
  *   The array of valid terms for this field, keyed by term id.
  */
