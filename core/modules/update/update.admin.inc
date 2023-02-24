@@ -180,5 +180,5 @@ function update_settings_submit($form, $form_state) {
   }
 
   // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }

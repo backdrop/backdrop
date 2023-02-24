@@ -275,7 +275,7 @@ function search_admin_settings_submit($form, &$form_state) {
   }
 
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

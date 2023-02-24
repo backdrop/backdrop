@@ -311,7 +311,7 @@ function language_negotiation_configure_session_form($form, &$form_state) {
  */
 function language_negotiation_configure_session_form_submit($form, &$form_state) {
   config_set('locale.settings', 'language_negotiation_session_parameter', $form_state['values']['language_negotiation_session_parameter']);
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**

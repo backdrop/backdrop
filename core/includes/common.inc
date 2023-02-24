@@ -8942,3 +8942,11 @@ function backdrop_get_filetransfer_info() {
   }
   return $info;
 }
+
+/**
+ * A helper function to display a consistent message when configuration options
+ * are saved.
+ */
+function backdrop_set_message_config_saved() {
+  backdrop_set_message(t('The configuration options have been saved.'));
+}

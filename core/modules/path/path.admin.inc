@@ -448,7 +448,7 @@ function path_patterns_form_submit($form, &$form_state) {
   }
 
   $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message_config_saved();
 }
 
 /**
