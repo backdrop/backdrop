@@ -923,7 +923,7 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     // node/preview/{$this->content_type->type}/%, and run the same tests.
 
     $layouts = layout_load_all();
-    $preview_layout = &$layouts['custom_node_preview'];
+    $preview_layout = $layouts['custom_node_preview'];
     $preview_layout->enable();
     $preview_layout->setPath('node/preview/' . $this->content_type->type . '/%');
     $preview_layout->save();
@@ -1051,9 +1051,9 @@ class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
     // path node/%/revisions/%/view.
 
     $layouts = layout_load_all();
-    $preview_layout = &$layouts['custom_node_revision'];
-    $preview_layout->enable();
-    $preview_layout->save();
+    $revision_layout = $layouts['custom_node_revision'];
+    $revision_layout->enable();
+    $revision_layout->save();
 
     // Check the old revision to see that it uses our override layout.
     $node = $nodes[0];
