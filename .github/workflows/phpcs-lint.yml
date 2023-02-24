@@ -36,4 +36,4 @@ jobs:
       #   uses: tj-actions/changed-files@v35
 
       - name: Run CodeSniffer
-        run: phpcs -n --colors --standard=../phpcs/Backdrop --basepath=. --extensions=php,inc,module,install,profile,test --filter=gitmodified . #${{ steps.changed-files.outputs.all_changed_files }}
+        run: phpcs -n --colors --standard=../phpcs/Backdrop --basepath=. --extensions=php,inc,module,install,profile,test --filter=GitStaged . #${{ steps.changed-files.outputs.all_changed_files }}
