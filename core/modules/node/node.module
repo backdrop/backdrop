@@ -1705,11 +1705,13 @@ function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
 
   // Check for node revisions.
   if (count($map) == 5 && $map[0] == 'node' && $map[2] == 'revisions' && $map[4] == 'view') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node revision.
     $rev_node = $map[1];
     if ($rev_node) {
       $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
       if ($node_layouts) {
-        $layouts = $node_layouts;
+        $layouts += $node_layouts;
         foreach ($layouts as $layout) {
           foreach ($layout->getContexts() as $context) {
             if (isset($context->position)) {
