@@ -2506,11 +2506,11 @@ function system_update_1026() {
   $config->set('file_private_path', update_variable_get('file_private_path', ''));
   $config->set('image_jpeg_quality', update_variable_get('image_jpeg_quality', 75));
 
-  // Get the Drupal install profile and switch it to "standard" if not usable
-  // with Backdrop.
+  // Get the Drupal installation profile, and switch it to "standard" if not
+  // available in Backdrop.
   $current_profile = update_variable_get('install_profile', 'standard');
   $available_profiles = backdrop_system_listing('/\.profile$/', 'profiles');
-  if (!array_key_exists($current_profile, $available_profiles)) {}
+  if (!array_key_exists($current_profile, $available_profiles)) {
     $old_profile = $current_profile;
     $current_profile = 'standard';
 
