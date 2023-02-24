@@ -237,6 +237,9 @@ function admin_bar_preprocess_page(&$variables) {
   }
 
   $config = config('admin_bar.settings');
+  if ($setting = $config->get('local_actions_bottom')) {
+    $settings['local_actions_bottom'] = $setting;
+  }
   if ($setting = $config->get('margin_top')) {
     $settings['margin_top'] = $setting;
   }

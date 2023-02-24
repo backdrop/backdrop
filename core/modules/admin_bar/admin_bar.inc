@@ -493,11 +493,19 @@ function admin_bar_links_menu($tree) {
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
-    // Make action links (typically "Add ...") appear first in dropdowns.
-    // They might appear first already, but only as long as there is no link
-    // that comes alphabetically first (e.g., a node type with label "Ad").
+    // Make action links (typically "Add ...") appear at the very top/bottom in
+    // the menu dropdowns, according to configuration (defaults to top). They
+    // might already be in the appropriate position, but only as long as there
+    // is no link that comes before/after them alphabetically (e.g., a content
+    // type with its label starting with "Ad").
+    $local_actions_bottom = config_get('admin_bar.settings', 'local_actions_bottom');
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      $data['link']['weight'] -= 1000;
+      if ($local_actions_bottom) {
+        $data['link']['weight'] += 9999;;
+      }
+      else {
+        $data['link']['weight'] -= 9999;
+      }
     }
 
     $links[$data['link']['href']] = array(
@@ -766,22 +774,39 @@ function admin_bar_links_alert() {
 function admin_bar_theme_settings() {
   $config = config('admin_bar.settings');
   $form['#config'] = 'admin_bar.settings';
-  $form['margin_top'] = array(
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings'),
+  );
+  $form['settings']['margin_top'] = array(
     '#type' => 'checkbox',
     '#title' => t('Adjust top margin'),
     '#default_value' => $config->get('margin_top'),
     '#description' => t('Shifts the entire site content down to make room for the administration bar. If disabled, absolute- or fixed-positioned page elements may be covered by the administration bar.'),
   );
-  $form['position_fixed'] = array(
+  $form['settings']['position_fixed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Keep bar at top of page'),
     '#default_value' => $config->get('position_fixed'),
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
+  $form['settings']['local_actions_bottom'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Keep local tasks at the bottom of menus'),
+    '#default_value' => $config->get('local_actions_bottom'),
+    '#description' => t('These are typically links like "Add ...". The default is for them to be placed at the top of other links within the same parent link, but you may want to move them to the bottom if they are getting in the way.'),
+  );
 
   $form['components'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enabled components'),
+    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+  );
+  $form['components']['components'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
+    '#title_display' => 'invisible',
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
       'admin_bar.back_to_site_link' => t('Back to site link'),
@@ -792,7 +817,6 @@ function admin_bar_theme_settings() {
       'admin_bar.account' => t('Account links'),
     ),
     '#default_value' => $config->get('components'),
-    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
     'admin_bar.back_to_site_link' => array (
       '#states' => array(
         'visible' => array(
@@ -809,13 +833,13 @@ function admin_bar_theme_settings() {
     ),
   );
 
-  $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
-  $form['components']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
-  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
-  $form['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
-  $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
-  $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
-  $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+  $form['components']['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['components']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
+  $form['components']['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
+  $form['components']['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
+  $form['components']['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
 
   $form['actions'] = array(
     '#type' => 'actions',
