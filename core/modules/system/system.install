@@ -2509,27 +2509,21 @@ function system_update_1026() {
   // Get the Drupal install profile and switch it to "standard" if not usable
   // with Backdrop.
   $current_profile = update_variable_get('install_profile', 'standard');
-  if ($current_profile != 'standard') {
-    $core_profiles = file_scan_directory('./core/profiles', '/\.profile$/', array('key' => 'name'));
-    $root_profiles = file_scan_directory('./profiles', '/\.profile$/', array('key' => 'name'));
-    $available = array_merge($core_profiles, $root_profiles);
-    if ($current_profile == 'minimal' || !array_key_exists($current_profile, $available)) {
-      $old_profile = $current_profile;
-      $current_profile = 'standard';
+  $available_profiles = backdrop_system_listing('/\.profile$/', 'profiles');
+  if (!array_key_exists($current_profile, $available_profiles)) {}
+    $old_profile = $current_profile;
+    $current_profile = 'standard';
 
-      db_update('system')
-        ->fields(array(
-         'status' => 1,
-         'schema_version' => 0,
-       ))
-       ->condition('name', $current_profile)->execute();
-
-      db_update('system')
-        ->fields(array(
-          'status' => 0,
-        ))
-        ->condition('name', $old_profile)->execute();
-    }
+    // Enable the "standard" profile.
+    db_update('system')
+      ->fields(array('status' => 1, 'schema_version' => 0))
+      ->condition('name', $current_profile)
+      ->execute();
+    // Disable the old, unavailable/missing profile.
+    db_update('system')
+      ->fields(array('status' => 0))
+      ->condition('name', $old_profile)
+      ->execute();
   }
   $config->set('install_profile', $current_profile);
 
