@@ -762,8 +762,6 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
-  backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
   backdrop_set_installed_schema_version('system', $version);
