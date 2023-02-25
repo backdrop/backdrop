@@ -1867,7 +1867,9 @@ function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_stat
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
-            $option_extras[$term->tid] = array('#attributes' => array('class' => array('taxonomy-term-depth-' . $term->depth)));
+            $option_extras[$term->tid] = array(
+              '#field_prefix' => theme('indentation', array('size' => $term->depth)),
+            );
           }
         }
       }
