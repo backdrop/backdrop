@@ -792,11 +792,17 @@ function admin_bar_theme_settings() {
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
   $form['settings']['local_actions_bottom'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Keep local tasks at the bottom of menus'),
+    '#type' => 'radios',
+    '#title' => t('Local tasks placement within their parent link'),
     '#default_value' => $config->get('local_actions_bottom'),
-    '#description' => t('These are typically links like "Add ...". The default is for them to be placed at the top of other links within the same parent link, but you may want to move them to the bottom if they are getting in the way.'),
+    '#options' => array(
+      0 => t('Keep on top'),
+      1 => t('Place at the bottom'),
+    ),
+    '#description' => t('These are typically links like "Add content type" or "Add menu".'),
   );
+  $form['settings']['local_actions_bottom'][0]['#description'] = t('This is the default.');
+  $form['settings']['local_actions_bottom'][1]['#description'] = t('You may want to move them to the bottom if they are getting in the way.');
 
   $form['components'] = array(
     '#type' => 'fieldset',
