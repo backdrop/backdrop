@@ -863,7 +863,7 @@ function admin_bar_theme_settings() {
       ),
     ),
     'admin_bar.locale' => array(
-      '#disabled' => TRUE,
+      '#disabled' => !module_exists('locale'),
     ),
   );
 
@@ -874,11 +874,11 @@ function admin_bar_theme_settings() {
   $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
   $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
   $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
-  $form['components']['admin_bar.locale']['#description'] = t('Links to switch the language of the user interface. This option is available only when the Locale module is enabled.');
-
-  if (module_exists('locale')) {
-    $form['components']['admin_bar.locale']['#disabled'] = FALSE;
+  $language_switcher_description = t('Links to switch the language of the user interface.');
+  if (!(module_exists('locale'))) {
+    $language_switcher_description .= ' ' . t('This option is available only when the <a href="@link">Locale module</a> is enabled.', array('@link' => url('admin/modules', array('query' => array('search' => 'locale')))));
   }
+  $form['components']['admin_bar.locale']['#description'] = $language_switcher_description;
 
   $form['actions'] = array(
     '#type' => 'actions',

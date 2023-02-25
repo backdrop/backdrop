@@ -3413,10 +3413,11 @@ function system_update_1087() {
 }
 
 /**
- * Enable Admin Bar's Language Switcher component.
+ * Enable Admin Bar's Language Switcher component if this is a multilingual
+ * site.
  */
 function system_update_1088() {
-  if (!module_exists('locale')) {
+  if (!module_exists('locale') && language_multilingual()) {
     return;
   }
   $config = config('admin_bar.settings');
