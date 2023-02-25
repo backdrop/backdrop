@@ -20,47 +20,6 @@
 }
 
 /**
- * Indents for tree-structured form.
- */
-[dir="ltr"] .taxonomy-term-depth-0 {
-  margin-left: 0;
-}
-[dir="ltr"] .taxonomy-term-depth-1 {
-  margin-left: 1em;
-}
-[dir="ltr"] .taxonomy-term-depth-2 {
-  margin-left: 2em;
-}
-[dir="ltr"] .taxonomy-term-depth-3 {
-  margin-left: 3em;
-}
-[dir="ltr"] .taxonomy-term-depth-4 {
-  margin-left: 4em;
-}
-[dir="ltr"] .taxonomy-term-depth-5 {
-  margin-left: 5em;
-}
-
-[dir="rtl"] .taxonomy-term-depth-0 {
-  margin-right: 0;
-}
-[dir="rtl"] .taxonomy-term-depth-1 {
-  margin-right: 1em;
-}
-[dir="rtl"] .taxonomy-term-depth-2 {
-  margin-right: 2em;
-}
-[dir="rtl"] .taxonomy-term-depth-3 {
-  margin-right: 3em;
-}
-[dir="rtl"] .taxonomy-term-depth-4 {
-  margin-right: 4em;
-}
-[dir="rtl"] .taxonomy-term-depth-5 {
-  margin-right: 5em;
-}
-
-/**
  * Vocabulary listing page.
  */
 .vocabulary-name .vocabulary-label {
