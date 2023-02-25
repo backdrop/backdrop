@@ -1868,7 +1868,7 @@ function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_stat
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
             if (isset($options[$term->tid])) {
-              $element['#options'][$term->tid] =  theme('indentation', array('size' => $term->depth)) . check_plain($options[$term->tid]);
+              $element['#options'][$term->tid] = theme('indentation', array('size' => $term->depth)) . check_plain($options[$term->tid]);
             }
           }
         }
