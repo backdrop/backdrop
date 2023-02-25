@@ -501,7 +501,7 @@ function admin_bar_links_menu($tree) {
     $local_actions_bottom = config_get('admin_bar.settings', 'local_actions_bottom');
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
       if ($local_actions_bottom) {
-        $data['link']['weight'] += 9999;;
+        $data['link']['weight'] += 9999;
       }
       else {
         $data['link']['weight'] -= 9999;
