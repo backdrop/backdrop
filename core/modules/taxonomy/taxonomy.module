@@ -1862,20 +1862,18 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  */
 function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
   if ($context['field']['type'] == 'taxonomy_term_reference') {
-    $option_extras = array();
+    $options = taxonomy_allowed_values($context['field'], FALSE);
     foreach ($context['field']['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
-            $option_extras[$term->tid] = array(
-              '#field_prefix' => theme('indentation', array('size' => $term->depth)),
-            );
+            if (isset($options[$term->tid])) {
+              $element['#options'][$term->tid] =  theme('indentation', array('size' => $term->depth)) . check_plain($options[$term->tid]);
+            }
           }
         }
       }
     }
-    $element += $option_extras;
-    $element['#options'] = taxonomy_allowed_values($context['field'], FALSE);
   }
 }
 
