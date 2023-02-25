@@ -221,6 +221,43 @@ span.admin-missing {
 .system-status-report .report-error .status-summary {
   color: #EC351C;
 }
+
+.system-status-report .status-description .item-list h3 {
+  font-size: 1em;
+}
+.system-status-report ul.requirements {
+  margin-left: 0; /* LTR */
+  padding-left: 0; /* LTR */
+}
+[dir="rtl"] .system-status-report ul.requirements {
+  margin-right: 0;
+  padding-right: 0;
+}
+.system-status-report ul.requirements li.status-ok,
+.system-status-report ul.requirements li.status-error {
+  list-style: none;
+  padding-left: 1em; /* LTR */
+  text-indent: -2ch;
+}
+[dir="rtl"] .system-status-report ul.requirements li.status-ok,
+[dir="rtl"] .system-status-report ul.requirements li.status-error {
+  padding-right: 1em;
+}
+.system-status-report ul.requirements li.status-ok:before {
+  content: "✓";
+  color: #006100;
+  padding-right: 1ch; /* LTR */
+}
+.system-status-report ul.requirements li.status-error:before {
+  content: "✗";
+  color: #ad0000;
+  padding-right: 1ch; /* LTR */
+}
+[dir="rtl"] .system-status-report ul.requirements li.status-ok:before,
+[dir="rtl"] .system-status-report ul.requirements li.status-error:before {
+  padding-left: 1ch;
+}
+
 @media all and (min-width: 721px) {
   .system-status-report .status-summary-mobile {
     display: none;
