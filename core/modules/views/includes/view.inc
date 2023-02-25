@@ -144,7 +144,7 @@ class view {
   // To avoid recursion in views embedded into areas.
   var $parent_views = array();
 
-  // Is the current stored view run as an attachment to another view?
+  // Whether or not the current stored view is an attachment to another view.
   var $is_attachment = NULL;
 
   // Stores the next steps of form items to handle.
