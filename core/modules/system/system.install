@@ -1132,8 +1132,7 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'plid' => array(  // Create tables.
-  backdrop_install_schema('system');
+      'plid' => array(
         'description' => 'The parent link ID (plid) is the mlid of the link above in the hierarchy, or zero if the link is at the top level in its menu.',
         'type' => 'int',
         'unsigned' => TRUE,
