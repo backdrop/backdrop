@@ -980,8 +980,7 @@ function system_schema() {
         'not null' => TRUE,
       ),
       'access_callback' => array(
-        'description' => 'The callback which determines the access to this route  // Create tables.
-  backdrop_install_schema('system');r path. Defaults to user_access.',
+        'description' => 'The callback which determines the access to this router path. Defaults to user_access.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
