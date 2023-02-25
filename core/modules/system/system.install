@@ -762,6 +762,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
+  // Create tables. This must be explicitly done or the tables won't be created.
+  backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
   backdrop_set_installed_schema_version('system', $version);
@@ -978,7 +980,8 @@ function system_schema() {
         'not null' => TRUE,
       ),
       'access_callback' => array(
-        'description' => 'The callback which determines the access to this router path. Defaults to user_access.',
+        'description' => 'The callback which determines the access to this route  // Create tables.
+  backdrop_install_schema('system');r path. Defaults to user_access.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1130,7 +1133,8 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'plid' => array(
+      'plid' => array(  // Create tables.
+  backdrop_install_schema('system');
         'description' => 'The parent link ID (plid) is the mlid of the link above in the hierarchy, or zero if the link is at the top level in its menu.',
         'type' => 'int',
         'unsigned' => TRUE,
