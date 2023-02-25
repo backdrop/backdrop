@@ -170,8 +170,9 @@ function update_prepare_bootstrap() {
         // See https://github.com/backdrop/backdrop-issues/issues/5496.
         db_change_field('url_alias', 'language', 'langcode', $langcode_spec);
 
-        // Re-add the 2 indices separately here, after the "language" column has
-        // been renamed.
+        // Re-add the 2 indices. We do this separately to avoid issues with
+        // older versions of MariaDB.
+        // @see https://github.com/backdrop/backdrop-issues/issues/5496
         db_add_index('url_alias', 'alias_langcode_pid', array('alias', 'langcode', 'pid'));
         db_add_index('url_alias', 'source_langcode_pid', array('source', 'langcode', 'pid'));
       }
