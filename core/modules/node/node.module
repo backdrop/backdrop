@@ -3522,9 +3522,9 @@ function node_requirements($phase) {
     $value .= ' (' . l(t('Rebuild permissions'), 'admin/reports/status/rebuild') . ')';
 
     if ($needs_rebuild) {
-      $description = t('Node access permissions need to be rebuilt.');  
+      $description = t('Node access permissions need to be rebuilt.');
       $severity = REQUIREMENT_ERROR;
-    } 
+    }
     else {
       $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache.');
       $severity = REQUIREMENT_OK;
@@ -3537,7 +3537,7 @@ function node_requirements($phase) {
       'title' => t('Node Access Permissions'),
       'value' => $value,
       'description' => $description,
-      'severity' => $severity
+      'severity' => $severity,
     );
   }
   return $requirements;
