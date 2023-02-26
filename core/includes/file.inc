@@ -1883,7 +1883,8 @@ function file_validate_is_image(File $file) {
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {
-    $errors[] = t('Only JPEG, PNG and GIF images are allowed.');
+    $supported_extensions = image_get_supported_extensions();
+    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
   }
 
   return $errors;

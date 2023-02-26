@@ -339,17 +339,24 @@ function image_gd_get_info(stdClass $image) {
   $data = @getimagesize($image->source);
 
   if (isset($data) && is_array($data)) {
-    $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    if (defined('IMAGETYPE_WEBP')) {
-      $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-        // Extend mapping of constants to extensions, as the PHP and GD
-        // versions support WebP.
-        // @see https://www.php.net/manual/en/image.constants.php
-        $extensions['18'] = 'webp';
+    $supported_extensions = image_get_supported_extensions();
+    foreach ($supported_extensions as $supported_extension) {
+      switch ($supported_extension) {
+        case 'gif':
+          $extensions['1'] = $supported_extension;
+          break;
+        case 'jpg':
+          $extensions['2'] = $supported_extension;
+          break;
+        case 'png':
+          $extensions['3'] = $supported_extension;
+          break;
+        case 'webp':
+          $extensions['18'] = $supported_extension;
+          break;
       }
     }
-    $extension = isset($extensions[$data[2]]) ?  $extensions[$data[2]] : '';
+    $extension = isset($extensions[$data[2]]) ? $extensions[$data[2]] : '';
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],
