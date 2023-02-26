@@ -12,6 +12,10 @@
  * @see system_install()
  */
 function standard_install() {
+  // Run the Minimal install profile first.
+  include_once BACKDROP_ROOT . '/core/profiles/minimal/minimal.install';
+  minimal_install();
+
   // Add text formats.
   $filtered_html_format = array(
     'format' => 'filtered_html',
@@ -100,13 +104,6 @@ function standard_install() {
   );
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
-
-  // Enable Basis theme and set it as default theme instead of Stark.
-  // @see system_install()
-  $default_theme = 'basis';
-  config_set('system.core', 'theme_default', $default_theme);
-  theme_enable(array($default_theme));
-  theme_disable(array('stark'));
 
   // Set home page to "home".
   config_set('system.core', 'site_frontpage', 'home');
@@ -493,12 +490,10 @@ function standard_install() {
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   $anonymous_permissions = array(
-    'access content',
     'access comments',
     $filtered_html_permission,
   );
   $authenticated_permissions = array(
-    'access content',
     'access comments',
     'post comments',
     'skip comment approval',
