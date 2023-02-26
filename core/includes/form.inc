@@ -2892,8 +2892,9 @@ function form_select_options($element, $choices = NULL) {
       else {
         $selected = '';
       }
-      if (!empty($element['#indentations'][$key])) {
-        $choice = str_repeat('· ', $element['#indentations'][$key]) . $choice;
+
+      if (!empty($element[$key]['#indentation'])) {
+        $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
       }
       $options .= '<option value="' . check_plain($key) . '"' . $selected . '>' . check_plain($choice) . '</option>';
     }
@@ -3402,7 +3403,6 @@ function form_process_radios($element) {
         '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
         '#weight' => $weight,
-        '#indentation' => !empty($element['#indentations'][$key]) ? $element['#indentations'][$key] : 0,
       );
     }
   }
@@ -3540,7 +3540,6 @@ function form_process_checkboxes($element) {
         '#attributes' => $element['#attributes'],
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
         '#weight' => $weight,
-        '#indentation' => !empty($element['#indentations'][$key]) ? $element['#indentations'][$key] : 0,
       );
     }
   }
