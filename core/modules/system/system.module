@@ -2440,7 +2440,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2450,7 +2449,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
