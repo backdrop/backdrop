@@ -3010,7 +3010,7 @@ function theme_radio($variables) {
   }
   _form_set_class($element, array('form-radio'));
 
-  $output= '';
+  $output = '';
   if (!empty($element['#indentation'])) {
     $output .= theme('indentation', array('size' => $element['#indentation']));
   }
@@ -3430,7 +3430,7 @@ function theme_checkbox($variables) {
   }
   _form_set_class($element, array('form-checkbox'));
 
-  $output= '';
+  $output = '';
   if (!empty($element['#indentation'])) {
     $output .= theme('indentation', array('size' => $element['#indentation']));
   }
