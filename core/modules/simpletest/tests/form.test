@@ -708,7 +708,7 @@ class FormElementTestCase extends BackdropWebTestCase {
         )
       ));
 
-      // Check select options
+      // Check select options.
       $elements = $this->xpath('//option[@value=:key ]', array(':key' => $key));
       $this->assertEqual($indentation, substr_count($elements[0], '·'), format_string('Select option with key :key has :indentation middle dot indentations',
         array(
