@@ -1,0 +1,13 @@
+{
+  "extends": "stylelint-config-recommended",
+  "rules": {
+    "color-hex-length": "long",
+    "declaration-block-single-line-max-declarations": 1,
+    "function-no-unknown": null,
+    "length-zero-no-unit": true,
+    "no-descending-specificity": null,
+    "no-duplicate-selectors": null,
+    "selector-attribute-quotes": "always",
+    "shorthand-property-no-redundant-values": true
+  }
+}
