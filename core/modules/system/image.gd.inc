@@ -356,8 +356,12 @@ function image_gd_get_info(stdClass $image) {
 
   if (isset($data) && is_array($data)) {
     $supported_extensions = image_get_supported_extensions();
+    // Only extensions that exist in GD.
     $extension = image_type_to_extension($data[2], FALSE) ?: '';
+    // Only extensions supported by Backdrop at this time.
     $extension = in_array($extension, $supported_extensions) ? $extension : '';
+    // Treat jpeg as jpg.
+    $extension = $extension == 'jpeg' ? 'jpg' : $extension;
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],
