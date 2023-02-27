@@ -112,7 +112,12 @@ function image_get_supported_extensions() {
   if (function_exists($function)) {
     return $function();
   }
-  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $toolkit, '%function' => $function), WATCHDOG_ERROR);
+  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.',
+    array(
+      '%toolkit' => $toolkit,
+      '%function' => $function),
+    WATCHDOG_ERROR
+  );
   return FALSE;
 }
 

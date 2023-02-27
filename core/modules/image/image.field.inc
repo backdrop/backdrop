@@ -17,7 +17,7 @@ function image_field_info() {
         'default_image' => '',
       ),
       'instance_settings' => array(
-        'file_extensions' => 'png gif jpg jpeg',
+        'file_extensions' => implode(' ', image_get_supported_extensions()),
         'file_directory' => '',
         'max_filesize' => '',
         'alt_field' => 0,

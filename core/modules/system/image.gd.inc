@@ -356,23 +356,8 @@ function image_gd_get_info(stdClass $image) {
 
   if (isset($data) && is_array($data)) {
     $supported_extensions = image_get_supported_extensions();
-    foreach ($supported_extensions as $supported_extension) {
-      switch ($supported_extension) {
-        case 'gif':
-          $extensions['1'] = $supported_extension;
-          break;
-        case 'jpg':
-          $extensions['2'] = $supported_extension;
-          break;
-        case 'png':
-          $extensions['3'] = $supported_extension;
-          break;
-        case 'webp':
-          $extensions['18'] = $supported_extension;
-          break;
-      }
-    }
-    $extension = isset($extensions[$data[2]]) ? $extensions[$data[2]] : '';
+    $extension = image_type_to_extension($data[2], FALSE) ?: '';
+    $extension = in_array($extension, $supported_extensions) ?: '';
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],
