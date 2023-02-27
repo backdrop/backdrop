@@ -357,7 +357,7 @@ function image_gd_get_info(stdClass $image) {
   if (isset($data) && is_array($data)) {
     $supported_extensions = image_get_supported_extensions();
     $extension = image_type_to_extension($data[2], FALSE) ?: '';
-    $extension = in_array($extension, $supported_extensions) ?: '';
+    $extension = in_array($extension, $supported_extensions) ? $extension : '';
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],
