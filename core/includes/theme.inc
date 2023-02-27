@@ -133,22 +133,17 @@ function backdrop_theme_initialize() {
  *
  * @param stdClass $theme
  *   An object with the following information:
- *     filename
- *       The .info file for this theme. The 'path' to
- *       the theme will be in this file's directory. (Required)
- *     owner
- *       The path to the .theme file or the .engine file to load for
- *       the theme. (Required)
- *     stylesheet
- *       The primary stylesheet for the theme. (Optional)
- *     engine
- *       The name of theme engine to use. (Optional)
+ *   - filename: The .info file for this theme. The 'path' to the theme will be
+ *     in this file's directory.
+ *   - owner: The path to the .theme file or the .engine file to load for the
+ *     theme.
+ *   - stylesheet: (optional) The primary stylesheet for the theme.
+ *   - engine: (optional) The name of theme engine to use.
  * @param array $base_themes
- *    An optional array of objects that represent the 'base theme' if the
- *    theme is meant to be derivative of another theme. It requires
- *    the same information as the $theme object. It should be in
- *    'oldest first' order, meaning the top level of the chain will
- *    be first.
+ *   An optional array of objects that represent the 'base theme' if the theme
+ *   is meant to be derivative of another theme. It requires the same
+ *   information as the $theme object. It should be in 'oldest first' order,
+ *   meaning the top level of the chain will be first.
  * @param string $registry_callback
  *   The callback to invoke to set the theme registry.
  */
@@ -164,7 +159,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   // theme stylesheets.
   $final_stylesheets = array();
 
-  // Grab stylesheets from base theme
+  // Grab stylesheets from base theme.
   foreach ($base_themes as $base) {
     if (!empty($base->stylesheets)) {
       foreach ($base->stylesheets as $media => $stylesheets) {
@@ -184,35 +179,53 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
     }
   }
 
-  // And now add the stylesheets properly
+  // And now add the stylesheets properly.
   foreach ($final_stylesheets as $media => $stylesheets) {
     foreach ($stylesheets as $stylesheet) {
       backdrop_add_css($stylesheet, array('group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media));
     }
   }
 
-  // Do basically the same as the above for scripts
+  // Do basically the same as the above for scripts.
   $final_scripts = array();
 
-  // Grab scripts from base theme
+  // Grab scripts from base theme.
   foreach ($base_themes as $base) {
     if (!empty($base->scripts)) {
-      foreach ($base->scripts as $name => $script) {
-        $final_scripts[$name] = $script;
+      foreach ($base->scripts as $key => $value) {
+        if (is_string($value)) {
+          // Empty scope defaults to 'header'.
+          $final_scripts['header'][$key] = $value;
+        }
+        else {
+          foreach ($value as $name => $script) {
+            $final_scripts[$key][$name] = $script;
+          }
+        }
       }
     }
   }
 
   // Add scripts used by this theme.
   if (!empty($theme->scripts)) {
-    foreach ($theme->scripts as $name => $script) {
-      $final_scripts[$name] = $script;
+    foreach ($theme->scripts as $key => $value) {
+      if (is_string($value)) {
+        // Empty scope defaults to 'header'.
+        $final_scripts['header'][$key] = $value;
+      }
+      else {
+        foreach ($value as $name => $script) {
+          $final_scripts[$key][$name] = $script;
+        }
+      }
     }
   }
 
   // Add scripts used by this theme.
-  foreach ($final_scripts as $script) {
-    backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE));
+  foreach ($final_scripts as $scope => $scripts) {
+    foreach ($scripts as $script) {
+      backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE, 'scope' => $scope));
+    }
   }
 
   $theme_engine = NULL;
@@ -1445,6 +1458,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
     $theme = !empty($GLOBALS['theme_key']) ? $GLOBALS['theme_key'] : '';
   }
 
+  if (empty($theme)) {
+    return;
+  }
+
   if (empty($configs[$theme])) {
     $configs[$theme] = config($theme . '.settings');
     $configs[$theme]->load();
@@ -2022,10 +2039,7 @@ function theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav class="breadcrumb">';
-    // Provide a navigational heading to give context for breadcrumb links to
-    // screen-reader users. Make the heading invisible with .element-invisible.
-    $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
+    $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
     $output .= '<ol><li>' . implode(' » </li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
@@ -2726,7 +2740,7 @@ function template_preprocess_header(&$variables) {
 /**
  * Preprocess variables for page.tpl.php
  *
- * @see system_elements()
+ * @see system_element_info()
  * @see page.tpl.php
  */
 function template_preprocess_page(&$variables) {

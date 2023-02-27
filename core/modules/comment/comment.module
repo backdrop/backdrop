@@ -68,6 +68,22 @@ define('COMMENT_NODE_CLOSED', 1);
 define('COMMENT_NODE_OPEN', 2);
 
 /**
+ * Auto generated comment titles.
+ */
+define('COMMENT_TITLE_AUTO', 'auto');
+
+/**
+ * Custom comment titles.
+ */
+define('COMMENT_TITLE_CUSTOM', 'custom');
+
+/**
+ * Hidden comment titles.
+ */
+define('COMMENT_TITLE_HIDDEN', 'hidden');
+
+
+/**
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
@@ -135,7 +151,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if ($type->settings['comment_subject_field']) {
+    if ($type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -314,7 +330,7 @@ function comment_node_type_load(&$types) {
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
-      'comment_subject_field' => FALSE,
+      'comment_title_options' => COMMENT_TITLE_AUTO,
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
@@ -399,8 +415,13 @@ function _comment_body_field_create($info) {
  */
 function comment_permission() {
   return array(
+    'administer comment settings' => array(
+      'title' => t('Administer comment settings'),
+      'description' => t('Configure comment settings per content type.'),
+    ),
     'administer comments' => array(
-      'title' => t('Administer comments and comment settings'),
+      'title' => t('Administer comments'),
+      'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -1065,6 +1086,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
+      '#access' => user_access('administer comment settings'),
       '#attributes' => array(
         'class' => array('comment-node-type-settings-form'),
       ),
@@ -1111,12 +1133,6 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
     );
-    $form['comment']['comment_subject_field'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Allow a custom title to be set for each comment'),
-      '#default_value' => $node_type->settings['comment_subject_field'],
-      '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
-    );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
         '#type' => 'checkbox',
@@ -1159,6 +1175,19 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_close_days'],
       '#field_suffix' => t('days'),
     );
+    $form['comment']['comment_title_options'] = array(
+      '#type' => 'radios',
+      '#title' => t('Comment titles'),
+      '#default_value' => $node_type->settings['comment_title_options'],
+      '#options' => array(
+        COMMENT_TITLE_CUSTOM => t('Visible, customizable'),
+        COMMENT_TITLE_AUTO => t('Visible, auto-generated'),
+        COMMENT_TITLE_HIDDEN => t('Hidden'),
+      ),
+    );
+    $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is provided, to allow customizing comment titles.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Note: this option might not be supported by some themes.');
   }
 }
 
@@ -1169,7 +1198,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
+    '#access' => user_access('administer comment settings'),
     '#title' => t('Comment settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -1813,10 +1842,10 @@ function comment_form($form, &$form_state, $comment) {
     );
   }
 
-  // Add author e-mail and homepage fields depending on the current user.
+  // Add author email and homepage fields depending on the current user.
   $form['author']['mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail'),
+    '#title' => t('Email'),
     '#default_value' => $comment->mail,
     '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
     '#maxlength' => 64,
@@ -1858,7 +1887,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_subject_field'],
+    '#access' => $node_type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM,
     '#weight' => -1,
   );
 

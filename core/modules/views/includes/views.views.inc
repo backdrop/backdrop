@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers that aren't tied to any other module.
