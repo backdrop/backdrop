@@ -98,21 +98,22 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
 }
 
 /**
- * Get supported images extensions.
+ * Gets supported image extensions.
  *
  * Backdrop supports GIF, JPG, PNG, and WEBP file formats when supported by the
- * GD toolkit, and may support others, depending on which toolkits are
- * installed.
+ * GD toolkit, and may support others, depending on the currently used toolkit.
  *
  * @return array
  *   Array of supported extensions.
  */
 function image_get_supported_extensions() {
-  $supported_extensions = array('gif', 'jpg', 'jpeg');
-
-  backdrop_alter('image_supported_extensions', $supported_extensions);
-
-  return $supported_extensions;
+  $toolkit = image_get_toolkit();
+  $function = 'image_' . $toolkit . '_supported_extensions';
+  if (function_exists($function)) {
+    return $function();
+  }
+  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $toolkit, '%function' => $function), WATCHDOG_ERROR);
+  return FALSE;
 }
 
 /**

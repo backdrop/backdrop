@@ -27,6 +27,22 @@ function image_gd_settings() {
 }
 
 /**
+ * Retrieve supported extensions for the GD2 toolkit.
+ */
+function image_gd_supported_extensions() {
+  $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+  $gd_info = gd_info();
+  if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+    // Extend mapping of constants to extensions, as the PHP and GD
+    // versions support WebP.
+    // @see https://www.php.net/manual/en/image.constants.php
+    $supported_extensions[] = 'webp';
+  }
+
+  return $supported_extensions;
+}
+
+/**
  * Verify GD2 settings (that the right version is actually installed).
  *
  * @return
