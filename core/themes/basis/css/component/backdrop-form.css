@@ -98,7 +98,7 @@ td.checkbox .form-item input {
 .filter-wrapper .filter-guidelines,
 .filter-wrapper .filter-help {
   font-size: 0.923em;
-  padding: 0.125em 0 0 0;
+  padding: 0.125em 0 0;
 }
 
 .filter-wrapper .form-item label {
@@ -113,9 +113,9 @@ td.checkbox .form-item input {
   padding: 0.5em 0.8em;
 }
 
-[dir=rtl] .form-item .description,
-[dir=rtl] .password-strength,
-[dir=rtl] .password-match {
+[dir="rtl"] .form-item .description,
+[dir="rtl"] .password-strength,
+[dir="rtl"] .password-match {
   border-left: none;
   border-right: 0.25em solid #bbbbbb;
 }
@@ -274,7 +274,7 @@ textarea.form-textarea:focus {
 
 ul.action-links {
   margin: 1em 0;
-  padding: 0 1.25em 0; /* LTR */
+  padding: 0 1.25em; /* LTR */
   list-style-type: none;
   overflow: hidden;
 }

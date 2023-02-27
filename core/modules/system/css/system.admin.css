@@ -9,11 +9,11 @@
  */
 .admin-panel {
   margin: 0;
-  padding: 5px 5px 15px 5px;
+  padding: 5px 5px 15px;
 }
 .admin-panel .description {
   margin: 0 0 3px;
-  padding: 2px 0 3px 0;
+  padding: 2px 0 3px;
 }
 .admin-panel .body {
   padding: 0 4px 2px 8px; /* LTR */
@@ -82,7 +82,7 @@ small .admin-link:after {
   margin: 1em 0;
   padding: 7px 13px;
   border-radius: 4px;
-  background-color: #fff;
+  background-color: #ffffff;
   border: 2px solid #EAEAEA;
 }
 #system-modules div.incompatible {
@@ -139,7 +139,7 @@ small .admin-link:after {
 div.admin-requirements,
 div.admin-required {
   font-size: 0.9em;
-  color: #444;
+  color: #444444;
 }
 span.admin-disabled {
   color: #C61214;
@@ -148,7 +148,7 @@ span.admin-enabled {
   color: #00BE58;
 }
 span.admin-missing {
-  color: #f00;
+  color: #ff0000;
 }
 
 /**
@@ -205,7 +205,7 @@ span.admin-missing {
 .system-status-report .status-title {
   font-weight: bold;
   line-height: 1.85em;
-  color: #000;
+  color: #000000;
 }
 .system-status-report .status-value {
   width: 100%; /* Fill up all remaining table space with this cell. */
@@ -216,7 +216,7 @@ span.admin-missing {
 }
 .system-status-report .status-description {
   font-size: 0.9em;
-  color: #444;
+  color: #444444;
 }
 .system-status-report .report-error .status-summary {
   color: #EC351C;
@@ -290,7 +290,7 @@ table.screenshot {
   text-align: center;
 }
 .theme-default .screenshot {
-  border: 1px solid #aaa;
+  border: 1px solid #aaaaaa;
 }
 .system-themes-list-enabled .theme-selector .screenshot,
 .system-themes-list-enabled .theme-selector .no-screenshot {
@@ -371,7 +371,7 @@ table.screenshot {
   font-weight: bold;
 }
 .theme-selector .operations {
-  margin: 10px 0 0 0;
+  margin: 10px 0 0;
   padding: 0;
 }
 .theme-selector .operations li {
@@ -417,7 +417,7 @@ table.screenshot {
   margin-right: 0;
 }
 .exposed-filters .form-item {
-  margin: 0 0 0.1em 0;
+  margin: 0 0 0.1em;
   padding: 0;
 }
 .exposed-filters .form-item label {

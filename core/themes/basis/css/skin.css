@@ -1179,7 +1179,7 @@ div.messages.status:before {
 
 /* Warning status message colors */
 .messages.warning {
-  color: #555;
+  color: #555555;
   background-color: #faf5c9;
 }
 div.messages.warning:before {
@@ -1189,18 +1189,18 @@ div.messages.warning:before {
 
 /* Error status message colors */
 .messages.error {
-  color: #f00;
+  color: #ff0000;
   background-color: #f9edec;
 }
 div.messages.error:before {
   /* background-image: url(../../../misc/message-32-error.png); */
-  background-color: #f00;
+  background-color: #ff0000;
 }
 
 /* Info status message colors */
 .messages.info {
   color: #004570;
-  background-color: #bdf;
+  background-color: #bbddff;
 }
 div.messages.info:before {
   /* background-image: url(../../../misc/message-32-info.png); */

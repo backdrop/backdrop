@@ -4,12 +4,12 @@
  */
 
 .maintenance-page {
-  background: #bbb;
+  background: #bbbbbb;
   text-align: center;
   padding: 5rem 2.5rem;
 }
 .maintenance-page .l-container {
-  background: #fff;
+  background: #ffffff;
   max-width: 43rem; /* 688px at 16px font size */
   margin: 0 auto;
   padding: 3rem 1.5rem;

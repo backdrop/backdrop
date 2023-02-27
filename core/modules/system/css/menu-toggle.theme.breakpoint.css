@@ -37,7 +37,7 @@
   left: 2px; /* LTR */
   height: 2px;
   width: 24px;
-  background: #bbb;
+  background: #bbbbbb;
   -webkit-transition: all 0.25s;
   transition: all 0.25s;
 }

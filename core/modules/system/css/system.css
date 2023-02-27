@@ -10,8 +10,8 @@
  */
 /* Suggestion list */
 #autocomplete {
-  background: #eee;
-  border: 1px solid #ddd;
+  background: #eeeeee;
+  border: 1px solid #dddddd;
   overflow: hidden;
   position: fixed;
   z-index: 9997;
@@ -23,7 +23,7 @@
   padding: 0;
 }
 #autocomplete li {
-  color: #000;
+  color: #000000;
   cursor: default;
   white-space: pre;
 }
@@ -86,8 +86,8 @@ fieldset.collapsible .fieldset-legend {
   box-sizing: border-box;
 }
 .resizable-textarea .grippie {
-  background: #eee url(../../../misc/grippie.png) no-repeat center 2px;
-  border: 1px solid #ddd;
+  background: #eeeeee url(../../../misc/grippie.png) no-repeat center 2px;
+  border: 1px solid #dddddd;
   border-top-width: 0;
   cursor: s-resize;
   height: 9px;
@@ -176,7 +176,7 @@ div.tree-child-horizontal {
  * @see tableheader.js
  */
 table.sticky-header {
-  background-color: #fff;
+  background-color: #ffffff;
   margin-top: 0;
   z-index: 9;
 }
@@ -188,11 +188,11 @@ table.sticky-header {
  */
 /* Bar */
 .progress .bar {
-  background-color: #fff;
+  background-color: #ffffff;
   border: 1px solid;
 }
 .progress .filled {
-  background-color: #000;
+  background-color: #000000;
   height: 2.5em;
   width: 5px;
 }
@@ -205,10 +205,10 @@ table.sticky-header {
 /* Throbber */
 .ajax-progress {
   display: inline-block;
-  padding: 1px 5px 2px 5px;
+  padding: 1px 5px 2px;
 }
 .ajax-progress-throbber .throbber {
-  background: transparent url(../../../misc/throbber-active.gif) no-repeat 0px center;
+  background: transparent url(../../../misc/throbber-active.gif) no-repeat 0 center;
   display: inline;
   padding: 1px 5px 2px;
 }

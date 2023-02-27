@@ -26,7 +26,7 @@ h6 {
 }
 h1 {
   font-size: 1.357em;
-  color: #000;
+  color: #000000;
 }
 h2 {
   font-size: 1.143em;
@@ -78,7 +78,7 @@ kbd {
   background-color: #f2f2f2;
   border: 1px outset #575757;
   margin: 0 3px;
-  color: #666;
+  color: #666666;
   display: inline-block;
   padding: 0 6px;
   -moz-border-radius: 5px;
@@ -101,17 +101,17 @@ caption {
 }
 blockquote {
   background: #f7f7f7;
-  border-left: 4px solid #bbb; /* RTL */
+  border-left: 4px solid #bbbbbb; /* RTL */
   font-style: italic;
   margin: 1.5em 10px;
   padding: 0.5em 10px;
 }
 [dir="rtl"] blockquote {
   border-left: none;
-  border-right: 4px solid #bbb;
+  border-right: 4px solid #bbbbbb;
 }
 blockquote:before {
-  color: #bbb;
+  color: #bbbbbb;
   content: "\201C"; /* RTL */
   font-size: 3em;
   line-height: 0.1em;
@@ -122,7 +122,7 @@ blockquote:before {
   content: "\201D";
 }
 blockquote:after {
-  color: #bbb;
+  color: #bbbbbb;
   content: "\201D"; /* RTL */
   font-size: 3em;
   line-height: 0.1em;

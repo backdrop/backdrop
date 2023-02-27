@@ -1,24 +1,24 @@
 
 body {
   margin: 1em;
-  background-color: #fff;
+  background-color: #ffffff;
 }
 [dir="rtl"] body {
   direction: rtl;
 }
 th {
   text-align: left; /* LTR */
-  color: #006;
-  border-bottom: 1px solid #ccc;
+  color: #000066;
+  border-bottom: 1px solid #cccccc;
 }
 [dir="rtl"] th {
   text-align: right;
 }
 tr.odd {
-  background-color: #ddd;
+  background-color: #dddddd;
 }
 tr.even {
-  background-color: #fff;
+  background-color: #ffffff;
 }
 td {
   padding: 5px;

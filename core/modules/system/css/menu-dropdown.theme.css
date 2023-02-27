@@ -103,8 +103,8 @@
     width: 0;
     height: 0;
     border-width: 4px;
-    border-style: solid dashed dashed dashed;
-    border-color: #555555 transparent transparent transparent;
+    border-style: solid dashed dashed;
+    border-color: #555555 transparent transparent;
     background: transparent;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
@@ -121,7 +121,7 @@
   .menu-dropdown ul {
     border: 1px solid #bbbbbb;
     padding: 5px 0;
-    background: #ccc;
+    background: #cccccc;
   }
   .menu-dropdown ul a,
   .menu-dropdown ul a:hover,
@@ -176,13 +176,13 @@
     height: 0;
     overflow: hidden;
     border-width: 6px;
-    border-style: dashed dashed solid dashed;
-    border-color: transparent transparent #555555 transparent;
+    border-style: dashed dashed solid;
+    border-color: transparent transparent #555555;
   }
   .menu-dropdown span.scroll-down-arrow {
     top: 8px;
-    border-style: solid dashed dashed dashed;
-    border-color: #555555 transparent transparent transparent;
+    border-style: solid dashed dashed;
+    border-color: #555555 transparent transparent;
   }
   [dir="rtl"] .menu-dropdown li.has-children > a {
     padding-right: 12px;

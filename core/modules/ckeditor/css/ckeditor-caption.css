@@ -26,16 +26,16 @@
 .caption > * {
   display: block;
   max-width: 100%;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
 }
 .caption > figcaption {
   display: table-caption;
   caption-side: bottom;
   max-width: none;
   padding: 3px 6px;
-  border: 1px solid #CCC;
+  border: 1px solid #CCCCCC;
   border-top: none;
-  background-color: #eee;
+  background-color: #eeeeee;
 }
 
 /**
@@ -43,7 +43,7 @@
  *
  * Based on http://codepen.io/flesler/pen/AEIFc.
  */
-.caption > figcaption[contenteditable=true]:empty:before {
+.caption > figcaption[contenteditable="true"]:empty:before {
   content: attr(data-placeholder);
   font-style: italic;
 }

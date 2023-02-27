@@ -16,7 +16,7 @@ body {
   background-image: -o-linear-gradient(top, #000000 0%, #000001 100%);
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #000000), color-stop(1, #000001));
   background-image: -webkit-linear-gradient(top, #000000 0%, #000001 100%);
-  background-image: linear-gradient(top, #000000 0%, #000001 100%);
+  background-image: linear-gradient(to top, #000000 0%, #000001 100%);
 }
 .l-header ul.menu > li > a {
   color: #e3e3e3;
@@ -30,7 +30,7 @@ body {
   color: #e3e3e3;
 }
 .l-header .no-tabs .menu-dropdown a span.sub-arrow {
-  border-color: #e3e3e3 transparent transparent transparent;
+  border-color: #e3e3e3 transparent transparent;
 }
 .l-header .no-tabs .menu-dropdown ul a span.sub-arrow {
   border-color: transparent transparent transparent #e3e3e3; /* RTL */

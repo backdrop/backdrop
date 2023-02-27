@@ -18,7 +18,7 @@ div.image-style-preview div.preview-image {
   position: relative;
 }
 div.image-style-preview div.preview-image div.width {
-  border: 1px solid #666;
+  border: 1px solid #666666;
   border-top: none;
   height: 2px;
   left: -1px;
@@ -33,7 +33,7 @@ div.image-style-preview div.preview-image div.width span {
   top: 4px;
 }
 div.image-style-preview div.preview-image div.height {
-  border: 1px solid #666;
+  border: 1px solid #666666;
   border-left: none;
   position: absolute;
   right: -6px;
@@ -62,5 +62,5 @@ table.image-anchor .odd {
   background: none;
 }
 table.image-anchor td {
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
 }

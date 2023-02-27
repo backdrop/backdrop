@@ -4,8 +4,8 @@
 .update-results {
   margin-top: 3em;
   padding: 0.25em;
-  border: 1px solid #ccc;
-  background: #eee;
+  border: 1px solid #cccccc;
+  background: #eeeeee;
   font-size: smaller;
 }
 .update-results h2 {
@@ -15,7 +15,7 @@
   margin-bottom: 0.25em;
 }
 .update-results .none {
-  color: #888;
+  color: #888888;
   font-style: italic;
 }
 .update-results .failure strong {

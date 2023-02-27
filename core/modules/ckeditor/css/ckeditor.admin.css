@@ -16,13 +16,13 @@
   padding: 6px 4px 2px;
   background: #f8f8f8;
   margin: 5px 0;
-  line-height: 1;
   font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
+  line-height: 1;
 }
 .ckeditor-toolbar-disabled {
   margin: 5px 0;
-  line-height: 1;
   font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
+  line-height: 1;
 }
 
 .ckeditor-buttons,
@@ -63,7 +63,7 @@
   border-bottom-right-radius: 2px;
 }
 .ckeditor-buttons .ckeditor-button-placeholder {
-  background: #333;
+  background: #333333;
   opacity: 0.3;
 }
 .ckeditor-buttons a {
@@ -71,7 +71,7 @@
 }
 .ckeditor-group-add-wrapper {
   float: left; /* LTR */
-  margin: 0px 0.3333em;
+  margin: 0 0.3333em;
 }
 [dir="rtl"] .ckeditor-group-add-wrapper {
   float: right;
@@ -116,7 +116,7 @@
   width: 16px;
   line-height: 0.9;
   font-weight: bold;
-  color: #333;
+  color: #333333;
   text-align: center;
 }
 .ckeditor-row-controls a:hover {
@@ -157,7 +157,7 @@
   text-align: center;
   border-left: 3px solid transparent;
   border-right: 3px solid transparent;
-  border-top: 3px solid #333;
+  border-top: 3px solid #333333;
   display: inline-block;
   margin: 0 4px 2px;
 }

@@ -157,11 +157,11 @@ table th {
 }
 .views-displays .secondary a {
   transition: none;
-  border: 2px solid #fff;
+  border: 2px solid #ffffff;
   border-radius: 5px; /* Additional radius needed to include border width. */
 }
 .views-displays .secondary li.add a {
-  background-color: #fff;
+  background-color: #ffffff;
   color: #008BCB;
 }
 .views-displays .secondary li.add a:hover {
@@ -177,7 +177,7 @@ table th {
   box-shadow: 0 5px 5px -5px hsla(0, 0%, 0%, 0.3);
 }
 .views-displays .secondary .action-list li {
-  background-color: #fff;
+  background-color: #ffffff;
 }
 .views-displays .secondary .action-list li:hover {
   background-color: #f7f7f7;

@@ -100,7 +100,7 @@ div.messages.error:before {
 
 .messages.info {
   color: #004570;
-  background-color: #bdf;
+  background-color: #bbddff;
 }
 .messages.info a {
   color: #004570;
@@ -135,7 +135,7 @@ div.messages.info:before {
 }
 .messages .dismiss:before,
 .messages .dismiss:after {
-  background: #999;
+  background: #999999;
   content: '';
   display: block;
   height: 2px;

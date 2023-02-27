@@ -4,14 +4,14 @@
 body {
   font-family: Arial, Verdana, sans-serif;
   font-size: 14px;
-  color: #222;
-  background-color: #fff;
+  color: #222222;
+  background-color: #ffffff;
   margin: 8px;
 }
 
 ol, ul, dl {
   /* IE7: reset rtl list margin. (CKEditor issue #7334) */
-  *margin-right: 0px;
+  *margin-right: 0;
   /* Preserved spaces for list items with text direction other than the list.
    * (CKEditor issues #6249,#8049) */
   padding: 0 40px;
