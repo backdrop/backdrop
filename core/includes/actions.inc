@@ -31,11 +31,11 @@
 /**
  * Retrieves a single action's info by its name, or all actions
  *
- * @param $action_name
+ * @param string|null $action_name
  *   (optional) The name of the action to retrieve.
  *
- * @return
- *   An array of action info as provided by hook_action_info() If no action
+ * @return array
+ *   An array of action info as provided by hook_action_info(). If no action
  *   name is specified, all actions in the system will be returned as an array
  *   keyed by the action name.
  */
@@ -77,7 +77,7 @@ function actions_get_info($action_name = NULL) {
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
  *
- * @return
+ * @return mixed
  *   The result of the executed action callback.
  *
  * @ingroup actions
@@ -107,7 +107,10 @@ function actions_execute($action_name, Entity $entity = NULL, &$context) {
   }
   else {
     $result = NULL;
-    trigger_error(t('The action "@action" could not be executed because the function "@callback" could not be found.', array('@action' => $action_name, '@callback' => $callback)), E_USER_ERROR);
+    trigger_error(t('The action "@action" could not be executed because the function "@callback" could not be found.', array(
+      '@action' => $action_name,
+      '@callback' => $callback,
+    )), E_USER_ERROR);
   }
 
   $stack--;
