@@ -857,10 +857,8 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * access if loaded again during the same page request.
  *
  * @param array|false $nids
- *   (optional) An array of node IDs or FALSE to load all the nodes.
- *   Using an empty array (the default value), the function will return an empty
- *   array; using FALSE, the function will return an array containing all the
- *   nodes.
+ *   (optional) An array of node IDs or FALSE to load all the nodes. Using an
+ *   empty array (the default value), the function will return an empty array.
  * @param array $conditions
  *   (deprecated) An associative array of conditions on the {node}
  *   table, where the keys are the database fields and the values are the
