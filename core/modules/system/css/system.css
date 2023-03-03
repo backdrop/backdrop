@@ -138,6 +138,7 @@ a.tabledrag-handle-hover .handle {
 }
 div.indentation {
   float: left; /* LTR */
+  height: 1.7em;
   margin: -1em 0.2em -1em -0.4em; /* LTR */
   padding: 1em 0 1em 0.6em; /* LTR */
   width: 20px;
@@ -146,6 +147,14 @@ div.indentation {
   float: right;
   margin: -1em -0.4em -1em 0.2em;
   padding: 1em 0.6em 1em 0;
+}
+div.form-item-indentation {
+  display: inline-block;
+  width: 1em;
+}
+[dir="rtl"] div.form-item-indentation {
+  display: inline-block;
+  width: 1em;
 }
 div.tree-child {
   background: url(../../../misc/tree.png) no-repeat 11px center; /* LTR */

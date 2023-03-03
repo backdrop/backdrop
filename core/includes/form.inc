@@ -3012,7 +3012,7 @@ function theme_radio($variables) {
 
   $output = '';
   if (!empty($element['#indentation'])) {
-    $output .= theme('indentation', array('size' => $element['#indentation']));
+    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
   }
   $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
 
@@ -3432,7 +3432,7 @@ function theme_checkbox($variables) {
 
   $output = '';
   if (!empty($element['#indentation'])) {
-    $output .= theme('indentation', array('size' => $element['#indentation']));
+    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
   }
   $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
   return $output;

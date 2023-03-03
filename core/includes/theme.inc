@@ -2597,6 +2597,21 @@ function theme_indentation($variables) {
 }
 
 /**
+ * Returns HTML for an indentation div; used for form elements.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - size: Optional. The number of indentations to create.
+ */
+function theme_form_element_indentation($variables) {
+  $output = '';
+  for ($n = 0; $n < $variables['size']; $n++) {
+    $output .= '<div class="form-item-indentation">&nbsp;</div>';
+  }
+  return $output;
+}
+
+/**
  * @} End of "addtogroup themeable".
  */
 
