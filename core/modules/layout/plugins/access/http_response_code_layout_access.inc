@@ -3,11 +3,12 @@
  * @file
  * Class for loading, modifying, and saving a layout access rule (condition).
  */
+
 class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function form(&$form, &$form_state) {
+  private function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $response_codes = isset($this->settings['http_response_codes']) ? $this->settings['http_response_codes'] : array();
 
@@ -47,7 +48,7 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function checkAccess() {
+  private function checkAccess() {
     $allowed_status_codes = array_filter($this->settings['http_response_codes']);
 
     $router = menu_get_item();
@@ -74,7 +75,7 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
    */
-  function summary() {
+  private function summary() {
     $allowed_status_codes = array_filter($this->settings['http_response_codes']);
 
     if (count($allowed_status_codes)) {
