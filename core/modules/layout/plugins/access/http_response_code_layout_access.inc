@@ -9,6 +9,7 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
+    $response_codes = isset($this->settings['http_response_codes']) ? $this->settings['http_response_codes'] : array();
     $form['http_response_codes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('HTTP response status is'),
@@ -17,10 +18,21 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
         403 => t('Access denied (403)'),
         404 => t('Page not found (404)'),
       ),
-      '#default_value' => isset($this->settings['http_response_codes']) ? $this->settings['http_response_codes'] : array(),
+      '#default_value' => $response_codes,
       '#description' => t('Shows the block on pages with any matching response code. If nothing is selected, the block will be shown on all pages where this layout applies.'),
     );
     $form['negate']['#description'] = t('Hides the block on pages with any matching response code selected from the options above.');
+    // Do not tick the negation checkbox if no status code has been selected.
+    $form['negate']['#default_value'] = empty($response_codes) ? 0 : $this->settings['negate'];
+    // Negation option should only be available if at least one status code has
+    // been selected.
+    $form['negate']['#states'] = array(
+      'enabled' => array(
+        array(':input[name="http_response_codes[200]"]' => array('checked' => TRUE)),
+        array(':input[name="http_response_codes[403]"]' => array('checked' => TRUE)),
+        array(':input[name="http_response_codes[404]"]' => array('checked' => TRUE)),
+      ),
+    );
   }
 
   /**
