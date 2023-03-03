@@ -2603,7 +2603,7 @@ function theme_indentation($variables) {
  *   An associative array containing:
  *   - size: Optional. The number of indentations to create.
  */
-function theme_form_element_indentation($variables) {
+function theme_form_element_indentation(array $variables) {
   $output = '';
   for ($n = 0; $n < $variables['size']; $n++) {
     $output .= '<div class="form-item-indentation">&nbsp;</div>';
