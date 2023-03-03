@@ -2599,7 +2599,7 @@ function theme_indentation($variables) {
 /**
  * Returns HTML for an indentation div; used for form elements.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - size: Optional. The number of indentations to create.
  */
