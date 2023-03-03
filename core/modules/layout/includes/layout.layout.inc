@@ -168,6 +168,11 @@ function layout_layout_access_info() {
     'description' => t('Control access by the current path.'),
     'class' => 'PathLayoutAccess',
   );
+  $info['http_response_code'] = array(
+    'title' => t('Server response'),
+    'description' => t('Control access by the HTTP response status code being returned by the server.'),
+    'class' => 'HttpResponseCodeLayoutAccess',
+  );
   return $info;
 }
 
