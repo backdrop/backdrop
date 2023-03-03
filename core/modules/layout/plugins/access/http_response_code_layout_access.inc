@@ -10,6 +10,15 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $response_codes = isset($this->settings['http_response_codes']) ? $this->settings['http_response_codes'] : array();
+
+    if (isset($form_state['block'])) {
+      $checkboxes_description = t('Shows the block on pages with any matching response code. If nothing is selected, the block will be shown on all pages where this layout applies.');
+      $negate_description = t('Hides the block on pages with any matching response code selected from the options above.');
+    }
+    elseif (isset($form_state['layout'])) {
+      $checkboxes_description = t('This layout will apply on pages with any matching response code. If nothing is selected, the layout will apply on all pages (subject to other visibility conditions).');
+      $negate_description = t('This layout will apply on all pages, except those with any matching response code selected from the options above (subject to other visibility conditions).');
+    }
     $form['http_response_codes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('HTTP response status is'),
@@ -19,9 +28,9 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
         404 => t('Page not found (404)'),
       ),
       '#default_value' => $response_codes,
-      '#description' => t('Shows the block on pages with any matching response code. If nothing is selected, the block will be shown on all pages where this layout applies.'),
+      '#description' => $checkboxes_description,
     );
-    $form['negate']['#description'] = t('Hides the block on pages with any matching response code selected from the options above.');
+    $form['negate']['#description'] = $negate_description;
     // Do not tick the negation checkbox if no status code has been selected.
     $form['negate']['#default_value'] = empty($response_codes) ? 0 : $this->settings['negate'];
     // Negation option should only be available if at least one status code has
