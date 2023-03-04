@@ -3128,6 +3128,7 @@ function backdrop_deliver_html_page($page_callback_result) {
   elseif (isset($page_callback_result)) {
     // Print anything besides a menu constant, assuming it's not NULL or
     // undefined.
+    backdrop_add_http_header('Status', '200 OK');
     print backdrop_render_page($page_callback_result);
   }
 
