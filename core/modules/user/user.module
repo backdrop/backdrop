@@ -1081,7 +1081,10 @@ function user_account_form_validate($form, &$form_state) {
         form_set_error('mail', t('The email address %email is already taken.', array('%email' => $mail)));
       }
       else {
-        form_set_error('mail', t('The email address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
+        form_set_error('mail', t('The email address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array(
+          '%email' => $mail,
+          '@password' => url('user/password'),
+        )));
       }
     }
   }
@@ -3289,7 +3292,10 @@ function user_register_submit($form, &$form_state) {
   // New administrative account without notification.
   $uri = $account->uri();
   if ($admin && !$notify) {
-    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No email has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No email has been sent.', array(
+      '@url' => url($uri['path'], $uri['options']),
+      '%name' => $account->name,
+    )));
   }
   // No email verification required; log in user immediately.
   elseif (!$admin && !$user_email_verification && $account->status) {
@@ -3304,7 +3310,10 @@ function user_register_submit($form, &$form_state) {
     $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
     _user_mail_notify($op, $account);
     if ($notify) {
-      backdrop_set_message(t('A welcome message with further instructions has been emailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+      backdrop_set_message(t('A welcome message with further instructions has been emailed to the new user <a href="@url">%name</a>.', array(
+        '@url' => url($uri['path'], $uri['options']),
+        '%name' => $account->name,
+      )));
     }
     else {
       backdrop_set_message(t('A welcome message with further instructions has been sent to your email address.'));
