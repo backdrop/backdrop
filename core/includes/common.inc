@@ -8009,6 +8009,9 @@ function backdrop_common_theme() {
     'details' => array(
       'render element' => 'element',
     ),
+    'form_element_indentation' => array(
+      'variables' => array('size' => 1),
+    ),
   );
 }
 
