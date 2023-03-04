@@ -1665,7 +1665,7 @@ function system_library_info() {
     ),
   );
   $libraries['ui.menu'] = array(
-    'title' => 'jQuery UI: Mouse',
+    'title' => 'jQuery UI: Menu',
     'website' => 'http://jqueryui.com/menu/',
     'version' => $libraries['ui']['version'],
     'js' => array(
@@ -2440,7 +2440,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2450,7 +2449,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
@@ -2482,21 +2480,15 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['timezone'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Locale settings'),
-    '#weight' => 6,
-    '#collapsible' => TRUE,
-  );
-  $form['timezone']['timezone'] = array(
+  $form['region_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
-    '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
+    '#description' => t("This account's preferred time zone for date and time display throughout the site."),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
+    $form['region_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
 }
@@ -3335,7 +3327,7 @@ function system_header_block($settings) {
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
   if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));
@@ -4070,6 +4062,7 @@ function system_autoload_info() {
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+    'views_handler_field_system_info' => 'views/views_handler_field_system_info.inc',
   );
 }
 
@@ -4154,10 +4147,10 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
-      ->condition('status', 1)
+      ->condition('node.title', '%' . db_like($string) . '%', 'LIKE')
+      ->condition('node.status', 1)
       ->addTag('node_access')
-      ->orderBy('nid', 'DESC')
+      ->orderBy('node.nid', 'DESC')
       ->range(0, $range)
       ->execute();
     foreach ($results as $result) {
@@ -4219,10 +4212,10 @@ function path_autocomplete($string = '') {
     if (module_exists('taxonomy') && $match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
+        ->condition('taxonomy_term_data.name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
-        ->orderBy('tid', 'DESC')
+        ->orderBy('taxonomy_term_data.tid', 'DESC')
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
@@ -4386,6 +4379,24 @@ function system_admin_paths() {
     'admin/reports/status/php' => FALSE,
   );
   return $paths;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function system_file_download($uri) {
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  if ($additional_public_schemes) {
+    $scheme = file_uri_scheme($uri);
+    if (in_array($scheme, $additional_public_schemes, TRUE)) {
+      return array(
+        // Returning any header grants access, and setting the 'Cache-Control'
+        // header is appropriate for public files.
+        'Cache-Control' => 'public',
+      );
+    }
+  }
 }
 
 /**

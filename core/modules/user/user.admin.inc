@@ -429,6 +429,36 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     '#value' => $roles,
   );
 
+  // JS-only table filters.
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('table-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the permission name, module name, or description to filter.'),
+    ),
+    '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
+  );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => $_GET['q'],
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
+  );
+
   // Render role/permission overview:
   $options = array();
   $module_info = system_get_info('module');
@@ -461,7 +491,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
         foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
+          // Build arrays for checked boxes for each role.
           if (in_array($perm, $role->permissions)) {
             $status[$role_name][] = $perm;
           }
@@ -470,7 +500,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Build the checkboxes here after the role arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -480,6 +510,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -503,6 +534,14 @@ function user_admin_permissions_submit($form, &$form_state) {
   }
 
   backdrop_set_message(t('The changes have been saved.'));
+
+  // Check if a previous search is present and preserve it on redirect.
+  if (!empty($form_state['values']['search'])) {
+    $form_state['redirect'] = array(
+      $_GET['q'],
+      array('query' => array('search' => $form_state['values']['search'])),
+    );
+  }
 }
 
 /**
@@ -586,7 +625,7 @@ function user_admin_roles($form, $form_state) {
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -673,6 +712,13 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#rows' => 3,
+    '#title' => t('Description'),
+    '#default_value' => isset($role->description) ? $role->description : '',
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
+  );
   $form['weight'] = array(
     '#type' => 'value',
     '#value' => empty($role->weight) ? 0 : $role->weight,
@@ -711,6 +757,7 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
+      'description' => $form_state['values']['description'],
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
@@ -723,11 +770,10 @@ function user_admin_role_submit($form, &$form_state) {
   else {
     // Update existing role.
     $role = $form_state['role'];
-    $old_role = $role->label;
     $role->label = $form_state['values']['label'];
+    $role->description = $form_state['values']['description'];
     user_role_save($role);
-    $new_role = $role->label;
-    backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+    backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));
   }
 
   $form_state['redirect'] = $redirect;

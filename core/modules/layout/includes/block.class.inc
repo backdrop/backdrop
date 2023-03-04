@@ -195,7 +195,7 @@ class Block extends LayoutHandler {
     // If this is a child block, merge in its child-specific data.
     if ($this->childDelta) {
       $children_blocks = $this->getChildren();
-      $block_info = array_merge($block_info, $children_blocks[$this->childDelta]);
+      $block_info = isset($children_blocks) ? array_merge($block_info, $children_blocks[$this->childDelta]) : NULL;
     }
 
     return $block_info;

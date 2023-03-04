@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Basic functions for Date tests.
@@ -47,7 +46,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
     $todate = !empty($todate) ? $todate : 'optional';
     $widget_type = !empty($widget_type) ? $widget_type : 'date_select';
     $tz_handling = !empty($tz_handling) ? $tz_handling : 'site';
-    $granularity = !empty($granularity) ? $granularity : array('year', 'month', 'day', 'hour', 'minute');
+    $granularity = !empty($granularity) ? backdrop_map_assoc($granularity) : backdrop_map_assoc(array('year', 'month', 'day', 'hour', 'minute'));
     $year_range = !empty($year_range) ? $year_range : '2010:+1';
     $input_format = !empty($input_format) ? $input_format : date_default_format($widget_type);
     $input_format_custom = !empty($input_format_custom) ? $input_format_custom : '';
@@ -266,7 +265,7 @@ class DateFieldTestCase extends DateFieldBasic {
   public function testField() {
     // Create a date fields with simple values.
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
-      foreach (array('date_select', 'date_popup', 'date_text') as $widget_type) {
+      foreach (array('date_select', 'date_popup', 'date_text', 'date_html5') as $widget_type) {
         $field_name = "field_test_$widget_type";
         $label = 'Test';
         $options = array(
@@ -320,6 +319,14 @@ class DateFieldTestCase extends DateFieldBasic {
         $edit[$field_name . '[und][0][show_todate]'] = '1';
         $edit[$field_name . '[und][0][value2][date]'] = '10/07/2010';
         $edit[$field_name . '[und][0][value2][time]'] = '11:30am';
+      }
+    }
+    elseif ($widget_type == 'date_html5') {
+      $edit[$field_name . '[und][0][value][date]'] = '2010-10-07';
+      $edit[$field_name . '[und][0][value][time]'] = '10:30';
+      if ($todate) {
+        $edit[$field_name . '[und][0][value2][date]'] = '2010-10-07';
+        $edit[$field_name . '[und][0][value2][time]'] = '11:30';
       }
     }
     // Test that the date is displayed correctly using both the 'short' and

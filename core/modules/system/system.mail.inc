@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop core implementations of MailSystemInterface.

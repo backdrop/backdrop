@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handler for node path field.

@@ -636,14 +636,15 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
-  $info = node_type_get_type($type);
-  $config = config('node.type.' . $type);
-  $config->delete();
-  field_attach_delete_bundle('node', $type);
-  module_invoke_all('node_type_delete', $info);
+  if ($info = node_type_get_type($type)) {
+    $config = config('node.type.' . $type);
+    $config->delete();
+    field_attach_delete_bundle('node', $type);
+    module_invoke_all('node_type_delete', $info);
 
-  // Clear the node type cache.
-  node_type_cache_reset();
+    // Clear the node type cache.
+    node_type_cache_reset();
+  }
 }
 
 /**
@@ -754,7 +755,7 @@ function node_type_cache_reset() {
 /**
  * Sets the default values for a node type.
  *
- * The defaults are appropriate for a type defined through hook_node_info(),
+ * The defaults are appropriate for a type defined through node_type_save(),
  * since 'custom' is TRUE for types defined in the user interface, and FALSE
  * for types defined by modules. (The 'module' flag prevents types from being
  * deleted through the user interface.) Also, the default for 'locked' is TRUE,
@@ -762,7 +763,7 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   See node_type_save() for details on what the array elements mean. Defaults
  *   to an empty array.
  *
  * @return
@@ -2414,7 +2415,7 @@ function _node_index_node(Node $node) {
 
   // Save the changed time of the most recent indexed node, for the search
   // results half-life calculation.
-  state_set('node_cron_last', $node->changed);
+  state_set('node_cron_last', (int) $node->changed);
 
   // Render the node.
   $build = node_view($node, 'search_index');
@@ -3420,9 +3421,6 @@ function node_content_form(Node $node, $form_state) {
       '#default_value' => $node->title,
       '#maxlength' => 255,
       '#weight' => -5,
-      '#attributes' => array(
-        'autofocus' => TRUE,
-      ),
     );
   }
 
@@ -3654,7 +3652,7 @@ function node_config_info() {
   $prefixes['node.type'] = array(
     'name_key' => 'type',
     'label_key' => 'name',
-    'group' => t('Node types'),
+    'group' => t('Content types'),
   );
   return $prefixes;
 }

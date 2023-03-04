@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests the Views integration with Field API.
