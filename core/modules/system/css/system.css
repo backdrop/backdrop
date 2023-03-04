@@ -148,13 +148,35 @@ div.indentation {
   margin: -1em -0.4em -1em 0.2em;
   padding: 1em 0.6em 1em 0;
 }
-div.form-item-indentation {
-  display: inline-block;
-  width: 1em;
+div.form-item-indentation-1 {
+  margin-left: 1em !important;
 }
-[dir="rtl"] div.form-item-indentation {
-  display: inline-block;
-  width: 1em;
+[dir="rtl"] div.form-item-indentation-1 {
+  margin-right: 1em !important;;
+}
+div.form-item-indentation-2 {
+  margin-left: 2em !important;;
+}
+[dir="rtl"] div.form-item-indentation-2 {
+  margin-right: 2em !important;;
+}
+div.form-item-indentation-3 {
+  margin-left: 3em !important;;
+}
+[dir="rtl"] div.form-item-indentation-3 {
+  margin-right: 3em !important;;
+}
+div.form-item-indentation-4 {
+  margin-left: 4em !important;;
+}
+[dir="rtl"] div.form-item-indentation-4 {
+  margin-right: 4em !important;;
+}
+div.form-item-indentation-5 {
+  margin-left: 5em !important;;
+}
+[dir="rtl"] div.form-item-indentation-5 {
+  margin-right: 5em !important;;
 }
 div.tree-child {
   background: url(../../../misc/tree.png) no-repeat 11px center; /* LTR */

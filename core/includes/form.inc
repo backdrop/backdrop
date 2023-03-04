@@ -3010,13 +3010,7 @@ function theme_radio($variables) {
   }
   _form_set_class($element, array('form-radio'));
 
-  $output = '';
-  if (!empty($element['#indentation'])) {
-    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
-  }
-  $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
-
-  return $output;
+  return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
 
 /**
@@ -3430,12 +3424,7 @@ function theme_checkbox($variables) {
   }
   _form_set_class($element, array('form-checkbox'));
 
-  $output = '';
-  if (!empty($element['#indentation'])) {
-    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
-  }
-  $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
-  return $output;
+  return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
 
 /**
@@ -4860,6 +4849,10 @@ function theme_form_element($variables) {
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
     $attributes['class'][] = 'form-disabled';
+  }
+  // Add indentation.
+  if (!empty($element['#indentation'])) {
+    $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
   }
   $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
 
