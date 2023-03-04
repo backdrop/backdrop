@@ -4,6 +4,9 @@
  * Class for loading, modifying, and saving a layout access rule (condition).
  */
 
+/**
+ * Provides a visibility condition based on HTTP response codes from the server.
+ */
 class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
