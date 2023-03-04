@@ -3010,13 +3010,7 @@ function theme_radio($variables) {
   }
   _form_set_class($element, array('form-radio'));
 
-  $output = '';
-  if (!empty($element['#indentation'])) {
-    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
-  }
-  $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
-
-  return $output;
+  return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
 
 /**
@@ -3430,12 +3424,7 @@ function theme_checkbox($variables) {
   }
   _form_set_class($element, array('form-checkbox'));
 
-  $output = '';
-  if (!empty($element['#indentation'])) {
-    $output .= theme('form_element_indentation', array('size' => $element['#indentation']));
-  }
-  $output .= '<input' . backdrop_attributes($element['#attributes']) . ' />';
-  return $output;
+  return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
 
 /**
