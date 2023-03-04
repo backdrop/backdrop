@@ -78,7 +78,7 @@ function user_pass_validate($form, &$form_state) {
     form_set_value(array('#parents' => array('account')), $account, $form_state);
   }
   elseif (config_get('system.core', 'generic_login_messages')) {
-    // Send an empty 'account' to the submit handler so it can show ther generic
+    // Send an empty 'account' to the submit handler so it can show the generic
     // message.
     form_set_value(array('#parents' => array('account')), FALSE, $form_state);
   }
