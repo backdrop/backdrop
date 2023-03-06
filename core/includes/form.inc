@@ -3663,7 +3663,12 @@ function theme_container($variables) {
       }
     }
   }
-
+  if (isset($element['#indentation'])) {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
+  }
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
 }
 
