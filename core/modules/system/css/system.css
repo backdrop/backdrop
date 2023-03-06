@@ -148,6 +148,12 @@ div.indentation {
   margin: -1em -0.4em -1em 0.2em;
   padding: 1em 0.6em 1em 0;
 }
+div.form-item-indentation-0 {
+  margin-left: 0;
+}
+[dir="rtl"] div.form-item-indentation-0 {
+  margin-right: 0;
+}
 div.form-item-indentation-1 {
   margin-left: 1em;
 }

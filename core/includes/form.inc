@@ -4851,7 +4851,7 @@ function theme_form_element($variables) {
     $attributes['class'][] = 'form-disabled';
   }
   // Add indentation.
-  if (!empty($element['#indentation'])) {
+  if (isset($element['#indentation'])) {
     $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
   }
   $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
