@@ -228,13 +228,14 @@ function field_ui_menu() {
 function field_ui_manage_display_link_title($entity_type, $bundle, $view_mode) {
   $bundle_name = _field_ui_get_bundle_machine_name($bundle);
   $entity_info = entity_get_info($entity_type);
+  module_load_include('inc', 'field_ui', 'field_ui.admin');
   $active_view_modes = field_ui_get_view_mode_data($entity_type, $bundle_name, TRUE);
 
   return t('@type: @mode display', array('@type' => $entity_info['bundles'][$bundle_name]['label'], '@mode' => $active_view_modes[$view_mode]['label']));
 }
 
 /**
- * Helper function to get the machine name of a given entity type bundle.
+ * Determines the machine name of a bundle.
  *
  * @param object|string $bundle
  *   The bundle object (or a string for user accounts).
