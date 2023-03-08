@@ -122,6 +122,60 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
       '%min' => $min['#title'],
     )));
   }
+
+  // Consider the value limits of the database, prevent impossible settings.
+  $field_type = $form['#field']['type'];
+  if ($field_type == 'number_integer') {
+    // @see https://mariadb.com/kb/en/int/
+    $min_db_integer = -2147483647;
+    $max_db_integer = 2147483647;
+    $settings = $form_state['values']['instance']['settings'];
+
+    if (!empty($settings['min']) && $settings['min'] < $min_db_integer) {
+      form_error($min, t('%min is smaller than the smallest value the database can save. Choose a value equal to or higher than %db_min.', array(
+        '%min' => $settings['min'],
+        '%db_min' => $min_db_integer,
+      )));
+    }
+    if (!empty($settings['max']) && $settings['max'] > $max_db_integer) {
+      form_error($max, t('%max is greater than the largest value the database can save. Choose a value equal to or lower than %db_max.', array(
+        '%max' => $settings['max'],
+        '%db_max' => $max_db_integer,
+      )));
+    }
+  }
+  elseif ($field_type == 'number_decimal') {
+    // The field settings for precision and scale also dictate the possible
+    // min/max values for the field.
+    $precision = $form['#field']['settings']['precision'];
+    $scale = $form['#field']['settings']['scale'];
+    $settings = $form_state['values']['instance']['settings'];
+
+    if (!empty($settings['min'])) {
+      $min_value = abs($settings['min']);
+      $digits = explode('.', $min_value);
+
+      if (strlen($digits[0]) > $precision - $scale || (isset($digits[1]) && strlen($digits[1]) > $scale)) {
+        form_error($min, t('%min exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+          '%min' => $settings['min'],
+          '%prec' => $precision,
+          '%scale' => $scale,
+        )));
+      }
+    }
+    if (!empty($settings['max'])) {
+      $max_value = abs($settings['max']);
+      $digits = explode('.', $max_value);
+
+      if (strlen($digits[0]) > $precision - $scale || (isset($digits[1]) && strlen($digits[1]) > $scale)) {
+        form_error($max, t('%max exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+          '%max' => $settings['max'],
+          '%prec' => $precision,
+          '%scale' => $scale,
+        )));
+      }
+    }
+  }
 }
 
 /**
@@ -347,7 +401,10 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   // Set the step for floating point and decimal numbers.
   switch ($field['type']) {
     case 'number_decimal':
-      $element['#step'] = pow(0.1, $field['settings']['scale']);
+      // Avoid small float as base in function pow() for better results
+      // regarding floating point precision.
+      $scale = (int) $field['settings']['scale'];
+      $element['#step'] = 1 / pow(10, $scale);
       break;
 
     case 'number_float':

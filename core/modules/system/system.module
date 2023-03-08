@@ -47,7 +47,7 @@ define('BACKDROP_REQUIRED', 2);
 define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
- * Maximum length of e-mail fields.
+ * Maximum length of email fields.
  */
 define('EMAIL_MAX_LENGTH', 254);
 
@@ -141,6 +141,12 @@ function system_theme() {
         'dialog' => TRUE,
       ),
     ) + $base,
+    'label_machine_name' => array(
+      'variables' => array(
+        'label' => NULL,
+        'machine_name' => NULL,
+      ),
+    ) + $base,
   ));
 }
 
@@ -155,6 +161,7 @@ function system_permission() {
     'administer site configuration' => array(
       'title' => t('Administer site configuration'),
       'restrict access' => TRUE,
+      'warning' => t('Provides access to a variety of settings/functionality that should generally be restricted to site administrators.'),
     ),
     'administer themes' => array(
       'title' => t('Administer themes'),
@@ -162,6 +169,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
+      'warning' => t('Run database updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
@@ -523,7 +531,12 @@ function system_element_info() {
     '#pre_render' => array('backdrop_pre_render_dropbutton'),
     '#theme' => 'links__dropbutton__operations',
   );
-
+  $types['details'] = array(
+    '#summary' => NULL,
+    '#details' => NULL,
+    '#open' => FALSE,
+    '#theme_wrappers' => array('details'),
+  );
   $types['container'] = array(
     '#theme_wrappers' => array('container'),
     '#process' => array('form_process_container'),
@@ -928,7 +941,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, email address, default home page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -948,7 +961,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
-    'description' => 'Settings related to URLs including path aliases and URL recirects.',
+    'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -974,21 +987,21 @@ function system_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls/check'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings/check'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -1133,6 +1146,8 @@ function system_page_delivery_callback_alter(&$delivery_callback, $page_output) 
  * Implements hook_library_info().
  */
 function system_library_info() {
+  $system_module_path = backdrop_get_path('module', 'system');
+
   // Backdrop's Ajax framework.
   $libraries['backdrop.ajax'] = array(
     'title' => 'Backdrop AJAX',
@@ -1270,7 +1285,7 @@ function system_library_info() {
     'title' => 'Modules Filter',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/modules.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1278,10 +1293,55 @@ function system_library_info() {
     'title' => 'Backdrop menu styles',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/menus.js' => array('group' => JS_DEFAULT),
     ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    // CSS is added conditionally below.
+  );
+
+  // Announce.
+  $libraries['backdrop.announce'] = array(
+    'title' => 'Announce',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/announce.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  $libraries['backdrop.menu-toggle'] = array(
+    'title' => 'Backdrop menu toggle',
+    'version' => BACKDROP_VERSION,
+    // CSS is added conditionally below.
+  );
+
+  // Add conditional CSS to above libraries.
+  $menu_config = config('menu.settings');
+  if ($menu_config->get('menu_breakpoint') == 'custom') {
+    $libraries['backdrop.menus']['css'] = array(
+      $system_module_path . '/css/menu-dropdown.theme.breakpoint.css' => array('group' => CSS_DEFAULT),
+      $system_module_path . '/css/menu-dropdown.theme.breakpoint-queries.css' => array(
+        'group' => CSS_DEFAULT,
+        'media' => 'all and (min-width: ' . $menu_config->get('menu_breakpoint_custom') . ')',
+      ),
+    );
+    $libraries['backdrop.menu-toggle']['css'] = array(
+      $system_module_path . '/css/menu-toggle.theme.breakpoint.css' => array('group' => CSS_DEFAULT),
+      $system_module_path . '/css/menu-toggle.theme.breakpoint-queries.css' => array(
+        'group' => CSS_DEFAULT,
+        'media' => 'all and (min-width: ' . $menu_config->get('menu_breakpoint_custom') . ')',
+      ),
+    );
+  }
+  else {
+    $libraries['backdrop.menus']['css'][$system_module_path . '/css/menu-dropdown.theme.css'] = array('group' => CSS_DEFAULT);
+    $libraries['backdrop.menu-toggle']['css'][$system_module_path . '/css/menu-toggle.theme.css'] = array('group' => CSS_DEFAULT);
+  }
+
+  // Dismiss buttons.
+  $libraries['backdrop.dismiss'] = array(
+    'title' => 'Dismiss buttons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/dismiss.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1366,7 +1426,7 @@ function system_library_info() {
     'title' => 'Jump Menu',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
+      $system_module_path . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
     ),
   );
 
@@ -1387,7 +1447,7 @@ function system_library_info() {
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
     'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.2',
+    'version' => '3.7.3',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
@@ -1445,7 +1505,7 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.12.1',
+    'version' => '1.13.0',
     'js' => array(
       'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1455,7 +1515,7 @@ function system_library_info() {
       'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.escape-selector.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
       'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
@@ -1605,7 +1665,7 @@ function system_library_info() {
     ),
   );
   $libraries['ui.menu'] = array(
-    'title' => 'jQuery UI: Mouse',
+    'title' => 'jQuery UI: Menu',
     'website' => 'http://jqueryui.com/menu/',
     'version' => $libraries['ui']['version'],
     'js' => array(
@@ -1784,12 +1844,28 @@ function system_library_info() {
       array('system', 'ui'),
     ),
   );
+
+  // The jQuery Color library was separate from jQuery UI: Effects in version
+  // 1.13.0 of jQuery UI. The version used here should be locked to the version
+  // shipped with jQuery UI.
+  $libraries['jquery.color'] = array(
+    'title' => 'jQuery Color',
+    'website' => 'https://github.com/jquery/jquery-color',
+    'version' => '2.2.0',
+    'js' => array(
+      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+  );
+
   $libraries['effects'] = array(
     'title' => 'jQuery UI: Effects',
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.color'),
     ),
   );
   $libraries['effects.blind'] = array(
@@ -1977,10 +2053,10 @@ function system_library_info() {
     'title' => 'Token behaviors',
     'version' => '1.0',
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+      $system_module_path . '/js/token.js' => array(),
     ),
     'css' => array(
-      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+      $system_module_path . '/css/token.css' => array(),
     ),
     'dependencies' => array(
       array('system', 'jquery.treetable'),
@@ -1994,11 +2070,11 @@ function system_library_info() {
     'website' => 'http://plugins.jquery.com/project/treetable',
     'version' => '3.2.0',
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+      $system_module_path . '/js/jquery.treetable.js' => array(),
     ),
     'css' => array(
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+      $system_module_path . '/css/jquery.treetable.css' => array(),
+      $system_module_path . '/css/jquery.treetable.theme.default.css' => array(),
     ),
   );
 
@@ -2364,7 +2440,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2374,7 +2449,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
@@ -2406,21 +2480,15 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['timezone'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Locale settings'),
-    '#weight' => 6,
-    '#collapsible' => TRUE,
-  );
-  $form['timezone']['timezone'] = array(
+  $form['region_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
-    '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
+    '#description' => t("This account's preferred time zone for date and time display throughout the site."),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
+    $form['region_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
 }
@@ -2679,7 +2747,7 @@ function system_check_directory($form_element) {
  * @param $files
  *   An array of files to check.
  * @param $type
- *   The type of the files.
+ *   The type of the files ('module', 'theme', 'layout').
  */
 function system_get_files_database(&$files, $type) {
   // Extract current files from database.
@@ -2780,7 +2848,11 @@ function system_update_files_database(&$files, $type) {
   // If any module or theme was moved to a new location, we need to reset the
   // system_list() cache or we will continue to load the old copy, look for
   // schema updates in the wrong place, etc.
-  system_list_reset();
+  // We avoid system_list_reset() since this resets the static storage in
+  // system_rebuild_module_data(), which itself calls this function.
+  backdrop_static_reset('system_list');
+  backdrop_static_reset('list_themes');
+  cache('bootstrap')->deleteMultiple(array('bootstrap_modules', 'system_list'));
 }
 
 /**
@@ -2829,8 +2901,17 @@ function system_get_info($type, $name = NULL) {
  *   An associative array of module information.
  */
 function _system_rebuild_module_data() {
-  // Find modules
-  $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
+  // Find module files, recording multiples if they exist.
+  $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'uri', 0);
+  $modules = array();
+  foreach ($files as $file) {
+    if (!isset($modules[$file->name])) {
+      $modules[$file->name] = $file;
+    }
+    // Modules found later in the search take precedence, but record all found.
+    $modules[$file->name]->uri = $file->uri;
+    $modules[$file->name]->all_uris[] = $file->uri;
+  }
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
@@ -3246,7 +3327,7 @@ function system_header_block($settings) {
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
   if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));
@@ -3710,7 +3791,7 @@ function system_time_zones($blank = NULL) {
  */
 function system_check_http_request() {
    watchdog_deprecated_function('system', __FUNCTION__);
-  // Try to get the content of the front page via backdrop_http_request().
+  // Try to get the content of the home page via backdrop_http_request().
   $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
   // can make a http request.
@@ -3740,6 +3821,21 @@ function system_image_toolkits() {
       'available' => function_exists('image_gd_check_settings') && image_gd_check_settings(),
     ),
   );
+}
+
+/**
+ * Implements hook_image_supported_extensions_alter().
+ *
+ * Add webp to supported file extensions if GD is the active image toolkit and
+ * the GD version supports WebP.
+ */
+function system_image_supported_extensions_alter(&$supported_extensions) {
+  if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      $supported_extensions[] = 'webp';
+    }
+  }
 }
 
 /**
@@ -3832,11 +3928,13 @@ function system_run_automated_cron() {
  *   string.
  */
 function system_get_date_formats($date_format_name = NULL) {
-  $date_formats = backdrop_static(__FUNCTION__, array());
+  $date_formats = &backdrop_static(__FUNCTION__, array());
   if (empty($date_formats)) {
     $date_formats = config_get('system.date', 'formats');
-    foreach ($date_formats as $name => $format) {
-      $date_formats[$name]['name'] = $name;
+    if (is_array($date_formats)) {
+      foreach ($date_formats as $name => $format) {
+        $date_formats[$name]['name'] = $name;
+      }
     }
   }
 
@@ -3964,6 +4062,7 @@ function system_autoload_info() {
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+    'views_handler_field_system_info' => 'views/views_handler_field_system_info.inc',
   );
 }
 
@@ -4048,18 +4147,17 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
-      ->condition('status', 1)
+      ->condition('node.title', '%' . db_like($string) . '%', 'LIKE')
+      ->condition('node.status', 1)
       ->addTag('node_access')
-      ->orderBy('nid', 'DESC')
+      ->orderBy('node.nid', 'DESC')
       ->range(0, $range)
       ->execute();
     foreach ($results as $result) {
       $path = backdrop_get_path_alias('node/' . $result->nid);
-      $matches[$path] = t('@title (Content: %type)', array(
-        '@title' => $result->title,
-        '%type' => node_type_get_name($result->type),
-      ));
+      $match = '<span class="autocomplete-suggestion">' . check_plain($result->title) . '</span>';
+      $match_description = t('Content: %type', array('%type' => node_type_get_name($result->type)));
+      $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
       $match_count++;
     }
 
@@ -4078,10 +4176,9 @@ function path_autocomplete($string = '') {
         $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
         $url = file_create_url($result->uri);
         $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-        $matches[$path] = t('@filename (File: %type)', array(
-          '@filename' => $result->filename,
-          '%type' => file_type_get_name($result->type),
-        ));
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->filename) . '</span>';
+        $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4103,29 +4200,28 @@ function path_autocomplete($string = '') {
         $users = user_load_multiple($uids);
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
-          $matches[$path] = t('@name (User account)', array(
-            '@name' => user_format_name($user),
-          ));
+          $match = '<span class="autocomplete-suggestion">' . check_plain(user_format_name($user)) . '</span>';
+          $match_description = t('User account');
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }
     }
 
     // Get taxonomy term matches.
-    if ($match_count < $range) {
+    if (module_exists('taxonomy') && $match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
+        ->condition('taxonomy_term_data.name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
-        ->orderBy('tid', 'DESC')
+        ->orderBy('taxonomy_term_data.tid', 'DESC')
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-        $matches[$path] = t('@name (Taxonomy term: %vocabulary)', array(
-          '@name' => $result->name,
-          '%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name,
-        ));
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->name) . '</span>';
+        $match_description = t('Taxonomy term: %vocabulary', array('%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name));
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4138,6 +4234,7 @@ function path_autocomplete($string = '') {
           if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
             $path = backdrop_get_path_alias($display->display_options['path']);
             if (!path_is_admin($path)) {
+              $view_title = '';
               $found_match = FALSE;
               // Display title.
               if (!empty($display->display_options['title']) && stripos($display->display_options['title'], $string) !== FALSE) {
@@ -4155,10 +4252,9 @@ function path_autocomplete($string = '') {
                 $view_title = $view->human_name;
               }
               if ($found_match) {
-                $matches[$path] = t('@title (View: %display)', array(
-                  '@title' => $view_title,
-                  '%display' => $view->human_name . ' - ' . $display->display_title,
-                ));
+                $match = '<span class="autocomplete-suggestion">' . check_plain($view_title) . '</span>';
+                $match_description = t('View: %human - %display', array('%human' => $view->human_name, '%display' => $display->display_title));
+                $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
               }
             }
@@ -4175,6 +4271,7 @@ function path_autocomplete($string = '') {
       $menu_items = layout_get_all_configs('menu_item');
       foreach ($menu_items as $menu_item) {
         if ($match_count < $range) {
+          $layout_title = '';
           $found_match = FALSE;
           if (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
             $found_match = TRUE;
@@ -4185,10 +4282,9 @@ function path_autocomplete($string = '') {
             $layout_title = $menu_item['name'];
           }
           if ($found_match) {
-            $matches[$menu_item['path']] = t('@title (Layout: %display)', array(
-              '@title' => $layout_title,
-              '%display' => $menu_item['name'],
-            ));
+            $match = '<span class="autocomplete-suggestion">' . check_plain($layout_title) . '</span>';
+            $match_description = t('Layout: %display', array('%display' => $menu_item['name']));
+            $matches[$menu_item['path']] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
             $match_count++;
           }
         }
@@ -4206,10 +4302,9 @@ function path_autocomplete($string = '') {
       foreach ($results as $result) {
         $path = backdrop_get_path_alias($result->link_path);
         if (!isset($matches[$path]) && !path_is_admin($path)) {
-          $matches[$path] = t('@title (Menu item: %path)', array(
-            '@title' => $result->link_title,
-            '%path' => $path,
-          ));
+          $match = '<span class="autocomplete-suggestion">' . check_plain($result->link_title) . '</span>';
+          $match_description = t('Menu item: %path', array('%path' => $path));
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }
@@ -4219,6 +4314,56 @@ function path_autocomplete($string = '') {
   // Allow modules to alter the matches.
   backdrop_alter('path_autocomplete', $matches, $string);
   backdrop_json_output($matches);
+}
+
+/**
+ * Menu callback; Redirects a deprecated menu location to a new path.
+ *
+ * This wrapper around backdrop_goto_deprecated() should be used as the menu
+ * callback in hook_menu() when redirecting from an old path to a new one.
+ *
+ * @param string $path
+ *   The path to which the user should be redirected. Because this is intended
+ *   to be used as a page callback, the old path is pulled from the current
+ *   menu location (the $_GET['q'] variable).
+ * @param array $argument_map
+ *   If the old path and new path have differing argument orders, this can be
+ *   used to map an argument from one position to another. An old path of
+ *   "my-module/%key-one/edit/%" could be redirected to
+ *   "my-module/configure/%key-one/%" by setting a map such as:
+ *    @code
+ *    array(
+ *      1 => 2
+ *      3 => 3
+ *    );
+ *    @endcode
+ *
+ *    Note that this map is zero-indexed.
+ *
+ * @see arg()
+ *
+ * @since 1.19.0 Function added.
+ */
+function system_redirect_deprecated_page($path, $argument_map = array()) {
+  // The argument map is passed in as old => new. But we need to get the old
+  // keys based on the new position in $path. So flip to make retrieving easy.
+  $argument_map = array_flip($argument_map);
+
+  // Perform any substitutions in the passed-in path with the current path.
+  $parts = explode('/', $path);
+  foreach ($parts as $index => $path_part) {
+    if (backdrop_substr($path_part, 0, 1) === '%') {
+      if (!empty($argument_map)) {
+        $parts[$index] = arg($argument_map[$index]);
+      }
+      else {
+        $parts[$index] = arg($index);
+      }
+    }
+  }
+  $path = implode('/', $parts);
+
+  backdrop_goto_deprecated($path);
 }
 
 /**
@@ -4234,6 +4379,24 @@ function system_admin_paths() {
     'admin/reports/status/php' => FALSE,
   );
   return $paths;
+}
+
+/**
+ * Implements hook_file_download().
+ */
+function system_file_download($uri) {
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  if ($additional_public_schemes) {
+    $scheme = file_uri_scheme($uri);
+    if (in_array($scheme, $additional_public_schemes, TRUE)) {
+      return array(
+        // Returning any header grants access, and setting the 'Cache-Control'
+        // header is appropriate for public files.
+        'Cache-Control' => 'public',
+      );
+    }
+  }
 }
 
 /**
@@ -4258,7 +4421,7 @@ function system_admin_paths() {
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
- *     '#default_setting' => $settings_config->get('first_setting'),
+ *     '#default_value' => $primary_config->get('first_setting'),
  *   ),
  *   'second_setting' => array( ... ),
  *
@@ -4272,7 +4435,7 @@ function system_admin_paths() {
  *
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
- *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#default_value' => $tertiary_config->get('bonus_three'),
  *       '#config' => 'mymodule.third',
  *     ),
  *   ),
@@ -4438,3 +4601,60 @@ function system_theme_debug_enabled_warning() {
     backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
   }
 }
+
+/**
+ * Wrapper around transliteration_get() that handles common clean up on strings.
+ *
+ * @param string $string
+ *   The string to be transliterated.
+ * @param array $options
+ *   An array of options for further cleanup. This array includes:
+ *   - langcode: The language code of the source string.
+ *   - replace: The character with which to replace unknown characters in the
+ *     string. Defaults to '_'.
+ *   - replace_pattern: A pattern for replacing unknown characters with the
+ *     "replace" value.
+ *   - maxlength: The maximum allowed length of the returned string.
+ *
+ * @return string
+ *   The transliterated and cleaned up string.
+ */
+
+function system_transliterate_machine_name($string, $options = array()) {
+  include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
+  $defaults = array(
+    'langcode' => $GLOBALS['language']->langcode,
+    'replace' => '_',
+    'replace_pattern' => NULL,
+    'maxlength' => NULL,
+  );
+  $options = array_intersect_key($options, $defaults) + $defaults;
+
+  // Build the default replacement pattern on the given "replace" property.
+  if (!isset($options['replace_pattern'])) {
+    $options['replace_pattern'] = '[^0-9A-Za-z' . $options['replace'] . ']+';
+  }
+
+  $replace = $options['replace'];
+  $string = transliteration_get($string, $replace, $options['langcode']);
+
+  // Remove remaining unsafe characters.
+  if ($options['replace_pattern']) {
+    $string = preg_replace('/' . $options['replace_pattern'] . '/', $options['replace'], $string);
+  }
+  // Replace whitespace.
+  $string = str_replace(' ', $replace, $string);
+  // Remove leading and trailing whitespace/unknown characters.
+  $string = trim($string, $replace);
+  // Collapse multiple consecutive replacement characters.
+  $replace_regex = strlen($replace) ? "([$replace])[$replace]+|" : '';
+  $string = preg_replace("/{$replace_regex}(_)_+|(\\.)\\.+|(-)-+/", '$1$2$3$4$5', $string);
+
+  // Set maxlength.
+  if ($options['maxlength']) {
+    $string = substr($string, 0, $options['maxlength']);
+  }
+
+  return $string;
+}
+

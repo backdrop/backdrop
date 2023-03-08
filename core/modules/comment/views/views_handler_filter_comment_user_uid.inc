@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_filter_comment_user_uid.

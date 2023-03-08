@@ -110,7 +110,7 @@ class BackdropDateTime extends DateTime {
       }
     }
     if (!$successfully_parsed && is_string($time)) {
-      // PHP < 5.3 doesn't like the GMT- notation for parsing timezones.
+      // Remove superfluous "GMT" from offsets in timezones.
       $time = str_replace("GMT-", "-", $time);
       $time = str_replace("GMT+", "+", $time);
       // We are going to let the parent DateTime object do a best effort attempt
@@ -197,6 +197,7 @@ class BackdropDateTime extends DateTime {
    * @return DateTime
    *   This object with the timezone updated.
    */
+  #[\ReturnTypeWillChange]
   public function setTimezone($timezone, $force = FALSE) {
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
@@ -228,7 +229,12 @@ class BackdropDateTime extends DateTime {
    * @return string|false
    *   Returns the formatted date string on success or FALSE on failure.
    */
+  #[\ReturnTypeWillChange]
   public function format($format, $force = FALSE) {
+    // If there are errors, formatting will likely not succeed. Return FALSE.
+    if (!empty($this->errors)) {
+      return FALSE;
+    }
     return parent::format($force ? $format : date_limit_format($format, $this->granularity));
   }
 

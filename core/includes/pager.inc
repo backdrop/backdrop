@@ -159,7 +159,7 @@ function theme_pager($variables) {
   $tags = $variables['tags'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
-  $quantity = (int) $variables['quantity'];
+  $quantity = empty($variables['quantity']) ? 0 : (int) $variables['quantity'];
   global $pager_page_array, $pager_total;
 
   // Return if there is no pager to be rendered.
