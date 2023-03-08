@@ -871,9 +871,10 @@ function field_ui_display_overview($entity_type, $bundle) {
   $bundle_name = field_extract_bundle($entity_type, $bundle);
 
   if (is_object($bundle) && property_exists($bundle, 'name')) {
-    $bundle_label = check_plain($bundle_info->name);
+    $bundle_label = check_plain($bundle->name);
   }
   if (!isset($bundle_label)) {
+    $entity_info = entity_get_info($entity_type);
     $bundle_label = check_plain($entity_info['label']);
   }
 
@@ -888,7 +889,7 @@ function field_ui_display_overview($entity_type, $bundle) {
   );
   $build['help'] = array(
     '#type' => 'help',
-    '#markup' => t('<strong>Display modes</strong> are variations of how an item can be displayed. Each @label display mode can be configured differently. For example: individual fields can be displayed using a different format, or hidden entirely.', array('@label' => $bundle_label)),
+    '#markup' => t('<strong>Display modes</strong> are variations of how an item can be displayed. Each display mode for %label can be configured differently. For example: individual fields can be displayed using a different format, or hidden entirely.', array('%label' => $bundle_label)),
   );
   $build['view_modes'] = array(
     '#theme' => 'field_ui_view_modes',
@@ -939,9 +940,9 @@ function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $in
     backdrop_sort($entity_view_modes, array('label' => SORT_STRING));
   }
 
-  // Get custom display mode names / labels.
+  // Get custom display mode names/labels.
   $all_view_mode_config = config_get('entity.view_modes', 'view_modes');
-  $view_mode_config = $all_view_mode_config[$entity];
+  $view_mode_config = isset($all_view_mode_config[$entity]) ? $all_view_mode_config[$entity] : array();
 
   // Get all display mode field settings.
   $view_mode_settings = field_view_mode_settings($entity, $bundle);
@@ -957,7 +958,7 @@ function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $in
     $all_view_modes['active']['default'] = array(
       'label' => 'Default',
       'custom settings' => TRUE,
-      'status' => '',
+      'status' => t('Used for all display modes which are not customized'),
       'storage' => 'Default (module-provided)',
     );
   }
@@ -968,7 +969,7 @@ function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $in
     $all_view_modes['active'][$machine] = array(
       'label' => $view_mode_info['label'],
       'custom settings' => $is_active,
-      'status' => $is_active ? 'Customized' : 'Using the <em>Default display</em>',
+      'status' => $is_active ? t('Customized') : t('Using the Default display mode'),
       'storage' => !empty($view_mode_config[$machine]) ? 'Custom' : 'Default (module-provided)',
     );
 

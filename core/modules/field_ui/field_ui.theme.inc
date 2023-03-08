@@ -100,10 +100,8 @@ function theme_field_ui_view_modes($variables) {
   $element = $variables['element'];
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
-  $entity_bundle = $element['#bundle_label'];
-  $bundle_machine_name = $element['#bundle'];
+  $bundle_label = $element['#bundle_label'];
   $path = $element['#admin_path'] . '/display';
-
   $rows = array();
 
   $header = array(
@@ -117,30 +115,17 @@ function theme_field_ui_view_modes($variables) {
   foreach ($view_modes as $view_mode_name => $view_mode_info) {
     $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
 
-    $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
-      'label' => $view_mode_info['label'],
-      'machine_name' => $view_mode_name,
-    ));
-
     $operations = array();
     if ($view_mode_name == 'default') {
-      // Add the special row class.
       $row_classes[] = 'default-view-mode';
-      // Add the special label handling.
-      $description = t('Used for all display modes which are not customized');
-      $row['label'] .= '<div class="description">' . $description . '</div>';
-      // Add the operations for the default display mode.
-      $operations = array(
-        'manage' => array(
-          'title' => t('Manage display'),
-          'href' => "$path/default",
-        ),
+      $operations['manage'] = array(
+        'title' => t('Manage display'),
+        'href' => "$path/default",
       );
-
     }
-    else if ($view_modes[$view_mode_name]['custom settings']) {
-      $row[] = '';
+    elseif ($view_mode_info['custom settings']) {
       $customized_count++;
+      $row_classes[] = 'customized-view-mode';
       $operations['manage'] = array(
         'title' => t('Manage display'),
         'href' => "$path/$view_mode_name",
@@ -154,7 +139,6 @@ function theme_field_ui_view_modes($variables) {
     else {
       $default_count++;
       $row_classes[] = 'uses-default';
-      $row['description'] = '<em>' . t('Uses the Default display mode') . '</em>';
       if (user_access('administer view modes')) {
         $operations['enable'] = array(
           'title' => t('Customize'),
@@ -177,6 +161,13 @@ function theme_field_ui_view_modes($variables) {
       );
     }
 
+    // For user accounts, the bundle is just the string "user".
+    $bundle_name = _field_ui_get_bundle_machine_name($element['#bundle']);
+    $row['label'] = theme('label_machine_name__node_display__' . $bundle_name, array(
+      'label' => $view_mode_info['label'],
+      'machine_name' => $view_mode_name,
+    ));
+    $row['description'] = '<div class="description">' . $view_mode_info['status'] . '</div>';
     $row['operations'] = array(
       'data' => array(
         '#type' => 'dropbutton',
@@ -186,16 +177,18 @@ function theme_field_ui_view_modes($variables) {
 
     // Add descriptive headers.
     if ($default_count == 1) {
-      $text = t('Not customized for !bundle', array('!bundle' => $element['#bundle']));
+      $text = t('Not customized for !bundle', array('!bundle' => $bundle_label));
       $header_row = array($text, '', '');
       $rows[] = array('data' => $header_row, 'class' => array('header'));
-      $default_count++; // Ensure header only prints once.
+      // Ensure header is printed only once.
+      $default_count++;
     }
     if ($customized_count == 1) {
-      $text = t('Customized for !bundle', array('!bundle' => $element['#bundle']));
+      $text = t('Customized for !bundle', array('!bundle' => $bundle_label));
       $header_row = array($text, '', '');
       $rows[] = array('data' => $header_row, 'class' => array('header'));
-      $customized_count++; // Ensure header only prints once.
+      // Ensure header is printed only once.
+      $customized_count++;
     }
 
     $rows[] = array('data' => $row, 'class' => $row_classes);

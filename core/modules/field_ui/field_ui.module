@@ -215,8 +215,10 @@ function field_ui_menu() {
 /**
  * Title callback. Generates the menu link for each view mode.
  *
- * @param object $bundle
- *   The loaded bundle object.
+ * @param string $entity_type
+ *   The machine name of the entity type.
+ * @param object|string $bundle
+ *   The loaded bundle object (this is a string for user accounts).
  * @param string $view_mode
  *   The machine name of the view mode.
  *
@@ -224,21 +226,38 @@ function field_ui_menu() {
  *   The menu link title (for use in Admin bar).
  */
 function field_ui_manage_display_link_title($entity_type, $bundle, $view_mode) {
-  if (is_object($bundle)) {
-    $type = $bundle->name;
+  $bundle_name = _field_ui_get_bundle_machine_name($bundle);
+  $entity_info = entity_get_info($entity_type);
+  $active_view_modes = field_ui_get_view_mode_data($entity_type, $bundle_name, TRUE);
 
-    $view_mode_label = $view_mode;
-    $view_mode_info = entity_view_mode_load($entity_type, $view_mode);
-    if ($view_mode_info && isset($view_mode_info['label'])) {
-      $view_mode_label = $view_mode_info['label'];
-    }
+  return t('@type: @mode display', array('@type' => $entity_info['bundles'][$bundle_name]['label'], '@mode' => $active_view_modes[$view_mode]['label']));
+}
+
+/**
+ * Helper function to get the machine name of a given entity type bundle.
+ *
+ * @param object|string $bundle
+ *   The bundle object (or a string for user accounts).
+ *
+ * @return string
+ *   The machine name of the bundle.
+ */
+function _field_ui_get_bundle_machine_name($bundle) {
+  // User accounts don't have bundles.
+  if (is_string($bundle)) {
+    $bundle_name = $bundle;
   }
-  // Account for the user case where there is no loaded bundle.
-  elseif ($bundle == 'user') {
-    $type = 'User account';
+  // Taxonomy bundles have a "machine_name" propety.
+  if (is_object($bundle) && isset($bundle->machine_name)) {
+    $bundle_name = $bundle->machine_name;
+  }
+  // Content type bundles, file type bundles etc. have a "type" propety that
+  // holds their machine name.
+  if (is_object($bundle) && isset($bundle->type)) {
+    $bundle_name = $bundle->type;
   }
 
-  return t('@type: @mode display', array('@type' => $type, '@mode' => $view_mode_label));
+  return $bundle_name;
 }
 
 /**
