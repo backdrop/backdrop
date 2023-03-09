@@ -907,14 +907,14 @@ function field_ui_display_overview($entity_type, $bundle) {
 /**
  * Retrieve all display mode data for an entity / bundle combo.
  *
- * @param (string) $entity
+ * @param string $entity
  *   Machine name for the entity type.
- * @param (string) $bundle
+ * @param string $bundle
  *   Machine name for the bundle.
- * @param (bool) $active_only
+ * @param bool $active_only
  *   Specifies if only active display modes should be returned.
  *
- * @return (array)
+ * @return array
  *   All display modes, keyed by active / default status as follows:
  *   $modes = array(
  *     'active' => array(
@@ -987,17 +987,17 @@ function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $in
 }
 
 /**
- * Determined whether a display mode is active for an entity / bundle combo.
+ * Determines whether a display mode is active for an entity/bundle combo.
  *
- * @param (string) $entity
+ * @param string $entity
  *   Machine name of entity type.
- * @param (array) $settings
+ * @param array $settings
  *   Settings for the display mode, as returned by field_view_mode_settings().
- * @param (array) $view_mode_info
+ * @param array $view_mode_info
  *   Module-provided information about the display mode, as returned by
  *   entity_get_info($entity);
  *
- * @return (bool)
+ * @return bool
  *   Whether or noot the display mode is active.
  */
 function _field_ui_display_mode_get_status($entity, $settings, $view_mode_info) {
