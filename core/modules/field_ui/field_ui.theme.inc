@@ -161,8 +161,7 @@ function theme_field_ui_view_modes($variables) {
       );
     }
 
-    // For user accounts, the bundle is just the string "user".
-    $bundle_name = _field_ui_get_bundle_machine_name($element['#bundle']);
+    $bundle_name = field_extract_bundle($element['#bundle']);
     $row['label'] = theme('label_machine_name__node_display__' . $bundle_name, array(
       'label' => $view_mode_info['label'],
       'machine_name' => $view_mode_name,

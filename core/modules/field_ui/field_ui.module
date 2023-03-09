@@ -226,39 +226,12 @@ function field_ui_menu() {
  *   The menu link title (for use in Admin bar).
  */
 function field_ui_manage_display_link_title($entity_type, $bundle, $view_mode) {
-  $bundle_name = _field_ui_get_bundle_machine_name($bundle);
+  $bundle_name = field_extract_bundle($entity_type, $bundle);
   $entity_info = entity_get_info($entity_type);
   module_load_include('inc', 'field_ui', 'field_ui.admin');
   $active_view_modes = field_ui_get_view_mode_data($entity_type, $bundle_name, TRUE);
 
   return t('@type: @mode display', array('@type' => $entity_info['bundles'][$bundle_name]['label'], '@mode' => $active_view_modes[$view_mode]['label']));
-}
-
-/**
- * Determines the machine name of a bundle.
- *
- * @param object|string $bundle
- *   The bundle object (or a string for user accounts).
- *
- * @return string
- *   The machine name of the bundle.
- */
-function _field_ui_get_bundle_machine_name($bundle) {
-  // User accounts don't have bundles.
-  if (is_string($bundle)) {
-    $bundle_name = $bundle;
-  }
-  // Taxonomy bundles have a "machine_name" propety.
-  if (is_object($bundle) && isset($bundle->machine_name)) {
-    $bundle_name = $bundle->machine_name;
-  }
-  // Content type bundles, file type bundles etc. have a "type" propety that
-  // holds their machine name.
-  if (is_object($bundle) && isset($bundle->type)) {
-    $bundle_name = $bundle->type;
-  }
-
-  return $bundle_name;
 }
 
 /**
