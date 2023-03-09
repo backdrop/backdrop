@@ -161,7 +161,7 @@ function theme_field_ui_view_modes($variables) {
       );
     }
 
-    $bundle_name = field_extract_bundle($element['#bundle']);
+    $bundle_name = field_extract_bundle($entity_type, $element['#bundle']);
     $row['label'] = theme('label_machine_name__node_display__' . $bundle_name, array(
       'label' => $view_mode_info['label'],
       'machine_name' => $view_mode_name,
