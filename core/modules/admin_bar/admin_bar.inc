@@ -493,14 +493,11 @@ function admin_bar_links_menu($tree) {
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
-    // Make action links (typically "Add ...") appear at the very top/bottom in
-    // the menu dropdowns, according to configuration (defaults to top). They
-    // might already be in the appropriate position, but only as long as there
-    // is no link that comes before/after them alphabetically (e.g., a content
-    // type with its label starting with "Ad").
+    // Move local action links to the appropriate position based on the
+    // respective setting. Defaults to 'top'.
     $local_actions_bottom = config_get('admin_bar.settings', 'local_actions_bottom');
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      if ($local_actions_bottom) {
+      if (config_get('admin_bar.settings', 'local_action_position') == 'bottom') {
         $data['link']['weight'] += 9999;
       }
       else {
@@ -791,18 +788,16 @@ function admin_bar_theme_settings() {
     '#default_value' => $config->get('position_fixed'),
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
-  $form['settings']['local_actions_bottom'] = array(
+  $form['settings']['local_action_position'] = array(
     '#type' => 'radios',
-    '#title' => t('Local tasks placement within their parent link'),
-    '#default_value' => $config->get('local_actions_bottom'),
+    '#title' => t('Position of local action links'),
+    '#default_value' => $config->get('local_action_position'),
     '#options' => array(
-      0 => t('Keep on top'),
-      1 => t('Place at the bottom'),
+      'top' => t('Top'),
+      'bottom' => t('Bottom'),
     ),
-    '#description' => t('These are typically links like "Add content type" or "Add menu".'),
+    '#description' => t('Where to display local action links (e.g. "<em>Add [something]</em>") within their respective sub-menus.'),
   );
-  $form['settings']['local_actions_bottom'][0]['#description'] = t('This is the default.');
-  $form['settings']['local_actions_bottom'][1]['#description'] = t('You may want to move them to the bottom if they are getting in the way.');
 
   $form['components'] = array(
     '#type' => 'fieldset',
