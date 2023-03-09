@@ -905,7 +905,7 @@ function field_ui_display_overview($entity_type, $bundle) {
 }
 
 /**
- * Retrieve all display mode data for an entity / bundle combo.
+ * Retrieve all display mode data for an entity/bundle combo.
  *
  * @param string $entity
  *   Machine name for the entity type.
@@ -915,7 +915,7 @@ function field_ui_display_overview($entity_type, $bundle) {
  *   Specifies if only active display modes should be returned.
  *
  * @return array
- *   All display modes, keyed by active / default status as follows:
+ *   All display modes, keyed by active/default status as follows:
  *   $modes = array(
  *     'active' => array(
  *       'label' => Foo,
@@ -934,7 +934,7 @@ function field_ui_display_overview($entity_type, $bundle) {
 function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $include_default = TRUE) {
   $entity_info = entity_get_info($entity);
 
-  // Get module-provided display mode names / labels.
+  // Get module-provided display mode names/labels.
   $entity_view_modes = $entity_info['view modes'];
   if (is_array($entity_view_modes)) {
     backdrop_sort($entity_view_modes, array('label' => SORT_STRING));
