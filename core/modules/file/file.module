@@ -210,10 +210,14 @@ function file_menu() {
     'access arguments' => array('administer file types'),
     'file' => 'file.admin.inc',
   );
+  // File Configuration
   $items['admin/structure/file-types/list'] = array(
-    'title' => 'List file types',
+    'title' => 'File types',
+    'description' => 'Manage settings for the type of files used on your site.',
+    'page callback' => 'file_list_types_page',
+    'access arguments' => array('administer file types'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+    'file' => 'file.admin.inc',
   );
   $items['admin/structure/file-types/settings'] = array(
     'title' => 'File settings',
