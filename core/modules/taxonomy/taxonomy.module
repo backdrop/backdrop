@@ -1862,17 +1862,20 @@ function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_stat
       $trees = $context['field']['settings']['allowed_values'];
     }
     else {
+      $tids = array_keys($element['#options']);
+      $vocabularies = db_query('
+        SELECT DISTINCT vocabulary
+        FROM {taxonomy_term_data}
+        WHERE tid IN ( :tids )
+        ', array(':tids' => $tids))
+        ->fetchCol();
       $trees = array();
-      foreach ($element['#options'] as $tid => $name) {
-        $term = taxonomy_term_load($tid);
-        if (!isset($trees[$term->vocabulary])) {
-          $trees[$term->vocabulary] = array(
-            'vocabulary' => $term->vocabulary,
-            'parent' => (integer) $term->parent,
-          );
-        }
+      foreach ($vocabularies as $vocabulary) {
+        $trees[] = array(
+          'vocabulary' => $vocabulary,
+          'parent' => 0,
+        );
       }
-      $trees = array_values($trees);
     }
     foreach ($trees as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
