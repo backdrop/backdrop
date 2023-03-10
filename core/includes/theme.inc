@@ -2569,8 +2569,7 @@ function theme_progress_bar($variables) {
 }
 
 /**
- * Returns HTML for an indentation div; used for drag and drop tables and for
- * indenting checkboxes and radio buttons for taxonomy reference form elements.
+ * Returns HTML for an indentation div. Used for drag and drop tables.
  *
  * @param $variables
  *   An associative array containing:

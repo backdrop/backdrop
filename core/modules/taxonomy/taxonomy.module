@@ -1757,7 +1757,7 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
  * @return array
  *   The array of valid terms for this field, keyed by term id.
  */
-function taxonomy_allowed_values($field, $indent = TRUE) {
+function taxonomy_allowed_values($field) {
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
@@ -1862,13 +1862,12 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  */
 function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
   if ($context['field']['type'] == 'taxonomy_term_reference') {
-    $options = taxonomy_allowed_values($context['field'], FALSE);
     foreach ($context['field']['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
-            if (isset($options[$term->tid])) {
-              $element['#options'][$term->tid] = theme('indentation', array('size' => $term->depth)) . check_plain($options[$term->tid]);
+            if (isset($element['#options'][$term->tid])) {
+              $element[$term->tid] = array('#indentation' => $term->depth);
             }
           }
         }
