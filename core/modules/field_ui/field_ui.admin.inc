@@ -1378,16 +1378,24 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     '#type' => 'submit',
     '#value' => t('Save')
   );
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => t('Cancel'),
-    '#href' => $admin_path . '/display',
-    '#options' => array(
-      'attributes' => array(
-        'class' => array('form-cancel')
+  // Only show the "Cancel" link when coming from the listing page of the
+  // display modes for this entity/bundle (i.e. not when directly coming via an
+  // admin bar link or elsewhere).
+  $referrer = parse_url($_SERVER['HTTP_REFERER']);
+  $referrer_path = ltrim($referrer['path'], '/');
+  $manage_displays_path = $admin_path . '/display';
+  if ($referrer_path == $manage_displays_path) {
+    $form['actions']['cancel'] = array(
+      '#type' => 'link',
+      '#title' => t('Cancel'),
+      '#href' => $manage_displays_path,
+      '#options' => array(
+        'attributes' => array(
+          'class' => array('form-cancel')
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
