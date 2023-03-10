@@ -1858,7 +1858,23 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  */
 function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
   if ($context['field']['type'] == 'taxonomy_term_reference') {
-    foreach ($context['field']['settings']['allowed_values'] as $tree) {
+    if (!empty($context['field']['settings']['allowed_values'])) {
+      $trees = $context['field']['settings']['allowed_values'];
+    }
+    else {
+      $trees = array();
+      foreach ($element['#options'] as $tid => $name) {
+        $term = taxonomy_term_load($tid);
+        if (!isset($trees[$term->vocabulary])) {
+          $trees[$term->vocabulary] = array(
+            'vocabulary' => $term->vocabulary,
+            'parent' => (integer) $term->parent,
+          );
+        }
+      }
+      $trees = array_values($trees);
+    }
+    foreach ($trees as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
