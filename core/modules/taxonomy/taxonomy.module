@@ -1763,8 +1763,6 @@ function taxonomy_allowed_values($field, $indent = TRUE) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
- // TODO, remove entirely
-//          $options[$term->tid] = ($indent ? str_repeat('· ', $term->depth) : '') . $term->name;
           $options[$term->tid] = $term->name;
         }
       }
