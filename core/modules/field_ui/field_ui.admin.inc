@@ -1374,7 +1374,20 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   );
 
   $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $admin_path . '/display',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('form-cancel')
+      ),
+    ),
+  );
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
