@@ -398,6 +398,26 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 // $settings['https'] = TRUE;
 
 /**
+ * SameSite cookie attribute.
+ *
+ * This setting can be used to set a value for the SameSite cookie attribute.
+ *
+ * Versions of PHP before 7.3 have no native support for the SameSite attribute,
+ * so it is emulated.
+ *
+ * The session.cookie-samesite setting in PHP 7.3 and later will be overridden
+ * by this variable for Backdrop session cookies, and any other cookies managed
+ * with backdrop_setcookie().
+ *
+ * Setting this variable to FALSE disables the SameSite attribute on cookies.
+ *
+ * @see backdrop_setcookie()
+ * @see backdrop_session_start()
+ * @see https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-samesite
+ */
+#$settings['samesite_cookie_value'] = 'None';
+
+/**
  * Drupal backwards compatibility.
  *
  * By default, Backdrop 1.0 includes a compatibility layer to keep it compatible

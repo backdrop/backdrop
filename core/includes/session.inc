@@ -285,6 +285,20 @@ function backdrop_session_start() {
     // Save current session data before starting it, as PHP will destroy it.
     $session_data = isset($_SESSION) ? $_SESSION : NULL;
 
+    // Apply any overrides to the session cookie parameters.
+    $params = $original_params = session_get_cookie_params();
+    // PHP settings for SameSite will be handled by _backdrop_cookie_params().
+    unset($params['samesite']);
+    $params = _backdrop_cookie_params($params);
+    if ($params !== $original_params) {
+      if (\PHP_VERSION_ID >= 70300) {
+        session_set_cookie_params($params);
+      }
+      else {
+        session_set_cookie_params($params['lifetime'], $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+      }
+    }
+
     session_start();
     backdrop_session_started(TRUE);
 
@@ -324,7 +338,14 @@ function backdrop_session_commit() {
         $insecure_session_name = substr(session_name(), 1);
         $params = session_get_cookie_params();
         $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
-        setcookie($insecure_session_name, $_COOKIE[$insecure_session_name], $expire, $params['path'], $params['domain'], FALSE, $params['httponly']);
+        $options = array(
+          'expires' => $expire,
+          'path' => $params['path'],
+          'domain' => $params['domain'],
+          'secure' => FALSE,
+          'httponly' => $params['httponly'],
+        );
+        backdrop_setcookie($insecure_session_name, $_COOKIE[$insecure_session_name], $options);
       }
     }
     // Write the session data.
@@ -367,7 +388,14 @@ function backdrop_session_regenerate() {
     // $params['lifetime'] seconds from the current request. If it is not set,
     // it will expire when the browser is closed.
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
-    setcookie($insecure_session_name, $session_id, $expire, $params['path'], $params['domain'], FALSE, $params['httponly']);
+    $options = array(
+      'expires' => $expire,
+      'path' => $params['path'],
+      'domain' => $params['domain'],
+      'secure' => FALSE,
+      'httponly' => $params['httponly'],
+    );
+    backdrop_setcookie($insecure_session_name, $session_id, $options);
     $_COOKIE[$insecure_session_name] = $session_id;
   }
 
@@ -382,7 +410,14 @@ function backdrop_session_regenerate() {
   if (isset($old_session_id)) {
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
-    setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    $options = array(
+      'expires' => $expire,
+      'path' => $params['path'],
+      'domain' => $params['domain'],
+      'secure' => $params['secure'],
+      'httponly' => $params['httponly'],
+    );
+    backdrop_setcookie(session_name(), session_id(), $options);
     $fields = array('sid' => session_id());
     if ($is_https) {
       $fields['ssid'] = session_id();
@@ -493,7 +528,14 @@ function _backdrop_session_delete_cookie($name, $secure = NULL) {
     if ($secure !== NULL) {
       $params['secure'] = $secure;
     }
-    setcookie($name, '', REQUEST_TIME - 3600, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    $options = array(
+      'expires' => REQUEST_TIME - 3600,
+      'path' => $params['path'],
+      'domain' => $params['domain'],
+      'secure' => $params['secure'],
+      'httponly' => $params['httponly'],
+    );
+    backdrop_setcookie($name, '', $options);
     unset($_COOKIE[$name]);
   }
 }
