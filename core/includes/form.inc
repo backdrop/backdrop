@@ -3001,6 +3001,10 @@ function theme_radio($variables) {
   $element['#attributes']['type'] = 'radio';
   element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
 
+  // Use strcmp() to compare the values so that they both get cast to string. If
+  // the #options keys mixed numeric and string keys, unexpected things can
+  // happen because PHP will try to cast string values to integers if they're
+  // being compared to an integer.
   if (isset($element['#return_value']) && $element['#value'] !== FALSE && !strcmp($element['#value'], $element['#return_value'])) {
     $element['#attributes']['checked'] = 'checked';
   }
