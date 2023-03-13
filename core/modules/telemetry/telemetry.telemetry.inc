@@ -8,6 +8,11 @@
  * Implements hook_telementry_info().
  */
 function telemetry_telemetry_info() {
+  $info['backdrop_version'] = array(
+    'label' => t('Backdrop version'),
+    'description' => t('The current version of Backdrop CMS running your site.'),
+    'project' => 'backdrop',
+  );
   $info['php_version'] = array(
     'label' => t('PHP version'),
     'description' => t('The current version of PHP running on your server.'),
@@ -41,6 +46,8 @@ function telemetry_telemetry_info() {
  */
 function telemetry_telemetry_data($key) {
   switch ($key) {
+    case 'backdrop_version':
+      return BACKDROP_VERSION;
     case 'php_version':
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
