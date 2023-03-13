@@ -675,6 +675,47 @@ class FormElementTestCase extends BackdropWebTestCase {
       )));
     }
   }
+
+  /**
+   * Test indentations for checkboxes, radios and select options.
+   */
+  public function testOptionIndentations() {
+    $this->backdropGet('form-test/checkboxes-radios-select-indentations');
+
+    $indentations = array(
+      'foo' => 1,
+      'bar' => 2,
+    );
+
+    foreach ($indentations as $key => $indentation) {
+      // Check checkboxes.
+      $elements = $this->xpath('//div[@class="form-checkboxes"]//div[contains(@class, :class)]', array(':class' => 'form-item-indentation-' . $indentation));
+      $this->assertEqual(count($elements), 1, format_string('Checkbox element with key :key has an indentation of :indentation',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+
+      // Check radios.
+      $elements = $this->xpath('//div[@class="form-radios"]//div[contains(@class, :class)]', array(':class' => 'form-item-indentation-' . $indentation));
+      $this->assertEqual(count($elements), 1, format_string('Radio element with value :key has an indentation of :indentation',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+
+      // Check select options.
+      $elements = $this->xpath('//option[@value=:key ]', array(':key' => $key));
+      $this->assertEqual($indentation, substr_count($elements[0], '·'), format_string('Select option with key :key has :indentation middle dot indentations',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+    }
+  }
 }
 
 /**

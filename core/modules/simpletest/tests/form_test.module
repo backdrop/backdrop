@@ -179,6 +179,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_checkboxes_radios'),
     'access callback' => TRUE,
   );
+  $items['form-test/checkboxes-radios-select-indentations'] = array(
+    'title' => t('Checkboxes, Radios and Select indentations'),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_checkboxes_radios_select_indentations'),
+    'access callback' => TRUE,
+  );
   $items['form-test/email'] = array(
     'title' => 'Email fields',
     'page callback' => 'backdrop_get_form',
@@ -1590,6 +1596,52 @@ function form_test_checkboxes_radios($form, &$form_state, $customize = FALSE) {
   }
 
   $form['submit'] = array('#type' => 'submit', '#value' => 'Submit');
+
+  return $form;
+}
+
+/**
+ * Form constructor to test indentations for radios, checkboxes and select.
+ */
+function form_test_checkboxes_radios_select_indentations($form, &$form_state) {
+  $form['checkboxes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Indented checkboxes',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['checkboxes']['foo']['#indentation'] = 1;
+  $form['checkboxes']['bar']['#indentation'] = 2;
+
+  $form['radios'] = array(
+    '#type' => 'radios',
+    '#title' => 'Indented radios',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['radios']['foo']['#indentation'] = 1;
+  $form['radios']['bar']['#indentation'] = 2;
+
+  $form['select'] = array(
+    '#type' => 'select',
+    '#title' => 'Indented select',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['select']['foo']['#indentation'] = 1;
+  $form['select']['bar']['#indentation'] = 2;
 
   return $form;
 }
