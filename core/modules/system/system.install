@@ -2505,7 +2505,28 @@ function system_update_1026() {
   $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
   $config->set('file_private_path', update_variable_get('file_private_path', ''));
   $config->set('image_jpeg_quality', update_variable_get('image_jpeg_quality', 75));
-  $config->set('install_profile', update_variable_get('install_profile', 'standard'));
+
+  // Get the Drupal installation profile, and switch it to "standard" if not
+  // available in Backdrop.
+  $current_profile = update_variable_get('install_profile', 'standard');
+  $available_profiles = backdrop_system_listing('/\.profile$/', 'profiles');
+  if (!array_key_exists($current_profile, $available_profiles)) {
+    $old_profile = $current_profile;
+    $current_profile = 'standard';
+
+    // Enable the "standard" profile.
+    db_update('system')
+      ->fields(array('status' => 1, 'schema_version' => 0))
+      ->condition('name', $current_profile)
+      ->execute();
+    // Disable the old, unavailable/missing profile.
+    db_update('system')
+      ->fields(array('status' => 0))
+      ->condition('name', $old_profile)
+      ->execute();
+  }
+  $config->set('install_profile', $current_profile);
+
   $config->set('clean_url', update_variable_get('clean_url', 0));
   $config->set('theme_default', update_variable_get('theme_default', 'stark'));
   $config->set('admin_theme', update_variable_get('admin_theme', ''));
