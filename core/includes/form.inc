@@ -2892,6 +2892,10 @@ function form_select_options($element, $choices = NULL) {
       else {
         $selected = '';
       }
+
+      if (!empty($element[$key]['#indentation'])) {
+        $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
+      }
       $options .= '<option value="' . check_plain($key) . '"' . $selected . '>' . check_plain($choice) . '</option>';
     }
   }
@@ -3659,7 +3663,12 @@ function theme_container($variables) {
       }
     }
   }
-
+  if (isset($element['#indentation'])) {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
+  }
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
 }
 
@@ -4845,6 +4854,10 @@ function theme_form_element($variables) {
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
     $attributes['class'][] = 'form-disabled';
+  }
+  // Add indentation.
+  if (isset($element['#indentation'])) {
+    $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
   }
   $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
 

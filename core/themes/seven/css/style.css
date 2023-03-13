@@ -866,7 +866,8 @@ form.views-exposed-form {
 div.teaser-checkbox .form-item,
 .form-item .form-item {
   padding: 5px 0;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   border: 0;
 }
 .form-type-checkbox {

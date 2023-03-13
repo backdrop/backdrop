@@ -8721,7 +8721,10 @@ function backdrop_parse_dependency($dependency) {
               $matches['minor']++;
             }
             if ($op == '=' || $op == '==') {
-              $value['versions'][] = array('op' => '<', 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x');
+              $value['versions'][] = array(
+                'op' => '<',
+                'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x',
+              );
               $op = '>=';
             }
           }
