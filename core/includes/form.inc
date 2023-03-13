@@ -2887,14 +2887,13 @@ function form_select_options($element, $choices = NULL) {
     else {
       $key = (string) $key;
       $option_attributes = array();
-      if ($value_valid && (!$value_is_array && (string) $element['#value'] === $key || ($value_is_array && in_array($key, $element['#value'])))) {
-        $option_attributes['selected'] = 'selected';
-      }
-
       if (!empty($element[$key]['#indentation'])) {
         $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
         $option_attributes['data-indentation-depth'] = $element[$key]['#indentation'];
         $option_attributes['class'] = 'indent';
+      }
+      if ($value_valid && (!$value_is_array && (string) $element['#value'] === $key || ($value_is_array && in_array($key, $element['#value'])))) {
+        $option_attributes['selected'] = 'selected';
       }
       $option_attributes['value'] = check_plain($key);
       $options .= '<option' . backdrop_attributes($option_attributes) . '>' . check_plain($choice) . '</option>';
