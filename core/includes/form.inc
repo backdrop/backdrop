@@ -2893,7 +2893,7 @@ function form_select_options($element, $choices = NULL) {
 
       if (!empty($element[$key]['#indentation'])) {
         $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
-        $option_attributes['data-indentation-depth'] = $element['#indentations'][$key];
+        $option_attributes['data-indentation-depth'] = $element[$key]['#indentation'];
         $option_attributes['class'] = 'indent';
       }
       $option_attributes['value'] = check_plain($key);
