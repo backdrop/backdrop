@@ -1854,14 +1854,17 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
 }
 
 /**
- * Implements hook_field_widget_options_buttons_form_alter().
+ * Implements hook_field_widget_form_alter().
  */
-function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
-  if ($context['field']['type'] == 'taxonomy_term_reference') {
-    if (empty($context['field']['settings']['option_list_callback']) || $context['field']['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
+function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
+  $field = $context['field'];
+  $widget_type = $context['instance']['widget']['type'];
+
+  if ($field['type'] == 'taxonomy_term_reference' && in_array($widget_type, array('options_buttons', 'options_select'))) {
+    if (empty($field['settings']['option_list_callback']) || $field['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
       // With the default callback, we can rely on 'allowed_values' to provide
       // the vocabularies needed to compute depth.
-      $trees = $context['field']['settings']['allowed_values'];
+      $trees = $field['settings']['allowed_values'];
     }
     else {
       // If a module has overridden 'option_list_callback', we can't rely on
@@ -1882,6 +1885,7 @@ function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_stat
         );
       }
     }
+
     foreach ($trees as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
