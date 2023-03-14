@@ -1858,7 +1858,7 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  */
 function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
   if ($context['field']['type'] == 'taxonomy_term_reference') {
-    if (empty($context['field']['settings']['option_list_callback'] || $context['field']['settings']['option_list_callback'] == 'taxonomy_allowed_values')) {
+    if (empty($context['field']['settings']['option_list_callback']) || $context['field']['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
       // With the default callback, we can rely on 'allowed_values' to provide
       // the vocabularies needed to compute depth.
       $trees = $context['field']['settings']['allowed_values'];
