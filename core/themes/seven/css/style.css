@@ -892,7 +892,7 @@ div.teaser-checkbox .form-item,
 }
 [dir="ltr"] .form-item input.form-radio,
 [dir="ltr"] .form-item input.form-checkbox {
-  margin-right: 5px;
+  margin-right: 5px; /* LTR */
 }
 [dir="rtl"] .form-item input.form-radio,
 [dir="rtl"] .form-item input.form-checkbox {
