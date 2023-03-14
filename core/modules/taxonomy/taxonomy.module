@@ -1854,41 +1854,63 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
 }
 
 /**
- * Implements hook_field_widget_options_buttons_form_alter().
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
  */
 function taxonomy_field_widget_options_buttons_form_alter(&$element, &$form_state, $context) {
-  if ($context['field']['type'] == 'taxonomy_term_reference') {
-    if (empty($context['field']['settings']['option_list_callback']) || $context['field']['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
-      // With the default callback, we can rely on 'allowed_values' to provide
-      // the vocabularies needed to compute depth.
-      $trees = $context['field']['settings']['allowed_values'];
+  $field = $context['field'];
+  if ($field['type'] == 'taxonomy_term_reference') {
+    _taxonomy_field_widget_options_process($field, $element);
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function taxonomy_field_widget_options_select_form_alter(&$element, &$form_state, $context) {
+  $field = $context['field'];
+  if ($field['type'] == 'taxonomy_term_reference') {
+    _taxonomy_field_widget_options_process($field, $element);
+  }
+}
+
+/**
+ * Adds indentation to the options items for taxonomy radios/checkboxes/selects.
+ *
+ * @see taxonomy_field_widget_options_buttons_form_alter()
+ * @see taxonomy_field_widget_options_select_form_alter()
+ */
+function _taxonomy_field_widget_options_process($field, &$element) {
+  if (empty($field['settings']['option_list_callback']) || $field['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
+    // With the default callback, we can rely on 'allowed_values' to provide
+    // the vocabularies needed to compute depth.
+    $trees = $field['settings']['allowed_values'];
+  }
+  else {
+    // If a module has overridden 'option_list_callback', we can't rely on
+    // 'allowed_values' to provide the vocabularies, so we'll have to fetch
+    // them.
+    $tids = array_keys($element['#options']);
+    $vocabularies = db_query('
+      SELECT DISTINCT vocabulary
+      FROM {taxonomy_term_data}
+      WHERE tid IN ( :tids )
+      ', array(':tids' => $tids))
+      ->fetchCol();
+    $trees = array();
+    foreach ($vocabularies as $vocabulary) {
+      $trees[] = array(
+        'vocabulary' => $vocabulary,
+        'parent' => 0,
+      );
     }
-    else {
-      // If a module has overridden 'option_list_callback', we can't rely on
-      // 'allowed_values' to provide the vocabularies, so we'll have to fetch
-      // them.
-      $tids = array_keys($element['#options']);
-      $vocabularies = db_query('
-        SELECT DISTINCT vocabulary
-        FROM {taxonomy_term_data}
-        WHERE tid IN ( :tids )
-        ', array(':tids' => $tids))
-        ->fetchCol();
-      $trees = array();
-      foreach ($vocabularies as $vocabulary) {
-        $trees[] = array(
-          'vocabulary' => $vocabulary,
-          'parent' => 0,
-        );
-      }
-    }
-    foreach ($trees as $tree) {
-      if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
-        if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
-          foreach ($terms as $term) {
-            if (isset($element['#options'][$term->tid])) {
-              $element[$term->tid] = array('#indentation' => $term->depth);
-            }
+  }
+
+  foreach ($trees as $tree) {
+    if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+      if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
+        foreach ($terms as $term) {
+          if (isset($element['#options'][$term->tid])) {
+            $element[$term->tid] = array('#indentation' => $term->depth);
           }
         }
       }
