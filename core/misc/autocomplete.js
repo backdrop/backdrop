@@ -197,7 +197,7 @@ Backdrop.jsAC.prototype.populatePopup = function () {
 
   // Add the popup to the page and position.
   $("body").prepend(this.popup);
-  var autocompletInstance = this;
+  var autocompleteInstance = this;
   positionPopup();
   Backdrop.optimizedResize.add(positionPopup, 'autocompletePopup');
 
@@ -207,7 +207,7 @@ Backdrop.jsAC.prototype.populatePopup = function () {
 
   function positionPopup() {
     // If the popup has been removed, remove this resize handler.
-    if (!autocompletInstance.popup) {
+    if (!autocompleteInstance.popup) {
       Backdrop.optimizedResize.remove('autocompletePopup');
       return;
     }
@@ -219,7 +219,7 @@ Backdrop.jsAC.prototype.populatePopup = function () {
 
     // Because we use "fixed" position, the final location is the offset from
     // the document and the height of the element, minus scroll bar position.
-    $(autocompletInstance.popup).css({
+    $(autocompleteInstance.popup).css({
       top: ($input.outerHeight() + offset.top - $(document).scrollTop()) + 'px',
       left: (offset.left - $(document).scrollLeft()) + 'px',
       width: ($input.width() + paddingWidth) + 'px',

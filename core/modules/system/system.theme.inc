@@ -165,7 +165,7 @@ function theme_system_modules_fieldset($variables) {
     // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
 
-    // Add the second column: module label and expand/collapse functionalty.
+    // Add the second column: module label and expand/collapse functionality.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
     // Add the third column: module version number.

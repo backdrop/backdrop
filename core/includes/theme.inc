@@ -591,7 +591,8 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
 
       // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
-      // Check for existing variable preprocessors. Ensure arrayness.
+      // Check for existing variable preprocessors and ensure they're in the
+      // expected format.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
         $info['preprocess functions'] = array();
         $prefixes = array();
@@ -1715,7 +1716,7 @@ function template_preprocess_datetime(&$variables) {
  *     Defaults to a human-readable representation of the timestamp value or the
  *     datetime attribute value using format_date().
  *     When invoked as #theme or #theme_wrappers of a render element, the
- *     rendered #children are autoamtically taken over as 'text', unless #text
+ *     rendered #children are automatically taken over as 'text', unless #text
  *     is explicitly set.
  *   - attributes: (optional) An associative array of HTML attributes to apply
  *     to the <time> element. A datetime attribute in 'attributes' overrides the
@@ -1790,7 +1791,7 @@ function theme_status_messages($variables) {
 /**
  * Returns HTML for a link.
  *
- * This is a wrapper around l() to allow for more flexible link themeing.
+ * This is a wrapper around l() to allow for more flexible link theming.
  *
  * Where performance is more important than theme flexibility, Backdrop code that
  * outputs a link should call the l() function directly, as #theme 'link'

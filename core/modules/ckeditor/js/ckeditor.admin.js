@@ -47,7 +47,7 @@ Backdrop.behaviors.ckeditorAdmin = {
       $toolbarGroupToggle.shown = true;
       $toolbarGroupToggle.text(Backdrop.t('Show group labels'));
       $toolbarGroupToggle.insertBefore($activeToolbar);
-      $toolbarGroupToggle.bind('click.ckeditorToogleGroups', function(event) {
+      $toolbarGroupToggle.bind('click.ckeditorToggleGroups', function(event) {
         adminToolbarToggleGroups.apply(event.target, [$toolbarGroupToggle]);
       });
 
@@ -349,7 +349,7 @@ Backdrop.behaviors.ckeditorAdmin = {
 };
 
 /**
- * Respond to the events of the editor system. 
+ * Respond to the events of the editor system.
  *
  * This handles hiding/showing options based on the enabling, disabling, and
  * initial state of buttons.

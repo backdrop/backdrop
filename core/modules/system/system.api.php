@@ -163,7 +163,7 @@ function hook_cron_queue_info() {
  * Alter cron queue information before cron runs.
  *
  * Called by backdrop_cron_run() to allow modules to alter cron queue settings
- * before any jobs are processesed.
+ * before any jobs are processed.
  *
  * @param array $queues
  *   An array of cron queue information.

@@ -2167,7 +2167,7 @@ function form_test_clicked_button($form, &$form_state) {
     '#type' => 'textfield',
   );
 
-  // Loop through each path argument, addding buttons based on the information
+  // Loop through each path argument, adding buttons based on the information
   // in the argument. For example, if the path is
   // form-test/clicked-button/s/i/rb, then 3 buttons are added: a 'submit', an
   // 'image_button', and a 'button' with #access=FALSE. This enables form.test
@@ -2413,7 +2413,7 @@ function form_test_system_config_form() {
     '#default_value' => $config->get('def'),
   );
 
-  // Test single-element overrrides
+  // Test single-element overrides.
   $sysconfig = config('system.core');
   $form['rss_description'] = array(
     '#type' => 'textfield',

@@ -59,7 +59,7 @@ interface EntityReferenceBehaviorHandlerInterface {
   public function validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors);
 
   /**
-   * Act on presaving an entity reference field.
+   * Act on pre-saving an entity reference field.
    *
    * @see hook_field_presave()
    */
