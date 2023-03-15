@@ -844,7 +844,7 @@ function system_menu() {
   );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
-    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathmatical symbols.',
+    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathematical symbols.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_utf8mb4_convert_form'),
     'access arguments' => array('administer site configuration'),
@@ -2440,7 +2440,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2450,7 +2449,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
@@ -4457,7 +4455,7 @@ function system_file_download($uri) {
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
- * in thier elements or fieldsets.
+ * in their elements or fieldsets.
  *
  * If no top-level $form['#config'] value is present, then the values will be
  * saved to variables using variable_set() from the Drupal compatibility layer.
@@ -4659,4 +4657,3 @@ function system_transliterate_machine_name($string, $options = array()) {
 
   return $string;
 }
-

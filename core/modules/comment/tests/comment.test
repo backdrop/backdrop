@@ -306,7 +306,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   Comment to perform operation on.
    * @param string $operation
    *   Operation to perform.
-   * @param boolean $aproval
+   * @param boolean $approval
    *   Operation is found on approval page.
    */
   function performCommentOperation($comment, $operation, $approval = FALSE) {
