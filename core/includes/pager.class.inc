@@ -178,6 +178,8 @@ class PagerDefault extends SelectQueryExtender {
    * @return int
    *   Element ID that is used to differentiate between different pager
    *   queries.
+   *
+   * @since 1.24.1 Method added.
    */
   public function getElement() {
     $this->ensureElement();
