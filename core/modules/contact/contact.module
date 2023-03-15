@@ -210,7 +210,7 @@ function contact_load($cid) {
  * Loads an array of all contact categories.
  *
  * @return array
- *   An array of contact categoryies data.
+ *   An array of contact category data.
  */
 function contact_config_data() {
   $config_data = array();

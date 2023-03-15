@@ -365,7 +365,7 @@ function config_export_single_form_update_type($form, &$form_state) {
   $form['export']['#value'] = '';
   $form['export']['#rows'] = 12;
 
-  // Because we need to replace both the configation name select and the
+  // Because we need to replace both the configuration name select and the
   // textarea, this requires using AJAX commands instead of a simple return.
   $commands = array();
   $commands[] = ajax_command_replace('#edit-config-type-wrapper', backdrop_render($form['config_name']));

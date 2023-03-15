@@ -17,6 +17,11 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
    */
   protected $label_key;
 
+  public $field;
+  public $instance;
+  public $entity_type;
+  public $entity;
+
   /**
    * Implements EntityReferenceHandler::getInstance().
    */
@@ -26,6 +31,8 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
     // Check if the entity type does exist and has a base table.
     $entity_info = entity_get_info($target_entity_type);
     if (empty($entity_info['base table'])) {
+      // Make sure the EntityReferenceSelectionHandlerBroken class is available.
+      include_once(dirname(__FILE__) . '/EntityReferenceSelectionHandler.inc');
       return EntityReferenceSelectionHandlerBroken::getInstance($field, $instance);
     }
 
@@ -167,9 +174,15 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
   /**
    * Implements EntityReferenceHandler::getReferencableEntities().
    */
-  public function getReferencableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0) {
+  public function getReferencableEntities($match = '', $match_operator = 'CONTAINS', $limit = 0) {
     $options = array();
     $entity_type = $this->field['settings']['target_type'];
+
+    if (is_null($match)) {
+      $match = '';
+    }
+    // Remove escape formatting.
+    $match = trim(str_replace('""', '"', $match));
 
     $query = $this->buildEntityFieldQuery($match, $match_operator);
     if ($limit > 0) {
@@ -252,7 +265,7 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
   }
 
   /**
-   * Build an EntityFieldQuery to get referencable entities.
+   * Build an EntityFieldQuery to get referenceable entities.
    */
   protected function buildEntityFieldQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = new EntityFieldQuery();

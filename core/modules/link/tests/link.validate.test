@@ -144,7 +144,7 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
   // Make sure that a link labelled <front> works.
   function testValidateFrontLink() {
     $valid = link_validate_url('<front>');
-    $this->assertEqual(LINK_FRONT, $valid, 'Make sure that front link is verfied and identified');
+    $this->assertEqual(LINK_FRONT, $valid, 'Make sure that front link is verified and identified');
   }
 
   function testValidateEmailLink() {
@@ -164,7 +164,7 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
 
   function testValidateNewsArticleLink() {
     $valid = link_validate_url('news:hj0db8$vrm$1@news.eternal-september.org');
-    $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to specific article valiates as news.');
+    $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to specific article validates as news.');
   }
 
   function testValidateBadNewsgroupLink() {

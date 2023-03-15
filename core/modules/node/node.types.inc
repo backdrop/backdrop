@@ -669,8 +669,8 @@ function node_node_type_update($info) {
  *
  * @param $type
  *   The node type to reset. The node type is passed back by reference with its
- *   resetted values. If there is no module-defined info for this node type,
- *   then nothing happens.
+ *   reset values. If there is no module-defined info for this node type, then
+ *   nothing happens.
  */
 function node_type_reset($type) {
   $info_array = module_invoke_all('node_info');

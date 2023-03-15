@@ -189,11 +189,11 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL with fragment works without a fragment in $options.');
 
-    // Verify fragment can be overidden in an external URL.
+    // Verify fragment can be overridden in an external URL.
     $url = $test_url . '#backdrop';
     $fragment = $this->randomName(10);
     $result = url($url, array('fragment' => $fragment));
-    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overidden with a custom fragment in $options.');
+    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overridden with a custom fragment in $options.');
 
     // Verify external URL can contain a query string.
     $url = $test_url . '?backdrop=awesome';
@@ -469,7 +469,7 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
    * Check that invalid multi-byte sequences are rejected.
    */
   function testInvalidMultiByte() {
-     // Ignore PHP 8.0+ null deprecatations.
+     // Ignore PHP 8.0+ null deprecations.
      $text = check_plain(NULL);
      $this->assertEqual($text, '', 'check_plain() casts null to string');
      $text = check_plain(FALSE);
@@ -599,7 +599,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
       $size = 79691776,
       $string . ' == ' . $parsed_size . ' bytes'
     );
-    $string = '76.24 Giggabyte'; // Misspeld text -> 76.24 GB
+    $string = '76.24 Giggabyte'; // Misspelled text -> 76.24 GB
     $this->assertEqual(
       $parsed_size = parse_size($string),
       $size = 81862076662,
@@ -729,7 +729,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Makes sure that reseting the CSS empties the cache.
+   * Makes sure that resetting the CSS empties the cache.
    */
   function testReset() {
     backdrop_static_reset('backdrop_add_css');
@@ -1427,7 +1427,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test backdrop_add_js() sets preproccess to false when cache is set to false.
+   * Test backdrop_add_js() sets preprocess to false when cache is set to false.
    */
   function testNoCache() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('cache' => FALSE));
@@ -1852,7 +1852,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // Retrieve all libraries for a module not implementing hook_library_info().
     // Note: This test installs Locale module.
     $libraries = backdrop_get_library('locale');
-    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an emtpy array.');
+    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an empty array.');
 
     // Retrieve a specific library by module and name.
     $farbtastic = backdrop_get_library('common_test', 'farbtastic');
@@ -2329,14 +2329,14 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
-    $invalid_ablosule_urls = array(
+    $invalid_absolute_urls = array(
       '',
       'ex!ample.com',
       'ex%ample.com',
     );
 
     foreach ($url_schemes as $scheme) {
-      foreach ($invalid_ablosule_urls as $url) {
+      foreach ($invalid_absolute_urls as $url) {
         $test_url = $scheme . '://' . $url;
         $valid_url = valid_url($test_url, TRUE);
         $this->assertFalse($valid_url, format_string('@url is NOT a valid url.', array('@url' => $test_url)));
@@ -2428,7 +2428,7 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     $this->assertFalse(valid_number_step(1, 1/3));
     $this->assertFalse(valid_number_step(-100, 100/7));
 
-    // Step mismatches very close to beeing valid.
+    // Step mismatches very close to being valid.
     $this->assertFalse(valid_number_step(70 + 9e-7, 10 + 9e-7));
     $this->assertFalse(valid_number_step(1109.87, 0.07));
     $this->assertFalse(valid_number_step(41239412.11, 2));
@@ -2591,7 +2591,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
   /**
    * Errors triggered during the test.
    *
-   * Errors are intercepted by the overriden implementation
+   * Errors are intercepted by the overridden implementation
    * of BackdropWebTestCase::error below.
    *
    * @var Array
