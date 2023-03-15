@@ -440,7 +440,7 @@ function user_views_plugins() {
     'row' => array(
       'user' => array(
         'title' => t('User accounts'),
-        'help' => t('Display the user acounts with standard user account view.'),
+        'help' => t('Display the user accounts with standard user account view.'),
         'handler' => 'views_plugin_row_user_view',
         'base' => array('users'), // only works with 'users' as base.
         'uses options' => TRUE,

@@ -381,7 +381,7 @@ function simpletest_test_get_all() {
         else {
           // If the .tests.info file is malformed, it puts a slew of
           // hard-to-diagnose errors into the watchdog log when the testing page
-          // is loaded. So we'll check for various malformalities and put a more
+          // is loaded. So we'll check for various malformations and put a more
           // informative error.
           foreach ($classes as $class => $info) {
             if (!is_array($info) || empty($info)) {
@@ -476,7 +476,7 @@ function simpletest_test_get_by_class($class) {
  * Implements hook_registry_files_alter().
  *
  * Add the test files for disabled modules so that we get a list containing
- * all the avialable tests.
+ * all the available tests.
  */
 function simpletest_registry_files_alter(&$files, $modules) {
   foreach ($modules as $module) {

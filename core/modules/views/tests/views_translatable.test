@@ -59,7 +59,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   }
 
   /**
-   * Tests the unpack translation funtionality.
+   * Tests the unpack translation functionality.
    */
   public function testUnpackTranslatable() {
     $view = $this->viewUnpackTranslatable();

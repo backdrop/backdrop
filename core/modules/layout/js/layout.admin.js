@@ -54,7 +54,7 @@ Backdrop.behaviors.layoutConfigure = {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
         // Cancel existing AJAX requests and start a new one.
-        for (var n = 0; n < ajax.currentRequests.lenth; n++) {
+        for (var n = 0; n < ajax.currentRequests.length; n++) {
           ajax.currentRequests[n].abort();
           ajax.cleanUp(ajax.currentRequests[n]);
         }
