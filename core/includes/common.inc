@@ -1310,7 +1310,7 @@ function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $locati
     return FALSE;
   }
   $strip_on_host_change = settings_get('backdrop_http_request_strip_sensitive_headers_on_host_change', TRUE);
-  $strip_on_https_downgrade = settings_get('drupal_http_request_strip_sensitive_headers_on_https_downgrade', TRUE);
+  $strip_on_https_downgrade = settings_get('backdrop_http_request_strip_sensitive_headers_on_https_downgrade', TRUE);
   if ($strip_on_host_change && strcasecmp($url_parsed['host'], $location_parsed['host']) !== 0) {
     return TRUE;
   }
