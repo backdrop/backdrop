@@ -1029,9 +1029,9 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
  * @param $type
  *   The widget type (i.e. 'single' or 'tags').
  * @param $field
- *   The field array defintion.
+ *   The field array definition.
  * @param $instance
- *   The instance array defintion.
+ *   The instance array definition.
  * @param $entity_type
  *   The entity type.
  * @param $entity_id

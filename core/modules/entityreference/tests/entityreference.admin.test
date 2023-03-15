@@ -70,7 +70,7 @@ class EntityReferenceAdminTestCase extends BackdropWebTestCase {
     // The base handler should be selected by default.
     $this->assertFieldByName('field[settings][handler]', 'base');
 
-    // The base handler settings should be diplayed.
+    // The base handler settings should be displayed.
     $entity_type = 'node';
     $entity_info = entity_get_info($entity_type);
     foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
