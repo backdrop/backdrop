@@ -3319,7 +3319,7 @@ function html_date_or_time_value_callback($element, $input = FALSE, &$form_state
   $return = '';
   if ($input !== FALSE) {
     $return = $input;
-  } 
+  }
   elseif (!empty($element['#default_value'])) {
     if (is_array($element['#default_value'])) {
       // Since #default_value for hidden elements is often an array, extract
