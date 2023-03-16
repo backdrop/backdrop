@@ -3313,6 +3313,28 @@ function html_date_validate($element, &$form_state) {
 }
 
 /**
+ * Element value callback for html_date and html_time elements.
+ */
+function html_date_or_time_value_callback($element, $input = FALSE, &$form_state = array()) {
+  $return = '';
+  if ($input !== FALSE) {
+    $return = $input;
+  } 
+  elseif (!empty($element['#default_value'])) {
+    if (is_array($element['#default_value'])) {
+      // Since #default_value for hidden elements is often an array, extract
+      // the actual value and return it.
+      $type = str_replace('html_', '', $element['#type']);
+      $return = $element['#default_value'][$type];
+    }
+    else {
+      $return = $element['#default_value'];
+    }
+  }
+  return $return;
+}
+
+/**
  * Validate a time string.
  */
 function html_time_validate($element, &$form_state) {

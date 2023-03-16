@@ -454,12 +454,14 @@ function system_element_info() {
     '#element_validate' => array('html_date_validate'),
     '#theme' => 'html_date',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_time'] = array(
     '#input' => TRUE,
     '#element_validate' => array('html_time_validate'),
     '#theme' => 'html_time',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_datetime'] = array(
     '#input' => TRUE,
