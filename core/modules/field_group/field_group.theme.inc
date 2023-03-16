@@ -155,7 +155,7 @@ function theme_multipage_pane($variables) {
 
   if ($page_counter_format == 1) { // t('Format 1 / 10')
     $count = $multipages[$parent_group->group_name];
-    $total = count($parent_group->children;
+    $total = count($parent_group->children);
     $message = '<span class="multipage-counter">%count / %total</span>';
     $output .= t($message, array('%count' => $count, '%total' => $total));
   }
