@@ -3343,7 +3343,7 @@ class FileAccessTestCase extends FileTestHelper {
   /**
    * Helper for testFilePrivateDownloadAccess() test.
    *
-   * Defines several cases for accesing private files.
+   * Defines several cases for accessing private files.
    *
    * @return array
    *   Array of associative arrays, each one having the next keys:

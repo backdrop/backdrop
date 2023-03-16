@@ -2100,7 +2100,7 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
   // is not wanted for the control. HTML supports two attributes for this:
   // http://www.w3.org/TR/html401/interact/forms.html#h-17.12. If a form wants
   // to start a control off with one of these attributes for UI purposes only,
-  // but still allow input to be processed if it's sumitted, it can set the
+  // but still allow input to be processed if it's submitted, it can set the
   // desired attribute in #attributes directly rather than using #disabled.
   // However, developers should think carefully about the accessibility
   // implications of doing so: if the form expects input to be enterable under
@@ -2590,7 +2590,7 @@ function form_type_select_value($element, $input = FALSE) {
         return (isset($element['#default_value']) && is_array($element['#default_value'])) ? $element['#default_value'] : array();
       }
     }
-    // Non-multiple select elements may have an empty option preprended to them
+    // Non-multiple select elements may have an empty option prepended to them
     // (see form_process_select()). When this occurs, usually #empty_value is
     // an empty string, but some forms set #empty_value to integer 0 or some
     // other non-string constant. PHP receives all submitted form input as
@@ -2891,6 +2891,10 @@ function form_select_options($element, $choices = NULL) {
       }
       else {
         $selected = '';
+      }
+
+      if (!empty($element[$key]['#indentation'])) {
+        $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
       }
       $options .= '<option value="' . check_plain($key) . '"' . $selected . '>' . check_plain($choice) . '</option>';
     }
@@ -3659,7 +3663,12 @@ function theme_container($variables) {
       }
     }
   }
-
+  if (isset($element['#indentation'])) {
+      // Ensure that the class attribute is set, while preserving any existing
+      // classes.
+      $element['#attributes'] += array('class' => array());
+      $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
+  }
   return '<div' . backdrop_attributes($element['#attributes']) . '>' . $element['#children'] . '</div>';
 }
 
@@ -3961,7 +3970,7 @@ function form_process_machine_name($element, &$form_state) {
   }
   $element['#attributes'] += array('dir' => 'ltr');
 
-  // The source element defaults to array('name'), but may have been overidden.
+  // The source element defaults to array('name'), but may have been overridden.
   if (empty($element['#machine_name']['source'])) {
     return $element;
   }
@@ -4845,6 +4854,10 @@ function theme_form_element($variables) {
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
     $attributes['class'][] = 'form-disabled';
+  }
+  // Add indentation.
+  if (isset($element['#indentation'])) {
+    $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
   }
   $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
 

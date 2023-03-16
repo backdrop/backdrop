@@ -1858,7 +1858,7 @@ function views_query_views_alter(QueryAlterableInterface $query) {
   $tables =& $query->getTables();
   $where =& $query->conditions();
 
-  // Replaces substitions in tables.
+  // Replaces substitutions in tables.
   foreach ($tables as $table_name => $table_metadata) {
     foreach ($table_metadata['arguments'] as $replacement_key => $value) {
       if (isset($substitutions[$value])) {
@@ -1867,7 +1867,7 @@ function views_query_views_alter(QueryAlterableInterface $query) {
     }
   }
 
-  // Replaces substitions in filter criterias.
+  // Replaces substitutions in filter criteria.
   _views_query_tag_alter_condition($query, $where, $substitutions);
 }
 
@@ -2029,7 +2029,7 @@ function views_process_check_options($element, &$form_state) {
 function views_object_types() {
   static $retval = NULL;
 
-  // Statically cache this so t() doesn't run a bajillion times.
+  // Statically cache this so t() doesn't run lots of times.
   if (!isset($retval)) {
     $retval = array(
       'field' => array(
@@ -2256,7 +2256,7 @@ function views_autoload_info() {
 /**
  * Cleans a CSS identifier, taking into account views tokenization.
  *
- * @param sring $class
+ * @param string $class
  *   A single CSS class, as entered into the Views user interface.
  * @param object $plugin
  *   The complete view plugin object for tokenization.

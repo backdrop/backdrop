@@ -5,7 +5,7 @@
  */
 
 /**
- * Implements hook_telementry_info().
+ * Implements hook_telemetry_info().
  */
 function telemetry_telemetry_info() {
   $info['php_version'] = array(
