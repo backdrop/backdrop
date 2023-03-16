@@ -8,7 +8,7 @@
     },
     {
       "name": "drupal",
-      "path": "https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/misc/cspell/dictionary.txt"
+      "path": "https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/misc/cspell/dictionary.txt"
     }
   ],
   "dictionaries": [
