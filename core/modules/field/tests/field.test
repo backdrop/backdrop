@@ -1199,7 +1199,7 @@ class FieldInfoTestCase extends FieldTestCase {
   }
 
   /**
-   * Test that field types and field definitions are correcly cached.
+   * Test that field types and field definitions are correctly cached.
    */
   function testFieldInfo() {
     // Test that field_test module's fields, widgets, and formatters show up.
@@ -1409,7 +1409,7 @@ class FieldInfoTestCase extends FieldTestCase {
     );
     field_create_instance($instance_definition);
 
-    // Disable coment module. This clears field_info cache.
+    // Disable the Comment module. This clears field_info cache.
     module_disable(array('comment'));
     $this->assertNull(field_info_instance('comment', 'field', 'comment_node_post'), 'No instances are returned on disabled entity types.');
   }
@@ -1587,7 +1587,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertFieldByName("{$this->field_name}[$langcode][1][value]", '', 'New widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
-    // TODO : check that non-field inpurs are preserved ('title')...
+    // @todo: Check that non-field inputs are preserved ('title').
 
     // Yet another time so that we can play with more values -> 3 widgets.
     $this->backdropPost(NULL, array(), t('Add another'));
@@ -1983,7 +1983,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertFieldByName('entity_2[field_unlimited][und][1][value]', 14, 'Entity 2: field_unlimited value 1 appears correctly is the form.');
     $this->assertFieldByName('entity_2[field_unlimited][und][2][value]', 15, 'Entity 2: field_unlimited value 2 appears correctly is the form.');
     $this->assertFieldByName('entity_2[field_unlimited][und][3][value]', '', 'Entity 2: an empty widget was added for field_unlimited value 3.');
-    // Save the form and check values are saved correclty.
+    // Save the form and check values are saved correctly.
     $this->backdropPost(NULL, array(), t('Save'));
     field_cache_clear();
     $this->assertFieldValues($entity_1, 'field_unlimited', LANGUAGE_NONE, array(3, 2));
@@ -2566,7 +2566,7 @@ class FieldCrudTestCase extends FieldTestCase {
    * @param $field_definition
    *   A field definition.
    * @param $modules
-   *   An aray of module names. The field will be tested to be inactive as long
+   *   An array of module names. The field will be tested to be inactive as long
    *   as any of those modules is disabled.
    */
   function _testActiveHelper($field_definition, $modules) {
@@ -3106,7 +3106,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     foreach ($instances as $instance) {
       $field_name = $instance['field_name'];
       $langcode = $display_language[$field_name];
-      // As the requested language was not assinged to any field, if the
+      // As the requested language was not assigned to any field, if the
       // returned language is defined for the current field, core fallback rules
       // were successfully applied.
       $this->assertTrue(isset($entity->{$field_name}[$langcode]) && $langcode != $requested_language, format_string('The display language for the field %field_name is %language.', array('%field_name' => $field_name, '%language' => $langcode)));

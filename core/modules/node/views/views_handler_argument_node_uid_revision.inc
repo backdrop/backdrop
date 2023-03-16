@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Defintion of views_handler_argument_node_uid_revision.
+ * Definition of views_handler_argument_node_uid_revision.
  */
 
 /**

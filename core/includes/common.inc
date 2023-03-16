@@ -1288,7 +1288,7 @@ function backdrop_http_request($url, array $options = array()) {
  *
  * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
  *
- * @param string $respone
+ * @param string $response
  *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
  *
  * @return array
@@ -1463,7 +1463,7 @@ function valid_url($url, $absolute = FALSE) {
  *   given step, integer or float.
  *
  * @return bool
- *   TRUE if no step mismatch has occured, or FALSE otherwise.
+ *   TRUE if no step mismatch has occurred, or FALSE otherwise.
  */
 function valid_number_step($value, $step, $offset = 0.0) {
   // Avoid division by zero.
@@ -2270,8 +2270,8 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
 
   // Get the plural index through the gettext formula.
   $index = (function_exists('locale_get_plural')) ? locale_get_plural($count, isset($options['langcode']) ? $options['langcode'] : NULL) : -1;
-  // If the index cannot be computed, use the plural as a fallback (which
-  // allows for most flexiblity with the replaceable @count value).
+  // If the index cannot be computed, use the plural as a fallback (which allows
+  // for the most flexibility with the replaceable @count value).
   if ($index < 0) {
     return t($plural, $args, $options);
   }
@@ -3442,7 +3442,7 @@ function backdrop_css_defaults($data = NULL) {
  *     The group number serves as a weight: the markup for loading a stylesheet
  *     within a lower weight group is output to the page before the markup for
  *     loading a stylesheet within a higher weight group, so CSS within higher
- *     weight groups take precendence over CSS within lower weight groups.
+ *     weight groups take precedence over CSS within lower weight groups.
  *   - 'every_page': For optimal front-end performance when aggregation is
  *     enabled, this should be set to TRUE if the stylesheet is present on every
  *     page of the website for users for whom it is present at all. This
@@ -3871,7 +3871,7 @@ function backdrop_pre_render_styles($elements) {
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
     switch ($group['type']) {
-      // For file items, there are three possibilites.
+      // For file items, there are three possibilities.
       // - The group has been aggregated: in this case, output a LINK tag for
       //   the aggregate file.
       // - The group can be aggregated but has not been (most likely because
@@ -4175,7 +4175,7 @@ function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRU
     $content = backdrop_load_stylesheet_content($contents, $_optimize);
   }
 
-  // Restore the parent base path as the file and its childen are processed.
+  // Restore the parent base path as the file and its children are processed.
   $basepath = $parent_base_path;
   return $content;
 }

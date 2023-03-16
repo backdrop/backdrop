@@ -12,7 +12,7 @@
  * - $classes: Array of classes to be added to the layout wrapper.
  * - $attributes: Additional attributes to be added to the layout wrapper.
  * - $row_data: An array of information about each row. Each item in the array
- *   contains the folowing information:
+ *   contains the following information:
  *   - $row_data['region_md']: the row region widths in Bootstrap format.
  *   - $row_data['region_name']: the region name.
  *   - $row_data['region_classes']: the region classes.

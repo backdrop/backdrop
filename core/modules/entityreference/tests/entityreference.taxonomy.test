@@ -63,7 +63,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
     );
     field_create_instance($instance);
 
-    // Create a terms vocobulary.
+    // Create a terms vocabulary.
     $vocabulary = new TaxonomyVocabulary(array(
       'name' => 'Terms',
       'machine_name' => 'terms',
@@ -88,7 +88,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
     $this->setupForIndex();
     $langcode = LANGUAGE_NONE;
 
-    // Asert node insert with reference to term.
+    // Assert node insert with reference to term.
     $settings = array();
     $settings['type'] = 'post';
     $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = 1;
@@ -96,7 +96,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
 
     $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
 
-    // Asert node update with reference to term.
+    // Assert node update with reference to term.
     node_save($node);
     $this->assertEqual(taxonomy_select_nodes(1), array($node->nid));
 

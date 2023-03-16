@@ -213,7 +213,7 @@ class DashboardTest extends BackdropWebTestCase {
     ));
     $this->assertEqual(count($taxonomy_admin_block), 0, 'The taxonomy overview list was not found.');
 
-    // There should now be three user acounts.
+    // There should now be three user accounts.
     $this->assertText('3 total user accounts', 'Three user accounts found.');
 
     // The dashboard should also accept new blocks.
@@ -249,7 +249,7 @@ class DashboardTest extends BackdropWebTestCase {
     $this->backdropGet('admin/dashboard/settings');
     $this->assertResponse(403);
 
-    // Swich to user with access, and test the dashboard settings form.
+    // Switch to user with access, and test the dashboard settings form.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/dashboard/settings');
     $edit = array(
