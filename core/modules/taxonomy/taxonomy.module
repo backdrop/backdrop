@@ -1859,34 +1859,8 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
 function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
   $field = $context['field'];
   $widget_type = $context['instance']['widget']['type'];
-
   if ($field['type'] == 'taxonomy_term_reference' && in_array($widget_type, array('options_buttons', 'options_select'))) {
-    if (empty($field['settings']['options_list_callback']) || $field['settings']['options_list_callback'] == 'taxonomy_allowed_values') {
-      // With the default callback, we can rely on 'allowed_values' to provide
-      // the vocabularies needed to compute depth.
-      $trees = $field['settings']['allowed_values'];
-    }
-    else {
-      // If a module has overridden 'option_list_callback', we can't rely on
-      // 'allowed_values' to provide the vocabularies, so we'll have to fetch
-      // them.
-      $tids = array_keys($element['#options']);
-      $vocabularies = db_query('
-        SELECT DISTINCT vocabulary
-        FROM {taxonomy_term_data}
-        WHERE tid IN ( :tids )
-        ', array(':tids' => $tids))
-        ->fetchCol();
-      $trees = array();
-      foreach ($vocabularies as $vocabulary) {
-        $trees[] = array(
-          'vocabulary' => $vocabulary,
-          'parent' => 0,
-        );
-      }
-    }
-
-    foreach ($trees as $tree) {
+    foreach ($field['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
         if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
           foreach ($terms as $term) {
