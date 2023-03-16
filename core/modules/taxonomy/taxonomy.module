@@ -1861,7 +1861,7 @@ function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
   $widget_type = $context['instance']['widget']['type'];
 
   if ($field['type'] == 'taxonomy_term_reference' && in_array($widget_type, array('options_buttons', 'options_select'))) {
-    if (empty($field['settings']['option_list_callback']) || $field['settings']['option_list_callback'] == 'taxonomy_allowed_values') {
+    if (empty($field['settings']['options_list_callback']) || $field['settings']['options_list_callback'] == 'taxonomy_allowed_values') {
       // With the default callback, we can rely on 'allowed_values' to provide
       // the vocabularies needed to compute depth.
       $trees = $field['settings']['allowed_values'];
