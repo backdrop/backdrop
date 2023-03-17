@@ -772,8 +772,6 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     the default parent for 'admin/people/create' is 'admin/people').
  *   - tab_root: (optional) For local task menu items, the path of the closest
  *     non-tab item; same default as "tab_parent".
- *   - position: (optional) Position of the block ('left' or 'right') on the
- *     system administration page for this item.
  *   - type: (optional) A bitmask of flags describing properties of the menu
  *     item. Many shortcut bitmasks are provided as constants in menu.inc:
  *     - "MENU_NORMAL_ITEM": (default) Normal menu items show up in the menu

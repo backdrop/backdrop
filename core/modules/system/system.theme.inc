@@ -519,11 +519,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
+  $blocks = array();
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -538,21 +534,14 @@ function theme_system_admin_index($variables) {
       $block['show'] = TRUE;
 
       if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
+        $blocks[] = $block_output;
       }
     }
   }
 
   $output = '<div class="admin clearfix">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
+  foreach ($blocks as $block) {
+    $output .= $block;
   }
   $output .= '</div>';
 
