@@ -2895,7 +2895,7 @@ function form_select_options($element, $choices = NULL) {
       if (!empty($element[$key]['#indentation'])) {
         $choice = str_repeat('· ', $element[$key]['#indentation']) . $choice;
         $option_attributes['data-indentation-depth'] = $element[$key]['#indentation'];
-        $option_attributes['class'] = 'indent';
+        $option_attributes['class'] = 'indentation';
       }
 
       $options .= '<option' . backdrop_attributes($option_attributes) . '>' . check_plain($choice) . '</option>';
@@ -3669,7 +3669,7 @@ function theme_container($variables) {
       // Ensure that the class attribute is set, while preserving any existing
       // classes.
       $element['#attributes'] += array('class' => array());
-      $element['#attributes']['class'][] = 'indent';
+      $element['#attributes']['class'][] = 'indentation';
       $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
       $element['#attributes']['data-indentation-depth'] = $element['#indentation'];
   }
@@ -4861,7 +4861,7 @@ function theme_form_element($variables) {
   }
   // Add indentation.
   if (isset($element['#indentation'])) {
-    $attributes['class'][] = 'indent';
+    $attributes['class'][] = 'indentation';
     $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
     $attributes['data-indentation-depth'] = $element['#indentation'];
   }
