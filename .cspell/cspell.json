@@ -42,14 +42,6 @@
   ],
   "overrides": [
     {
-      "filename": "/core/modules/layout/tests/layout.test",
-      "ignoreWords": ["isnt"]
-    },
-    {
-      "filename": "/core/modules/simpletest/tests/session*",
-      "ignoreWords": ["dont"]
-    },
-    {
       "filename": "/core/themes/bartik/color/color.inc",
       "ignoreWords": ["Blackdrop"]
     }
