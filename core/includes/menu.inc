@@ -512,7 +512,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   $site_config = config('system.core');
-  
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -3429,7 +3429,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   $parent = FALSE;
 
-  // This item is explicitely top-level, skip the rest of the parenting.
+  // This item is explicitly top-level, skip the rest of the parenting.
   if (isset($menu_link['plid']) && empty($menu_link['plid'])) {
     return $parent;
   }
@@ -3559,7 +3559,7 @@ function _menu_find_router_path($link_path) {
 }
 
 /**
- * Inserts, updates, or deletes an uncustomized menu link related to a module.
+ * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
  * @param $module
  *   The name of the module.
@@ -3884,11 +3884,11 @@ function _menu_router_build($callbacks) {
             $item['theme arguments'] = $parent['theme arguments'];
           }
         }
-        // Same for load arguments: if a loader doesn't have any explict
+        // Same for load arguments: if a loader doesn't have any explicit
         // arguments, try to find arguments in the parent.
         if (!isset($item['load arguments'])) {
           foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
+            // This loader doesn't have any explicit arguments...
             if (!is_array($function)) {
               // ... check the parent for a loader at the same position
               // using the same function name and defining arguments...

@@ -288,15 +288,36 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
     $childList.parent().siblings('li')
       .find('ul.expanded').removeClass('expanded').end()
       .find('.expanded-trail').removeClass('expanded-trail');
+
+    // Check if child is outside viewport.
+    var $outside = outsideViewport($childList[0]);
+    if ($outside.right) {
+      $(this).addClass('outside-right');
+    }
+    if ($outside.left) {
+      $(this).addClass('outside-left');
+    }
   }
   function closeChild(e) {
     // Start the timer.
     var $uls = $(this).find('> ul');
     var $link = $(this).find('> a, > span');
+    var $li = $(this);
     this.sfTimer = setTimeout(function () {
       $uls.removeClass('expanded');
       $link.removeClass('expanded-trail');
+      $li.removeClass('outside-right');
+      $li.removeClass('outside-left');
     }, 400);
+  }
+  function outsideViewport(e) {
+    var $rect = e.getBoundingClientRect();
+
+    var $out = {};
+    $out.left = $rect.left < 0;
+    $out.right = $rect.right > (window.innerWidth || document.documentElement.clientWidth);
+
+    return $out;
   }
 };
 
@@ -407,7 +428,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   function resultsHandler(e) {
     var $this = $(this);
     var show = e.type === 'mouseenter' || e.type === 'focusin' || e.type === 'touchstart';
-    // Supress the normal click handling on first touch, only highlighting.
+    // Suppress the normal click handling on first touch, only highlighting.
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
@@ -479,6 +500,48 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   });
 };
 
+/**
+ * Replaces the "Home" link with "Back to site" link.
+ *
+ * Back to site link points to the last non-administrative page the user visited
+ * within the same browser tab.
+ */
+Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
+  if (!settings.admin_bar.back_to_site_link) {
+    return;
+  }
+
+  // Grab the stored path of the last non-admin page.
+  var escapeAdminPath = sessionStorage.getItem("escapeAdminPath");
+
+  // Saves the last non-administrative page in the browser to be able to link back
+  // to it when browsing administrative pages. If there is a destination parameter
+  // there is not need to save the current path because the page is loaded within
+  // an existing "workflow".
+  if (
+    !settings.admin_bar.current_path_is_admin &&
+    !/destination=/.test(window.location.search)
+  ) {
+    sessionStorage.setItem(
+      "escapeAdminPath",
+      settings.admin_bar.current_path
+    );
+  }
+
+  // We only want to change the first anchor tag in the admin bar icon sub-menu.
+  var $toolbarEscape = $(".admin-bar-icon a").first();
+
+  // If the current page is admin, then switch the path.
+  if (
+    $toolbarEscape.length &&
+    settings.admin_bar.current_path_is_admin &&
+    escapeAdminPath !== null
+  ) {
+    $toolbarEscape.addClass("escape");
+    $toolbarEscape.attr("href", settings.basePath + escapeAdminPath);
+    $toolbarEscape.text(Backdrop.t("Back to site"));
+  }
+};
 /**
  * @} End of "defgroup admin_behaviors".
  */

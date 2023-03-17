@@ -47,7 +47,7 @@ define('BACKDROP_REQUIRED', 2);
 define('BACKDROP_WEIGHT_SELECT_MAX', 100);
 
 /**
- * Maximum length of e-mail fields.
+ * Maximum length of email fields.
  */
 define('EMAIL_MAX_LENGTH', 254);
 
@@ -161,6 +161,7 @@ function system_permission() {
     'administer site configuration' => array(
       'title' => t('Administer site configuration'),
       'restrict access' => TRUE,
+      'warning' => t('Provides access to a variety of settings/functionality that should generally be restricted to site administrators.'),
     ),
     'administer themes' => array(
       'title' => t('Administer themes'),
@@ -168,6 +169,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
+      'warning' => t('Run database updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
@@ -842,7 +844,7 @@ function system_menu() {
   );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
-    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathmatical symbols.',
+    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathematical symbols.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_utf8mb4_convert_form'),
     'access arguments' => array('administer site configuration'),
@@ -939,7 +941,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default home page, and number of posts per page, error pages.',
+    'description' => 'Change site name, logo, favicon, slogan, email address, default home page, and number of posts per page, error pages.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
@@ -1445,7 +1447,7 @@ function system_library_info() {
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
     'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.2',
+    'version' => '3.7.3',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
@@ -1663,7 +1665,7 @@ function system_library_info() {
     ),
   );
   $libraries['ui.menu'] = array(
-    'title' => 'jQuery UI: Mouse',
+    'title' => 'jQuery UI: Menu',
     'website' => 'http://jqueryui.com/menu/',
     'version' => $libraries['ui']['version'],
     'js' => array(
@@ -2438,7 +2440,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2448,7 +2449,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
@@ -2480,21 +2480,15 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['timezone'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Locale settings'),
-    '#weight' => 6,
-    '#collapsible' => TRUE,
-  );
-  $form['timezone']['timezone'] = array(
+  $form['region_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
-    '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
+    '#description' => t("This account's preferred time zone for date and time display throughout the site."),
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
+    $form['region_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
 }
@@ -3349,7 +3343,7 @@ function system_breadcrumb_block($settings = array()) {
     $current_class .= ' element-invisible';
   }
 
-  $crumbs[] = '<span class="' . $current_class . '">' . backdrop_get_title() . '</span>';
+  $crumbs[] = '<span aria-current="page" class="' . $current_class . '">' . backdrop_get_title() . '</span>';
 
   if (isset($settings['hide']) && $settings['hide'] == TRUE) {
     if (!isset($crumbs[2]) && isset($settings['current']) && $settings['current'] != TRUE) {
@@ -4089,6 +4083,7 @@ function system_autoload_info() {
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
+    'views_handler_field_system_info' => 'views/views_handler_field_system_info.inc',
   );
 }
 
@@ -4173,15 +4168,15 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
-      ->condition('status', 1)
+      ->condition('node.title', '%' . db_like($string) . '%', 'LIKE')
+      ->condition('node.status', 1)
       ->addTag('node_access')
-      ->orderBy('nid', 'DESC')
+      ->orderBy('node.nid', 'DESC')
       ->range(0, $range)
       ->execute();
     foreach ($results as $result) {
       $path = backdrop_get_path_alias('node/' . $result->nid);
-      $match = '<span class="autocomplete-suggestion">' . $result->title . '</span>';
+      $match = '<span class="autocomplete-suggestion">' . check_plain($result->title) . '</span>';
       $match_description = t('Content: %type', array('%type' => node_type_get_name($result->type)));
       $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
       $match_count++;
@@ -4202,7 +4197,7 @@ function path_autocomplete($string = '') {
         $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
         $url = file_create_url($result->uri);
         $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-        $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->filename) . '</span>';
         $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
         $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
@@ -4226,7 +4221,7 @@ function path_autocomplete($string = '') {
         $users = user_load_multiple($uids);
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
-          $match = '<span class="autocomplete-suggestion">' . user_format_name($user) . '</span>';
+          $match = '<span class="autocomplete-suggestion">' . check_plain(user_format_name($user)) . '</span>';
           $match_description = t('User account');
           $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
@@ -4238,14 +4233,14 @@ function path_autocomplete($string = '') {
     if (module_exists('taxonomy') && $match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
+        ->condition('taxonomy_term_data.name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
-        ->orderBy('tid', 'DESC')
+        ->orderBy('taxonomy_term_data.tid', 'DESC')
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-        $match = '<span class="autocomplete-suggestion">' . $result->name . '</span>';
+        $match = '<span class="autocomplete-suggestion">' . check_plain($result->name) . '</span>';
         $match_description = t('Taxonomy term: %vocabulary', array('%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name));
         $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
@@ -4260,6 +4255,7 @@ function path_autocomplete($string = '') {
           if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
             $path = backdrop_get_path_alias($display->display_options['path']);
             if (!path_is_admin($path)) {
+              $view_title = '';
               $found_match = FALSE;
               // Display title.
               if (!empty($display->display_options['title']) && stripos($display->display_options['title'], $string) !== FALSE) {
@@ -4277,7 +4273,7 @@ function path_autocomplete($string = '') {
                 $view_title = $view->human_name;
               }
               if ($found_match) {
-                $match = '<span class="autocomplete-suggestion">' . $view_title . '</span>';
+                $match = '<span class="autocomplete-suggestion">' . check_plain($view_title) . '</span>';
                 $match_description = t('View: %human - %display', array('%human' => $view->human_name, '%display' => $display->display_title));
                 $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
@@ -4296,6 +4292,7 @@ function path_autocomplete($string = '') {
       $menu_items = layout_get_all_configs('menu_item');
       foreach ($menu_items as $menu_item) {
         if ($match_count < $range) {
+          $layout_title = '';
           $found_match = FALSE;
           if (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
             $found_match = TRUE;
@@ -4306,7 +4303,7 @@ function path_autocomplete($string = '') {
             $layout_title = $menu_item['name'];
           }
           if ($found_match) {
-            $match = '<span class="autocomplete-suggestion">' . $layout_title . '</span>';
+            $match = '<span class="autocomplete-suggestion">' . check_plain($layout_title) . '</span>';
             $match_description = t('Layout: %display', array('%display' => $menu_item['name']));
             $matches[$menu_item['path']] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
             $match_count++;
@@ -4326,7 +4323,7 @@ function path_autocomplete($string = '') {
       foreach ($results as $result) {
         $path = backdrop_get_path_alias($result->link_path);
         if (!isset($matches[$path]) && !path_is_admin($path)) {
-          $match = '<span class="autocomplete-suggestion">' . $result->link_title . '</span>';
+          $match = '<span class="autocomplete-suggestion">' . check_plain($result->link_title) . '</span>';
           $match_description = t('Menu item: %path', array('%path' => $path));
           $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
@@ -4406,6 +4403,24 @@ function system_admin_paths() {
 }
 
 /**
+ * Implements hook_file_download().
+ */
+function system_file_download($uri) {
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  if ($additional_public_schemes) {
+    $scheme = file_uri_scheme($uri);
+    if (in_array($scheme, $additional_public_schemes, TRUE)) {
+      return array(
+        // Returning any header grants access, and setting the 'Cache-Control'
+        // header is appropriate for public files.
+        'Cache-Control' => 'public',
+      );
+    }
+  }
+}
+
+/**
  * Sets up a form to save information automatically.
  *
  * This function adds a submit handler and a submit button to a form array. The
@@ -4427,7 +4442,7 @@ function system_admin_paths() {
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
- *     '#default_setting' => $settings_config->get('first_setting'),
+ *     '#default_value' => $primary_config->get('first_setting'),
  *   ),
  *   'second_setting' => array( ... ),
  *
@@ -4441,7 +4456,7 @@ function system_admin_paths() {
  *
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
- *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#default_value' => $tertiary_config->get('bonus_three'),
  *       '#config' => 'mymodule.third',
  *     ),
  *   ),
@@ -4461,7 +4476,7 @@ function system_admin_paths() {
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
- * in thier elements or fieldsets.
+ * in their elements or fieldsets.
  *
  * If no top-level $form['#config'] value is present, then the values will be
  * saved to variables using variable_set() from the Drupal compatibility layer.
@@ -4663,4 +4678,3 @@ function system_transliterate_machine_name($string, $options = array()) {
 
   return $string;
 }
-

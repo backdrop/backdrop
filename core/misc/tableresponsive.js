@@ -81,7 +81,7 @@ $.extend(TableResponsive.prototype, {
     }
     // When the toggle is pegged, its presence is maintained because the user
     // has interacted with it. This is necessary to keep the link visible if the
-    // user adjusts screen size and changes the visibilty of columns.
+    // user adjusts screen size and changes the visibility of columns.
     if (!pegged && hiddenLength === 0) {
       this.$link.hide().text(this.hideText);
     }

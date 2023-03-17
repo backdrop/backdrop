@@ -52,7 +52,7 @@ class LocaleConfigurationTest extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-site-default-en', 'Default language updated.');
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), 'Correct page redirection.');
 
-    // Check if a valid language prefix is added afrer changing the default
+    // Check if a valid language prefix is added after changing the default
     // language.
     $this->backdropGet('admin/config/regional/language/detection/url');
     $this->assertFieldByXPath('//input[@name="prefix[en]"]', 'en', 'A valid path prefix has been added to the previous default language.');
@@ -636,7 +636,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
     backdrop_static_reset('locale_get_plural');
     backdrop_static_reset('locale_get_plural:plurals');
 
-    // Test locale_get_plural() for English (no formula presnt).
+    // Test locale_get_plural() for English (no formula present).
     $this->assertIdentical(locale_get_plural(1, 'en'), 0, "Computed plural index for 'en' with count 1 is 0.");
     $this->assertIdentical(locale_get_plural(0, 'en'), 1, "Computed plural index for 'en' with count 0 is 1.");
     $this->assertIdentical(locale_get_plural(5, 'en'), 1, "Computed plural index for 'en' with count 5 is 1.");
@@ -1740,7 +1740,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     // Check that the "xx" home page is readily available because path prefix
     // negotiation is pre-configured.
     $this->backdropGet($prefix);
-    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readibly available.');
+    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readily available.');
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
@@ -2179,7 +2179,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
         'expect' => $language_string,
         'expected_provider' => LANGUAGE_NEGOTIATION_URL,
         'http_header' => $http_header_browser_fallback,
-        'message' => 'URL (PATH) > BROWSER: with langage prefix, UI language is based on path prefix',
+        'message' => 'URL (PATH) > BROWSER: with language prefix, UI language is based on path prefix',
       ),
       // Default, browser language preference is not one of site's lang.
       array(
@@ -2483,7 +2483,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
 
     $this->assertEqual($url, $expected, 'The right port is used.');
 
-    // If we set the port explicitly in url(), it should not be overriden.
+    // If we set the port explicitly in url(), it should not be overridden.
     $url = url('', array(
       'absolute' => TRUE,
       'language' => $language,
@@ -2493,7 +2493,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $expected = 'http://example.fr:90/';
     $expected .= $index_php ? 'index.php/' : '';
 
-    $this->assertEqual($url, $expected, 'A given port is not overriden.');
+    $this->assertEqual($url, $expected, 'A given port is not overridden.');
 
     // Restore HTTP_HOST.
     $_SERVER['HTTP_HOST'] = $http_host;
@@ -2943,4 +2943,3 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $this->assertTrue($result);
   }
 }
-

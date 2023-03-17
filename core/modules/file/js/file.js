@@ -19,10 +19,6 @@ Backdrop.behaviors.fileUploadChange = {
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
-  },
-  detach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
 };
 
@@ -33,10 +29,6 @@ Backdrop.behaviors.fileButtons = {
   attach: function (context) {
     $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
     $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
-  },
-  detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
   }
 };
 
@@ -137,7 +129,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // AJAX behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');

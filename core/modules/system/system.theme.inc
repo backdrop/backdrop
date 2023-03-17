@@ -165,7 +165,7 @@ function theme_system_modules_fieldset($variables) {
     // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
 
-    // Add the second column: module label and expand/collapse functionalty.
+    // Add the second column: module label and expand/collapse functionality.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
     // Add the third column: module version number.
@@ -177,6 +177,9 @@ function theme_system_modules_fieldset($variables) {
     }
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    if (isset($module['#project']) && $module['#project'] != 'backdrop') {
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $module['#project']) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $module['#project']) . '</div>';
     }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';

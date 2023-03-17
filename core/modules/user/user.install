@@ -39,7 +39,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => "User's e-mail address.",
+        'description' => "User's email address.",
       ),
       'signature' => array(
         'type' => 'varchar',
@@ -103,7 +103,7 @@ function user_schema() {
         'length' => 254,
         'not null' => FALSE,
         'default' => '',
-        'description' => 'E-mail address used for initial account creation.',
+        'description' => 'Email address used for initial account creation.',
       ),
       'data' => array(
         'type' => 'blob',
@@ -193,10 +193,14 @@ function user_install() {
 /**
  * Implements hook_update_dependencies().
  */
-function system_update_dependencies() {
+function user_update_dependencies() {
   // Ensure layouts have been converted before renaming our user roles.
   $dependencies['user'][1007] = array(
     'system' => 1025,
+  );
+  // Ensure the 'auto' column already exists in url_alias table.
+  $dependencies['user'][1021] = array(
+    'system' => 1039,
   );
   return $dependencies;
 }
@@ -314,7 +318,7 @@ function user_update_1005() {
   $config->set('register_admin_created_subject', update_variable_get('register_admin_created_subject', 'An administrator created an account for you at [site:name]'));
   $config->set('register_admin_created_body', update_variable_get('register_admin_created_body', '[user:name],\n\nA site administrator at [site:name] has created an account for you. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('register_pending_approval_subject', update_variable_get('register_pending_approval_subject', 'Account details for [user:name] at [site:name] (pending admin approval)'));
-  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another e-mail containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
+  $config->set('register_pending_approval_body', update_variable_get('register_pending_approval_body', '[user:name],\n\nThank you for registering at [site:name]. Your application for an account is currently pending approval. Once it has been approved, you will receive another email containing information about how to log in, set your password, and other details.\n\n\n--  [site:name] team'));
   $config->set('register_no_approval_required_subject', update_variable_get('register_no_approval_required_subject', 'Account details for [user:name] at [site:name]'));
   $config->set('register_no_approval_required_body', update_variable_get('register_no_approval_required_body', '[user:name],\n\nThank you for registering at [site:name]. You may now log in by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once to log in and will lead you to a page where you can set your password.\n\nAfter setting your password, you will be able to log in at [site:login-url] in the future using:\n\nusername: [user:name]\npassword: Your password\n\n--  [site:name] team'));
   $config->set('password_reset_subject', update_variable_get('password_reset_subject', 'Password reset information for [user:name] at [site:name]'));
@@ -1303,6 +1307,41 @@ function user_update_1022() {
   $config->save();
 
   update_variable_del('log_user_flood_control');
+}
+
+/**
+ * Add default descriptions to user roles.
+ */
+function user_update_1023() {
+  $config_names = config_get_names_with_prefix('user.role.');
+  $admin_role_name = config_get('system.core', 'user_admin_role');
+
+  // Use role_help module description text as a default, if available.
+  $role_help = array();
+  if (db_table_exists('role_help')) {
+    $role_help = db_query('SELECT role, summary FROM {role_help}')->fetchAllKeyed();
+    backdrop_set_message(t('Backdrop core now provides most of the functionality of Role Help module. See the <a href="!url">change record for more information</a>.', array('!url' => 'https://docs.backdropcms.org/change-records/user-roles-now-have-descriptions-role-help-module-in-core')), 'warning');
+
+    // Convert numeric anonymous and authenticated role IDs to string versions.
+    if (isset($role_help['1'])) {
+      $role_help['anonymous'] = $role_help['1'];
+      unset($role_help['1']);
+    }
+    if (isset($role_help['2'])) {
+      $role_help['authenticated'] = $role_help['2'];
+      unset($role_help['2']);
+    }
+  }
+
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $role_name = $config->get('name');
+    if ($config->get('description') === NULL && isset($role_help[$role_name])) {
+      $description = $role_help[$role_name];
+      $config->set('description', $description);
+      $config->save();
+    }
+  }
 }
 
 /**
