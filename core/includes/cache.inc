@@ -722,7 +722,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
    *   The cache bin for which the object is created.
    */
   public function __construct($bin) {
-    $config = config('system.core.settings');
+    $config = config('system.core');
 
     $this->bin = $bin;
 
@@ -742,7 +742,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
 
     // If no class is selected or a taggable cache is selected as the backend,
     // reset to the database cache.
-    if (empty($class) || $class instanceof BackdropTaggableCacheInterface) {
+    if (empty($class) || in_array('BackdropTaggableCacheInterface', class_implements($class))) {
       $class = 'BackdropDatabaseCache';
     }
 
@@ -875,7 +875,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
     }
 
     // Does the backend support tags natively?
-    if ($this->backend instanceof TaggableBackdropCacheInterface) {
+    if ($this->backend instanceof BackdropTaggableCacheInterface) {
       $this->backend->set($cid, $data, $expire, $tags);
     }
     else {

@@ -916,6 +916,8 @@ function system_schema() {
   $schema['cache_path']['description'] = 'Cache table for URL alias lookup.';
   $schema['cache_token'] = $schema['cache'];
   $schema['cache_token']['description'] = 'Cache table for token information.';
+  $schema['cache_cachetags'] = $schema['cache'];
+  $schema['cache_cachetags']['description'] = 'Cache table for computed cache tag invalidation values.';
 
   $schema['invalidated_cache_tags'] = array(
     'description' => 'Table for tracking cache tag invalidations.',
@@ -3433,13 +3435,29 @@ function system_update_1087() {
 }
 
 /**
- * Creates the {invalidated_cache_tags} table if it does not exist.
+ * Creates database tables and config items for cache tags if they do not exist.
  */
 function system_update_1088() {
+  $schema = system_schema();
+
   if (!db_table_exists('invalidated_cache_tags')) {
-    $schema = system_schema();
     db_create_table('invalidated_cache_tags', $schema['invalidated_cache_tags']);
   }
+  if (!db_table_exists('cache_cachetags')) {
+    db_create_table('cache_cachetags', $schema['cache_cachetags']);
+  }
+
+  $config = config('system.core');
+  if ($config->get('use_cache_tags_cache') === NULL) {
+    $config->set('use_cache_tags_cache', TRUE);
+  }
+  if ($config->get('emit_cache_max_age') === NULL) {
+    $config->set('emit_cache_max_age', TRUE);
+  }
+  if ($config->get('emit_cache_tags') === NULL) {
+    $config->set('emit_cache_tags', TRUE);
+  }
+  $config->save();
 }
 
 /**

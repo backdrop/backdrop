@@ -3737,11 +3737,11 @@ function system_flush_caches() {
   // Reset the menu static caches.
   menu_reset_static_cache();
 
-  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
+  if (!config_get('system.core', 'use_cache_tags_cache')) {
     return array();
   }
 
-  return array('cache_cache_tags');
+  return array('cache_cachetags');
 }
 
 /**
@@ -4667,7 +4667,7 @@ function system_transliterate_machine_name($string, $options = array()) {
 /**
  * Implements hook_process_html().
  */
-function system_process_html(&$variables) {
+function system_preprocess_page(&$variables) {
   backdrop_emit_cache_tags();
   backdrop_emit_cache_max_age();
 }
@@ -4686,7 +4686,7 @@ function system_ajax_render_alter(&$commands) {
 function system_emit_cache_tags($tags) {
   $page_cache_tags = &backdrop_static(__FUNCTION__, array());
 
-  if (config_get('system.core.settings', 'emit_cache_tags')) {
+  if (config_get('system.core', 'emit_cache_tags')) {
     backdrop_add_http_header('X-Backdrop-Cache-Tags', implode(' ', $tags));
   }
 
@@ -4849,19 +4849,6 @@ function system_cache_tags_is_valid($checksum, array $tags) {
 }
 
 /**
- * Wraps the internal Backdrop API with an official API.
- *
- * @param string $bin
- *   The bin to get a cache object for.
- *
- * @return BackdropCacheInterface
- *   The BackdropCacheInterface object for the selected bin.
- */
-function system_cache_get_object($bin) {
-  return _cache_get_object($bin);
-}
-
-/**
  * Calculates the current checksum for a given set of tags.
  *
  * @param array $tags
@@ -4928,11 +4915,11 @@ function _system_cache_tags_load_from_db(array $query_tags) {
  *   The tag to invalidate.
  */
 function _system_cache_tags_invalidate_cache($tag) {
-  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
+  if (!config_get('system.core', 'use_cache_tags_cache')) {
     return;
   }
 
-  cache_clear_all($tag, 'cache_cache_tags');
+  cache_clear_all($tag, 'cache_cachetags');
 }
 
 /**
@@ -4942,12 +4929,10 @@ function _system_cache_tags_invalidate_cache($tag) {
  *   The array of (tag, invalidations) to sync to the database.
  */
 function _system_cache_tags_update_cache(array $result) {
-  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
-    return;
-  }
-
-  foreach ($result as $tag => $invalidations) {
-    cache_set($tag, $invalidations, 'cache_cache_tags');
+  if (config_get('system.core', 'use_cache_tags_cache')) {
+    foreach ($result as $tag => $invalidations) {
+      cache_set($tag, $invalidations, 'cache_cachetags');
+    }
   }
 }
 
@@ -4962,14 +4947,14 @@ function _system_cache_tags_update_cache(array $result) {
  *   An array keyed by tag with invalidations as value.
  */
 function _system_cache_tags_load_from_cache(array &$query_tags) {
-  if (!config_get('system.core.settings', 'use_cache_tags_cache')) {
+  if (!config_get('system.core', 'use_cache_tags_cache')) {
     return array();
   }
 
   $result = array();
 
   // Load from cache.
-  $cached = cache_get_multiple($query_tags, 'cache_cache_tags');
+  $cached = cache_get_multiple($query_tags, 'cache_cachetags');
   foreach ($cached as $tag => $item) {
     $result[$tag] = $item->data;
   }
