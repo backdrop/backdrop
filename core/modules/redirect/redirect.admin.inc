@@ -439,7 +439,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#parents' => array('override'),
   );
 
-  if (!empty($form_state['storage']['override_messages']) && !count(form_get_errors())) {
+  if (!empty($form_state['storage']['override_messages']) && !form_get_errors()) {
     $form['override']['#access'] = TRUE;
     if (count($form_state['storage']['override_messages']) > 1) {
       $message_output = theme('item_list', array('items' => $form_state['storage']['override_messages']));

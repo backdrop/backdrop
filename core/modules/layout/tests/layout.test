@@ -1981,6 +1981,8 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $hero_title_1 = 'Wonderwoman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
+    // "isnt" is purposefully missing an apostrophe as it was causing tests to
+    // fail.
     $hero_content_2 = "This isnt gonna end well...";
 
     // Create some sample images.
@@ -2242,7 +2244,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
     $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
 
-    // Edit the node to get a system mesage.
+    // Edit the node to get a system message.
     $this->backdropPost("node/1/edit", array(), t('Save'));
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');

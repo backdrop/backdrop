@@ -303,7 +303,7 @@ class BackdropDateTime extends DateTime {
    * @param array|null $granularity
    *   An array of date parts. Defaults to NULL.
    * @param bool $flexible
-   *   TRUE if the granuliarty is flexible, FALSE otherwise. Defaults to FALSE.
+   *   TRUE if the granularity is flexible, FALSE otherwise. Defaults to FALSE.
    *
    * @return bool
    *   Whether a date is valid for a given granularity.
@@ -570,10 +570,10 @@ class BackdropDateTime extends DateTime {
     // If the input value is '0000-00-00', PHP's date class will later
     // incorrectly convert it to something like '-0001-11-30' if we do setDate()
     // here. If we don't do setDate() here, it will default to the current date
-    // and we will lose any way to tell that there was no date in the orignal
+    // and we will lose any way to tell that there was no date in the original
     // input values. So set a flag we can use later to tell that this date
     // object was created using only time values, and that the date values are
-    // artifical.
+    // artificial.
     if (empty($final_date['year']) && empty($final_date['month']) && empty($final_date['day'])) {
       $this->timeOnly = TRUE;
     }

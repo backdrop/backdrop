@@ -564,4 +564,3 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
     return $base_url . '/core/modules/simpletest/tests/http.php?q=' . $url;
   }
 }
-

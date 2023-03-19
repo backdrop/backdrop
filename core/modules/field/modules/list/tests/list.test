@@ -360,7 +360,7 @@ class ListFieldUITestCase extends FieldTestCase {
   }
 
   /**
-   * List (boolen) : test 'On/Off' values input.
+   * List (boolean) : test 'On/Off' values input.
    */
   function testListAllowedValuesBoolean() {
     $this->field_name = 'field_list_boolean';
@@ -479,7 +479,7 @@ class ListFieldDisplayTestCase extends FieldTestCase {
   }
 
   /**
-   * List (boolen) : test 'On/Off' values input.
+   * List (boolean) : test 'On/Off' values input.
    */
   function testListDisplayFormatterBoolean() {
     $this->field_name = 'field_list_boolean';

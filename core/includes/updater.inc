@@ -292,7 +292,7 @@ abstract class Updater implements BackdropUpdaterInterface {
       }
 
       // Copy the directory in place.
-      // Check for core udpate.
+      // Check for core update.
       if ($this->name == 'backdrop') {
         $source = $this->source . '/core';
         $name = 'core';

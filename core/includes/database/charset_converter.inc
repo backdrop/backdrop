@@ -48,7 +48,7 @@ class DatabaseCharsetConverter {
    * DatabaseCharsetConverter constructor.
    *
    * @param string $charset
-   *   (Optional) The charcter set to be used. Defaults to "utf8mb4".
+   *   (Optional) The character set to be used. Defaults to "utf8mb4".
    * @param string $collation
    *   (Optional) The collation to be used. Defaults to "utf8mb4_general_ci".
    */
