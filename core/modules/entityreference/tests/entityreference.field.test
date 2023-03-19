@@ -6,6 +6,12 @@
 class EntityReferenceFieldTestCase extends BackdropWebTestCase {
 
   /**
+   * The admin user that the test runs under.
+   *
+   * @var Backdrop\user\Entity
+   */
+  public $admin_user;
+  /**
    * The content type that is created.
    *
    * @var string

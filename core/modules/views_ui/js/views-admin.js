@@ -139,7 +139,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
 
   /**
    * Use the title for populating the fields, or send a request
-   * for a translitarated version of the source field value when needed.
+   * for a transliterated version of the source field value when needed.
    */
   _populate: function () {
     if (this.replace == '') {
@@ -247,8 +247,8 @@ Backdrop.behaviors.viewsUiRenderAddViewButton = {
     var $displayButtons = $menu.nextAll('input.add-display').detach();
     $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
       .parent().first().addClass('first').end().last().addClass('last');
-    // Remove the 'Add ' prefix from the button labels since they're being palced
-    // in an 'Add' dropdown.
+    // Remove the 'Add ' prefix from the button labels since they're being
+    // placed in an 'Add' dropdown.
     // @todo This assumes English, but so does $addDisplayDropdown above. Add
     //   support for translation.
     $displayButtons.each(function () {

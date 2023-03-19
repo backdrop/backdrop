@@ -79,7 +79,7 @@ $(document).on({
  * TableHeader will make the current table header stick to the top of the page
  * if the table is very long.
  *
- * Fire a custom "topoffsetchange" event to make TableHeader compute the
+ * Fire a custom "offsettopchange" event to make TableHeader compute the
  * new offset value from the "data-offset-top" attributes of relevant elements.
  *
  * @param table

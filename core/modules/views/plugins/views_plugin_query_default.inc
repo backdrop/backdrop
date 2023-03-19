@@ -141,17 +141,6 @@ class views_plugin_query_default extends views_plugin_query {
       'alias' => $base_table,
     );
 
-/**
- * -- we no longer want the base field to appear automatigically.
-    if ($base_field) {
-      $this->fields[$base_field] = array(
-        'table' => $base_table,
-        'field' => $base_field,
-        'alias' => $base_field,
-      );
-    }
- */
-
     $this->count_field = array(
       'table' => $base_table,
       'field' => $base_field,
@@ -166,13 +155,13 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Set the view to be distinct.
    *
-   * There are either distinct per base field or distinct in the pure sql way,
+   * There are either distinct per base field or distinct in the pure SQL way,
    * based on $pure_distinct.
    *
    * @param bool $value
-   *   Should the view by distincted.
+   *   Whether or not the view is distinct.
    * @param bool $pure_distinct
-   *   Should only the sql keyword be added.
+   *   Whether just the SQL keyword should be added.
    */
   function set_distinct($value = TRUE, $pure_distinct = FALSE) {
     if (!(isset($this->no_distinct) && $value)) {
@@ -292,7 +281,7 @@ class views_plugin_query_default extends views_plugin_query {
     $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
     // This method may be called more than once. When called for the first time,
     // it receives a string from the form element. That string must be exploded
-    // into an array before setting the form value. 
+    // into an array before setting the form value.
     if (is_string($value)) {
       $value = explode(',', $value);
     }
@@ -661,7 +650,6 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Have we been this way?
     if (isset($traced[$join->left_table])) {
-      // we looped. Broked.
       return FALSE;
     }
 
@@ -832,7 +820,7 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Remove all fields that may've been added; primarily used for summary
+   * Remove all fields that may have been added; primarily used for summary
    * mode where we're changing the query because we didn't get data we needed.
    */
   function clear_fields() {

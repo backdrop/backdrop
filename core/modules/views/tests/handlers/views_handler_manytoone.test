@@ -61,7 +61,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
    * @param TaxonomyVocabulary $vocabulary
    *   Vocabulary to create term in.
    *
-   * @return TaxonomyTrem
+   * @return TaxonomyTerm
    *   Term with random properties.
    */
   protected function createTerm($vocabulary) {

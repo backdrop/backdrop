@@ -763,7 +763,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Don't add a sort if there is no form value or the user selected none as sort.
     if (!empty($form_state['values']['show']['sort']) && $form_state['values']['show']['sort'] != 'none') {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
-      // Column either be a column-name or the table-columnn-ame.
+      // $column is either [column name] or [table]-[column name].
       $column = explode('-', $column);
       if (count($column) > 1) {
         $table = $column[0];
