@@ -1171,7 +1171,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], 'en', '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1179,7 +1179,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '<', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1187,7 +1187,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisfied).');
 
     // Test grouping with another field to ensure that grouping cache is reset
     // properly.

@@ -757,7 +757,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
   // Save all updated terms.
   foreach ($changed_terms as $changed) {
     $term = (object) $changed;
-    // Update term_hierachy and term_data directly since we don't have a
+    // Update term_hierarchy and term_data directly since we don't have a
     // fully populated term object to save.
     db_update('taxonomy_term_hierarchy')
       ->fields(array('parent' => $term->parent))
