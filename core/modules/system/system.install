@@ -3448,6 +3448,16 @@ function system_update_1090() {
 }
 
 /**
+ * Set the jQuery version to the fallback to ensure existing sites do not
+ * break.
+ */
+function system_update_1091() {
+  if (config_get('system.core', 'jquery_fallback') === NULL) {
+    config_set('system.core', 'jquery_fallback', TRUE);
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

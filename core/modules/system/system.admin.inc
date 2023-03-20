@@ -1780,6 +1780,26 @@ function system_performance_settings($form, &$form_state) {
 }
 
 /**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $form['jquery_fallback'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('jQuery fallback'),
+    '#default_value' => $config->get('jquery_fallback'),
+    '#description' => t('Whether to use the default or fallback version of jQuery to use on the site. If you have any critical modules that are not working properly with the latest version, you may wish to use the fallback.'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Submit callback; clear system caches.
  *
  * @ingroup forms
