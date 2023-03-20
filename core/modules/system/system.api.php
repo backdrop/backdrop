@@ -795,6 +795,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * For a detailed usage example, see page_example.module.
  * For comprehensive documentation on the menu system, see
  * http://drupal.org/node/102338.
+ *
+ * @since 1.24.2 Support for the "position" key removed.
  */
 function hook_menu() {
   $items['example'] = array(

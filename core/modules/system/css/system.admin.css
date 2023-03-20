@@ -26,6 +26,11 @@ div.admin {
   padding-top: 15px;
   columns: 2;
 }
+@media all and (max-width: 768px) {
+  div.admin {
+    columns: 1;
+  }
+}
 div.admin .left {
   float: left; /* LTR */
   width: 47%;
