@@ -409,9 +409,9 @@ function theme_admin_page($variables) {
 
   if (!empty($container)) {
     $output = '<div class="admin clearfix">';
-      foreach ($container as $data) {
-        $output .= $data;
-      }
+    foreach ($container as $data) {
+      $output .= $data;
+    }
     $output .= '</div>';
   }
   else {
