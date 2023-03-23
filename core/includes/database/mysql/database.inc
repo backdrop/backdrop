@@ -283,9 +283,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!$this->doCommit()) {
-          throw new DatabaseTransactionCommitFailedException();
-        }
+        $this->doCommit();
       }
       else {
         // Attempt to release this savepoint in the standard way.
@@ -324,13 +322,16 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    */
   protected function doCommit() {
     if ($this->pdo->inTransaction()) {
-      return $this->pdo->commit();
+      $success = parent::doCommit();
     }
     else {
       // In PHP 8.0 a PDOException is thrown when a commit is attempted with no
       // transaction active. In previous PHP versions this failed silently.
-      return TRUE;
+      $success = TRUE;
+      // Allow callbacks to perform their own cleanup.
+      $this->executeRootTransactionEndCallbacks($success);
     }
+    return $success;
   }
 
   /**
