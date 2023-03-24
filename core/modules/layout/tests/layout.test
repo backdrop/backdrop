@@ -1981,9 +1981,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $hero_title_1 = 'Wonderwoman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
-    // "isnt" is purposefully missing an apostrophe as it was causing tests to
-    // fail.
-    $hero_content_2 = "This isnt gonna end well...";
+    $hero_content_2 = "Whatever it takes.";
 
     // Create some sample images.
     $good_image = imagecreate(2400, 400);
