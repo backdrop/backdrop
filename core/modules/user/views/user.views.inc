@@ -268,6 +268,78 @@ function user_views_data() {
     ),
   );
 
+  // Changed field.
+  $data['users']['changed'] = array(
+    // The item it appears as on the UI.
+    'title' => t('Changed date'),
+    // The help that appears on the UI.
+    'help' => t('The date the user was changed.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['users']['changed_fulldate'] = array(
+    'title' => t('Changed date'),
+    'help' => t('Date in the form of CCYYMMDD.'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_fulldate',
+    ),
+  );
+
+  $data['users']['changed_year_month'] = array(
+    'title' => t('Changed year + month'),
+    'help' => t('Date in the form of YYYYMM.'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_year_month',
+    ),
+  );
+
+  $data['users']['changed_year'] = array(
+    'title' => t('Changed year'),
+    'help' => t('Date in the form of YYYY.'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_year',
+    ),
+  );
+
+  $data['users']['changed_month'] = array(
+    'title' => t('Changed month'),
+    'help' => t('Date in the form of MM (01 - 12).'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_month',
+    ),
+  );
+
+  $data['users']['changed_day'] = array(
+    'title' => t('Changed day'),
+    'help' => t('Date in the form of DD (01 - 31).'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_day',
+    ),
+  );
+
+  $data['users']['changed_week'] = array(
+    'title' => t('Changed week'),
+    'help' => t('Date in the form of WW (01 - 53).'),
+    'argument' => array(
+      'field' => 'changed',
+      'handler' => 'views_handler_argument_node_created_week',
+    ),
+  );
+
   // access field
   $data['users']['access'] = array(
     'title' => t('Last access'), // The item it appears as on the UI,
