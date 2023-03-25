@@ -343,11 +343,18 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['rows'] = $flexible_layout->rows;
     $variables['row_data'] = array();
+
+    $variables['row_widths'] = array(
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
+    );
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
