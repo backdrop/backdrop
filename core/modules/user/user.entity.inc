@@ -62,6 +62,8 @@ class User extends Entity implements UserInterface {
    * The timestamp when the user was changed.
    *
    * @var integer
+   *
+   * @since 1.25.0 Property added.
    */
   public $changed;
 
