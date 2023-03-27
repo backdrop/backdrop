@@ -3452,8 +3452,8 @@ function system_update_1090() {
  * break.
  */
 function system_update_1091() {
-  if (config_get('system.core', 'jquery_fallback') === NULL) {
-    config_set('system.core', 'jquery_fallback', TRUE);
+  if (config_get('system.core', 'jquery_version') === NULL) {
+    config_set('system.core', 'jquery_version', 'legacy');
   }
 }
 
