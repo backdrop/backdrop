@@ -34,7 +34,6 @@
     "/core/misc/jquery.js",
     "/core/misc/jquery-extend*",
     "/core/misc/jquery-html-prefilter*",
-    "/core/misc/jquery.color.js",
     "/core/misc/jquery.*.js",
     "/core/misc/opensans/",
     "/core/misc/smartmenus/",
