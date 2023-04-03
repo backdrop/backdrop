@@ -1194,7 +1194,7 @@ class views_plugin_display extends views_plugin {
         'title' => t('Show'),
         'value' => $row_title,
         'setting' => $row_summary,
-        'desc' => t('Change the way each row in the view is styled.'),
+        'desc' => t('Change the way each row in the view is output.'),
       );
       // This adds a 'Settings' link to the row_options setting if the row style has options.
       if (!empty($row_plugin['uses options'])) {
@@ -1749,7 +1749,7 @@ class views_plugin_display extends views_plugin {
         }
         break;
       case 'row_plugin':
-        $form['#title'] .= t('How should each row in this view be styled');
+        $form['#title'] .= t('How should each row in this view be output');
         $form['#help_topic'] = 'style-row';
         $form['row_plugin'] =  array(
           '#type' => 'radios',
