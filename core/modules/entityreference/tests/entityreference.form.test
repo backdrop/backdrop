@@ -178,7 +178,7 @@ class EntityReferenceFormTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Hepler method to submit node creation form.
+   * Helper method to submit node creation form.
    *
    * @param object $type
    *   Node type object.
