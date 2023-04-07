@@ -413,7 +413,7 @@ class Block extends LayoutHandler {
    * all. An empty array means that a block may provide children, but that there
    * are none currently.
    *
-   * return array|NULL
+   * @return array|null
    */
   function getChildren() {
     return NULL;
