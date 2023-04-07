@@ -948,7 +948,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  * @param $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
- * return array
+ * @return array
  *   An array of all sort methods, keyed by method name, with each value an
  *   array with the following keys:
  *   - method: Same as the method name key.

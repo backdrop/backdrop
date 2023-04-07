@@ -231,7 +231,7 @@ class LayoutMenuItem {
   /**
    * Get all contexts required or configured for this menu path.
    *
-   * return LayoutContext[]
+   * @return LayoutContext[]
    */
   function getContexts() {
     if (is_null($this->contexts)) {
