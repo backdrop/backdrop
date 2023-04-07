@@ -1329,7 +1329,7 @@ function image_effect_apply($image, $effect) {
  * @param $current_pixels
  * @param $new_pixels
  *
- * return int
+ * @return int
  */
 function image_filter_keyword($value, $current_pixels, $new_pixels) {
   switch ($value) {
