@@ -880,11 +880,10 @@ function backdrop_retrieve_form($form_id, &$form_state) {
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
- *   A keyed array containing the current state of the form. This
- *   includes the current persistent storage data for the form, and
- *   any data passed along by earlier steps when displaying a
- *   multi-step form. Additional information, like the sanitized $_POST
- *   data, is also accumulated here.
+ *   A keyed array containing the current state of the form. This includes the
+ *   current persistent storage data for the form, and any data passed along by
+ *   earlier steps when displaying a multi-step form. Additional information,
+ *   like the sanitized $_POST data, is also accumulated here.
  */
 function backdrop_process_form($form_id, &$form, &$form_state) {
   $form_state['values'] = array();
@@ -913,23 +912,48 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
   if ($form_state['process_input']) {
     backdrop_validate_form($form_id, $form, $form_state);
 
-    // backdrop_html_id() maintains a cache of element IDs it has seen,
-    // so it can prevent duplicates. We want to be sure we reset that
-    // cache when a form is processed, so scenarios that result in
-    // the form being built behind the scenes and again for the
-    // browser don't increment all the element IDs needlessly.
-    if (!form_get_errors()) {
+    // backdrop_html_id() maintains a cache of element IDs it has seen, so it
+    // can prevent duplicates. We want to be sure we reset that cache when a
+    // form is processed, so scenarios that result in the form being built
+    // behind the scenes and again for the browser don't increment all the
+    // element IDs needlessly.
+    $errors = form_get_errors();
+    if (!$errors) {
       // In case of errors, do not break HTML IDs of other forms.
       backdrop_static_reset('backdrop_html_id');
+    }
+    else {
+      // Set inline form errors. These errors are displayed directly below the
+      // respective fields that have triggered them. See theme_form_element().
+      $error_items = array();
+      foreach ($errors as $element => $error_message) {
+        // This is intentionally set to "true" instead of TRUE, since that's
+        // what is expected as the value of that property.
+        // See https://developer.mozilla.org/docs/Web/Accessibility/ARIA/Attributes/aria-errormessage
+        $form[$element]['#attributes']['aria-invalid'] = 'true';
+        // The value of this attribute should be the same as the HTML ID of the
+        // element holding the validation error text for this field.
+        // See theme_form_element().
+        $form[$element]['#attributes']['aria-errormessage'] = 'error-' . $form[$element]['#id'];
+        $form[$element]['#element_error'] = $error_message;
+
+        // Compile a list of errors in the current form.
+        $error_items[] = l($error_message, current_path(), array('fragment' => 'error-' . $form[$element]['#id']));
+      }
+
+      // Provide a summary of validation errors at the top of the form, along
+      // with fragment links, to help navigate directly to the invalid fields.
+      $errors_list = theme('item_list', array('items' => $error_items));
+      backdrop_set_message(t('Correct the following @count errors and try again:', array('@count' => count($errors))) . $errors_list, 'error');
     }
 
     if ($form_state['submitted'] && !form_get_errors() && !$form_state['rebuild']) {
       // Execute form submit handlers.
       form_execute_handlers('submit', $form, $form_state);
 
-      // We'll clear out the cached copies of the form and its stored data
-      // here, as we've finished with them. The in-memory copies are still
-      // here, though.
+      // We'll clear out the cached copies of the form and its stored data here,
+      // as we've finished with them. The in-memory copies are still here
+      // though.
       if (empty($form_state['no_cache']) && !empty($form_state['values']['form_build_id']) && !config_get('system.core', 'cache')) {
         tempstore_clear('form', $form_state['values']['form_build_id']);
         tempstore_clear('form_state', $form_state['values']['form_build_id']);
@@ -1692,9 +1716,6 @@ function form_set_error($name = NULL, $message = '', $limit_validation_errors = 
     }
     if ($record) {
       $form[$name] = $message;
-      if ($message) {
-        backdrop_set_message($message, 'error');
-      }
     }
   }
 
@@ -4887,6 +4908,12 @@ function theme_form_element($variables) {
       break;
   }
 
+  if (!empty($element['#element_error'])) {
+    // The HTML ID of this element should be set to the same value as the
+    // 'aria-errormessage' attribute of the form element with the respective
+    // validation error. See backdrop_process_form().
+    $output .= '<div id="error-' . $element['#id'] . '" class="element-error messages error">' . $element['#element_error'] . "</div>\n";
+  }
   if (!empty($element['#description'])) {
     $output .= '<div class="description">' . $element['#description'] . "</div>\n";
   }
