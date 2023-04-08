@@ -4429,6 +4429,89 @@ function backdrop_clear_opcode_cache($filepath) {
 }
 
 /**
+ * Backdrop's wrapper around PHP's native setcookie() function.
+ *
+ * Allows altering the $value and $options of a cookie.
+ *
+ * @param $name
+ *   The name of the cookie.
+ * @param $value
+ *   The value of the cookie.
+ * @param $options
+ *   An associative array which may have any of the keys "expires", "path",
+ *   "domain", "secure", "httponly", "samesite".
+ *
+ * @see setcookie()
+ * @ingroup php_wrappers
+ */
+function backdrop_setcookie($name, $value, $options) {
+  $options = _backdrop_cookie_params($options);
+  if (\PHP_VERSION_ID >= 70300) {
+    setcookie($name, $value, $options);
+  }
+  else {
+    setcookie($name, $value, $options['expires'], $options['path'], $options['domain'], $options['secure'], $options['httponly']);
+  }
+}
+
+/**
+ * Process the parameters for cookies. This emulates support for the SameSite
+ * attribute in earlier versions of PHP, and allows the value of that attribute
+ * to be overridden.
+ *
+ * @param $options
+ *   An associative array which may have any of the keys "expires", "path",
+ *   "domain", "secure", "httponly", "samesite".
+ *
+ * @return
+ *   An associative array which may have any of the keys "expires", "path",
+ *   "domain", "secure", "httponly", "samesite".
+ */
+function _backdrop_cookie_params($options) {
+  $options['samesite'] = _backdrop_samesite_cookie($options);
+  if (\PHP_VERSION_ID < 70300) {
+    // Emulate SameSite support in older PHP versions.
+    if (!empty($options['samesite'])) {
+      // Ensure the SameSite attribute is only added once.
+      if (!preg_match('/SameSite=/i', $options['path'])) {
+        $options['path'] .= '; SameSite=' . $options['samesite'];
+      }
+    }
+  }
+  return $options;
+}
+
+/**
+ * Determine the value for the SameSite cookie attribute, in the following order
+ * of precedence:
+ *
+ * 1) A value explicitly passed to backdrop_setcookie().
+ * 2) A value set in $conf['samesite_cookie_value'].
+ * 3) The setting from php ini.
+ * 4) The default of None, or FALSE (no attribute) if the cookie is not Secure.
+ *
+ * @param $options
+ *   An associative array as passed to backdrop_setcookie().
+ *
+ * @return
+ *   The value for the SameSite cookie attribute.
+ */
+function _backdrop_samesite_cookie($options) {
+  if (isset($options['samesite'])) {
+    return $options['samesite'];
+  }
+  $override = settings_get('samesite_cookie_value', NULL);
+  if ($override !== NULL) {
+    return $override;
+  }
+  $ini_options = session_get_cookie_params();
+  if (isset($ini_options['samesite'])) {
+    return $ini_options['samesite'];
+  }
+  return empty($options['secure']) ? FALSE : 'None';
+}
+
+/**
  * Checks if a host matches the trusted host patterns in settings.php.
  *
  * @param string $host

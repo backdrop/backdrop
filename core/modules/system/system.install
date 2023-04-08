@@ -3413,6 +3413,21 @@ function system_update_1087() {
 }
 
 /**
+ * Set the default value for the SameSite cookie attribute.
+ */
+function system_update_1088() {
+  $config = config('system.core');
+  // Migrate the respective Drupal 7 variable to config.
+  $config->set('samesite_cookie_value', update_variable_get('samesite_cookie_value', 'Lax'));
+  update_variable_del('samesite_cookie_value');
+  // Add the default value to existing Backdrop sites.
+  if ($config->get('system.core', 'samesite_cookie_value') === NULL) {
+    $config->set('system.core', 'samesite_cookie_value', 'Lax');
+  }
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

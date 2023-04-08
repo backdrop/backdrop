@@ -518,6 +518,16 @@ function &drupal_register_shutdown_function($callback = NULL) {
   return backdrop_register_shutdown_function($callback);
 }
 
+/**
+ * Allows altering the $value and $options of a cookie.
+ *
+ * @deprecated since 1.24.1
+ * @see backdrop_setcookie()
+ */
+function drupal_setcookie($name, $value, $options) {
+  return backdrop_setcookie($name, $value, $options);
+}
+
 // Functions from common.inc.
 
 /**
