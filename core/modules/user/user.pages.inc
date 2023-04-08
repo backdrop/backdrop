@@ -558,11 +558,14 @@ function user_cancel_methods() {
     $form[$name] = array(
       '#type' => 'radio',
       '#title' => $method['title'],
-      '#description' => (isset($method['description']) ? $method['description'] : NULL),
+      '#description' => isset($method['description']) ? $method['description'] : NULL,
       '#return_value' => $name,
       '#default_value' => $default_method,
       '#parents' => array('user_cancel_method'),
     );
+    if (isset($method['access'])) {
+      $form[$name]['#access'] = $method['access'];
+    }
   }
   return $form;
 }
