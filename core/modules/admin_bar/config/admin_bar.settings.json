@@ -1,5 +1,6 @@
 {
     "_config_name": "admin_bar.settings",
+    "local_action_position": "top",
     "margin_top": 1,
     "position_fixed": 1,
     "components": [
