@@ -1178,27 +1178,29 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Change the way content is formatted.'),
     );
 
-    // This adds a 'Settings' link to the style_options setting if the style has options.
+    // This adds a 'Settings' link to the style_options setting if the style has
+    // options.
     if (!empty($style_plugin['uses options'])) {
-      $options['style_plugin']['links']['style_options'] = t('Change settings for this format');
+      $options['style_plugin']['links']['style_options'] = t('Change settings for this format.');
     }
 
     if (!empty($style_plugin['uses row plugin'])) {
       $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
       $row_plugin_instance = $this->get_plugin('row');
-      $row_summary = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->summary_title();
       $row_title = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->plugin_title();
+      $row_summary = empty($row_plugin['title']) ? t('Missing style plugin') : $row_plugin_instance->summary_title();
 
       $options['row_plugin'] = array(
         'category' => 'format',
-        'title' => t('Show'),
+        'title' => t('Field source'),
         'value' => $row_title,
         'setting' => $row_summary,
-        'desc' => t('Change the way each row in the view is styled.'),
+        'desc' => t('Change the source of fields for each row in the view results.'),
       );
-      // This adds a 'Settings' link to the row_options setting if the row style has options.
+      // This adds a 'Settings' link to the row_options setting if the row style
+      // has options.
       if (!empty($row_plugin['uses options'])) {
-        $options['row_plugin']['links']['row_options'] = t('Change settings for this style');
+        $options['row_plugin']['links']['row_options'] = t('Change settings for this field source.');
       }
     }
     if (!empty($this->definition['use ajax'])) {
@@ -1729,7 +1731,7 @@ class views_plugin_display extends views_plugin {
         if (!isset($name)) {
           $name = $this->get_option('row_plugin');
         }
-        // if row, $style will be empty.
+        // If row, $style will be empty.
         if (empty($style)) {
           $form['#title'] .= t('Row style options');
           $type = 'row_plugin';
@@ -1749,18 +1751,45 @@ class views_plugin_display extends views_plugin {
         }
         break;
       case 'row_plugin':
-        $form['#title'] .= t('How should each row in this view be styled');
+        $form['#title'] .= t('What should be the source of the fields for each row in this view');
         $form['#help_topic'] = 'style-row';
+
+        $options = views_fetch_plugin_names('row', $this->get_style_type(), array($this->view->base_table));
         $form['row_plugin'] =  array(
           '#type' => 'radios',
-          '#options' => views_fetch_plugin_names('row', $this->get_style_type(), array($this->view->base_table)),
+          '#title' => t('Field source'),
+          '#title_display' => 'invisible',
+          '#options' => $options,
           '#default_value' => $this->get_option('row_plugin'),
         );
 
-        $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
-        if (!empty($row_plugin['uses options'])) {
-          $form['markup'] = array(
-            '#markup' => '<div class="form-item description">' . t('You may also adjust the !settings for the currently selected row style.', array('!settings' => $this->option_link(t('settings'), 'row_options'))) . '</div>',
+        foreach ($options as $option => $option_label) {
+          $row_plugin = views_fetch_plugin_data('row', $option);
+          $description = array();
+          if (!empty($row_plugin['help'])) {
+            $description[] = $row_plugin['help'];
+          }
+          if (!empty($row_plugin['uses options'])) {
+            // Placeholder: This won't work well, unless each row plugin
+            // provides its own help text for when it has configurable options.
+            // $description[] = t('You may also adjust the !settings for the currently selected row style.', array('!settings' => $this->option_link(t('settings'), 'row_options')));
+          }
+          if (!empty($description)) {
+            $form['row_plugin'][$option]['#description'] = implode(' ', $description);
+          }
+        }
+
+        // @todo: This help text and link here are problematic, so it would need
+        // to either be adjusted or removed.
+        // See https://github.com/backdrop/backdrop-issues/issues/5993
+        $current_row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
+        if (!empty($current_row_plugin['uses options'])) {
+          $form['options_help'] = array(
+            '#type' => 'item',
+            '#markup' => t('You may also adjust the !settings for the currently selected field source.', array('!settings' => $this->option_link(t('settings'), 'row_options'))),
+            '#wrapper_attributes' => array(
+              'class' => array('description'),
+            ),
           );
         }
 
