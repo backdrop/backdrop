@@ -110,6 +110,11 @@ function user_pass_validate($form, &$form_state) {
 
     form_set_value(array('#parents' => array('account')), $account, $form_state);
   }
+  elseif (config_get('system.core', 'generic_login_messages')) {
+    // Send an empty 'account' to the submit handler so it can show the generic
+    // message.
+    form_set_value(array('#parents' => array('account')), FALSE, $form_state);
+  }
   else {
     form_set_error('name', t('Sorry, %name is not recognized as a user name or an email address.', array('%name' => $name)));
   }
@@ -124,11 +129,24 @@ function user_pass_submit($form, &$form_state) {
   global $language;
 
   $account = $form_state['values']['account'];
-  // Mail one time login URL and instructions using current language.
-  $mail = _user_mail_notify('password_reset', $account, $language);
-  if (!empty($mail)) {
-    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
-    backdrop_set_message(t('Further instructions have been sent to your email address.'));
+  $generic_message = t('If a matching account is found, further instructions will be sent to that email address.');
+
+  if ($account) {
+    // Mail one time login URL and instructions using current language.
+    $mail = _user_mail_notify('password_reset', $account, $language);
+    if (!empty($mail)) {
+      watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+
+      if (config_get('system.core', 'generic_login_messages')) {
+        backdrop_set_message($generic_message, 'info');
+      }
+      else {
+        backdrop_set_message(t('Further instructions have been sent to your email address.'));
+      }
+    }
+  }
+  else {
+    backdrop_set_message($generic_message, 'info');
   }
 
   $form_state['redirect'] = 'user';

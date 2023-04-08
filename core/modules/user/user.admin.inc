@@ -399,6 +399,14 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
+  $form['generic_login_messages'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show generic messages for failed logins and password resets.'),
+    '#default_value' => $core_config->get('generic_login_messages'),
+    '#description' => t('Generic messages can help prevent user enumeration. This is where <em>specific</em> messages like "Incorrect password" can allow attackers to deduce that the provided username exists. This could be considered a security and/or privacy issue. Using <em>generic</em> messages like "Incorrect username or password" can avoid this.'),
+    '#config' => 'system.core',
+  );
+
   return system_settings_form($form);
 }
 
