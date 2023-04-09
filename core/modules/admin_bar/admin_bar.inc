@@ -488,8 +488,6 @@ function admin_bar_links_menu($tree) {
       }
       continue;
     }
-    // Omit alias lookups.
-    $data['link']['localized_options']['alias'] = TRUE;
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
