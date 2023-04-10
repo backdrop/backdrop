@@ -1170,7 +1170,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 
     // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
     // the bundled GD version still might not support it.
-    $webp_supported = (imagetypes() & IMG_WEBP);
+    $gd_info = gd_info();
+    $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {
       $this->assertText(strip_tags($refused_message), 'WebP image type has been refused');
       // Also check the field description.
