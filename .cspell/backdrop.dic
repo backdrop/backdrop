@@ -206,6 +206,7 @@ HEADERFUNCTION
 hilite
 Hilite
 hitem
+hmac
 HMAC
 hovermenu
 htmldog
@@ -515,6 +516,7 @@ VERIFYPEER
 verygreatbackdropmodule
 VIEWNAME
 vọng
+watchdog
 WCAG
 wday
 weba
