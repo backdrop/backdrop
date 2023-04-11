@@ -167,7 +167,7 @@ function image_field_instance_settings_form($field, $instance) {
   $form['alt_field_required'] = array(
     '#type' => 'checkbox',
     '#title' => t('<em>Alt</em> field required'),
-    '#default_value' => $settings['alt_field_required'],
+    '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
     '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility for all users.'),
     '#weight' => 11,
     '#states' => array(
@@ -186,7 +186,7 @@ function image_field_instance_settings_form($field, $instance) {
   $form['title_field_required'] = array(
     '#type' => 'checkbox',
     '#title' => t('<em>Title</em> field required'),
-    '#default_value' => $settings['title_field_required'],
+    '#default_value' => !isset($settings['title_field_required']) ? 0 : $settings['title_field_required'],
     '#weight' => 13,
     '#states' => array(
       'visible' => array(
@@ -555,7 +555,6 @@ function image_field_widget_process($element, &$form_state, $form) {
     // @see http://www.gawds.org/show.php?contentid=28
     '#maxlength' => 512,
     '#weight' => -2,
-    '#required' => $settings['alt_field_required'],
     '#access' => (bool) $item['fid'] && $settings['alt_field'],
   );
   $element['title'] = array(
@@ -565,11 +564,60 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image.'),
     '#maxlength' => 1024,
     '#weight' => -1,
-    '#required' => $settings['title_field_required'],
     '#access' => (bool) $item['fid'] && $settings['title_field'],
   );
 
+  // Pass alt and title required status to JS in case other modules need access.
+  $element['#attached']['js'][] = array(
+    'type' => 'setting',
+    'data' => array(
+      'image' => array(
+        'altRequired' => $instance['settings']['alt_field_required'],
+        'titleRequired' => $instance['settings']['title_field_required'],
+      ),
+    ),
+  );
+
+  if ($settings['alt_field_required']) {
+    $element['alt']['#title'] .= ' <span class="form-required" title="' . t('The alt text field is required.') . '">*</span>';
+    $element['alt']['#element_validate'] = array('_image_required_fields_validate');
+  }
+  if ($settings['title_field_required']) {
+    $element['title']['#title'] .= ' <span class="form-required" title="' . t('The title attribute field is required.') . '">*</span>';
+    $element['title']['#element_validate'] = array('_image_required_fields_validate');
+  }
+
   return $element;
+}
+
+/**
+ * Validate callback for alt and title field.
+ *
+ * This is separated in a validate function instead of a #required flag to avoid
+ * being validated on the process callback.
+ */
+function _image_required_fields_validate($element, &$form_state) {
+  // Only do validation if the function is triggered from other places than
+  // the image process form.
+  if (isset($form_state['triggering_element']['#submit']) && !in_array('file_managed_file_submit', $form_state['triggering_element']['#submit'])) {
+    // If the image is not there, we do not check for empty values.
+    $parents = $element['#parents'];
+    $field = array_pop($parents);
+    $image_field = backdrop_array_get_nested_value($form_state['input'], $parents);
+    if ($image_field == NULL) {
+      $image_field = array();
+    }
+    // We check for the array key, so that it can be NULL (like if the user
+    // submits the form without using the "upload" button).
+    if (!array_key_exists($field, $image_field)) {
+      return;
+    }
+    // Check if field is left empty.
+    elseif (empty($image_field[$field])) {
+      form_error($element, t('The !title field is required', array('!title' => ucwords($field))));
+      return;
+    }
+  }
 }
 
 /**
