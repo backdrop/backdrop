@@ -1207,10 +1207,17 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
-    $this->backdropGet('node/add/post');
-    $nid = $this->uploadNodeImage($test_image, $field_name, 'post');
-    $this->assertText(t('Alternate text field is required.'), 'Alt text required displayed on post form.');
-    $this->assertText(t('Title field is required.'), 'Title text required displayed on post form.');
+    $edit = array(
+      'title' => $this->randomName(),
+    );
+    $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = backdrop_realpath($test_image->uri);
+    $this->backdropPost('node/add/post', $edit, t('Save'));
+    $this->assertText(t('The Alt field is required.'), 'Alt text required displayed on post form.');
+    $this->assertText(t('The Title field is required.'), 'Title text required displayed on post form.');
+    $edit = array(
+      "title" => $this->randomName(),
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
   }
 }
 
