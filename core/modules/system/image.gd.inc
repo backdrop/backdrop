@@ -31,14 +31,16 @@ function image_gd_settings() {
  */
 function image_gd_supported_extensions() {
   $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
-  $gd_info = gd_info();
-  if (version_compare(PHP_VERSION, '7.1.0', '>=') && isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-    // Extend mapping of constants to extensions, as the PHP and GD
-    // versions support WebP.
-    // getimagesize() only gets WebP support in PHP 7.1.0.
-    // @see https://www.php.net/manual/en/image.constants.php.
-    // @see https://www.php.net/manual/en/function.getimagesize.php
-    $supported_extensions[] = 'webp';
+  if (defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      // Extend supported extensions, as the PHP and GD versions support WebP.
+      // IMAGETYPE_WEBP and getimagesize() WebP support were both added in
+      // PHP 7.1.0.
+      // @see https://www.php.net/manual/en/image.constants.php.
+      // @see https://www.php.net/manual/en/function.getimagesize.php
+      $supported_extensions[] = 'webp';
+    }
   }
 
   return $supported_extensions;
