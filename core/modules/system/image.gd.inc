@@ -37,7 +37,7 @@ function image_gd_supported_extensions() {
       // Extend supported extensions, as the PHP and GD versions support WebP.
       // IMAGETYPE_WEBP and getimagesize() WebP support were both added in
       // PHP 7.1.0.
-      // @see https://www.php.net/manual/en/image.constants.php.
+      // @see https://www.php.net/manual/en/image.constants.php
       // @see https://www.php.net/manual/en/function.getimagesize.php
       $supported_extensions[] = 'webp';
     }

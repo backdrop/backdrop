@@ -1178,7 +1178,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     ));
 
     // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
-    // the bundled GD version still might not support it.
+    // particularly for getimagesize() so that's the minimum.
+    // @see https://www.php.net/manual/en/function.gd-info.php
+    // @see https://www.php.net/manual/en/function.getimagesize.php
     $gd_info = gd_info();
     $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {

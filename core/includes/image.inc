@@ -118,7 +118,7 @@ function image_get_supported_extensions() {
       '%function' => $function),
     WATCHDOG_ERROR
   );
-  return FALSE;
+  return array();
 }
 
 /**
