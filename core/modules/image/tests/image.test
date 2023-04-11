@@ -1194,7 +1194,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test required alt and title settings.
    */
-  function testRequiredAltTitle() {
+  public function testRequiredAltTitle() {
     $test_image = current($this->backdropGetTestFiles('image'));
     list(, $test_image_extension) = explode('.', $test_image->filename);
     $field_name = strtolower($this->randomName());

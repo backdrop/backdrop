@@ -563,6 +563,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * internal alias.
  *
  * @param string $url
+ *   A URL before it is cleaned-up.
  *
  * @return string
  *   A cleaned-up URL that is either a properly formatted external URL or an
@@ -590,7 +591,7 @@ function _filter_cleanup_url($url) {
   // - adding extra prefixes if being re-edited;
   // - a url getting double-encoded;
   // - or domains with relative protocols.
-  // E.g. /fr/node/1, //domain.tld
+  // E.g. /fr/node/1, //domain.tld.
   if (substr($url, 0, 1) == '/') {
     return $url;
   }
@@ -613,7 +614,7 @@ function _filter_cleanup_url($url) {
  * @return string
  *   The URL with the protocol prepended if needed.
  *
- * @see link_cleanup_url().
+ * @see link_cleanup_url()
  */
 function _filter_create_valid_external_url($url) {
   // Skip if it's already a valid external URL with a protocol.
