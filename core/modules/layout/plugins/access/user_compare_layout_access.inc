@@ -7,7 +7,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  public function __construct($plugin_name, array $data = array()) {
     parent::__construct($plugin_name, $data);
     $this->settings += array(
       'equality' => 1,
@@ -17,7 +17,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function summary() {
+  public function summary() {
     $contexts = $this->settings['contexts'];
     if (empty($contexts) || count($contexts) != 2 || empty($contexts['user1']) || empty($contexts['user2'])) {
       return t('Compares two user accounts');
@@ -30,7 +30,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
       }
       elseif (is_numeric($source)) {
         $message = 'The user account from the path (in position @position)';
-        $substitutions = array('@position' => $position = $source +1);
+        $substitutions = array('@position' => $position = $source + 1);
         $labels[$key] = t($message, $substitutions);
       }
       else {
@@ -56,8 +56,8 @@ class UserCompareLayoutAccess extends LayoutAccess {
     $account1 = $this->contexts['user1']->data;
     $account2 = $this->contexts['user2']->data;
 
-    // xor returns false if the two booleanss are the same, and true if they are
-    // not. For example: if we asked for equality and they are equal, return
+    // The xor returns false if the two booleans are the same, and true if they
+    // are not. For example: if we asked for equality and they are equal, return
     // true. If we asked for INequality and they are equal, return false.
     return ($account1->uid == $account2->uid) xor empty($this->settings['equality']);
   }
