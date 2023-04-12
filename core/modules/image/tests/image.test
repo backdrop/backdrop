@@ -1192,17 +1192,15 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   }
 
   /**
-   * Test required alt and title settings.
+   * Test required alt setting.
    */
-  public function testRequiredAltTitle() {
+  public function testRequiredAlt() {
     $test_image = current($this->backdropGetTestFiles('image'));
     list(, $test_image_extension) = explode('.', $test_image->filename);
     $field_name = strtolower($this->randomName());
     $instance_settings = array(
       'alt_field' => 1,
       'alt_field_required' => 1,
-      'title_field' => 1,
-      'title_field_required' => 1,
       'file_extensions' => $test_image_extension,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
@@ -1212,8 +1210,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     );
     $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = backdrop_realpath($test_image->uri);
     $this->backdropPost('node/add/post', $edit, t('Save'));
-    $this->assertText(t('The Alt field is required.'), 'Alt text required displayed on post form.');
-    $this->assertText(t('The Title field is required.'), 'Title text required displayed on post form.');
+    $this->assertText(t('The Alt field is required'), 'Alt text required displayed on post form.');
   }
 }
 

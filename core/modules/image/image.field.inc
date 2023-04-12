@@ -23,7 +23,6 @@ function image_field_info() {
         'alt_field' => 1,
         'alt_field_required' => 0,
         'title_field' => 0,
-        'title_field_required' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
         'default_image' => '',
@@ -182,17 +181,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $settings['title_field'],
     '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image. Enabling this field is not recommended, as it can cause problems with screen readers.'),
     '#weight' => 12,
-  );
-  $form['title_field_required'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('<em>Title</em> field required'),
-    '#default_value' => !isset($settings['title_field_required']) ? 0 : $settings['title_field_required'],
-    '#weight' => 13,
-    '#states' => array(
-      'visible' => array(
-        'input[name="instance[settings][title_field]"]' => array('checked' => TRUE),
-      ),
-    ),
   );
   $form['orientate'] = array(
     '#type' => 'checkbox',
@@ -573,7 +561,6 @@ function image_field_widget_process($element, &$form_state, $form) {
     'data' => array(
       'image' => array(
         'altRequired' => $instance['settings']['alt_field_required'],
-        'titleRequired' => $instance['settings']['title_field_required'],
       ),
     ),
   );
@@ -582,16 +569,12 @@ function image_field_widget_process($element, &$form_state, $form) {
     $element['alt']['#title'] .= ' <span class="form-required" title="' . t('The alt text field is required.') . '">*</span>';
     $element['alt']['#element_validate'] = array('_image_required_fields_validate');
   }
-  if ($settings['title_field_required']) {
-    $element['title']['#title'] .= ' <span class="form-required" title="' . t('The title attribute field is required.') . '">*</span>';
-    $element['title']['#element_validate'] = array('_image_required_fields_validate');
-  }
 
   return $element;
 }
 
 /**
- * Validate callback for alt and title field.
+ * Validate callback for alt field.
  *
  * This is separated in a validate function instead of a #required flag to avoid
  * being validated on the process callback.
