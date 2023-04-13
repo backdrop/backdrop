@@ -195,7 +195,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     }
     else {
       $user_module_permissions = module_invoke('user', 'permission');
-      $permissions_message .= ' ' . t('Only roles with the %permission permission make any necessary adjustments.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+      $permissions_message .= ' ' . t('Only roles with the %permission permission can make any necessary adjustments.', array('%permission' => $user_module_permissions['administer permissions']['title']));
     }
 
     // We are mimicking the style of a warning/info message here. If we used
