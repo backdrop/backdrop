@@ -21,6 +21,7 @@ function system_menu_block_defaults($menu_name) {
     'style' => NULL,
     'expand_all' => FALSE,
     'clickdown' => FALSE,
+    'collapse' => 'default',
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -140,6 +141,25 @@ function system_menu_block_form($config) {
       '!menu_settings' => $link,
     )),
   );
+  $form['collapse'] = array(
+    '#type' => 'select',
+    '#title' => t('Collapsible Behavior'),
+    '#default_value' => $config['collapse'],
+    '#options' => array(
+      'default' => 'Default',
+      'toggle' => 'Toggle',
+      'link' => 'Link',
+      'accordion' => 'Accordion',
+      'accordion-toggle' => 'Accordion toggle',
+      'accordion-link' => 'Accordion link',
+    ),
+    '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
 
   return $form;
 }
@@ -203,6 +223,7 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
+      $data['content']['#wrapper_attributes']['data-collapse'] = $config['collapse'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
