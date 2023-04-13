@@ -550,10 +550,10 @@ function user_admin_roles($form, $form_state) {
     '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
   );
 
-  // Administrative role option.
-  $form['permission_auto_assign'] = array(
+  // Default administrator role and content editor role options.
+  $form['default_roles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Automatic permission assignment'),
+    '#title' => t('Default roles'),
     '#description' => t('Changing these settings will not affect existing permissions.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -568,14 +568,14 @@ function user_admin_roles($form, $form_state) {
   // this is the selected option if the role that was previously set as admin or
   // content editor is deleted).
   $roles = array(0 => t('disabled')) + $roles;
-  $form['permission_auto_assign']['user_admin_role'] = array(
+  $form['default_roles']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
     '#description' => t('Whenever new modules are enabled, any new permissions these modules introduce will be automatically granted to the role selected here.'),
   );
-  $form['permission_auto_assign']['user_editor_role'] = array(
+  $form['default_roles']['user_editor_role'] = array(
     '#type' => 'select',
     '#title' => t('Default content editor role'),
     '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
