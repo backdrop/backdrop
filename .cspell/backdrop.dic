@@ -186,6 +186,7 @@ ftlabel
 fttype
 ftvid
 fullname
+funcs
 Furfero
 geary
 Geary
@@ -205,6 +206,7 @@ HEADERFUNCTION
 hilite
 Hilite
 hitem
+hmac
 hovermenu
 htmldog
 Htmlto
@@ -448,6 +450,7 @@ tabledragging
 tableresize
 tablesorting
 tabletools
+tagname
 tarname
 tascript
 tést
@@ -512,6 +515,7 @@ VERIFYPEER
 verygreatbackdropmodule
 VIEWNAME
 vọng
+watchdog
 WCAG
 wday
 weba
