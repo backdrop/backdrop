@@ -93,7 +93,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
-    'title' => 'Templates',
+    'title' => 'Layout templates',
     'description' => 'Manage layout templates.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),
@@ -604,7 +604,7 @@ function layout_page_access() {
  * the default layout would be distracting.
  *
  * @param bool $suppress
- *   If set to TRUE, the layout will be supressed.
+ *   If set to TRUE, the layout will be suppressed.
  * @return bool
  *   TRUE if the layout can be suppressed, FALSE otherwise.
  *
@@ -2489,7 +2489,7 @@ function layout_flexible_row_styles() {
  *  CSS classes, as entered into the Layout user interface.
  *
  * @return string
- *   String of santized classes separated by spaces.
+ *   String of sanitized classes separated by spaces.
  */
 function _layout_clean_custom_css($classes = array()) {
   if (!empty($classes)) {

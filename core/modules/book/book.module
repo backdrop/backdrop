@@ -1211,7 +1211,7 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
  * Gets the data representing a subtree of the book hierarchy.
  *
  * The root of the subtree will be the link passed as a parameter, so the
- * returned tree will contain this item and all its descendents in the menu
+ * returned tree will contain this item and all its descendants in the menu
  * tree.
  *
  * @param $link

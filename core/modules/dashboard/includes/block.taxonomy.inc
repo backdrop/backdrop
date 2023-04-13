@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Dashboard block displaying informtion about taxonomy, including:
+ * Dashboard block displaying information about taxonomy, including:
  * -
  */
 class DashboardTaxonomyBlock extends Block {
@@ -56,7 +56,7 @@ class DashboardTaxonomyBlock extends Block {
 
     $allowed_vocabularies = !empty($this->settings['vocabularies']) ? $this->settings['vocabularies'] : FALSE;
     // Passing FALSE to taxonomy_vocabulary_load_multiple() loads all
-    // vocabulaies.
+    // vocabularies.
     $vocabularies = taxonomy_vocabulary_load_multiple($allowed_vocabularies);
 
     $rows = array();

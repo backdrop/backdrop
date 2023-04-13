@@ -590,7 +590,8 @@ function node_type_form_submit($form, &$form_state) {
   // Make the new content type indexable by default if Search module is enabled.
   if (module_exists('search')) {
     $search_content_types = config_get('search.settings', 'content_types');
-    // If no types are specified, then all types are enabled and there's no need to make any changes.
+    // If no types are specified, then all types are enabled and there's no need
+    // to make any changes.
     if ($search_content_types) {
       $search_content_types[] = $type->type;
       natsort($search_content_types);
@@ -687,6 +688,7 @@ function node_type_form_permissions($type) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -764,8 +766,8 @@ function node_node_type_update($info) {
  *
  * @param $type
  *   The node type to reset. The node type is passed back by reference with its
- *   resetted values. If there is no module-defined info for this node type,
- *   then nothing happens.
+ *   reset values. If there is no module-defined info for this node type, then
+ *   nothing happens.
  */
 function node_type_reset($type) {
   $info_array = module_invoke_all('node_info');

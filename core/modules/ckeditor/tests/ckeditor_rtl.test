@@ -48,7 +48,7 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test that the CKEditor admin form works correnctly with RTL languages.
+   * Test that the CKEditor admin form works correctly with RTL languages.
    */
   public function testRtlAdminIcons() {
     $arabic = language_load('ar');

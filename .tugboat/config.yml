@@ -1,11 +1,12 @@
 services:
   php:
-    image: tugboatqa/php:7.2-apache
+    image: tugboatqa/php:8.1-apache
     default: true
     depends: mariadb
     commands:
       init:
         # Install PHP 'zip' extension to allow installing Backdrop modules.
+        - apt update && apt install -y libzip-dev
         - docker-php-ext-install zip
         # Enable Apache 'rewrite' module for clean URLs.
         - a2enmod rewrite

@@ -214,8 +214,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   public function createDatabase($database) {
     try {
       // Create the database and set it as active.
-      $this->exec("CREATE DATABASE IF NOT EXISTS $database");
-      $this->exec("USE $database");
+      $this->pdo->exec("CREATE DATABASE IF NOT EXISTS $database");
+      $this->pdo->exec("USE $database");
     }
     catch (\Exception $e) {
       throw new DatabaseNotFoundException($e->getMessage());
