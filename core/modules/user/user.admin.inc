@@ -573,14 +573,14 @@ function user_admin_roles($form, $form_state) {
     '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Whenever new modules are enabled, any new permissions these modules introduce will be automatically granted to the role selected here.'),
+    '#description' => t('This role will be automatically given any permission introduced by newly enabled modules.'),
   );
   $form['default_roles']['user_editor_role'] = array(
     '#type' => 'select',
     '#title' => t('Default content editor role'),
     '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
     '#options' => $roles,
-    '#description' => t('Whenever a new content type is created, permissions required to create, edit and manage content of that type will be automatically granted to the role selected here.'),
+    '#description' => t('This role will be automatically given permission to create, edit, and delete content for any newly created content types.'),
   );
 
   // Settings for anonymous users.
