@@ -131,7 +131,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
 
   // Prepare various messages about automatic permission assignment, and
-  // warnings if no role is configured to create/view/edit content of this type.
+  // warnings if no role is configured to create/edit/delete content of this
+  // type.
   $system_config = config('system.core');
   // Prepare the array with the human-readable labels of any roles that are have
   // been configured in the "Default roles" section in
@@ -183,7 +184,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       count($auto_permission_roles),
       'The %role role has been assigned permissions to create, edit and delete any content of this type.',
       'The %admin and %editor roles have been assigned permissions to create, edit and delete any content of this type.',
-      $auto_permission_roles,
+      $auto_permission_roles
     );
     $permissions_message_type = 'info';
   }
