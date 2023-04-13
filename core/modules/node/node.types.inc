@@ -176,12 +176,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $permissions_message = t('Nobody will be able to create, view or edit any content of this type until permissions have been configured appropriately for it.');
 
     if (user_access('administer permissions')) {
-      $permissions_message .= ' ' . t('You can do that manually for this contnet type in the <em>Permissions</em> tab below. You may also want to consider automating this, by specifying a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+      $permissions_message .= ' ' . t('You can do that manually for this content type in the <em>Permissions</em> tab below. You may also want to consider automating this, by specifying a default content editor role in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> configuration page.', array('@link' => url('admin/config/people/roles')));
     }
 
     $permissions_message_type = 'warning';
   }
-  // Show some info messsages if automatic permission assignment is enabled for
+  // Show some info messages if automatic permission assignment is enabled for
   // at least one of the default admin/editor roles. We only show these when
   // creating a new content type.
   if (count($auto_permission_roles) != 0 && empty($type->type)) {
@@ -194,7 +194,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
     if (user_access('administer permissions')) {
       $permissions_message .= ' ' . t('You may want to further tweak these in the <em>Permissions</em> tab below.');
-      $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> confirguration page.', array('@link' => url('admin/config/people/roles')));
+      $permissions_message .= ' ' . t('This behavior can be adjusted in the <em>Automatic permission assignment</em> section of the <a href="@link" target="_blank">Roles</a> configuration page.', array('@link' => url('admin/config/people/roles')));
     }
 
     $permissions_message_type = 'info';
@@ -211,7 +211,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     // unnecessarily prominent and potentially distracting. We are placing it
     // right above the vertical tabs section instead (where permissions can be
     // configured). Intentionally not placing it inside the "Permissions" tab
-    // either, since a) that is not the deault tab, so it wouldn't be visible,
+    // either, since a) that is not the default tab, so it wouldn't be visible,
     // and b) we need to show some warnings to people even if they don't have
     // access to the "Permissions" tab.
     $form['permissions_message_container'] = array(
