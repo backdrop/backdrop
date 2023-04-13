@@ -362,15 +362,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
-  $form['permissions']['permissions'] = $content_type_permissions;
-  $form['permissions']['default_permissions_tip'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('messages', 'info')),
-  );
-  $form['permissions']['default_permissions_tip']['message'] = array(
-    '#type' => 'markup',
-    '#markup' => t('You can change which roles are automatically assigned permissions in the "Default roles" section on the <a href="@link" target="_blank">Roles</a> configuration page.', array('@link' => url('admin/config/people/roles'))),
-  );
 
   // Revision settings.
   $form['revision'] = array(
