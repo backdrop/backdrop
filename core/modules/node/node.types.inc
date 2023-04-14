@@ -362,6 +362,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
+  $form['permissions']['permissions'] = $content_type_permissions;
 
   // Revision settings.
   $form['revision'] = array(
