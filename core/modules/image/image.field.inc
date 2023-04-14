@@ -677,10 +677,12 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
  */
 function image_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $alt = NULL;
 
   // Check if the formatter involves a link.
   if ($display['settings']['image_link'] == 'content') {
     $uri = entity_uri($entity_type, $entity);
+    $alt = $entity->label();
   }
   elseif ($display['settings']['image_link'] == 'file') {
     $link_file = TRUE;
@@ -712,6 +714,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       '#item' => $item,
       '#image_style' => $display['settings']['image_style'],
       '#path' => isset($uri) ? $uri : '',
+      '#alt' => $alt,
     );
   }
 
