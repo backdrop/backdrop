@@ -172,14 +172,14 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // role have been disabled in in admin/config/people/roles, while at the same
   // time no other role has been granted any permission associated with this
   // content type. We show this warning for both new and existing content types.
-  if (count($auto_permission_roles) == 0 || !$permissions_assigned) {
-    $permissions_message = t('Nobody will be able to create, edit or delete any content of this type until permissions have been configured appropriately for it.');
+  if (!$permissions_assigned) {
+    $permissions_message = t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.');
     $permissions_message_type = 'warning';
   }
   // Show some info messages if automatic permission assignment is enabled for
   // at least one of the default admin/editor roles. We only show these when
   // creating a new content type.
-  if (count($auto_permission_roles) != 0 && empty($type->type)) {
+  if (!empty($auto_permission_roles) && empty($type->type)) {
     $permissions_message = format_plural(
       count($auto_permission_roles),
       'The %role role has been assigned permissions to create, edit and delete any content of this type.',
