@@ -567,10 +567,11 @@ function user_admin_roles($form, $form_state) {
   // this is the selected option if the role that was previously set as admin is
   // deleted).
   $roles = array(0 => t('disabled')) + $roles;
+  $user_admin_role = $system_config->get('user_admin_role');
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
-    '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
+    '#default_value' => $user_admin_role ? $user_admin_role : 0,
     '#options' => $roles,
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
@@ -598,6 +599,10 @@ function user_admin_roles($form, $form_state) {
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
     $form['roles'][$role_name]['#weight'] = $order;
+    if ($role_name == $user_admin_role) {
+      $admin_role_info = ' ' . _user_admin_admin_role_description();
+      $form['roles'][$role_name]['#role']->description .=  $admin_role_info;
+    }
     $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
       '#title' => t('Weight for @title', array('@title' => check_plain($role->label))),
@@ -662,11 +667,9 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
   $config->save();
 
-  // Save roles.
+  // Save only the role weight.
   foreach ($form_state['values']['roles'] as $role_name => $role_values) {
-    $role = $form['roles'][$role_name]['#role'];
-    $role->weight = $role_values['weight'];
-    user_role_save($role);
+    config_set('user.role.' . $role_name, 'weight', $role_values['weight']);
   }
   backdrop_set_message(t('The role settings have been updated.'));
 }
@@ -681,6 +684,15 @@ function user_admin_role($form, &$form_state, $role = NULL) {
   $form_state['role'] = $role;
   if (empty($role)) {
     backdrop_set_title('Add role');
+  }
+  elseif (isset($role->name)) {
+    backdrop_set_title(t('Configure %role_name role', array('%role_name' => filter_xss_admin($role->label))), PASS_THROUGH);
+
+    $admin_role = config_get('system.core', 'user_admin_role');
+    if ($role->name == $admin_role) {
+      $message = _user_admin_admin_role_description();
+      backdrop_set_message($message, 'info');
+    }
   }
 
   $form['label'] = array(
