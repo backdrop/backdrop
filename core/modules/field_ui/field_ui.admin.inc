@@ -925,7 +925,7 @@ function field_ui_display_overview($entity_type, $bundle) {
  *     ),
  *     'default' => array(
  *       'label' => BAR,
- *       'custom settings' => FLASE,
+ *       'custom settings' => FALSE,
  *       'status' => 'Using the <em>Default display</em>'
  *       'storage' => 'Default (module-provided)'
  *     ),
@@ -998,7 +998,7 @@ function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $in
  *   entity_get_info($entity);
  *
  * @return bool
- *   Whether or noot the display mode is active.
+ *   Whether or not the display mode is active.
  */
 function _field_ui_display_mode_get_status($entity, $settings, $view_mode_info) {
   if (isset($settings[$entity]['custom_settings'])) {
