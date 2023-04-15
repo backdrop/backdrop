@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the node RSS row style plugin.

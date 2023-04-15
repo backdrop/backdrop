@@ -408,6 +408,24 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Suppress warnings of multiple versions of the same module being found.
+ *
+ * When scanning for module files, if Backdrop encounters multiple instances of
+ * the same module (for example, a version of a module in the /modules directory
+ * that has the same name as a module in /core), then only the last module will
+ * be loaded. In such cases, Backdrop will show a warning on the status report
+ * page.
+ *
+ * Having multiple versions of the same module may be intentional in certain use
+ * cases though, such as in some multisite configurations, when there is need to
+ * override a core or contrib module with a different version in the /sites
+ * folder. In such cases, you may want to disable the status report warnings.
+ *
+ * Uncomment the line below to disable the warnings.
+ */
+// $settings['disable_multiple_modules_warnings'] = TRUE;
+
+/**
  * Configuration overrides.
  *
  * These settings allow you to specify values for anything stored in config
@@ -438,6 +456,29 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 //$config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
+ * Additional public file schemes:
+ *
+ * Public schemes are URI schemes that allow download access to all users for
+ * all files within that scheme.
+ *
+ * The "public" scheme is always public, and the "private" scheme is always
+ * private, but other schemes, such as "https", "s3", "example", or others,
+ * can be either public or private depending on the site. By default, they're
+ * private, and access to individual files is controlled via
+ * hook_file_download().
+ *
+ * Typically, if a scheme should be public, a module makes it public by
+ * implementing hook_file_download(), and granting access to all users for all
+ * files. This could be either the same module that provides the stream wrapper
+ * for the scheme, or a different module that decides to make the scheme
+ * public. However, in cases where a site needs to make a scheme public, but
+ * is unable to add code in a module to do so, the scheme may be added to this
+ * variable, the result of which is that system_file_download() grants public
+ * access to all files within that scheme.
+ */
+//$config['system.core']['file_additional_public_schemes'] = array('example');
+
+/**
  * Include a local settings file, if available.
  *
  * To make local development easier, you can add a settings.local.php file that
@@ -445,7 +486,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * environment (staging, development, etc).
  *
  * Typically used to specify a different database connection information, to
- * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing emails,
  * Google Analytics, and other things that should not happen on development and
  * testing sites.
  *

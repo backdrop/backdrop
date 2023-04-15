@@ -343,20 +343,34 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['rows'] = $flexible_layout->rows;
     $variables['row_data'] = array();
+
+    $variables['row_widths'] = array(
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
+    );
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
       if ($row['contains'] == 'region_12') {
-        if (!empty($row['region_names']['region_name_0'])) {
-          $region_name = $row['region_names']['region_name_0'];
+        $region_classes = '';
+        if (!empty($row['region_names']['region_0'])) {
+          $region_name = $row['region_names']['region_0']['label'];
+          $class_name = isset($row['region_names']['region_0']['name']) ? $row['region_names']['region_0']['name'] : backdrop_html_class($row['region_names']['region_0']['label']);
+          $region_classes .= 'l-region--' . $class_name;
+          $custom_classes = !empty($row['region_names']['region_0']['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_0']['classes']) : '';
+          $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? $custom_classes : '';
         }
         else {
           $region_name = $name;
+          $region_classes .= 'l-region--' . backdrop_html_class($name);
         }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
@@ -364,15 +378,22 @@ function layout_preprocess_layout(&$variables) {
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
-          if (!empty($row['region_names']['region_name_' . $i])) {
-            $region_name = $row['region_names']['region_name_' . $i];
+          $region_classes = '';
+          if (!empty($row['region_names']['region_' . $i])) {
+            $region_name = $row['region_names']['region_' . $i]['label'];
+            $class_name = isset($row['region_names']['region_' . $i]['name']) ? $row['region_names']['region_' . $i]['name'] : backdrop_html_class($row['region_names']['region_' . $i]['label']);
+            $region_classes .= 'l-region--' . $class_name;
+            $custom_classes = !empty($row['region_names']['region_' . $i]['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_' . $i]['classes']) : '';
+            $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $custom_classes : '';
           }
           else {
             $region_name = $name . ' ' . $i;
+            $region_classes .= 'l-region--' . backdrop_html_class($name . ' ' . $i);
           }
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
+            'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;
@@ -516,9 +537,10 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes'] = array(
-    'class' => $title_classes,
-  );
+  $variables['title_attributes'] = array();
+  if (!empty($title_classes)) {
+    $variables['title_attributes']['class'] = $title_classes;
+  }
 
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
@@ -527,7 +549,8 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes'] = array(
-    'class' => $content_classes,
-  );
+  $variables['content_attributes'] = array();
+  if (!empty($content_classes)) {
+    $variables['content_attributes']['class'] = $content_classes;
+  }
 }

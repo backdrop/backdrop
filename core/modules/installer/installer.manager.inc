@@ -25,7 +25,7 @@
  * batch operation is responsible for downloading a single file, extracting the
  * archive, and verifying the contents. If there are any errors, the user is
  * redirected back to the first page with the error messages. If all downloads
- * were extacted and verified, the user is instead redirected to
+ * were extracted and verified, the user is instead redirected to
  * admin/update/ready, a landing page which reminds them to backup their
  * database and asks if they want to put the site offline during the update.
  * Once the user presses the "Install updates" button, they are redirected to
@@ -507,11 +507,10 @@ function installer_manager_install_form($form, &$form_state) {
   backdrop_set_title('Manual installation');
 
   $form['help_text'] = array(
-    '#prefix' => '<p>',
+    '#type' => 'help',
     '#markup' => t('You can find modules, themes, and layouts on <a href="https://backdropcms.org">backdropcms.org</a>. The following file extensions are supported: %extensions.', array(
       '%extensions' => archiver_get_extensions(),
     )),
-    '#suffix' => '</p>',
   );
 
   $form['bulk_wrapper'] = array(
@@ -619,8 +618,7 @@ function _installer_manager_check_backends(&$form, $operation) {
 
   // Otherwise, show the available backends.
   $form['available_backends'] = array(
-    '#prefix' => '<p>',
-    '#suffix' => '</p>',
+    '#type' => 'help',
   );
 
   $available_backends = backdrop_get_filetransfer_info();

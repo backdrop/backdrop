@@ -5,22 +5,32 @@
  */
 
 /**
- * Implements hook_telementry_info().
+ * Implements hook_telemetry_info().
  */
 function telemetry_telemetry_info() {
   $info['php_version'] = array(
-    'label' => t('PHP Version'),
+    'label' => t('PHP version'),
     'description' => t('The current version of PHP running on your server.'),
     'project' => 'backdrop',
   );
   $info['mysql_version'] = array(
-    'label' => t('MySQL Version'),
+    'label' => t('MySQL version'),
     'description' => t('The version number of your database (either MySQL or MariaDB).'),
     'project' => 'backdrop',
   );
   $info['server_os'] = array(
     'label' => t('Server OS'),
     'description' => t('The operating system of your server, such as RedHat Linux, Debian, Windows, etc.'),
+    'project' => 'backdrop',
+  );
+  $info['web_server'] = array(
+    'label' => t('Web server'),
+    'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
+    'project' => 'backdrop',
+  );
+  $info['install_profile'] = array(
+    'label' => t('Installation profile'),
+    'description' => t('The profile that was used to install your site.'),
     'project' => 'backdrop',
   );
   return $info;
@@ -37,5 +47,20 @@ function telemetry_telemetry_data($key) {
       return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
     case 'server_os':
       return PHP_OS;
+    case 'web_server':
+      if (backdrop_is_apache()) {
+        return 'Apache';
+      }
+      elseif (backdrop_is_nginx()) {
+        return 'nginx';
+      }
+      elseif (backdrop_is_litespeed()) {
+        return 'LiteSpeed';
+      }
+      else {
+        return 'Other';
+      }
+    case 'install_profile':
+      return backdrop_get_profile();
   }
 }

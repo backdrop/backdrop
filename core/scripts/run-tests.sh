@@ -301,7 +301,7 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
-  --cache     Generate cache for instalation profiles to boost tests speed.
+  --cache     Generate cache for installation profiles to boost tests speed.
 
   --myisam-convert
               Convert cache tables to MyISAM. Improves test performance but is
@@ -986,7 +986,7 @@ function simpletest_script_print_error($message) {
  */
 function simpletest_script_print($message, $status) {
   global $args;
-  if ($args['color']) {
+  if (isset($args['color']) && $args['color']) {
     $color_code = simpletest_script_color_code($status);
     $message = "\033[" . $color_code . "m" . $message . "\033[0m";
   }

@@ -392,6 +392,13 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['flood_log_failed_attempts'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log excessive failed login attempts.'),
+    '#default_value' => $flood_config->get('flood_log_failed_attempts'),
+    '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -412,6 +419,36 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   $form['roles'] = array(
     '#type' => 'value',
     '#value' => $roles,
+  );
+
+  // JS-only table filters.
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('table-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the permission name, module name, or description to filter.'),
+    ),
+    '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
+  );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => $_GET['q'],
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
   );
 
   // Render role/permission overview:
@@ -437,7 +474,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
         $perm_item += array(
           'description' => '',
           'restrict access' => FALSE,
-          'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+          'warning' => '',
         );
         $options[$perm] = '';
         $form['permission'][$perm] = array(
@@ -446,7 +483,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
         foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
+          // Build arrays for checked boxes for each role.
           if (in_array($perm, $role->permissions)) {
             $status[$role_name][] = $perm;
           }
@@ -455,7 +492,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Build the checkboxes here after the role arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -465,6 +502,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -488,6 +526,14 @@ function user_admin_permissions_submit($form, &$form_state) {
   }
 
   backdrop_set_message(t('The changes have been saved.'));
+
+  // Check if a previous search is present and preserve it on redirect.
+  if (!empty($form_state['values']['search'])) {
+    $form_state['redirect'] = array(
+      $_GET['q'],
+      array('query' => array('search' => $form_state['values']['search'])),
+    );
+  }
 }
 
 /**
@@ -498,6 +544,11 @@ function user_admin_permissions_submit($form, &$form_state) {
  */
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
+
+  $form['roles_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
+  );
 
   // Administrative role option.
   $form['admin_role'] = array(
@@ -515,7 +566,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
-  array_unshift($roles, t('disabled'));
+  $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
@@ -566,7 +617,7 @@ function user_admin_roles($form, $form_state) {
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -653,6 +704,13 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#rows' => 3,
+    '#title' => t('Description'),
+    '#default_value' => isset($role->description) ? $role->description : '',
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
+  );
   $form['weight'] = array(
     '#type' => 'value',
     '#value' => empty($role->weight) ? 0 : $role->weight,
@@ -691,6 +749,7 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
+      'description' => $form_state['values']['description'],
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
@@ -703,11 +762,10 @@ function user_admin_role_submit($form, &$form_state) {
   else {
     // Update existing role.
     $role = $form_state['role'];
-    $old_role = $role->label;
     $role->label = $form_state['values']['label'];
+    $role->description = $form_state['values']['description'];
     user_role_save($role);
-    $new_role = $role->label;
-    backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+    backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));
   }
 
   $form_state['redirect'] = $redirect;
