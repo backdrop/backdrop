@@ -2451,9 +2451,7 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
   }
 
   // Rebuild the admin menu cache.
-  if (db_table_exists('cache_admin_bar')) {
-    cache('admin_bar')->flush();
-  }
+  cache_flush('admin_bar');
 
   $form_state['redirect'] = $path;
 }
@@ -2512,9 +2510,7 @@ function field_ui_view_mode_delete_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#path'];
 
   // Rebuild the admin menu cache.
-  if (db_table_exists('cache_admin_bar')) {
-    cache('admin_bar')->flush();
-  }
+  cache_flush('admin_bar');
   menu_cache_clear();
 }
 
@@ -2529,9 +2525,7 @@ function field_ui_view_mode_enable_access() {
 
   if ($token_check && user_access('administer view modes')) {
     // Rebuild the admin menu cache.
-    if (db_table_exists('cache_admin_bar')) {
-      cache('admin_bar')->flush();
-    }
+    cache_flush('admin_bar');
     menu_cache_clear();
     return TRUE;
   }
@@ -2569,9 +2563,7 @@ function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redi
   backdrop_set_message($message);
 
   // Clear the menu cache to add the display mode to the administration menu.
-  if (db_table_exists('cache_admin_bar')) {
-    cache('admin_bar')->flush();
-  }
+  cache_flush('admin_bar');
   menu_cache_clear();
 
   if ($redirect) {

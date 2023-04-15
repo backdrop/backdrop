@@ -138,7 +138,9 @@ function cache_set($cid, $data, $bin = 'cache', $expire = CACHE_PERMANENT) {
  *   The bin whose data should be emptied.
  */
 function cache_flush($bin) {
-  return cache($bin)->flush();
+  if (db_table_exists('cache_' . $bin)) {
+    return cache($bin)->flush();
+  }
 }
 
 /**
