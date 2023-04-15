@@ -2664,6 +2664,18 @@ function user_role_change_permissions($role_name, array $permissions = array()) 
 }
 
 /**
+ * Implements hook_node_type_delete() to delete content-type-specific
+ * permissions from all roles when a content type is being deleted.
+ */
+function user_node_type_delete($info) {
+  $node_type_permissions = array_keys(node_list_permissions($info->type));
+  $roles = array_keys(user_roles(FALSE, NULL));
+  foreach ($roles as $role_name) {
+    user_role_revoke_permissions($role_name, $node_type_permissions);
+  }
+}
+
+/**
  * Grant permissions to a user role.
  *
  * @param string $role_name
