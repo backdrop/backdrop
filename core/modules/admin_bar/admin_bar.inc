@@ -729,40 +729,13 @@ function admin_bar_links_page() {
  * @see theme_admin_bar_links()
  */
 function admin_bar_links_locale() {
-  if (!module_exists('locale') || !language_multilingual()) {
-    return array();
-  }
-
-  global $language;
-  $language_default = $language;
-
   $links['locale'] = array(
     '#title' => theme('admin_bar_icon_locale'),
     '#attributes' => array('class' => array('admin-bar-locale-links')),
   );
 
-  $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
-  $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
-
-  if (!isset($language_links->links)) {
-    return array();
-  }
-
-  foreach ($language_links->links as $language_link) {
-    if ($language_link['language']->langcode == $language_default->langcode) {
-      continue;
-    }
-
-    $links['locale'][$language_link['language']->langcode] = array(
-      '#attributes' => array('class' => array('locale')),
-      '#title' => $language_link['language']->native,
-      '#href' => url($language_link['href'], array(
-        'language' => $language_link['language'],
-        'absolute' => TRUE,
-      )),
-      '#below' => array(),
-      '#original_link' => array(),
-    );
+  if ($locale_links = admin_bar_locale_links()) {
+    $links['locale'] = $locale_links;
   }
 
   // Don't display an empty menu.

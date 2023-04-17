@@ -438,43 +438,58 @@ function admin_bar_admin_bar_replacements($complete) {
     // Check whether the page links component is enabled.
     if (in_array('admin_bar.locale', $components)) {
       if (module_exists('locale') && language_multilingual()) {
-        global $language;
-        $language_default = $language;
-
-        $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
-        $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
-
-        if (isset($language_links->links)) {
-          foreach ($language_links->links as $language_link) {
-            if ($language_link['language']->langcode == $language_default->langcode) {
-              continue;
-            }
-
-            $links[$language_link['language']->langcode] = array(
-              '#attributes' => array('class' => array('locale')),
-              '#title' => $language_link['language']->native,
-              '#href' => url($language_link['href'], array(
-                'language' => $language_link['language'],
-                'absolute' => TRUE,
-              )),
-              '#below' => array(),
-              '#original_link' => array(),
-            );
-          }
+        if ($locale_links = admin_bar_locale_links()) {
           // Theme the locale links but remove the <ul> element
           // so we can swap out the list items for the current <ul> element.
-          $themed_locale_links = preg_replace('/<ul[^>]*>(.*?)<\/ul>/', '$1',
-            theme('admin_bar_links', array(
-              'elements' => $links),
-            )
+          $theme_locale_links = theme('admin_bar_links', array(
+            'elements' => $locale_links),
           );
-          $items['.admin-bar-locale-links>ul.dropdown'] = $themed_locale_links;
+          $items['.admin-bar-locale-links>ul.dropdown'] = preg_replace('/<ul[^>]*>(.*?)<\/ul>/', '$1', $theme_locale_links);
         }
       }
     }
   }
 
   return $items;
+}
+
+/**
+ * Build Locale links.
+ *
+ */
+function admin_bar_locale_links() {
+  if (!module_exists('locale') || !language_multilingual()) {
+    return array();
+  }
+
+  global $language;
+  $language_default = $language;
+
+  $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
+  $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
+
+  if (!isset($language_links->links)) {
+    return array();
+  }
+
+  foreach ($language_links->links as $language_link) {
+    if ($language_link['language']->langcode == $language_default->langcode) {
+      continue;
+    }
+
+    $links[$language_link['language']->langcode] = array(
+      '#attributes' => array('class' => array('locale')),
+      '#title' => $language_link['language']->native,
+      '#href' => url($language_link['href'], array(
+        'language' => $language_link['language'],
+        'absolute' => TRUE,
+      )),
+      '#below' => array(),
+      '#original_link' => array(),
+    );
+  }
+
+  return $links;
 }
 
 /**
