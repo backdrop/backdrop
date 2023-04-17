@@ -367,8 +367,8 @@ function theme_status_report($variables) {
       $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
 
-    // For the installation "Requirements problem" page, place the label and the
-    // desctription of each check/row in a single table cell.
+    // For the "Requirements problem" page of the installer, place the label and
+    // the description of each check/row in a single table cell.
     if ($phase == 'install') {
       $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
       $data = array(
