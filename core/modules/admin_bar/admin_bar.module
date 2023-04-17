@@ -479,7 +479,7 @@ function admin_bar_locale_links() {
 
     $links[$language_link['language']->langcode] = array(
       '#attributes' => array('class' => array('locale')),
-      '#title' => $language_link['language']->native,
+      '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
       '#href' => url($language_link['href'], array(
         'language' => $language_link['language'],
         'absolute' => TRUE,

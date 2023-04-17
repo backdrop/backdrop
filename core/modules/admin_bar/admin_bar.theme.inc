@@ -29,7 +29,7 @@ function theme_admin_bar_icon_page($variables) {
 */
 function theme_admin_bar_icon_locale($variables) {
   global $language;
-  return $language->native;
+  return isset($language->native) ? $language->native : $language->name;
 }
 
 /**
