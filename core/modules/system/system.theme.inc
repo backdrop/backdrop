@@ -290,6 +290,7 @@ function theme_system_modules_uninstall($variables) {
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  $phase = isset($variables['phase']) ? $variables['phase'] : 'runtime';
   backdrop_sort($requirements, array('title' => SORT_STRING));
 
   // Separate requirements by severity.
@@ -341,7 +342,7 @@ function theme_status_report($variables) {
   $system_status_report_table = array(
     'header' => array(),
     'rows' => array(),
-    'attributes' => array('class' => 'system-status-report'),
+    'attributes' => array('class' => array('system-status-report', 'phase-' . $phase)),
     'caption' => '',
     'colgroups' => array(),
     'sticky' => FALSE,
@@ -366,14 +367,23 @@ function theme_status_report($variables) {
       $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
 
-    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
-
-    $row = array(
-      'data' => array(
+    if ($phase == 'install') {
+      $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title . $description, 'class' => 'status-title'),
+      );
+    }
+    else {
+      $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
         array('data' => $severity['icon'], 'class' => 'report-icon'),
         array('data' => $title, 'class' => 'status-title'),
         array('data' => $description, 'class' => array('status-value', 'priority-low')),
-      ),
+      );
+    }
+    $row = array(
+      'data' => $data,
       'class' => $severity['class'],
     );
 

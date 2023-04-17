@@ -780,7 +780,7 @@ function install_verify_requirements(&$install_state) {
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
-      $status_report = theme('status_report', array('requirements' => $requirements));
+      $status_report = theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
       $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
       return $status_report;
     }
