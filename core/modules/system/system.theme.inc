@@ -285,8 +285,13 @@ function theme_system_modules_uninstall($variables) {
  *       - REQUIREMENT_OK: The requirement is satisfied.
  *       - REQUIREMENT_WARNING: The requirement failed with a warning.
  *       - REQUIREMENT_ERROR: The requirement failed with an error.
+ *   - phase: The current phase. Possible values are one of:
+ *     - install.
+ *     - update.
+ *     - runtime (the default, if nothing else specified).
  *
  * @ingroup themeable
+ * @since 1.24.2 support for the "phase" variable added.
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
