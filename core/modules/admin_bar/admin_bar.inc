@@ -732,11 +732,7 @@ function admin_bar_links_locale() {
   $links['locale'] = array(
     '#title' => theme('admin_bar_icon_locale'),
     '#attributes' => array('class' => array('admin-bar-locale-links')),
-  );
-
-  if ($locale_links = admin_bar_locale_links()) {
-    $links['locale'] = $locale_links;
-  }
+  ) + admin_bar_locale_links();
 
   // Don't display an empty menu.
   $locale_links = element_children($links['locale']);
