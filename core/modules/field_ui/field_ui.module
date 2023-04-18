@@ -163,7 +163,12 @@ function field_ui_menu() {
             $items["$path/display/$view_mode"] = array(
               'title' => $view_mode_info['label'],
               'page callback' => 'backdrop_get_form',
-              'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode),
+              'page arguments' => array(
+                'field_ui_display_form',
+                $entity_type,
+                $bundle_arg,
+                $view_mode,
+              ),
               // The access callback needs to check both the current 'custom
               // display' setting for the view mode, and the overall access
               // rules for the bundle admin pages.
