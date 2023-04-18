@@ -168,13 +168,13 @@ function field_ui_menu() {
               // display' setting for the view mode, and the overall access
               // rules for the bundle admin pages.
               'access callback' => '_field_ui_view_mode_menu_access',
-              'access arguments' => array_merge(array(
-                $entity_type,
-                $bundle_arg,
-                $view_mode,
-                $access['access callback']),
-                $access['access arguments'],
-              ),
+              'access arguments' => array_merge(
+                array(
+                  $entity_type,
+                  $bundle_arg,
+                  $view_mode,
+                  $access['access callback'],
+                ), $access['access arguments']),
               'type' => MENU_LOCAL_TASK,
               'file' => 'field_ui.admin.inc',
             );
