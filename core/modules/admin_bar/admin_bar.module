@@ -442,7 +442,7 @@ function admin_bar_admin_bar_replacements($complete) {
           // Theme the locale links but remove the <ul> element
           // so we can swap out the list items for the current <ul> element.
           $theme_locale_links = theme('admin_bar_links', array(
-            'elements' => $locale_links
+            'elements' => $locale_links,
           ));
           $items['.admin-bar-locale-links>ul.dropdown'] = preg_replace('/<ul[^>]*>(.*?)<\/ul>/', '$1', $theme_locale_links);
         }
