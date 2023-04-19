@@ -114,6 +114,13 @@ function admin_bar_menu_link_delete($link) {
 }
 
 /**
+ * Implements hook_language_insert().
+ */
+function admin_bar_language_insert() {
+  cache('admin_bar')->flush();
+}
+
+/**
  * Implements hook_language_update().
  */
 function admin_bar_language_update() {
