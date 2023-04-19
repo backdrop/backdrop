@@ -2575,10 +2575,21 @@ function system_block_configure($delta, $settings) {
     return system_header_block_form($settings);
   }
   elseif ($delta === 'breadcrumb') {
+    $form['separator'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Separator'),
+      '#description' => t("The character(s) to display between individual breadcrumb items. Defaults to ' » '"),
+      '#default_value' => !empty($settings['separator']) ? $settings['separator'] : ' » ',
+    );
     $form['current'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display the current page title as the last breadcrumb'),
+      '#title' => t('Add the current page title to the end of the breadcrumb trail'),
       '#default_value' => !empty($settings['current']),
+    );
+    $form['hide'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Hide the breadcrumb trail if the only breadcrumb is 'Home'"),
+      '#default_value' => !empty($settings['hide']),
     );
     return $form;
   }
@@ -3311,8 +3322,18 @@ function system_header_block($settings) {
  */
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
+
+  $current_class = 'current';
+  if (isset($settings['current']) && $settings['current'] != TRUE) {
+    $current_class .= ' element-invisible';
+  }
+
+  $crumbs[] = '<span aria-current="page" class="' . $current_class . '">' . backdrop_get_title() . '</span>';
+
+  if (isset($settings['hide']) && $settings['hide'] == TRUE) {
+    if (!isset($crumbs[2]) && isset($settings['current']) && $settings['current'] != TRUE) {
+      return;
+    }
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));

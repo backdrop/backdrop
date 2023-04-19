@@ -2515,7 +2515,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
 
     // Test breadcrumb in comment preview.
     $this->backdropGet("comment/reply/$node->nid");
-    $xpath = '//nav[@class="breadcrumb"]/ol/li[last()]/a';
+    $xpath = '//nav[@class="breadcrumb"]/ol/li[last()-1]/a';
     $this->assertEqual(current($this->xpath($xpath)), $node->title, 'Node breadcrumb is equal to node title.', 'Node');
 
     // Test node title in comment preview.
