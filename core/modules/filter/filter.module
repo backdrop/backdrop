@@ -1331,7 +1331,7 @@ function filter_process_format($element) {
     '#weight' => 20,
   );
   foreach ($formats as $format) {
-    $options[$format->format] = $format->name;
+    $options[$format->format] = check_plain($format->name);
     $element['format']['guidelines'][$format->format] = array(
       '#theme' => 'filter_guidelines',
       '#format' => $format,
