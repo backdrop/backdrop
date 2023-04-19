@@ -3413,6 +3413,15 @@ function system_update_1087() {
 }
 
 /**
+ * Set the file schemes whose paths should not be normalized.
+ */
+function system_update_1088() {
+  if (config_get('system.core', 'file_not_normalized_schemes') === NULL) {
+    config_set('system.core', 'file_not_normalized_schemes', array());
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
