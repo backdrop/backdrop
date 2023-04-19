@@ -4370,6 +4370,33 @@ function system_admin_paths() {
  * Implements hook_file_download().
  */
 function system_file_download($uri) {
+  // If $uri is a path or belongs to a scheme that has . and .. segments removed
+  // in file_uri_normalize_dot_segments(), then do not allow such segments now.
+  $scheme = file_uri_scheme($uri);
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (!in_array($scheme, $skip_schemes)) {
+        // If $uri represents a local path, then replace DIRECTORY_SEPARATOR
+        // with '/'.
+        if (DIRECTORY_SEPARATOR !== '/') {
+          $class = file_stream_wrapper_get_class($scheme);
+          if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+            $uri = str_replace(DIRECTORY_SEPARATOR, '/', $uri);
+          }
+        }
+        $parts = explode('/', $uri);
+        foreach ($parts as $part) {
+          if ($part === '.' || $part === '..') {
+            // Deny path traversal.
+            return -1;
+          }
+        }
+      }
+    }
+  }
+
   $core_schemes = array('public', 'private', 'temporary');
   $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
   if ($additional_public_schemes) {
