@@ -474,7 +474,7 @@ function user_admin_permissions_submit($form, &$form_state) {
 /**
  * Builds a matrix of permission checkboxes.
  *
- * Use this funtion to generate a matrix of checkboxes within a form. In the
+ * Use this function to generate a matrix of checkboxes within a form. In the
  * matrix each column is a user role, and each row is a permission. You can
  * specify which set of permissions is to be included in the matrix, as well as
  * which user role(s).
