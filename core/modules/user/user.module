@@ -996,7 +996,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
     '#weight' => 6,
-    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
+    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) && config_get('system.date', 'user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT || (module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
   );
   // See system_user_timezone() and locale_language_selector_form() for the form
