@@ -143,7 +143,7 @@ function contact_form_permissions() {
     foreach ($roles as $role_name => $role) {
       // Builds arrays for checked boxes for each role. Always select the Admin
       // role on new forms.
-      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
+      if (in_array($perm, $role->permissions)) {
         $status[$role_name][] = $perm;
       }
     }
