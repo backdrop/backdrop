@@ -185,7 +185,7 @@ class Archive_Tar
                     if ($data == "\37\213") {
                         $this->_compress = true;
                         $this->_compress_type = 'gz';
-                        // No sure it's enought for a magic code ....
+                        // Not sure it's enough for a magic code.
                     } elseif ($data == "BZ") {
                         $this->_compress = true;
                         $this->_compress_type = 'bz2';
@@ -2174,6 +2174,40 @@ class Archive_Tar
                             }
                         }
                     } elseif ($v_header['typeflag'] == "2") {
+                        $absolute_link = FALSE;
+                        $link_depth = 0;
+                        if (strpos($v_header['link'], "/") === 0 || strpos($v_header['link'], ':') !== FALSE) {
+                          $absolute_link = TRUE;
+                        }
+                        else {
+                            $s_filename = preg_replace('@^' . preg_quote($p_path) . '@', "", $v_header['filename']);
+                            $s_linkname = str_replace('\\', '/', $v_header['link']);
+                            foreach (explode("/", $s_filename) as $dir) {
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== "." ) {
+                                    $link_depth++;
+                                }
+                            }
+                            foreach (explode("/", $s_linkname) as $dir){
+                                if ($link_depth <= 0) {
+                                    break;
+                                }
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== ".") {
+                                    $link_depth++;
+                                }
+                            }
+                        }
+                        if ($absolute_link || $link_depth <= 0) {
+                            $this->_error(
+                                 'Out-of-path file extraction {'
+                                 . $v_header['filename'] . ' --> ' .
+                                 $v_header['link'] . '}'
+                            );
+                            return false;
+                        }
                         if (!$p_symlinks) {
                             $this->_warning('Symbolic links are not allowed. '
                                 . 'Unable to extract {'
@@ -2474,7 +2508,7 @@ class Archive_Tar
 
     /**
      * Compress path by changing for example "/dir/foo/../bar" to "/dir/bar",
-     * rand emove double slashes.
+     * and remove double slashes.
      *
      * @param string $p_dir path to reduce
      *

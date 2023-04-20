@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Batch processing API for processes to run in multiple HTTP requests.
@@ -37,8 +36,6 @@ function batch_load($id) {
 
 /**
  * Renders the batch processing page based on the current state of the batch.
- *
- * @see _batch_shutdown()
  */
 function _batch_page() {
   $batch = &batch_get();
@@ -56,9 +53,6 @@ function _batch_page() {
     }
   }
 
-  // Register database update for the end of processing.
-  backdrop_register_shutdown_function('_batch_shutdown');
-
   // Add batch-specific CSS.
   foreach ($batch['sets'] as $batch_set) {
     if (isset($batch_set['css'])) {
@@ -68,7 +62,7 @@ function _batch_page() {
     }
   }
 
-  // Surpress messages during batch requests.
+  // Suppress messages during batch requests.
   backdrop_show_messages(FALSE);
 
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
@@ -96,6 +90,12 @@ function _batch_page() {
       _batch_finished();
       break;
   }
+
+  // Save updated data for the next page request.
+  db_update('batch')
+    ->fields(array('batch' => serialize($batch)))
+    ->condition('bid', $batch['id'])
+    ->execute();
 
   return $output;
 }
@@ -447,17 +447,16 @@ function _batch_finished() {
         $queue->deleteQueue();
       }
     }
+    // Clean-up the session. Not needed for CLI updates.
+    if (isset($_SESSION)) {
+      unset($_SESSION['batches'][$batch['id']]);
+      if (empty($_SESSION['batches'])) {
+        unset($_SESSION['batches']);
+      }
+    }
   }
   $_batch = $batch;
   $batch = NULL;
-
-  // Clean-up the session. Not needed for CLI updates.
-  if (isset($_SESSION)) {
-    unset($_SESSION['batches'][$_batch['id']]);
-    if (empty($_SESSION['batches'])) {
-      unset($_SESSION['batches']);
-    }
-  }
 
   // Redirect if needed.
   if ($_batch['progressive']) {
@@ -489,20 +488,5 @@ function _batch_finished() {
     if (function_exists($function)) {
       $function($_batch['source_url'], array('query' => array('op' => 'finish', 'id' => $_batch['id'])));
     }
-  }
-}
-
-/**
- * Shutdown function: Stores the current batch data for the next request.
- *
- * @see _batch_page()
- * @see backdrop_register_shutdown_function()
- */
-function _batch_shutdown() {
-  if ($batch = batch_get()) {
-    db_update('batch')
-      ->fields(array('batch' => serialize($batch)))
-      ->condition('bid', $batch['id'])
-      ->execute();
   }
 }

@@ -77,8 +77,8 @@ function theme_comment_post_forbidden($variables) {
  * @see comment.tpl.php
  */
 function template_preprocess_comment(&$variables) {
-  $view_mode = $variables['elements']['#view_mode'];
-  $bundle = $variables['elements']['#bundle'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['bundle'] = $variables['elements']['#bundle'];
   $comment = $variables['elements']['#comment'];
   $node = $variables['elements']['#node'];
   $node_type = node_type_get_type($node->type);
@@ -104,9 +104,11 @@ function template_preprocess_comment(&$variables) {
 
   $uri = $comment->uri();
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
-
-  $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
+  
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
+  $variables['permalink_path'] = $uri['path'] . "#" . $uri['options']['fragment'];
+  $variables['title_display'] = $node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN;
+  $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
   // Preprocess fields.
@@ -145,5 +147,16 @@ function template_preprocess_comment(&$variables) {
       $variables['classes'][] = 'comment-by-viewer';
     }
   }
+  if ($node_type->settings['comment_title_options'] == COMMENT_TITLE_HIDDEN) {
+    $variables['classes'][] = 'comment-title-hidden';
+  }
+  elseif ($node_type->settings['comment_title_options'] == COMMENT_TITLE_AUTO) {
+    $variables['classes'][] = 'comment-title-auto';
+  }
+  else {
+    $variables['classes'][] = 'comment-title-custom';
+  }
+  
+  // Gather classes specific to the comment title.
+  $variables['title_classes'][] = 'comment-title';
 }
-

@@ -50,7 +50,6 @@ function dashboard_permission() {
   return array(
     'access dashboard' => array(
       'title' => t('Access Dashboard'),
-      'description' => t('Access the dashboard.'),
     ),
     'administer dashboard' => array(
       'title' => t('Administer Dashboard'),
@@ -200,7 +199,8 @@ function dashboard_user_login(&$edit, $account) {
   }
 
   // Check access to any dashboard layouts, and redirect.
-  $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
+  $router_item = menu_get_item('admin/dashboard');
+  $dashboard_layouts = layout_load_multiple_by_router_item($router_item);
   foreach ($dashboard_layouts as $dashboard_layout) {
     if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
       $_GET['destination'] = 'admin/dashboard';
