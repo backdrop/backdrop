@@ -540,7 +540,6 @@ function standard_install() {
     'delete any card content',
     'view hidden paths',
     'access dashboard',
-    'view the administration theme',
     'access administration bar',
     'access content overview',
     'access administration pages',
