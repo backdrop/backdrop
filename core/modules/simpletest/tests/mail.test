@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test the Backdrop mailing system.
@@ -52,7 +51,7 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
   }
 
   /**
-   * Concatenate and wrap the e-mail body for plain-text mails.
+   * Concatenate and wrap the email body for plain-text mails.
    *
    * @see DefaultMailSystem
    */

@@ -356,7 +356,7 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
  */
 Backdrop.optionsElement.prototype.addOption = function(currentOption) {
   var self = this;
-  var windowHieght = $(document).height();
+  var windowHeight = $(document).height();
   var newOption = $(currentOption).clone()
     .find('input.option-key').val(self.keyType == 'numeric' ? self.nextNumericKey() : '').end()
     .find('input.option-value').val('').end()
@@ -366,8 +366,8 @@ Backdrop.optionsElement.prototype.addOption = function(currentOption) {
     .insertAfter(currentOption)
     .get(0);
 
-  // Scroll down to accomidate the new option.
-  $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHieght);
+  // Scroll down to accommodate the new option.
+  $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHeight);
 
   // Make the new option draggable.
   Backdrop.tableDrag[this.identifier].makeDraggable(newOption);

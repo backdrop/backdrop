@@ -17,8 +17,9 @@
  * attached).
  *
  * @return
- *   An array whose keys are entity type names and whose values identify
- *   properties of those types that the system needs to know about:
+ *   An array of information about one or more entity types
+ *   Keys are entity type names; values identify properties of those types that
+ *   the system needs to know about:
  *   - label: The human-readable name of the type.
  *   - entity class: A class that the controller will use for instantiating
  *     entities. Must extend the Entity class or implement EntityInterface.
@@ -69,7 +70,7 @@
  *     - bundle: The name of the property that contains the name of the bundle
  *       object.
  *   - bundles: An array describing all bundles for this object type. Keys are
- *     bundles machine names, as found in the objects' 'bundle' property
+ *     bundles' machine names, as found in the objects' 'bundle' property
  *     (defined in the 'entity keys' entry above). This entry can be omitted if
  *     this entity type exposes a single bundle (all entities have the same
  *     collection of fields). The name of this single bundle will be the same as
@@ -88,6 +89,9 @@
  *       - access callback: As in hook_menu(). 'user_access' will be assumed if
  *         no value is provided.
  *       - access arguments: As in hook_menu().
+ *     - bundle cache: (used by DefaultEntityController) Set to FALSE to disable
+ *       persistent caching of fully loaded entities for this bundle. Defaults
+ *       to TRUE. Has no effect if 'entity cache' for the entity is FALSE.
  *   - view modes: An array describing the display modes for the entity type.
  *     Display modes let entities be displayed differently depending on the
  *     context. For instance, a node can be displayed differently on its own

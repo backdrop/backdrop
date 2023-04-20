@@ -43,7 +43,7 @@ class views_handler_filter extends views_handler {
   var $operator = '=';
 
   /**
-   * Contains the information of the selected item in a gruped filter.
+   * Contains the information of the selected item in a grouped filter.
    */
   var $group_info = NULL;
 
@@ -967,13 +967,13 @@ class views_handler_filter extends views_handler {
         }
         if ($has_state) {
           foreach ($states as $key => $state) {
-            $row['value'][$children]['#states']['visible'][] = array(
+            $row['value'][$children]['#states']['visible'][$key] = array(
               ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => array('value' => $state),
             );
-            unset($row['value'][$children]['#states']['visible'][$key]);
           }
 
-          $row['value'][$children]['#title'] = '';
+          $row['value'][$children]['#title_display'] = 'invisible';
+          $row['value'][$children]['#placeholder'] = $row['value'][$children]['#title'];
 
           if (!empty($this->options['group_info']['group_items'][$item_id]['value'][$children])) {
             $row['value'][$children]['#default_value'] = $this->options['group_info']['group_items'][$item_id]['value'][$children];
@@ -1046,6 +1046,9 @@ class views_handler_filter extends views_handler {
       '#type' => 'submit',
       '#value' => t('Add another item'),
       '#submit' => array('views_ui_config_item_form_add_group'),
+      '#attributes' => array(
+        'class' => array('use-ajax-submit'),
+      ),
     );
 
     $js = array();
@@ -1169,13 +1172,13 @@ class views_handler_filter extends views_handler {
   /*
    * Transform the input from a grouped filter into a standard filter.
    *
-   * When a filter is a group, find the set of operator and values
-   * that the choosed item represents, and inform views that a normal
-   * filter was submitted by telling the operator and the value selected.
+   * When a filter is a group, find the set of operator and values that the
+   * chosen item represents, and inform views that a normal filter was submitted
+   * by telling the operator and the value selected.
    *
    * The param $selected_group_id is only passed when the filter uses the
-   * checkboxes widget, and this function will be called for each item
-   * choosed in the checkboxes.
+   * checkboxes widget, and this function will be called for each item chosen
+   * in the checkboxes.
    */
   function convert_exposed_input(&$input, $selected_group_id = NULL) {
     if ($this->is_a_group()) {
@@ -1294,7 +1297,7 @@ class views_handler_filter extends views_handler {
         }
 
         if ($this->operator != 'empty' && $this->operator != 'not empty') {
-          if ($value == 'All' || $value === array()) {
+          if ($value === 'All' || $value === array() || $value === 0) {
             return FALSE;
           }
         }

@@ -1,4 +1,4 @@
-; This info file contains an enourmous number of tests. They are ordered by:
+; This info file contains an enormous number of tests. They are ordered by:
 ; 1) The main SimpleTest tests from the simpletest.test file.
 ; 2) The list of all *.test files in the /tests directory, alphabetically.
 ; 3) Within each *.test file, matching the declaration order of each class.
@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -410,6 +410,12 @@ file = common.test
 name = Query parsing using backdrop_get_query_array()
 description = Tests that backdrop_get_query_array() correctly parses query parameters.
 group = Common
+file = common.test
+
+[BlockInterestCohortTest]
+name = Block Interest Cohort
+description = Check Permissions-Policy header to disable Google FLoC.
+group = System
 file = common.test
 
 [FeedIconTest]
@@ -832,7 +838,7 @@ description = Tests stream wrapper functions.
 group = File API
 file = file.test
 
-[FileTranferTest]
+[FileTransferTest]
 name = FileTransfer unit tests
 description = Test that the jail is respected and that protocols using recursive file move operations work.
 group = System
@@ -895,6 +901,12 @@ file = form.test
 [FormsFormStoragePageCacheTestCase]
 name  = Forms using form storage on cached pages
 description  = Tests a form using form storage and makes sure validation and caching works when page caching for anonymous users is turned on.
+group = Form API
+file = form.test
+
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
 group = Form API
 file = form.test
 
@@ -1107,6 +1119,12 @@ name = Module implements alter
 description = Tests the hook_module_implements_alter.
 group = Module
 file = module.test
+
+[PagerFunctionalWebTestCase]
+name = Pager functionality
+description = Tests pager functionality.
+group = Pager
+file = pager.test
 
 [PasswordHashingTest]
 name = Password hashing

@@ -30,7 +30,7 @@ function filter_admin_overview($form) {
       'href' => "admin/config/content/formats/$id",
       'weight' => 0,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -54,7 +54,11 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
@@ -78,7 +82,11 @@ function filter_admin_overview($form) {
           'weight' => -10,
         );
       }
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);

@@ -109,7 +109,7 @@ function theme_test_hook_init_page_callback() {
 }
 
 /**
- * Menu callback for testing template overridding based on filename.
+ * Menu callback for testing template overriding based on filename.
  */
 function theme_test_template_test_page_callback() {
   return theme('theme_test_template_test');

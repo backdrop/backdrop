@@ -299,14 +299,6 @@ input.form-radio {
   padding-left: 9px; /* LTR */
 }
 
-.views-ui-view-name {
-  font-weight: bold;
-}
-
-.views-ui-view-machine-name {
-  font-size: smaller;
-}
-
 @media (max-width: 768px) {
   table.sticky-header {
     display: none;
@@ -504,6 +496,30 @@ td.group-title {
   float: left;
   padding-top: 3px;
   padding-right: 10px;
+}
+
+#views-rearrange-filters {
+  border-top: 1px solid #ccc;
+}
+#views-rearrange-filters tr.even,
+#views-rearrange-filters tr.odd {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+#views-rearrange-filters tr.filter-group-operator-row {
+  border-bottom: 1px solid #ccc;
+}
+#views-rearrange-filters tr.views-group-title {
+  border-bottom: none;
+}
+#views-rearrange-filters td.group-operator {
+  border-right: 1px solid #ccc; /* LTR */
+  vertical-align: middle;
+}
+[dir="rtl"] #views-rearrange-filters td.group-operator {
+  border-left: 1px solid #ccc;
 }
 
 /* This keeps the collapsible fieldsets of options from crashing into the bottom
@@ -760,11 +776,11 @@ td.group-title {
 
 /* @group Attachment bucket overridden
  *
- * Applies a overriden(italics) font style to overridden buckets.
+ * Applies an overridden font style (italics) to overridden buckets.
  * The better way to implement this would be to add the overridden class
  * to the bucket header when the bucket is overridden and style it as a
  * generic icon classed element. For the moment, we'll style the bucket
- * header specifically with the overriden font style.
+ * header specifically with the overridden font style.
  */
 
 .views-ui-display-tab-setting.overridden,

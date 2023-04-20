@@ -176,11 +176,7 @@ function user_admin_settings($form, &$form_state) {
   );
 
   module_load_include('password.inc', 'user', 'user');
-  $criteria = _user_password_policy_help();
-
-  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
-  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
-  $description .= $criteria;
+  $description = _user_password_policy_help();
 
   $form['password_policy']['user_password_reject_weak'] = array(
     '#type' => 'checkbox',
@@ -288,8 +284,11 @@ function user_admin_settings($form, &$form_state) {
  */
 function user_admin_settings_submit($form, &$form_state) {
   system_settings_form_submit($form, $form_state);
-  // Clear the token cache.
+  // Clear the token cache, which also resets token-related static variables.
   token_cache_clear();
+
+  // Clear all other caches, because menu items and permissions may have changed.
+  backdrop_flush_all_caches();
 }
 
 /**
@@ -393,6 +392,13 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['flood_log_failed_attempts'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log excessive failed login attempts.'),
+    '#default_value' => $flood_config->get('flood_log_failed_attempts'),
+    '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -455,6 +461,14 @@ function user_admin_permissions_submit($form, &$form_state) {
   }
 
   backdrop_set_message(t('The changes have been saved.'));
+
+  // Check if a previous search is present and preserve it on redirect.
+  if (!empty($form_state['values']['search'])) {
+    $form_state['redirect'] = array(
+      $_GET['q'],
+      array('query' => array('search' => $form_state['values']['search'])),
+    );
+  }
 }
 
 /**
@@ -567,6 +581,11 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
+  $form['roles_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
+  );
+
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
@@ -583,7 +602,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin is
   // deleted).
-  array_unshift($roles, t('disabled'));
+  $roles = array(0 => t('disabled')) + $roles;
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
@@ -634,7 +653,7 @@ function user_admin_roles($form, $form_state) {
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -707,7 +726,7 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#size' => 30,
     '#required' => TRUE,
     '#maxlength' => 64,
-    '#description' => t('The name for this role. Example: "moderator", "editorial board", "site architect".'),
+    '#description' => t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
   );
   $form['name'] = array(
     '#type' => 'machine_name',
@@ -721,11 +740,25 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#rows' => 3,
+    '#title' => t('Description'),
+    '#default_value' => isset($role->description) ? $role->description : '',
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
+  );
   $form['weight'] = array(
     '#type' => 'value',
     '#value' => empty($role->weight) ? 0 : $role->weight,
   );
   $form['actions'] = array('#type' => 'actions');
+  // Only show the 'Save and set permissions' button when creating a new role.
+  if (empty($role)) {
+    $form['actions']['continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and set permissions'),
+    );
+  }
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save role'),
@@ -734,8 +767,8 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     '#type' => 'link',
     '#href' => 'admin/config/people/roles',
     '#title' => t('Cancel'),
+    '#options' => array('attributes' => array('class' => array('form-cancel'))),
   );
-  $form['actions']['cancel']['#options']['attributes']['class'][] = 'form-cancel';
 
   return $form;
 }
@@ -744,26 +777,34 @@ function user_admin_role($form, &$form_state, $role = NULL) {
  * Form submit handler for the user_admin_role() form.
  */
 function user_admin_role_submit($form, &$form_state) {
+  // Set the default redirect.
+  $redirect = 'admin/config/people/roles';
+
   if (empty($form_state['role'])) {
     // Save a new role.
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
+      'description' => $form_state['values']['description'],
     );
     user_role_save($role);
     backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
+    // Determine whether it was the 'Save and set permissions' or the 'Save
+    // role' button that was clicked, and set the form redirect accordingly.
+    if ($form_state['triggering_element']['#id'] == 'edit-continue') {
+      $redirect = 'admin/config/people/permissions';
+    }
   }
   else {
     // Update existing role.
     $role = $form_state['role'];
-    $old_role = $role->label;
     $role->label = $form_state['values']['label'];
+    $role->description = $form_state['values']['description'];
     user_role_save($role);
-    $new_role = $role->label;
-    backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
+    backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));
   }
 
-  $form_state['redirect'] = 'admin/config/people/roles';
+  $form_state['redirect'] = $redirect;
 }
 
 /**
