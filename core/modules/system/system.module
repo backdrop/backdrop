@@ -171,7 +171,13 @@ function system_permission() {
     ),
     'view the administration theme' => array(
       'title' => t('View the administration theme'),
-      'description' => config_get('system.core', 'admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
+      // 'description' => config_get('system.core', 'admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
+      // NOTE: new 'description' and 'deprecated' keys to be used as a test for
+      // https://github.com/backdrop/backdrop-issues/issues/4487
+      // Before merging this PR, these should be removed, and original
+      // description restored.
+      'description' => t('This permission has been removed. For details, see the <a href="@change_record">change record</a>.'),
+      'deprecated' => TRUE,
     ),
     'access site reports' => array(
       'title' => t('View site reports'),

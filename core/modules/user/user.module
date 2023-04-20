@@ -481,9 +481,9 @@ function user_role_permissions($role_names = array()) {
  * @return
  *   Boolean TRUE if the user has the requested permission.
  *
- * All permission checks in Backdrop should go through this function. This
- * way, we guarantee consistent behavior, and ensure that the superuser
- * can perform all actions.
+ * All permission checks in Backdrop should go through this function. This way,
+ * we guarantee consistent behavior, and ensure that the superuser can perform
+ * all actions.
  */
 function user_access($permission_name, $account = NULL) {
   global $user;
@@ -492,24 +492,55 @@ function user_access($permission_name, $account = NULL) {
     $account = $user;
   }
 
-  // User #1 has all privileges:
-  if ($account->uid == 1) {
-    return TRUE;
-  }
-
-  // To reduce the number of SQL queries, we cache the user's permissions
-  // in a static variable.
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // To reduce the number of SQL queries, we cache all permission info, as well
+  // as individual users' permissions in a static variable. Using the advanced
+  // backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['perm'] = &backdrop_static(__FUNCTION__);
   }
+
+  // $permissions = &$backdrop_static_fast['permissions']['all'];
+  // $permissions = user_permissions_info();
+  // if (!isset($permissions)) {
+  //   $permissions = module_invoke_all('permission');
+  // }
+  // // Log a message if the permission is deprecated.
+  // if (in_array($permission_name, $permissions)) {
+  //   if (!empty($permissions[$permission_name]['deprecated'])) {
+  //     $message = 'The @permission_name permission has been deprecated and should no longer be used.';
+  //     $variables = array('@permission_name' => $permission_name);
+  //     if (isset($permissions[$permission_name]['title'])) {
+  //       $message = 'The %permission permission (@permission_name) has been deprecated and should no longer be used.';
+  //       $variables['%permission'] = $permissions[$permission_name]['title'];
+  //     }
+  //     watchdog('user', $message, $variables, WATCHDOG_WARNING);
+  //   }
+  // }
+
+  // User #1 has all privileges.
+  if ($account->uid == 1) {
+    return TRUE;
+  }
+
   $perm = &$backdrop_static_fast['perm'];
   if (!isset($perm[$account->uid])) {
     $perm[$account->uid] = user_role_permissions($account->roles);
   }
 
   return in_array($permission_name, $perm[$account->uid]);
+}
+
+function user_permissions_info() {
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['permissions'] = &backdrop_static(__FUNCTION__);
+  }
+  $permissions = &$backdrop_static_fast['permissions'];
+  if (!isset($permissions)) {
+    $permissions = module_invoke_all('permission');
+  }
+  return $permissions;
 }
 
 /**

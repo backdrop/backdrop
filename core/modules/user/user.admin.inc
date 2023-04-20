@@ -513,19 +513,30 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
   // Render the role/permission matrix.
   $options = array();
   $status = array();
-  foreach ($permissions as $perm => $perm_item) {
+  $deprecated_permissions = array();
+  foreach ($permissions as $permission => $perm_item) {
     // Fill in default values for the permission.
+    $warning = '';
+    if (!empty($perm_item['restrict access'])) {
+      $warning = t('Warning: Give to trusted roles only; this permission has security implications.');
+    }
+    if (!empty($perm_item['deprecated'])) {
+      $warning = t('Warning: This permission should no longer be used.');
+      $deprecated_permissions[] = $permission;
+    }
     $perm_item += array(
       'description' => '',
       'restrict access' => FALSE,
-      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+      'deprecated' => FALSE,
+      'warning' => $warning,
     );
-    $options[$perm] = '';
-    $form['permission'][$perm] = array(
+    $options[$permission] = '';
+    $form['permission'][$permission] = array(
       '#type' => 'item',
       '#markup' => $perm_item['title'],
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
+
     // Build arrays for the ticked permission checkboxes for each role in the
     // matrix.
     foreach ($roles as $role_name => $role) {
@@ -533,9 +544,20 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
       // - If the permission has been previously granted to the role.
       // - For the Admin role column, if the form is creating a new item (i.e.
       //   when creating a new vocabulary or a new content type).
-      if (in_array($perm, $role->permissions) || ($form_is_new && $role->name == $admin_role)) {
-        $status[$role_name][] = $perm;
+      if (in_array($permission, $role->permissions) || ($form_is_new && $role->name == $admin_role)) {
+        $status[$role_name][] = $permission;
       }
+      // If the permission is found to be assigned to at least one role, flag it
+      // as such.
+      if (in_array($permission, $role->permissions)) {
+        $perm_item['assigned'] = TRUE;
+      }
+    }
+
+    // If the permission is deprecated, but not assigned to any role, remove it
+    // from the list.
+    if ($perm_item['deprecated'] && !$perm_item['assigned']) {
+      unset($permissions[$permission]);
     }
   }
 
@@ -547,6 +569,13 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
       '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
       '#attributes' => array('class' => array('role-' . $role_name)),
     );
+    foreach ($deprecated_permissions as $deprecated_permission) {
+      // If a deprecated permission is not already assigned to a role, prevent
+      // it from being assigned, by locking the checkbox.
+      if (!in_array($deprecated_permission, $status[$role_name])) {
+        $form['checkboxes'][$role_name][$deprecated_permission]['#disabled'] = TRUE;
+      }
+    }
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
       '#tree' => TRUE,
