@@ -606,7 +606,7 @@ function user_permission() {
 /**
  * Implements hook_config_info().
  */
-function user_config_info() {F
+function user_config_info() {
   $prefixes['user.flood'] = array(
     'label' => t('User flood'),
     'group' => t('Configuration'),
