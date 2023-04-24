@@ -606,7 +606,7 @@ function user_permission() {
 /**
  * Implements hook_config_info().
  */
-function user_config_info() {
+function user_config_info() {F
   $prefixes['user.flood'] = array(
     'label' => t('User flood'),
     'group' => t('Configuration'),
@@ -996,7 +996,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
     '#weight' => 6,
-    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (!$register && module_exists('locale') && language_multilingual()),
+    '#access' => ($user->uid > 0 && config_get('system.date', 'user_configurable_timezones')) || ($user->uid > 0 && module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
   );
   // See system_user_timezone() and locale_language_selector_form() for the form
