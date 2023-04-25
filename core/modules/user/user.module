@@ -809,7 +809,8 @@ function user_account_form(&$form, &$form_state) {
 
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
-  if (!$register) {
+  $user_email_verification = config_get('system.core', 'user_email_verification');
+  if (($user->uid == 0 && !$user_email_verification) || $admin_users) {
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
