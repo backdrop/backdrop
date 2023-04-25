@@ -217,13 +217,13 @@ Backdrop.jsAC.prototype.populatePopup = function () {
     var paddingRight = parseInt($input.css('padding-right').replace('px', ''), 10);
     var paddingWidth = paddingLeft + paddingRight;
 
-    // Because we use "fixed" position, the final location is the offset from
-    // the document and the height of the element, minus scroll bar position.
+    // Position "absolute" instead of "fixed" for mobile Safari compatibility.
+    // See https://github.com/backdrop/backdrop-issues/issues/6050
     $(autocompleteInstance.popup).css({
-      top: ($input.outerHeight() + offset.top - $(document).scrollTop()) + 'px',
-      left: (offset.left - $(document).scrollLeft()) + 'px',
+      top: ($input.outerHeight() + offset.top) + 'px',
+      left: offset.left + 'px',
       width: ($input.width() + paddingWidth) + 'px',
-      position: 'fixed'
+      position: 'absolute'
     });
   }
 };

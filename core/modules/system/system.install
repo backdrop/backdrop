@@ -3413,10 +3413,19 @@ function system_update_1087() {
 }
 
 /**
+ * Set the file schemes whose paths should not be normalized.
+ */
+function system_update_1088() {
+  if (config_get('system.core', 'file_not_normalized_schemes') === NULL) {
+    config_set('system.core', 'file_not_normalized_schemes', array());
+  }
+}
+
+/**
  * Enable Admin Bar's Language Switcher component if this is a multilingual
  * site.
  */
-function system_update_1088() {
+function system_update_1089() {
   if (!module_exists('locale') && language_multilingual()) {
     return;
   }
