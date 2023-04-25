@@ -167,7 +167,8 @@ function image_field_instance_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('<em>Alt</em> field required'),
     '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
-    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility for all users.'),
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
+    '#indentation' => 1,
     '#weight' => 11,
     '#states' => array(
       'visible' => array(
