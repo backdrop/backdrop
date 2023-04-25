@@ -146,17 +146,15 @@ function system_menu_block_form($config) {
     '#title' => t('Collapsible Behavior'),
     '#default_value' => $config['collapse'],
     '#options' => array(
-      'default' => 'Default',
-      'toggle' => 'Toggle',
-      'link' => 'Link',
-      'accordion' => 'Accordion',
-      'accordion-toggle' => 'Accordion toggle',
-      'accordion-link' => 'Accordion link',
+      'default' => t('Default - tap once to expand, tap again for the link'),
+      'toggle' => t('Toggle - converts parents into toggles without links'),
+      'link' => t('Link - text on parent is a link, +/- acts as a toggle'),
     ),
     '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
       ),
     ),
   );
