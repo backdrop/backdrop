@@ -992,12 +992,11 @@ function user_account_form(&$form, &$form_state) {
     $form['#validate'][] = 'user_validate_picture';
   }
 
-  $timezone_selector = $user->uid == $form['#user']->uid && config_get('system.date', 'user_configurable_timezones');
   $form['region_language'] = array(
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
     '#weight' => 6,
-    '#access' => $timezone_selector || ($user->uid > 0 && module_exists('locale') && language_multilingual()),
+    '#access' => config_get('system.date', 'user_configurable_timezones') || ($user->uid > 0 && module_exists('locale') && language_multilingual()),
     '#group' => 'additional_settings',
   );
   // See system_user_timezone() and locale_language_selector_form() for the form
