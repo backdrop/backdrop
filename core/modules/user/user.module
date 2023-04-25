@@ -992,7 +992,7 @@ function user_account_form(&$form, &$form_state) {
     $form['#validate'][] = 'user_validate_picture';
   }
 
-  $timezone_selector = $user->uid == $form['#user']->uid && config_get('system.date', 'user_configurable_timezones'));
+  $timezone_selector = $user->uid == $form['#user']->uid && config_get('system.date', 'user_configurable_timezones');
   $form['region_language'] = array(
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
