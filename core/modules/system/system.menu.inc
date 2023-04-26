@@ -158,6 +158,11 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['accordion'] = array('#type' => 'checkbox',
+    '#title' => t('Accordion-style'),
+    '#default_value' => $config['accordion'],
+    '#description' => t('Also resets any visible sub menus from deeper levels or other branches upon expanding.'),
+  );
 
   return $form;
 }
@@ -221,7 +226,13 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
-      $data['content']['#wrapper_attributes']['data-collapse'] = $config['collapse'];
+      if ($config['accordion']) {
+        $collapsible_behavior = ($config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
+      }
+      else {
+        $collapsible_behavior = $config['collapse'];
+      }
+      $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
