@@ -166,6 +166,12 @@ function system_menu_block_form($config) {
     '#title' => t('Accordion-style'),
     '#default_value' => $config['accordion'],
     '#description' => t('Also resets any visible sub menus from deeper levels or other branches upon expanding.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
   );
 
   return $form;
