@@ -148,7 +148,7 @@ function system_menu_block_form($config) {
   $form['collapse'] = array(
     '#type' => 'select',
     '#title' => t('Collapsible Behavior'),
-    '#default_value' => $config['collapse'],
+    '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
     '#options' => array(
       'default' => t('Default - tap once to expand, tap again for the link'),
       'toggle' => t('Toggle - converts parents into toggles without links'),
@@ -164,7 +164,7 @@ function system_menu_block_form($config) {
   );
   $form['accordion'] = array('#type' => 'checkbox',
     '#title' => t('Accordion-style'),
-    '#default_value' => $config['accordion'],
+    '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
     '#description' => t('Also resets any visible sub menus from deeper levels or other branches upon expanding.'),
     '#states' => array(
       'visible' => array(
