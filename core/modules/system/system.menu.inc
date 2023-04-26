@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @file
+ */
+
+/**
  * Implements hook_block_configure().
  */
 function _system_block_configure($delta = '', $settings = array()) {
@@ -227,10 +231,10 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       if (!empty($config['accordion'])) {
-        $collapsible_behavior = ($config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
+        $collapsible_behavior = (empty($config['collapse']) || $config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
       }
       else {
-        $collapsible_behavior = $config['collapse'];
+        $collapsible_behavior = (!empty($config['collapse'])) ? $config['collapse'] : 'default';
       }
       $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
@@ -409,7 +413,7 @@ function system_menu_tree_depth_trim(array &$tree, $depth_limit) {
   foreach ($tree as $key => &$value) {
     if ($tree[$key]['below']) {
       if ($depth_limit > 1) {
-        system_menu_tree_depth_trim($tree[$key]['below'], $depth_limit-1);
+        system_menu_tree_depth_trim($tree[$key]['below'], $depth_limit - 1);
       }
       else {
         // Remove the children items.
