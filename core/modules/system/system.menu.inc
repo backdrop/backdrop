@@ -234,7 +234,7 @@ function system_menu_block_build(array $config) {
         $collapsible_behavior = (empty($config['collapse']) || $config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
       }
       else {
-        $collapsible_behavior = (!empty($config['collapse'])) ? $config['collapse'] : 'default';
+        $collapsible_behavior = (empty($config['collapse'])) ? 'default' : $config['collapse'];
       }
       $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
