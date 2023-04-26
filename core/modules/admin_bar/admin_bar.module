@@ -451,7 +451,7 @@ function admin_bar_admin_bar_replacements($complete) {
           $theme_locale_links = theme('admin_bar_links', array(
             'elements' => $locale_links,
           ));
-          $items['.admin-bar-locale-links>ul.dropdown'] = preg_replace('/<ul[^>]*>(.*?)<\/ul>/', '$1', $theme_locale_links);
+          $items['.admin-bar-locale-links>ul.dropdown'] = strip_tags($theme_locale_links, '<li><a>');
         }
       }
     }
