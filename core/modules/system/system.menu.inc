@@ -226,7 +226,7 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
-      if ($config['accordion']) {
+      if (!empty($config['accordion'])) {
         $collapsible_behavior = ($config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
       }
       else {
