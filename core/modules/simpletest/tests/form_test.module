@@ -1722,10 +1722,10 @@ function form_test_h5datetime_submit($form, &$form_state) {
   exit();
 }
 
-/** 
+/**
  * Form constructor for disabled html_date and html_time elements.
- * 
- * @see 
+ *
+ * @see form_test_disabled_h5date_h5time_submit().
  */
 function form_test_disabled_h5date_h5time($form, &$form_state) {
   $form['disabled_h5date'] = array(
@@ -1733,7 +1733,7 @@ function form_test_disabled_h5date_h5time($form, &$form_state) {
     '#title' => 'Date',
     '#description' => 'A date.',
     '#default_value' => array(
-        'date' => '2023-01-01'
+        'date' => '2023-01-01',
     ),
     '#access' => FALSE,
   );
@@ -1745,7 +1745,7 @@ function form_test_disabled_h5date_h5time($form, &$form_state) {
       'time' => '20:30',
     ),
     '#access' => FALSE,
-  );  
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Submit',

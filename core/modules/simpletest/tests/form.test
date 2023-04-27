@@ -2324,13 +2324,13 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
 
   /**
    * Test return value for disabled html_date and html_time elements.
-   * 
+   *
    * These two FAPI elements use an array for #default_value, so, the value
    * callback function html_date_or_time_value_callback needs to take care of
    * converting the array to a string upon submission of a form that contains
-   * them.   
+   * them.
    */
-  function testDisabledH5DateOrTimeElement() {
+  public function testDisabledH5DateOrTimeElement() {
     $values = backdrop_json_decode($this->backdropPost('form-test/disabled-h5date-h5time', array(), 'Submit'));
     // If the value callback html_date_or_time_value_callback() did its job
     // correctly, we'll get strings.
