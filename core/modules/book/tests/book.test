@@ -77,6 +77,7 @@ class BookTestCase extends BackdropWebTestCase {
     $nodes[] = $this->createBookNode($book->nid, $nodes[0]->book['mlid']); // Node 2.
     $nodes[] = $this->createBookNode($book->nid); // Node 3.
     $nodes[] = $this->createBookNode($book->nid); // Node 4.
+    cache_flush('cache_entity_node');
 
     $this->backdropLogout();
 
