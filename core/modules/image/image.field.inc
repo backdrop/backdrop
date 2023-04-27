@@ -187,7 +187,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
     '#default_value' => $settings['orientate'],
-    '#weight' => 14,
+    '#weight' => 13,
     '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
   );
   // Add a second line of description.
