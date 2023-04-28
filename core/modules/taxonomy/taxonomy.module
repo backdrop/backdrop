@@ -1747,18 +1747,19 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
 /**
  * Returns the set of valid terms for a taxonomy field.
  *
- * @param $field
+ * @param array $field
  *   The field definition.
- * @return
+ *
+ * @return array
  *   The array of valid terms for this field, keyed by term id.
  */
-function taxonomy_allowed_values($field) {
+function taxonomy_allowed_values(array $field) {
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+          $options[$term->tid] = $term->name;
         }
       }
     }
@@ -1850,6 +1851,27 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
   );
 
   return $element;
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
+  $field = $context['field'];
+  $widget_type = $context['instance']['widget']['type'];
+  if ($field['type'] == 'taxonomy_term_reference' && in_array($widget_type, array('options_buttons', 'options_select'))) {
+    foreach ($field['settings']['allowed_values'] as $tree) {
+      if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+        if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
+          foreach ($terms as $term) {
+            if (isset($element['#options'][$term->tid])) {
+              $element[$term->tid] = array('#indentation' => $term->depth);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
