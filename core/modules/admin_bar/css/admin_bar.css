@@ -170,8 +170,7 @@
 #admin-bar .dropdown .admin-bar-locale-links > span {
   background: transparent url(../images/language--white--64.png) 95% center no-repeat;
   background-size: 20px;
-  padding-right: 30px;
-  /* LTR */
+  padding-right: 30px; /* LTR */
 }
 
 [dir="rtl"] #admin-bar .dropdown .admin-bar-locale-links > span {
