@@ -909,22 +909,18 @@ class Layout {
    *   TRUE if this layout has all the required contexts, FALSE otherwise.
    */
   function hasContexts($required_contexts) {
-    $all_contexts = $this->getContexts();
-    foreach ($required_contexts as $required_context_name) {
-      $context_missing = TRUE;
-      foreach ($all_contexts as $context) {
-        if ($context->isA($required_context_name)) {
+    $all_available_contexts = $this->getContexts();
+    $context_counts = array_count_values($required_contexts);
+    foreach (array_unique($required_contexts) as $required_context_name) {
+      foreach ($all_available_contexts as $available_context) {
+        if ($available_context->isA($required_context_name)) {
           // Matching context available, continue to the next one.
-          $context_missing = FALSE;
-          break;
+          $context_counts[$required_context_name] = ($context_counts[$required_context_name] > 0) ? $context_counts[$required_context_name] - 1 : 0;
         }
       }
-      if ($context_missing) {
-        return FALSE;
-      }
     }
-
-    return TRUE;
+    
+    return empty(array_filter($context_counts));
   }
 
   /**
