@@ -3426,7 +3426,7 @@ function system_update_1088() {
  * site.
  */
 function system_update_1089() {
-  if (!module_exists('locale') && language_multilingual()) {
+  if (!(module_exists('locale') && language_multilingual())) {
     return;
   }
   $config = config('admin_bar.settings');
