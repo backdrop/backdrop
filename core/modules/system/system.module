@@ -637,7 +637,6 @@ function system_menu() {
   $items['admin/structure'] = array(
     'title' => 'Structure',
     'description' => 'Administer blocks, content types, menus, etc.',
-    'position' => 'right',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -649,7 +648,6 @@ function system_menu() {
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
-    'position' => 'left',
     'weight' => -4,
     'file' => 'system.admin.inc',
   );
@@ -743,7 +741,6 @@ function system_menu() {
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
     'description' => 'Administration tools.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -752,7 +749,6 @@ function system_menu() {
   $items['admin/config/media'] = array(
     'title' => 'Media',
     'description' => 'Media tools.',
-    'position' => 'left',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -790,7 +786,6 @@ function system_menu() {
   $items['admin/config/services'] = array(
     'title' => 'Web services',
     'description' => 'Tools related to web services.',
-    'position' => 'right',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -809,7 +804,6 @@ function system_menu() {
   $items['admin/config/development'] = array(
     'title' => 'Development',
     'description' => 'Development tools.',
-    'position' => 'right',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -844,7 +838,7 @@ function system_menu() {
   );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
-    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathmatical symbols.',
+    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathematical symbols.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_utf8mb4_convert_form'),
     'access arguments' => array('administer site configuration'),
@@ -856,7 +850,6 @@ function system_menu() {
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
     'description' => 'Regional settings, localization and translation.',
-    'position' => 'left',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -922,7 +915,6 @@ function system_menu() {
   $items['admin/config/search'] = array(
     'title' => 'Search',
     'description' => 'Local site search settings.',
-    'position' => 'left',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -933,7 +925,6 @@ function system_menu() {
   $items['admin/config/system'] = array(
     'title' => 'System',
     'description' => 'General system related configuration.',
-    'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -962,7 +953,6 @@ function system_menu() {
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
-    'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1011,7 +1001,6 @@ function system_menu() {
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
     'description' => 'Settings related to formatting and authoring content.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1019,7 +1008,6 @@ function system_menu() {
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1027,7 +1015,6 @@ function system_menu() {
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
     'description' => 'Tools that enhance the user interface.',
-    'position' => 'right',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1035,7 +1022,6 @@ function system_menu() {
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
     'description' => 'Settings related to editorial workflow.',
-    'position' => 'right',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1049,7 +1035,6 @@ function system_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
     'weight' => 5,
-    'position' => 'left',
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status'] = array(
@@ -2440,7 +2425,6 @@ function system_form_user_profile_form_alter(&$form, &$form_state) {
   if (config_get('system.date', 'user_configurable_timezones')) {
     system_user_timezone($form, $form_state);
   }
-  return $form;
 }
 
 /**
@@ -2450,7 +2434,6 @@ function system_form_user_register_form_alter(&$form, &$form_state) {
   $config = config('system.date');
   if ($config->get('user_configurable_timezones') && $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT) {
     system_user_timezone($form, $form_state);
-    return $form;
   }
 }
 
@@ -4387,6 +4370,33 @@ function system_admin_paths() {
  * Implements hook_file_download().
  */
 function system_file_download($uri) {
+  // If $uri is a path or belongs to a scheme that has . and .. segments removed
+  // in file_uri_normalize_dot_segments(), then do not allow such segments now.
+  $scheme = file_uri_scheme($uri);
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (!in_array($scheme, $skip_schemes)) {
+        // If $uri represents a local path, then replace DIRECTORY_SEPARATOR
+        // with '/'.
+        if (DIRECTORY_SEPARATOR !== '/') {
+          $class = file_stream_wrapper_get_class($scheme);
+          if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+            $uri = str_replace(DIRECTORY_SEPARATOR, '/', $uri);
+          }
+        }
+        $parts = explode('/', $uri);
+        foreach ($parts as $part) {
+          if ($part === '.' || $part === '..') {
+            // Deny path traversal.
+            return -1;
+          }
+        }
+      }
+    }
+  }
+
   $core_schemes = array('public', 'private', 'temporary');
   $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
   if ($additional_public_schemes) {
@@ -4457,7 +4467,7 @@ function system_file_download($uri) {
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
- * in thier elements or fieldsets.
+ * in their elements or fieldsets.
  *
  * If no top-level $form['#config'] value is present, then the values will be
  * saved to variables using variable_set() from the Drupal compatibility layer.
@@ -4516,7 +4526,7 @@ function system_settings_form_submit($form, &$form_state) {
   else {
     watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
     if (!settings_get('backdrop_drupal_compatibility')) {
-      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management.', 'error'));
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management.'), 'error');
       return;
     }
 
@@ -4659,4 +4669,3 @@ function system_transliterate_machine_name($string, $options = array()) {
 
   return $string;
 }
-

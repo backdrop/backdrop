@@ -1117,7 +1117,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- a malformed image tag.');
 
     $f = filter_xss('<blockquote><script>alert(0)</script></blockquote>', array('blockquote'));
-    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockqoute.');
+    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockquote.');
 
     $f = filter_xss("<!--[if true]><script>alert(0)</script><![endif]-->");
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script within a comment.');

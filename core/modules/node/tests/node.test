@@ -815,8 +815,19 @@ class PagePreviewTestCase extends BackdropWebTestCase {
  */
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 
-  function setUp() {
-    parent::setUp('node_layout_preview_test');
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+    // Module node_layout_preview_revision_test is a helper module that creates
+    // three layouts used in testing previews and revisions:
+    //
+    // Layout custom_node has path node/% and uses the Taylor template.
+    // Layout custom_node_preview has path node/preview/page/% and uses the
+    //   Sutro template. It is initially disabled.
+    // Layout custom_node_revision has path node/%/revisions/%/view and uses the
+    //   Sutro template. It is initially disabled.
 
     // Create a content type for checking node/edit page layouts.
     $this->content_type = $this->backdropCreateContentType();
@@ -829,9 +840,24 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Returns the NID of the most recently created node of our content type.
+   */
+  public function lastNid() {
+    return db_query('
+      SELECT nid FROM {node}
+      WHERE type = :type
+      ORDER BY nid DESC
+      LIMIT 1
+      ', array(':type' => $this->content_type->type))
+      ->fetchField();
+  }
+
+  /**
    * Tests that the correct layout is used for node add and node edit previews.
    */
-  function testNodeLayoutPreview() {
+  public function testNodeLayoutPreview() {
+
+    // The node preview should use the 'custom_node' layout with path node/%.
 
     // Create a node to test through the admin interface.
     $this->backdropGet('node/add/' . $this->content_type->type);
@@ -852,9 +878,13 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     // layout.
     $this->assertText('Node body field', '"Node body field" found.');
 
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
     // Look for the body text, which appears only in that field if the context
     // was set properly.
-    $this->assertText($body, "\"{$body}\" found.");
+    $this->assertText($body, "Body text \"{$body}\" found.");
 
     // Create a new node; fill in its title and body, then save.
     $this->backdropGet('node/add/' . $this->content_type->type);
@@ -866,8 +896,8 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    // Edit the node with a new random body content, then preview.
-    $this->backdropGet('node/1/edit');
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
     $body = $this->randomName();
     $edit = array(
       'body[und][0][value]' => $body,
@@ -880,6 +910,163 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     // Look for the heading of the field body block that exists only in our
     // layout.
     $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Now enable the 'custom_node_preview' layout; give it path
+    // node/preview/{$this->content_type->type}/%, and run the same tests.
+
+    $layouts = layout_load_all();
+    $preview_layout = $layouts['custom_node_preview'];
+    $preview_layout->enable();
+    $preview_layout->setPath('node/preview/' . $this->content_type->type . '/%');
+    $preview_layout->save();
+
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+
+  }
+}
+
+/**
+ * Tests that the correct layout is used for node revisions.
+ */
+class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+
+    // Create and login user.
+    $web_user = $this->backdropCreateUser(array(
+      'view revisions',
+    ));
+    $this->backdropLogin($web_user);
+    $nodes = array();
+
+    // Create initial node.
+    $node = $this->backdropCreateNode();
+    $settings = get_object_vars($node);
+    $settings['revision'] = 1;
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    // Create a revision with random title and body and update variables.
+    $this->backdropCreateNode($settings);
+    // Make sure we get revision information.
+    $node = node_load($node->nid);
+    $settings = get_object_vars($node);
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    $this->nodes = $nodes;
+  }
+
+  /**
+   * Tests that the correct layout is used for node revisions.
+   */
+  public function testNodeLayoutRevisions() {
+    $nodes = $this->nodes;
+
+    // The node revision should use the 'custom_node' layout with path node/%.
+
+    // Confirm that our layout shows up on both the original node and its
+    // revision.
+    foreach ($nodes as $node) {
+      $body = $node->body[LANGUAGE_NONE][0]['value'];
+      $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+      $this->assertText($body, 'Correct body text displays for version.');
+
+      // Look for the taylor template (only exists in our layout).
+      $this->assertText('taylor', 'Layout template "taylor" found.');
+
+      // Look for the heading of the field body block that exists only in our
+      // layout.
+      $this->assertText('Node body field', '"Node body field" found.');
+
+      // Look for the body text, which appears only in that field if the context
+      // was set properly.
+      $this->assertText($body, "\"{$body}\" found.");
+    }
+
+    // Enable the node revision override layout 'custom_node_revision' with
+    // path node/%/revisions/%/view.
+
+    $layouts = layout_load_all();
+    $revision_layout = $layouts['custom_node_revision'];
+    $revision_layout->enable();
+    $revision_layout->save();
+
+    // Check the old revision to see that it uses our override layout.
+    $node = $nodes[0];
+    $body = $node->body[LANGUAGE_NONE][0]['value'];
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+    $this->assertText($body, 'Correct body text displays for version.');
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Revision layout title', '"Custom Node Revision layout title" found.');
 
     // Look for the body text, which appears only in that field if the context
     // was set properly.
@@ -1703,8 +1890,8 @@ class NodeSaveTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests determing changes in hook_node_presave() and verifies the static node
-   * load cache is cleared upon save.
+   * Tests determining changes in hook_node_presave() and verifies the static
+   * node load cache is cleared upon save.
    */
   function testDeterminingChanges() {
     // Initial creation.
@@ -1742,7 +1929,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    * @see node_test_node_insert()
    */
   function testNodeSaveOnInsert() {
-    // node_test_node_insert() tiggers a save on insert if the title equals
+    // node_test_node_insert() triggers a save on insert if the title equals
     // 'new'.
     $node = $this->backdropCreateNode(array('title' => 'new'));
     $this->assertEqual($node->title, 'Node ' . $node->nid, 'Node saved on node insert.');
@@ -1770,7 +1957,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
 
-    // Create a content type programmaticaly.
+    // Create a content type programmatically.
     $type = $this->backdropCreateContentType();
 
     $config = config('node.type.' . $type->type);
@@ -2273,7 +2460,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
     }
 
-    // Verify 'view any unpubished content' allows view but not edit or delete.
+    // Verify 'view any unpublished content' allows view but not edit or delete.
     $this->backdropLogout();
     $this->backdropLogin($this->base_user_4);
     $this->backdropGet('admin/content');

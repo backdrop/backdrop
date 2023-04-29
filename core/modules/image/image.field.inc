@@ -68,7 +68,7 @@ function image_field_settings_form($field, $instance) {
     $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
 
     $form['default_image']['remove'] = array(
-      '#type' => t('checkbox'),
+      '#type' => 'checkbox',
       '#title' => t('Remove default image'),
     );
   }
@@ -195,7 +195,7 @@ function image_field_instance_settings_form($field, $instance) {
     $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
 
     $form['default_image']['remove'] = array(
-      '#type' => t('checkbox'),
+      '#type' => 'checkbox',
       '#title' => t('Remove default image'),
     );
   }

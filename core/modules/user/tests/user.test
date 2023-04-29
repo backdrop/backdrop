@@ -230,6 +230,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $this->assertEqual($new_user->mail, $mail, 'Email address matches.');
     $this->assertEqual($new_user->signature, '', 'Correct signature field.');
     $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
+    $this->assertEqual($new_user->changed, $new_user->created, 'Correct changed time.');
     $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
     $this->assertEqual($new_user->timezone, $config_system_date->get('default_timezone'), 'Correct time zone field.');
     $this->assertEqual($new_user->language, '', 'Correct language field.');
@@ -320,9 +321,9 @@ class UserRegistrationTestCase extends UserLoginTestBase {
       // Check user fields.
       $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
       $new_user = reset($accounts);
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
     }
   }
 
@@ -2375,6 +2376,8 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[user:last-login:short]'] = format_date($account->login, 'short', '', NULL, $language->langcode);
     $tests['[user:created]'] = format_date($account->created, 'medium', '', NULL, $language->langcode);
     $tests['[user:created:short]'] = format_date($account->created, 'short', '', NULL, $language->langcode);
+    $tests['[user:changed]'] = format_date($account->changed, 'medium', '', NULL, $language->langcode);
+    $tests['[user:changed:short]'] = format_date($account->changed, 'short', '', NULL, $language->langcode);
     $tests['[current-user:name]'] = check_plain(user_format_name($global_account));
 
     // Test to make sure that we generated something for each token.

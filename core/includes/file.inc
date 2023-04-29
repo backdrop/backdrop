@@ -2169,6 +2169,7 @@ function file_download() {
   $scheme = array_shift($args);
   $target = implode('/', $args);
   $uri = $scheme . '://' . $target;
+  $uri = file_uri_normalize_dot_segments($uri);
   if (file_stream_wrapper_valid_scheme($scheme) && file_exists($uri)) {
     $headers = file_download_headers($uri);
     if (count($headers)) {
@@ -2733,6 +2734,55 @@ function file_get_content_headers(File $file) {
     'Content-Length' => $file->filesize,
     'Cache-Control' => 'private',
   );
+}
+
+/**
+ * Normalize dot segments in a URI.
+ *
+ * @param $uri
+ *   A stream, referenced as "scheme://target".
+ *
+ * @return string
+ *   The URI with dot segments removed and slashes as directory separator.
+ */
+function file_uri_normalize_dot_segments($uri) {
+  $scheme = file_uri_scheme($uri);
+
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (empty($skip_schemes) || !in_array($scheme, $skip_schemes)) {
+        // URIs should always use '/' for separating directories in paths.
+        $class = file_stream_wrapper_get_class($scheme);
+        if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+          $target = str_replace(DIRECTORY_SEPARATOR, '/', $target);
+
+          // Remove '.' and '..' from the path.
+          $parts = explode('/', $target);
+          $normalized = array();
+          foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+              continue;
+            }
+            elseif ($part === '..') {
+              array_pop($normalized);
+            }
+            else {
+              $normalized[] = $part;
+            }
+          }
+
+          $target = implode('/', $normalized);
+        }
+
+        $uri = $scheme . '://' . $target;
+      }
+    }
+  }
+
+  return $uri;
 }
 
 /**

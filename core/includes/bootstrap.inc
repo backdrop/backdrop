@@ -593,11 +593,14 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  * which directory should be used based on the hostname. If not using multisite,
  * the path returned will be a single period (indicating the current directory).
  *
- * @param $http_host
+ * @param string $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
- * @param $script_name
+ * @param string $script_name
  *   The part of the url following the hostname, including the leading slash.
+ * @param bool $require_settings
+ *   Only configuration directories with an existing settings.php file
+ *   will be recognized. Defaults to TRUE.
  *
  * @return
  *   The relative path of the matching configuration directory.
@@ -2532,7 +2535,8 @@ function backdrop_set_title($title = NULL, $output = CHECK_PLAIN) {
  *   The number of random bytes to fetch and base64 encode.
  *
  * @return string
- *   The base64 encoded result will have a length of up to 4 * $byte_count.
+ *   The base64 encoded result will have a length of up to
+ *   ceil($byte_count * 4 / 3).
  */
 function backdrop_random_key($byte_count = 32) {
   return backdrop_base64_encode(backdrop_random_bytes($byte_count));
@@ -4135,7 +4139,7 @@ function backdrop_autoload($class) {
  * static $foo = &backdrop_static(__FUNCTION__);
  * @endcode
  * However, the above line of code does not work, because PHP only allows static
- * variables to be initializied by literal values, and does not allow static
+ * variables to be initialized by literal values, and does not allow static
  * variables to be assigned to references.
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.static
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.references
