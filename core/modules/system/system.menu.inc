@@ -146,13 +146,13 @@ function system_menu_block_form($config) {
     )),
   );
   $form['collapse'] = array(
-    '#type' => 'select',
+    '#type' => 'radios',
     '#title' => t('Collapsible Behavior'),
     '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
     '#options' => array(
-      'default' => t('Default - tap once to expand, tap again for the link'),
-      'toggle' => t('Toggle - converts parents into toggles without links'),
-      'link' => t('Link - text on parent is a link, +/- acts as a toggle'),
+      'default' => t('Default'),
+      'toggle' => t('Toggle'),
+      'link' => t('Link'),
     ),
     '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
     '#states' => array(
@@ -162,10 +162,14 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
+  $form['collapse']['toggle']['#description'] = t('Parent functions as toggle without a link.');
+  $form['collapse']['link']['#description'] = t('Parent text is a link, +/- acts as a toggle.');
+
   $form['accordion'] = array('#type' => 'checkbox',
     '#title' => t('Accordion-style'),
     '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
-    '#description' => t('Also resets any visible sub menus from deeper levels or other branches upon expanding.'),
+    '#description' => t('Close all sub-menus when closing parent menu items.'),
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
