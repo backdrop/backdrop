@@ -126,13 +126,27 @@ $url = parse_url($options['db-url']);
 $url = (object)array_map('urldecode', $url);
 
 // Assign null values to all required fields that do not already exist
-$url->driver = $url->driver ?? NULL ;
-$url->user = $url->user ?? NULL ;
-$url->pass = $url->pass ?? NULL ;
-$url->host = $url->host ?? NULL ;
-$url->port = $url->port ?? NULL ;
-$url->path = $url->path ?? NULL ;
-$url->database = $url->database ?? NULL ;
+if(!isset($url->driver) && empty($url->driver)) {
+	$url->driver = NULL ;
+}
+if(!isset($url->user) && empty($url->user)) {
+	$url->user = NULL ;
+}
+if(!isset($url->pass) && empty($url->pass)) {
+	$url->pass = NULL ;
+}
+if(!isset($url->host) && empty($url->host)) {
+	$url->host = NULL ;
+}
+if(!isset($url->port) && empty($url->port)) {
+	$url->port = NULL ;
+}
+if(!isset($url->path) && empty($url->path)) {
+	$url->path = NULL ;
+}
+if(!isset($url->database) && empty($url->database)) {
+	$url->database = NULL ;
+}
 
 $db_spec = array(
   'driver' => 'mysql',
