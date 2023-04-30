@@ -226,6 +226,71 @@ function user_update_dependencies() {
 }
 
 /**
+ * Implements hook_requirements().
+ *
+ * Display warning about deprecated permissions still assigned to roles.
+ */
+function user_requirements($phase) {
+  $requirements = array();
+
+  if ($phase == 'runtime') {
+    $description = NULL;
+    $roles = user_roles(FALSE, NULL, TRUE);
+
+    $permissions = module_invoke_all('permission');
+    $module_info = system_get_info('module');
+    $permission_modules = user_permission_get_modules();
+    $deprecated_permissions = array();
+
+    foreach ($permissions as $permission => $perm_item) {
+      if (!empty($perm_item['deprecated'])) {
+        $deprecated_permission_roles = array();
+        // Check if the deprecated permission is assigned to any role.
+        foreach ($roles as $role) {
+          if (in_array($permission, $role->permissions)) {
+            $deprecated_permission_roles[] = $role->label;
+          }
+        }
+        // If the deprecated permission is granted to at least one role, add it
+        // to the list.
+        if (!empty($deprecated_permission_roles)) {
+          $deprecated_permissions[$permission] = $perm_item;
+          // Add the roles this permission is granted to.
+          $deprecated_permissions[$permission]['roles'] = $deprecated_permission_roles;
+          // Add the module that provides the permission.
+          $deprecated_permissions[$permission]['module'] = $module_info[$permission_modules[$permission]]['name'];
+        }
+      }
+    }
+
+    // Only show the warning in the "Status report" page if there are deprecated
+    // permissions detected, that are assigned to at least one role.
+    if (!empty($deprecated_permissions)) {
+      $items = array();
+      // Prepare the permissions/roles list.
+      foreach ($deprecated_permissions as $permission) {
+        $items[] = array(
+          'data' => t('<strong>@permission</strong> (provided by the @module module) is currently assigned to:', array('@permission' => $permission['title'], '@module' => $permission['module'])),
+          'children' => $permission['roles'],
+        );
+      }
+      $description = t('The following permissions should no longer be used:');
+      $description .= theme('item_list', array('items' => $items));
+      $description .= t('You can unassign these permissions on the <a href="@permissions">Permissions</a> page.', array('@permissions' => '/admin/config/people/permissions'));
+
+      $requirements['deprecated_permissions'] = array(
+        'title' => t('Deprecated permissions'),
+        'value' => t('Deprecated permissions are assigned to one or more roles.'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $description,
+      );
+    }
+  }
+
+  return $requirements;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */
