@@ -56,7 +56,16 @@ function template_preprocess_search_results(&$variables) {
       $variables['content_attributes']['lang'] = $result['language'];
     }
   }
-  $variables['pager'] = theme('pager', array('tags' => NULL));
+
+  $pager_type = config_get('search.settings', 'search_pager_type');
+  // Set the default (full) pager as the fallback.
+  $pager = isset($pager_type) ? $pager_type : 'pager';
+  // @to-do: Figure out why it is required to rebuild the theme registry in
+  // order for the mini pager (provided by Views) to be rendered. How come this
+  // works properly with the default pager (provided by core)?
+  backdrop_theme_rebuild();
+  $variables['pager'] = theme($pager, array('tags' => NULL));
+
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
 
