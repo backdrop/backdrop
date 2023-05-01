@@ -123,30 +123,22 @@ if (empty($options['db-url'])) {
 }
 $url = parse_url($options['db-url']);
 
-$url = (object)array_map('urldecode', $url);
+$url = array_map('urldecode', $url);
 
-// Assign null values to all required fields that do not already exist
-if(!isset($url->driver) && empty($url->driver)) {
-	$url->driver = NULL ;
+// Check if the driver is set to mysql and report error if it is not.
+if ( $url['scheme'] != 'mysql' ) {
+  print "Only mysql connections are supported. Specify one as --db-url=mysql://user:pass@host_name/db_name.\n";
+  exit;
 }
-if(!isset($url->user) && empty($url->user)) {
-	$url->user = NULL ;
-}
-if(!isset($url->pass) && empty($url->pass)) {
-	$url->pass = NULL ;
-}
-if(!isset($url->host) && empty($url->host)) {
-	$url->host = NULL ;
-}
-if(!isset($url->port) && empty($url->port)) {
-	$url->port = NULL ;
-}
-if(!isset($url->path) && empty($url->path)) {
-	$url->path = NULL ;
-}
-if(!isset($url->database) && empty($url->database)) {
-	$url->database = NULL ;
-}
+
+$url += array(
+  'user' => NULL,
+  'pass' => NULL,
+  'host' => NULL,
+  'port' => NULL,
+);
+
+$url = (object)$url;
 
 $db_spec = array(
   'driver' => 'mysql',
@@ -157,7 +149,6 @@ $db_spec = array(
   // Remove leading / character from database names.
   'database' => substr($url->path, 1),
 );
-
 
 $settings = array(
   'parameters' => array(
