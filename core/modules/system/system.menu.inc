@@ -2,6 +2,7 @@
 
 /**
  * @file
+ * Menu block configuration form and display.
  */
 
 /**
@@ -147,7 +148,7 @@ function system_menu_block_form($config) {
   );
   $form['collapse'] = array(
     '#type' => 'radios',
-    '#title' => t('Collapsible Behavior'),
+    '#title' => t('Collapsible behavior'),
     '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
     '#options' => array(
       'default' => t('Default'),
