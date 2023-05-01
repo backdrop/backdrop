@@ -47,17 +47,17 @@ class ViewsLayoutsTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/views/add');
 
     // Create our layout context view and configure its properties.
-    $layoutContextView = array();
-    $layoutContextView['human_name'] = 'Layout Context Test (User account)';
-    $layoutContextView['name'] = 'layout_context_test_ua';
-    $layoutContextView['show[wizard_key]'] = 'users';
-    $layoutContextView['description'] = 'This view will allow a a layout to reference contextually';
-    $layoutContextView['page[create]'] = FALSE;
-    $layoutContextView['block[create]'] = 1;
-    $layoutContextView['block[title]'] = 'block';
-    $layoutContextView['block[style][row_plugin]'] = 'fields';
+    $layout_context_view = array();
+    $layout_context_view['human_name'] = 'Layout Context Test (User account)';
+    $layout_context_view['name'] = 'layout_context_test_ua';
+    $layout_context_view['show[wizard_key]'] = 'users';
+    $layout_context_view['description'] = 'This view will allow a a layout to reference contextually';
+    $layout_context_view['page[create]'] = FALSE;
+    $layout_context_view['block[create]'] = 1;
+    $layout_context_view['block[title]'] = 'block';
+    $layout_context_view['block[style][row_plugin]'] = 'fields';
 
-    $this->backdropPost('admin/structure/views/add', $layoutContextView, t('Save view'));
+    $this->backdropPost('admin/structure/views/add', $layout_context_view, t('Save view'));
     $this->assertText(t('Your view was saved. You may configure it from the list below.'));
 
     // Navigate to the configure page of our view and add fields to sort the

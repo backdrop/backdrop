@@ -152,7 +152,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/delete'] = array(
     'title' => 'Delete row',
     'page callback' => 'layout_flexible_template_delete_row',
-    'page arguments' => [5, 7],
+    'page arguments' => array(5, 7),
     'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
@@ -233,7 +233,7 @@ function layout_menu() {
   $items['admin/structure/layouts/manage/%layout_tempstore'] = array(
     'title' => 'Manage blocks',
     'title callback' => 'layout_page_title',
-    'title arguments' => [4],
+    'title arguments' => array(4),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_content_form', 4),
     'type' => MENU_NORMAL_ITEM,
@@ -299,7 +299,7 @@ function layout_menu() {
 
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
     'title' => 'Configure block',
-    'load arguments' => [4],
+    'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_block_configure_form', 4, 7, 6),
     'file' => 'layout.admin.inc',
@@ -1605,7 +1605,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
         'preview' => 'preview.png',
         'default region' => 'content',
         'stylesheets' => array(
-          'all' => [str_replace('_', '-', $name) . '.css'],
+          'all' => array(str_replace('_', '-', $name) . '.css'),
         ),
       );
       if (!isset($info[$name]['template'])) {
@@ -1759,7 +1759,7 @@ function layout_get_style_info($plugin_name) {
  * @param $block_delta
  *   The key of the block within that module.
  *
- * @return array
+ * @return array|FALSE
  *   The information from hook_block_info() for the requests block(s).
  */
 function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
@@ -1799,7 +1799,7 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
       return $block_info['modules'][$block_module][$block_delta];
     }
     else {
-      return array();
+      return FALSE;
     }
   }
   elseif (isset($block_module)) {
@@ -1807,7 +1807,7 @@ function layout_get_block_info($block_module = NULL, $block_delta = NULL) {
       return $block_info['modules'][$block_module];
     }
     else {
-      return array();
+      return FALSE;
     }
   }
 
@@ -2309,7 +2309,7 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL) {
  * @param string $flexible_template_name
  *   The machine name of the template to load.
  *
- * @return LayoutFlexibleTemplate
+ * @return LayoutFlexibleTemplate|false
  */
 function layout_flexible_template_load($flexible_template_name = NULL) {
   $all_templates = layout_flexible_template_load_all();
@@ -2317,7 +2317,7 @@ function layout_flexible_template_load($flexible_template_name = NULL) {
     return $all_templates[$flexible_template_name];
   }
   else {
-    return "";
+    return FALSE;
   }
 }
 
