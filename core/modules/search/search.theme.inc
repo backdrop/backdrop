@@ -58,7 +58,7 @@ function template_preprocess_search_results(&$variables) {
   }
 
   $pager_type = config_get('search.settings', 'search_pager_type');
-  // Set the default (full) pager as the fallback.
+  // Set the full pager as the default/fallback.
   $pager = isset($pager_type) ? $pager_type : 'pager';
   // @to-do: Figure out why it is required to rebuild the theme registry in
   // order for the mini pager (provided by Views) to be rendered. How come this
