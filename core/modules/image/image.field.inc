@@ -566,7 +566,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     // and then adding the #required property to the function that it calls.
     // That way, it is rendered, but it doesn't actually trigger any validation.
     $element['alt']['#pre_render'] = array('_image_field_widget_alt_pre_render');
-    $element['alt']['#element_validate'] = array('_image_required_fields_validate');
+    $element['alt']['#element_validate'] = array('_image_field_widget_alt_validate');
     // Pass the alt required status as a data-* attribute on the form element,
     // in case other modules need access to it.
     $element['alt']['#attributes'] = array('data-alt-required' => 'true');
@@ -592,7 +592,7 @@ function _image_field_widget_alt_pre_render($element) {
  * This is separated in a validate function instead of a #required flag to avoid
  * being validated on the process callback.
  */
-function _image_required_fields_validate($element, &$form_state) {
+function _image_field_widget_alt_validate($element, &$form_state) {
   // Only do validation if the function is triggered from other places than
   // the image process form.
   if (isset($form_state['triggering_element']['#submit']) && !in_array('file_managed_file_submit', $form_state['triggering_element']['#submit'])) {
