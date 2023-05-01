@@ -87,7 +87,9 @@ function dblog_overview() {
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
 
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  if (user_access('clear logs')) {
+    $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  }
 
   return $build;
 }
