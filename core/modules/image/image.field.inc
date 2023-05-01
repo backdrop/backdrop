@@ -559,13 +559,30 @@ function image_field_widget_process($element, &$form_state, $form) {
   );
 
   if ($settings['alt_field_required']) {
-    $element['alt']['#title'] .= ' <span class="form-required" title="' . t('The alt text field is required.') . '">*</span>';
+    // Adding #required directly to the element would trigger unnecessary
+    // validation errors when uploading the image before submitting the form.
+    // Rather than adding manual markup to the #title to mimic the required
+    // asterisk indication, we are adding an element #pre_render attribute,
+    // and then adding the #required property to the function that it calls.
+    // That way, it is rendered, but it doesn't actually trigger any validation.
+    $element['alt']['#pre_render'] = array('_image_field_widget_alt_pre_render');
     $element['alt']['#element_validate'] = array('_image_required_fields_validate');
     // Pass the alt required status as a data-* attribute on the form element,
     // in case other modules need access to it.
     $element['alt']['#attributes'] = array('data-alt-required' => 'true');
   }
 
+  return $element;
+}
+
+/**
+ * Add the required indicator to the alt field during pre-render.
+ *
+ * Avoids triggering unnecessary validation errors when uploading the image
+ * before submitting the form.
+ */
+function _image_field_widget_alt_pre_render($element) {
+  $element['#required'] = TRUE;
   return $element;
 }
 
