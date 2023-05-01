@@ -35,9 +35,9 @@ function TableResponsive (table) {
   // traversed only once to find them.
   this.$headers = this.$table.find('th');
   // Add a link before the table for users to show or hide weight columns.
-  this.$link = $('<a href="#" class="tableresponsive-toggle"></a>')
+  this.$link = $('<a href="#" class="tableresponsive-toggle">' + this.showText + '</a>')
     .attr({
-      'title': Backdrop.t('Show table cells that were hidden to make the table fit within a small screen.')
+      'title': Backdrop.t('Toggle visibility of table cells, that were hidden to make the table fit within a small screen.')
     })
     .on('click', $.proxy(this, 'eventhandlerToggleColumns'));
 
@@ -81,7 +81,7 @@ $.extend(TableResponsive.prototype, {
     }
     // When the toggle is pegged, its presence is maintained because the user
     // has interacted with it. This is necessary to keep the link visible if the
-    // user adjusts screen size and changes the visibilty of columns.
+    // user adjusts screen size and changes the visibility of columns.
     if (!pegged && hiddenLength === 0) {
       this.$link.hide().text(this.hideText);
     }

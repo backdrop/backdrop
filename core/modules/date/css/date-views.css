@@ -110,3 +110,7 @@
   margin-right: 10px;
   font-weight: bold;
 }
+
+.date-nav-wrapper .pager {
+  margin: 0;
+}

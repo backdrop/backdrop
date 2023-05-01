@@ -19,7 +19,7 @@ Backdrop.behaviors.verticalTabs = {
 
       // Check if there are some fieldsets that can be converted to vertical-tabs
       var $fieldsets = $('> fieldset', this);
-      if ($fieldsets.length == 0) {
+      if ($fieldsets.length <= 1) {
         return;
       }
 

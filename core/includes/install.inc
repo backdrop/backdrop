@@ -1,9 +1,8 @@
 <?php
-
 /**
-* @file
-* API functions for installing modules and themes.
-*/
+ * @file
+ * API functions for installing modules and themes.
+ */
 
 /**
  * Indicates that a module has not been installed yet.
@@ -115,7 +114,7 @@ function backdrop_get_schema_versions($module) {
     // Narrow this down to functions ending with an integer, since all
     // hook_update_N() functions end this way, and there are other
     // possible functions which match '_update_'. We use preg_grep() here
-    // instead of foreaching through all defined functions, since the loop
+    // instead of iterating through all defined functions, since the loop
     // through all PHP functions can take significant page execution time
     // and this function is called on every administrative page via
     // system_requirements().
@@ -503,7 +502,10 @@ abstract class DatabaseTasks {
       Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
       try {
         Database::getConnection()->createDatabase($database);
-        $last_exception = FALSE;
+        // After creating the database, we must run DatabaseTasks::connect()
+        // again to be sure a connection to the new database can be established.
+        Database::removeConnection('default');
+        return $this->connect();
       }
       catch (PDOException $e) {
         $last_exception = $e;
@@ -606,6 +608,7 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['password']) ? '' : $database['password'],
       '#required' => FALSE,
       '#size' => 45,
+      '#password_toggle' => TRUE,
     );
 
     $form['advanced_options'] = array(
@@ -991,18 +994,25 @@ function backdrop_install_system() {
  *   all modules in this list have already been disabled before this function
  *   is called.
  * @param bool $uninstall_dependents
- *   (optional) If TRUE, the function will check that all modules which depend
- *   on the passed-in module list either are already uninstalled or contained in
- *   the list, and it will ensure that the modules are uninstalled in the
- *   correct order. This incurs a significant performance cost, so use FALSE if
- *   you know $module_list is already complete and in the correct order.
- *   Defaults to TRUE.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules
+ *     dependent on the passed-in module(s) are checked to see if they're
+ *     already uninstalled, or if they're included in $module_list. If all
+ *     dependents are in $module_list, they will all be uninstalled in the
+ *     correct order. If, however, dependent modules are still installed and not
+ *     included in $module_list, the passed-in module(s) will not be
+ *     uninstalled. Note that dependency-checking incurs a significant
+ *     performance cost.
+ *   - If FALSE, dependency-checking is bypassed. Dependent modules not included
+ *     in $module_list will not be uninstalled, and modules in the list may not
+ *     be uninstalled in the correct order. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @return bool
- *   Returns TRUE if the operation succeeds or FALSE if it aborts due to an
- *   unsafe condition, namely, $uninstall_dependents is TRUE and a module in
- *   $module_list has dependents which are not already uninstalled and not also
- *   included in $module_list).
+ *   Returns FALSE if $uninstall_dependents is TRUE, and one or more dependent
+ *   modules are still installed but not included in $module_list. Otherwise
+ *   returns TRUE.
  *
  * @see module_disable()
  * @see module_enable()
@@ -1043,8 +1053,8 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     // Uninstall the module.
     module_load_install($module);
     module_invoke($module, 'uninstall');
-    backdrop_uninstall_schema($module);
     config_uninstall_config($module);
+    backdrop_uninstall_schema($module);
 
     watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
     backdrop_set_installed_schema_version($module, SCHEMA_UNINSTALLED);
@@ -1298,7 +1308,7 @@ function st($string, array $args = array(), array $options = array()) {
 
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       // Escaped only
       case '@':
         $args[$key] = check_plain($value);

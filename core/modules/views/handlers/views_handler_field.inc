@@ -260,7 +260,7 @@ class views_handler_field extends views_handler {
    *
    * This function can be overridden by fields that want more or fewer
    * elements available, though this seems like it would be an incredibly
-   * rare occurence.
+   * rare occurrence.
    */
   function get_elements() {
     static $elements = NULL;
@@ -659,6 +659,18 @@ class views_handler_field extends views_handler {
       '#collapsed' => TRUE,
       '#weight' => 100,
     );
+
+    $defaults_changed = FALSE;
+    if ($this->options['alter']['alter_text'] ||
+        $this->options['alter']['make_link'] ||
+        $this->options['alter']['trim'] ||
+        $this->options['alter']['strip_tags'] ||
+        $this->options['alter']['nl2br']) {
+      $defaults_changed = TRUE;
+    }
+    if ($defaults_changed) {
+      $form['alter']['#collapsed'] = FALSE;
+    }
 
     if ($this->allow_advanced_render()) {
       $form['alter']['#tree'] = TRUE;
@@ -1220,7 +1232,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
         $more_link_path = $this->options['alter']['more_link_path'];
         $more_link_path = strip_tags(decode_entities(strtr($more_link_path, $tokens)));
 
-        // Take sure that paths which was runned through url() does work as well.
+        // Make sure that the path that was run through url() works as well.
         $base_path = base_path();
         // Checks whether the path starts with the base_path.
         if (strpos($more_link_path, $base_path) === 0) {
@@ -1391,7 +1403,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
       }
     }
 
-    // If the query and fragment were programatically assigned overwrite any
+    // If the query and fragment were programmatically assigned overwrite any
     // parsed values.
     if (isset($alter['query'])) {
       // Convert the query to a string, perform token replacement, and then
@@ -1520,7 +1532,8 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
     foreach ($array as $param => $val) {
       if (is_array($val)) {
-         // Copy parent_keys array, so we don't afect other elements of this iteration.
+         // Copy parent_keys array, so we don't affect other elements of this
+         // iteration.
          $child_parent_keys = $parent_keys;
          $child_parent_keys[] = $param;
          // Get the child tokens.
