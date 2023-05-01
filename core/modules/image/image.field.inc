@@ -576,10 +576,9 @@ function image_field_widget_process($element, &$form_state, $form) {
 }
 
 /**
- * Add the required indicator to the alt field during pre-render.
+ * Pre-render callback for alt field.
  *
- * Avoids triggering unnecessary validation errors when uploading the image
- * before submitting the form.
+ * Mark a field as #required for display only.
  */
 function _image_field_widget_alt_pre_render($element) {
   $element['#required'] = TRUE;
