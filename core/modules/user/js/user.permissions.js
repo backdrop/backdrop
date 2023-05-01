@@ -140,8 +140,8 @@ Backdrop.behaviors.permissionWarnings = {
     $table.find('.permission-warning-description').hide();
 
     // Toggle the warning description.
-    $('a.warning-toggle').click(function(e) {
-      var $description = $(this).closest('.description').find('.permission-warning-description').toggle();
+    $table.on('click', 'a.warning-toggle', function(e) {
+      var $description = $(this).closest('td').find('.permission-warning-description').toggle();
       if ($description.is(':visible')) {
         $(this).text(Backdrop.t('less'));
       }
