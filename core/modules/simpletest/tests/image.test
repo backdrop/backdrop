@@ -458,7 +458,7 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
         $this->assertTrue($correct_dimensions_real, format_string('Image %file after %action action has proper dimensions.', array('%file' => $file, '%action' => $op)));
         $this->assertTrue($correct_dimensions_object, format_string('Image %file object after %action action is reporting the proper height and width values.', array('%file' => $file, '%action' => $op)));
         // JPEG colors will always be messed up due to compression.
-        if ($image->info['extension'] != 'jpg') {
+        if (!in_array($image->info['extension'], array('jpg', 'jpeg'))) {
           $this->assertTrue($correct_colors, format_string('Image %file object after %action action has the correct color placement.', array('%file' => $file, '%action' => $op)));
         }
       }
