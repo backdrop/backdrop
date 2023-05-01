@@ -28,6 +28,8 @@ function image_gd_settings() {
 
 /**
  * Retrieve supported extensions for the GD2 toolkit.
+ *
+ * @since 1.25.0 Function added.
  */
 function image_gd_supported_extensions() {
   $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
