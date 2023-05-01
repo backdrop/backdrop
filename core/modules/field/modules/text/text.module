@@ -109,7 +109,7 @@ function text_field_instance_settings_form($field, $instance) {
     '#type' => 'checkboxes',
     '#title' => t('Allowed text formats'),
     '#default_value' => $settings['allowed_formats'],
-    '#description' => t("Choose which <a href=\"@text_formats\">text formats</a> should be available for authors to select from. If an existing field uses a text format not selected here, authors' access will be denied.", array('@text_formats' => '/admin/config/content/formats')),
+    '#description' => t('Choose which <a href="@text_formats">text formats</a> should be available for authors. If an author does not have permission to a format on existing content, the field will be locked.', array('@text_formats' => url('admin/config/content/formats'))),
     '#options' => $formats,
     '#states' => array(
       'visible' => array(
@@ -118,6 +118,7 @@ function text_field_instance_settings_form($field, $instance) {
     ),
     '#weight' => 0,
   );
+  $form['allowed_formats'][filter_fallback_format()]['#value'] = TRUE;
   $form['allowed_formats'][filter_fallback_format()]['#disabled'] = TRUE;
 
   if ($field['type'] == 'text_with_summary') {
