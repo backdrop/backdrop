@@ -168,7 +168,9 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('<em>Alt</em> field required'),
     '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
     '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
-    '#indentation' => 1,
+    // @todo: This is currently broken. Restore once the bug is fixed.
+    // See https://github.com/backdrop/backdrop-issues/issues/6090.
+    // '#indentation' => 1,
     '#weight' => 11,
     '#states' => array(
       'visible' => array(
@@ -556,19 +558,12 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#access' => (bool) $item['fid'] && $settings['title_field'],
   );
 
-  // Pass alt and title required status to JS in case other modules need access.
-  $element['#attached']['js'][] = array(
-    'type' => 'setting',
-    'data' => array(
-      'image' => array(
-        'altRequired' => $instance['settings']['alt_field_required'],
-      ),
-    ),
-  );
-
   if ($settings['alt_field_required']) {
     $element['alt']['#title'] .= ' <span class="form-required" title="' . t('The alt text field is required.') . '">*</span>';
     $element['alt']['#element_validate'] = array('_image_required_fields_validate');
+    // Pass the alt required status as a data-* attribute on the form element,
+    // in case other modules need access to it.
+    $element['alt']['#attributes'] = array('data-alt-required' => 'true');
   }
 
   return $element;
