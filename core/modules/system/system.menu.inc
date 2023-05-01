@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Menu block configuration form and display.
+ */
+
+/**
  * Implements hook_block_configure().
  */
 function _system_block_configure($delta = '', $settings = array()) {
@@ -21,6 +26,7 @@ function system_menu_block_defaults($menu_name) {
     'style' => NULL,
     'expand_all' => FALSE,
     'clickdown' => FALSE,
+    'collapse' => 'default',
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -140,6 +146,38 @@ function system_menu_block_form($config) {
       '!menu_settings' => $link,
     )),
   );
+  $form['collapse'] = array(
+    '#type' => 'radios',
+    '#title' => t('Collapsible behavior'),
+    '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
+    '#options' => array(
+      'default' => t('Default'),
+      'toggle' => t('Toggle'),
+      'link' => t('Link'),
+    ),
+    '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
+  $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
+  $form['collapse']['toggle']['#description'] = t('Parent functions as toggle without a link.');
+  $form['collapse']['link']['#description'] = t('Parent text is a link, +/- acts as a toggle.');
+
+  $form['accordion'] = array('#type' => 'checkbox',
+    '#title' => t('Accordion-style'),
+    '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
+    '#description' => t('Close all sub-menus when closing parent menu items.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
 
   return $form;
 }
@@ -203,6 +241,13 @@ function system_menu_block_build(array $config) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
       $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
+      if (!empty($config['accordion'])) {
+        $collapsible_behavior = (empty($config['collapse']) || $config['collapse'] == 'default') ? 'accordion' : 'accordion-' . $config['collapse'];
+      }
+      else {
+        $collapsible_behavior = (empty($config['collapse'])) ? 'default' : $config['collapse'];
+      }
+      $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
@@ -379,7 +424,7 @@ function system_menu_tree_depth_trim(array &$tree, $depth_limit) {
   foreach ($tree as $key => &$value) {
     if ($tree[$key]['below']) {
       if ($depth_limit > 1) {
-        system_menu_tree_depth_trim($tree[$key]['below'], $depth_limit-1);
+        system_menu_tree_depth_trim($tree[$key]['below'], $depth_limit - 1);
       }
       else {
         // Remove the children items.
