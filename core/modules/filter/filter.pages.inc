@@ -69,6 +69,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
@@ -126,7 +127,9 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
   $form['size'] = array(
     '#title' => t('Image size'),
@@ -560,7 +563,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * internal alias.
  *
  * @param string $url
- *   The URL entered by the user.
+ *   A URL before it is cleaned-up.
  *
  * @return string
  *   A cleaned-up URL that is either a properly formatted external URL or an
