@@ -165,13 +165,13 @@ function system_menu_block_form($config) {
       ),
     ),
   );
-  $form['collapse']['toggle']['#description'] = t('The parent item iteself has no link functionality.');
+  $form['collapse']['toggle']['#description'] = t('The parent item itself has no link functionality.');
   $form['collapse']['link']['#description'] = t('Separate +/- button acts as an expand/collapse toggle.');
 
   $form['accordion'] = array('#type' => 'checkbox',
     '#title' => t('Accordion-style'),
     '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
-    '#description' => t('Colapses all sub-menus when closing parent menu items.'),
+    '#description' => t('Collapses all sub-menus when closing parent menu items.'),
     // @todo: This is currently broken. Restore once the bug is fixed.
     // See https://github.com/backdrop/backdrop-issues/issues/6090.
     // '#indentation' => 1,
