@@ -148,14 +148,16 @@ function system_menu_block_form($config) {
   );
   $form['collapse'] = array(
     '#type' => 'radios',
-    '#title' => t('Collapsible behavior'),
+    '#title' => t('Parent item behavior in collapsible/mobile mode'),
     '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
     '#options' => array(
-      'default' => t('Default'),
-      'toggle' => t('Toggle'),
-      'link' => t('Link'),
+      'default' => t('Expand on first tap, act as a link on second tap'),
+      'toggle' => t('Each tap expands/collapses the nested sub-menus'),
+      'link' => t('Only function as a menu link'),
     ),
-    '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
+    // @todo: This is currently broken. Restore once the bug is fixed.
+    // See https://github.com/backdrop/backdrop-issues/issues/6090.
+    // '#indentation' => 1,
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
@@ -163,14 +165,16 @@ function system_menu_block_form($config) {
       ),
     ),
   );
-  $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
-  $form['collapse']['toggle']['#description'] = t('Parent functions as toggle without a link.');
-  $form['collapse']['link']['#description'] = t('Parent text is a link, +/- acts as a toggle.');
+  $form['collapse']['toggle']['#description'] = t('The parent item iteself has no link functionality.');
+  $form['collapse']['link']['#description'] = t('Separate +/- button acts as an expand/collapse toggle.');
 
   $form['accordion'] = array('#type' => 'checkbox',
     '#title' => t('Accordion-style'),
     '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
-    '#description' => t('Close all sub-menus when closing parent menu items.'),
+    '#description' => t('Colapses all sub-menus when closing parent menu items.'),
+    // @todo: This is currently broken. Restore once the bug is fixed.
+    // See https://github.com/backdrop/backdrop-issues/issues/6090.
+    // '#indentation' => 1,
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
