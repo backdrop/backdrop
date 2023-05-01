@@ -1221,7 +1221,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     );
     $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = backdrop_realpath($test_image->uri);
     $this->backdropPost('node/add/post', $edit, t('Save'));
-    $this->assertText(t('The Alt field is required'), 'Alt text required displayed on post form.');
+    $this->assertText(t('The Alternate text field is required.'), 'Alt text required displayed on post form.');
   }
 }
 
