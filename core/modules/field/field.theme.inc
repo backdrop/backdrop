@@ -66,7 +66,8 @@ function theme_field($variables) {
 
   // Render the label, if it's not hidden.
   if (!$variables['label_hidden']) {
-    $output .= '<div class="field-label">' . $variables['label'] . ':&nbsp;</div>';
+    $label_classes = 'field-label' . ($variables['label_invisible'] ? ' element-invisible' : '');
+    $output .= '<div class="' . $label_classes . '">' . $variables['label'] . ':&nbsp;</div>';
   }
 
   // Render the items.
@@ -196,6 +197,7 @@ function template_preprocess_field(&$variables, $hook) {
   // label, it needs to supply a preprocess function that sets it to the
   // sanitized element title or whatever else is wanted in its place.
   $variables['label_hidden'] = ($element['#label_display'] == 'hidden');
+  $variables['label_invisible'] = ($element['#label_display'] == 'invisible');
   $variables['label'] = $variables['label_hidden'] ? NULL : check_plain($element['#title']);
 
   // We want other preprocess functions and the theme implementation to have

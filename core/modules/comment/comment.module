@@ -400,7 +400,7 @@ function _comment_body_field_create($info) {
       'required' => TRUE,
       'display' => array(
         'default' => array(
-          'label' => 'hidden',
+          'label' => 'invisible',
           'type' => 'text_default',
           'weight' => 0,
         ),

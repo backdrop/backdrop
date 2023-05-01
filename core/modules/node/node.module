@@ -584,11 +584,11 @@ function node_add_body_field($type, $label = 'Body') {
       'settings' => array('display_summary' => TRUE),
       'display' => array(
         'default' => array(
-          'label' => 'hidden',
+          'label' => 'invisible',
           'type' => 'text_default',
         ),
         'teaser' => array(
-          'label' => 'hidden',
+          'label' => 'invisible',
           'type' => 'text_summary_or_trimmed',
         ),
       ),
