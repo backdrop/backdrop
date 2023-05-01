@@ -105,6 +105,8 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
  *
  * @return array
  *   Array of supported extensions.
+ *
+ * @since 1.25.0 Function added.
  */
 function image_get_supported_extensions() {
   $toolkit = image_get_toolkit();
@@ -112,13 +114,14 @@ function image_get_supported_extensions() {
   if (function_exists($function)) {
     return $function();
   }
-  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.',
+  watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
     array(
       '%toolkit' => $toolkit,
       '%function' => $function),
     WATCHDOG_ERROR
   );
-  return array();
+  // Provide a fallback list of extensions.
+  return array('jpg', 'jpeg', 'gif', 'png');
 }
 
 /**
