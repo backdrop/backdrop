@@ -19,6 +19,9 @@ Backdrop.behaviors.menuStyles = {
           noMouseOver: true
         });
       }
+      menuSettings = $.extend(menuSettings, {
+        collapsibleBehavior: ($menu.data('collapse')) ? ($menu.data('collapse')) : 'default'
+      });
       if (Backdrop.menuStyles[style]) {
         Backdrop.menuStyles[style].attach(element, menuSettings);
       }

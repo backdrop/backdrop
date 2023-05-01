@@ -662,6 +662,11 @@ function _book_update_outline(Node $node) {
         backdrop_static_reset('book_get_books');
       }
     }
+    // Get all nodes that are part of this book and flush their caches.
+    $affected_nids = db_query("SELECT nid FROM {book} WHERE bid = :bid", array(
+      ':bid' => $node->book['bid'],
+    ))->fetchAllAssoc('nid');
+    entity_get_controller('node')->resetCache(array_keys($affected_nids));
 
     return TRUE;
   }
