@@ -89,7 +89,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_extensions' => array(implode(' ', image_get_supported_extensions())),
       'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
@@ -642,6 +642,7 @@ function _filter_create_valid_external_url($url) {
  * all external URLs even if they have dangerous protocols.
  *
  * @param string $url
+ *   The URL entered by the user.
  *
  * @return bool
  *   TRUE if URL has protocol.
