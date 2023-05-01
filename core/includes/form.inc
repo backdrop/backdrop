@@ -3668,6 +3668,7 @@ function theme_container($variables) {
       // Ensure that the class attribute is set, while preserving any existing
       // classes.
       $element['#attributes'] += array('class' => array());
+      $element['#attributes']['class'][] = 'form-item-indentation';
       $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
       $element['#attributes']['data-indentation-depth'] = $element['#indentation'];
   }
@@ -4859,6 +4860,7 @@ function theme_form_element($variables) {
   }
   // Add indentation.
   if (isset($element['#indentation'])) {
+    $attributes['class'][] = 'form-item-indentation';
     $attributes['class'][] = 'form-item-indentation-' . $element['#indentation'];
     $attributes['data-indentation-depth'] = $element['#indentation'];
   }
