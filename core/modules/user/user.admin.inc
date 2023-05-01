@@ -567,7 +567,7 @@ function user_admin_roles($form, $form_state) {
   // Add the "disabled" option to the top of the roles list (makes sure that
   // this is the selected option if the role that was previously set as admin or
   // content editor is deleted).
-  $roles = array(0 => t('disabled')) + $roles;
+  $roles = array(0 => t('- None -')) + $roles;
   $form['default_roles']['user_admin_role'] = array(
     '#type' => 'select',
     '#title' => t('Default administrator role'),
