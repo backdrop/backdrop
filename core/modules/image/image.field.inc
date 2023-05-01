@@ -608,9 +608,9 @@ function _image_required_fields_validate($element, &$form_state) {
     if (!array_key_exists($field, $image_field)) {
       return;
     }
-    // Check if field is left empty.
+    // Check if the field is left empty.
     elseif (empty($image_field[$field])) {
-      form_error($element, t('The !title field is required', array('!title' => ucwords($field))));
+      form_error($element, t('The %title field is required.', array('%title' => $element['#title'])));
       return;
     }
   }
