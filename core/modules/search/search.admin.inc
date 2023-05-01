@@ -54,7 +54,7 @@ function search_reindex_confirm() {
  */
 function search_reindex_confirm_submit(&$form, &$form_state) {
   $config = config('search.settings');
-  $limit_per_pass = $config->get('search_cron_limit');  
+  $limit_per_pass = $config->get('search_cron_limit');
 
   $index_stats = search_get_stats();
 
@@ -150,13 +150,13 @@ function search_admin_settings($form, &$form_state) {
     // function to be called for the pager. See how $variables['pager'] is being
     // set in template_preprocess_search_results().
     '#options' => array(
-      'pager' => t('Full pager'),
-      'views_mini_pager' => t('Mini pager'),
+      'full' => t('Full pager'),
+      'mini' => t('Mini pager'),
     ),
-    '#default_value' => isset($pager_type) ? $pager_type : 'pager',
+    '#default_value' => isset($pager_type) ? $pager_type : 'full',
   );
-  $form['pager']['search_pager_type']['pager']['#description'] = t('Includes "Previous"/"Next" and "First"/"Last" links, as well as numbered links for each page of the search results.');
-  $form['pager']['search_pager_type']['views_mini_pager']['#description'] = t('Shows only "Previous"/"Next" links, and indications of the current and total number of search results pages.');
+  $form['pager']['search_pager_type']['full']['#description'] = t('Includes "Previous"/"Next" and "First"/"Last" links, as well as numbered links for each page of the search results.');
+  $form['pager']['search_pager_type']['mini']['#description'] = t('Shows only "Previous"/"Next" links, and indications of the current and total number of search results pages.');
 
   $form['logging'] = array(
     '#type' => 'fieldset',

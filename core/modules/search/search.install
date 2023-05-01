@@ -230,7 +230,7 @@ function search_update_1002() {
 function search_update_1003() {
   $config = config('search.settings');
   if ($config->get('search_pager_type') === NULL) {
-    $config->set('search_pager_type', 'pager');
+    $config->set('search_pager_type', 'full');
     $config->save();
   }
 }
