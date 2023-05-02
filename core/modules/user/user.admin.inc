@@ -605,6 +605,10 @@ function user_admin_roles($form, $form_state) {
   $roles = user_roles(FALSE, NULL, TRUE);
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
+    // $form['roles'][$role_name]['#something'] = array(
+    //   '#type' => 'markup',
+    //   '#markup' => 'something',
+    // );
     $form['roles'][$role_name]['#weight'] = $order;
     $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
@@ -788,7 +792,14 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
     '#type' => 'value',
     '#value' => $role->name,
   );
-  return confirm_form($form, t('Are you sure you want to delete the %role role?', array('%role' => $role->label)), 'admin/config/people/roles', t('This action cannot be undone.'), t('Delete'));
+
+  if (!empty($role->default_roles)) {
+    backdrop_set_message(t('This role is currently configured as the @default_roles.', array('@default_roles' => implode(' ' . t('and') . ' ', $role->default_roles))), 'warning');
+  }
+  backdrop_set_message(t('This action cannot be undone.'), 'warning');
+
+  // return confirm_form($form, t('Are you sure you want to delete the %role role?', array('%role' => $role->label)), 'admin/config/people/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the %role role?', array('%role' => $role->label)), 'admin/config/people/roles', '', t('Delete'));
 }
 
 /**
