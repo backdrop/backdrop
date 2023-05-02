@@ -1466,6 +1466,8 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
       $this->admin_user,
       $this->editor_user,
     );
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
     foreach ($content_type_permissions as $type_permission) {
       $permission_name = backdrop_strtolower(str_replace('content', "$content_type_name content", $type_permission));
       foreach ($user_accounts as $user_account) {
