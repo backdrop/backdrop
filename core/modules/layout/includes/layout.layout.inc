@@ -167,17 +167,15 @@ function layout_layout_access_info() {
     'title' => t('User account: Compare'),
     'description' => t('Compare two user accounts. For example: logged-in vs profile being viewed.'),
     'class' => 'UserCompareLayoutAccess',
-    // Contexts are specified as context key => context type. The key will be
-    // used in the $contexts array passed to the access class methods. The type
-    // references a context provided by hook_layout_context_info().
+    // Two different contexts of type user are needed for this access check.
     'required contexts' => array(
       'user1' => 'user',
       'user2' => 'user',
     ),
     // Optional if needing to clarify between contexts of the same type.
     'required contexts labels' => array(
-      'user1' => t('The logged-in user account'),
-      'user2' => t('User account to compare to the logged-in user account'),
+      'user1' => t('First user account'),
+      'user2' => t('Second user account'),
     ),
   );
   $info['path'] = array(

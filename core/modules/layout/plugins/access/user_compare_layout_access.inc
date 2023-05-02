@@ -1,6 +1,10 @@
 <?php
 /**
  * @file
+ * Contains UserCompareLayoutAccess class.
+ */
+
+/**
  * Plugin to provide access if two user account contexts are the same.
  */
 class UserCompareLayoutAccess extends LayoutAccess {
@@ -67,25 +71,31 @@ class UserCompareLayoutAccess extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['helptext'] = array(
-      '#type' => 'help',
-      '#value' => t('Compare a user account to the currently logged-in user account. For someone viewing their own profile page, for example, choose "User account being viewed" and say "Display if the above user account is" and "the same as the logged-in user account".'),
-    );
-    // Always assume the first context is the logged-in user account.
-    $form['contexts']['user1'] = array(
-      '#type' => 'value',
-      '#value' => 'current_user', 
-    );
-    // Remove logged-in user account from list of comparison options.
+
+    // Move logged-in user account to be the first option in the first list.
+    if (isset($form['contexts']['user1']['#options']['current_user'])) {
+      $option_label = $form['contexts']['user1']['#options']['current_user'];
+      $form['contexts']['user1']['#options'] = array_merge(
+        array('current_user' => $option_label),
+        $form['contexts']['user1']['#options'],
+      );
+    }
+    // If there are only two options, remove the second one.
+    if (count($form['contexts']['user1']['#options']) === 2) {
+      array_pop($form['contexts']['user1']['#options']);
+    }
+
+    // Remove logged-in user account from second list.
     if (isset($form['contexts']['user2']['#options']['current_user'])) {
       unset($form['contexts']['user2']['#options']['current_user']);
     }
+
     $form['equality'] = array(
       '#type' => 'radios',
-      '#title' => t('Display this block if the above user account is'),
+      '#title' => t('Comparison mode'),
       '#options' => array(
-        1 => t('the same as the logged-in user account.'),
-        0 => t('different from the logged-in user account.'),
+        1 => t('Display if user accounts are the same'),
+        0 => t('Display if user accounts are different'),
       ),
       '#default_value' => $this->settings['equality'],
     );
