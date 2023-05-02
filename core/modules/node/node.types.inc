@@ -182,8 +182,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
   if (!empty($auto_permission_roles) && empty($type->type)) {
     $permissions_message = format_plural(
       count($auto_permission_roles),
-      'The %role role has been assigned permissions to create, edit, and delete any content of this type.',
-      'The %admin and %editor roles have been assigned permissions to create, edit, and delete any content of this type.',
+      'The %role role has been assigned permissions to create, edit, and delete content of this type.',
+      'The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.',
       $auto_permission_roles
     );
     $permissions_message_type = 'info';
@@ -661,11 +661,13 @@ function node_type_form_permissions($type) {
     );
     foreach ($roles as $role_name => $role) {
       // Builds arrays for checked boxes for each role. For new content types,
-      // if user_admin_role and/or user_editor_role have been configured in the
-      // "Default roles" section in admin/config/people/roles, then always
-      // select all permissions for these roles.
+      // if user_admin_role and/or user_editor_role have been configured, then
+      // select sensible permissions for these roles.
       if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
-        $status[$role_name][] = $perm;
+        // Do not allow editors to delete any content.
+        if (!($role->name == $editor_role && strstr($perm, 'delete any'))) {
+          $status[$role_name][] = $perm;
+        }
       }
     }
   }
