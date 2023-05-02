@@ -168,9 +168,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('<em>Alt</em> field required'),
     '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
     '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
-    // @todo: This is currently broken. Restore once the bug is fixed.
-    // See https://github.com/backdrop/backdrop-issues/issues/6090.
-    // '#indentation' => 1,
+    '#indentation' => 1,
     '#weight' => 11,
     '#states' => array(
       'visible' => array(
