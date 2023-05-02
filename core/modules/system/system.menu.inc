@@ -155,9 +155,7 @@ function system_menu_block_form($config) {
       'toggle' => t('Each tap expands/collapses the nested sub-menus'),
       'link' => t('Only function as a menu link'),
     ),
-    // @todo: This is currently broken. Restore once the bug is fixed.
-    // See https://github.com/backdrop/backdrop-issues/issues/6090.
-    // '#indentation' => 1,
+    '#indentation' => 1,
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
@@ -172,9 +170,7 @@ function system_menu_block_form($config) {
     '#title' => t('Accordion-style'),
     '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
     '#description' => t('Collapses all sub-menus when closing parent menu items.'),
-    // @todo: This is currently broken. Restore once the bug is fixed.
-    // See https://github.com/backdrop/backdrop-issues/issues/6090.
-    // '#indentation' => 1,
+    '#indentation' => 1,
     '#states' => array(
       'visible' => array(
         ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
