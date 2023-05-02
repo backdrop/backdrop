@@ -1254,7 +1254,7 @@ function check_markup($text, $format_id = NULL, $langcode = '', $cache = FALSE) 
  *     'textarea' by default.
  *   - #format: (optional) The text format name to preselect. If NULL or not
  *     set, the default format for the current user will be used.
- *   - #allowed_formats: (optional) An array of format IDs that should be
+ *   - #allowed_formats: (optional) An array of format names that should be
  *     available options. If none are specified, all available formats for the
  *     current user are displayed.
  *
