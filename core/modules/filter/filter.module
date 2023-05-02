@@ -50,6 +50,8 @@ function filter_element_info() {
   $type['text_format'] = array(
     // The text format selected by default for this element.
     '#format' => NULL,
+    // An array of text format names that are displayed. This list is further
+    // reduced to only those that the currently logged-in user has access.
     '#allowed_formats' => array(),
     // Whether file uploads are permitted through the editor (if supported).
     // Disable by default, modules must specifically implement saving files as
@@ -1250,10 +1252,13 @@ function check_markup($text, $format_id = NULL, $langcode = '', $cache = FALSE) 
  *   The form element to process. Properties used:
  *   - #base_type: The form element #type to use for the 'value' element.
  *     'textarea' by default.
- *   - #format: (optional) The text format ID to preselect. If NULL or not set,
- *     the default format for the current user will be used.
+ *   - #format: (optional) The text format name to preselect. If NULL or not
+ *     set, the default format for the current user will be used.
+ *   - #allowed_formats: (optional) An array of format IDs that should be
+ *     available options. If none are specified, all available formats for the
+ *     current user are displayed.
  *
- * @return
+ * @return array
  *   The expanded element.
  */
 function filter_process_format($element) {
@@ -1293,9 +1298,13 @@ function filter_process_format($element) {
 
   // Get a list of allowed formats to which the current user has access.
   $formats = filter_formats($user);
-  foreach ($formats as $format) {
-    if (!in_array($format->format, array_filter($element['#allowed_formats']))) {
-      unset($formats[$format->format]);
+
+  // Reduce the list if a list of allowed formats was provided.
+  if (!empty($element['#allowed_formats'])) {
+    foreach ($formats as $format) {
+      if (!in_array($format->format, $element['#allowed_formats'])) {
+        unset($formats[$format->format]);
+      }
     }
   }
 
