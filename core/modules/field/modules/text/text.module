@@ -89,6 +89,7 @@ function text_field_instance_settings_form($field, $instance) {
   foreach (filter_formats() as $format) {
     $formats[$format->format] = $format->name;
   }
+  unset($formats[filter_fallback_format()]);
 
   $form['#element_validate'][] = 'text_field_instance_settings_form_validate';
 
@@ -100,7 +101,7 @@ function text_field_instance_settings_form($field, $instance) {
       t('Plain text'),
       t('Filtered text (user selects text format)'),
     ),
-    '#weight' => 0,
+    '#weight' => -2,
   );
 
   // An empty array of formats indicates all formats are allowed.
@@ -118,12 +119,8 @@ function text_field_instance_settings_form($field, $instance) {
         'input[name="instance[settings][text_processing]"]' => array('value' => 1),
       ),
     ),
-    '#weight' => 0,
+    '#weight' => -1,
   );
-
-  // Display the fallback format as disabled but locked in the enabled state.
-  $form['allowed_formats'][filter_fallback_format()]['#value'] = 'plain_text';
-  $form['allowed_formats'][filter_fallback_format()]['#disabled'] = TRUE;
 
   if ($field['type'] == 'text_with_summary') {
     $form['display_summary'] = array(
@@ -144,7 +141,6 @@ function text_field_instance_settings_form($field, $instance) {
 function text_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
   $all_formats = array_keys($element['allowed_formats']['#options']);
   $enabled_formats = array_keys(array_filter($element['allowed_formats']['#value']));
-  $enabled_formats[] = filter_fallback_format();
   if ($all_formats == $enabled_formats) {
     form_set_value($element['allowed_formats'], array(), $form_state);
   }

@@ -1298,11 +1298,13 @@ function filter_process_format($element) {
 
   // Get a list of allowed formats to which the current user has access.
   $formats = filter_formats($user);
+  $fallback_format = filter_fallback_format();
 
   // Reduce the list if a list of allowed formats was provided.
   if (!empty($element['#allowed_formats'])) {
     foreach ($formats as $format) {
-      if (!in_array($format->format, $element['#allowed_formats'])) {
+      if ($format->format !== $fallback_format &&
+        !in_array($format->format, $element['#allowed_formats'])) {
         unset($formats[$format->format]);
       }
     }
@@ -1325,7 +1327,6 @@ function filter_process_format($element) {
   }
 
   // Remove the Plain text format if not set and other options are available.
-  $fallback_format = filter_fallback_format();
   if (($element['#format'] != $fallback_format) && (count($formats) > 1) && array_key_exists($fallback_format, $formats)) {
     unset($formats[$fallback_format]);
   }
