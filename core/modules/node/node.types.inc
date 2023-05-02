@@ -182,8 +182,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
   if (!empty($auto_permission_roles) && empty($type->type)) {
     $permissions_message = format_plural(
       count($auto_permission_roles),
-      'The %role role has been assigned permissions to create, edit and delete any content of this type.',
-      'The %admin and %editor roles have been assigned permissions to create, edit and delete any content of this type.',
+      'The %role role has been assigned permissions to create, edit, and delete any content of this type.',
+      'The %admin and %editor roles have been assigned permissions to create, edit, and delete any content of this type.',
       $auto_permission_roles
     );
     $permissions_message_type = 'info';
