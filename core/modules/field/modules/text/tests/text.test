@@ -22,7 +22,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test text field validation.
    */
-  function _xtestTextFieldValidation() {
+  function testTextFieldValidation() {
     // Create a field with settings to validate.
     $max_length = 3;
     $this->field = array(
@@ -65,7 +65,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test widgets.
    */
-  function _xtestTextfieldWidgets() {
+  function testTextfieldWidgets() {
     $this->_testTextfieldWidgets('text', 'text_textfield');
     $this->_testTextfieldWidgets('text_long', 'text_textarea');
   }
@@ -124,7 +124,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test widgets + 'formatted_text' setting.
    */
-  function _xtestTextfieldWidgetsFormatted() {
+  function testTextfieldWidgetsFormatted() {
     $this->_testTextfieldWidgetsFormatted('text', 'text_textfield');
     $this->_testTextfieldWidgetsFormatted('text_long', 'text_textarea');
   }
@@ -298,7 +298,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    field_create_instance($this->instance);
+    $this->instance = field_create_instance($this->instance);
 
     // Display the creation form.
     $this->backdropLogin($this->web_user);
@@ -323,49 +323,46 @@ class TextFieldTestCase extends BackdropWebTestCase {
     $this->content = backdrop_render($entity->content);
     $this->assertRaw('<div><strong><span>', 'Value is displayed unfiltered');
 
-    /*
-
-    // Log back in as admin.
-    $this->backdropLogin($this->admin_user);
     // Change field to allow only one format.
-    $path = "entity_test/structure/entity_test/fields/entity_test.entity_test.";
-    $this->backdropGet($path);
-    $this->backdropPost(NULL, ["settings[allowed_formats][{$format1->format}]" => $format1->format], 'Save settings');
-    $this->backdropGet($path);
+    $this->instance['settings']['allowed_formats'] = array($format1->format);
+    field_update_instance($this->instance);
+
     // Display the creation form.
-    $this->backdropLogin($this->web_user);
     // We shouldn't have the 'format' selector since only one format is allowed.
     $this->backdropGet('test-entity/add/test-bundle');
-    $this->assertFieldByName("{$field_name}[0][value]");
-    $this->assertNoFieldByName("{$field_name}[0][format]");
+    $this->assertFieldByName("{$this->field_name}[und][0][value]");
+    $this->assertNoFieldByName("{$this->field_name}[und][0][format]");
 
     // Retest the entity renders fine even though filter2 is disabled.
-    $entity = EntityTest::load($id);
-    $display = $entity_display_repository->getViewDisplay($entity->getEntityTypeformat, $entity->bundle(), 'full');
-    $content = $display->build($entity);
-    $rendered_entity = \backdrop::service('renderer')->renderRoot($content);
-    $this->assertStringContainsString('<div><strong><span>', (string) $rendered_entity);
+    $entity = field_test_entity_test_load($id);
+    $entity->content = field_attach_view($entity->entityType(), $entity, 'full');
+    $this->content = backdrop_render($entity->content);
+    $this->assertRaw('<div><strong><span>', 'Value is displayed unfiltered');
 
     // Test when 2 of 3 formats are selected.
-    $field->setSetting('allowed_formats', [$format1->format, $format2->format]);
-    $field->save();
+    $this->instance['settings']['allowed_formats'] = array(
+      $format1->format,
+      $format2->format
+    );
+    field_update_instance($this->instance);
+
     $this->backdropGet('test-entity/add/test-bundle');
-    // We should see the 'format' selector again.
-    $this->assertSession()->fieldExists("{$field_name}[0][value]", NULL);
+    // We should see the 'format' selector again with only two options.
+    $this->assertFieldByName("{$this->field_name}[und][0][value]", NULL);
     $this->assertRaw('<option value="' . $format1->format . '"');
     $this->assertRaw('<option value="' . $format2->format . '"');
-    $this->assertSession()->optionNotExists("{$field_name}[0][format]", $format3->format);
+    $this->assertNoRaw('<option value="' . $format3->format . '"');
 
     // Change field to allow all formats by configuring none as allowed.
-    $field->setSetting('allowed_formats', []);
-    $field->save();
+    $this->instance['settings']['allowed_formats'] = array();
+    field_update_instance($this->instance);
+
     $this->backdropGet('test-entity/add/test-bundle');
-    // We should see the 'format' selector again.
-    $this->assertSession()->fieldExists("{$field_name}[0][value]", NULL);
+    // We should see the 'format' selector again with all formats.
+    $this->assertFieldByName("{$this->field_name}[und][0][value]", NULL);
     $this->assertRaw('<option value="' . $format1->format . '"');
     $this->assertRaw('<option value="' . $format2->format . '"');
     $this->assertRaw('<option value="' . $format3->format . '"');
-    */
   }
 
 }
