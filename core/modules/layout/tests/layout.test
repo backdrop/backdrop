@@ -3145,7 +3145,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->assertTrue($title, 'The flexible template is found in the UI list of templates with the new name.');
     $flexible_layout_delete_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/delete';
     $edit = array();
-    $this->backdropPost($flexible_layout_delete_link, $edit, t('Delete template'));
+    $this->backdropPost($flexible_layout_delete_link, $edit, t('Delete layout template'));
     $this->backdropGet('admin/structure/layouts/settings');
     $title = $this->xpath("//td//div[text()=:name]", array(':name' => 'To be deleted'));
     $this->assertFalse($title, 'The flexible template is not found in the UI list of templates with the new name.');

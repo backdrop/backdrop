@@ -2554,17 +2554,17 @@ function layout_delete_form($form, &$form_state, $layout) {
   $form_state['layout'] = $layout;
 
   if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
-    $question = t('Delete layout @title?', array('@title' => $layout->title));
-    $text = t('Are you sure you want to delete this layout? Deleting a layout cannot be undone.');
-    $button_text = t('Delete layout');
+    $question = t('Are you sure you want to delete the %title layout?', array('%title' => $layout->title));
+    $description = NULL;
+    $yes = t('Delete layout');
   }
   else {
-    $question = t('Revert layout @title?', array('@title' => $layout->title));
-    $text = t('Reverting the layout will delete any changes, reverting it to the original default layout provided by the %module module.', array('%module' => $layout->module));
-    $button_text = t('Revert layout');
+    $question = t('Are you sure you want to revert the %title layout?', array('%title' => $layout->title));
+    $description = t('Reverting the layout will delete any changes, reverting it to the original default layout provided by the %module module.', array('%module' => $layout->module));
+    $yes = t('Revert layout');
   }
 
-  return confirm_form($form, $question, 'admin/structure/layouts', $text, $button_text);
+  return confirm_form($form, $question, 'admin/structure/layouts', $description, $yes);
 }
 
 /**

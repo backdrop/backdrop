@@ -293,7 +293,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     foreach ($category_ids as $cid) {
       $category = contact_load($cid);
       $category_name = $category['category'];
-      $this->backdropPost('admin/structure/contact/delete/' . $cid, array(), t('Delete'));
+      $this->backdropPost('admin/structure/contact/delete/' . $cid, array(), t('Delete contact category'));
       $this->assertRaw(t('Contact form category %category has been deleted.', array('%category' => $category_name)), 'Category deleted successfully.');
     }
   }

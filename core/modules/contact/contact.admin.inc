@@ -489,14 +489,8 @@ function contact_category_delete_form($form, &$form_state, array $contact) {
     '#value' => $contact,
   );
 
-  return confirm_form(
-    $form,
-    t('Are you sure you want to delete %category?', array('%category' => $contact['category'])),
-    'admin/structure/contact',
-    t('This action cannot be undone.'),
-    t('Delete'),
-    t('Cancel')
-  );
+  $question = t('Are you sure you want to delete %category?', array('%category' => $contact['category']));
+  return confirm_form($form, $question, 'admin/structure/contact', NULL, t('Delete contact category'));
 }
 
 /**

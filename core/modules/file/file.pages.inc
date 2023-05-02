@@ -516,7 +516,7 @@ function file_manage_form($form, &$form_state, File $file) {
     $form['replace_upload'] = array(
       '#type' => 'managed_file',
       '#title' => t('Replace file'),
-      '#description' => t('This file will replace the existing file. This action cannot be undone.'),
+      '#description' => t('This file will replace the existing file. <strong>This action cannot be undone!</strong>'),
       '#upload_validators' => file_get_upload_validators($replacement_options),
     );
   }

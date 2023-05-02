@@ -234,10 +234,8 @@ function comment_multiple_delete_confirm($form, &$form_state) {
     backdrop_goto('admin/content/comment');
   }
   else {
-    return confirm_form($form,
-                        t('Are you sure you want to delete these comments and all their children?'),
-                        'admin/content/comment', t('This action cannot be undone.'),
-                        t('Delete comments'), t('Cancel'));
+    $question = t('Are you sure you want to delete these comments and all their children?');
+    return confirm_form($form, $question, 'admin/content/comment', NULL, t('Delete comments'));
   }
 }
 
