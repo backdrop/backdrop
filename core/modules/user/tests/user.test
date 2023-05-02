@@ -1469,7 +1469,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     foreach ($content_type_permissions as $type_permission) {
       $permission_name = backdrop_strtolower(str_replace('content', "$content_type_name content", $type_permission));
       foreach ($user_accounts as $user_account) {
-        user_access($permission_name, $user_account);
+        $this->assertTrue(user_access($permission_name, $user_account));
       }
     }
   }
