@@ -77,6 +77,7 @@
     "theme_default": "stark",
     "theme_debug": 0,
     "user_admin_role": "",
+    "user_editor_role": "editor",
     "user_cancel_method": "user_cancel_block",
     "user_email_verification": 1,
     "user_email_match": 1,
