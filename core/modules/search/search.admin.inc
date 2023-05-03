@@ -146,9 +146,6 @@ function search_admin_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Pager type'),
     '#title_display' => 'invisible',
-    // The options keys here should be kept the same as the name of theme
-    // function to be called for the pager. See how $variables['pager'] is being
-    // set in template_preprocess_search_results().
     '#options' => array(
       'full' => t('Full pager'),
       'mini' => t('Mini pager'),
