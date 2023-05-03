@@ -189,9 +189,13 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
  *   An associative array of results from the batch operation.
  */
 function installer_authorize_update_batch_finished($success, $results) {
+  $successful_projects = array();
   foreach ($results['log'] as $project => $messages) {
     if (!empty($messages['#abort'])) {
       $success = FALSE;
+    } 
+    else {
+      $successful_projects[] = $project;
     }
   }
   $offline = state_get('maintenance_mode', FALSE);
@@ -227,10 +231,30 @@ function installer_authorize_update_batch_finished($success, $results) {
       'type' => 'error',
     );
   }
-  // Since we're doing an update of existing code, always add a task for
-  // running update.php.
-  $results['tasks'][] = t('Your projects have been downloaded and updated.');
-  $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  $updates_needed = FALSE;
+  include_once(BACKDROP_ROOT . '/core/includes/install.inc');
+  foreach ($successful_projects as $module) {
+    module_load_install($module);
+    $updates = backdrop_get_schema_versions($module);
+    if ($updates !== FALSE) {
+      $current_schema = backdrop_get_installed_schema_version($module);
+      // If current schema is greater than 7000, bring it down to 999
+      $current_schema = $current_schema > 7000 ? 999 : $current_schema;
+      $latest_schema = end($updates);
+      if ($current_schema < $latest_schema) {
+        $updates_needed = TRUE;
+        break;
+      }
+    }
+  }
+  // Only add a task for running update.php if it is actually needed.
+  if ($updates_needed) {
+    $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  }
+  elseif ($success) {
+    backdrop_set_message($page_message['message'], $page_message['type']);
+    backdrop_goto('admin/config/system/updates');
+  }
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);
