@@ -563,8 +563,8 @@ function node_type_form_submit($form, &$form_state) {
       $permissions = array();
       // Convert the placeholder permissions (from the format 'create content')
       // to the actual permission (in the format 'create $type content').
-      foreach ($form_state['values'][$role->name] as $placeholder => $permission) {
-        if ($permission) {
+      foreach ($form_state['values'][$role->name] as $placeholder_permission => $permission_granted) {
+        if ($permission_granted) {
           $permissions[] = node_generate_permission_from_placeholder($placeholder_permission, $type->type);
         }
       }
