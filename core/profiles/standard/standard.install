@@ -374,7 +374,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('This is your first post! You may edit or delete it.'),
-            'format' => 'filtered_html'
+            'format' => 'filtered_html',
           ),
         ),
       ),
@@ -416,8 +416,6 @@ function standard_install() {
 
   // Creating three default Card nodes.
   // Special thanks to @indigoxela for providing the icons.
-
-
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
@@ -437,7 +435,7 @@ function standard_install() {
   );
 
   foreach ($cards as $image_filename => $info) {
-    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename;
+    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/images/'. $image_filename;
     $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
 
     $file = entity_create('file', array(
