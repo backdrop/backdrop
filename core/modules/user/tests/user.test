@@ -9,7 +9,7 @@ include_once(BACKDROP_ROOT . '/core/modules/simpletest/tests/system_config_test.
 class UserLoginTestBase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('dblog', 'user_flood_test');
   }
 
@@ -26,7 +26,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
    *   Whether or not to expect that the flood control mechanism will be
    *   triggered..
    */
-  function assertFailedLogin($account, $by_email = FALSE, $incorrect_pass = FALSE, $flood_trigger = NULL) {
+  public function assertFailedLogin($account, $by_email = FALSE, $incorrect_pass = FALSE, $flood_trigger = NULL) {
     if ($this->loggedInUser) {
       $this->backdropLogout();
     }
@@ -85,7 +85,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
 class UserRegistrationTestCase extends UserLoginTestBase {
   protected $profile = 'testing';
 
-  function testRegistrationWithEmailVerification() {
+  public function testRegistrationWithEmailVerification() {
     $config = config('system.core');
 
     // Require email verification.
@@ -119,7 +119,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $this->assertFalse($new_user->status, 'New account is blocked until approved by an administrator.');
   }
 
-  function testRegistrationWithoutEmailVerification() {
+  public function testRegistrationWithoutEmailVerification() {
     $config = config('system.core');
 
     // Don't require email verification.
@@ -170,7 +170,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $this->assertText(t('Member for'), 'User can log in after administrator approval.');
   }
 
-  function testRegistrationEmailDuplicates() {
+  public function testRegistrationEmailDuplicates() {
     $config = config('system.core');
 
     // Don't require email verification.
@@ -197,7 +197,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $this->assertRaw(t('The email address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
   }
 
-  function testRegistrationDefaultValues() {
+  public function testRegistrationDefaultValues() {
     $config_user_settings = config('system.core');
 
     // Allow registration by site visitors without administrator approval.
@@ -241,7 +241,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   /**
    * Tests Field API fields on user registration forms.
    */
-  function testRegistrationWithUserFields() {
+  public function testRegistrationWithUserFields() {
     module_enable(array('field', 'field_test'));
     $config_user_settings = config('system.core');
 
@@ -330,7 +330,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   /**
    * Tests new users username matches their email if username is an email.
    */
-  function testRegistrationEmailAsUsername() {
+  public function testRegistrationEmailAsUsername() {
     // Don't require email verification.
     // Allow registration by site visitors without administrator approval.
     config('system.core')
@@ -365,7 +365,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   /**
    * Tests new users username not matching their email if username is an email.
    */
-  function testRegistrationEmailAsUsernameDisabled() {
+  public function testRegistrationEmailAsUsernameDisabled() {
     // Test that 'user_email_match' turned off allows emails that don't match.
     config('system.core')
       ->set('user_email_match', FALSE)
@@ -391,7 +391,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
 
 class UserValidationTestCase extends BackdropUnitTestCase {
   // Username validation.
-  function testUsernames() {
+  public function testUsernames() {
     $test_cases = array( // '<username>' => array('<description>', 'assert<testName>'),
       'foo'                    => array('Valid username', 'assertNull'),
       'FOO'                    => array('Valid username', 'assertNull'),
@@ -425,14 +425,14 @@ class UserValidationTestCase extends BackdropUnitTestCase {
 class UserLoginTestCase extends UserLoginTestBase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('user_session_test');
   }
 
   /**
    * Test that login credentials work (or not) in different login modes.
    */
-  function testLoginMethods() {
+  public function testLoginMethods() {
     $account = $this->backdropCreateUser(array());
 
     // Login via name or email (both succeed). The default for new sites.
@@ -464,7 +464,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test the global login flood control.
    */
-  function testGlobalLoginFloodControl() {
+  public function testGlobalLoginFloodControl() {
     config('user.flood')
       ->set('flood_ip_limit', 10)
       // Set a high per-user limit out so that it is not relevant in the test.
@@ -501,7 +501,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test the per-user login flood control.
    */
-  function testPerUserLoginFloodControl() {
+  public function testPerUserLoginFloodControl() {
     config('user.flood')
       // Set a high global limit out so that it is not relevant in the test.
       ->set('floo_ip_limit', 4000)
@@ -541,7 +541,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test that user password is re-hashed upon login after changing $count_log2.
    */
-  function testPasswordRehashOnLogin() {
+  public function testPasswordRehashOnLogin() {
     // Load password hashing API.
     require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
     // Set initial $count_log2 to the default, BACKDROP_HASH_COUNT.
@@ -573,7 +573,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test logging in when an anon session already exists.
    */
-  function testLoginWithAnonSession() {
+  public function testLoginWithAnonSession() {
     // Visit the callback to generate a session for this anon user.
     $this->backdropGet('user_session_test_anon_session');
     // Now login.
@@ -584,7 +584,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Attempt to login with an unregistered username.
    */
-  function testAccountNotFound() {
+  public function testAccountNotFound() {
     $edit = array(
       'name' => $this->randomName(8),
       'pass' => $this->randomName(8),
@@ -596,7 +596,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Attempt to login with an invalid array users and passwords.
    */
-  function testArrayLoginValues() {
+  public function testArrayLoginValues() {
     $edit = array(
       'pass' => $this->randomName(8),
     );
@@ -627,7 +627,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Attempt to cancel account without permission.
    */
-  function testUserCancelWithoutPermission() {
+  public function testUserCancelWithoutPermission() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
@@ -661,7 +661,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
    * This should never be possible, or the site owner would become unable to
    * administer the site.
    */
-  function testUserCancelUid1() {
+  public function testUserCancelUid1() {
     // Update uid 1's name and password to we know it.
     $password = user_password();
     require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
@@ -697,7 +697,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Attempt invalid account cancellations.
    */
-  function testUserCancelInvalid() {
+  public function testUserCancelInvalid() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
@@ -739,7 +739,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Disable account and keep all content.
    */
-  function testUserBlock() {
+  public function testUserBlock() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_block');
 
     // Create a user.
@@ -774,7 +774,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Disable account and unpublish all content.
    */
-  function testUserBlockUnpublish() {
+  public function testUserBlockUnpublish() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_block_unpublish');
 
     // Create a user.
@@ -818,7 +818,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Delete account and anonymize all content.
    */
-  function testUserAnonymize() {
+  public function testUserAnonymize() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a user.
@@ -869,7 +869,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Delete account and remove all content.
    */
-  function testUserDelete() {
+  public function testUserDelete() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_delete');
 
     // Create a user.
@@ -936,7 +936,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Create an administrative user and delete another user.
    */
-  function testUserCancelByAdmin() {
+  public function testUserCancelByAdmin() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
 
     // Create a regular user.
@@ -961,7 +961,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
   /**
    * Create an administrative user and mass-delete other users.
    */
-  function testMassUserCancelByAdmin() {
+  public function testMassUserCancelByAdmin() {
     config_set('system.core', 'user_cancel_method', 'user_cancel_reassign');
     // Enable account cancellation notification.
     config_set('system.core', 'user_mail_status_canceled_notify', TRUE);
@@ -1018,7 +1018,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   protected $user;
   protected $_directory_test;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('image'));
 
     // Enable user pictures.
@@ -1039,7 +1039,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $this->assertTrue($this->_directory_test, "The directory $picture_path doesn't exist or is not writable. Further tests won't be made.");
   }
 
-  function testNoPicture() {
+  public function testNoPicture() {
     $this->backdropLogin($this->user);
 
     // Try to upload a file that is not an image for the user picture.
@@ -1056,7 +1056,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
    *
    * results: The image should be uploaded because ImageGDToolkit resizes the picture
    */
-  function testWithGDinvalidDimension() {
+  public function testWithGDinvalidDimension() {
     if ($this->_directory_test && image_get_toolkit()) {
       $this->backdropLogin($this->user);
 
@@ -1091,7 +1091,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
    *
    * results: The image should be uploaded because ImageGDToolkit resizes the picture
    */
-  function testWithGDinvalidSize() {
+  public function testWithGDinvalidSize() {
     if ($this->_directory_test && image_get_toolkit()) {
       $this->backdropLogin($this->user);
 
@@ -1129,7 +1129,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
    *
    * results: The image shouldn't be uploaded
    */
-  function testWithoutGDinvalidDimension() {
+  public function testWithoutGDinvalidDimension() {
     if ($this->_directory_test && !image_get_toolkit()) {
       $this->backdropLogin($this->user);
 
@@ -1163,7 +1163,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
    *
    * results: The image shouldn't be uploaded
    */
-  function testWithoutGDinvalidSize() {
+  public function testWithoutGDinvalidSize() {
     if ($this->_directory_test && !image_get_toolkit()) {
       $this->backdropLogin($this->user);
 
@@ -1197,7 +1197,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
    *
    * results: The image should be uploaded
    */
-  function testPictureIsValid() {
+  public function testPictureIsValid() {
     if ($this->_directory_test) {
       $this->backdropLogin($this->user);
 
@@ -1243,7 +1243,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   /**
    * Test HTTP schema working with user pictures.
    */
-  function testExternalPicture() {
+  public function testExternalPicture() {
     $this->backdropLogin($this->user);
     // Set the default picture to an URI with a HTTP schema.
     $images = $this->backdropGetTestFiles('image');
@@ -1263,7 +1263,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   /**
    * Tests deletion of user pictures.
    */
-  function testDeletePicture() {
+  public function testDeletePicture() {
     $this->backdropLogin($this->user);
 
     $image = current($this->backdropGetTestFiles('image'));
@@ -1306,7 +1306,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     $this->assertFalse(is_file($pic_path), 'File is removed from file system');
   }
 
-  function saveUserPicture($image) {
+  public function saveUserPicture($image) {
     $edit = array('files[picture_upload]' => backdrop_realpath($image->uri));
     $this->backdropPost('user/' . $this->user->uid . '/edit', $edit, t('Save'));
 
@@ -1318,7 +1318,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
   /**
    * Tests the admin form validates user picture settings.
    */
-  function testUserPictureAdminFormValidation() {
+  public function testUserPictureAdminFormValidation() {
     $this->backdropLogin($this->backdropCreateUser(array('administer account settings')));
 
     // The default values are valid.
@@ -1342,7 +1342,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   protected $admin_role_name;
   protected $editor_role_name;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $this->admin_user = $this->backdropCreateUser(
@@ -1367,7 +1367,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Change user permissions and check user_access().
    */
-  function testUserPermissionChanges() {
+  public function testUserPermissionChanges() {
     $this->backdropLogin($this->admin_user);
     $role_name = $this->admin_role_name;
     $account = $this->admin_user;
@@ -1396,7 +1396,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Test assigning of permissions for the administrator role.
    */
-  function testAdministratorRole() {
+  public function testAdministratorRole() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/roles');
 
@@ -1417,7 +1417,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Test assigning of permissions for the default editor role.
    */
-  function testEditorRole() {
+  public function testEditorRole() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/roles');
 
@@ -1524,7 +1524,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Verify proper permission changes by user_role_change_permissions().
    */
-  function testUserRoleChangePermissions() {
+  public function testUserRoleChangePermissions() {
     $role_name = $this->admin_role_name;
     $account = $this->admin_user;
 
@@ -1551,7 +1551,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
   /**
    * Registers a user and deletes it.
    */
-  function testUserAdmin() {
+  public function testUserAdmin() {
     // Create admin user to delete registered user.
     $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
     $admin_user->created -= 2;
@@ -1668,7 +1668,7 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the display of dates and time when user-configurable time zones are set.
    */
-  function testUserTimeZone() {
+  public function testUserTimeZone() {
     // Setup date/time settings for Los Angeles time.
     config('system.date')
       ->set('user_configurable_timezones', 1)
@@ -1725,7 +1725,7 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
 class UserAutocompleteTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Set up two users with different permissions to test access.
@@ -1736,7 +1736,7 @@ class UserAutocompleteTestCase extends BackdropWebTestCase {
   /**
    * Tests access to user autocompletion and verify the correct results.
    */
-  function testUserAutocomplete() {
+  public function testUserAutocomplete() {
     // Check access from unprivileged user, should be denied.
     $this->backdropLogin($this->unprivileged_user);
     $this->backdropGet('user/autocomplete/' . $this->unprivileged_user->name[0]);
@@ -1763,7 +1763,7 @@ class UserAccountLinksUnitTests extends BackdropWebTestCase {
   /**
    * Test the user login block.
    */
-  function testAccountMenu() {
+  public function testAccountMenu() {
     // Create a regular user.
     $user = $this->backdropCreateUser(array());
 
@@ -1806,7 +1806,7 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
   /**
    * Tests the secondary menu.
    */
-  function testUserLoginBlock() {
+  public function testUserLoginBlock() {
     // Create a user with some permission that anonymous users lack.
     $user = $this->backdropCreateUser(array('administer permissions'));
 
@@ -1839,14 +1839,14 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
     $this->assertEqual(url('node', array('absolute' => TRUE)), $this->getUrl(), 'Redirected to frontpage and not external site after login.');
   }
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('menu');
   }
 
   /**
    * Tests disabling the 'My account' link.
    */
-  function testDisabledAccountLink() {
+  public function testDisabledAccountLink() {
     // Create an admin user and log in.
     $this->backdropLogin($this->backdropCreateUser(array('access administration pages', 'administer menu')));
 
@@ -1885,7 +1885,7 @@ class UserSaveTestCase extends BackdropWebTestCase {
   /**
    * Test creating a user with arbitrary uid.
    */
-  function testUserImport() {
+  public function testUserImport() {
     // User ID must be a number that is not in the database.
     $max_uid = db_query('SELECT MAX(uid) FROM {users}')->fetchField();
     $test_uid = $max_uid + mt_rand(1000, 1000000);
@@ -1918,7 +1918,7 @@ class UserSaveTestCase extends BackdropWebTestCase {
 class UserCreateTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('views'));
   }
 
@@ -1926,7 +1926,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
    * Create a user through the administration interface and ensure that it
    * displays in the user list.
    */
-  protected function testUserAdd() {
+  public function testUserAdd() {
     $user = $this->backdropCreateUser(array('administer users'));
     $this->backdropLogin($user);
 
@@ -2047,7 +2047,7 @@ class UserEditTestCase extends BackdropWebTestCase {
   /**
    * Test user edit page.
    */
-  function testUserEdit() {
+  public function testUserEdit() {
     // Test user edit functionality with user pictures disabled.
     $config = config('system.core');
     $config->set('user_pictures', 0)->save();
@@ -2125,14 +2125,14 @@ class UserEditTestCase extends BackdropWebTestCase {
  */
 class UserEditRebuildTestCase extends BackdropWebTestCase {
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('user_form_test');
   }
 
   /**
    * Test user edit page when the form is set to rebuild.
    */
-  function testUserEditFormRebuild() {
+  public function testUserEditFormRebuild() {
     $user1 = $this->backdropCreateUser(array('change own username'));
     $this->backdropLogin($user1);
 
@@ -2165,7 +2165,7 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('comment');
 
     // Enable user signatures.
@@ -2190,7 +2190,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
    * Test that a user can change their signature format and that it is respected
    * upon display.
    */
-  function testUserSignature() {
+  public function testUserSignature() {
     // Enable comment subjects on 'page' nodes
     $node_type = node_type_get_type('page');
     $node_type->settings['comment_title_options'] = COMMENT_TITLE_CUSTOM;
@@ -2250,7 +2250,7 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
   /**
    * Tests a user editing their own account.
    */
-  function testUserEditedOwnAccount() {
+  public function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
     // only.
     config_set('system.core', 'user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
@@ -2302,7 +2302,7 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
 class UserRoleAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users', 'assign roles'));
   }
@@ -2310,7 +2310,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   /**
    * Test adding, renaming and deleting roles.
    */
-  function testRoleAdministration() {
+  public function testRoleAdministration() {
     $this->backdropLogin($this->admin_user);
 
     // Visit the main roles administration page.
@@ -2440,7 +2440,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
   /**
    * Test user role weight change operation.
    */
-  function testRoleWeightChange() {
+  public function testRoleWeightChange() {
     $this->backdropLogin($this->admin_user);
 
     // Pick up a role and get its weight.
@@ -2470,7 +2470,7 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Creates a user, then tests the tokens generated from it.
    */
-  function testUserTokenReplacement() {
+  public function testUserTokenReplacement() {
     global $language;
     $url_options = array(
       'absolute' => TRUE,
@@ -2528,11 +2528,11 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
 class UserUserSearchTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('search'));
   }
 
-  function testUserSearch() {
+  public function testUserSearch() {
     // Verify that a user without 'administer users' permission cannot search
     // for users by email address. Additionally, ensure that the username has a
     // plus sign to ensure searching works with that.
@@ -2597,7 +2597,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array(
       'administer permissions',
@@ -2611,7 +2611,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * Tests that a user can be assigned a role and that the role can be removed
    * again.
    */
-  function testAssignAndRemoveRole()  {
+  public function testAssignAndRemoveRole()  {
     $role_name = $this->backdropCreateRole(array('administer content types'));
     $account = $this->backdropCreateUser();
 
@@ -2634,7 +2634,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
    * Tests that when creating a user the role can be assigned. And that it can
    * be removed again.
    */
-  function testCreateUserWithRole() {
+  public function testCreateUserWithRole() {
     $role_name = $this->backdropCreateRole(array('administer content types'));
     // Create a new user and add the role at the same time.
     $edit = array(
@@ -2695,7 +2695,7 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
    */
   protected $adminUser;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('user_form_test');
     // Create two users
     $this->accessUser = $this->backdropCreateUser(array('access content'));
@@ -2705,7 +2705,7 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
   /**
    * Tests that user_validate_current_pass can be reused on a custom form.
    */
-  function testUserValidateCurrentPassCustomForm() {
+  public function testUserValidateCurrentPassCustomForm() {
     $this->backdropLogin($this->adminUser);
 
     // Check that filling out a single password field does not validate.
@@ -2737,7 +2737,7 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->account = $this->backdropCreateUser();
     $this->anonymous = backdrop_anonymous_user();
@@ -2746,7 +2746,7 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   /**
    * Test label callback.
    */
-  function testLabelCallback() {
+  public function testLabelCallback() {
     $this->assertEqual(entity_label('user', $this->account), $this->account->name, t('The username should be used as label'));
 
     // Setup a random anonymous name to be sure the name is used.
@@ -2758,7 +2758,7 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   /**
    * Test URI callback.
    */
-  function testUriCallback() {
+  public function testUriCallback() {
     $uri = entity_uri('user', $this->account);
     $this->assertEqual('user/' . $this->account->uid, $uri['path'], t('Correct user URI.'));
   }
