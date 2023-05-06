@@ -1455,21 +1455,21 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
         // default admin role, but not for the default editor role.
         if ($type_permission == 'delete any content') {
           if ($role_name == $this->editor_role_name) {
-            $this->assertNoFieldChecked($checkbox_id);
+            $this->assertNoFieldChecked($checkbox_id, format_string('The checkbox for the @permission permission is not ticked for the default editor role.'), array('@permission' => $type_permission));
           }
           if ($role_name == $this->admin_role_name) {
-            $this->assertFieldChecked($checkbox_id);
+            $this->assertFieldChecked($checkbox_id), format_string('The checkbox for the @permission permission is ticked for the default admin role.'), array('@permission' => $type_permission);
           }
         }
         else {
           // Check that other permissions for this content type are ticked for
           // both the default admin role and the default editor role.
           if ($role_name == $this->editor_role_name || $role_name == $this->admin_role_name) {
-            $this->assertFieldChecked($checkbox_id);
+            $this->assertFieldChecked($checkbox_id, format_string('The checkbox for the @permission permission is ticked for the default role.'), array('@permission' => $type_permission));
           }
           else {
             // These permissions should not be ticked for all other roles.
-            $this->assertNoFieldChecked($checkbox_id);
+            $this->assertNoFieldChecked($checkbox_id, format_string('The checkbox for the @permission permission is not ticked for the non-default role.'), array('@permission' => $type_permission));
           }
         }
       }
@@ -1498,10 +1498,10 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
         // the default editor role.
         if ($type_permission == "delete any $content_type_name content") {
           if ($user_account == $this->editor_user) {
-            $this->assertFalse(user_access($type_permission, $user_account));
+            $this->assertFalse(user_access($type_permission, $user_account), format_string('The default editor role does not have the @permission permission.'), array('@permission' => $type_permission));
           }
           if ($user_account == $this->admin_user) {
-            $this->assertTrue(user_access($type_permission, $user_account));
+            $this->assertTrue(user_access($type_permission, $user_account), format_string('The default admin role has the @permission permission.'), array('@permission' => $type_permission));
           }
         }
         else {
@@ -1509,12 +1509,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
           // assigned to both the default admin role and the default editor
           // role.
           if ($user_account == $this->editor_user || $user_account == $this->admin_user) {
-            $this->assertTrue(user_access($type_permission, $user_account));
+            $this->assertTrue(user_access($type_permission, $user_account), format_string('Default role has the @permission permission.'), array('@permission' => $type_permission));
           }
           else {
             // These permissions should not have been assigned to any of the
             // other roles.
-            $this->assertFalse(user_access($type_permission, $user_account));
+            $this->assertFalse(user_access($type_permission, $user_account), format_string('Non-default role does not have the @permission permission.'), array('@permission' => $type_permission));
           }
         }
       }
