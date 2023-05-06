@@ -1491,12 +1491,13 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
     $content_type_permissions = array_keys(node_list_permissions($content_type_name));
+    $delete_content_type_permission = node_generate_permission_from_placeholder('delete any content', $content_type_name);
     foreach ($content_type_permissions as $type_permission) {
       foreach ($user_accounts as $user_account) {
         // Check that the 'delete any content' permission for the newly created
         // content type has been assigned to the default admin role, but not to
         // the default editor role.
-        if ($type_permission == "delete any $content_type_name content") {
+        if ($type_permission == $delete_content_type_permission) {
           if ($user_account == $this->editor_user) {
             $this->assertFalse(user_access($type_permission, $user_account), format_string('The default editor role does not have the @permission permission.'), array('@permission' => $type_permission));
           }
