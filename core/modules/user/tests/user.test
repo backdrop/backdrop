@@ -1498,10 +1498,10 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
         // the default editor role.
         if ($type_permission == "delete any $content_type_name content") {
           if ($user_account == $this->editor_user) {
-            $this->assertFalse(user_access($permission_name, $user_account));
+            $this->assertFalse(user_access($type_permission, $user_account));
           }
           if ($user_account == $this->admin_user) {
-            $this->assertTrue(user_access($permission_name, $user_account));
+            $this->assertTrue(user_access($type_permission, $user_account));
           }
         }
         else {
@@ -1509,12 +1509,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
           // assigned to both the default admin role and the default editor
           // role.
           if ($user_account == $this->editor_user || $user_account == $this->admin_user) {
-            $this->assertTrue(user_access($permission_name, $user_account));
+            $this->assertTrue(user_access($type_permission, $user_account));
           }
           else {
             // These permissions should not have been assigned to any of the
             // other roles.
-            $this->assertFalse(user_access($permission_name, $user_account));
+            $this->assertFalse(user_access($type_permission, $user_account));
           }
         }
       }
