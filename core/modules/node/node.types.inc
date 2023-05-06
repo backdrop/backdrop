@@ -632,48 +632,48 @@ function node_type_form_permissions($type) {
   unset($default_editor_permissions['delete any content']);
 
   $role_permissions = array();
-  foreach ($permissions as $perm => $perm_item) {
+  foreach ($permissions as $permission_name => $permission_item) {
     // Fill in default values for the permission.
-    $perm_item += array(
+    $permission_item += array(
       'description' => '',
       'restrict access' => FALSE,
       'warning' => '',
     );
-    $form['permission'][$perm] = array(
+    $form['permission'][$permission_name] = array(
       '#type' => 'item',
-      '#markup' => $perm_item['title'],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+      '#markup' => $permission_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $permission_item)),
     );
 
     // Build the arrays of ticked checkboxes for each role.
     foreach ($roles as $role_name => $role) {
       // For existing content types, the respective checkbox should be ticked if
       // the permission is among the permissions a role already has.
-      $role_has_permission = !$type_is_new && in_array($perm, $role->permissions);
+      $role_has_permission = !$type_is_new && in_array($permission_name, $role->permissions);
 
       // For new content types, if the default admin and/or default editor role
       // has been configured, then select some sensible permissions.
       switch ($role->name) {
         // The default admin role gets all content-related permissions.
         case $admin_role:
-          $allowed_perms = array_keys($default_admin_permissions);
+          $allowed_permissions = array_keys($default_admin_permissions);
           break;
 
         // The default editor role gets the same permissions as the default
         // admin role, except the "Delete any content" one.
         case $editor_role:
-          $allowed_perms = array_keys($default_editor_permissions);
+          $allowed_permissions = array_keys($default_editor_permissions);
           break;
 
         // The default for all other roles is not to have any permission
         // auto-assigned.
         default:
-          $allowed_perms = array();
+          $allowed_permissions = array();
       }
-      $role_should_have_permission = $type_is_new && in_array($perm, $allowed_perms);
+      $role_should_have_permission = $type_is_new && in_array($permission_name, $allowed_permissions);
 
       if ($role_has_permission || $role_should_have_permission) {
-        $role_permissions[$role_name][] = $perm;
+        $role_permissions[$role_name][] = $permission_name;
       }
     }
   }
