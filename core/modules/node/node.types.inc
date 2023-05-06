@@ -208,7 +208,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     // to people even if they don't have access to the "Permissions" tab.
     $form['permissions_message_container'] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+      '#attributes' => array('class' => array(
+        'messages', $permissions_message_type),
+      ),
     );
     $form['permissions_message_container']['message'] = array(
       '#type' => 'markup',

@@ -1345,7 +1345,16 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer content types', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(
+      array(
+        'administer permissions',
+        'access user profiles',
+        'administer site configuration',
+        'administer account settings',
+        'administer content types',
+        'administer modules',
+      ),
+    );
     $this->editor_user = $this->backdropCreateUser(array('access content'));
 
     // Find the new role names.
@@ -1428,7 +1437,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.', array(
       '%admin' => $this->admin_role_name,
-      '%editor' => $this->editor_role_name
+      '%editor' => $this->editor_role_name,
     )));
     // Opposite of the above assertNoFieldByXPath(), confirm that there are at
     // least some permission checkboxes checked.
