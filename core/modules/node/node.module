@@ -2815,9 +2815,7 @@ function node_list_permissions($type = '') {
   // Existing content type. Generate the list of actual permissions, by adding
   // the content type name in the names and descriptions of the placeholder
   // permissions.
-  if (!empty($type)) {
-    $info = node_type_get_type($type);
-
+  if (!empty($type) && $info = node_type_get_type($type)) {
     foreach ($permissions as $placeholder_permission => $placeholder_permission_info) {
       // Inject the content type name in the new permission name.
       $actual_permission = node_generate_permission_from_placeholder($placeholder_permission, $type);
