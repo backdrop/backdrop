@@ -622,8 +622,11 @@ function node_type_form_permissions($type) {
     '#value' => $roles,
   );
 
-  // Get the list of permissions for this content type. If this is a new content
-  // type, get the set of default "placeholder" permissions.
+  // - If this is an existing content type, get the list of permissions for it.
+  //   These permissions include the content type name in their name.
+  // - If this is a new content type being created, this returns the default set
+  //   of "placeholder" permissions. These permissions do NOT include the name
+  //   of the content type in their names.
   $permissions = node_list_permissions($type);
   $default_admin_permissions = $default_editor_permissions = $permissions;
   // If the default editor role is configured, it should have the same default
