@@ -2812,28 +2812,6 @@ function node_list_permissions($type = '') {
     ),
   );
 
-
-
-
-
-$content_type_permissions = array_keys($permissions);
-dpm($content_type_permissions);
-
-
-$simple_array = array(
-    'create content',
-    'edit own content',
-    'edit any content',
-    'delete own content',
-    'delete any content',
-  );
-dpm($simple_array, 'simple_array');
-
-
-
-
-
-
   // Existing content type. Generate the list of actual permissions, by adding
   // the content type name in the names and descriptions of the placeholder
   // permissions.

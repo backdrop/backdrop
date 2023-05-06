@@ -1454,7 +1454,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
         }
         else {
           // Check that other permissions for this content type are ticked for
-          // the default admin role, but not for the default editor role.
+          // both the default admin role and the default editor role.
           if ($role_name == $this->editor_role_name || $role_name == $this->admin_role_name) {
             $this->assertFieldChecked($checkbox_id);
           }
@@ -1484,6 +1484,9 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $content_type_permissions = array_keys(node_list_permissions($content_type_name));
     foreach ($content_type_permissions as $type_permission) {
       foreach ($user_accounts as $user_account) {
+        // Check that the 'delete any content' permission for the newly created
+        // content type has been assigned to the default admin role, but not to
+        // the default editor role.
         if ($type_permission == "delete any $content_type_name content") {
           if ($user_account == $this->editor_user) {
             $this->assertFalse(user_access($permission_name, $user_account));
@@ -1493,10 +1496,15 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
           }
         }
         else {
+          // Check that other permissions for this content type have been
+          // assigned to both the default admin role and the default editor
+          // role.
           if ($user_account == $this->editor_user || $user_account == $this->admin_user) {
             $this->assertTrue(user_access($permission_name, $user_account));
           }
           else {
+            // These permissions should not have been assigned to any of the
+            // other roles.
             $this->assertFalse(user_access($permission_name, $user_account));
           }
         }
