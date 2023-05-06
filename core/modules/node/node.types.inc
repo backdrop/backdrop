@@ -650,10 +650,6 @@ function node_type_form_permissions($type) {
 
     // Build the arrays of ticked checkboxes for each role.
     foreach ($roles as $role_name => $role) {
-      // For existing content types, the respective checkbox should be ticked if
-      // the permission is among the permissions a role already has.
-      $role_has_permission = !$type_is_new && in_array($permission_name, $role->permissions);
-
       // For new content types, if the default admin and/or default editor role
       // has been configured, then select some sensible permissions.
       switch ($role->name) {
@@ -674,6 +670,10 @@ function node_type_form_permissions($type) {
           $allowed_permissions = array();
       }
       $role_should_have_permission = $type_is_new && in_array($permission_name, $allowed_permissions);
+
+      // For existing content types, the respective checkbox should be ticked if
+      // the permission is among the permissions a role already has.
+      $role_has_permission = !$type_is_new && in_array($permission_name, $role->permissions);
 
       if ($role_has_permission || $role_should_have_permission) {
         $role_permissions[$role_name][] = $permission_name;
