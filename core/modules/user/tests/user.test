@@ -1406,19 +1406,19 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test assigning of permissions for the editor role.
+   * Test assigning of permissions for the default editor role.
    */
   function testEditorRole() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/roles');
 
-    // Before setting an admin role, check that no permissions are automatically
-    // assigned on new content types.
+    // Before setting a default admin role, check that no permissions are
+    // automatically assigned on new content types.
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.'));
     $this->assertNoFieldByXPath("//table[@id='permissions']//input[@checked]");
 
-    // Set both an admin role and editor role.
+    // Set both a default admin role and a default editor role.
     $edit = array();
     $edit['user_admin_role'] = $this->admin_role_name;
     $edit['user_editor_role'] = $this->editor_role_name;
@@ -1434,23 +1434,34 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     // least some permission checkboxes checked.
     $this->assertFieldByXPath("//table[@id='permissions']//input[@checked]");
 
-    $content_type_permissions = array(
-      'create content',
-      'edit own content',
-      'edit any content',
-      'delete own content',
-      'delete any content',
-    );
-    // In this case, both admin and editor checkboxes are checked.
+    $content_type_permissions = array_keys(node_list_permissions());
     $role_names = array(
       $this->admin_role_name,
       $this->editor_role_name,
     );
     foreach ($content_type_permissions as $type_permission) {
       foreach ($role_names as $role_name) {
-        if (!($type_permission == 'delete any content' && $role_name == $this->editor_role_name)) {
-          $checkbox_id = backdrop_strtolower(str_replace(' ', '-', "edit $role_name $type_permission"));
-          $this->assertFieldChecked($checkbox_id);
+        $checkbox_id = backdrop_html_id("edit $role_name $type_permission");
+        // Check that the 'delete any content' permission is ticked for the
+        // default admin role, but not for the default editor role.
+        if ($type_permission == 'delete any content') {
+          if ($role_name == $this->editor_role_name) {
+            $this->assertNoFieldChecked($checkbox_id);
+          }
+          if ($role_name == $this->admin_role_name) {
+            $this->assertFieldChecked($checkbox_id);
+          }
+        }
+        else {
+          // Check that other permissions for this content type are ticked for
+          // the default admin role, but not for the default editor role.
+          if ($role_name == $this->editor_role_name || $role_name == $this->admin_role_name) {
+            $this->assertFieldChecked($checkbox_id);
+          }
+          else {
+            // These permissions should not be ticked for all other roles.
+            $this->assertNoFieldChecked($checkbox_id);
+          }
         }
       }
     }
@@ -1463,18 +1474,31 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save content type'));
 
-    // Now check permissions were correctly assigned.
+    // Check that permissions have been assigned properly.
     $user_accounts = array(
       $this->admin_user,
       $this->editor_user,
     );
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
+    $content_type_permissions = array_keys(node_list_permissions($content_type_name));
     foreach ($content_type_permissions as $type_permission) {
-      $permission_name = backdrop_strtolower(str_replace('content', "$content_type_name content", $type_permission));
       foreach ($user_accounts as $user_account) {
-        if (!($type_permission == 'delete any content' && $user_account == $this->editor_user)) {
-          $this->assertTrue(user_access($permission_name, $user_account));
+        if ($type_permission == "delete any $content_type_name content") {
+          if ($user_account == $this->editor_user) {
+            $this->assertFalse(user_access($permission_name, $user_account));
+          }
+          if ($user_account == $this->admin_user) {
+            $this->assertTrue(user_access($permission_name, $user_account));
+          }
+        }
+        else {
+          if ($user_account == $this->editor_user || $user_account == $this->admin_user) {
+            $this->assertTrue(user_access($permission_name, $user_account));
+          }
+          else {
+            $this->assertFalse(user_access($permission_name, $user_account));
+          }
         }
       }
     }
