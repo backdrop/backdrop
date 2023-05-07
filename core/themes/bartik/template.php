@@ -21,7 +21,7 @@ function bartik_preprocess_maintenance_page(&$variables) {
 function bartik_css_alter(&$css) {
   // If using the legacy "Blue lagoon" color scheme, load the legacy stylesheet.
   $theme_path = backdrop_get_path('theme', 'bartik');
-  if (theme_get_setting('color_legacy') && isset($css[$theme_path . '/css/colors.css'])) {
+  if (theme_settings_get('color_legacy') && isset($css[$theme_path . '/css/colors.css'])) {
     $css[$theme_path . '/css/colors.css']['data'] = $theme_path . '/css/colors-legacy.css';
   }
 }
@@ -34,7 +34,7 @@ function bartik_css_alter(&$css) {
 function bartik_preprocess_layout(&$variables) {
   if (isset($variables['content']['header'])) {
     $extra_header_classes = array();
-    $extra_header_classes[] = theme_get_setting('main_menu_tabs');
+    $extra_header_classes[] = theme_settings_get('main_menu_tabs');
     $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');
     if (in_array($variables['layout']->layout_template, $legacy)) {
       $extra_header_classes[] = 'l-header-inner';

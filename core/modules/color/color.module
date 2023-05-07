@@ -45,7 +45,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
 
     // See if we're using a predefined scheme.
     // Note: we use the original theme when the default scheme is chosen.
-    $current_scheme = theme_get_setting('color.palette', $theme_name);
+    $current_scheme = theme_settings_get('color.palette', NULL, $theme_name);
     foreach ($schemes as $key => $scheme) {
       if ($current_scheme == $scheme) {
         $scheme_name = $key;
@@ -208,7 +208,7 @@ function color_css_alter(&$css) {
   }
   if (!isset($preview_data)) {
     // Override stylesheets.
-    $color_paths = theme_get_setting('color.stylesheets');
+    $color_paths = theme_settings_get('color.stylesheets');
 
     if (!empty($color_paths)) {
       $info = color_get_info($theme_key);
@@ -413,7 +413,7 @@ function color_get_palette($theme, $default = FALSE) {
   $palette = $info['schemes']['default']['colors'];
 
   // Load config.
-  if (!$default && ($theme_palette = theme_get_setting('color.palette', $theme))) {
+  if (!$default && ($theme_palette = theme_settings_get('color.palette', NULL, $theme))) {
     foreach ($theme_palette as $color_name => $color_code) {
       $palette[$color_name] = $color_code;
     }
@@ -585,7 +585,7 @@ function color_rebuild_settings($theme_name = NULL) {
  */
 function color_save_configuration($theme_name, $theme_info, $palette) {
   // Delete any old color files.
-  $files = theme_get_setting('color.files', $theme_name);
+  $files = theme_settings_get('color.files', NULL, $theme_name);
   if ($files) {
     foreach ($files as $file) {
       @backdrop_unlink($file);
@@ -595,7 +595,7 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
     @backdrop_rmdir($file);
   }
 
-  // Don't render the default colorscheme, use the standard theme instead.
+  // Don't render the default color scheme; use the standard theme instead.
   if (empty($palette) || implode(',', color_get_palette($theme_name, TRUE)) == implode(',', $palette)) {
     return NULL;
   }

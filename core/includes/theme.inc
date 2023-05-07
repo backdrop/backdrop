@@ -1437,21 +1437,45 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
 /**
  * Retrieves a setting for the current theme or for a given theme.
  *
+ * Legacy function no longer used by core, but preserved for backwards
+ * compatibility.
+ *
+ * @deprecated since 1.26.0 this is only a wrapper around theme_settings_get(),
+ * which was introduced to allow a default value to be defined.
+ *
+ * @see theme_settings_get()
+ */
+function theme_get_setting($setting_name, $theme = NULL) {
+  watchdog_deprecated_function('system', __FUNCTION__);
+  return theme_settings_get($setting_name, NULL, $theme);
+}
+
+/**
+ * Retrieves a setting for the current theme or for a given theme.
+ *
  * The final setting is obtained from the last value found in the following
  * sources:
- * - the default theme-specific settings defined in any base theme's .info file
- * - the default theme-specific settings defined in the theme's .info file
- * - the saved values from the theme's settings form
+ * - the default theme-specific settings defined in any base theme's .info file.
+ * - the default theme-specific settings defined in the theme's .info file.
+ * - the saved values from the theme's settings form.
+ * - the value provided as the optional $default parameter in the function.
  *
  * @param $setting_name
  *   The name of the setting to be retrieved.
- * @param $theme
+ * @param $default (optional)
+ *   The default value to use if this setting is not set.
+ * @param $theme (optional)
  *   The name of a given theme; defaults to the current theme.
  *
- * @return
- *   The value of the requested setting, NULL if the setting does not exist.
+ * @return mixed|NULL
+ *   - the value of the requested setting if found,
+ *   - or the value provided as the $default parameter if the setting was not
+ *     found,
+ *   - or NULL if the setting does not exist and no default value was provided.
+ * 
+ * @since 1.26.0 function added.
  */
-function theme_get_setting($setting_name, $theme = NULL) {
+function theme_settings_get($setting_name, $default = NULL, $theme = NULL) {
   $configs = &backdrop_static(__FUNCTION__, array());
 
   // If no key is given, use the current theme if we can determine it.
@@ -1479,7 +1503,13 @@ function theme_get_setting($setting_name, $theme = NULL) {
 
   // Loop up through any base themes.
   if (is_null($value) && isset($theme_info->info['base theme'])) {
-    $value = theme_get_setting($setting_name, $theme_info->info['base theme']);
+    $value = theme_settings_get($setting_name, NULL, $theme_info->info['base theme']);
+  }
+
+  // If nothing found after all, then fall back to the $default value if one was
+  // provided.
+  if (is_null($value)) {
+    $value = $default;
   }
 
   return $value;

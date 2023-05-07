@@ -134,13 +134,13 @@ class ThemeUnitTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test the theme_get_setting() function.
+   * Test the theme_settings_get() function.
    */
-  function testThemeGetSetting() {
+  function testThemeSettingsGet() {
     $GLOBALS['theme_key'] = 'test_theme';
-    $this->assertIdentical(theme_get_setting('theme_test_setting'), 'default value', 'theme_get_setting() uses the default theme automatically.');
-    $this->assertNotEqual(theme_get_setting('subtheme_override', 'test_basetheme'), theme_get_setting('subtheme_override', 'test_subtheme'), 'Base theme\'s default settings values can be overridden by subtheme.');
-    $this->assertIdentical(theme_get_setting('basetheme_only', 'test_subtheme'), 'base theme value', 'Base theme\'s default settings values are inherited by subtheme.');
+    $this->assertIdentical(theme_settings_get('theme_test_setting'), 'default value', 'theme_settings_get() uses the default theme automatically.');
+    $this->assertNotEqual(theme_settings_get('subtheme_override', NULL, 'test_basetheme'), theme_settings_get('subtheme_override', NULL, 'test_subtheme'), 'Base theme\'s default settings values can be overridden by subtheme.');
+    $this->assertIdentical(theme_settings_get('basetheme_only', NULL, 'test_subtheme'), 'base theme value', 'Base theme\'s default settings values are inherited by subtheme.');
   }
 
   /**
