@@ -479,7 +479,6 @@ function admin_bar_locale_links() {
     return array();
   }
 
-  $links = array();
   foreach ($language_links->links as $language_link) {
     if ($language_link['language']->langcode == $language_default->langcode) {
       continue;
