@@ -5021,19 +5021,19 @@ function theme_form_element_label($variables) {
 }
 
 /**
- * Returns HTML for a form element description and required marker.
+ * Returns HTML for a form element's help text (#description).
  *
  * Form element descriptions may appear before or after elements, depending on
  * theme_form_element() and #description_display.
  *
- * This function will not be called for elements with no description, depending
- * on #description_display.
+ * This function will not be called for elements with no description.
  *
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *
  * @since 1.26.0 theme function introduced.
+ *
  * @ingroup themeable
  */
 function theme_form_element_description($variables) {
