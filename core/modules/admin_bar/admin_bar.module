@@ -451,7 +451,7 @@ function admin_bar_admin_bar_replacements($complete) {
           $theme_locale_links = theme('admin_bar_links', array(
             'elements' => $locale_links,
           ));
-          $items['.admin-bar-locale-links>ul.dropdown'] = strip_tags($theme_locale_links, '<li><a>');
+          $items['.admin-bar-locale-links>ul.dropdown'] = strip_tags($theme_locale_links, '<li><a><span>');
         }
       }
     }
@@ -481,20 +481,32 @@ function admin_bar_locale_links() {
 
   $links = array();
   foreach ($language_links->links as $language_link) {
-    if ($language_link['language']->langcode == $language_default->langcode || empty($language_link['href'])) {
+    if ($language_link['language']->langcode == $language_default->langcode) {
       continue;
     }
 
-    $links[$language_link['language']->langcode] = array(
-      '#attributes' => array('class' => array('locale')),
-      '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
-      '#href' => url($language_link['href'], array(
-        'language' => $language_link['language'],
-        'absolute' => TRUE,
-      )),
-      '#below' => array(),
-      '#original_link' => array(),
-    );
+    if (!empty($language_link['href'])) {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#href' => url($language_link['href'], array(
+          'language' => $language_link['language'],
+          'absolute' => TRUE,
+        )),
+        '#below' => array(),
+        '#original_link' => array(),
+      );
+    }
+    else {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#type' => 'markup',
+        '#prefix' => '<span>',
+        '#markup' => (isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name) . ' (' . t('unavailable') . ')',
+        '#suffix' => '</span>',
+      );
+    }
   }
 
   return $links;
