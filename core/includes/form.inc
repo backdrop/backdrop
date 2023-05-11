@@ -1857,13 +1857,46 @@ function form_builder($form_id, &$element, &$form_state) {
     $element += $info;
     $element['#defaults_loaded'] = TRUE;
   }
+
+  // Set the defaults for the position of the description/help text for various
+  // form elements, based on the current theme settings (if set).
+  // @todo: create helper function for this, so that we don't call
+  // theme_get_setting() for each element, and also use caching.
+  $respect_explicit_description_display = (theme_get_setting('respect_explicit_description_display') !== NULL) ? theme_get_setting('respect_explicit_description_display') : TRUE;
+  $fieldsets_description_position = (theme_get_setting('fieldsets_description_position') !== NULL) ? theme_get_setting('fieldsets_description_position') : 'before';
+  $radios_and_checkboxes_description_position = (theme_get_setting('radios_and_checkboxes_description_position') !== NULL) ? theme_get_setting('radios_and_checkboxes_description_position') : 'after';
+  $default_description_position = (theme_get_setting('default_description_position') !== NULL) ? theme_get_setting('default_description_position') : 'after';
+
+  $description_display = $default_description_position;
+  // If the '#description_display' property has been explicitly set for this
+  // element, and if not overridden by any theme settings, then respect it.
+  if (isset($element['#description_display']) && $respect_explicit_description_display) {
+    $description_display = $element['#description_display'];
+  }
+  elseif (isset($element['#type'])) {
+    switch ($element['#type']) {
+      case 'fieldset':
+        $description_display = $fieldsets_description_position;
+        break;
+
+      case 'radio':
+      case 'radios':
+      case 'checkbox':
+      case 'checkboxes':
+        $description_display = $radios_and_checkboxes_description_position;
+        break;
+
+      default:
+        $description_display = $default_description_position;
+    }
+  }
+
   // Assign basic defaults common for all form elements.
   $element += array(
     '#required' => FALSE,
     '#attributes' => array(),
     '#title_display' => 'before',
-    // '#description_display' => (isset($element['#type']) && $element['#type'] == 'fieldset') ? 'before' : 'after',
-    '#description_display' => (isset($element['#type']) && $element['#type'] == 'fieldset') ? 'after' : 'before',
+    '#description_display' => $description_display,
   );
 
   // Special handling if we're on the top level form element.
@@ -5047,7 +5080,7 @@ function theme_form_element_description($variables) {
   }
 
   $attributes = array('class' => array('description'));
-  if ($element['#description_display'] === 'invisible') {
+  if (isset($element['#description_display']) && $element['#description_display'] === 'invisible') {
     $attributes['class'][] = 'element-invisible';
   }
 
