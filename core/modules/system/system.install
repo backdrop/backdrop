@@ -3422,6 +3422,32 @@ function system_update_1088() {
 }
 
 /**
+ * Enable Admin Bar's Language Switcher component if this is a multilingual
+ * site.
+ */
+function system_update_1089() {
+  if (!(module_exists('locale') && language_multilingual())) {
+    return;
+  }
+  $config = config('admin_bar.settings');
+  $components = $config->get('components');
+  $components[] = 'admin_bar.locale';
+  $config->set('components', array_unique($components));
+  $config->save();
+}
+
+/**
+ * Set a default value for the new user_editor_role setting on existing sites.
+ */
+function system_update_1090() {
+  $config = config('system.core');
+  if ($config->get('user_editor_role') === NULL) {
+    $config->set('user_editor_role', '');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

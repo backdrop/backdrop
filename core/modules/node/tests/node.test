@@ -3649,6 +3649,47 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropGet($node_path);
     $this->assertResponse(404);
   }
+
+  /**
+   * Test node update and insert with entity cache.
+   *
+   * Make sure that creating a new node does not affect existing entity cache
+   * records, and updating a node only acts on the affected cid.
+   */
+  function testNodeUpdateInsertCache() {
+    $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
+    $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
+    $ids = array($node_one->nid, $node_two->nid);
+    $query = 'SELECT * FROM {cache_entity_node}';
+
+    // Trigger caching for both nodes and get cache records.
+    node_load_multiple($ids);
+    $cached = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached), 2, 'Both nodes have a record in table cache_entity_node.');
+
+    // Update one of the nodes.
+    $this->backdropLogin($this->admin_user);
+    $updated_title = 'Node two updated';
+    $edit = array('title' => $updated_title);
+    $this->backdropPost('node/' . $node_two->nid . '/edit', $edit, t('Save'));
+
+    // Check records in the entity cache database table after updating a node.
+    $cached_after_update = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_update), 2, 'Both nodes still have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_update[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+    $this->assertNotEqual($cached_after_update[2]->created, $cached[2]->created, 'Cache timestamp of node 2 has changed after updating.');
+    $node_data = unserialize($cached_after_update[2]->data);
+    $this->assertEqual($node_data->title, $updated_title, 'Cached node title is correct after updating.');
+
+    // Create a new page node.
+    $edit = array('title' => 'Node three');
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+
+    // Check records again.
+    $cached_after_insert = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_insert), 3, 'All three nodes have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_insert[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+  }
 }
 
 /**
