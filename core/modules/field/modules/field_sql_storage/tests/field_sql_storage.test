@@ -4,7 +4,7 @@
  * Tests for field_sql_storage.module.
  *
  * Field_sql_storage.module implements the default back-end storage plugin
- * for the Field Strage API.
+ * for the Field Storage API.
  */
 
 /**

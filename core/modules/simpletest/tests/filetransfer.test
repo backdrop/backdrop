@@ -1,7 +1,7 @@
 <?php
 
 
-class FileTranferTest extends BackdropWebTestCase {
+class FileTransferTest extends BackdropWebTestCase {
   protected $hostname = 'localhost';
   protected $username = 'backdrop';
   protected $password = 'password';

@@ -226,6 +226,12 @@ description = Test abstract handler definitions.
 group = Views
 file = views_handlers.test
 
+[ViewsLayoutsTest]
+name = Layouts and Views context
+description = Test to see if layout context can modify a view.
+group = Views
+file = views_layout.test
+
 [ViewsModuleTest]
 name = Tests views.module
 description = Tests some basic functions of views.module.
@@ -280,6 +286,12 @@ description = Test creating basic views with the wizard and viewing them on the 
 group = Views UI
 file = views_ui.test
 
+[ViewsTranslatableTest]
+name = Views Translatable Test
+description = Tests the pluggable translations.
+group = Views
+file = views_translatable.test
+
 [ViewsUIWizardDefaultViewsTestCase]
 name = Views UI default views functionality
 description = Test enabling, disabling, and reverting default views via the listing page.
@@ -330,12 +342,6 @@ file = views_upgrade.test
 
 [ViewsViewTest]
 name = Test the view class
-description = Tests some  functionality of the view class.
+description = Tests some functionality of the view class.
 group = Views
 file = views_view.test
-
-[ViewsTranslatableTest]
-name = 'Views Translatable Test'
-description = 'Tests the pluggable translations'
-group = Views
-file = views_translatable.test

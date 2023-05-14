@@ -209,7 +209,7 @@ function update_cron() {
     return;
   }
 
-  // An update interval of 0 means manaul checking only.
+  // An update interval of 0 means manual checking only.
   $frequency = config_get('update.settings', 'update_interval_days');
   if ($frequency == 0) {
     return;

@@ -1,0 +1,24 @@
+<?php
+/**
+ * @file
+ * Node layout preview/revision test module.
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function node_layout_preview_revision_test_config_info() {
+  $prefixes['layout.layout.custom_node'] = array(
+    'label' => t('Custom Node layout'),
+    'group' => t('Layouts'),
+  );
+  $prefixes['layout.layout.custom_node_preview'] = array(
+    'label' => t('Custom Node Preview layout'),
+    'group' => t('Layouts'),
+  );
+  $prefixes['layout.layout.custom_node_revision'] = array(
+    'label' => t('Custom Node Revision layout'),
+    'group' => t('Layouts'),
+  );
+  return $prefixes;
+}
