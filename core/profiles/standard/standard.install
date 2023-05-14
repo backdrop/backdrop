@@ -280,7 +280,7 @@ function standard_install() {
 
     'settings' => array(
       'file_directory' => 'field/image',
-      'file_extensions' => 'png gif jpg jpeg',
+      'file_extensions' => implode(' ', image_get_supported_extensions()),
       'max_filesize' => '',
       'max_resolution' => '',
       'min_resolution' => '',
@@ -328,7 +328,7 @@ function standard_install() {
 
     'settings' => array(
       'file_directory' => 'field/image',
-      'file_extensions' => 'png gif jpg jpeg',
+      'file_extensions' => implode(' ', image_get_supported_extensions()),
       'max_filesize' => '',
       'max_resolution' => '',
       'min_resolution' => '',

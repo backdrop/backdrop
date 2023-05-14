@@ -69,6 +69,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
@@ -88,7 +89,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_extensions' => array(implode(' ', image_get_supported_extensions())),
       'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
@@ -126,7 +127,9 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
   $form['size'] = array(
     '#title' => t('Image size'),
@@ -560,6 +563,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * internal alias.
  *
  * @param string $url
+ *   A URL before it is cleaned-up.
  *
  * @return string
  *   A cleaned-up URL that is either a properly formatted external URL or an
@@ -587,7 +591,7 @@ function _filter_cleanup_url($url) {
   // - adding extra prefixes if being re-edited;
   // - a url getting double-encoded;
   // - or domains with relative protocols.
-  // E.g. /fr/node/1, //domain.tld
+  // E.g. /fr/node/1, //domain.tld.
   if (substr($url, 0, 1) == '/') {
     return $url;
   }
@@ -610,7 +614,7 @@ function _filter_cleanup_url($url) {
  * @return string
  *   The URL with the protocol prepended if needed.
  *
- * @see link_cleanup_url().
+ * @see link_cleanup_url()
  */
 function _filter_create_valid_external_url($url) {
   // Skip if it's already a valid external URL with a protocol.
@@ -638,6 +642,7 @@ function _filter_create_valid_external_url($url) {
  * all external URLs even if they have dangerous protocols.
  *
  * @param string $url
+ *   The URL entered by the user.
  *
  * @return bool
  *   TRUE if URL has protocol.
