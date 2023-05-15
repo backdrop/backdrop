@@ -155,17 +155,16 @@ function system_menu_block_form($config) {
       'toggle' => t('Toggle'),
       'link' => t('Link'),
     ),
-    '#description' => t('Parent item\'s behavior in collapsible (mobile) view.'),
+    '#description' => t('Determines how parent menu items behave when the menu is shown on small screens.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
         'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
       ),
     ),
   );
   $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
-  $form['collapse']['toggle']['#description'] = t('Parent functions as toggle without a link.');
-  $form['collapse']['link']['#description'] = t('Parent text is a link, +/- acts as a toggle.');
+  $form['collapse']['toggle']['#description'] = t('Parent expands or collapses on each tap and does not act a link.');
+  $form['collapse']['link']['#description'] = t('Parent text is a link, +/- element expands or collapses.');
 
   $form['accordion'] = array('#type' => 'checkbox',
     '#title' => t('Accordion-style'),
@@ -173,7 +172,6 @@ function system_menu_block_form($config) {
     '#description' => t('Close all sub-menus when closing parent menu items.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="block_settings[toggle]"]' => array('checked' => TRUE),
         'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
       ),
     ),
