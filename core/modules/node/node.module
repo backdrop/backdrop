@@ -2772,37 +2772,90 @@ function node_node_access($node, $op, $account) {
 }
 
 /**
- * Helper function to generate standard node permission list for a given type.
+ * Generates a list of permissions for a specific content type.
  *
  * @param $type
- *   The machine-readable name of the node type.
+ *   The machine-readable name of the content type.
+ *
+ *   If $type is empty or omitted, the default content-related permissions are
+ *   returned. These are "placeholder" permissions - the actual permissions
+ *   include the content type name in their name. For example, if the content
+ *   type is called "test", the actual permission for creating content of this
+ *   type will be "create test content" instead of just "create content" (which
+ *   is the respective placeholder permission). This is useful when the content
+ *   type name has not been created yet (for instance, when creating a new
+ *   content type in node_type_form_permissions().
  *
  * @return array
  *   An array of permission names and descriptions.
+ *
+ * @since 1.25.0 $type is optional.
  */
-function node_list_permissions($type) {
-  $info = node_type_get_type($type);
-
-  // Build standard list of node permissions for this type.
-  $perms = array(
-    "create $type content" => array(
-      'title' => t('%type_name: Create new content', array('%type_name' => $info->name)),
+function node_list_permissions($type = '') {
+  // Default, "placeholder" permissions when creating a new content type (the
+  // content type name has not been created yet).
+  $permissions = array(
+    'create content' => array(
+      'title' => t('Create new content'),
     ),
-    "edit own $type content" => array(
-      'title' => t('%type_name: Edit own content', array('%type_name' => $info->name)),
+    'edit own content' => array(
+      'title' => t('Edit own content'),
     ),
-    "edit any $type content" => array(
-      'title' => t('%type_name: Edit any content', array('%type_name' => $info->name)),
+    'edit any content' => array(
+      'title' => t('Edit any content'),
     ),
-    "delete own $type content" => array(
-      'title' => t('%type_name: Delete own content', array('%type_name' => $info->name)),
+    'delete own content' => array(
+      'title' => t('Delete own content'),
     ),
-    "delete any $type content" => array(
-      'title' => t('%type_name: Delete any content', array('%type_name' => $info->name)),
+    'delete any content' => array(
+      'title' => t('Delete any content'),
     ),
   );
 
-  return $perms;
+  // Existing content type. Generate the list of actual permissions, by adding
+  // the content type name in the names and descriptions of the placeholder
+  // permissions.
+  if (!empty($type) && $info = node_type_get_type($type)) {
+    foreach ($permissions as $placeholder_permission => $placeholder_permission_info) {
+      // Inject the content type name in the new permission name.
+      $actual_permission = node_generate_permission_from_placeholder($placeholder_permission, $type);
+      // Add the content type name as a prefix to the permission description.
+      $actual_permission_title = $info->name . ': ' . $placeholder_permission_info['title'];
+      // Add the updated permission to the array.
+      $permissions[$actual_permission]['title'] = $actual_permission_title;
+      // Remove the placeholder permission from the array.
+      unset($permissions[$placeholder_permission]);
+    }
+  }
+
+  return $permissions;
+}
+
+/**
+ * Convert a placeholder content type permission to an actual permission.
+ *
+ * When a new content type is created or being saved, the permissions in the
+ * content type edit form and the respective $form_state values are in the
+ * format 'create content'. When saving the type, we need to include the content
+ * type name in the permission name in the format 'create $type content'.
+ *
+ * @param $placeholder_permission
+ *   The machine-readable name of the placeholder permission to be converted.
+ * @param $type
+ *   The machine-readable name of the content type.
+ *
+ * @return string
+ *   The name of the actual permission, converted to the format that includes
+ *   the content type name.
+ *
+ * @see node_list_permissions()
+ * @see node_type_form_submit()
+ */
+function node_generate_permission_from_placeholder($placeholder_permission, $type) {
+  $parts = explode('content', $placeholder_permission);
+  $permission = $parts[0] . $type . ' content';
+
+  return $permission;
 }
 
 /**

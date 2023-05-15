@@ -182,8 +182,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
   if (!empty($auto_permission_roles) && empty($type->type)) {
     $permissions_message = format_plural(
       count($auto_permission_roles),
-      'The %role role has been assigned permissions to create, edit, and delete any content of this type.',
-      'The %admin and %editor roles have been assigned permissions to create, edit, and delete any content of this type.',
+      'The %role role has been assigned permissions to create, edit, and delete content of this type.',
+      'The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.',
       $auto_permission_roles
     );
     $permissions_message_type = 'info';
@@ -208,7 +208,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     // to people even if they don't have access to the "Permissions" tab.
     $form['permissions_message_container'] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+      '#attributes' => array('class' => array(
+        'messages', $permissions_message_type),
+      ),
     );
     $form['permissions_message_container']['message'] = array(
       '#type' => 'markup',
@@ -551,26 +553,24 @@ function node_type_form_submit($form, &$form_state) {
   menu_rebuild();
 
   if ($status == SAVED_UPDATED) {
-    // Update node type permissions
+    // Update node type permissions.
     foreach ($form_state['values']['roles'] as $role_name => $role) {
       user_role_change_permissions($role->name, $form_state['values'][$role->name]);
     }
     backdrop_set_message(t('The content type %name has been updated.', array('%name' => $type->name)));
   }
   elseif ($status == SAVED_NEW) {
-    // Save new permissions
+    // Save new permissions.
     foreach ($form_state['values']['roles'] as $role_name => $role) {
-      $valid_perms = array();
-      // Re-create the permissions string in the format 'create $type content'
-      // from the default 'create content' for saving permissions.
-      foreach ($form_state['values'][$role->name] as $string => $perm) {
-        if ($perm) {
-          $parts = explode('content', $string);
-          $valid_string = $parts[0] . $type->type . ' content';
-          $valid_perms[] = $valid_string;
+      $permissions = array();
+      // Convert the placeholder permissions (from the format 'create content')
+      // to the actual permission (in the format 'create $type content').
+      foreach ($form_state['values'][$role->name] as $placeholder_permission => $permission_granted) {
+        if ($permission_granted) {
+          $permissions[] = node_generate_permission_from_placeholder($placeholder_permission, $type->type);
         }
       }
-      user_role_grant_permissions($role->name, $valid_perms);
+      user_role_grant_permissions($role->name, $permissions);
     }
     if ($form_state['values']['body']) {
       node_add_body_field($type);
@@ -579,7 +579,8 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
-  // Make the new content type indexable by default if Search module is enabled.
+  // Make the new content type indexable by default if the Search module is
+  // enabled.
   if (module_exists('search')) {
     $search_content_types = config_get('search.settings', 'content_types');
     // If no types are specified, then all types are enabled and there's no need
@@ -604,10 +605,11 @@ function node_type_form_submit($form, &$form_state) {
  * @see node_type_form()
  */
 function node_type_form_permissions($type) {
-  // Retrieve role names for columns.
-  $roles = user_roles(FALSE, NULL, TRUE);
+  $type_is_new = empty($type);
   $admin_role = config_get('system.core', 'user_admin_role');
   $editor_role = config_get('system.core', 'user_editor_role');
+  // Retrieve role names for the columns of the permission matrix.
+  $roles = user_roles(FALSE, NULL, TRUE);
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
@@ -622,50 +624,61 @@ function node_type_form_permissions($type) {
     '#value' => $roles,
   );
 
-  // Render role/permission overview:
-  $options = array();
+  // - If this is an existing content type, get the list of permissions for it.
+  //   These permissions include the content type name in their name.
+  // - If this is a new content type being created, this returns the default set
+  //   of "placeholder" permissions. These permissions do NOT include the name
+  //   of the content type in their names.
+  $permissions = node_list_permissions($type);
+  $default_admin_permissions = $default_editor_permissions = $permissions;
+  // If the default editor role is configured, it should have the same default
+  // permissions as the default administrator, except the "delete any content"
+  // permission.
+  unset($default_editor_permissions['delete any content']);
 
-  $default_perms = array(
-    "create content" => array(
-      'title' => t('Create new content'),
-    ),
-    "edit own content" => array(
-      'title' => t('Edit own content'),
-    ),
-    "edit any content" => array(
-      'title' => t('Edit any content'),
-    ),
-    "delete own content" => array(
-      'title' => t('Delete own content'),
-    ),
-    "delete any content" => array(
-      'title' => t('Delete any content'),
-    ),
-  );
-
-  $permissions = !empty($type) ? node_list_permissions($type) : $default_perms;
-
-  $status = array();
-  foreach ($permissions as $perm => $perm_item) {
+  $role_permissions = array();
+  foreach ($permissions as $permission_name => $permission_item) {
     // Fill in default values for the permission.
-    $perm_item += array(
+    $permission_item += array(
       'description' => '',
       'restrict access' => FALSE,
       'warning' => '',
     );
-    $options[$perm] = '';
-    $form['permission'][$perm] = array(
+    $form['permission'][$permission_name] = array(
       '#type' => 'item',
-      '#markup' => $perm_item['title'],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+      '#markup' => $permission_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $permission_item)),
     );
+
+    // Build the arrays of ticked checkboxes for each role.
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. For new content types,
-      // if user_admin_role and/or user_editor_role have been configured in the
-      // "Default roles" section in admin/config/people/roles, then always
-      // select all permissions for these roles.
-      if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
-        $status[$role_name][] = $perm;
+      // For new content types, if the default admin and/or default editor role
+      // has been configured, then select some sensible permissions.
+      switch ($role->name) {
+        // The default admin role gets all content-related permissions.
+        case $admin_role:
+          $allowed_permissions = array_keys($default_admin_permissions);
+          break;
+
+        // The default editor role gets the same permissions as the default
+        // admin role, except the "Delete any content" one.
+        case $editor_role:
+          $allowed_permissions = array_keys($default_editor_permissions);
+          break;
+
+        // The default for all other roles is not to have any permission
+        // auto-assigned.
+        default:
+          $allowed_permissions = array();
+      }
+      $role_should_have_permission = $type_is_new && in_array($permission_name, $allowed_permissions);
+
+      // For existing content types, the respective checkbox should be ticked if
+      // the permission is among the permissions a role already has.
+      $role_has_permission = !$type_is_new && in_array($permission_name, $role->permissions);
+
+      if ($role_has_permission || $role_should_have_permission) {
+        $role_permissions[$role_name][] = $permission_name;
       }
     }
   }
@@ -674,8 +687,8 @@ function node_type_form_permissions($type) {
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#options' => array_fill_keys(array_keys($permissions), ''),
+      '#default_value' => isset($role_permissions[$role_name]) ? $role_permissions[$role_name] : array(),
       '#attributes' => array('class' => array('role-' . $role_name)),
     );
     $form['role_names'][$role_name] = array(
