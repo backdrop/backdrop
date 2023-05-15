@@ -163,7 +163,7 @@ function system_menu_block_form($config) {
     ),
   );
   $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
-  $form['collapse']['toggle']['#description'] = t(' Parent expands or collapses on each tap and does not act a link.');
+  $form['collapse']['toggle']['#description'] = t('Parent expands or collapses on each tap and does not act a link.');
   $form['collapse']['link']['#description'] = t('Parent text is a link, +/- element expands or collapses.');
 
   $form['accordion'] = array('#type' => 'checkbox',
