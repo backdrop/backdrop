@@ -664,8 +664,9 @@ function node_type_form_permissions($type) {
       // if user_admin_role and/or user_editor_role have been configured, then
       // select sensible permissions for these roles.
       if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
-        // Do not allow editors to delete any content.
-        if (!($role->name == $editor_role && strstr($perm, 'delete any'))) {
+        // Do not grant the 'delete any content' permission to editors by
+        // default.
+        if (!($role->name == $editor_role && $perm == 'delete any content')) {
           $status[$role_name][] = $perm;
         }
       }
