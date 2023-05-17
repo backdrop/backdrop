@@ -130,6 +130,92 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#description' => t('Describe this content type. The text will be displayed on the <em>Add content</em> page.'),
   );
 
+  // Prepare various messages about automatic permission assignment, and
+  // warnings if no role is configured to create/edit/delete content of this
+  // type.
+  $system_config = config('system.core');
+  // Prepare the array with the human-readable labels of any roles that are have
+  // been configured in the "Default roles" section in
+  // admin/config/people/roles. This array is used by format_plural() later.
+  $default_admin_role = $system_config->get('user_admin_role');
+  $default_editor_role = $system_config->get('user_editor_role');
+  $auto_permission_roles = array();
+  if ($default_admin_role && $admin_role = user_role_load($default_admin_role)) {
+    $auto_permission_roles['%admin'] = $admin_role->label;
+  }
+  if ($default_editor_role && $editor_role = user_role_load($default_editor_role)) {
+    $auto_permission_roles['%editor'] = $editor_role->label;
+  }
+  // Handle the case where the same role has been configured to be both the
+  // default admin as well as the default editor.
+  $auto_permission_roles = array_unique($auto_permission_roles);
+  // Prepare the $auto_permission_roles array for format_plural() when there's
+  // only one role.
+  if (count($auto_permission_roles) == 1) {
+    $one_role = reset($auto_permission_roles);
+    unset($auto_permission_roles);
+    $auto_permission_roles['%role'] = $one_role;
+  }
+
+  $permissions_assigned = FALSE;
+  $content_type_permissions = node_type_form_permissions($type->type);
+  foreach ($content_type_permissions['checkboxes'] as $role => $checkboxes) {
+    if (!empty($checkboxes['#default_value'])) {
+      // At least one permission related to this content type is assigned to at
+      // least one role.
+      $permissions_assigned = TRUE;
+      break;
+    }
+  }
+
+  // Edge case, where both the default admin role and the default content editor
+  // role have been disabled in in admin/config/people/roles, while at the same
+  // time no other role has been granted any permission associated with this
+  // content type. We show this warning for both new and existing content types.
+  if (!$permissions_assigned) {
+    $permissions_message = t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.');
+    $permissions_message_type = 'warning';
+  }
+  // Show some info messages if automatic permission assignment is enabled for
+  // at least one of the default admin/editor roles. We only show these when
+  // creating a new content type.
+  if (!empty($auto_permission_roles) && empty($type->type)) {
+    $permissions_message = format_plural(
+      count($auto_permission_roles),
+      'The %role role has been assigned permissions to create, edit, and delete content of this type.',
+      'The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.',
+      $auto_permission_roles
+    );
+    $permissions_message_type = 'info';
+  }
+
+  if (isset($permissions_message)) {
+    if (user_access('administer permissions')) {
+      $permissions_message .= ' ' . t('You can make any necessary adjustments in the <em>Permissions</em> tab below.');
+    }
+    else {
+      $user_module_permissions = module_invoke('user', 'permission');
+      $permissions_message .= ' ' . t('Only roles with the %permission permission can make any necessary adjustments.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+    }
+
+    // We are mimicking the style of a warning/info message here. If we used
+    // backdrop_set_message(), the message would be placed at the top of the
+    // page, which would make it unnecessarily prominent and potentially
+    // distracting. We are placing it right above the vertical tabs section
+    // instead (closer to where permissions can be configured). Intentionally
+    // not placing it inside the "Permissions" tab either, since that is not the
+    // default tab, so it wouldn't be visible, and we need to show some warnings
+    // to people even if they don't have access to the "Permissions" tab.
+    $form['permissions_message_container'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+    );
+    $form['permissions_message_container']['message'] = array(
+      '#type' => 'markup',
+      '#markup' => $permissions_message,
+    );
+  }
+
   $form['additional_settings'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
@@ -276,7 +362,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
-  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+  $form['permissions']['permissions'] = $content_type_permissions;
 
   // Revision settings.
   $form['revision'] = array(
@@ -521,6 +607,7 @@ function node_type_form_permissions($type) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
+  $editor_role = config_get('system.core', 'user_editor_role');
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
@@ -573,10 +660,15 @@ function node_type_form_permissions($type) {
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. Always select the Admin
-      // role on new forms.
-      if (in_array($perm, $role->permissions) || (!$type && $role->name == $admin_role)) {
-        $status[$role_name][] = $perm;
+      // Builds arrays for checked boxes for each role. For new content types,
+      // if user_admin_role and/or user_editor_role have been configured, then
+      // select sensible permissions for these roles.
+      if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
+        // Do not grant the 'delete any content' permission to editors by
+        // default.
+        if (!($role->name == $editor_role && $perm == 'delete any content')) {
+          $status[$role_name][] = $perm;
+        }
       }
     }
   }

@@ -97,7 +97,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getOrderBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the expression array structure.
    */
   public function &getOrderBy();
@@ -115,7 +115,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getGroupBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the group-by array structure.
    */
   public function &getGroupBy();
@@ -1588,7 +1588,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::orderBy().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function orderBy($field, $direction = 'ASC') {
     // Only allow ASC and DESC, default to ASC.
@@ -1600,7 +1600,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::orderRandom().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function orderRandom() {
     $alias = $this->addExpression('RAND()', 'random_field');
@@ -1611,7 +1611,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::range().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function range($start = NULL, $length = NULL) {
     $this->range = func_num_args() ? array('start' => $start, 'length' => $length) : array();
@@ -1621,7 +1621,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::union().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function union(SelectQueryInterface $query, $type = '') {
     // Handle UNION aliasing.
@@ -1648,7 +1648,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::groupBy().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function groupBy($field) {
     $this->group[$field] = $field;
@@ -1658,7 +1658,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::countQuery().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function countQuery() {
     // Create our new query object that we will mutate into a count query.

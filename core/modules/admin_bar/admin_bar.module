@@ -64,6 +64,9 @@ function admin_bar_theme() {
     'admin_bar_icon_page' => array(
       'variables' => array('src' => NULL, 'alt' => NULL),
     ) + $base,
+    'admin_bar_icon_locale' => array(
+      'variables' => array('src' => NULL, 'alt' => NULL),
+    ) + $base,
   );
 }
 
@@ -107,6 +110,13 @@ function admin_bar_menu_link_update($link) {
  */
 function admin_bar_menu_link_delete($link) {
   // Flush all of our caches to pick up the link.
+  cache('admin_bar')->flush();
+}
+
+/**
+ * Implements hook_language_insert().
+ */
+function admin_bar_language_insert() {
   cache('admin_bar')->flush();
 }
 
@@ -432,9 +442,73 @@ function admin_bar_admin_bar_replacements($complete) {
         $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name, $query);
       }
     }
+    // Check whether the page links component is enabled.
+    if (in_array('admin_bar.locale', $components)) {
+      if (module_exists('locale') && language_multilingual()) {
+        if ($locale_links = admin_bar_locale_links()) {
+          // Theme the locale links but remove the <ul> element
+          // so we can swap out the list items for the current <ul> element.
+          $theme_locale_links = theme('admin_bar_links', array(
+            'elements' => $locale_links,
+          ));
+          $items['.admin-bar-locale-links>ul.dropdown'] = strip_tags($theme_locale_links, '<li><a><span>');
+        }
+      }
+    }
   }
 
   return $items;
+}
+
+/**
+ * Build Locale links.
+ *
+ */
+function admin_bar_locale_links() {
+  if (!module_exists('locale') || !language_multilingual()) {
+    return array();
+  }
+
+  global $language;
+  $language_default = $language;
+
+  $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
+  $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
+
+  if (!isset($language_links->links)) {
+    return array();
+  }
+
+  foreach ($language_links->links as $language_link) {
+    if ($language_link['language']->langcode == $language_default->langcode) {
+      continue;
+    }
+
+    if (!empty($language_link['href'])) {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#href' => url($language_link['href'], array(
+          'language' => $language_link['language'],
+          'absolute' => TRUE,
+        )),
+        '#below' => array(),
+        '#original_link' => array(),
+      );
+    }
+    else {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#type' => 'markup',
+        '#prefix' => '<span>',
+        '#markup' => (isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name) . ' (' . t('unavailable') . ')',
+        '#suffix' => '</span>',
+      );
+    }
+  }
+
+  return $links;
 }
 
 /**

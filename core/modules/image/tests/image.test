@@ -31,7 +31,10 @@ require BACKDROP_ROOT . '/core/modules/simpletest/tests/image.test';
 class ImageFieldTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp('image');
     $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer fields', 'administer nodes', 'create post content', 'edit any post content', 'delete any post content', 'administer image styles'));
     $this->backdropLogin($this->admin_user);
@@ -55,7 +58,7 @@ class ImageFieldTestCase extends BackdropWebTestCase {
    * @param $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
    */
-  function createImageField($name, $type_name, $field_settings = array(), $instance_settings = array(), $widget_settings = array()) {
+  public function createImageField($name, $type_name, $field_settings = array(), $instance_settings = array(), $widget_settings = array()) {
     $field = array(
       'field_name' => $name,
       'type' => 'image',
@@ -92,7 +95,7 @@ class ImageFieldTestCase extends BackdropWebTestCase {
    * @param $type
    *   The type of node to create.
    */
-  function uploadNodeImage($image, $field_name, $type) {
+  public function uploadNodeImage($image, $field_name, $type) {
     $edit = array(
       'title' => $this->randomName(),
     );
@@ -114,7 +117,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   protected $image_info;
   protected $image_filepath;
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp('image_module_test');
 
     $this->style_name = 'style_foo';
@@ -124,7 +130,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   /**
    * Test image_style_path().
    */
-  function testImageStylePath() {
+  public function testImageStylePath() {
     $scheme = 'public';
     $actual = image_style_path($this->style_name, "$scheme://foo/bar.gif");
     $expected = "$scheme://styles/" . $this->style_name . "/$scheme/foo/bar.gif";
@@ -138,35 +144,35 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   /**
    * Test image_style_url() with a file using the "public://" scheme.
    */
-  function testImageStyleUrlAndPathPublic() {
+  public function testImageStyleUrlAndPathPublic() {
     $this->_testImageStyleUrlAndPath('public');
   }
 
   /**
    * Test image_style_url() with a file using the "private://" scheme.
    */
-  function testImageStyleUrlAndPathPrivate() {
+  public function testImageStyleUrlAndPathPrivate() {
     $this->_testImageStyleUrlAndPath('private');
   }
 
   /**
    * Test image_style_url() with the "public://" scheme and unclean URLs.
    */
-   function testImageStyleUrlAndPathPublicUnclean() {
+  public function testImageStyleUrlAndPathPublicUnclean() {
      $this->_testImageStyleUrlAndPath('public', FALSE);
    }
 
   /**
    * Test image_style_url() with the "private://" schema and unclean URLs.
    */
-  function testImageStyleUrlAndPathPrivateUnclean() {
+  public function testImageStyleUrlAndPathPrivateUnclean() {
     $this->_testImageStyleUrlAndPath('private', FALSE);
   }
 
   /**
    * Test that an invalid source image returns a 404.
    */
-  function testImageStyleUrlForMissingSourceImage() {
+  public function testImageStyleUrlForMissingSourceImage() {
     $non_existent_uri = 'public://foo.png';
     $generated_url = image_style_url($this->style_name, $non_existent_uri);
     $this->backdropGet($generated_url);
@@ -176,7 +182,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   /**
    * Test that we do not pass an array to backdrop_add_http_header.
    */
-  function testImageContentTypeHeaders() {
+  public function testImageContentTypeHeaders() {
     $files = $this->backdropGetTestFiles('image');
     $file = array_shift($files);
     // Copy the test file to private folder.
@@ -192,7 +198,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   /**
    * Test image_style_url().
    */
-  function _testImageStyleUrlAndPath($scheme, $clean_url = TRUE) {
+  public function _testImageStyleUrlAndPath($scheme, $clean_url = TRUE) {
     // Make the default scheme neither "public" nor "private" to verify the
     // functions work for other than the default scheme.
     config_set('system.core', 'file_default_scheme', 'temporary');
@@ -287,7 +293,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
 class ImageEffectsUnitTest extends ImageToolkitTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('image', 'image_module_test'));
     module_load_include('inc', 'image', 'image.effects');
   }
@@ -295,7 +304,7 @@ class ImageEffectsUnitTest extends ImageToolkitTestCase {
   /**
    * Test all the image effects provided by core.
    */
-  function testEffects() {
+  public function testEffects() {
     // Test the image_resize_effect() function.
     $this->assertTrue(image_resize_effect($this->image, array('width' => 1, 'height' => 2)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
@@ -366,7 +375,7 @@ class ImageEffectsUnitTest extends ImageToolkitTestCase {
   /**
    * Test image effect caching.
    */
-  function testImageEffectsCaching() {
+  public function testImageEffectsCaching() {
     $image_effect_definitions_called = &backdrop_static('image_module_test_image_effect_info_alter');
 
     // First call should grab a fresh copy of the data.
@@ -390,7 +399,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   /**
    * Given an image style, generate an image.
    */
-  function createSampleImage($style) {
+  public function createSampleImage($style) {
     static $file_path;
 
     // First, we need to make sure we have an image in our testing
@@ -407,7 +416,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   /**
    * Count the number of images currently create for a style.
    */
-  function getImageCount($style) {
+  public function getImageCount($style) {
     return count(file_scan_directory('public://styles/' . $style['name'], '/.*/'));
   }
 
@@ -415,7 +424,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
    * Test creating an image style with a numeric name and ensuring it can be
    * applied to an image.
    */
-  function testNumericStyleName() {
+  public function testNumericStyleName() {
     $style_name = rand();
     $style_label = $this->randomName();
     $edit = array(
@@ -432,7 +441,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   /**
    * General test to add a style, add/remove/edit effects to it, then delete it.
    */
-  function testStyle() {
+  public function testStyle() {
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
     $style_label = $this->randomName();
@@ -587,7 +596,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   /**
    * Test to override, edit, then revert a style.
    */
-  function testDefaultStyle() {
+  public function testDefaultStyle() {
     // Setup a style to be created and effects to add to it.
     $style_name = 'thumbnail';
     $style_label = 'Thumbnail (100x100)';
@@ -651,7 +660,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
   /**
    * Test deleting a style and choosing a replacement style.
    */
-  function testStyleReplacement() {
+  public function testStyleReplacement() {
     // Create a new style.
     $style_name = strtolower($this->randomName(10));
     $style_label = $this->randomName();
@@ -707,14 +716,14 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
   /**
    * Test image formatters on node display for public files.
    */
-  function testImageFieldFormattersPublic() {
+  public function testImageFieldFormattersPublic() {
     $this->_testImageFieldFormatters('public');
   }
 
   /**
    * Test image formatters on node display for private files.
    */
-  function testImageFieldFormattersPrivate() {
+  public function testImageFieldFormattersPrivate() {
     // Remove access content permission from anonymous users.
     user_role_change_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content' => FALSE));
     $this->_testImageFieldFormatters('private');
@@ -723,7 +732,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
   /**
    * Test image formatters on node display.
    */
-  function _testImageFieldFormatters($scheme) {
+  public function _testImageFieldFormatters($scheme) {
     $field_name = strtolower($this->randomName());
     $this->createImageField($field_name, 'post', array('uri_scheme' => $scheme));
     // Create a new node with an image attached.
@@ -816,7 +825,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
   /**
    * Tests for image field settings.
    */
-  function testImageFieldSettings() {
+  public function testImageFieldSettings() {
     $test_image = current($this->backdropGetTestFiles('image'));
     list(, $test_image_extension) = explode('.', $test_image->filename);
     $field_name = strtolower($this->randomName());
@@ -923,7 +932,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
   /**
    * Test use of a default image with an image field.
    */
-  function testImageFieldDefaultImage() {
+  public function testImageFieldDefaultImage() {
     // Create a new image field.
     $field_name = strtolower($this->randomName());
     $this->createImageField($field_name, 'post');
@@ -1001,7 +1010,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test min/max resolution settings.
    */
-  function testDimensions() {
+  public function testDimensions() {
     $field_name = strtolower($this->randomName());
     $min_dimensions = 50;
     $max_dimensions = 100;
@@ -1037,7 +1046,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
    * Test image rotation resulting from EXIF data.
    * Requires a special test image, file rotate90cw.jpg.
    */
-  function testOrientation() {
+  public function testOrientation() {
     // Create an image field.
     $field_name = strtolower($this->randomName());
     $instance_settings = array(
@@ -1081,7 +1090,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test single width resolution setting.
    */
-  function testWidthDimensions() {
+  public function testWidthDimensions() {
     $field_name = strtolower($this->randomName());
     $min_dimensions = 50;
     $max_dimensions = 100;
@@ -1116,7 +1125,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test single height resolution setting.
    */
-  function testHeightDimensions() {
+  public function testHeightDimensions() {
     $field_name = strtolower($this->randomName());
     $min_dimensions = 50;
     $max_dimensions = 100;
@@ -1169,7 +1178,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     ));
 
     // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
-    // the bundled GD version still might not support it.
+    // particularly for getimagesize() so that's the minimum.
+    // @see https://www.php.net/manual/en/function.gd-info.php
+    // @see https://www.php.net/manual/en/function.getimagesize.php
     $gd_info = gd_info();
     $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {
@@ -1191,6 +1202,27 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     }
   }
 
+  /**
+   * Test required alt setting.
+   */
+  public function testRequiredAlt() {
+    $test_image = current($this->backdropGetTestFiles('image'));
+    list(, $test_image_extension) = explode('.', $test_image->filename);
+    $field_name = strtolower($this->randomName());
+    $instance_settings = array(
+      'alt_field' => 1,
+      'alt_field_required' => 1,
+      'file_extensions' => $test_image_extension,
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    $edit = array(
+      'title' => $this->randomName(),
+    );
+    $edit['files[' . $field_name . '_' . LANGUAGE_NONE . '_0]'] = backdrop_realpath($test_image->uri);
+    $this->backdropPost('node/add/post', $edit, t('Save'));
+    $this->assertText(t('!name field is required.', array('!name' => 'Alternate text')), 'Alt text required displayed on post form.');
+  }
 }
 
 /**
@@ -1199,14 +1231,17 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 class ImageDimensionsUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('image', 'image_module_test'));
   }
 
   /**
    * Test styled image dimensions cumulatively.
    */
-  function testImageDimensions() {
+  public function testImageDimensions() {
     // Create a working copy of the file.
     $files = $this->backdropGetTestFiles('image');
     $file = reset($files);
@@ -1402,7 +1437,7 @@ class ImageDimensionsScaleTestCase extends BackdropUnitTestCase {
   /**
    * Tests all control flow branches in image_dimensions_scale().
    */
-  function testImageDimensionsScale() {
+  public function testImageDimensionsScale() {
     // Define input / output datasets to test different branch conditions.
     $test = array();
 
@@ -1532,14 +1567,18 @@ class ImageDimensionsScaleTestCase extends BackdropUnitTestCase {
  * Tests default image settings.
  */
 class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
-  function setUp() {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('field_ui'));
   }
 
   /**
    * Tests CRUD for fields and fields instances with default images.
    */
-  function testDefaultImages() {
+  public function testDefaultImages() {
     // Create files to use as the default images.
     $files = $this->backdropGetTestFiles('image');
     $default_images = array();
@@ -1722,7 +1761,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
   /**
    * Given an image style and a wrapper, generate an image.
    */
-  function createSampleImage($style, $wrapper) {
+  public function createSampleImage($style, $wrapper) {
     static $file;
 
     if (!isset($file)) {
@@ -1742,14 +1781,14 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
   /**
    * Count the number of images currently created for a style in a wrapper.
    */
-  function getImageCount($style, $wrapper) {
+  public function getImageCount($style, $wrapper) {
     return count(file_scan_directory($wrapper . '://styles/' . $style['name'], '/.*/'));
   }
 
   /**
    * General test to flush a style.
    */
-  function testFlush() {
+  public function testFlush() {
 
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
@@ -1819,7 +1858,10 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
   protected $style_name;
   protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('image', 'image_module_test'));
 
     $this->style_name = 'style_foo';
@@ -1839,7 +1881,7 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
   /**
    * Check the number of images that can be generated simultaneously.
    */
-  function testFloodProtection() {
+  public function testFloodProtection() {
     // Copy sample images.
     $files = $this->backdropGetTestFiles('image');
     $file = reset($files);
@@ -1960,14 +2002,17 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
  */
 class ImageThemeFunctionWebTestCase extends BackdropWebTestCase {
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
     parent::setUp(array('image'));
   }
 
   /**
    * Tests usage of the image field formatters.
    */
-  function testImageFormatterTheme() {
+  public function testImageFormatterTheme() {
     // Create an image.
     $files = $this->backdropGetTestFiles('image');
     $file = reset($files);
