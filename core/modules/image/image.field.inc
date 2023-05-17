@@ -17,10 +17,11 @@ function image_field_info() {
         'default_image' => '',
       ),
       'instance_settings' => array(
-        'file_extensions' => 'png gif jpg jpeg',
+        'file_extensions' => implode(' ', image_get_supported_extensions()),
         'file_directory' => '',
         'max_filesize' => '',
-        'alt_field' => 0,
+        'alt_field' => 1,
+        'alt_field_required' => 0,
         'title_field' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
@@ -162,18 +163,31 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The alt attribute may be used by search engines, screen readers, and when the image cannot be loaded.'),
     '#weight' => 10,
   );
+  $form['alt_field_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('<em>Alt</em> field required'),
+    '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
+    '#indentation' => 1,
+    '#weight' => 11,
+    '#states' => array(
+      'visible' => array(
+        'input[name="instance[settings][alt_field]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['title_field'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Title</em> field'),
     '#default_value' => $settings['title_field'],
-    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
-    '#weight' => 11,
+    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image. Enabling this field is not recommended, as it can cause problems with screen readers.'),
+    '#weight' => 12,
   );
   $form['orientate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
     '#default_value' => $settings['orientate'],
-    '#weight' => 12,
+    '#weight' => 13,
     '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
   );
   // Add a second line of description.
@@ -436,7 +450,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     }
 
     // If not using custom extension validation, ensure this is an image.
-    $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+    $supported_extensions = image_get_supported_extensions();
     backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
@@ -542,7 +556,61 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#access' => (bool) $item['fid'] && $settings['title_field'],
   );
 
+  if ($settings['alt_field_required']) {
+    // Adding #required directly to the element would trigger unnecessary
+    // validation errors when uploading the image before submitting the form.
+    // Rather than adding manual markup to the #title to mimic the required
+    // asterisk indication, we are adding an element #pre_render attribute,
+    // and then adding the #required property to the function that it calls.
+    // That way, it is rendered, but it doesn't actually trigger any validation.
+    $element['alt']['#pre_render'] = array('_image_field_widget_alt_pre_render');
+    $element['alt']['#element_validate'] = array('_image_field_widget_alt_validate');
+    // Pass the alt required status as a data-* attribute on the form element,
+    // in case other modules need access to it.
+    $element['alt']['#attributes'] = array('data-alt-required' => 'true');
+  }
+
   return $element;
+}
+
+/**
+ * Pre-render callback for alt field.
+ *
+ * Mark a field as #required for display only.
+ */
+function _image_field_widget_alt_pre_render($element) {
+  $element['#required'] = TRUE;
+  return $element;
+}
+
+/**
+ * Validate callback for alt field.
+ *
+ * This is separated in a validate function instead of a #required flag to avoid
+ * being validated on the process callback.
+ */
+function _image_field_widget_alt_validate($element, &$form_state) {
+  // Only do validation if the function is triggered from other places than
+  // the image process form.
+  if (isset($form_state['triggering_element']['#submit']) && !in_array('file_managed_file_submit', $form_state['triggering_element']['#submit'])) {
+    // If the image is not there, we do not check for empty values.
+    $parents = $element['#parents'];
+    $field = array_pop($parents);
+    $image_field = backdrop_array_get_nested_value($form_state['input'], $parents);
+    if ($image_field == NULL) {
+      $image_field = array();
+    }
+    // We check for the array key, so that it can be NULL (like if the user
+    // submits the form without using the "upload" button).
+    if (!array_key_exists($field, $image_field)) {
+      return;
+    }
+    // Check if the field is left empty.
+    elseif (empty($image_field[$field])) {
+      form_error($element, t('The %title field is required.', array('%title' => $element['#title'])));
+      return;
+    }
+  }
 }
 
 /**

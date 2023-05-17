@@ -700,7 +700,6 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     config_set('path.settings', 'node_page_pattern', '');
 
     $langcode = LANGUAGE_NONE;
-    $title_key = "title";
     $body_value_key = "body[$langcode][0][value]";
     $body_format_key = "body[$langcode][0][format]";
 
