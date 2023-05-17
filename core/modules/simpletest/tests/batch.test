@@ -100,8 +100,8 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
 
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
-    // The stack contains execution order of batch callbacks and submit
-    // hanlders and logging of corresponding $form_state[{values'].
+    // The stack contains execution order of batch callbacks and submit handlers
+    // and logging of corresponding $form_state[{values'].
     $this->assertEqual(batch_test_stack(), $this->_resultStack('chained', $value), t('Execution order was correct, and $form_state is correctly persisted.'));
     $this->assertText('Redirection successful.', t('Redirection after batch execution is correct.'));
   }
@@ -116,8 +116,8 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
     $this->backdropGet('batch-test/programmatic/' . $value);
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
-    // The stack contains execution order of batch callbacks and submit
-    // hanlders and logging of corresponding $form_state[{values'].
+    // The stack contains execution order of batch callbacks and submit handlers
+    // and logging of corresponding $form_state[{values'].
     $this->assertEqual(batch_test_stack(), $this->_resultStack('chained', $value), t('Execution order was correct, and $form_state is correctly persisted.'));
     $this->assertText('Got out of a programmatic batched form.', t('Page execution continues normally.'));
   }
@@ -335,7 +335,7 @@ class BatchPercentagesUnitTestCase extends BackdropUnitTestCase {
       // The same logic holds for 1/200: we should get 0.5%.
       '0.5' => array('total' => 200, 'current' => 1),
       // Numbers that come out evenly, such as 50/200, should be forced to have
-      // extra digits for consistancy.
+      // extra digits for consistency.
       '25.0' => array('total' => 200, 'current' => 50),
       // Regardless of number of digits we're using, 100% should always just be
       // 100%.
