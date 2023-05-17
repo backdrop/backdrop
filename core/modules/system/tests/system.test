@@ -1575,7 +1575,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     // Make sure that the 3rd node is no longer on frontpage.
     $this->backdropGet('');
-    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
+    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting frontpage listing to 2 nodes.');
 
     // Change the home page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
