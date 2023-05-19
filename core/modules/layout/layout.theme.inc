@@ -343,11 +343,18 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['rows'] = $flexible_layout->rows;
     $variables['row_data'] = array();
+
+    $variables['row_widths'] = array(
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
+    );
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
@@ -530,9 +537,10 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes'] = array(
-    'class' => $title_classes,
-  );
+  $variables['title_attributes'] = array();
+  if (!empty($title_classes)) {
+    $variables['title_attributes']['class'] = $title_classes;
+  }
 
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
@@ -541,7 +549,8 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes'] = array(
-    'class' => $content_classes,
-  );
+  $variables['content_attributes'] = array();
+  if (!empty($content_classes)) {
+    $variables['content_attributes']['class'] = $content_classes;
+  }
 }

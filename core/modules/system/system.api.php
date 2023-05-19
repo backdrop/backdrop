@@ -163,7 +163,7 @@ function hook_cron_queue_info() {
  * Alter cron queue information before cron runs.
  *
  * Called by backdrop_cron_run() to allow modules to alter cron queue settings
- * before any jobs are processesed.
+ * before any jobs are processed.
  *
  * @param array $queues
  *   An array of cron queue information.
@@ -269,12 +269,13 @@ function hook_element_info_alter(&$type) {
  * the browser.
  *
  * This hook by default is not called on pages served by the default page cache,
- * but can be enabled through the $settings['invoke_page_cache_hooks'] option in
+ * but can be enabled through the $settings['page_cache_invoke_hook'] option in
  * settings.php.
  *
  * @param $destination
- *   If this hook is invoked as part of a backdrop_goto() call, then this argument
- *   will be a fully-qualified URL that is the destination of the redirect.
+ *   If this hook is invoked as part of a backdrop_goto() call, then this
+ *   argument will be a fully-qualified URL that is the destination of the
+ *   redirect.
  */
 function hook_exit($destination = NULL) {
   db_update('counter')
@@ -534,8 +535,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * mymodule_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
  * arguments, in that order.
  *
- * Special care should be taken for the page callback backdrop_get_form(), because
- * your specific form callback function will always receive $form and
+ * Special care should be taken for the page callback backdrop_get_form(),
+ * because your specific form callback function will always receive $form and
  * &$form_state as the first function arguments:
  * @code
  *   function mymodule_abc_form($form, &$form_state) {
@@ -648,55 +649,56 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * );
  * @endcode
  *
- * @return
+ * @return array
  *   An array of menu items. Each menu item has a key corresponding to the
  *   Backdrop path being registered. The corresponding array value is an
  *   associative array that may contain the following key-value pairs:
- *   - "title": Required. The untranslated title of the menu item.
- *   - "title callback": Function to generate the title; defaults to t().
- *     If you require only the raw string to be output, set this to FALSE.
- *   - "title arguments": Arguments to send to t() or your custom callback,
- *     with path component substitution as described above.
- *   - "description": The untranslated description of the menu item.
- *   - "page callback": The function to call to display a web page when the user
- *     visits the path. If omitted, the parent menu item's callback will be used
- *     instead.
- *   - "page arguments": An array of arguments to pass to the page callback
- *     function, with path component substitution as described above.
- *   - "delivery callback": The function to call to package the result of the
- *     page callback function and send it to the browser. Defaults to
- *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
- *     item. Note that this function is called even if the access checks fail,
- *     so any custom delivery callback function should take that into account.
- *     Backdrop includes the following delivery callbacks in core:
- *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
+ *   - title: The untranslated title of the menu item.
+ *   - title callback: (optional) Function to generate the title; defaults to
+ *     t(). If you require only the raw string to be output, set this to FALSE.
+ *   - title arguments: (optional) Arguments to send to t() or your custom
+ *     callback, with path component substitution as described above.
+ *   - description: (optional) The untranslated description of the menu item.
+ *   - page callback: (optional) The function to call to display a web page when
+ *     the user visits the path. If omitted, the parent menu item's callback
+ *     will be used instead.
+ *   - page arguments: (optional) An array of arguments to pass to the page
+ *     callback function, with path component substitution as described above.
+ *   - delivery callback: (optional) The function to call to package the result
+ *     of the page callback function and send it to the browser. Defaults to
+ *     backdrop_deliver_html_page() unless a value is inherited from a parent
+ *     menu item. Note that this function is called even if the access checks
+ *     fail, so any custom delivery callback function should take that into
+ *     account. Backdrop includes the following delivery callbacks in core:
+ *     - "backdrop_deliver_html_page": The default used for printing HTML pages.
  *       Menu items with this callback may be wrapped in a layout template by
  *       Layout module. See layout_route_handler().
- *     - backdrop_json_deliver: The value of the menu callback will be rendered
- *       as JSON without any further processing. This delivery callback should
- *       be used on any path that should return a JSON response at all times,
- *       even on access denied or 404 pages.
- *     - ajax_deliver: This delivery callback is used when returning AJAX
+ *     - "backdrop_json_deliver": The value of the menu callback will be
+ *       rendered as JSON without any further processing. This delivery callback
+ *       should be used on any path that should return a JSON response at all
+ *       times, even on access denied or 404 pages.
+ *     - "ajax_deliver": This delivery callback is used when returning AJAX
  *       commands that will be interpreted by Backdrop core's ajax.js file. This
  *       delivery callback is set automatically if the menu callback returns a
  *       renderable element with the #type property "ajax_commands".
- *     - ajax_deliver_dialog: This delivery callback is used when the contents
+ *     - "ajax_deliver_dialog": This delivery callback is used when the contents
  *       of a menu callback should be returned as AJAX commands to open as a
  *       dialog. This delivery callback is set automatically if the requesting
- *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
- *   - "access callback": A function returning TRUE if the user has access
- *     rights to this menu item, and FALSE if not. It can also be a boolean
- *     constant instead of a function, and you can also use numeric values
- *     (will be cast to boolean). Defaults to user_access() unless a value is
- *     inherited from the parent menu item; only MENU_DEFAULT_LOCAL_TASK items
- *     can inherit access callbacks. To use the user_access() default callback,
- *     you must specify the permission to check as 'access arguments' (see
- *     below).
- *   - "access arguments": An array of arguments to pass to the access callback
- *     function, with path component substitution as described above. If the
- *     access callback is inherited (see above), the access arguments will be
- *     inherited with it, unless overridden in the child menu item.
- *   - "theme callback": (optional) A function returning the machine-readable
+ *       AJAX call requested a dialog. See
+ *       system_page_delivery_callback_alter().
+ *   - access callback: (optional) A function returning TRUE if the user has
+ *     access rights to this menu item, and FALSE if not. It can also be a
+ *     boolean constant instead of a function, and you can also use numeric
+ *     values (will be cast to boolean). Defaults to user_access() unless a
+ *     value is inherited from the parent menu item; only
+ *     MENU_DEFAULT_LOCAL_TASK items can inherit access callbacks. To use the
+ *     user_access() default callback, you must specify the permission to check
+ *     as 'access arguments' (see below).
+ *   - access arguments: (optional) An array of arguments to pass to the access
+ *     callback function, with path component substitution as described above.
+ *     If the access callback is inherited (see above), the access arguments
+ *     will be inherited with it, unless overridden in the child menu item.
+ *   - theme callback: (optional) A function returning the machine-readable
  *     name of the theme that will be used to render the page. If not provided,
  *     the value will be inherited from a parent menu item. If there is no
  *     theme callback, or if the function does not return the name of a current
@@ -709,18 +711,18 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     switching functionality (for example, a module which allows the theme to
  *     be set dynamically based on the current user's role) should use
  *     hook_custom_theme() instead.
- *   - "theme arguments": An array of arguments to pass to the theme callback
- *     function, with path component substitution as described above.
- *   - "file": A file that will be included before the page callback is called;
- *     this allows page callback functions to be in separate files. The file
- *     should be relative to the implementing module's directory unless
+ *   - theme arguments: (optional) An array of arguments to pass to the theme
+ *     callback function, with path component substitution as described above.
+ *   - file: (optional) A file that will be included before the page callback is
+ *     called; this allows page callback functions to be in separate files. The
+ *     file should be relative to the implementing module's directory unless
  *     otherwise specified by the "file path" option. Does not apply to other
  *     callbacks (only page callback).
- *   - "file path": The path to the directory containing the file specified in
- *     "file". This defaults to the path to the module implementing the hook.
- *   - "load arguments": An array of arguments to be passed to each of the
- *     wildcard object loaders in the path, after the path argument itself.
- *
+ *   - file path: (optional) The path to the directory containing the file
+ *     specified in "file". This defaults to the path to the module implementing
+ *     the hook.
+ *   - load arguments: (optional) An array of arguments to be passed to each of
+ *     the wildcard object loaders in the path, after the path argument itself.
  *     For example, if a module registers path node/%node/revisions/%/view
  *     with load arguments set to array(3), the '%node' in the path indicates
  *     that the loader function node_load() will be called with the second
@@ -728,7 +730,6 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     indicates that the fourth path component will also be passed to
  *     node_load() (numbering of path components starts at zero). So, if path
  *     node/12/revisions/29/view is requested, node_load(12, 29) will be called.
- *
  *     There are also two "magic" values that can be used in load arguments.
  *     "%index" indicates the index of the wildcard path component. "%map"
  *     indicates the path components as an array. For example, if a module
@@ -742,59 +743,60 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     component and numbering starts at zero). user_category_load() can then
  *     use these values to extract the information that 'foo' is the category
  *     being requested.
- *   - "weight": An integer that determines the relative position of items in
- *     the menu; higher-weighted items sink. Defaults to 0. Menu items with the
- *     same weight are ordered alphabetically.
- *   - "menu_name": Optional. Set this to a custom menu if you don't want your
- *     item to be placed in the Main menu.
- *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
+ *   - weight: (optional) An integer that determines the relative position of
+ *     items in the menu; higher-weighted items sink. Defaults to 0. Menu items
+ *     with the same weight are ordered alphabetically.
+ *   - menu_name: (optional) Set this to a custom menu (e.g. "main-menu") if you
+ *     want your item to be placed in a menu. Defaults to a hidden "internal"
+ *     menu.
+ *   - expanded: (optional) If set to TRUE, and if a menu link is provided for
  *     this menu item (as a result of other properties), then the menu link is
  *     always expanded, equivalent to its 'always expanded' checkbox being set
  *     in the UI.
- *   - "context": (optional) Defines the context a tab may appear in. By
- *     default, all tabs are only displayed as local tasks when being rendered
- *     in a page context. All tabs that should be accessible as contextual links
- *     in page region containers outside of the parent menu item's primary page
- *     context should be registered using one of the following contexts:
- *     - MENU_CONTEXT_PAGE: (default) The tab is displayed as local task for the
- *       page context only.
- *     - MENU_CONTEXT_INLINE: The tab is displayed as contextual link outside of
- *       the primary page context only.
+ *   - context: (optional) Defines the context a tab may appear in. By default,
+ *     all tabs are only displayed as local tasks when being rendered in a page
+ *     context. All tabs that should be accessible as contextual links in page
+ *     region containers outside of the parent menu item's primary page context
+ *     should be registered using one of the following contexts:
+ *     - "MENU_CONTEXT_PAGE": (default) The tab is displayed as local task for
+ *       the page context only.
+ *     - "MENU_CONTEXT_INLINE": The tab is displayed as contextual link outside
+ *       of the primary page context only.
  *     Contexts can be combined. For example, to display a tab both on a page
  *     and inline, a menu router item may specify:
  *     @code
  *       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
  *     @endcode
- *   - "tab_parent": For local task menu items, the path of the task's parent
- *     item; defaults to the same path without the last component (e.g., the
- *     default parent for 'admin/people/create' is 'admin/people').
- *   - "tab_root": For local task menu items, the path of the closest non-tab
- *     item; same default as "tab_parent".
- *   - "position": Position of the block ('left' or 'right') on the system
- *     administration page for this item.
- *   - "type": A bitmask of flags describing properties of the menu item.
- *     Many shortcut bitmasks are provided as constants in menu.inc:
- *     - MENU_NORMAL_ITEM: Normal menu items show up in the menu tree and can be
- *       moved/hidden by the administrator.
- *     - MENU_CALLBACK: Callbacks register a path so that the correct
+ *   - tab_parent: (optional) For local task menu items, the path of the task's
+ *     parent item; defaults to the same path without the last component (e.g.,
+ *     the default parent for 'admin/people/create' is 'admin/people').
+ *   - tab_root: (optional) For local task menu items, the path of the closest
+ *     non-tab item; same default as "tab_parent".
+ *   - type: (optional) A bitmask of flags describing properties of the menu
+ *     item. Many shortcut bitmasks are provided as constants in menu.inc:
+ *     - "MENU_NORMAL_ITEM": (default) Normal menu items show up in the menu
+ *       tree and can be moved/hidden by the administrator.
+ *     - "MENU_CALLBACK": Callbacks register a path so that the correct
  *       information is generated when the path is accessed.
- *     - MENU_SUGGESTED_ITEM: Modules may "suggest" menu items that the
+ *     - "MENU_SUGGESTED_ITEM": Modules may "suggest" menu items that the
  *       administrator may enable.
- *     - MENU_LOCAL_ACTION: Local actions are menu items that describe actions
+ *     - "MENU_LOCAL_ACTION": Local actions are menu items that describe actions
  *       on the parent item such as adding a new user or block, and are
  *       rendered in the action-links list in your theme.
- *     - MENU_LOCAL_TASK: Local tasks are menu items that describe different
+ *     - "MENU_LOCAL_TASK": Local tasks are menu items that describe different
  *       displays of data, and are generally rendered as tabs.
- *     - MENU_DEFAULT_LOCAL_TASK: Every set of local tasks should provide one
+ *     - "MENU_DEFAULT_LOCAL_TASK": Every set of local tasks should provide one
  *       "default" task, which should display the same page as the parent item.
- *     If the "type" element is omitted, MENU_NORMAL_ITEM is assumed.
- *   - "options": An array of options to be passed to l() when generating a link
- *     from this menu item. Note that the "options" parameter has no effect on
- *     MENU_LOCAL_TASK, MENU_DEFAULT_LOCAL_TASK, and MENU_LOCAL_ACTION items.
+ *   - options: (optional) An array of options to be passed to l() when
+ *     generating a link from this menu item. Note that the "options" parameter
+ *     has no effect on MENU_LOCAL_TASK, MENU_DEFAULT_LOCAL_TASK, and
+ *     MENU_LOCAL_ACTION items.
  *
  * For a detailed usage example, see page_example.module.
  * For comprehensive documentation on the menu system, see
  * http://drupal.org/node/102338.
+ *
+ * @since 1.24.2 Support for the "position" key removed.
  */
 function hook_menu() {
   $items['example'] = array(
@@ -1346,7 +1348,7 @@ function hook_forms($form_id, $args) {
  * hook_init() instead. In hook_boot(), only the most basic APIs are available
  * and not all modules have been loaded. This hook by default is not called on
  * pages served by the default page cache, but can be enabled through the
- * $settings['invoke_page_cache_hooks'] option in settings.php.
+ * $settings['page_cache_invoke_hook'] option in settings.php.
  *
  * @see hook_init()
  */
@@ -1550,9 +1552,9 @@ function hook_system_info_alter(&$info, $file, $type) {
 /**
  * Define user permissions.
  *
- * This hook can supply permissions that the module defines, so that they
- * can be selected on the user permissions page and used to grant or restrict
- * access to actions the module performs.
+ * This hook can supply permissions that the module defines, so that they can be
+ * selected on the user permissions page and used to grant or restrict access to
+ * actions the module performs.
  *
  * Permissions are checked using user_access().
  *
@@ -1572,25 +1574,29 @@ function hook_system_info_alter(&$info, $file, $type) {
  *     have inherent security risks across a variety of potential use cases
  *     (for example, the "administer filters" and "bypass node access"
  *     permissions provided by Backdrop core). When set to TRUE, a standard
- *     warning message defined in user_admin_permissions() and output via
- *     theme_user_permission_description() will be associated with the
- *     permission and displayed with it on the permission administration page.
- *     Defaults to FALSE.
+ *     warning message output via theme_user_permission_description() will be
+ *     associated with the permission and displayed with it on the permission
+ *     administration page. Defaults to FALSE.
  *   - warning: (optional) A translated warning message to display for this
- *     permission on the permission administration page. This warning overrides
- *     the automatic warning generated by 'restrict access' being set to TRUE.
- *     This should rarely be used, since it is important for all permissions to
- *     have a clear, consistent security warning that is the same across the
- *     site. Use the 'description' key instead to provide any information that
- *     is specific to the permission you are defining.
+ *     permission on the permission administration page. This warning should
+ *     describe the security implications of this permission and accompanies the
+ *     automatic warning generated by 'restrict access' being set to TRUE. This
+ *     warning message will be initially hidden and can be viewed by clicking
+ *     the 'more' link.
  *
  * @see theme_user_permission_description()
  */
 function hook_permission() {
   return array(
+    'configure my module' => array(
+      'title' => t('Configure my module'),
+      'description' => t('Configure settings for my module.'),
+    ),
     'administer my module' =>  array(
       'title' => t('Administer my module'),
       'description' => t('Perform administration tasks for my module.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows people to perform actions that could lead to data loss.'),
     ),
   );
 }
@@ -1893,7 +1899,7 @@ function hook_watchdog(array $log_entry) {
  *     or backdrop_mail() for possible id values.
  *   - to: The address or addresses the message will be sent to. The
  *     formatting of this string must comply with RFC 2822.
- *   - subject: Subject of the e-mail to be sent. This must not contain any
+ *   - subject: Subject of the email to be sent. This must not contain any
  *     newline characters, or the mail may not be sent properly. backdrop_mail()
  *     sets this to an empty string when the hook is invoked.
  *   - body: An array of lines containing the message to be sent. Backdrop will
@@ -2564,6 +2570,7 @@ function hook_requirements($phase) {
  *   definition.
  *
  * @see hook_schema_alter()
+ * @see hook_schema_0()
  *
  * @ingroup schemaapi
  */
@@ -2628,10 +2635,15 @@ function hook_schema() {
 /**
  * Perform alterations to existing database schemas.
  *
- * When a module modifies the database structure of another module (by
- * changing, adding or removing fields, keys or indexes), it should
- * implement hook_schema_alter() to update the default $schema to take its
- * changes into account.
+ * When a module modifies the database structure of another module (by changing,
+ * adding or removing fields, keys or indexes), it should implement
+ * hook_schema_alter() to update the default $schema to take its changes into
+ * account.
+ *
+ * Note that when a module is installed, schema alterations are not applied (see
+ * backdrop_install_schema()), so it should also implement hook_install() (and
+ * possibly hook_uninstall()) to perform the alterations there. See
+ * comment.install for an example.
  *
  * See hook_schema() for details on the schema definition structure.
  *
@@ -2648,6 +2660,60 @@ function hook_schema_alter(&$schema) {
     'default' => 0,
     'description' => 'Per-user timezone configuration.',
   );
+}
+
+/**
+ * Define the database schema to use when a module is installed during updates.
+ *
+ * This hook is called when installing a module during the update or upgrade
+ * process. It creates the initial database schema for the newly installed
+ * module before any of its update hooks are called.
+ *
+ * Unlike hook_schema(), when modules are installed during the update process,
+ * all hook_update_N for the module will be invoked after the database table(s)
+ * defined by this hook are created. This means that the schema definition
+ * provided here may be modified later by hook_update_N.
+ *
+ * See hook_schema() for details on the schema definition structure.
+ *
+ * @return array
+ *   A schema definition structure array. For each element of the
+ *   array, the key is a table name and the value is a table structure
+ *   definition.
+ *
+ * @see hook_schema()
+ * @see hook_schema_alter()
+ *
+ * @ingroup schemaapi
+ */
+function hook_schema_0() {
+  $schema['mymodule'] = array(
+    'description' => 'The base table for mymodule.',
+    'fields' => array(
+      'mymodule_id' => array(
+        'description' => 'The primary identifier for mymodule.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'The description column of mymodule.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('mymodule_id'),
+  );
+  return $schema;
 }
 
 /**
@@ -2796,10 +2862,10 @@ function hook_install() {
  * Examples:
  * - mymodule_update_1000(): This is the required update for mymodule to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
- * - mymodule_update_1100(): This is the first update to get the database ready
- *   to run mymodule 1.x-1.*.
- * - mymodule_update_1200(): This is the first update to get the database ready
- *   to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
+ * - mymodule_update_1100(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-1.*.
+ * - mymodule_update_1200(): This is the first update to get the database/config
+ *   ready to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
  *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
  *   11xx updates, because those reside in the 1.x-1.x branch only.
  *
@@ -2854,12 +2920,24 @@ function hook_install() {
 function hook_update_N(&$sandbox) {
   // For non-multipass updates the signature can be `function hook_update_N() {`
 
-  // For most updates, the following is sufficient.
+  // Convert Drupal 7 variables to Backdrop config. Make sure these new config
+  // settings and their default values exist in `config/mymodule.settings.json`.
+  $config = config('mymodule.settings');
+  $config->set('one', update_variable_get('mymodule_one', '1.11'));
+  $config->set('two', update_variable_get('mymodule_two', '2.22'));
+  $config->save();
+  update_variable_del('mymodule_one');
+  update_variable_del('mymodule_two');
+
+  // Update existing config with a new setting. Make sure the new setting and
+  // its default value exists in `config/mymodule.settings.json`.
+  config_set('mymodule.settings', 'three', '3.33');
+
+  // For most database updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
-  // However, for more complex operations that may take a long time,
-  // you may hook into Batch API as in the following example.
-
+  // However, for more complex operations that may take a long time, you may
+  // hook into Batch API as in the following example.
   // Update 3 users at a time to have an exclamation point after their names.
   // (They're really happy that we can do batch API in this hook!)
   if (!isset($sandbox['progress'])) {
@@ -3049,7 +3127,7 @@ function hook_disable() {
  * or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
- * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
+ * @link https://docs.backdropcms.org/php-standards Backdrop Coding Standards @endlink
  *
  * The contents of this hook are not cached. Because of this, absolutely no
  * logic should be included in this hook. Do not do any database queries or

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Simpletest mock module for Ajax forms testing.

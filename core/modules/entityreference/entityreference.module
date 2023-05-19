@@ -1,0 +1,1632 @@
+<?php
+
+define('ENTITYREFERENCE_DENIED', '- Restricted access -');
+
+/**
+ * @file
+ * Entityreference primary module file.
+ */
+
+/**
+ * Implements hook_field_info().
+ */
+function entityreference_field_info() {
+  return array(
+    'entityreference' => array(
+      'label' => 'Entity Reference',
+      'description' => t('Defines a field type for referencing other entities.'),
+      'settings' => array(
+        'target_type' => 'node',
+        'handler' => 'base',
+        'handler_settings' => array(),
+      ),
+      'instance_settings' => array(),
+      'default_widget' => 'entityreference_autocomplete',
+      'default_formatter' => 'entityreference_label',
+      'property_callbacks' => array('entityreference_field_property_callback'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function entityreference_flush_caches() {
+  // Because of the intricacies of the info hooks, keep a separate list of the
+  // base tables of each entities, so that entityreference_field_schema() can
+  // be used without calling entity_get_info().
+  // @see https://drupal.org/node/1416558
+  $base_tables = array();
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (!empty($entity_info['base table']) && !empty($entity_info['entity keys']['id'])) {
+      $base_tables[$entity_type] = array($entity_info['base table'], $entity_info['entity keys']['id']);
+    }
+  }
+  // Use state because cache is going to be cleared right after
+  // hook_flush_caches() is finished.
+  state_set('entityreference_base_tables', $base_tables);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function entityreference_theme($existing, $type, $theme, $path) {
+  return array(
+    'entityreference_label' => array(
+      'variables' => array('label' => NULL, 'item' => NULL, 'settings' => NULL, 'uri' => NULL),
+    ),
+    'entityreference_entity_id' => array(
+      'variables' => array('item' => NULL, 'settings' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function entityreference_menu() {
+  $items = array();
+
+  $items['entityreference/autocomplete/single/%/%/%'] = array(
+    'title' => 'Reference Autocomplete',
+    'page callback' => 'entityreference_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5),
+    'access callback' => 'entityreference_autocomplete_access_callback',
+    'access arguments' => array(2, 3, 4, 5),
+    'type' => MENU_CALLBACK,
+  );
+  $items['entityreference/autocomplete/tags/%/%/%'] = array(
+    'title' => 'Reference Autocomplete',
+    'page callback' => 'entityreference_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5),
+    'access callback' => 'entityreference_autocomplete_access_callback',
+    'access arguments' => array(2, 3, 4, 5),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function entityreference_field_is_empty($item, $field) {
+  $empty = !isset($item['target_id']) || !is_numeric($item['target_id']);
+
+  // Invoke the behaviors to allow them to override the empty status.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->is_empty_alter($empty, $item, $field);
+  }
+  return $empty;
+}
+
+/**
+ * Get the behavior handlers for a given entityreference field.
+ */
+function entityreference_get_behavior_handlers($field, $instance = NULL) {
+  $object_cache = backdrop_static(__FUNCTION__);
+  $identifier = $field['field_name'];
+  if (!empty($instance)) {
+    $identifier .= ':' . $instance['entity_type'] . ':' . $instance['bundle'];
+  }
+
+  if (!isset($object_cache[$identifier])) {
+    $object_cache[$identifier] = array();
+
+    // Merge in defaults.
+    $field['settings'] += array('behaviors' => array());
+
+    $object_cache[$field['field_name']] = array();
+    $behaviors = !empty($field['settings']['handler_settings']['behaviors']) ? $field['settings']['handler_settings']['behaviors'] : array();
+    if (!empty($instance['settings']['behaviors'])) {
+      $behaviors = array_merge($behaviors, $instance['settings']['behaviors']);
+    }
+    foreach ($behaviors as $behavior => $settings) {
+      if (empty($settings['status'])) {
+        // Behavior is not enabled.
+        continue;
+      }
+
+      $object_cache[$identifier][] = _entityreference_get_behavior_handler($behavior);
+    }
+  }
+
+  return $object_cache[$identifier];
+}
+
+/**
+ * Get the behavior handler for a given entityreference field and instance.
+ *
+ * @param $behavior
+ *   The behavior handler name.
+ */
+function _entityreference_get_behavior_handler($behavior) {
+  $object_cache = backdrop_static(__FUNCTION__);
+
+  if (!isset($object_cache[$behavior])) {
+    $class = entityreference_load_behavior_class($behavior);
+
+    // Ensure the class is available, setting it as broken if it isn't.
+    if (!$class || !class_exists($class)) {
+      include_once(dirname(__FILE__) . '/plugins/behavior/EntityReferenceBehaviorHandler.inc');
+      $class = 'EntityReferenceBehaviorHandlerBroken';
+    }
+
+    $object_cache[$behavior] = new $class($behavior);
+  }
+
+  return $object_cache[$behavior];
+}
+
+/**
+ * Get the selection handler for a given entityreference field.
+ */
+function entityreference_get_selection_handler($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+  $handler = $field['settings']['handler'];
+  $class = entityreference_load_selection_class($handler);
+
+  if ($class && class_exists($class)) {
+    return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
+  }
+  else {
+    return EntityReferenceSelectionHandlerBroken::getInstance($field, $instance, $entity_type, $entity);
+  }
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function entityreference_field_load($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field) as $handler) {
+    $handler->load($entity_type, $entities, $field, $instances, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function entityreference_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  $ids = array();
+  foreach ($items as $delta => $item) {
+    if (!entityreference_field_is_empty($item, $field) && $item['target_id'] !== NULL) {
+      $ids[$item['target_id']] = $delta;
+    }
+  }
+
+  if ($ids) {
+    $valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities(array_keys($ids));
+
+    if (!empty($valid_ids)) {
+      $invalid_entities = array_diff_key($ids, array_flip($valid_ids));
+      if ($invalid_entities) {
+        foreach ($invalid_entities as $id => $delta) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'entityreference_invalid_entity',
+            'message' => t('The referenced entity (@type: @id) is invalid.', array('@type' => $field['settings']['target_type'], '@id' => $id)),
+          );
+        }
+      }
+    }
+  }
+
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->validate($entity_type, $entity, $field, $instance, $langcode, $items, $errors);
+  }
+}
+
+/**
+ * Implements hook_field_presave().
+ *
+ * Adds the target type to the field data structure when saving.
+ */
+function entityreference_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->presave($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_insert().
+ */
+function entityreference_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->insert($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_attach_insert().
+ *
+ * Emulates a post-insert hook.
+ */
+function entityreference_field_attach_insert($entity_type, $entity) {
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'entityreference') {
+      foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+        $handler->postInsert($entity_type, $entity, $field, $instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_update().
+ */
+function entityreference_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->update($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_attach_update().
+ *
+ * Emulates a post-update hook.
+ */
+function entityreference_field_attach_update($entity_type, $entity) {
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'entityreference') {
+      foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+        $handler->postUpdate($entity_type, $entity, $field, $instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_delete().
+ */
+function entityreference_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Invoke the behaviors.
+  foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+    $handler->delete($entity_type, $entity, $field, $instance, $langcode, $items);
+  }
+}
+
+/**
+ * Implements hook_field_attach_delete().
+ *
+ * Emulates a post-delete hook.
+ */
+function entityreference_field_attach_delete($entity_type, $entity) {
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'entityreference') {
+      foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+        $handler->postDelete($entity_type, $entity, $field, $instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function entityreference_entity_insert($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostInsert');
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function entityreference_entity_update($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostUpdate');
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function entityreference_entity_delete($entity, $entity_type) {
+  entityreference_entity_crud($entity, $entity_type, 'entityPostDelete');
+}
+
+/**
+ * Invoke a behavior based on entity CRUD.
+ *
+ * @param $entity
+ *   The entity object.
+ * @param $entity_type
+ *   The entity type.
+ * @param $method_name
+ *   The method to invoke.
+ */
+function entityreference_entity_crud($entity, $entity_type, $method_name) {
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'entityreference') {
+      foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+        $handler->{$method_name}($entity_type, $entity, $field, $instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_settings_form().
+ */
+function entityreference_field_settings_form($field, $instance, $has_data) {
+  // The field settings infrastructure is not AJAX enabled by default,
+  // because it doesn't pass over the $form_state.
+  // Build the whole form into a #process which has access to the form state.
+  $form = array(
+    '#type' => 'container',
+    '#attached' => array(
+      'css' => array(backdrop_get_path('module', 'entityreference') . '/css/entityreference.admin.css'),
+    ),
+    '#process' => array(
+      '_entityreference_field_settings_process',
+      '_entityreference_field_settings_ajax_process',
+    ),
+    '#element_validate' => array('_entityreference_field_settings_validate'),
+    '#field' => $field,
+    '#instance' => $instance,
+    '#has_data' => $has_data,
+  );
+  return $form;
+}
+
+/**
+ * Callback for custom element processing.
+ */
+function _entityreference_field_settings_process($form, $form_state) {
+  $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
+  $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
+  $has_data = $form['#has_data'];
+
+  $settings = $field['settings'];
+  $settings += array('handler' => 'base');
+
+  // Select the target entity type.
+  $entity_type_options = array();
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    $entity_type_options[$entity_type] = $entity_info['label'];
+  }
+
+  $form['target_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Target type'),
+    '#options' => $entity_type_options,
+    '#default_value' => $field['settings']['target_type'],
+    '#required' => TRUE,
+    '#description' => t('The entity type that can be referenced through this field.'),
+    '#disabled' => $has_data,
+    '#size' => 1,
+    '#ajax' => TRUE,
+    '#limit_validation_errors' => array(),
+  );
+
+  $handlers = _entityreference_selection_plugins();
+  backdrop_sort($handlers);
+  $handlers_options = array();
+  foreach ($handlers as $handler => $handler_info) {
+    $handlers_options[$handler] = check_plain($handler_info['title']);
+  }
+
+  $form['handler'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Entity selection'),
+    '#tree' => TRUE,
+    '#process' => array('_entityreference_form_process_merge_parent'),
+  );
+
+  $form['handler']['handler'] = array(
+    '#type' => 'select',
+    '#title' => t('Mode'),
+    '#options' => $handlers_options,
+    '#default_value' => $settings['handler'],
+    '#required' => TRUE,
+    '#ajax' => TRUE,
+    '#limit_validation_errors' => array(),
+  );
+  $form['handler_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Change handler'),
+    '#limit_validation_errors' => array(),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#submit' => array('entityreference_settings_ajax_submit'),
+  );
+
+  $form['handler']['handler_settings'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('entityreference-settings')),
+  );
+
+  $handler = entityreference_get_selection_handler($field, $instance);
+  $form['handler']['handler_settings'] += $handler->settingsForm($field, $instance);
+
+  _entityreference_get_behavior_elements($form, $field, $instance, 'field');
+  if (!empty($form['behaviors'])) {
+    $form['behaviors'] += array(
+      '#type' => 'fieldset',
+      '#title' => t('Additional behaviors'),
+      '#parents' => array_merge($form['#parents'], array('handler_settings', 'behaviors')),
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Custom callback for ajax processing.
+ */
+function _entityreference_field_settings_ajax_process($form, $form_state) {
+  _entityreference_field_settings_ajax_process_element($form, $form);
+  return $form;
+}
+
+/**
+ * Helper function for custom ajax processing.
+ */
+function _entityreference_field_settings_ajax_process_element(&$element, $main_form) {
+  if (isset($element['#ajax']) && $element['#ajax'] === TRUE) {
+    $element['#ajax'] = array(
+      'callback' => 'entityreference_settings_ajax',
+      'wrapper' => $main_form['#id'],
+      'element' => $main_form['#array_parents'],
+    );
+  }
+
+  foreach (element_children($element) as $key) {
+    _entityreference_field_settings_ajax_process_element($element[$key], $main_form);
+  }
+}
+
+/**
+ * Custom callback for element processing.
+ */
+function _entityreference_form_process_merge_parent($element) {
+  $parents = $element['#parents'];
+  array_pop($parents);
+  $element['#parents'] = $parents;
+  return $element;
+}
+
+/**
+ * Helper function to remove blank elements.
+ */
+function _entityreference_element_validate_filter(&$element, &$form_state) {
+  $element['#value'] = array_filter($element['#value']);
+  form_set_value($element, $element['#value'], $form_state);
+}
+
+/**
+ * Implements hook_validate().
+ */
+function _entityreference_field_settings_validate($form, &$form_state) {
+  // Store the new values in the form state.
+  $field = $form['#field'];
+  if (isset($form_state['values']['field'])) {
+    $field['settings'] = $form_state['values']['field']['settings'];
+  }
+  $form_state['entityreference']['field'] = $field;
+
+  unset($form_state['values']['field']['settings']['handler_submit']);
+}
+
+/**
+ * Implements hook_field_instance_settings_form().
+ */
+function entityreference_field_instance_settings_form($field, $instance) {
+  $form['settings'] = array(
+    '#type' => 'container',
+    '#attached' => array(
+      'css' => array(backdrop_get_path('module', 'entityreference') . '/css/entityreference.admin.css'),
+    ),
+    '#weight' => 10,
+    '#tree' => TRUE,
+    '#process' => array(
+      '_entityreference_form_process_merge_parent',
+      '_entityreference_field_instance_settings_form',
+      '_entityreference_field_settings_ajax_process',
+    ),
+    '#element_validate' => array('_entityreference_field_instance_settings_validate'),
+    '#field' => $field,
+    '#instance' => $instance,
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_field_settings_form().
+ */
+function _entityreference_field_instance_settings_form($form, $form_state) {
+  $field = isset($form_state['entityreference']['field']) ? $form_state['entityreference']['field'] : $form['#field'];
+  $instance = isset($form_state['entityreference']['instance']) ? $form_state['entityreference']['instance'] : $form['#instance'];
+
+  _entityreference_get_behavior_elements($form, $field, $instance, 'instance');
+  if (!empty($form['behaviors'])) {
+    $form['behaviors'] += array(
+      '#type' => 'fieldset',
+      '#title' => t('Additional behaviors'),
+      '#process' => array(
+        '_entityreference_field_settings_ajax_process',
+      ),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_validate().
+ */
+function _entityreference_field_instance_settings_validate($form, &$form_state) {
+  // Store the new values in the form state.
+  $instance = $form['#instance'];
+  if (isset($form_state['values']['instance'])) {
+    $instance = backdrop_array_merge_deep($instance, $form_state['values']['instance']);
+  }
+  $form_state['entityreference']['instance'] = $instance;
+}
+
+/**
+ * Get the field or instance elements for the field configuration.
+ */
+function _entityreference_get_behavior_elements(&$element, $field, $instance, $level) {
+  // Add the accessible behavior handlers.
+  $behavior_plugins = entityreference_get_accessible_behavior_plugins($field, $instance);
+
+  if ($behavior_plugins[$level]) {
+    $element['behaviors'] = array();
+
+    foreach ($behavior_plugins[$level] as $name => $plugin) {
+      if ($level == 'field') {
+        $settings = !empty($field['settings']['handler_settings']['behaviors'][$name]) ? $field['settings']['handler_settings']['behaviors'][$name] : array();
+      }
+      else {
+        $settings = !empty($instance['settings']['behaviors'][$name]) ? $instance['settings']['behaviors'][$name] : array();
+      }
+      $settings += array('status' => $plugin['force enabled']);
+
+      // Render the checkbox.
+      $element['behaviors'][$name] = array(
+        '#tree' => TRUE,
+      );
+      $element['behaviors'][$name]['status'] = array(
+        '#type' => 'checkbox',
+        '#title' => check_plain($plugin['title']),
+        '#description' => $plugin['description'],
+        '#default_value' => $settings['status'],
+        '#disabled' => $plugin['force enabled'],
+        '#ajax' => TRUE,
+      );
+
+      if ($settings['status']) {
+        $handler = _entityreference_get_behavior_handler($name);
+        if ($behavior_elements = $handler->settingsForm($field, $instance)) {
+          foreach ($behavior_elements as $key => &$behavior_element) {
+            $behavior_element += array(
+              '#default_value' => !empty($settings[$key]) ? $settings[$key] : NULL,
+            );
+          }
+
+          // Get the behavior settings.
+          $behavior_elements += array(
+            '#type' => 'container',
+            '#process' => array('_entityreference_form_process_merge_parent'),
+            '#attributes' => array(
+              'class' => array('entityreference-settings'),
+            ),
+          );
+          $element['behaviors'][$name]['settings'] = $behavior_elements;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Get all accessible behavior plugins.
+ */
+function entityreference_get_accessible_behavior_plugins($field, $instance) {
+  $plugins = array('field' => array(), 'instance' => array());
+  foreach (_entityreference_behavior_plugins() as $name => $plugin) {
+    $handler = _entityreference_get_behavior_handler($name);
+    $level = $plugin['behavior type'];
+    if ($handler->access($field, $instance)) {
+      $plugins[$level][$name] = $plugin;
+    }
+  }
+  return $plugins;
+}
+
+/**
+ * Ajax callback for the handler settings form.
+ *
+ * @see entityreference_field_settings_form()
+ */
+function entityreference_settings_ajax($form, $form_state) {
+  $trigger = $form_state['triggering_element'];
+  return backdrop_array_get_nested_value($form, $trigger['#ajax']['element']);
+}
+
+/**
+ * Submit handler for the non-JS case.
+ *
+ * @see entityreference_field_settings_form()
+ */
+function entityreference_settings_ajax_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Property callback for the Entity Metadata framework.
+ */
+function entityreference_field_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  // Only Entity Plus would parse the property_callbacks, but check just to
+  // be safe.
+  if (module_exists('entity_plus')) {
+    // Set the property type based on the targe type.
+    $field_type['property_type'] = $field['settings']['target_type'];
+
+    // Then apply the default.
+    entity_plus_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
+
+    // Invoke the behaviors to allow them to change the properties.
+    foreach (entityreference_get_behavior_handlers($field, $instance) as $handler) {
+      $handler->property_info_alter($info, $entity_type, $field, $instance, $field_type);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function entityreference_field_widget_info() {
+  $widgets['entityreference_autocomplete'] = array(
+    'label' => t('Autocomplete'),
+    'description' => t('An autocomplete text field.'),
+    'field types' => array('entityreference'),
+    'settings' => array(
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      'hide_ids' => FALSE,
+      // We don't have a default here, because it's not the same between
+      // the two widgets, and the Field API doesn't update default
+      // settings when the widget changes.
+      'path' => '',
+    ),
+  );
+
+  $widgets['entityreference_autocomplete_tags'] = array(
+    'label' => t('Autocomplete (Tags style)'),
+    'description' => t('An autocomplete text field.'),
+    'field types' => array('entityreference'),
+    'settings' => array(
+      'match_operator' => 'CONTAINS',
+      'size' => 60,
+      'hide_ids' => FALSE,
+      // We don't have a default here, because it's not the same between
+      // the two widgets, and the Field API doesn't update default
+      // settings when the widget changes.
+      'path' => '',
+    ),
+    'behaviors' => array(
+      'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+    ),
+  );
+
+  return $widgets;
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function entityreference_field_widget_info_alter(&$info) {
+  if (module_exists('options')) {
+    $info['options_select']['field types'][] = 'entityreference';
+    $info['options_buttons']['field types'][] = 'entityreference';
+  }
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function entityreference_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings'] + field_info_widget_settings($widget['type']);
+
+  $form = array();
+
+  if ($widget['type'] == 'entityreference_autocomplete' || $widget['type'] == 'entityreference_autocomplete_tags') {
+    $form['match_operator'] = array(
+      '#type' => 'select',
+      '#title' => t('Autocomplete matching'),
+      '#default_value' => $settings['match_operator'],
+      '#options' => array(
+        'STARTS_WITH' => t('Starts with'),
+        'CONTAINS' => t('Contains'),
+      ),
+      '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
+    );
+    $form['size'] = array(
+      '#type' => 'number',
+      '#title' => t('Size of textfield'),
+      '#default_value' => $settings['size'],
+      '#min' => 1,
+      '#required' => TRUE,
+    );
+    $form['hide_ids'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide IDs'),
+      '#description' => t('If your target entities have unique labels you may choose not to have the IDs shown to the user. Note that this setting will make it impossible to reference entities with non-unique labels!'),
+      '#default_value' => $settings['hide_ids'],
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_options_list().
+ */
+function entityreference_options_list($field, $instance = NULL, $entity_type = NULL, $entity = NULL) {
+  if (!$options = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->getReferencableEntities()) {
+    return array();
+  }
+
+  // Rebuild the array, by changing the bundle key into the bundle label.
+  $target_type = $field['settings']['target_type'];
+  $entity_info = entity_get_info($target_type);
+
+  $return = array();
+  foreach ($options as $bundle => $entity_ids) {
+    $bundle_label = check_plain($entity_info['bundles'][$bundle]['label']);
+    $return[$bundle_label] = $entity_ids;
+  }
+
+  return count($return) == 1 ? reset($return) : $return;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function entityreference_query_entityreference_alter(QueryAlterableInterface $query) {
+  $handler = $query->getMetadata('entityreference_selection_handler');
+  $handler->entityFieldQueryAlter($query);
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function entityreference_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  // Ensure that the entity target type exists before displaying the widget.
+  $entity_info = entity_get_info($field['settings']['target_type']);
+  if (empty($entity_info)) {
+    return;
+  }
+  $entity_type = $instance['entity_type'];
+  $entity = isset($element['#entity']) ? $element['#entity'] : NULL;
+  $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
+
+  if ($instance['widget']['type'] == 'entityreference_autocomplete' || $instance['widget']['type'] == 'entityreference_autocomplete_tags') {
+
+    if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+      // Let the Field API handles multiple values, only take
+      // care of the one matching our delta.
+      if (isset($items[$delta])) {
+        $items = array($items[$delta]);
+      }
+      else {
+        $items = array();
+      }
+    }
+
+    $entity_ids = array();
+    $entity_labels = array();
+
+    // Build an array of entities ID.
+    foreach ($items as $item) {
+      if (isset($item['target_id'])) {
+        $entity_ids[] = $item['target_id'];
+      }
+    }
+
+    // Load those entities and loop through them to extract their labels.
+    $entities = entity_load_multiple($field['settings']['target_type'], $entity_ids);
+
+    foreach ($entities as $entity_id => $entity_item) {
+      $label = $handler->getLabel($entity_item);
+      $key = $instance['widget']['settings']['hide_ids'] ? $label : "$label ($entity_id)";
+      // Labels containing commas or quotes must be wrapped in quotes.
+      if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
+        $key = '"' . str_replace('"', '""', $key) . '"';
+      }
+      $entity_labels[] = $key;
+    }
+
+    // Prepare the autocomplete path.
+    if (!empty($instance['widget']['settings']['path'])) {
+      $autocomplete_path = $instance['widget']['settings']['path'];
+    }
+    else {
+      $autocomplete_path = $instance['widget']['type'] == 'entityreference_autocomplete' ? 'entityreference/autocomplete/single' : 'entityreference/autocomplete/tags';
+    }
+
+    $autocomplete_path .= '/' . $field['field_name'] . '/' . $instance['entity_type'] . '/' . $instance['bundle'] . '/';
+    // Use <NULL> as a placeholder in the URL when there's no entity.
+    // Most webservers collapse two consecutive slashes.
+    $id = 'NULL';
+    if ($entity) {
+      list($eid) = entity_extract_ids($entity_type, $entity);
+      if ($eid) {
+        $id = $eid;
+      }
+    }
+    $autocomplete_path .= $id;
+
+    if ($instance['widget']['type'] == 'entityreference_autocomplete') {
+      $element += array(
+        '#type' => 'textfield',
+        '#maxlength' => 1024,
+        '#default_value' => implode(', ', $entity_labels),
+        '#autocomplete_path' => $autocomplete_path,
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('_entityreference_autocomplete_validate'),
+      );
+      return array('target_id' => $element);
+    }
+    else {
+      $element += array(
+        '#type' => 'textfield',
+        '#maxlength' => 1024,
+        '#default_value' => implode(', ', $entity_labels),
+        '#autocomplete_path' => $autocomplete_path,
+        '#size' => $instance['widget']['settings']['size'],
+        '#element_validate' => array('_entityreference_autocomplete_tags_validate'),
+      );
+      return $element;
+    }
+  }
+}
+
+/**
+ * Implements hook_validate().
+ */
+function _entityreference_autocomplete_validate($element, &$form_state, $form) {
+  // If a value was entered into the autocomplete...
+  $value = '';
+  if (!empty($element['#value'])) {
+    // Take "label (entity id)', match the id from parenthesis.
+    if (preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
+      $value = $matches[1];
+    }
+    else {
+      // Try to get a match from the input string when the user didn't use the
+      // autocomplete but filled in a value manually.
+      $field = field_info_field($element['#field_name']);
+      $handler = entityreference_get_selection_handler($field);
+      $field_name = $element['#field_name'];
+      $field = field_info_field($field_name);
+      $instance = field_info_instance($element['#entity_type'], $field_name, $element['#bundle']);
+      $handler = entityreference_get_selection_handler($field, $instance);
+      $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form);
+    }
+  }
+  // Update the value of this element so the field can validate the product IDs.
+  form_set_value($element, $value, $form_state);
+}
+
+/**
+ * Implements hook_validate().
+ */
+function _entityreference_autocomplete_tags_validate($element, &$form_state, $form) {
+  $value = array();
+  // If a value was entered into the autocomplete...
+  if (!empty($element['#value'])) {
+    $entities = backdrop_explode_tags($element['#value']);
+    $value = array();
+    foreach ($entities as $entity) {
+      // Take "label (entity id)', match the id from parenthesis.
+      if (preg_match("/.+\((\d+)\)/", $entity, $matches)) {
+        $value[] = array(
+          'target_id' => $matches[1],
+        );
+      }
+      else {
+        // Try to get a match from the input string when the user didn't use the
+        // autocomplete but filled in a value manually.
+        $field = field_info_field($element['#field_name']);
+        $handler = entityreference_get_selection_handler($field);
+        $value[] = array(
+          'target_id' => $handler->validateAutocompleteInput($entity, $element, $form_state, $form),
+        );
+      }
+    }
+  }
+  // Update the value of this element so the field can validate the product IDs.
+  form_set_value($element, $value, $form_state);
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function entityreference_field_widget_error($element, $error) {
+  form_error($element, $error['message']);
+}
+
+/**
+ * Menu Access callback for the autocomplete widget.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field_name
+ *   The name of the entity-reference field.
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle_name
+ *   The bundle name.
+ *
+ * @return bool
+ *   True if user can access this menu item.
+ */
+function entityreference_autocomplete_access_callback($type, $field_name, $entity_type, $bundle_name) {
+  $field = field_info_field($field_name);
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+  if (!$field || !$instance || $field['type'] != 'entityreference' || !field_access('edit', $field, $entity_type)) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
+ * Menu callback: autocomplete the label of an entity.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field_name
+ *   The name of the entity-reference field.
+ * @param $entity_type
+ *   The entity type.
+ * @param $bundle_name
+ *   The bundle name.
+ * @param $entity_id
+ *   Optional; The entity ID the entity-reference field is attached to.
+ *   Defaults to ''.
+ * @param $string
+ *   The label of the entity to query by.
+ */
+function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
+  // If the request has a '/' in the search text, then the menu system will have
+  // split it into multiple arguments and $string will only be a partial.
+  // Make sure to recover the intended $string.
+  $args = func_get_args();
+  // Shift off the $type, $field_name, $entity_type,
+  // $bundle_name, and $entity_id args.
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  array_shift($args);
+  $string = implode('/', $args);
+
+  $field = field_info_field($field_name);
+  $instance = field_info_instance($entity_type, $field_name, $bundle_name);
+
+  return entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id, $string);
+}
+
+/**
+ * Return JSON based on given field, instance and string.
+ *
+ * This function can be used by other modules that wish to pass a mocked
+ * definition of the field on instance.
+ *
+ * @param $type
+ *   The widget type (i.e. 'single' or 'tags').
+ * @param $field
+ *   The field array definition.
+ * @param $instance
+ *   The instance array definition.
+ * @param $entity_type
+ *   The entity type.
+ * @param $entity_id
+ *   Optional; The entity ID the entity-reference field is attached to.
+ *   Defaults to ''.
+ * @param $string
+ *   The label of the entity to query by.
+ */
+function entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id = '', $string = '') {
+  $matches = array();
+  $prefix = '';
+
+  $entity = NULL;
+  if ($entity_id !== 'NULL') {
+    $entity = entity_load($entity_type, $entity_id);
+    $has_view_access = (entity_access('view', $entity_type, $entity) !== FALSE);
+    $has_update_access = (entity_access('update', $entity_type, $entity) !== FALSE);
+    if (!$entity || !($has_view_access || $has_update_access)) {
+      return MENU_ACCESS_DENIED;
+    }
+  }
+
+  $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
+
+  if ($type == 'tags') {
+    // The user enters a comma-separated list of tags.
+    // Only autocomplete the last tag.
+    $tags_typed = backdrop_explode_tags($string);
+    $tag_last = backdrop_strtolower(array_pop($tags_typed));
+    if (!empty($tag_last)) {
+      $prefix = count($tags_typed) ? implode(', ', $tags_typed) . ', ' : '';
+    }
+  }
+  else {
+    // The user enters a single tag.
+    $tag_last = $string;
+  }
+
+  if (isset($tag_last)) {
+    // Get an array of matching entities.
+    $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
+    $denied_label = t(ENTITYREFERENCE_DENIED);
+    // Loop through the products and convert them into autocomplete output.
+    foreach ($entity_labels as $values) {
+      foreach ($values as $entity_id => $label) {
+        // Never autocomplete entities that aren't accessible.
+        if ($label == $denied_label) {
+          continue;
+        }
+        $key = $instance['widget']['settings']['hide_ids'] ? $label : "$label ($entity_id)";
+        // Strip starting/trailing white spaces, line breaks and tags.
+        $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
+        // Names containing commas or quotes must be wrapped in quotes.
+        if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
+          $key = '"' . str_replace('"', '""', $key) . '"';
+        }
+        $matches[$prefix . $key] = '<div class="reference-autocomplete">' . $label . '</div>';
+      }
+    }
+  }
+
+  backdrop_json_output($matches);
+}
+
+ /**
+ * Introspects field and instance settings, and determines the correct settings
+ * for the functioning of the formatter.
+ *
+ * Settings:
+ *   - entity_type - The entity_type being loaded.
+ *   - column - The name of the ref. field column that stores the entity id.
+ */
+function entityreference_field_type_settings($field) {
+  $settings = array(
+    'entity_type' => NULL,
+    'column' => NULL,
+  );
+
+  if ($field['type'] == 'entityreference') {
+    $settings['entity_type'] = $field['settings']['target_type'];
+    $settings['column'] = 'target_id';
+  }
+  elseif ($field['type'] == 'taxonomy_term_reference') {
+    $settings['entity_type'] = 'taxonomy_term';
+    $settings['column'] = 'tid';
+  }
+
+  return $settings;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function entityreference_field_formatter_info() {
+  return array(
+    'entityreference_label' => array(
+      'label' => t('Label'),
+      'description' => t('Display the label of the referenced entities.'),
+      'field types' => array('entityreference'),
+      'settings' => array(
+        'link' => FALSE,
+        'bypass_access' => FALSE,
+      ),
+    ),
+    'entityreference_entity_id' => array(
+      'label' => t('Entity id'),
+      'description' => t('Display the id of the referenced entities.'),
+      'field types' => array('entityreference'),
+    ),
+    'entityreference_entity_view' => array(
+      'label' => t('Rendered entity'),
+      'description' => t('Display the referenced entities as they are rendered.'),
+      'field types' => array('entityreference', 'taxonomy_term_reference'),
+      'settings' => array(
+        'view_mode' => 'default',
+        'links' => TRUE,
+        'use_content_language' => TRUE,
+        'hide_title' => FALSE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function entityreference_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
+  $element = array();
+
+  if ($display['type'] == 'entityreference_label') {
+    $element['bypass_access'] = array(
+      '#title' => t('Show entity labels regardless of user access'),
+      '#description' => t("All entities in the field will be shown, without checking them for access. If the 'Link' setting is also enabled, an entity which the user does not have access to view will show without a link."),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['bypass_access'],
+    );
+
+    $element['link'] = array(
+      '#title' => t('Link label to the referenced entity'),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['link'],
+    );
+  }
+
+  if ($display['type'] == 'entityreference_entity_view') {
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
+    $options = array('default' => t('Default'));
+    if (!empty($entity_info['view modes'])) {
+      foreach ($entity_info['view modes'] as $view_mode => $view_mode_settings) {
+        $options[$view_mode] = $view_mode_settings['label'];
+      }
+    }
+
+    $element['view_mode'] = array(
+      '#type' => 'select',
+      '#options' => $options,
+      '#title' => t('View mode'),
+      '#default_value' => $settings['view_mode'],
+      '#access' => count($options) > 1,
+    );
+
+    $element['links'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show links'),
+      '#default_value' => $settings['links'],
+    );
+
+    $element['use_content_language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use current content language'),
+      '#default_value' => $settings['use_content_language'],
+    );
+    $element['hide_title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide title'),
+      '#default_value' => $settings['hide_title'],
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function entityreference_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
+
+  $summary = array();
+
+  if ($display['type'] == 'entityreference_label') {
+    $summary[] = $settings['link'] ? t('Link to the referenced entity') : t('No link');
+    $summary[] = $settings['bypass_access'] ? t('Show labels regardless of access') : t('Respect entity access for label visibility');
+  }
+
+  if ($display['type'] == 'entityreference_entity_view') {
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
+    $view_mode_label = $settings['view_mode'] == 'default' ? t('Default') : $settings['view_mode'];
+    if (isset($entity_info['view modes'][$settings['view_mode']]['label'])) {
+      $view_mode_label = $entity_info['view modes'][$settings['view_mode']]['label'];
+    }
+    $summary[] = t('Rendered as @mode', array('@mode' => $view_mode_label));
+    $summary[] = !empty($settings['links']) ? t('Display links') : t('Do not display links');
+    $summary[] = !empty($settings['use_content_language']) ? t('Use current content language') : t('Use field language');
+    $summary[] = !empty($settings['hide_title']) ? t('Hide Title') : t('Show Title');
+  }
+
+  return implode('<br />', $summary);
+}
+
+/**
+ * Implements hook_field_formatter_prepare_view().
+ */
+function entityreference_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
+  $target_ids = array();
+
+  // Collect every possible entity attached to any of the entities.
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $delta => $item) {
+      if (isset($item[$column])) {
+        $target_ids[] = $item[$column];
+      }
+    }
+  }
+
+  $target_entities = array();
+  if ($target_ids) {
+    if (entity_get_info($target_type)) {
+      $target_entities = entity_load_multiple($target_type, $target_ids);
+    }
+    else {
+      watchdog(
+        'entityreference',
+        'The field %field_label references entities of type %entity_type, but that entity type does not exist.',
+        array(
+          '%field_label' => $field['field_name'],
+          '%entity_type' => $target_type,
+        ),
+        WATCHDOG_ERROR
+      );
+    }
+  }
+
+  // Iterate through the fieldable entities again to attach the loaded data.
+  foreach ($entities as $id => $entity) {
+    $rekey = FALSE;
+
+    foreach ($items[$id] as $delta => $item) {
+      // Check whether the referenced entity could be loaded.
+      if (isset($target_entities[$item[$column]])) {
+        // Replace the instance value with the term data.
+        $items[$id][$delta]['entity'] = $target_entities[$item[$column]];
+        // Check whether the user has access to the referenced entity.
+        $has_view_access = (entity_access('view', $target_type, $target_entities[$item[$column]]) !== FALSE);
+        $has_update_access = (entity_access('update', $target_type, $target_entities[$item[$column]]) !== FALSE);
+        $items[$id][$delta]['access'] = ($has_view_access || $has_update_access);
+      }
+      // Otherwise, unset the instance value, since the entity does not exist.
+      else {
+        unset($items[$id][$delta]);
+        $rekey = TRUE;
+      }
+    }
+
+    if ($rekey) {
+      // Rekey the items array.
+      $items[$id] = array_values($items[$id]);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function entityreference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $result = array();
+  $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
+
+  switch ($display['type']) {
+    case 'entityreference_label':
+      $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
+
+      foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible, unless allowing output of
+        // entity labels without considering access.
+        if (empty($item['access']) && !$display['settings']['bypass_access']) {
+          continue;
+        }
+
+        // Calling EntityReferenceHandler::getLabel() would make a repeated,
+        // wasteful call to entity_access().
+        $label = entity_label($field['settings']['target_type'], $item['entity']);
+
+        // Check if the settings and access allow a link to be displayed.
+        $display_link = $display['settings']['link'] && $item['access'];
+
+        $uri = NULL;
+
+        // If the link is allowed and the entity has a uri, display a link.
+        if ($display_link) {
+          $uri = entity_uri($target_type, $item['entity']);
+        }
+
+        $result[$delta] = array(
+          '#theme' => 'entityreference_label',
+          '#label' => $label,
+          '#item' => $item,
+          '#uri' => $uri,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
+      }
+      break;
+
+    case 'entityreference_entity_id':
+      foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
+        $result[$delta] = array(
+          '#theme' => 'entityreference_entity_id',
+          '#item' => $item,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
+      }
+      break;
+
+    case 'entityreference_entity_view':
+      $target_langcode = $langcode;
+      if (!empty($settings['use_content_language']) && !empty($GLOBALS['language_content']->language)) {
+        $target_langcode = $GLOBALS['language_content']->language;
+      }
+
+      foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
+        // Protect from recursive rendering.
+        static $depth = 0;
+        $depth++;
+        if ($depth > 20) {
+          throw new EntityReferenceRecursiveRenderingException(t('Recursive rendering detected when rendering entity @entity_type(@entity_id). Aborting rendering.', array('@entity_type' => $target_type, '@entity_id' => $item[$column])));
+        }
+
+        $target_entity = clone $item['entity'];
+        $target_entity->buildContent($settings['view_mode'], $target_langcode);
+        $result[$delta][$target_type][$item[$column]] = $target_entity->view($settings['view_mode'], $target_langcode, !empty($settings['hide_title']));
+        if (empty($settings['links']) && isset($result[$delta][$target_type][$item[$column]]['links'])) {
+          $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
+        }
+        $result[$delta][$target_type][$item[$column]]['#theme'] .= '__entityreference';
+        $depth = 0;
+      }
+      break;
+  }
+
+  return $result;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function entityreference_views_api() {
+  return array(
+    'api' => 3,
+    'path' => backdrop_get_path('module', 'entityreference') . '/views',
+  );
+}
+
+/**
+ * Implements hook_entityreference_behavior_plugins().
+ */
+function entityreference_entityreference_behavior_plugins() {
+  $plugins = array();
+  if (module_exists('taxonomy')) {
+    $plugins['taxonomy'] = array(
+        'title' => t('Taxonomy index'),
+        'description' => t('Include the term references created by instances of this field carried by node entities in the core {taxonomy_index} table. This will allow various modules to handle them like core term_reference fields.'),
+        'class' => 'EntityReferenceBehaviorHandlerTaxonomyIndex',
+        'behavior type' => 'instance',
+        'force enabled' => TRUE,
+    );
+  }
+  if (module_exists('views')) {
+    $plugins['views'] = array(
+        'title' => t('Render Views filters as select list'),
+        'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
+        'class' => 'EntityReferenceBehaviorHandlerViewsFilterSelect',
+        'behavior type' => 'field',
+    );
+  }
+  return $plugins;
+}
+
+/**
+ * Implements hook_entityreference_selection_plugins().
+ */
+function entityreference_entityreference_selection_plugins() {
+  $plugins['base'] = array(
+      'title' => t('Simple (with optional filter by bundle)'),
+      'class' => 'EntityReferenceSelectionHandlerGeneric',
+      'weight' => -100,
+  );
+  if (module_exists('views')) {
+    $plugins['views'] = array(
+        'title' => t('Views: Filter by an entity reference view'),
+        'class' => 'EntityReferenceSelectionHandlerViews',
+        'weight' => 0,
+    );
+  }
+  return $plugins;
+}
+
+/**
+ * Load a behavior class for a given property.
+ */
+function entityreference_load_behavior_class($property) {
+  $plugins = _entityreference_behavior_plugins();
+  return !empty($plugins[$property]['class']) ? $plugins[$property]['class'] : NULL;
+}
+
+/**
+ * Load a selection class for a given property.
+ */
+function entityreference_load_selection_class($property) {
+  $plugins = _entityreference_selection_plugins();
+  return !empty($plugins[$property]['class']) ? $plugins[$property]['class'] : NULL;
+}
+
+/**
+ * Get all behavior plugins implemented by any module.
+ *
+ */
+function _entityreference_behavior_plugins() {
+  $plugins = &backdrop_static(__FUNCTION__);
+  if (!empty($plugins)) {
+    return $plugins;
+  }
+
+  $plugins = array();
+  $default = array(
+    'description' => '',
+    'behavior type' => 'field',
+    'access callback' => FALSE,
+    'force enabled' => FALSE,
+  );
+
+  foreach (module_implements('entityreference_behavior_plugins') as $module) {
+    $behavior_plugins = module_invoke($module, 'entityreference_behavior_plugins');
+    foreach ($behavior_plugins as $plugin_name => $plugin) {
+      $plugin = $plugin + $default;
+      $behavior_plugins[$plugin_name] = $plugin;
+    }
+    $plugins = $plugins + $behavior_plugins;
+  }
+
+  return $plugins;
+}
+
+/**
+ * Get all selection plugins implemented by any module.
+ */
+function _entityreference_selection_plugins() {
+  $plugins = &backdrop_static(__FUNCTION__);
+  if (!empty($plugins)) {
+    return $plugins;
+  }
+
+  $plugins = array();
+  foreach (module_implements('entityreference_selection_plugins') as $module) {
+    $plugins = $plugins + module_invoke($module, 'entityreference_selection_plugins');
+  }
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function entityreference_autoload_info() {
+  return array(
+    'EntityReferenceBehaviorHandlerInterface' => 'plugins/behavior/EntityReferenceBehaviorHandler.inc',
+    'EntityReferenceBehaviorHandler' => 'plugins/behavior/EntityReferenceBehaviorHandler.inc',
+    'EntityReferenceBehaviorHandlerBroken' => 'plugins/behavior/EntityReferenceBehaviorHandler.inc',
+    'EntityReferenceBehaviorHandlerTaxonomyIndex' => 'plugins/behavior/EntityReferenceBehaviorHandlerTaxonomyIndex.inc',
+    'EntityReferenceBehaviorHandlerViewsFilterSelect' => 'plugins/behavior/EntityReferenceBehaviorHandlerViewsFilterSelect.inc',
+    'EntityReferenceSelectionHandlerInterface' => 'plugins/selection/EntityReferenceSelectionHandler.inc',
+    'EntityReferenceSelectionHandlerBroken' => 'plugins/selection/EntityReferenceSelectionHandler.inc',
+    'EntityReferenceSelectionHandlerGeneric' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerGeneric_node' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerGeneric_user' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerGeneric_comment' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerGeneric_file' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerGeneric_taxonomy_term' => 'plugins/selection/EntityReferenceSelectionHandlerGeneric.inc',
+    'EntityReferenceSelectionHandlerViews' => 'plugins/selection/EntityReferenceSelectionHandlerViews.inc',
+    'entityreference_plugin_display' => 'views/entityreference_plugin_display.inc',
+    'entityreference_plugin_row_fields' => 'views/entityreference_plugin_row_fields.inc',
+    'entityreference_plugin_style' => 'views/entityreference_plugin_style.inc',
+    'EntityReferenceRecursiveRenderingException' => 'includes/entityreference.exceptions.inc',
+  );
+}
+
+/**
+ * Theme label.
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_label($vars) {
+  $label = $vars['label'];
+  $settings = $vars['settings'];
+  $item = $vars['item'];
+  $uri = $vars['uri'];
+
+  $output = '';
+
+  // If the link is to be displayed and the entity has a uri, display a link.
+  // Note the assignment ($url = ) here is intended to be an assignment.
+  if ($settings['display']['link'] && isset($uri['path'])) {
+    $output .= l($label, $uri['path'], $uri['options']);
+  }
+  else {
+    $output .= check_plain($label);
+  }
+
+  return $output;
+}
+
+/**
+ * Theme entity_id
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_entity_id($vars) {
+  $item = $vars['item'];
+
+  $output = '';
+
+  $output = check_plain($item['target_id']);
+
+  return $output;
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function entityreference_preprocess_node(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Implements hook_preprocess_file_entity().
+ */
+function entityreference_preprocess_file_entity(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Implements hook_preprocess_taxonomy_term().
+ */
+function entityreference_preprocess_taxonomy_term(&$variables) {
+  _entityreference_preprocess_set_title_display($variables);
+}
+
+/**
+ * Pass title display setting to templates.
+ *
+ * If #page is set in the rendered entity reference display mode then pass it to the template.
+ *
+ * @param array $variables
+ */
+function _entityreference_preprocess_set_title_display(&$variables) {
+  if (!strstr($variables['theme_hook_original'], 'entityreference')) {
+    return;
+  }
+  if (isset($variables['elements']['#page']) && $variables['elements']['#page'] !== NULL) {
+    $variables['page'] = $variables['elements']['#page'];
+  }
+}
