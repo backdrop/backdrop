@@ -314,8 +314,7 @@ function config_install_default_config($project, $config_name = NULL) {
  * Uninstall all the configuration provided by a project.
  */
 function config_uninstall_config($project, $config_name = NULL) {
-  if (module_exists($project)) {
-    backdrop_load('module', $project);
+  if (backdrop_load('module', $project)) {
   }
   elseif ($theme_path = backdrop_get_path('theme', $project)) {
     if (file_exists($theme_path . '/template.php')) {
