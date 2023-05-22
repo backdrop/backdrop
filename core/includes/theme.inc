@@ -1645,7 +1645,6 @@ function theme_enable($theme_list) {
       ->execute();
 
     // Copy any default configuration data to the system config directory/
-    dpm($key);
     config_install_default_config($key);
   }
 

@@ -290,7 +290,6 @@ function config_install_default_config($project, $config_name = NULL) {
     $storage = new ConfigFileStorage($project_config_dir);
     $files = glob($project_config_dir . '/*.json');
     foreach ($files as $file) {
-  dpm($file);
       // Load config data into the active store and write it out to the
       // file system in the Backdrop config directory. Note the config name
       // needs to be the same as the file name WITHOUT the extension.
@@ -315,9 +314,12 @@ function config_install_default_config($project, $config_name = NULL) {
  * Uninstall all the configuration provided by a project.
  */
 function config_uninstall_config($project, $config_name = NULL) {
-  foreach (array('module', 'theme', 'layout') as $project_type) {
-    if (backdrop_load($project_type, $project) {
-      break;
+  if (module_exists($project)) {
+    backdrop_load('module', $project);
+  }
+  elseif ($theme_path = backdrop_get_path('theme', $project)) {
+    if (file_exists($theme_path . '/template.php')) {
+      include_once $theme_path . '/template.php';
     }
   }
 
