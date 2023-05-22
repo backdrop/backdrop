@@ -280,7 +280,7 @@ function config_load_multiple($names, $type = 'active') {
  */
 function config_install_default_config($project, $config_name = NULL) {
   $project_path = NULL;
-  foreach (array('module', 'theme', 'layout') as $project_type) {
+  foreach (array('module', 'theme') as $project_type) {
     if ($project_path = backdrop_get_path($project_type, $project)) {
       break;
     }
