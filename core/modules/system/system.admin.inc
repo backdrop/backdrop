@@ -2443,8 +2443,6 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
 
   $form['name'] = array(
     '#type' => 'machine_name',
-    '#title' => t('Machine-readable name'),
-    '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
     '#disabled' => !empty($format),
     '#default_value' => !empty($format) ? $format['name'] : '',
     '#machine_name' => array(

@@ -1,11 +1,29 @@
-
 /* Field display */
 .field .field-label {
   font-weight: bold;
 }
+
+/**
+ * Do not wrap machine name preview text.
+ *
+ * @see https://github.com/backdrop/backdrop-issues/issues/1349
+ */
+.field-suffix.machine-name-preview {
+  white-space: nowrap;
+}
+
+/**
+ * Clear fields with inline labels, as the label and field items are floated.
+ *
+ * @see https://meiert.com/en/blog/no-clearfix/
+ */
+.field-label-inline {
+  overflow: auto;
+}
+
 .field-label-inline .field-label,
 .field-label-inline .field-items {
-  float:left; /*LTR*/
+  float: left; /*LTR*/
 }
 [dir="rtl"] .field-label-inline .field-label,
 [dir="rtl"] .field-label-inline .field-items {
