@@ -2887,7 +2887,7 @@ function form_select_options($element, $choices = NULL) {
     else {
       $key = (string) $key;
       $option_attributes = array();
-      $option_attributes['value'] = check_plain($key);
+      $option_attributes['value'] = $key;
       if ($value_valid && (!$value_is_array && (string) $element['#value'] === $key || ($value_is_array && in_array($key, $element['#value'])))) {
         $option_attributes['selected'] = 'selected';
       }
