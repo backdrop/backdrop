@@ -69,11 +69,9 @@ class views_plugin_display extends views_plugin {
       unset($options['defaults']);
     }
 
-    $skip_cache = config_get('views.settings', 'skip_cache');
-
-    // Cache for unpack_options, but not if we are in the UI.
+    // Cache for unpack_options, but not if we are in the ui.
     static $unpack_options = array();
-    if (empty($view->editing) || !$skip_cache) {
+    if (empty($view->editing)) {
       $cid = 'unpack_options:' . md5(serialize(array($this->options, $options)));
       if (empty($unpack_options[$cid])) {
         $cache = views_cache_get($cid, TRUE);
