@@ -71,25 +71,23 @@ class views_plugin_display extends views_plugin {
 
     $skip_cache = config_get('views.settings', 'skip_cache');
 
-    if (!$skip_cache) {
-      // Cache for unpack_options, but not if we are in the UI.
-      static $unpack_options = array();
-      if (empty($view->editing)) {
-        $cid = 'unpack_options:' . md5(serialize(array($this->options, $options)));
-        if (empty($unpack_options[$cid])) {
-          $cache = views_cache_get($cid, TRUE);
-          if (!empty($cache->data)) {
-            $this->options = $cache->data;
-          }
-          else {
-            $this->unpack_options($this->options, $options);
-            views_cache_set($cid, $this->options, TRUE);
-          }
-          $unpack_options[$cid] = $this->options;
+    // Cache for unpack_options, but not if we are in the UI.
+    static $unpack_options = array();
+    if (empty($view->editing) || !$skip_cache) {
+      $cid = 'unpack_options:' . md5(serialize(array($this->options, $options)));
+      if (empty($unpack_options[$cid])) {
+        $cache = views_cache_get($cid, TRUE);
+        if (!empty($cache->data)) {
+          $this->options = $cache->data;
         }
         else {
-          $this->options = $unpack_options[$cid];
+          $this->unpack_options($this->options, $options);
+          views_cache_set($cid, $this->options, TRUE);
         }
+        $unpack_options[$cid] = $this->options;
+      }
+      else {
+        $this->options = $unpack_options[$cid];
       }
     }
     else {
