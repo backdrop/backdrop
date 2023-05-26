@@ -4657,6 +4657,7 @@ function views_ui_admin_settings_advanced() {
   $form['cache']['skip_cache_warning'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('messages', 'warning')),
+    '#indentation' => 1,
     '#states' => array(
       // Only show this warning when Views data caching is being disabled.
       'visible' => array(
