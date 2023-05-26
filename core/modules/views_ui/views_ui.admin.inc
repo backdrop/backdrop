@@ -4648,6 +4648,26 @@ function views_ui_admin_settings_advanced() {
     '#access' => user_access('flush caches'),
   );
 
+  $form['cache']['skip_cache'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable Views data caching'),
+    '#default_value' => $config->get('skip_cache'),
+    '#description' => t('To increase performance, Views caches data about tables, modules, and views available. Disabling the caching of this data will cause Views to always rebuild it when needed.'),
+  );
+  $form['cache']['skip_cache_warning'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'warning')),
+    '#states' => array(
+      // Only show this warning when Views data caching is being disabled.
+      'visible' => array(
+        'input[name="skip_cache"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['cache']['skip_cache_warning']['warning'] = array(
+    '#markup' => t('This setting can have a serious performance impact on your site, so only enable it for debugging purposes, and make sure to disable it on production environments.'),
+  );
+
   $form['cache']['clear_cache'] = array(
     '#type' => 'submit',
     '#value' => t("Clear Views' cache"),
