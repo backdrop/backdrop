@@ -39,7 +39,7 @@ function telemetry_telemetry_info() {
   $module_info = system_rebuild_module_data();
   $telemetry_modules = _telemetry_core_module_list();
   foreach ($telemetry_modules as $module) {
-    $info[$module] = array(
+    $info['core_module_' . $module] = array(
       'label' => t('Core module: @module', array('@module' => $module_info[$module]->info['name'])),
       'description' => $module_info[$module]->info['description'],
       'project' => 'backdrop',
@@ -94,8 +94,9 @@ function telemetry_telemetry_data($key) {
       return backdrop_get_profile();
   }
 
+  $module = preg_replace('/^(core_module_)(.*)$/', '${2}', $key);
   $telemetry_modules = _telemetry_core_module_list();
-  if (in_array($key, $telemetry_modules)) {
-    return module_exists($key) ? 'enabled' : 'disabled';
+  if (in_array($module, $telemetry_modules)) {
+    return module_exists($module) ? 'enabled' : 'disabled';
   }
 }
