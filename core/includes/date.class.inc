@@ -9,6 +9,10 @@
 class BackdropDateTime extends DateTime {
   public $granularity = array();
   public $errors = array();
+  public $dateOnly = FALSE;
+  public $timeOnly = FALSE;
+  public $originalTime = 'now';
+
   protected static $allgranularity = array(
     'year',
     'month',
