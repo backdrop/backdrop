@@ -54,11 +54,6 @@ class LayoutRendererFlexible {
   var $region_buttons = array();
 
   /**
-   * @var bool
-   */
-  protected $flexible;
-
-  /**
    * Construct the object that will be used to render the editor.
    *
    * @param Layout $layout
