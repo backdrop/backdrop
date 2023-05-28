@@ -2696,6 +2696,16 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $account;
+
+  /**
+   * @var AnonymousUser
+   */
+  protected $anonymous;
+
   function setUp() {
     parent::setUp();
     $this->account = $this->backdropCreateUser();

@@ -640,6 +640,11 @@ class MenuTestCase extends BackdropWebTestCase {
  * Test menu settings for nodes.
  */
 class MenuNodeTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('menu');
 

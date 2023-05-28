@@ -821,6 +821,11 @@ class BackdropUnitTestCase extends BackdropTestCase {
   protected $originalModuleList;
 
   /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
    * Constructor for BackdropUnitTestCase.
    */
   function __construct($test_id = NULL) {

@@ -111,6 +111,21 @@ class ListFieldTestCase extends FieldTestCase {
  */
 class ListDynamicValuesTestCase extends FieldTestCase {
   /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
+  /**
    * @var array
    */
   protected $test;
@@ -194,6 +209,26 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
  * List module UI tests.
  */
 class ListFieldUITestCase extends FieldTestCase {
+  /**
+   * @var string
+   */
+  protected $type;
+
+  /**
+   * @var string
+   */
+  protected $hyphen_type;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var string
+   */
+  protected $admin_path;
+
   function setUp() {
     parent::setUp('field_test', 'field_ui');
 

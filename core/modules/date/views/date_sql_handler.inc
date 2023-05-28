@@ -20,12 +20,16 @@ class date_sql_handler {
   var $local_timezone_field = NULL;
   // Use if the offset is stored in a field.
   var $offset_field = NULL;
-
   /**
    * @var string
    * The granularity of the adjustment. Values: SECOND, MINUTE, DAY, HOUR.
    */
   var $granularity;
+
+  /**
+   * @var array
+   */
+  public $placeholders;
 
   /**
    * The object constructor.

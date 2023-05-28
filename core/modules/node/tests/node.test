@@ -1826,6 +1826,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
 class NodeSaveTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('node_test');
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
@@ -3030,6 +3035,11 @@ class NodeQueryAlter extends BackdropWebTestCase {
    */
   protected $noAccessUser;
 
+  /**
+   * @var User
+   */
+  protected $noAccessUser2;
+
   function setUp() {
     parent::setUp('node_access_test');
 
@@ -3831,6 +3841,10 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  * node instances.
  */
 class NodePublishScheduling extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function testNodeTypeCreateDefaultDraft() {
     // Create a content type of fooba via the user interface.

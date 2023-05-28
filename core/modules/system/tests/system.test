@@ -1212,6 +1212,10 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  * Tests site maintenance functionality.
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $user;
   protected $admin_user;
   protected $profile = 'testing';
 
@@ -1734,6 +1738,16 @@ class SystemMainContentFallback extends BackdropWebTestCase {
  */
 class SystemThemeFunctionalTest extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var Node
+   */
+  protected $node;
 
   function setUp() {
     parent::setUp(array('node', 'block'));
@@ -2385,6 +2399,16 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
  * Tests administrative overview pages.
  */
 class SystemAdminTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     // testAdminPages() requires Locale module.
     parent::setUp(array('locale'));
@@ -2471,6 +2495,11 @@ class SystemAdminTestCase extends BackdropWebTestCase {
  * Tests authorize.php and related hooks.
  */
 class SystemAuthorizeCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('system_test'));
 
@@ -2755,6 +2784,11 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
  * Test menu block settings.
  */
 class MenuBlockTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('menu');
 
