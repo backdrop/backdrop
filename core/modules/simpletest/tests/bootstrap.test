@@ -11,6 +11,11 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
   /**
    * @var string
    */
+  protected $remote_ip;
+
+  /**
+   * @var string
+   */
   protected $proxy_ip;
 
   /**
