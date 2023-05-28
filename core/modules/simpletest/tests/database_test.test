@@ -3922,7 +3922,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
   /**
    * @var bool
    */
-  protected skipTest;
+  protected $skipTest;
 
   function setUp() {
     parent::setUp();
