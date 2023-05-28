@@ -448,3 +448,17 @@ table.screenshot {
   margin-left: 1em;
   margin-right: 0;
 }
+
+/**
+ * CSS for the debug info page.
+ */
+#debug-info-wrapper textarea {
+  cursor: text;
+  font: 1em monospace;
+  white-space: pre;
+}
+
+[dir="rtl"] #debug-info-wrapper textarea {
+  text-align: right;
+  unicode-bidi: plaintext;
+}

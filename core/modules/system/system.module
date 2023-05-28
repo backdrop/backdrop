@@ -1056,8 +1056,23 @@ function system_menu() {
     'title' => 'Status report',
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
-    'weight' => -60,
     'access arguments' => array('access site reports'),
+    'weight' => -60,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/status/report'] = array(
+    'title' => 'View status report',
+    'access arguments' => array('access site reports'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/reports/status/debug'] = array(
+    'title' => 'Get debug info',
+    'description' => 'Get information about the site that can help with support requests and debugging.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_debug_info_form'),
+    'weight' => 10,
+    'access arguments' => array('access site reports'),
+    'type' => MENU_LOCAL_TASK,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
