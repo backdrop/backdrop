@@ -2737,6 +2737,10 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
  * Tests the format_date() function.
  */
 class CommonFormatDateTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   /**
    * Arbitrary langcode for a custom language.

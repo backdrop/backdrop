@@ -3,6 +3,36 @@
 class BootstrapIPAddressTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var string
+   */
+  protected $oldserver;
+
+  /**
+   * @var string
+   */
+  protected $proxy_ip;
+
+  /**
+   * @var string
+   */
+  protected $proxy2_ip;
+
+  /**
+   * @var string
+   */
+  protected $forwarded_ip;
+
+  /**
+   * @var string
+   */
+  protected $cluster_ip;
+
+  /**
+   * @var string
+   */
+  protected $untrusted_ip;
+
   function setUp() {
     $this->oldserver = $_SERVER;
 
