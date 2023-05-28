@@ -110,6 +110,16 @@ class ListFieldTestCase extends FieldTestCase {
  * Sets up a List field for testing allowed values functions.
  */
 class ListDynamicValuesTestCase extends FieldTestCase {
+  /**
+   * @var array
+   */
+  protected $test;
+
+  /**
+   * @var test_entity
+   */
+  protected $entity;
+
   function setUp() {
     parent::setUp(array('list', 'field_test', 'list_test'));
 
@@ -440,6 +450,26 @@ class ListFieldUITestCase extends FieldTestCase {
  * Tests that formatters are working properly.
  */
 class ListFieldDisplayTestCase extends FieldTestCase {
+  /**
+   * @var string
+   */
+  protected $type;
+
+  /**
+   * @var string
+   */
+  protected $hyphen_type;
+
+  /**
+   * @var string
+   */
+  protected $admin_path;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
   function setUp() {
     parent::setUp('field_test', 'field_ui');
 

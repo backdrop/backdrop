@@ -13,6 +13,31 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
   protected $profile = 'testing';
 
   /**
+   * @var User
+   */
+  protected $account;
+
+  /**
+   * @var User
+   */
+  protected $account2;
+
+  /**
+   * @var Node
+   */
+  protected $node_user_posted;
+
+  /**
+   * @var Node
+   */
+  protected $node_user_commented;
+
+  /**
+   * @var array
+   */
+  protected $column_map;
+
+  /**
    * Post comment.
    *
    * @param object $node

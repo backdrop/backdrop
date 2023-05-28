@@ -9,13 +9,28 @@
  * use of the AnonymousUser class in places where different kinds of users are
  * listed together.
  */
-class AnonymousUser implements UserInterface {
+class AnonymousUser extends stdClass implements UserInterface {
   public $uid = 0;
   public $name = NULL;
   public $hostname = NULL;
   public $roles = array(BACKDROP_ANONYMOUS_ROLE);
   public $status = 1;
   public $cache = 0;
+
+  /**
+   * @var string
+   */
+  public $session;
+
+  /**
+   * @var int
+   */
+  public $timestamp;
+
+  /**
+   * @var string
+   */
+  public $mail;
 
   /**
    * Constructor for an anonymous user object.

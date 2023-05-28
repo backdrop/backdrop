@@ -5,6 +5,11 @@
  */
 class EntityBundleLayoutAccess extends LayoutAccess {
   /**
+   * @var string
+   */
+  protected $entity_type;
+
+  /**
    * Constructor for a Layout access rule.
    */
   function __construct($plugin_name, array $data = array()) {

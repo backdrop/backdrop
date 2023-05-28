@@ -66,11 +66,20 @@ interface BackdropUpdaterInterface {
  * Base class for Updaters used in Backdrop.
  */
 abstract class Updater implements BackdropUpdaterInterface {
-
   /**
    * @var string $source Directory to install from.
    */
   public $source;
+
+  /**
+   * @var string
+   */
+  protected $name;
+
+  /**
+   * @var string
+   */
+  protected $title;
 
   public function __construct($source) {
     $this->source = $source;

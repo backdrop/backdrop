@@ -8,6 +8,21 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends BackdropWebTestCase {
+  /**
+   * @var array
+   */
+  protected $fields;
+
+  /**
+   * @var array
+   */
+  protected $field_names;
+
+  /**
+   * @var array
+   */
+  protected $instances;
+
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 

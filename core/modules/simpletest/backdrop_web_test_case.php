@@ -1070,6 +1070,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   public $temp_files_directory;
 
   /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguageUrl;
+
+  /**
    * Constructor for BackdropWebTestCase.
    */
   function __construct($test_id = NULL) {
