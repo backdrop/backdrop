@@ -3737,7 +3737,7 @@ class FieldTokenTestCase extends FieldTestCase {
   protected $node;
 
   /**
-   * @var array
+   * @var object
    */
   protected $content_type;
 
