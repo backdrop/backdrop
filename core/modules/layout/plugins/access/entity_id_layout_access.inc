@@ -5,6 +5,16 @@
  */
 class EntityIDLayoutAccess extends LayoutAccessNegatable {
   /**
+   * @var string
+   */
+  protected $entity_type;
+
+  /**
+   * @var array
+   */
+  protected $entity_info;
+
+  /**
    * Constructor for a Layout access rule.
    */
   function __construct($plugin_name, array $data = array()) {

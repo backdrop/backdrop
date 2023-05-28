@@ -13,6 +13,26 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
   protected $childTestResults;
 
   /**
+   * @var string
+   */
+  protected $pass;
+
+  /**
+   * @var string
+   */
+  protected $fail;
+
+  /**
+   * @var string
+   */
+  protected $valid_permission;
+
+  /**
+   * @var string
+   */
+  protected $invalid_permission;
+
+  /**
    * Store the test ID from each test run for comparison, to ensure they are
    * incrementing.
    */
@@ -587,6 +607,11 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCa
    */
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('simpletest'));
 
@@ -624,6 +649,11 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebT
    * @see BackdropSystemListingCompatibleTestCase
    */
   protected $profile = 'minimal';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function setUp() {
     parent::setUp(array('simpletest'));
