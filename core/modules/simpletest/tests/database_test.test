@@ -15,7 +15,7 @@ class FakeRecord {
   /**
    * @var string
    */
-  protected $name;
+  public $name;
 }
 
 /**
