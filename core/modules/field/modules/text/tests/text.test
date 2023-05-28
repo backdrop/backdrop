@@ -13,6 +13,11 @@ class TextFieldTestCase extends BackdropWebTestCase {
    */
   protected $field;
 
+  /**
+   * @var string
+   */
+  protected $field_name;
+
   function setUp() {
     parent::setUp('field_test');
 

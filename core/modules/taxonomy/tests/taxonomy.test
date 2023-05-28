@@ -1845,6 +1845,16 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests setting languages for taxonomy.
  */
 class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var TaxonomyVocabulary
+   */
+  protected $vocabulary;
+
   function setUp() {
     parent::setUp('node', 'language');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer languages', 'administer content types', 'administer fields'));
