@@ -99,11 +99,6 @@ class TestFileTransfer extends FileTransfer {
    */
   public $shouldIsDirectoryReturnTrue = FALSE;
 
-  /**
-   * @var MockTestConnection
-   */
-  protected $connection;
-
   function __construct($jail, $username, $password, $hostname = 'localhost', $port = 9999) {
     parent::__construct($jail, $username, $password, $hostname, $port);
   }
