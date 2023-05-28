@@ -75,7 +75,7 @@ function template_preprocess_installer_browser_list(&$variables) {
         $title = t('Themes');
         break;
       case 'layout':
-        $title = t('Layouts');
+        $title = t('Layout templates');
         break;
       default:
         $title = t('Projects');

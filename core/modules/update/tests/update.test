@@ -281,7 +281,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    */
   function testGetUpdaterFromDirectory() {
     module_load_include('inc', 'installer', 'installer.manager');
-    // Extract our stub sample backdop zip archive to temporary.
+    // Extract our stub sample Backdrop zip archive to temporary.
     $extract_directory = _installer_manager_extract_directory();
     $file = backdrop_get_path('module', 'update') . '/tests/backdrop-sample.zip';
     $archive = installer_manager_archive_extract($file, $extract_directory);

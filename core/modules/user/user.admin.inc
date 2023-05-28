@@ -502,7 +502,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->admin_description),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -550,29 +550,37 @@ function user_admin_roles($form, $form_state) {
     '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
   );
 
-  // Administrative role option.
-  $form['admin_role'] = array(
+  // Default administrator role and content editor role options.
+  $form['default_roles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Administrator role'),
+    '#title' => t('Default roles'),
+    '#description' => t('Changing these settings will not affect existing permissions.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
   $roles = user_roles();
-  // Do not allow the anonymous or authenticated roles to be set as the
-  // administrator.
+  // Do not allow the anonymous or authenticated roles to be set as the default
+  // administrator or content editor roles.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   // Add the "disabled" option to the top of the roles list (makes sure that
-  // this is the selected option if the role that was previously set as admin is
-  // deleted).
-  $roles = array(0 => t('disabled')) + $roles;
-  $form['admin_role']['user_admin_role'] = array(
+  // this is the selected option if the role that was previously set as admin or
+  // content editor is deleted).
+  $roles = array(0 => t('- None -')) + $roles;
+  $form['default_roles']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Changing this setting will not affect existing permissions.'),
+    '#description' => t('This role will be automatically given any permission introduced by newly enabled modules.'),
+  );
+  $form['default_roles']['user_editor_role'] = array(
+    '#type' => 'select',
+    '#title' => t('Default content editor role'),
+    '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
+    '#options' => $roles,
+    '#description' => t('This role will be automatically given permission to create, edit, and delete content for any newly created content types.'),
   );
 
   // Settings for anonymous users.
@@ -645,7 +653,7 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
+    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -660,6 +668,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->set('user_editor_role', $form_state['values']['user_editor_role']);
   $config->save();
 
   // Save roles.
@@ -704,20 +713,12 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
-  $form['admin_description'] = array(
-    '#type' => 'textarea',
-    '#rows' => 3,
-    '#title' => t('Admin description'),
-    '#default_value' => isset($role->admin_description) ? $role->admin_description : '',
-    '#description' => t('Summary of this role\'s purpose, shown on the role listing page.'),
-  );
   $form['description'] = array(
     '#type' => 'textarea',
     '#rows' => 3,
-    '#title' => t('Help text'),
+    '#title' => t('Description'),
     '#default_value' => isset($role->description) ? $role->description : '',
-    '#description' => t('Description to present when assigning this role on the account edit form.'),
-    '#access' => !isset($role->name) || $role->name !== BACKDROP_ANONYMOUS_ROLE,
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
   );
   $form['weight'] = array(
     '#type' => 'value',
@@ -757,7 +758,6 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
-      'admin_description' => $form_state['values']['admin_description'],
       'description' => $form_state['values']['description'],
     );
     user_role_save($role);
@@ -772,7 +772,6 @@ function user_admin_role_submit($form, &$form_state) {
     // Update existing role.
     $role = $form_state['role'];
     $role->label = $form_state['values']['label'];
-    $role->admin_description = $form_state['values']['admin_description'];
     $role->description = $form_state['values']['description'];
     user_role_save($role);
     backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));

@@ -10,6 +10,7 @@
 .admin-panel {
   margin: 0;
   padding: 5px 5px 15px 5px;
+  break-inside: avoid;
 }
 .admin-panel .description {
   margin: 0 0 3px;
@@ -23,6 +24,12 @@
 }
 div.admin {
   padding-top: 15px;
+  columns: 2;
+}
+@media all and (max-width: 768px) {
+  div.admin {
+    columns: 1;
+  }
 }
 div.admin .left {
   float: left; /* LTR */

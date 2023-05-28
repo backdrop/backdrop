@@ -208,7 +208,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
     user_role_grant_permissions($web_user_role, array($permission));
     $this->backdropLogin($this->web_user);
 
-    // Display edition form.
+    // Display edit form.
     // We should now have a 'text format' selector.
     $this->backdropGet('test-entity/manage/' . $id . '/edit');
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", NULL, 'Widget is displayed');
@@ -227,6 +227,144 @@ class TextFieldTestCase extends BackdropWebTestCase {
     $this->content = backdrop_render($entity->content);
     $this->assertRaw($value, 'Value is displayed unfiltered');
   }
+
+  /**
+   * Test widgets for fields with selected allowed formats.
+   */
+  public function testTextfieldWidgetsAllowedFormats() {
+    // Create one text format.
+    $format1 = array(
+      'format' => backdrop_strtolower($this->randomName()),
+      'name' => $this->randomName(),
+      'weight' => -3,
+    );
+    $format1 = (object) $format1;
+    filter_format_save($format1);
+
+    // Create a second text format.
+    $format2 = array(
+      'format' => backdrop_strtolower($this->randomName()),
+      'name' => $this->randomName(),
+      'weight' => -2,
+      'filters' => array(
+        'filter_html' => array(
+          'status' => 1,
+          'settings' => array(
+            'allowed_html' => '<strong>',
+          ),
+        ),
+      ),
+    );
+    $format2 = (object) $format2;
+    filter_format_save($format2);;
+
+    // Create a third text format.
+    $format3 = array(
+      'weight' => -1,
+      'format' => backdrop_strtolower($this->randomName()),
+      'name' => $this->randomName(),
+    );
+    $format3 = (object) $format3;
+    filter_format_save($format3);
+
+    // Grant the web user access to all formats.
+    $web_user_roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
+    $web_user_role = reset($web_user_roles);
+    user_role_grant_permissions($web_user_role, array(
+      filter_permission_name($format1),
+      filter_permission_name($format2),
+      filter_permission_name($format3),
+    ));
+
+    // Create a field with multiple formats allowed.
+    $this->field_name = backdrop_strtolower($this->randomName());
+    $this->field = array('field_name' => $this->field_name, 'type' => 'text_long');
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'label' => $this->randomName() . '_label',
+      'settings' => array(
+        'text_processing' => TRUE,
+        'allowed_formats' => array(),
+      ),
+      'widget' => array(
+        'type' => 'text_textarea',
+      ),
+      'display' => array(
+        'full' => array(
+          'type' => 'text_default',
+        ),
+      ),
+    );
+    $this->instance = field_create_instance($this->instance);
+
+    // Display the creation form.
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('test-entity/add/test-bundle');
+    $this->assertFieldByName("{$this->field_name}[und][0][value]");
+    $this->assertRaw('<option value="' . $format1->format . '"');
+    $this->assertRaw('<option value="' . $format2->format . '"');
+    $this->assertRaw('<option value="' . $format3->format . '"');
+
+    $filtered_markup = '<div><strong><span>Hello World</span></strong></div>';
+    $edit = array(
+      "{$this->field_name}[und][0][value]" => $filtered_markup,
+    );
+    $this->backdropPost(NULL, $edit, 'Save');
+    preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
+    $id = $match[1];
+    $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
+
+    // Display the entity.
+    $entity = field_test_entity_test_load($id);
+    $entity->content = field_attach_view($entity->entityType(), $entity, 'full');
+    $this->content = backdrop_render($entity->content);
+    $this->assertRaw('<div><strong><span>', 'Value is displayed unfiltered');
+
+    // Change field to allow only one format.
+    $this->instance['settings']['allowed_formats'] = array($format1->format);
+    field_update_instance($this->instance);
+
+    // Display the creation form.
+    // We shouldn't have the 'format' selector since only one format is allowed.
+    $this->backdropGet('test-entity/add/test-bundle');
+    $this->assertFieldByName("{$this->field_name}[und][0][value]");
+    $this->assertNoFieldByName("{$this->field_name}[und][0][format]");
+
+    // Retest the entity renders fine even though filter2 is disabled.
+    $entity = field_test_entity_test_load($id);
+    $entity->content = field_attach_view($entity->entityType(), $entity, 'full');
+    $this->content = backdrop_render($entity->content);
+    $this->assertRaw('<div><strong><span>', 'Value is displayed unfiltered');
+
+    // Test when 2 of 3 formats are selected.
+    $this->instance['settings']['allowed_formats'] = array(
+      $format1->format,
+      $format2->format
+    );
+    field_update_instance($this->instance);
+
+    $this->backdropGet('test-entity/add/test-bundle');
+    // We should see the 'format' selector again with only two options.
+    $this->assertFieldByName("{$this->field_name}[und][0][value]", NULL);
+    $this->assertRaw('<option value="' . $format1->format . '"');
+    $this->assertRaw('<option value="' . $format2->format . '"');
+    $this->assertNoRaw('<option value="' . $format3->format . '"');
+
+    // Change field to allow all formats by configuring none as allowed.
+    $this->instance['settings']['allowed_formats'] = array();
+    field_update_instance($this->instance);
+
+    $this->backdropGet('test-entity/add/test-bundle');
+    // We should see the 'format' selector again with all formats.
+    $this->assertFieldByName("{$this->field_name}[und][0][value]", NULL);
+    $this->assertRaw('<option value="' . $format1->format . '"');
+    $this->assertRaw('<option value="' . $format2->format . '"');
+    $this->assertRaw('<option value="' . $format3->format . '"');
+  }
+
 }
 
 class TextSummaryTestCase extends BackdropWebTestCase {

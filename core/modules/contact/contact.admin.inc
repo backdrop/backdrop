@@ -159,7 +159,7 @@ function contact_form_permissions() {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->admin_description),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -508,7 +508,7 @@ function contact_category_delete_form_submit($form, &$form_state) {
 
   // Get Categories Data.
   $config_data = contact_config_data();
-  $default_catageory = $config_data['contact_default_category'];
+  $default_category = $config_data['contact_default_category'];
   $categories = $config_data['categories'];
 
   foreach ($categories as $key => $cat) {
@@ -516,7 +516,7 @@ function contact_category_delete_form_submit($form, &$form_state) {
 
       unset($categories[$key]);
 
-      if ($cat['cid'] == $default_catageory) {
+      if ($cat['cid'] == $default_category) {
         $config_data['contact_default_category'] = 0;
       }
 
