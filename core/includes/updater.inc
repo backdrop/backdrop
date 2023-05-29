@@ -66,6 +66,7 @@ interface BackdropUpdaterInterface {
  * Base class for Updaters used in Backdrop.
  */
 abstract class Updater implements BackdropUpdaterInterface {
+
   /**
    * @var string $source Directory to install from.
    */

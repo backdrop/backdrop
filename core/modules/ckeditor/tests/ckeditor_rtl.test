@@ -9,12 +9,11 @@
  */
 class CKEditorRtlTestCase extends BackdropWebTestCase {
   /**
-   * User entity.
+   * User User object.
    *
-   * @var User
+   * @var object
    */
   protected $adminUser;
-
   /**
    * Profile name.
    *
