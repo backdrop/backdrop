@@ -18,21 +18,6 @@ class AnonymousUser extends stdClass implements UserInterface {
   public $cache = 0;
 
   /**
-   * @var string
-   */
-  public $session;
-
-  /**
-   * @var int
-   */
-  public $timestamp;
-
-  /**
-   * @var string
-   */
-  public $mail;
-
-  /**
    * Constructor for an anonymous user object.
    */
   public function __construct($values = array()) {
