@@ -5,6 +5,11 @@
  */
 class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
   /**
+   * @var bool;
+   */
+  public $storage = FALSE;
+
+  /**
    * Get the context from this relationship.
    *
    * @param LayoutContext $source_context;
