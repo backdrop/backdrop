@@ -520,8 +520,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'help' => '',
-      'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
 
