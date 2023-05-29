@@ -464,7 +464,16 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $files = file_scan_directory($directory, '/.*\.json/');
     foreach ($files as $filepath => $file) {
       $config_data = json_decode(file_get_contents($filepath), TRUE);
-      $config_data['config_test_addition'] = 'test';
+      // The Layout and TaxonomyVocabulary class don't allow dynamic properties.
+      if (strpos($file->name, 'layout.layout.') === 0) {
+        $config_data['layout_template'] = 'simmons';
+      }
+      elseif (strpos($file->name, 'taxonomy.vocabulary.') === 0) {
+        $config_data['description'] = 'config_test_addition';
+      }
+      else {
+        $config_data['config_test_addition'] = 'test';
+      }
       file_put_contents($filepath, backdrop_json_encode($config_data, TRUE));
     }
 
