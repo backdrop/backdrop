@@ -821,6 +821,7 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
    * @var User
    */
   protected $admin_user;
+
   /**
    * Sets up test case.
    */

@@ -9,7 +9,7 @@
  */
 class CKEditorRtlTestCase extends BackdropWebTestCase {
   /**
-   * User User object.
+   * User object.
    *
    * @var object
    */
