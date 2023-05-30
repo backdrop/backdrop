@@ -236,7 +236,10 @@ function install_begin_request(&$install_state) {
     exit;
   }
 
-  backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
+  $conf_path = conf_path();
+  if (file_exists(BACKDROP_ROOT . '/' . $conf_path . '/settings.php')) {
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
+  }
 
   require_once BACKDROP_ROOT . '/core/modules/system/system.install';
   require_once BACKDROP_ROOT . '/core/includes/common.inc';

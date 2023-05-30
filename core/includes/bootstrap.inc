@@ -623,9 +623,10 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
         $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
-        if (isset($sites[$dir]) && file_exists(BACKDROP_ROOT . '/sites/' . $sites[$dir])) {
-          $dir = $sites[$dir];
-        }
+        if (isset($sites[$dir])) {
+          $conf = './sites/' . $sites[$dir];
+          return $conf;
+       }
         if (file_exists(BACKDROP_ROOT . '/sites/' . $dir . '/settings.php') || (!$require_settings && file_exists(BACKDROP_ROOT . '/sites/' . $dir))) {
           $conf = './sites/' . $dir;
           return $conf;
@@ -847,9 +848,7 @@ function backdrop_settings_initialize() {
   $settings = array();
 
   $conf_path = conf_path();
-  if (file_exists($conf_path . '/settings.php')) {
-    require_once $conf_path . '/settings.php';
-  }
+  require_once $conf_path . '/settings.php';
   if (!empty($settings['backdrop_drupal_compatibility'])) {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
