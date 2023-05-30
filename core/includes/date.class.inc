@@ -21,7 +21,9 @@ class BackdropDateTime extends DateTime {
   public $timeOnly;
 
   /**
-   * @var string
+   * Date string, timestamp or indexed date array.
+   *
+   * @var string|int|array
    */
   public $originalTime;
 
