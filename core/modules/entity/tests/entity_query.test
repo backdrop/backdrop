@@ -18,11 +18,6 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
    */
   protected $field_names;
 
-  /**
-   * @var array
-   */
-  protected $instances;
-
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
@@ -99,7 +94,6 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $instances[1]['bundle'] = $instances[1]['entity_type'] = 'test_entity_bundle';
     field_create_instance($instances[1]);
 
-    $this->instances = $instances;
     // Write entity base table if there is one.
     $entities = array();
 

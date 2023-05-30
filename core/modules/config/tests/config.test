@@ -563,11 +563,6 @@ class ConfigurationSyncTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   /**
-   * @var object
-   */
-  protected $content_type;
-
-  /**
    * @var User
    */
   protected $admin_user;
@@ -577,7 +572,7 @@ class ConfigurationSyncTest extends BackdropWebTestCase {
 
     // Create a blank content type into which our new config-based field will be
     // added.
-    $this->content_type = $this->backdropCreateContentType(array(
+    $this->backdropCreateContentType(array(
       'type' => 'post',
       'name' => 'Post',
     ));
