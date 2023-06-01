@@ -327,8 +327,7 @@ function layout_preprocess_layout(&$variables) {
   // Build HTML for displaying flexible templates.
   if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
     $layout_name = $variables['layout_info']['name'];
-    $edit_path = "admin/structure/layouts/settings/flexible-template/$layout_name/configure";
-    if (current_path() == $edit_path) {
+    if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
       $variables['flexible_editor'] = TRUE;
       $flexible_layout = layout_flexible_tempstore_load($layout_name);
     }
