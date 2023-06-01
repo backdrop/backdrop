@@ -326,14 +326,13 @@ function layout_preprocess_layout(&$variables) {
 
   // Build HTML for displaying flexible templates.
   if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
-    $layout_name = $variables['layout_info']['name'];
     if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
       $variables['flexible_editor'] = TRUE;
-      $flexible_layout = layout_flexible_tempstore_load($layout_name);
+      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
     }
     else {
       $variables['flexible_editor'] = FALSE;
-      $flexible_layout = layout_flexible_template_load($layout_name);
+      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
     }
     $variables['region_buttons'] = array();
     if (isset($variables['renderer']->region_buttons)) {
