@@ -212,7 +212,7 @@ function installer_manager_update_form($form, $form_state) {
     }
     // Indicate update type, if security or unsupported version.
     if (isset($type) && isset($update_types[$type])) {
-      $entry['title'] .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
+      $entry['project_name']['data'] .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
     }
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
