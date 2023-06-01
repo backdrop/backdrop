@@ -93,12 +93,17 @@ function installer_manager_update_form($form, $form_state) {
   else {
     $update_emails = $update_config->get('update_emails');
     if (empty($update_emails)) {
-      $email_notifications_message = t('<a href="@link">No email address has been provided</a> for notifications about available updates.', array('@link' => $settings_link));
+      $email_notifications_message = t('<a href="@link">No email address has been provided</a> for notifications about available updates.', array(
+        '@link' => $settings_link
+      ));
       $message_type = 'warning';
     }
     else {
       $recipients = implode(', ', $update_emails);
-      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array('@link' => $settings_link, '@recipients' => $recipients));
+      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array(
+        '@link' => $settings_link,
+        '@recipients' => $recipients
+      ));
       $message_type = 'info';
     }
   }
