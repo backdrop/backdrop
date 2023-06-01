@@ -69,18 +69,25 @@ function installer_manager_update_form($form, $form_state) {
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array('@link' => $settings_link, '@frequency' => $frequency[$update_interval_days]));
+    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array(
+      '@link' => $settings_link,
+      '@frequency' => $frequency[$update_interval_days]
+    ));
     $message_type = 'info';
   }
   else {
-    $frequency_message = t('<a href="@link">Automatic update checks are disabled</a> and will need to be run manually.', array('@link' => $settings_link));
+    $frequency_message = t('<a href="@link">Automatic update checks are disabled</a> and will need to be run manually.', array(
+      '@link' => $settings_link)
+    );
     $message_type = 'warning';
   }
   backdrop_set_message($frequency_message, $message_type);
 
   $update_threshold = $update_config->get('update_threshold');
   if ($update_threshold == 'none') {
-    $email_notifications_message = t('<a href="@link">Email notifications are disabled</a> for available updates.', array('@link' => $settings_link));
+    $email_notifications_message = t('<a href="@link">Email notifications are disabled</a> for available updates.', array(
+      '@link' => $settings_link)
+    );
     $message_type = 'warning';
   }
   else {
@@ -136,7 +143,7 @@ function installer_manager_update_form($form, $form_state) {
     // The project name to display can vary based on the info we have.
     if (!empty($project['title'])) {
       if (!empty($project['link'])) {
-        $project_name = l($project['title'], $project['link'], array('attributes' => array('target'=>'_blank')));
+        $project_name = l($project['title'], $project['link'], array('attributes' => array('target' => '_blank')));
       }
       else {
         $project_name = check_plain($project['title']);
@@ -157,7 +164,7 @@ function installer_manager_update_form($form, $form_state) {
 
     $recommended_release = $project['releases'][$project['recommended']];
     $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
-    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target'=>'_blank'));
+    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target' => '_blank'));
     $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
     $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
