@@ -152,19 +152,23 @@ function dblog_watchdog(array $log_entry) {
  */
 function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   $site_config = config('system.core');
-  $form['dblog_row_limit'] = array(
+  $form['dblog'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Database log'),
+  );
+  $form['dblog']['dblog_row_limit'] = array(
     '#type' => 'select',
-    '#title' => t('Database log messages to keep'),
+    '#title' => t('Messages to keep'),
     '#default_value' => $site_config->get('log_row_limit'),
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
-    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/config/system/cron'))),
   );
 
   $format = $site_config->get('log_date_format');
   $pattern = isset($form_state['values']['dblog_date_format']) ? $form_state['values']['dblog_date_format'] : $format;
   $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
 
-  $form['dblog_date_format'] = array(
+  $form['dblog']['dblog_date_format'] = array(
     '#type' => 'textfield',
     '#title' => t('Date format for log messages'),
     '#maxlength' => 100,
@@ -182,6 +186,18 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
       'id' => 'date-format-pattern',
     ),
   );
+
+  $form['dblog']['dblog_max_length'] = array(
+    '#type' => 'number',
+    '#title' => t('Abbreviated message length'),
+    '#default_value' => $site_config->get('log_max_length'),
+    '#description' => t('The maximum log message length when abbreviated on the <a href="@url">recent log messages page</a>.', array('@url' => url('admin/reports/dblog'))),
+    '#required' => TRUE,
+    '#min' => 1,
+    '#max' => 255,
+    '#field_suffix' => t('characters'),
+  );
+
   $form['#submit'][] = 'dblog_logging_settings_submit';
 }
 
@@ -193,4 +209,5 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
 function dblog_logging_settings_submit($form, &$form_state) {
   config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
   config_set('system.core', 'log_date_format', $form_state['values']['dblog_date_format']);
+  config_set('system.core', 'log_max_length', $form_state['values']['dblog_max_length']);
 }

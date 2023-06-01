@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides mimetype mappings.

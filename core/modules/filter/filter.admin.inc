@@ -30,7 +30,7 @@ function filter_admin_overview($form) {
       'href' => "admin/config/content/formats/$id",
       'weight' => 0,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -54,7 +54,11 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
@@ -78,7 +82,11 @@ function filter_admin_overview($form) {
           'weight' => -10,
         );
       }
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);
@@ -789,6 +797,7 @@ function filter_editor_image_upload_settings_form($format) {
   $settings += array(
     'status' => FALSE,
     'scheme' => file_default_scheme(),
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
@@ -838,11 +847,19 @@ function filter_editor_image_upload_settings_form($format) {
     );
   }
   // Set data- attributes with human-readable names for all possible stream
-  // wrappers, so that drupal.ckeditor.drupalimage.admin's summary rendering
+  // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
   }
+
+  $form['alt_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('<em>Alt</em> text required'),
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
+    '#default_value' => $settings['alt_required'],
+    '#states' => $show_if_image_uploads_enabled,
+  );
 
   $form['directory'] = array(
     '#type' => 'textfield',
@@ -961,7 +978,7 @@ function filter_editor_file_upload_settings_form($format) {
     );
   }
   // Set data- attributes with human-readable names for all possible stream
-  // wrappers, so that drupal.ckeditor.drupalimage.admin's summary rendering
+  // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));

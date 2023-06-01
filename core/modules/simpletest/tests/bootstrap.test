@@ -129,21 +129,22 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $etag = $this->backdropGetHeader('ETag');
     $last_modified = $this->backdropGetHeader('Last-Modified');
 
+    // Match a cache based on Etag only.
+    $this->backdropGet($test_path, array(), array('If-None-Match: ' . $etag));
+    $this->assertResponse(304, 'Conditional request with Etag only returned 304 Not Modified.');
+
+    // Include both Etag and Date, even though the date is ignored.
+    // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
     $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . $last_modified, 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request returned 304 Not Modified.');
+    $this->assertResponse(304, 'Conditional request with Etag and unnecessary If-Modified-Since returned 304 Not Modified.');
 
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC822, strtotime($last_modified)), 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request with obsolete If-Modified-Since date returned 304 Not Modified.');
-
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC850, strtotime($last_modified)), 'If-None-Match: ' . $etag));
-    $this->assertResponse(304, 'Conditional request with obsolete If-Modified-Since date returned 304 Not Modified.');
-
+    // Match a cache based on date only.
     $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . $last_modified));
-    $this->assertResponse(200, 'Conditional request without If-None-Match returned 200 OK.');
-    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
+    $this->assertResponse(304, 'Conditional request without If-None-Match returned 304 Not Modified.');
 
-    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC1123, strtotime($last_modified) + 1), 'If-None-Match: ' . $etag));
-    $this->assertResponse(200, 'Conditional request with new a If-Modified-Since date newer than Last-Modified returned 200 OK.');
+    // Try a conditional request that is too stale to get a cached copy.
+    $this->backdropGet($test_path, array(), array('If-Modified-Since: ' . gmdate(DATE_RFC1123, strtotime($last_modified) - 1)));
+    $this->assertResponse(200, 'Conditional request with new a If-Modified-Since date older than Last-Modified returned 200 OK.');
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
 
     $user = $this->backdropCreateUser();

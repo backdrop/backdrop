@@ -124,3 +124,34 @@ div.messages.info:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }
 
+/* Dismiss buttons */
+.messages .dismiss {
+  display: block;
+  height: 15px;
+  position: absolute;
+  right: 5px; /* LTR */
+  top: 5px;
+  width: 15px;
+}
+.messages .dismiss:before,
+.messages .dismiss:after {
+  background: #999;
+  content: '';
+  display: block;
+  height: 2px;
+  margin-top: 6px;
+  width: 15px;
+}
+.messages .dismiss:before {
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+.messages .dismiss:after {
+  margin-top: -2px;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+[dir="rtl"] .messages .dismiss {
+  left: 5px;
+  right: auto;
+}
