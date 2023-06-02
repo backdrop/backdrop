@@ -3824,7 +3824,19 @@ function theme_tableselect($variables) {
       array_unshift($header, '');
     }
   }
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => $element['#empty'], 'attributes' => $element['#attributes']));
+
+  $theme_table_vars = array(
+    'header' => $header,
+    'rows' => $rows,
+    'footer' => isset($element['#footer']) ? $element['#footer'] : array(),
+    'attributes' => $element['#attributes'],
+    'caption' => isset($element['#caption']) ? $element['#caption'] : '',
+    'colgroups' => isset($element['#colgroups']) ? $element['#colgroups'] : array(),
+    'sticky' => isset($element['#sticky']) ? $element['#sticky'] : TRUE,
+    'empty' => $element['#empty'],
+  );
+
+  return theme('table', $theme_table_vars);
 }
 
 /**
