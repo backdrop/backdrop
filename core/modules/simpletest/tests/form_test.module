@@ -772,6 +772,13 @@ function _form_test_tableselect_js_select_form($form, $form_state, $action) {
 }
 
 /**
+* AJAX callback that returns the form element.
+*/
+function _form_test_tableselect_ajax_callback($form, &$form_state) {
+  return $form['tableselect'];
+}
+
+/**
  * Tests functionality of vertical tabs.
  */
 function _form_test_vertical_tabs_form($form, &$form_state) {
@@ -799,13 +806,6 @@ function _form_test_vertical_tabs_form($form, &$form_state) {
     '#type' => 'textfield',
   );
   return $form;
-}
-
-/**
-* Ajax callback that returns the form element.
-*/
-function _form_test_tableselect_ajax_callback($form, &$form_state) {
-  return $form['tableselect'];
 }
 
 /**
