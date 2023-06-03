@@ -3847,7 +3847,7 @@ function form_process_tableselect($element) {
   }
 
   $element['#tree'] = TRUE;
-dpm($element['#options']);
+
   if (empty($element['#options'])) {
     $element['#value'] = array();
   }
