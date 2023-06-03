@@ -65,8 +65,8 @@ class TaxonomyTerm extends Entity {
    * This property is not loaded, but may be used to modify the term parents via
    * TaxonomyTerm::save().
    *
-   * The property can be set to an array of term IDs. An entry of 0 means this
-   * term does not have any parents. When omitting this variable during an
+   * The property can be set to an array of term IDs. An entry of array(0) means
+   * this term does not have any parents. When omitting this variable during an
    * update, the existing hierarchy for the term remains unchanged.
    *
    * @var array
@@ -120,7 +120,11 @@ class TaxonomyTerm extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    return user_access('administer taxonomy', $account);
+    $admin_access = user_access('administer taxonomy', $account);
+    if (!empty($bundle)) {
+      return user_access("create terms in $bundle", $account) || $admin_access;
+    }
+    return $admin_access;
   }
 
   /**

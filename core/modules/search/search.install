@@ -225,6 +225,17 @@ function search_update_1002() {
 }
 
 /**
+ * Set a default for the new search_pager_type setting if not already set.
+ */
+function search_update_1003() {
+  $config = config('search.settings');
+  if ($config->get('search_pager_type') === NULL) {
+    $config->set('search_pager_type', 'full');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
