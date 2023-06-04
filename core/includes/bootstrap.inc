@@ -626,7 +626,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
         if (isset($sites[$dir])) {
           $conf = './sites/' . $sites[$dir];
           return $conf;
-       }
+        }
         if (file_exists(BACKDROP_ROOT . '/sites/' . $dir . '/settings.php') || (!$require_settings && file_exists(BACKDROP_ROOT . '/sites/' . $dir))) {
           $conf = './sites/' . $dir;
           return $conf;
