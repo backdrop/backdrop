@@ -2320,9 +2320,9 @@ function system_debug_info() {
 }
 
 /**
- * AJAX submit handler for system_debug_info_form().
+ * Compiles the various information for the debug info page.
  *
- * Handles switching the debug_info textarea.
+ * @see system_debug_info().
  */
 function system_get_debug_info() {
   global $language;
@@ -2404,7 +2404,7 @@ function system_get_debug_info() {
   // Add a line with a note about the default content theme (explicitly 2
   // columns per line, otherwise vsprintf() complains).
   $default_content_theme = t('*used when editing or creating content');
-  $debug_info_lines[$default_content_theme] = array($default_content_theme, '');
+  $debug_info_lines['Default content theme'] = array('', $default_content_theme);
 
   $debug_info_lines[] = $empty_line;
 
