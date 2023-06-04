@@ -1045,19 +1045,12 @@ function system_menu() {
     'weight' => -60,
     'file' => 'system.admin.inc',
   );
-  $items['admin/reports/status/report'] = array(
-    'title' => 'View status report',
-    'access arguments' => array('access site reports'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/reports/status/debug'] = array(
-    'title' => 'Get debug info',
+  $items['admin/reports/debug'] = array(
+    'title' => 'Debug information',
     'description' => 'Get information about the site that can help with support requests and debugging.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_debug_info_form'),
-    'weight' => 10,
+    'page callback' => 'system_debug_info',
     'access arguments' => array('access site reports'),
-    'type' => MENU_LOCAL_TASK,
+    'weight' => -50,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
