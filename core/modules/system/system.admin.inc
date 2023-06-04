@@ -1790,16 +1790,18 @@ function system_jquery_settings() {
   $form['#config'] = 'system.core';
 
   $options = array(
-    'default' => t('jQuery 3 (Recommended)'),
-    'legacy' => t('jQuery 1 (Legacy)'),
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
   );
   $form['jquery_version'] = array(
     '#type' => 'radios',
     '#title' => t('jQuery version'),
     '#default_value' => $config->get('jquery_version'),
     '#options' => $options,
-    '#description' => t('Whether to use the latest version of jQuery, or fall back to using the v1.x legacy version. If you have modules or themes that are not working properly with the latest version, you may wish to use the legacy.'),
+    '#description' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/introducing-jquery'))),
   );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
 
   return system_settings_form($form);
 }
