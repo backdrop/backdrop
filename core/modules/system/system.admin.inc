@@ -2460,7 +2460,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    '#description' => t('A date format using PHP date and time codes. See the <em>PHP date/time codes</em> below for available options.'),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
@@ -2480,6 +2480,16 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => (!empty($format['name']) ? t('Save format') : t('Add format')),
+  );
+
+  $php_codes_details = '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Format string</em> field above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>';
+  $php_codes_details .= system_php_date_time_codes_table();
+  $form['php_codes'] = array(
+    '#type' => 'details',
+    '#summary' => t('PHP date/time codes'),
+    '#details' => $php_codes_details,
+    '#open' => TRUE,
+    '#weight' => 999,
   );
 
   return $form;
@@ -2512,6 +2522,142 @@ function system_date_time_lookup($form, &$form_state) {
   $parent_id = $element['#wrapper_attributes']['id'];
   $commands[] = ajax_command_html("#$parent_id .field-suffix", '<span>' . $element['#field_suffix'] . '</span>');
   return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Returns HTML markup for a table of PHP date/time codes.
+ */
+function system_php_date_time_codes_table() {
+  $rows = array();
+
+  $codes = array(
+    t('Day') => array(
+      'd' => array(
+        'type' => t('Number'),
+        'description' => t('Day of the month (<em>with</em> leading zero)'),
+      ),
+      'j' => array(
+        'type' => t('Number'),
+        'description' => t('Day of the month (<em>without</em> leading zero)'),
+      ),
+      'l' => array(
+        'type' => t('String'),
+        'description' => t('Day of the week (full name)'),
+      ),
+      'D' => array(
+        'type' => t('String'),
+        'description' => t('Day of the week (abbreviated)'),
+      ),
+      'S' => array(
+        'type' => t('Suffix'),
+        'description' => t("English ordinal suffix for the day of the month (use with 'j')"),
+      ),
+    ),
+    t('Month') => array(
+      'm' => array(
+        'type' => t('Number'),
+        'description' => t('Numeric representation of the month (<em>with</em> leading zero)'),
+      ),
+      'n' => array(
+        'type' => t('Number'),
+        'description' => t('Numeric representation of the month (<em>without</em> leading zero)'),
+      ),
+      'F' => array(
+        'type' => t('String'),
+        'description' => t('Month name (full)'),
+      ),
+      'M' => array(
+        'type' => t('String'),
+        'description' => t('Month name (abbreviated)'),
+      ),
+    ),
+    t('Year') => array(
+      'Y' => array(
+        'type' => t('Number'),
+        'description' => t('Year (full)'),
+      ),
+      'y' => array(
+        'type' => t('Number'),
+        'description' => t('Year (abbreviated)'),
+      ),
+    ),
+    t('Time') => array(
+      'h' => array(
+        'type' => t('Number'),
+        'description' => t('Hour in 12-hour format (<em>with</em> leading zero)'),
+      ),
+      'H' => array(
+        'type' => t('Number'),
+        'description' => t('Hour in 24-hour format (<em>with</em> leading zero)'),
+      ),
+      'g' => array(
+        'type' => t('Number'),
+        'description' => t('Hour in 12-hour format (<em>without</em> leading zero)'),
+      ),
+      'G' => array(
+        'type' => t('Number'),
+        'description' => t('Hour in 24-hour format (<em>without</em> leading zero)'),
+      ),
+      'i' => array(
+        'type' => t('Number'),
+        'description' => t('Minute (<em>with</em> leading zero)'),
+      ),
+      's' => array(
+        'type' => t('Number'),
+        'description' => t('Second (<em>with</em> leading zero)'),
+      ),
+      'a' => array(
+        'type' => t('Suffix'),
+        'description' => t('Ante/post meridiem (lowercase)'),
+      ),
+      'A' => array(
+        'type' => t('Suffix'),
+        'description' => t('Ante/post meridiem (uppercase)'),
+      ),
+    ),
+    t('Timezone') => array(
+      'e' => array(
+        'type' => t('String'),
+        'description' => t('Timezone name'),
+      ),
+      'O' => array(
+        'type' => t('Number'),
+        'description' => t('Timezone offset from Greenwich time (GMT)'),
+      ),
+      'T' => array(
+        'type' => t('String'),
+        'description' => t('Timezone abbreviation (if known), otherwise offset from GMT'),
+      ),
+    ),
+  );
+
+  foreach ($codes as $heading => $code_group) {
+    // Add heading row.
+    $rows[] = array(array(
+      'data' => '<strong>' . $heading . '</strong>',
+      'colspan' => 4,
+    ));
+
+    // Add rows for individual PHP codes.
+    foreach ($code_group as $code => $code_info) {
+      $rows[] = array(
+        $code,
+        $code_info['type'],
+        $code_info['description'],
+        date($code),
+      );
+    }
+  }
+
+  return theme('table', array(
+    'header' => array(
+      array('data' => t('Code')),
+      array('data' => t('Type'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+      array('data' => t('Description')),
+      array('data' => t('Example'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    ),
+    'rows' => $rows,
+  ));
 }
 
 /**

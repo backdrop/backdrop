@@ -172,7 +172,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#type' => 'textfield',
     '#title' => t('Date format for log messages'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <em>PHP date/time codes</em> below for available options.'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
     '#ajax' => array(
@@ -199,6 +199,16 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   );
 
   $form['#submit'][] = 'dblog_logging_settings_submit';
+
+  $php_codes_details = '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Date format for log messages</em> field above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>';
+  $php_codes_details .= system_php_date_time_codes_table();
+  $form['php_codes'] = array(
+    '#type' => 'details',
+    '#summary' => t('PHP date/time codes'),
+    '#details' => $php_codes_details,
+    '#open' => TRUE,
+    '#weight' => 999,
+  );
 }
 
 /**

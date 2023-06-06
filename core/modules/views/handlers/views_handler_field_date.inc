@@ -49,8 +49,21 @@ class views_handler_field_date extends views_handler_field {
     $form['custom_date_format'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom date format'),
-      '#description' => t('If "Custom", see the <a href="@url" target="_blank">PHP manual</a> for available options. Otherwise, enter the number of different time units to display, which defaults to 2.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+      '#description' => t('If "Custom", see the <em>PHP date/time codes</em> below for available options. Otherwise, enter the number of different time units to display, which defaults to 2.'),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
+    );
+    form_load_include($form_state, 'inc', 'system', 'system.admin');
+    $php_codes_details = '<p>' . t('This is a list of common date/time PHP codes that you can use in the <em>Custom date format</em> field above. Please see <a href="https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters" target="_blank">PHP\'s manual</a> for the full range of options.') . '</p>';
+    $php_codes_details .= system_php_date_time_codes_table();
+    $form['php_codes'] = array(
+      '#type' => 'details',
+      '#summary' => t('PHP date/time codes'),
+      '#details' => $php_codes_details,
+      '#states' =>array(
+        'visible' => array(
+          ':input[name="options[date_format]"]' => array('value' => 'custom'),
+        ),
+      ),
     );
     $form['timezone'] = array(
       '#type' => 'select',
