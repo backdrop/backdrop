@@ -17,8 +17,8 @@ function theme_text_format_wrapper($variables) {
   $element = $variables['element'];
   $output = '<div class="text-format-wrapper">';
   $output .= $element['#children'];
-  if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . '</div>';
+  if (!empty($element['#description']) && $element['#description_display'] == 'after') {
+    $output .= theme('form_element_description', $variables);
   }
   $output .= "</div>\n";
 

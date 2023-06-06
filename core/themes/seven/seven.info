@@ -11,3 +11,8 @@ stylesheets[screen][] = css/responsive-tabs.css
 ckeditor_stylesheets[] = css/seven.base.css
 
 scripts[] = js/script.js
+
+settings[respect_explicit_description_display] = true
+settings[fieldsets_description_position] = before
+settings[radios_and_checkboxes_description_position] = after
+settings[default_description_position] = after

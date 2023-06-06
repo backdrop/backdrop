@@ -1857,11 +1857,46 @@ function form_builder($form_id, &$element, &$form_state) {
     $element += $info;
     $element['#defaults_loaded'] = TRUE;
   }
+
+  // Set the defaults for the position of the description/help text for various
+  // form elements, based on the current theme settings (if set).
+  // @todo: create helper function for this, so that we don't call
+  // theme_get_setting() for each element, and also use caching.
+  $respect_explicit_description_display = (theme_get_setting('respect_explicit_description_display') !== NULL) ? theme_get_setting('respect_explicit_description_display') : TRUE;
+  $fieldsets_description_position = (theme_get_setting('fieldsets_description_position') !== NULL) ? theme_get_setting('fieldsets_description_position') : 'before';
+  $radios_and_checkboxes_description_position = (theme_get_setting('radios_and_checkboxes_description_position') !== NULL) ? theme_get_setting('radios_and_checkboxes_description_position') : 'after';
+  $default_description_position = (theme_get_setting('default_description_position') !== NULL) ? theme_get_setting('default_description_position') : 'after';
+
+  $description_display = $default_description_position;
+  // If the '#description_display' property has been explicitly set for this
+  // element, and if not overridden by any theme settings, then respect it.
+  if (isset($element['#description_display']) && $respect_explicit_description_display) {
+    $description_display = $element['#description_display'];
+  }
+  elseif (isset($element['#type'])) {
+    switch ($element['#type']) {
+      case 'fieldset':
+        $description_display = $fieldsets_description_position;
+        break;
+
+      case 'radio':
+      case 'radios':
+      case 'checkbox':
+      case 'checkboxes':
+        $description_display = $radios_and_checkboxes_description_position;
+        break;
+
+      default:
+        $description_display = $default_description_position;
+    }
+  }
+
   // Assign basic defaults common for all form elements.
   $element += array(
     '#required' => FALSE,
     '#attributes' => array(),
     '#title_display' => 'before',
+    '#description_display' => $description_display,
   );
 
   // Special handling if we're on the top level form element.
@@ -2975,14 +3010,29 @@ function theme_fieldset($variables) {
     $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
   }
   $output .= '<div class="fieldset-wrapper">';
+
+  $description_before = '';
+  $description_after = '';
   if (!empty($element['#description'])) {
-    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+    $description = theme('form_element_description', $variables);
+
+    switch ($element['#description_display']) {
+      case 'before':
+      case 'invisible':
+        $description_before = $description;
+        break;
+
+      case 'after':
+        $description_after = $description;
+        break;
+    }
   }
-  $output .= $element['#children'];
+
+  $output .= $description_before . $element['#children'];
   if (isset($element['#value'])) {
     $output .= $element['#value'];
   }
-  $output .= '</div>';
+  $output .= $description_after . '</div>';
   $output .= "</fieldset>\n";
   return $output;
 }
@@ -4793,38 +4843,47 @@ function theme_file($variables) {
  *   $form structure and set via form_builder()).
  * - form-disabled: Only set if the form element is #disabled.
  *
- * In addition to the element itself, the DIV contains a label for the element
- * based on the optional #title_display property, and an optional #description.
- *
- * The optional #title_display property can have these values:
- * - before: The label is output before the element. This is the default.
- *   The label includes the #title and the required marker, if #required.
- * - after: The label is output after the element. For example, this is used
- *   for radio and checkbox #type elements as set in system_element_info().
- *   If the #title is empty but the field is #required, the label will
- *   contain only the required marker.
- * - invisible: Labels are critical for screen readers to enable them to
- *   properly navigate through forms but can be visually distracting. This
- *   property hides the label for everyone except screen readers.
- * - attribute: Set the title attribute on the element to create a tooltip
- *   but output no label element. This is supported only for checkboxes
- *   and radios in form_pre_render_conditional_form_element(). It is used
- *   where a visual label is not needed, such as a table of checkboxes where
- *   the row and column provide the context. The tooltip will include the
- *   title and required marker.
- *
- * If the #title property is not set, then the label and any required marker
- * will not be output, regardless of the #title_display or #required values.
- * This can be useful in cases such as the password_confirm element, which
- * creates children elements that have their own labels and required markers,
- * but the parent element should have neither. Use this carefully because a
- * field without an associated label can cause accessibility challenges.
+ * In addition to the element itself, the DIV contains:
+ * - a label (#title) for the element, which can be positioned relative to the
+ *   element using an optional #title_display property. The optional
+ *   #title_display property can have the following values:
+ *   - before (default): The label is output before the element. The label
+ *     includes the #title and the required marker (if #required is set to
+ *     TRUE).
+ *   - after: The label is output after the element. For example, this is used
+ *     for checkboxes and radios, as set in system_element_info(). If the #title
+ *     is empty but the field is #required, the label will contain only the
+ *     required marker.
+ *   - invisible: Labels are critical for screen readers to enable them to
+ *     properly navigate through forms, but they can be visually distracting.
+ *     This property hides the label for everyone except screen readers.
+ *   - attribute: Set the title attribute on the element to create a tooltip but
+ *     output no label element. This is supported only for checkboxes and radios
+ *     in form_pre_render_conditional_form_element(). It is used where a visual
+ *     label is not needed, such as a table of checkboxes where the row and
+ *     column provide the context. The tooltip will include the title and the
+ *     required marker.
+ *   If the #title property is not set, then the label and any required marker
+ *   will not be output, regardless of the #title_display or #required values.
+ *   This can be useful in cases such as the password_confirm element, which
+ *   creates children elements that have their own labels and required markers,
+ *   but the parent element should have neither. Use this carefully because a
+ *   field without an associated label can cause accessibility challenges.
+ * - an optional help text (#description), which can also be positioned relative
+ *   to the element using the optional #description_display property. The
+ *   optional #description_display property can have the following values:
+ *   - after (the default for all elements except for fieldset): The description
+ *     is output after the element.
+ *   - before (the default for fieldsets): The description is output before the
+ *     element, after the label (if not visually hidden).
+ *   - invisible: The description is output between the label and the main form
+ *     element, hidden visually but available to screen readers.
  *
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #title_display, #description, #id, #required,
- *     #children, #type, #name.
+ *     Properties used: #type, #name, #title, #title_display, #id, #required,
+ *     #description, #description_display, #children.
  *
  * @ingroup themeable
  */
@@ -4846,13 +4905,13 @@ function theme_form_element($variables) {
   // Add element's #type and #name as class to aid with JS/CSS selectors.
   $attributes['class'][] = 'form-item';
   if (!empty($element['#type'])) {
-    $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+    $attributes['class'][] = backdrop_html_class('form-type-' . $element['#type']);
     if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
       $attributes['class'][] = 'form-error';
     }
   }
   if (!empty($element['#name'])) {
-    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+    $attributes['class'][] = backdrop_html_class('form-item-' . $element['#name']);
   }
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
@@ -4870,33 +4929,51 @@ function theme_form_element($variables) {
   if (!isset($element['#title'])) {
     $element['#title_display'] = 'none';
   }
+
+  $description_before = '';
+  $description_after = '';
+  if (!empty($element['#description'])) {
+    $description = theme('form_element_description', $variables);
+
+    switch ($element['#description_display']) {
+      case 'before':
+      // It is preferable for screen readers if the help text is near/after the
+      // label of the element. So treat it the same as "before" when it comes to
+      // its placement in that case.
+      case 'invisible':
+        $description_before = $description;
+        break;
+
+      case 'after':
+        $description_after = $description;
+        break;
+    }
+  }
+
+  $label = theme('form_element_label', $variables);
+
   $prefix = isset($element['#field_prefix']) ? '<span class="field-prefix">' . $element['#field_prefix'] . '</span> ' : '';
   $suffix = isset($element['#field_suffix']) ? ' <span class="field-suffix">' . $element['#field_suffix'] . '</span>' : '';
+  $main_element =  $description_before . $prefix . $element['#children'] . $suffix;
 
   switch ($element['#title_display']) {
     case 'before':
     case 'invisible':
-      $output .= ' ' . theme('form_element_label', $variables);
-      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      $output .= ' ' . $label . ' ' . $main_element . "\n";
       break;
 
     case 'after':
-      $output .= ' ' . $prefix . $element['#children'] . $suffix;
-      $output .= ' ' . theme('form_element_label', $variables) . "\n";
+      $output .= ' ' . $main_element . ' ' . $label . "\n";
       break;
 
     case 'none':
     case 'attribute':
-      // Output no label and no required marker, only the children.
-      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      // Output no label and no required marker; only the children.
+      $output .= ' ' . $main_element . "\n";
       break;
   }
 
-  if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
-  }
-
-  $output .= "</div>\n";
+  $output .= $description_after . "</div>\n";
 
   return $output;
 }
@@ -4974,6 +5051,40 @@ function theme_form_element_label($variables) {
 
   // The leading whitespace helps visually separate fields from inline labels.
   return ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+}
+
+/**
+ * Returns HTML for a form element's help text (#description).
+ *
+ * Form element descriptions may appear before or after elements, depending on
+ * theme_form_element() and #description_display.
+ *
+ * This function will not be called for elements with no description.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *
+ * @since 1.26.0 theme function introduced.
+ *
+ * @ingroup themeable
+ */
+function theme_form_element_description($variables) {
+  $element = $variables['element'];
+  // This is also used in the installer, pre-database setup.
+  $t = get_t();
+
+  // If description is not set, output nothing.
+  if (!isset($element['#description'])) {
+    return '';
+  }
+
+  $attributes = array('class' => array('description'));
+  if (isset($element['#description_display']) && $element['#description_display'] === 'invisible') {
+    $attributes['class'][] = 'element-invisible';
+  }
+
+  return '<div' . backdrop_attributes($attributes) . '>' . $element['#description'] . "</div>\n";
 }
 
 /**
