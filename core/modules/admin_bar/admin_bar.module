@@ -260,8 +260,6 @@ function admin_bar_preprocess_page(&$variables) {
   if (path_is_admin($current_path)) {
     $settings['current_path_is_admin'] = TRUE;
   }
-  $alias = backdrop_get_path_alias($current_path, $language->langcode);
-  $settings['current_path'] = $alias;
 
   $components = $config->get('components');
   if (in_array('admin_bar.back_to_site_link', $components)) {
