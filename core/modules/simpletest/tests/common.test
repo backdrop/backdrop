@@ -898,7 +898,10 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
       ),
       'type' => 'external',
     ));
+
+    // Retrieve the rendered styles.
     $css = backdrop_get_css();
+
     $this->backdropSetContent($css);
     $this->assertTrue($this->xpath('//link[starts-with(@href, "' . file_create_url($css_internal) . '") and @custom="foo"]'), 'Rendered internal CSS with correct custom attribute.');
     $this->assertTrue($this->xpath('//link[@href="' . $css_external . '" and @custom="foo"]'), 'Rendered external CSS with correct custom attribute.');
@@ -1618,7 +1621,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests adding JavaScript files with additional attributes.
    */
-  public function testAttributes() {
+  public function testRenderScriptsAttributes() {
     // Disable aggregation.
     config_set('system.core', 'preprocess_js', 0);
     // Add internal and external JavaScript files that add the 'async' and
@@ -1695,7 +1698,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests that attributes are maintained when JS aggregation is enabled.
    */
-  public function testAggregatedAttributes() {
+  public function testRenderAggregatedScriptsAttributes() {
     // Enable aggregation.
     config_set('system.core', 'preprocess_js', TRUE);
     // Add internal and external JavaScript files that add the 'async' and
