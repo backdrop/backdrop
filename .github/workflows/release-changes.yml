@@ -1,0 +1,18 @@
+# Add labels to PRs when certain files are changed.
+# @see https://github.com/marketplace/actions/labeler
+
+name: Release Changes
+
+on:
+- pull_request_target
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Label PR
+      uses: actions/labeler@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        configuration-path: .github/release-changes.yml
+        sync-labels: true
