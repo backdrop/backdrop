@@ -4,5 +4,6 @@
         "url": "https://projects.backdropcms.org",
         "name": "Backdrop"
     },
-    "core_update": true
+    "core_update": true,
+    "download_location": "root"
 }

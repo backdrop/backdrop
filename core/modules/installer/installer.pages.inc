@@ -321,6 +321,21 @@ function installer_browser_installation_select_versions_form($form, &$form_state
 
   backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'https://backdropcms.org/backups'))), 'warning');
 
+  // Add an option for selecting the download location for multisites.
+  if (strpos(conf_path(), '/sites/') !== FALSE) {
+    $form['download_location'] = array(
+      '#type' => 'radios',
+      '#title' => format_plural(count($form['releases']), 'Where this project will be made available', 'Where these projects will be made available'),
+      '#options' => array(
+        'root' => t('All sites'),
+        'multisite' => t('This site only'),
+      ),
+      '#default_value' => config_get('installer.settings', 'download_location'),
+    );
+    $form['download_location']['root']['#description'] = t('Download project(s) inside the root/shared directory (e.g.: %path)', array('%path' => realpath(BACKDROP_ROOT) . '/modules/'));
+    $form['download_location']['multisite']['#description'] = t('Download project(s) inside the site-specific directory (e.g.: %path)', array('%path' => realpath(conf_path()) . '/modules/'));
+  }
+
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Perform updates with site in maintenance mode (strongly recommended)'),
@@ -430,6 +445,11 @@ function installer_browser_installation_select_versions_form_submit($form, &$for
   $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
   if ($form_state['values']['maintenance_mode'] == TRUE) {
     state_set('maintenance_mode', TRUE);
+  }
+
+  // Save the download location setting.
+  if (isset($form_state['values']['download_location'])) {
+    config_set('installer.settings', 'download_location', $form_state['values']['download_location']);
   }
 
   foreach ($form_state['values']['releases'] as $item) {
