@@ -4919,8 +4919,8 @@ function views_ui_default_button($element, &$form_state, $form) {
 function views_ui_field_list() {
   $views = views_get_all_views();
 
-  // Fetch all fieldapi fields which are used in views
-  // Therefore search in all views, displays and handler-types.
+  // Fetch all Field API fields which are used in views. Therefore search in all
+  // views, displays and handler-types.
   $fields = array();
   foreach ($views as $view) {
     foreach ($view->display as $display_id => $display) {
@@ -4930,7 +4930,7 @@ function views_ui_field_list() {
             $data = views_fetch_data($item['table']);
             if (isset($data[$item['field']]) && isset($data[$item['field']][$type])
               && $data = $data[$item['field']][$type]) {
-              // The final check that we have a fieldapi field now.
+              // The final check that we have a Field API field now.
               if (isset($data['field_name'])) {
                 $fields[$data['field_name']][$view->name] = $view->name;
               }

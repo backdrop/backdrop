@@ -50,17 +50,22 @@ function field_ui_fields_list() {
         }
 
         // Add the current instance.
-        $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
         $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
         $bundle_label = $bundles[$entity_type][$bundle]['label'];
+        // Where possible, provide links to the configuration pages for field
+        // instances and respective bundles.
+        $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
         if ($admin_path) {
           $bundle_manage_fields_link = $admin_path . '/fields';
+          $bundle_label = l($bundle_label, $bundle_manage_fields_link);
           $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
-          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
+          $field_label = l($field_label, $field_configure_link);
         }
-        else {
-          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
+        // Add a "required" indicator to required field instances.
+        if ($instances[$entity_type][$bundle][$field_name]['required']) {
+          $field_label .= ' <abbr class="form-required" title="' . t('This field instance is required.') . '">*</abbr>';
         }
+        $rows[$field_name]['data']['used_as'][] = t('!field in !bundle', array('!field' => $field_label, '!bundle' => $bundle_label));
 
       }
     }
@@ -318,6 +323,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'label' => array(
         '#markup' => theme('label_machine_name__node_fields__' . $bundle, array(
           'label' => $instance['label'],
+          'required' => $instance['required'],
         )),
       ),
       'weight' => array(
@@ -391,6 +397,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       'label' => array(
         '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
           'label' => $extra_field['label'],
+          'required' => isset($extra_field['required']) ? $extra_field['required'] : FALSE,
         )),
       ),
       'weight' => array(
@@ -430,7 +437,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
     );
   }
 
-  // Additional row: add new field.
+  // Additional "Add new field" row.
   $max_weight = field_info_max_weight($entity_type, $bundle, 'form');
   $field_type_options = field_ui_field_type_options();
   $widget_type_options = field_ui_widget_type_options(NULL, TRUE);
@@ -516,7 +523,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#cell_attributes' => array('colspan' => 3),
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
-      // Place the 'translatable' property as an explicit value so that contrib
+      // Place the 'translatable' property as an explicit value, so that contrib
       // modules can form_alter() the value for newly created fields.
       'translatable' => array(
         '#type' => 'value',
@@ -525,7 +532,7 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
     );
   }
 
-  // Additional row: add existing field.
+  // Additional "Add existing field" row.
   $existing_fields = field_ui_existing_field_options($entity_type, $bundle);
   if ($existing_fields && $widget_type_options) {
     // Build list of options.
@@ -1018,10 +1025,13 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     'hidden' => t('Hidden'),
   );
 
+  $required_indicator = ' <abbr class="form-required" title="' . t('This field is required.') . '">*</abbr>';
+
   // Field rows.
   foreach ($instances as $name => $instance) {
     $field = field_info_field($instance['field_name']);
     $display = $instance['display'][$view_mode];
+    $required = $instance['required'] ? $required_indicator : '';
     $table[$name] = array(
       '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
       '#row_type' => 'field',
@@ -1031,7 +1041,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
         'defaultFormatter' => $field_types[$field['type']]['default_formatter'],
       ),
       'human_name' => array(
-        '#markup' => check_plain($instance['label']),
+        '#markup' => check_plain($instance['label']) . $required,
       ),
       'weight' => array(
         '#type' => 'textfield',

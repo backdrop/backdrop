@@ -612,6 +612,10 @@ function node_field_extra_fields() {
         'label' => $type->title_label,
         'description' => $description,
         'weight' => -5,
+        // The title field is always required for nodes. This is used in
+        // field_ui_field_overview_form() to provide a "required" indicator (red
+        // asterisk).
+        'required' => TRUE,
       );
     }
 
