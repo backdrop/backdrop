@@ -529,7 +529,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  */
 function user_cancel_methods() {
   $site_config = config('system.core');
-  $anonymous_name = $site_config->get('anonymous');
+  $anonymous_name = config_get('user.role.anonymous', 'label');
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content.'),
