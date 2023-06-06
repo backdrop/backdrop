@@ -17,7 +17,7 @@
  * @deprecated since 1.3.0
  */
 function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
-  if (theme_get_setting('color_legacy', 'bartik')) {
+  if (theme_settings_get('color_legacy', NULL, 'bartik')) {
     $form['color']['scheme']['#default_value'] = 'blue_lagoon';
     $palette = $form['color']['info']['#value']['schemes']['blue_lagoon']['colors'];
     foreach ($palette as $key => $color) {

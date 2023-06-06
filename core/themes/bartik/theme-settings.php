@@ -18,6 +18,6 @@ $form['tabs_wrapper']['main_menu_tabs'] = array(
     'rounded-tabs' => t('Rounded tabs'),
     'square-tabs' => t('Square tabs'),
   ),
-  '#default_value' => theme_get_setting('main_menu_tabs', 'bartik'),
+  '#default_value' => theme_settings_get('main_menu_tabs', 'no-tabs', 'bartik'),
   '#description' => t('When rounded or square tabs are selected, menu link color is overridden and set to #333 for better visibility.'),
 );

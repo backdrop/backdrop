@@ -1743,12 +1743,21 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     theme_enable(array('test_theme'));
 
     // Test that the theme-specific settings form can be saved and that the
-    // theme-specific checkbox is checked and unchecked as appropriate.
+    // theme-specific checkboxes are checked and unchecked as appropriate.
     $this->backdropGet('admin/appearance/settings/test_theme');
     $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
+    // Test that when the form is loaded, the #default_value is set
+    // appropriately for fields with default values set via the optional
+    // $default parameter in theme_settings_get(), when at the same time there
+    // are no respective defaults explicitly set via settings[] in the .info
+    // file.
+    $this->assertFieldChecked('edit-test-theme-checkbox-default-value-true', 'The test_theme_checkbox_default_value_true setting is checked.');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox-default-value-false', 'The test_theme_checkbox_default_value_false setting is unchecked.');
+    // Untick the test_theme_checkbox and save the form.
     $this->backdropPost(NULL, array('test_theme_checkbox' => TRUE), t('Save theme settings'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is checked.');
+    // Tick the test_theme_checkbox and save the form.
     $this->backdropPost(NULL, array('test_theme_checkbox' => FALSE), t('Save theme settings'));
     $this->assertText('The configuration options have been saved.');
     $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
