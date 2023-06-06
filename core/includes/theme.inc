@@ -1914,7 +1914,10 @@ function theme_links($variables) {
 
       $class = array();
       // Use the array key as class name.
-      $class[] = backdrop_html_class($key);
+      $key_class = backdrop_html_class($key);
+      if ($key_class != '_') {
+        $class[] = $key_class;
+      }
       // Add odd/even, first, and last classes.
       $class[] = ($i % 2 ? 'odd' : 'even');
       if ($i == 1) {
