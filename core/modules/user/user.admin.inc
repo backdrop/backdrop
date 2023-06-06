@@ -380,15 +380,15 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      '0' => t('User ID and IP address combination'),
-      '1' => t('User ID only'),
+      FALSE => t('User ID and IP address combination'),
+      TRUE => t('User ID only'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
     FALSE => array(
-      '#description' => ' Less secure, less likely to lock out users.',
+      '#description' => t('Less secure, less likely to lock out users.'),
     ),
     TRUE => array(
-      '#description' => 'More secure, more likely to lock out users.',
+      '#description' => t('More secure, more likely to lock out users.'),
     ),
   );
 
