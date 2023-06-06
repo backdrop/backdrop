@@ -351,7 +351,7 @@ function path_patterns_form($form, $form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('URL patterns automatically alias new content based on wildcards called <em>tokens</em>. For example the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code> using the pattern <code>blog/[node:title]</code>.'),
+    '#markup' => t('Your site can have URLs generated automatically based on wildcards called <em>tokens</em> or <em>URL aliases</em> can be defined manually in the UI. For automatic generation of URL aliases, define <em>URL alias patterns</em> for each type of content below.'),
   );
 
   $all_path_info = path_get_info();
