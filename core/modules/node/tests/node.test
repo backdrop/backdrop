@@ -1983,7 +1983,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
     $this->assertEqual($config->get('settings.hidden_path'), '0', 'The new content type has hidden_path disabled.');
 
-    // Add a node of type foo; make sure we can visit it with 200 response..
+    // Add a node of type foo; make sure we can visit it with 200 response.
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
 
@@ -2100,7 +2100,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     ));
     $this->backdropLogin($admin_user);
 
-    // Create new role
+    // Create new role.
     $role_name = $this->backdropCreateRole(array('access content'));
     $web_user = $this->backdropCreateUser();
 
@@ -2145,6 +2145,70 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $account = user_load($web_user->uid, TRUE);
     $this->assertTrue(user_access('edit own page content', $account), "Web user has edit own page content permission.");
     $this->assertTrue(user_access('edit any page content', $account), "Web user has edit any page content permission.");
+  }
+
+  /**
+   * Tests that node type permissions are removed from user role config files
+   * when the node type is deleted.
+   */
+  function testNodeTypeRemovePermissions() {
+    // Create admin user.
+    $admin_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer permissions',
+    ));
+    // Get the name of the role assigned to the newly-created admin user, and
+    // make it the default admin role for the site (all new permissions are
+    // automatically assigned to it).
+    $admin_role = reset($admin_user->roles);
+    config_set('system.core', 'user_admin_role', $admin_role);
+
+    $this->backdropLogin($admin_user);
+
+    // Create a new content type via the user interface.
+    $name = strtolower($this->randomName(8));
+    $edit = array(
+      'name' => $name,
+      'title_label' => "Title for $name",
+      'type' => $name,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    node_type_cache_reset();
+    // At this point, all permissions relevant to the newly-created content type
+    // should have been automatically assigned to the default site admin role.
+
+    // Create a new role, and grant permissions to it for all actions available
+    // for the newly-created content type.
+    $node_type_permissions = array_keys(node_list_permissions($name));
+    $regular_role = $this->backdropCreateRole($node_type_permissions, NULL, TRUE);
+
+    $roles = array(
+      'admin role' => $admin_role,
+      'regular role' => $regular_role,
+    );
+
+    // Get the permissions array within each role config file, and confirm that
+    // all permissions relevant to the new content type exist in the array.
+    foreach ($roles as $role_type => $role) {
+      $permissions = config_get('user.role.' . $role, 'permissions') != NULL ? config_get('user.role.' . $role, 'permissions') : array();
+      foreach ($node_type_permissions as $permission) {
+        $this->assertTrue(in_array($permission, $permissions), "Permission '$permission' exists in the config file of the $role_type.");
+      }
+    }
+
+    // Delete the content type via the user interface.
+    $this->backdropPost('admin/structure/types/manage/'  . $name . '/delete', array(), t('Delete'));
+    $this->backdropGet('admin/structure/types');
+    $this->assertNoText($name, "Content type $name is no longer found on admin/structure/types.");
+
+    // Get the permissions array again, and confirm that all permissions
+    // relevant to the deleted content type have been removed from it.
+    foreach ($roles as $role_type => $role) {
+      $permissions = config_get('user.role.' . $role, 'permissions') != NULL ? config_get('user.role.' . $role, 'permissions') : array();
+      foreach ($node_type_permissions as $permission) {
+        $this->assertFalse(in_array($permission, $permissions), "Permission '$permission' removed from the config file of the $role_type.");
+      }
+    }
   }
 
   /**
