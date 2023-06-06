@@ -2330,10 +2330,12 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
    * converting the array to a string upon submission of a form that contains
    * them.
    */
-  public function testDisabledH5DateOrTimeElement() {
-    $values = backdrop_json_decode($this->backdropPost('form-test/disabled-h5date-h5time', array(), 'Submit'));
+  public function testNoAccessH5DateOrTimeElement() {
+    $values = backdrop_json_decode($this->backdropPost('form-test/no-access-h5date-h5time', array(), 'Submit'));
     // If the value callback html_date_or_time_value_callback() did its job
     // correctly, we'll get strings.
+    $this->assertEqual($values['no_access_h5date'], '2023-01-01', 'Correct no_access_h5date value');
+    $this->assertEqual($values['no_access_h5time'], '20:30', 'Correct no_access_h5time value');
     $this->assertEqual($values['disabled_h5date'], '2023-01-01', 'Correct disabled_h5date value');
     $this->assertEqual($values['disabled_h5time'], '20:30', 'Correct disabled_h5time value');
   }
