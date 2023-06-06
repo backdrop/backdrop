@@ -213,6 +213,10 @@ function theme_user_admin_roles($variables) {
   $header = array(
     array('data' => t('Name'), 'class' => array('role-name')),
     array(
+      'data' => t('Special functionality'),
+      'class' => array('role-special', 'priority-low'),
+    ),
+    array(
       'data' => t('Description'),
       'class' => array('role-description', 'priority-low'),
     ),
@@ -221,8 +225,13 @@ function theme_user_admin_roles($variables) {
   );
   foreach (element_children($form['roles']) as $role_name) {
     $label = $form['roles'][$role_name]['#role']->label;
-    if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $label .= ' ' . t('(required)');
+
+    $special = '';
+    if ($form['roles'][$role_name]['#role']->required_role) {
+      $special = t('required');
+    }
+    if (!empty($form['roles'][$role_name]['#role']->default_roles)) {
+      $special = implode(', ', $form['roles'][$role_name]['#role']->default_roles);
     }
 
     $row = array();
@@ -232,6 +241,9 @@ function theme_user_admin_roles($variables) {
         'machine_name' => $form['roles'][$role_name]['#role']->name,
       )),
       'class' => array('role-name'),
+    );
+    $row[] = array(
+      'data' => $special,
     );
     $row[] = array(
       'data' => filter_xss_admin($form['roles'][$role_name]['#role']->description),
