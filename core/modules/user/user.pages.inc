@@ -227,11 +227,14 @@ function user_pass_reset_form($form, &$form_state, $account) {
     $description = _user_password_policy_help();
   }
   $form['message'] = array(
-    '#markup' => t('<p>Please enter a new password to access your account.</p>'),
+    '#markup' => '<p>' . t('Please enter a new password to access your account.') . '</p>',
   );
   $form['pass'] = array(
-    '#type' => 'password_confirm',
+    '#type' => 'password',
+    '#title' => t('New password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
     '#description' => $description,
   );
   $form['actions'] = array(
