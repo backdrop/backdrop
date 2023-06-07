@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Filter module.
@@ -40,9 +39,9 @@
  * For performance reasons content is only filtered once; the result is stored
  * in the cache table and retrieved from the cache the next time the same piece
  * of content is displayed. If a filter's output is dynamic, it can override the
- * cache mechanism, but obviously this should be used with caution: having one
- * filter that does not support caching in a particular text format disables
- * caching for the entire format, not just for one filter.
+ * cache mechanism, but this should be used with caution: having one filter that
+ * does not support caching in a particular text format disables caching for the
+ * entire format, not just for one filter.
  *
  * Beware of the filter cache when developing your module: it is advised to set
  * your filter to 'cache' => FALSE while developing, but be sure to remove that
@@ -114,9 +113,8 @@ function hook_filter_info() {
  *   implementations.
  */
 function hook_filter_info_alter(&$info) {
-  // Replace the PHP evaluator process callback with an improved
-  // PHP evaluator provided by a module.
-  $info['php_code']['process callback'] = 'my_module_php_evaluator';
+  // Replace the image caption process callback with an improved custom version.
+  $info['filter_image_caption']['process callback'] = 'my_module_custom_caption';
 
   // Alter the default settings of the URL filter provided by core.
   $info['filter_url']['default settings'] = array(
@@ -136,28 +134,32 @@ function hook_filter_info_alter(&$info) {
  *   which should be unique and therefore prefixed with the name of the module.
  *   Each value is an associative array describing the editor, with the
  *   following elements (all are optional except as noted):
- *   - title: (required) A human readable name for the editor.
+ *   - label: (required) A human readable name for the editor.
  *   - settings callback: The name of a function that returns configuration
  *     form elements for the editor. See hook_editor_EDITOR_settings() for
  *     details.
  *   - default settings: An associative array containing default settings for
  *     the editor, to be applied when the editor has not been configured yet.
+ *   - file: The name of a file containing the editor settings callback.
+ *   - library: An associative array containing an optional library.
  *   - js settings callback: The name of a function that returns configuration
  *     options that should be added to the page via JavaScript for use on the
  *     client side. See hook_editor_EDITOR_js_settings() for details.
  *
- * @see filter_example.module
- * @see hook_filter_info_alter()
+ * @see ckeditor.module
+ * @see hook_editor_info_alter()
  */
 function hook_editor_info() {
   $editors['myeditor'] = array(
-    'title' => t('My Editor'),
+    'label' => t('My Editor'),
     'settings callback' => '_myeditor_settings',
     'default settings' => array(
       'enable_toolbar' => TRUE,
       'toolbar_buttons' => array('bold', 'italic', 'underline', 'link', 'image'),
       'resizeable' => TRUE,
     ),
+    'file' => 'myeditor.admin.inc',
+    'library' => array('mymodule', 'myeditor'),
     'js settings callback' => '_myeditor_js_settings',
   );
   return $editors;
@@ -171,7 +173,7 @@ function hook_editor_info() {
  *   implementations.
  */
 function hook_editor_info_alter(&$editors) {
-  $editors['some_other_editor']['title'] = t('A different name');
+  $editors['some_other_editor']['label'] = t('A different name');
 }
 
 /**
@@ -440,7 +442,7 @@ function callback_filter_allowed_html($filter, $format) {
  */
 function callback_filter_tips($filter, $format, $long) {
  if ($long) {
-    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized simply add a couple blank lines.');
+    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized, add a couple blank lines.');
   }
   else {
     return t('Lines and paragraphs break automatically.');

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the locale module.
@@ -54,6 +53,19 @@ function locale_enable() {
 
   locale_language_negotiation_url_prefixes_save($prefixes);
   locale_language_negotiation_url_domains_save($domains);
+
+  // When enabling locale go through all config files and add translatables.
+  $active_storage = config_get_config_storage('active');
+  $names = $active_storage->listAll();
+
+  foreach ($names as $name) {
+    $config = config($name);
+    if ($config->get('_config_translatables') !== NULL) {
+      foreach ($config->get('_config_translatables') as $translatable) {
+        $translation = locale($config->get($translatable), 'config:' . $name . ':' . $translatable);
+      }
+    }
+  }
 }
 
 /**
@@ -264,7 +276,16 @@ function locale_update_1003() {
   $config->set('_config_static', true);
 
   $config->set('language_negotiation_session_parameter', update_variable_get('locale_language_negotiation_session_param', 'language'));
-  $config->set('language_negotiation_url_part', update_variable_get('locale_language_negotiation_url_part', 'path_prefix'));
+  // Defined constants for locale_language_negotiation_url_part have changed in Backdrop.
+  // (LOCALE_)LANGUAGE_NEGOTIATION_URL_PREFIX: 0 -> 'path_prefix'.
+  // (LOCALE_)LANGUAGE_NEGOTIATION_URL_DOMAIN: 1 -> 'domain'.
+  $negotiation_url = update_variable_get('locale_language_negotiation_url_part', 'path_prefix');
+  if ($negotiation_url === 1) {
+    $config->set('language_negotiation_url_part', 'domain');
+  }
+  else {
+    $config->set('language_negotiation_url_part', 'path_prefix');
+  }
 
   // Ensure defaults are set for all enabled languages.
   $languages = db_query('SELECT * FROM {language} ORDER BY weight ASC, name ASC')->fetchAllAssoc('langcode');

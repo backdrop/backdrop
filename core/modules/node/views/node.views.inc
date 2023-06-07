@@ -172,7 +172,22 @@ function node_views_data() {
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Published'),
       'type' => 'yes-no',
-      'use equal' => TRUE, // Use status = 1 instead of status <> 0 in WHERE statment
+      // Use status = 1 instead of status <> 0 in WHERE statement.
+      'use equal' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // hidden path
+  $data['node']['hidden_path'] = array(
+    'title' => t('Hidden path'),
+    'help' => t('Whether or not the content has a hidden path.'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_node_hidden_path',
+      'label' => t('Paths are hidden'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -734,6 +749,10 @@ function node_row_node_view_preprocess_node(&$variables) {
   // Prevent the comment form from showing up if this is not a page display.
   if ($variables['view_mode'] == 'full' && !$variables['view']->display_handler->has_path()) {
     $node->comment = FALSE;
+  }
+
+  if (!$options['title']) {
+    unset($variables['title']);
   }
 
   if (!$options['links']) {

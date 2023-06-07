@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains a search filter handler.
@@ -97,7 +96,8 @@ class views_handler_filter_search extends views_handler_filter {
   }
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
@@ -145,12 +145,12 @@ class views_handler_filter_search extends views_handler_filter {
       $search_condition = db_and();
 
       if (!$this->options['remove_score']) {
-        // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
+        // Create a new join to relate the 'search_total' table to our current 'search_index' table.
         $join = new views_join;
         $join->construct('search_total', $search_index, 'word', 'word');
         $search_total = $this->query->add_relationship('search_total', $join, $search_index);
 
-        $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
+        $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
       }
 
       if (empty($this->query->relationships[$this->relationship])) {
@@ -192,43 +192,5 @@ class views_handler_filter_search extends views_handler_filter {
     }
     // Set to NULL to prevent PDO exception when views object is cached.
     $this->search_query = NULL;
-  }
-}
-
-/**
- * Extends the core SearchQuery.
- */
-class viewsSearchQuery extends SearchQuery {
-  public function &conditions() {
-    return $this->conditions;
-  }
-  public function words() {
-    return $this->words;
-  }
-
-  public function simple() {
-    return $this->simple;
-  }
-
-  public function matches() {
-    return $this->matches;
-  }
-
-  public function publicParseSearchExpression() {
-    return $this->parseSearchExpression();
-  }
-
-  function condition_replace_string($search, $replace, &$condition) {
-    if ($condition['field'] instanceof DatabaseCondition) {
-      $conditions =& $condition['field']->conditions();
-      foreach ($conditions as $key => &$subcondition) {
-        if (is_numeric($key)) {
-          $this->condition_replace_string($search, $replace, $subcondition);
-        }
-      }
-    }
-    else {
-      $condition['field'] = str_replace($search, $replace, $condition['field']);
-    }
   }
 }

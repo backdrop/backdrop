@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the comment RSS row style plugin.
@@ -107,7 +106,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
       ),
       array(
         'key' => 'dc:creator',
-        'value' => $comment->name,
+        'value' => user_format_name($comment),
       ),
       array(
         'key' => 'guid',

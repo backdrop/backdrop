@@ -20,7 +20,7 @@ function installer_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   installer_browser_check_zip_loaded();
 
-  // Show link to enable page if recently installed modules were not yet 
+  // Show link to enable page if recently installed modules were not yet
   // enabled.
   $recent_projects = installer_browser_get_installed_projects();
   foreach ($recent_projects as $project) {
@@ -31,7 +31,7 @@ function installer_browser_page($type) {
 
   switch($type) {
     case 'layout':
-      backdrop_set_title(t('Install layouts'));
+      backdrop_set_title(t('Install layout templates'));
       break;
     case 'module':
       backdrop_set_title(t('Install modules'));
@@ -263,11 +263,9 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
         $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
+      $releases_list[$version] = $release_title;
       if (isset($release['release_link'])) {
-        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank')));
-      }
-      else {
-        $releases_list[$version] = $release_title;
+        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
       }
     }
 
@@ -304,7 +302,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
     if (count($releases_list) > 1) {
       $form['releases'][$project['name']]['selected_text']['#markup'] .=
-        ' (<a class="installer-browser-show-releases-link js-only" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
+        ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
     }
 
     // Update the project type based on the type of projects being selected.
@@ -313,13 +311,15 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
   }
 
+  ksort($form['releases']);
+
   // If there is nothing to install, go to the enable page.
   if (empty($form['releases'])) {
     backdrop_set_message(t('No releases data found for any of the selected projects.'), 'warning');
     backdrop_goto('admin/installer/install/enable');
   }
 
-  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))), 'warning');
+  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'https://backdropcms.org/backups'))), 'warning');
 
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
@@ -592,7 +592,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
       '#submit' => array('installer_browser_installation_theme_finish'),
     );
   }
-  
+
   return $form;
 }
 
@@ -645,6 +645,32 @@ function installer_browser_installation_theme_set($form, &$form_state) {
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
 
+  // Go through each of the installed projects and add any contained submodules
+  // that are not hidden to the list of projects.
+  foreach ($projects as $project) {
+    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
+      foreach ($modules as $module) {
+        // Ignore stand-alone and hidden modules.
+        if (!isset($module->info['project']) || !isset($modules[$project['name']]->info['project']) || !empty($module->info['hidden'])) {
+          continue;
+        }
+        // The "type" key is required. Skip over any (sub)module not specifying
+        // it in its .info file.
+        if (!isset($module->info['type'])) {
+          continue;
+        }
+        // Collect information about sub-modules.
+        if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name) {
+          $projects[$module->name] = array(
+            'type' => $module->info['type'],
+            'title' => $module->info['name'],
+            'name' => $module->name,
+          );
+        }
+      }
+    }
+  }
+
   $options = array();
   $missing = array();
 
@@ -662,27 +688,33 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
               $dependencies[] = $dependency_name . ' (' . t('Requires version @version', array('@version' => $dependency_version_string)) . ')';
             }
             else {
-              $dependencies[] = $modules[$dependency_name]->info['name'] . ' (' . t('Installed') . ')';
+              $dependencies[] = $modules[$dependency_name]->info['name'] . ' (<span class="admin-enabled">' . t('installed') . '</span>)';
             }
           }
           else {
             $dependency_check = FALSE;
-            $dependencies[] = $dependency_name . ' (' . t('Missing') . ')';
+            $dependencies[] = $dependency_name . ' (<span class="admin-missing">' . t('missing') . '</span>)';
           }
         }
-        if ($dependency_check) {
-          $options[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
-        }
-        else {
-          $missing[$project['name']] = array(
-            array('data' => $modules[$project['name']]->info['name']),
-            array('data' => $modules[$project['name']]->info['version']),
-            array('data' => implode(', ', $dependencies)),
-          );
+        // Build the list of options, but only include (sub)modules that are not
+        // hidden. This check also helps with the rare case where the main
+        // module within a project needs to be hidden, and submodules enabled
+        // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
+        if (empty($modules[$project['name']]->info['hidden'])) {
+          if ($dependency_check) {
+            $options[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
+          else {
+            $missing[$project['name']] = array(
+              array('data' => $modules[$project['name']]->info['name']),
+              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => implode(', ', $dependencies)),
+            );
+          }
         }
       }
       else {
@@ -698,30 +730,48 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     array('data' => t('Dependencies'), 'class' => array('priority-low')),
   );
 
-  if (!empty($options) || !empty($missing)) {
+  $all_options = array_merge($options, $missing);
+  ksort($all_options);
+
+  if (!empty($all_options)) {
     $form['module_instructions'] = array(
       '#type' => 'item',
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
-    if (!empty($options)) {
-      $form['modules'] = array(
-        '#type' => 'tableselect',
-        '#title' => t('Enable modules'),
-        '#description' => t('Select which modules you would like to enable.'),
-        '#header' => $headers,
-        '#options' => $options,
-        '#empty' => t('No new modules installed.'),
-        '#multiple' => TRUE,
-        '#js_select' => TRUE,
-        '#weight' => 1,
-      );
+    $form['modules'] = array(
+      '#type' => 'tableselect',
+      '#title' => t('Enable modules'),
+      '#description' => t('Select which modules you would like to enable.'),
+      '#header' => $headers,
+      '#options' => $all_options,
+      '#empty' => t('No new modules installed.'),
+      '#multiple' => TRUE,
+      '#js_select' => TRUE,
+      '#weight' => 1,
+    );
 
+    // Disable the checkboxes of any module that has unmet dependencies.
+    foreach ($all_options as $key => $value) {
+      if (in_array($key, array_keys($missing))) {
+        $form['modules'][$key]['#disabled'] = TRUE;
+      }
+    }
+
+    // Show the "Enable modules" button only if there are modules that can be
+    // enabled (at least one module without any missing dependencies).
+    if (!empty($options)) {
       $form['actions'] = array('#type' => 'actions');
       $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#submit' => array('installer_browser_installation_enable_form_submit'),
         '#value' => t('Enable modules'),
       );
+    }
+
+    // If there is at least one module in the list (even one that cannot be
+    // enabled due to unmet dependencies), then show the "Finish without
+    // enabling" link.
+    if (!empty($all_options)) {
       $form['actions']['cancel'] = array(
         '#type' => 'link',
         '#name' => 'cancel',
@@ -731,22 +781,10 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       );
     }
 
+    // If there is at least one module with unmet dependencies, then show a
+    // warning to explain why these modules in the list have no checkboxes.
     if (!empty($missing)) {
-      $form['actions'] = array('#type' => 'actions');
-      $form['actions']['cancel'] = array(
-        '#type' => 'link',
-        '#name' => 'cancel',
-        '#title' => t('Cancel'),
-        '#href' => 'admin/installer/reset/module/all',
-        '#options' => array(),
-      );
-      $form['missing'] = array(
-        '#type' => 'item',
-        '#title' => t('Missing Dependencies'),
-        '#description' => t('These modules are missing one or more dependencies and cannot be enabled.'),
-        '#markup' => theme('table', array('header' => $headers, 'rows' => $missing)),
-        '#weight' => 2,
-      );
+      backdrop_set_message(t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'), 'warning');
     }
   }
 
@@ -910,7 +948,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  * @param $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
- * return array
+ * @return array
  *   An array of all sort methods, keyed by method name, with each value an
  *   array with the following keys:
  *   - method: Same as the method name key.
@@ -919,7 +957,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'label' => t('Relevancy'), 'default_sort' => 'desc'),
+    'score' => array('method' => 'score', 'label' => t('Relevance'), 'default_sort' => 'desc'),
     'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
     'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
     'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),
@@ -985,13 +1023,11 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
         backdrop_set_message(t('Error: The project was not found.'), 'error');
       }
       break;
-
     case 'remove':
       installer_browser_install_queue_remove($project_name);
       break;
-
     default:
-      return MENU_NOT_FOUND;    
+      return MENU_NOT_FOUND;
   }
 
   if ($method === 'ajax') {

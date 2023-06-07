@@ -13,7 +13,7 @@ function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Operations'));
+  $header = array(t('Name'), t('Description'), t('Operations'));
   $rows = array();
 
   // Sort the list of content types by label instead of machine name.
@@ -22,7 +22,12 @@ function node_overview_types() {
   foreach ($names as $key => $name) {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
-    $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $row = array(theme('label_machine_name__node_type', array(
+      'label' => $name,
+      'machine_name' => $type->type,
+    )));
+    $row[] = filter_xss_admin($type->description);
+    $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => 'admin/structure/types/manage/' . $type_url_str,
@@ -125,6 +130,92 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#description' => t('Describe this content type. The text will be displayed on the <em>Add content</em> page.'),
   );
 
+  // Prepare various messages about automatic permission assignment, and
+  // warnings if no role is configured to create/edit/delete content of this
+  // type.
+  $system_config = config('system.core');
+  // Prepare the array with the human-readable labels of any roles that are have
+  // been configured in the "Default roles" section in
+  // admin/config/people/roles. This array is used by format_plural() later.
+  $default_admin_role = $system_config->get('user_admin_role');
+  $default_editor_role = $system_config->get('user_editor_role');
+  $auto_permission_roles = array();
+  if ($default_admin_role && $admin_role = user_role_load($default_admin_role)) {
+    $auto_permission_roles['%admin'] = $admin_role->label;
+  }
+  if ($default_editor_role && $editor_role = user_role_load($default_editor_role)) {
+    $auto_permission_roles['%editor'] = $editor_role->label;
+  }
+  // Handle the case where the same role has been configured to be both the
+  // default admin as well as the default editor.
+  $auto_permission_roles = array_unique($auto_permission_roles);
+  // Prepare the $auto_permission_roles array for format_plural() when there's
+  // only one role.
+  if (count($auto_permission_roles) == 1) {
+    $one_role = reset($auto_permission_roles);
+    unset($auto_permission_roles);
+    $auto_permission_roles['%role'] = $one_role;
+  }
+
+  $permissions_assigned = FALSE;
+  $content_type_permissions = node_type_form_permissions($type->type);
+  foreach ($content_type_permissions['checkboxes'] as $role => $checkboxes) {
+    if (!empty($checkboxes['#default_value'])) {
+      // At least one permission related to this content type is assigned to at
+      // least one role.
+      $permissions_assigned = TRUE;
+      break;
+    }
+  }
+
+  // Edge case, where both the default admin role and the default content editor
+  // role have been disabled in in admin/config/people/roles, while at the same
+  // time no other role has been granted any permission associated with this
+  // content type. We show this warning for both new and existing content types.
+  if (!$permissions_assigned) {
+    $permissions_message = t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.');
+    $permissions_message_type = 'warning';
+  }
+  // Show some info messages if automatic permission assignment is enabled for
+  // at least one of the default admin/editor roles. We only show these when
+  // creating a new content type.
+  if (!empty($auto_permission_roles) && empty($type->type)) {
+    $permissions_message = format_plural(
+      count($auto_permission_roles),
+      'The %role role has been assigned permissions to create, edit, and delete content of this type.',
+      'The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.',
+      $auto_permission_roles
+    );
+    $permissions_message_type = 'info';
+  }
+
+  if (isset($permissions_message)) {
+    if (user_access('administer permissions')) {
+      $permissions_message .= ' ' . t('You can make any necessary adjustments in the <em>Permissions</em> tab below.');
+    }
+    else {
+      $user_module_permissions = module_invoke('user', 'permission');
+      $permissions_message .= ' ' . t('Only roles with the %permission permission can make any necessary adjustments.', array('%permission' => $user_module_permissions['administer permissions']['title']));
+    }
+
+    // We are mimicking the style of a warning/info message here. If we used
+    // backdrop_set_message(), the message would be placed at the top of the
+    // page, which would make it unnecessarily prominent and potentially
+    // distracting. We are placing it right above the vertical tabs section
+    // instead (closer to where permissions can be configured). Intentionally
+    // not placing it inside the "Permissions" tab either, since that is not the
+    // default tab, so it wouldn't be visible, and we need to show some warnings
+    // to people even if they don't have access to the "Permissions" tab.
+    $form['permissions_message_container'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+    );
+    $form['permissions_message_container']['message'] = array(
+      '#type' => 'markup',
+      '#markup' => $permissions_message,
+    );
+  }
+
   $form['additional_settings'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
@@ -132,12 +223,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     ),
   );
 
+  // Submission form settings.
   $form['submission'] = array(
     '#type' => 'fieldset',
     '#title' => t('Submission form settings'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -10,
+    '#weight' => -15,
   );
   $form['submission']['title_label'] = array(
     '#title' => t('Title field label'),
@@ -158,55 +250,57 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->help,
     '#description' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
+  $form['submission']['node_preview'] = array(
+    '#type' => 'radios',
+    '#title' => t('Preview before submitting'),
+    '#default_value' => $type->settings['node_preview'],
+    '#options' => array(
+      BACKDROP_DISABLED => t('Disabled'),
+      BACKDROP_OPTIONAL => t('Optional'),
+    ),
+  );
+
+  // Publishing settings.
   $form['workflow'] = array(
     '#type' => 'fieldset',
     '#title' => t('Publishing settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -5,
+    '#weight' => -10,
   );
-  $form['workflow']['status_default'] = array(
-    '#type' => 'radios',
-    '#title' => t('Default status'),
-    '#options' => array(
-      NODE_PUBLISHED => t('Published'),
-      NODE_NOT_PUBLISHED => t('Draft'),
-      NODE_SCHEDULED => t('Schedule for later'),
-    ),
-    '#default_value' => $type->settings['status_default'],
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
-    '#required' => TRUE,
-  );
-  $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
-    'visible' => array(
-      'input[name="scheduling_enabled"]' => array('checked' => TRUE),
-    ),
-  );
-
   $form['workflow']['scheduling_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show option for scheduling'),
     '#default_value' => $type->settings['scheduling_enabled'],
   );
-
-  if (module_exists('language')) {
-    $form['workflow']['language'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Multilingual support'),
-      '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
-    );
-  }
-
+  $form['workflow']['status_default'] = array(
+    '#type' => 'radios',
+    '#title' => t('Default publish action'),
+    '#options' => array(
+      NODE_PUBLISHED => t('Publish immediately'),
+      NODE_NOT_PUBLISHED => t('Save as draft'),
+      NODE_SCHEDULED => t('Schedule for later'),
+    ),
+    '#default_value' => $type->settings['status_default'],
+    '#required' => TRUE,
+  );
+  $form['workflow']['status_default'][NODE_PUBLISHED]['#description'] = t('Published content can be accessed by site visitors.');
+  $form['workflow']['status_default'][NODE_NOT_PUBLISHED]['#description'] = t('Content saved as draft can be accessed only by the content creator or site administrators.');
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#description'] = t('Content is saved as draft. It will be automatically published at the date and time selected.');
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
+    'visible' => array(
+      'input[name="scheduling_enabled"]' => array('checked' => TRUE),
+    ),
+  );
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
     '#options' => array(
-      'sticky_enabled' => t('Show option to make posts sticky'),
-      'sticky_default' => t('Make posts sticky by default'),
+      'sticky_enabled' => t('Show option to make sticky'),
+      'sticky_default' => t('Make sticky by default'),
     ),
-    '#description' => t('Sticky posts may be shown at the top of listings.'),
+    '#description' => t('Sticky content may be shown at the top of listings.'),
   );
   $form['workflow']['sticky']['sticky_enabled'] = array(
     '#default_value' => $type->settings['sticky_enabled'],
@@ -218,15 +312,14 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('sticky_default'),
     '#return_value' => 1,
   );
-
   $form['workflow']['promote'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
     '#options' => array(
-      'promote_enabled' => t('Show option to promote posts'),
-      'promote_default' => t('Promote posts by default'),
+      'promote_enabled' => t('Show option to promote'),
+      'promote_default' => t('Promote by default'),
     ),
-    '#description' => t('Promoted posts will often be shown on the main homepage or blog.'),
+    '#description' => t('Promoted content will often be shown on the main homepage or blog.'),
   );
   $form['workflow']['promote']['promote_enabled'] = array(
     '#default_value' => $type->settings['promote_enabled'],
@@ -239,13 +332,46 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#return_value' => 1,
   );
 
+  // Multilingual support.
+  if (module_exists('language')) {
+    $form['multilingual'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multilingual support'),
+      '#collapsible' => TRUE,
+      '#group' => 'additional_settings',
+      '#weight' => -5,
+    );
+    $form['multilingual']['language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Multilingual support'),
+      '#default_value' => $type->settings['language'],
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new content is saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+    );
+  }
+
+  // URL alias pattern.
+  // @see: path_pattern_settings_form().
+
+  // Content type permissions.
+  $form['permissions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+    '#weight' => 0,
+  );
+  $form['permissions']['permissions'] = $content_type_permissions;
+
+  // Revision settings.
   $form['revision'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 1,
+    '#weight' => 10,
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
@@ -261,25 +387,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('revision_default'),
   );
 
-  // Node type permissions
-  $form['permissions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#group' => 'additional_settings',
-    '#access' => user_access('administer permissions'),
-    '#weight' => -3,
-  );
-  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+  // Menu settings.
+  // @see: menu_form_node_type_form_alter().
 
+  // Display settings.
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 10,
+    '#weight' => 20,
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',
@@ -287,20 +405,45 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $node_submitted_state = array(
+    'visible' => array(
+      'input[name="node_submitted"]' => array('checked' => TRUE),
+    ),
+  );
+  $form['display']['node_submitted_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author/date format'),
+    '#default_value' => $type->settings['node_submitted_format'],
+    '#description' => t('The format to use for the author username and publish date. Example: "Submitted by [node:author] on [node:created:medium]"'),
+    '#states' => $node_submitted_state,
+  );
+  $form['display']['node_submitted_tokens'] = array(
+    '#type' => 'item', // Needed for states to work.
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#states' => $node_submitted_state,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display the author picture'),
       '#default_value' => $type->settings['node_user_picture'],
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
-      '#states' => array(
-        // Hide the picture settings when submitted info is disabled.
-        'visible' => array(
-          'input[name="node_submitted"]' => array('checked' => TRUE),
-        ),
-      ),
+      // Hide the picture settings when submitted info is disabled.
+      '#states' => $node_submitted_state,
     );
   }
+  $form['display']['hidden_path'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide path display'),
+    '#default_value' => $type->settings['hidden_path'],
+    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden paths" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
+  );
+
+  // Comment settings.
+  // @see: comment_form_node_type_form_alter().
 
   $form['old_type'] = array(
     '#type' => 'value',
@@ -389,6 +532,7 @@ function node_type_form_submit($form, &$form_state) {
   $type->old_type = isset($form_state['values']['old_type']) ? $form_state['values']['old_type'] : $type->type;
 
   $type->description = $form_state['values']['description'];
+  $type->node_preview = $form_state['values']['node_preview'];
   $type->help = $form_state['values']['help'];
   $type->title_label = $form_state['values']['title_label'];
   // title_label is required in core; has_title will always be true, unless a
@@ -435,6 +579,18 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
+  // Make the new content type indexable by default if Search module is enabled.
+  if (module_exists('search')) {
+    $search_content_types = config_get('search.settings', 'content_types');
+    // If no types are specified, then all types are enabled and there's no need
+    // to make any changes.
+    if ($search_content_types) {
+      $search_content_types[] = $type->type;
+      natsort($search_content_types);
+      config_set('search.settings', 'content_types', $search_content_types);
+    }
+  }
+
   $form_state['redirect'] = 'admin/structure/types';
   return;
 }
@@ -451,6 +607,7 @@ function node_type_form_permissions($type) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   $admin_role = config_get('system.core', 'user_admin_role');
+  $editor_role = config_get('system.core', 'user_editor_role');
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
@@ -494,7 +651,7 @@ function node_type_form_permissions($type) {
     $perm_item += array(
       'description' => '',
       'restrict access' => FALSE,
-      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+      'warning' => '',
     );
     $options[$perm] = '';
     $form['permission'][$perm] = array(
@@ -503,10 +660,15 @@ function node_type_form_permissions($type) {
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. Always select the Admin
-      // role on new forms.
-      if (in_array($perm, $role->permissions) || (!$type && $role->name == $admin_role)) {
-        $status[$role_name][] = $perm;
+      // Builds arrays for checked boxes for each role. For new content types,
+      // if user_admin_role and/or user_editor_role have been configured, then
+      // select sensible permissions for these roles.
+      if (in_array($perm, $role->permissions) || (!$type && ($role->name == $admin_role || $role->name == $editor_role))) {
+        // Do not grant the 'delete any content' permission to editors by
+        // default.
+        if (!($role->name == $editor_role && $perm == 'delete any content')) {
+          $status[$role_name][] = $perm;
+        }
       }
     }
   }
@@ -521,6 +683,7 @@ function node_type_form_permissions($type) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -552,10 +715,15 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
+      'node_preview' => TRUE,
 
       // Submitted information.
       'node_submitted' => TRUE,
+      'node_submitted_format' => t('[node:created:medium] by [node:author]'),
       'node_user_picture' => TRUE,
+
+      // Setting to prevent page from being accessed directly.
+      'hidden_path' => FALSE,
 
       // Though Language module is required to change this setting, all node
       // types have a language setting, even if it is disabled by default.
@@ -583,7 +751,7 @@ function node_node_type_update($info) {
     $update_count = node_type_update_nodes($info->old_type, $info->type);
 
     if ($update_count) {
-      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
+      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 piece of content from %old-type to %type.', 'Changed the content type of @count pieces of content from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
     }
   }
 }
@@ -593,8 +761,8 @@ function node_node_type_update($info) {
  *
  * @param $type
  *   The node type to reset. The node type is passed back by reference with its
- *   resetted values. If there is no module-defined info for this node type,
- *   then nothing happens.
+ *   reset values. If there is no module-defined info for this node type, then
+ *   nothing happens.
  */
 function node_type_reset($type) {
   $info_array = module_invoke_all('node_info');

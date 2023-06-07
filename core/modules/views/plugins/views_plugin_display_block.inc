@@ -80,12 +80,23 @@ class views_plugin_display_block extends views_plugin_display {
         $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
+
+    $required_contexts = array();
+    if (!empty($this->display->display_options['argument_input'])) {
+      foreach ($this->display->display_options['argument_input'] as $key => $value) {
+        if ($value['type'] == 'layout') {
+          $required_contexts[$key] = $value['layout'];
+        }
+      }
+    }
+
     return array(
       $delta => array(
         'info' => $info,
         'description' => $this->view->description ? check_plain(t($this->view->description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
+        'required contexts' => $required_contexts,
       ),
     );
   }
@@ -263,8 +274,20 @@ class views_plugin_display_block extends views_plugin_display {
         break;
 
       case 'argument_input':
-        $form['#title'] .= t('Choose the data source for view arguments');
+        $form['#title'] .= t('Choose the data sources for contextual filters');
         $argument_input = $this->get_argument_input();
+
+        // Retrieve all available contexts for the user to select from
+        // when using layout with contextual filter input.
+        $layout_context_info = _layout_get_all_info('layout_context');
+        $layout_context_options = array();
+
+        foreach ($layout_context_info as $key => $value) {
+          // Only process contexts with definitions where hidden is not true.
+          if (!array_key_exists('hidden', $value) || !$value['hidden']) {
+            $layout_context_options[$key] = $value['title'];
+          }
+        }
 
         $form['argument_input']['#tree'] = TRUE;
 
@@ -278,39 +301,48 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['type'] = array(
             '#type' => 'select',
             '#options' => array(
-              'none' => t('No argument'),
-              'wildcard' => t('Argument wildcard'),
-              //'context' => t('From context'),
+              'none' => t('No filter'),
+              'url' => t('From URL'),
+              'layout' => t('From layout'),
               'fixed' => t('Fixed'),
               'user' => t('Input in block settings'),
+              'wildcard' => t('Wildcard (*)'),
             ),
             '#attributes' => array('class' => array('argument-type-' . $safe)),
             '#title' => t('@arg source', array('@arg' => $argument['name'])),
             '#default_value' => $argument['type'],
           );
-          /*
-          $form['argument_input'][$id]['context'] = array(
+
+          $form['argument_input'][$id]['position'] = array(
             '#type' => 'select',
-            '#title' => t('Required context'),
-            '#description' => t('If "From context" is selected, which type of context to use.'),
-            '#default_value' => $argument['context'],
-            '#options' => array(), // @todo: Context options.
+            '#title' => t('URL position'),
+            '#description' => t('In the url http://example.com/foo/bar/baz, for example, foo would be in position 1, bar 2, and baz 3.'),
+            '#default_value' => $argument['position'],
+            '#options' => array(
+              // Humans don't count from zero, adjust by one.
+              0 => 1,
+              1 => 2,
+              2 => 3,
+              3 => 4,
+              4 => 5,
+              5 => 6
+            ),
             '#states' => array(
               'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'context'),
+                'select.argument-type-' . $safe => array('value' => 'url'),
               ),
             ),
           );
-          */
 
-          $form['argument_input'][$id]['context_optional'] = array(
-            '#type' => 'checkbox',
-            '#title' => t('Context is optional'),
-            '#description' => t('This context need not be present for the block to function. If you plan to use this, ensure that the argument handler can handle empty values gracefully.'),
-            '#default_value' => $argument['context_optional'],
+          $form['argument_input'][$id]['layout'] = array(
+            '#type' => 'select',
+            '#title' => t('Required context'),
+            '#description' => t('Select which type of context to use that best matches the contextual filter.'),
+            '#default_value' => $argument['layout'],
+            '#options' => $layout_context_options,
             '#states' => array(
               'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'context'),
+                'select.argument-type-' . $safe => array('value' => 'layout'),
               ),
             ),
           );
@@ -318,7 +350,7 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['fixed'] = array(
             '#type' => 'textfield',
             '#title' => t('Fixed argument'),
-            '#description' => t('If "Fixed" is selected, what to use as an argument.'),
+            '#description' => t('This value will be set permanently as the filter value.'),
             '#default_value' => $argument['fixed'],
             '#states' => array(
               'visible' => array(
@@ -330,7 +362,7 @@ class views_plugin_display_block extends views_plugin_display {
           $form['argument_input'][$id]['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Label'),
-            '#description' => t('If this argument is presented to the administrator configuring a layout, what label to apply to it.'),
+            '#description' => t('Label to apply to the filter when it is presented to the person configuring a layout.'),
             '#default_value' => empty($argument['label']) ? $argument['name'] : $argument['label'],
             '#states' => array(
               'visible' => array(
@@ -388,7 +420,6 @@ class views_plugin_display_block extends views_plugin_display {
     }
   }
 
-
   /**
    * Adjust the array of argument input to match the current list of
    * arguments available for this display. This ensures that changing
@@ -399,7 +430,7 @@ class views_plugin_display_block extends views_plugin_display {
     $arguments = $this->get_option('argument_input');
     $handlers = $this->get_handlers('argument');
 
-    // We use a separate output so as to seamlessly discard info for
+    // We use a separate output to seamlessly discard info for
     // arguments that no longer exist.
     $output = array();
 
@@ -407,10 +438,10 @@ class views_plugin_display_block extends views_plugin_display {
       if (empty($arguments[$id])) {
         $output[$id] = array(
           'type' => 'none',
-          'context' => 'any',
-          'context_optional' => FALSE,
+          'layout' => '',
           'fixed' => '',
           'name' => $handler->ui_name(),
+          'position' => '',
         );
       }
       else {
@@ -447,7 +478,7 @@ class views_plugin_display_block extends views_plugin_display {
 
   /**
    * Determine if this display should display the exposed filters widgets, so
-   * the view will know whether or not to render them.
+   * the view will know whether to render them.
    *
    * Regardless of what this function returns, exposed filters will not be used
    * nor displayed unless uses_exposed() returns TRUE.

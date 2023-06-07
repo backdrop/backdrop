@@ -1,0 +1,13 @@
+{
+    "_config_name": "file.type.image",
+    "_module": "file",
+    "type": "image",
+    "name": "Image",
+    "description": "An image file is a still visual.",
+    "mimetypes": [
+        "image/*"
+    ],
+    "disabled": false,
+    "storage": 4,
+    "module": "file"
+}

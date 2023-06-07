@@ -18,7 +18,7 @@
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ * - Node-type-specific hooks: When defining a node type, node_type_save()
  *   returns a 'base' component. Node-type-specific hooks are named
  *   base_hookname() instead of mymodule_hookname() (in a module called
  *   'mymodule' for example). Only the node type's corresponding implementation
@@ -530,8 +530,8 @@ function hook_node_load($nodes, $types) {
  *
  * Note that not all modules will want to influence access on all node types. If
  * your module does not want to actively grant or block access, return
- * NODE_ACCESS_IGNORE or simply return nothing. Blindly returning FALSE will
- * break other node access modules.
+ * NODE_ACCESS_IGNORE or return nothing. Blindly returning FALSE will break
+ * other node access modules.
  *
  * Also note that this function isn't called for node listings (e.g., RSS feeds,
  * the default home page at path 'node', a recent content block, etc.) See
@@ -543,9 +543,9 @@ function hook_node_load($nodes, $types) {
  * @param string $op
  *   The operation to be performed. Possible values:
  *   - "create"
- *   - "delete"
- *   - "update"
  *   - "view"
+ *   - "update"
+ *   - "delete"
  * @param object $account
  *   The user object to perform the access check operation on.
  *
@@ -613,7 +613,7 @@ function hook_node_prepare(Node $node) {
  *   Extra information to be displayed with search result. This information
  *   should be presented as an associative array. It will be concatenated with
  *   the post information (last updated, author) in the default search result
- *   theming.
+ *   markup.
  *
  * @ingroup node_api_hooks
  */
@@ -731,8 +731,8 @@ function hook_node_validate(Node $node, $form, &$form_state) {
  * This hook is invoked when a node form is submitted with the "Save" button,
  * after form values have been copied to the form state's node object, but
  * before the node is saved. It is a chance for modules to adjust the node's
- * properties from what they are simply after a copy from $form_state['values'].
- * This hook is intended for adjusting non-field-related properties. See
+ * properties from what they are after a copy from $form_state['values']. This
+ * hook is intended for adjusting non-field-related properties. See
  * hook_field_attach_submit() for customizing field-related properties.
  *
  * @param Node $node
@@ -859,7 +859,7 @@ function hook_node_view_alter(&$build) {
  */
 function hook_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
-  $config = config_get('my_module.settings');
+  $config = config('my_module.settings');
   if ($config->get('vote_node_enabled')) {
     return array(
       'vote_average' => array(
@@ -937,7 +937,7 @@ function hook_node_type_update($info) {
   // Update a setting that pointed at the old type name to the new type name.
   if (!empty($info->old_type) && $info->old_type != $info->type) {
     $config = config('my_module.settings');
-    $default_type = $config->get('defaut_node_type');
+    $default_type = $config->get('default_node_type');
     if ($default_type === $info->old_type) {
       $config->set('default_node_type', $info->type);
     }

@@ -247,7 +247,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
       // A message string for a specific plurality.
 
       if (($context != 'MSGID') && ($context != 'MSGCTXT') && ($context != 'MSGID_PLURAL') && ($context != 'MSGSTR_ARR')) {
-        // Message strings must come after msgid, msgxtxt, msgid_plural, or other msgstr[] entries.
+        // Message strings must come after msgid, msgctxt, msgid_plural, or other msgstr[] entries.
         _locale_import_message('The translation file %filename contains an error: "msgstr[]" is unexpected on line %line.', $file, $lineno);
         return FALSE;
       }
@@ -665,7 +665,7 @@ function _locale_import_parse_arithmetic($string) {
   foreach ($tokens as $token) {
     $current_token = $token;
 
-    // Numbers and the $n variable are simply pushed into $element_stack
+    // Numbers and the $n variable are pushed into $element_stack.
     if (is_numeric($token)) {
       $element_stack[] = $current_token;
     }

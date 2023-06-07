@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_sort_random.
@@ -19,4 +18,8 @@ class views_handler_sort_random extends views_handler_sort {
     parent::options_form($form, $form_state);
     $form['order']['#access'] = FALSE;
   }
+
+  function can_expose() { return FALSE; }
+
+  function admin_summary() { return; }
 }

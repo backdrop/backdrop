@@ -30,127 +30,6 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
- * Autocomplete callback for link textfield.
- */
-function _filter_link_autocomplete($string) {
-  $matches = array();
-  $match_count = 0;
-  if ($string) {
-    // Get node matches.
-    $results = db_select('node')
-      ->fields('node', array('nid', 'title', 'status'))
-      ->condition('title', db_like($string) . '%', 'LIKE')
-      ->condition('status', 1)
-      ->addTag('node_access')
-      ->orderBy('nid', 'DESC')
-      ->range(0, 10)
-      ->execute();
-    foreach ($results as $result) {
-      $path = backdrop_get_path_alias('node/' . $result->nid);
-      $matches['/' . $path] = check_plain($result->title) . ' (' . t('Content') . ')';
-      $match_count++;
-    }
-
-    // Get file matches.
-    if (user_access('manage files') && $match_count < 10) {
-      $results = db_select('file_managed')
-        ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
-        ->condition('filename', db_like($string) . '%', 'LIKE')
-        ->condition('status', 1)
-        ->condition('filemime', 'image%', 'NOT LIKE')
-        ->orderBy('fid', 'DESC')
-        ->range(0, 10 - $match_count)
-        ->execute();
-      foreach ($results as $result) {
-        // Try to make a local path if possible for better portability.
-        $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-
-        $url = file_create_url($result->uri);
-        $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-
-        $matches[$path] = check_plain($result->filename) . ' (' . t('File')  . ')';
-        $match_count++;
-      }
-    }
-
-    // Get user matches.
-    if (user_access('access user profiles') && $match_count < 10) {
-      $results = db_select('users')
-        ->fields('users', array('uid', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
-        ->range(0, 10 - $match_count)
-        ->orderBy('uid', 'DESC')
-        ->execute();
-      // We need to load the User object to user user_format_name().
-      $uids = array();
-      foreach ($results as $result) {
-        $uids[] = $result->uid;
-      }
-      if (!empty($uids)) {
-        $users = user_load_multiple($uids);
-        foreach ($users as $user) {
-          $path = backdrop_get_path_alias('user/' . $user->uid);
-          $matches['/' . $path] = user_format_name($user) . ' (' . t('User') . ')';
-          $match_count++;
-        }
-      }
-    }
-
-    // Get taxonomy term matches.
-    if ($match_count < 10) {
-      $results = db_select('taxonomy_term_data')
-        ->fields('taxonomy_term_data', array('tid', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
-        ->addTag('taxonomy_term_access')
-        ->range(0, 10 - $match_count)
-        ->orderBy('tid', 'DESC')
-        ->execute();
-      foreach ($results as $result) {
-        $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-        $matches['/' . $path] = check_plain($result->name) . ' (' . t('Taxonomy term') . ')';
-        $match_count++;
-      }
-    }
-
-    // Get Views page matches.
-    if ($match_count < 10) {
-      $views = views_get_enabled_views();
-      foreach ($views as $view) {
-        foreach ($view->display as $display_id => $display) {
-          if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
-            $path = backdrop_get_path_alias($display->display_options['path']);
-            if (!path_is_admin($path)) {
-              if (stripos($view->human_name, $string) !== FALSE || (!empty($display->title) && stripos($display->title, $string) !== FALSE)) {
-                $view_display_title = (!empty($display->title)) ? $display->title : check_plain($view->human_name) . ' : ' . $display_id;
-                $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
-                $match_count++;
-              }
-            }
-          }
-          if ($match_count == 10) {
-            break 2;
-          }
-        }
-      }
-    }
-
-    // Load layout paths
-    if ($match_count < 10) {
-      $menu_items = layout_get_all_configs('menu_item');
-      foreach ($menu_items as $menu_item) {
-        if (stripos($menu_item['name'], $string) !== FALSE && $match_count < 10) {
-          $matches['/' . $menu_item['path']] = check_plain($menu_item['name']) . ' (' . t('Layout path') . ')';
-          $match_count++;
-        }
-      }
-    }
-  }
-  // Allow modules to alter the matches.
-  backdrop_alter('link_autocomplete', $matches, $string);
-  backdrop_json_output($matches);
-}
-
-/**
  * Form callback: Display a form for inserting/editing an image.
  */
 function filter_format_editor_image_form($form, &$form_state, $format) {
@@ -171,8 +50,11 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   }
 
   // Set the dialog title and submit button label.
-  if (!empty($values['src'])) {
-    backdrop_set_title(t('Edit image'));
+  if (!empty($values['src']) || !empty($form_state['storage']['editing_image'])) {
+    // Remember this is editing, not inserting. In the event the image is
+    // removed and re-uploaded.
+    $form_state['storage']['editing_image'] = TRUE;
+    backdrop_set_title(t('Edit image details'));
     $submit_button_label = t('Update');
   }
   else {
@@ -187,30 +69,33 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
-  if (!empty($upload_settings['max_dimensions']['width']) && !empty($upload_settings['max_dimensions']['height'])) {
+  if (!empty($upload_settings['max_dimensions']['width']) || !empty($upload_settings['max_dimensions']['height'])) {
     $max_dimensions = $upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height'];
   }
   else {
     $max_dimensions = 0;
   }
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $orientation = !empty($upload_settings['orientate']) ? $upload_settings['orientate'] : 0;
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['image']['fid'] = array(
-    '#title' => t('Image upload'),
+    '#title' => t('Upload an image'),
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_extensions' => array(implode(' ', image_get_supported_extensions())),
+      'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image Upload'),
+      'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
@@ -219,34 +104,32 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
-    '#title' => t('Image URL'),
+    '#title' => t('Select from library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image URL'),
+      'data-editor-image-toggle' => t('Select from library'),
     ),
-    '#weight' => -2,
+    '#weight' => -8,
+    '#maxlength' => 256,
   );
 
   // If no current value or an existing file exists, default to showing
   // the uploading interface.
   if ($fid || empty($form['image']['src']['#default_value'])) {
-    $form['image']['fid']['#weight'] = -10;
     $form['image']['src']['#default_value'] = '';
-  }
-  // Otherwise if editing an unmanaged file, show the raw URL field.
-  else {
-    $form['image']['src']['#weight'] = -10;
   }
 
   $form['alt'] = array(
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
   $form['size'] = array(
     '#title' => t('Image size'),
@@ -257,8 +140,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Width'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['width']) ? $values['width'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['width']) ? $values['width'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
@@ -268,8 +150,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Height'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['height']) ? $values['height'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['height']) ? $values['height'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
@@ -297,6 +178,24 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
+  // This button is hidden from display and clicked via JavaScript in
+  // Backdrop.behaviors.editorImageDialog in filter.js.
+  $form['library_open'] = array(
+    '#type' => 'submit',
+    '#value' => t('Select from library'),
+    '#name' => 'library_open',
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#ajax' => array(
+      'callback' => '_filter_image_library_ajax',
+      'event' => 'click',
+    ),
+    '#limit_validation_errors' => array(),
+    '#validate' => array(),
+    '#submit' => array(),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -311,15 +210,34 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 }
 
 /**
+ * Render the image library.
+ */
+function _filter_image_library_ajax() {
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
+  $rendered_library = '<div class="library-view" data-editor-library-view="true">' . $view . '</div>';
+  $error_messages = theme('status_messages');
+
+  $commands = array();
+  $commands[] = ajax_command_prepend('.editor-image-library', $error_messages . $rendered_library);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Image source overrides file uploads, as the values are emptied out when
-  // hidden by JavaScript.
-  if (!empty($form_state['values']['attributes']['src'])) {
-    $form_state['values']['fid'] = NULL;
-    $form_state['values']['attributes']['data-file-id'] = NULL;
-  }
   // Convert any uploaded files from the FID values to the src attribute.
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
@@ -365,7 +283,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link value'),
+    '#title' => t('Link destination'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -375,8 +293,9 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
-    '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#maxlength' => 256,
+    '#autocomplete_path' => 'path-autocomplete',
+    '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
 
 
@@ -388,6 +307,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
+    'status' => 0,
+    'scheme' => 'public',
   );
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
@@ -433,13 +354,54 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'text'),
   );
 
-  $form['target'] = array(
-    '#title' => t('Open in new window'),
+  $form['more'] = array(
+    '#title' => t('More link options'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['more']['target'] = array(
+    '#title' => t('Open the link destination in a new window'),
     '#type' => 'checkbox',
     '#return_value' => '_blank',
     '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
     '#parents' => array('attributes', 'target'),
   );
+
+  $form['more']['class'] = array(
+    '#title' => t('CSS classes'),
+    '#description' => t('Separate multiple CSS classes with spaces.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['class']) ? $values['class'] : '',
+    '#parents' => array('attributes', 'class'),
+  );
+
+  $fragment_info_link = l(t('fragment'), 'https://en.wikipedia.org/wiki/Fragment_identifier', array('attributes' => array('target' => '_blank')));
+  $form['more']['id'] = array(
+    '#title' => t('Unique Identifier'),
+    '#description' => t('Setting an ID allows linking to this part of the page using a URL !fragment.', array('!fragment' => $fragment_info_link)),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['id']) ? $values['id'] : '',
+    '#parents' => array('attributes', 'id'),
+  );
+
+  $form['more']['title'] = array(
+    '#title' => t('Link title'),
+    '#description' => t('The title attribute of the link. Usually shown as a small tooltip on hover.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['title']) ? $values['title'] : '',
+    '#parents' => array('attributes', 'title'),
+  );
+
+  $form['more']['rel'] = array(
+    '#title' => t('Relationship (rel)'),
+    '#description' => t('Specifies the relationship between the current page and the linked page.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['rel']) ? $values['rel'] : '',
+    '#parents' => array('attributes', 'rel'),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -451,6 +413,20 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Validate handler for filter_format_editor_link_form().
+ */
+function filter_format_editor_link_form_validate($form, &$form_state) {
+  if (isset($form_state['values']['attributes']['class'])) {
+    $classes = explode(' ', $form_state['values']['attributes']['class']);
+    $clean_classes = array();
+    foreach ($classes as $class_name) {
+      $clean_classes[] = backdrop_clean_css_identifier($class_name, array());
+    }
+    $form_state['values']['attributes']['class'] = implode(' ', $clean_classes);
+  }
 }
 
 /**
@@ -495,6 +471,20 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
   }
+
+  // Clean up optional attributes, if not specified, remove.
+  $more = array('class', 'target', 'id', 'title', 'rel', 'data-file-id');
+  foreach ($more as $attribute) {
+    if (isset($form_state['values']['attributes'][$attribute])) {
+      $value = trim($form_state['values']['attributes'][$attribute]);
+      if (strlen($value) === 0 || ($attribute === 'target' && empty($value))) {
+        unset($form_state['values']['attributes'][$attribute]);
+      }
+      else {
+        $form_state['values']['attributes'][$attribute] = $value;
+      }
+    }
+  }
 }
 
 /**
@@ -533,45 +523,170 @@ function filter_format_editor_dialog_save($form, &$form_state) {
 
 /**
  * Element validation function.
+ *
+ * Clean up a URL and see if it will pass validation. Instead of stripping
+ * dangerous protocols we flag them as invalid to make the user aware.
+ *
+ * @see filter_format_editor_link_form()
+ * @see filter_format_editor_image_form()
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
 
-  // If Link module is available, automatically clean up URL, automatically
-  // adding http:// or a prefixing slash if needed.
-  if (module_exists('link') && $type = link_validate_url($value)) {
-    $value = link_cleanup_url($value);
-    if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
-      $value = '/' . $value;
-    }
+  // Allow empty values, since this will not result in a link tag anyway.
+  if ($value === '') {
+    form_set_value($element, $value, $form_state);
+    return;
   }
+
+  // Clean up the URL so it's more likely to pass validation.
+  $value = _filter_cleanup_url($value);
 
   form_set_value($element, $value, $form_state);
 
-  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
-  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
+  // Flag if it has any dangerous protocols.
+  $stripped_url = backdrop_strip_dangerous_protocols($value);
+  $dangerous_protocols = $stripped_url !== $value ? TRUE : FALSE;
+
+  // If it has dangerous protocols the URL is invalid. Or if it isn't either
+  // a valid relative nor a valid absolute path.
+  if ($dangerous_protocols || (!valid_url($value, TRUE) && !valid_url($value, FALSE))) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
 }
 
 /**
- * Find a managed file ID from a url.
+ * Clean up the URL for validation.
  *
+ * Attempts to create a URL that will pass validation: add a protocol if it
+ * looks like a domain but the protocol is missing; or create a valid, encoded
+ * internal alias.
+ *
+ * @param string $url
+ *   A URL before it is cleaned-up.
+ *
+ * @return string
+ *   A cleaned-up URL that is either a properly formatted external URL or an
+ *   internal path.
+ *
+ * @see _filter_format_editor_link_url_validate()
+ */
+function _filter_cleanup_url($url) {
+  // Will add a default protocol if missing on an external url.
+  $url = _filter_create_valid_external_url($url);
+
+  // If it's an external URL with a protocol we can skip the rest of the
+  // clean up.
+  if (_filter_url_has_protocol($url)) {
+    return $url;
+  }
+
+  // Return anchors as is.
+  if (substr($url, 0, 1) == '#') {
+    return $url;
+  }
+
+  // Return if it begins with a slash. Avoids issues such as:
+  // - extra language prefixes if it's a multilingual site;
+  // - adding extra prefixes if being re-edited;
+  // - a url getting double-encoded;
+  // - or domains with relative protocols.
+  // E.g. /fr/node/1, //domain.tld.
+  if (substr($url, 0, 1) == '/') {
+    return $url;
+  }
+
+  // Break up the components so we can build up an aliased internal path.
+  $url_parts = backdrop_parse_url($url);
+
+  return url($url_parts['path'], $url_parts);
+}
+
+/**
+ * Forms a valid external URL if possible.
+ *
+ * Automatically adds an http:// to addresses that appear to be external URLs
+ * but have no specified protocol.
+ *
+ * @param string $url
+ *   The URL entered by the user.
+ *
+ * @return string
+ *   The URL with the protocol prepended if needed.
+ *
+ * @see link_cleanup_url()
+ */
+function _filter_create_valid_external_url($url) {
+  // Skip if it's already a valid external URL with a protocol.
+  if (_filter_url_has_protocol($url)) {
+    return $url;
+  }
+
+  // If it looks like a domain name but it's missing a protocol, add a protocol.
+  // The will catch domains like archive.org but will skip a valid external
+  // domains with a relative protocol like //archive.org.
+  $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+  if (!empty($domain_match)) {
+    // We add a relative protocol since we don't know if the address requires
+    // http or https.
+    $url = '//' . $url;
+  }
+
+  return $url;
+}
+
+/**
+ * Checks if a URL has a protocol.
+ *
+ * Checks for a protocol as a sign that the URL is external. We want to include
+ * all external URLs even if they have dangerous protocols.
+ *
+ * @param string $url
+ *   The URL entered by the user.
+ *
+ * @return bool
+ *   TRUE if URL has protocol.
+ */
+function _filter_url_has_protocol($url) {
+  // If it has a scheme then it has a protocol.
+  if (parse_url($url, PHP_URL_SCHEME)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Find a managed file ID from a url.
  */
 function _filter_get_file_id($href) {
+  $result = 0;
+
+  // Make sure this is a file, either in public or in private path.
+  global $base_path;
+  $public_path = config_get('system.core', 'file_public_path');
+  // Private files have "system/files/" in their URL.
+  // @see BackdropPrivateStreamWrapper::getExternalUrl()
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/' . ')#';
+  if (preg_match($pattern, $href) === FALSE) {
+    return $result;
+  }
+
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
-  $filename = substr($href,$pos + 1);
-  // Now find this file name in uri field to get fid.
-  $results = db_select('file_managed')
-    ->fields('file_managed', array('fid', 'uri'))
-    ->condition('uri', '%' . $filename, 'LIKE')
-    ->orderBy('fid', 'DESC')
-    ->execute();
+  $filename = substr($href, $pos + 1);
 
-  $result = 0;
-  foreach ($results as $found) {
-    $result = $found->fid;
+  // Now find this file name in uri field to get fid.
+  if (!empty($filename)) {
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'uri'))
+      ->condition('uri', '%/' . $filename, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
+
+    foreach ($results as $found) {
+      $result = $found->fid;
+    }
   }
+
   return $result;
 }

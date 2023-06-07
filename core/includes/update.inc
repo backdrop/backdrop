@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop database update API.
@@ -11,10 +10,10 @@
 /**
  * Minimum schema version of Drupal 7 required for upgrade to Backdrop.
  *
- * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running
- * the most recent version, or the upgrade could fail. We can't easily
- * check the Drupal 7 version once the update process has begun, so instead
- * we check the schema version of system.module in the system table.
+ * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running the most
+ * recent version, or the upgrade could fail. We can't check the Drupal 7
+ * version  once the update process has begun, so instead we check the schema
+ * version of system.module in the system table.
  */
 define('REQUIRED_D7_SCHEMA_VERSION', '7069');
 
@@ -90,8 +89,15 @@ function update_prepare_bootstrap() {
   $active_config = config_get_config_storage('active');
   $staging_config = config_get_config_storage('staging');
 
-  if (!$settings_exist || !$active_config->isInitialized() || !$staging_config->isInitialized()) {
+  if (!$settings_exist || !$active_config->isInitialized()) {
     backdrop_install_config_directories();
+  }
+
+  // Check for a staging directory.
+  if (!$staging_config->isInitialized()) {
+    $t = get_t();
+    backdrop_set_message($t('The staging configuration directory (%directory) could not be found. Please make sure it exists and is properly referenced in settings.php.',
+      array('%directory' => config_get_config_directory('staging'))), 'warning', FALSE);
   }
 
   // If any of the required settings needs to be written, then settings.php
@@ -289,6 +295,84 @@ function update_module_add_to_system($modules = array()) {
 }
 
 /**
+ * Checks for disabled dependencies during a Drupal 7 upgrade.
+ *
+ * @return string
+ *   A themed message that lists modules that will be enabled, to be displayed
+ *   in the 'info' page of the update process.
+ */
+
+function update_upgrade_check_dependencies() {
+  $status_report = '';
+  if (backdrop_get_installed_schema_version('system') > 7000) {
+    $modules_to_enable = update_upgrade_modules_to_enable();
+
+    if (empty($modules_to_enable)) {
+      return '';
+    }
+
+    $files = system_rebuild_module_data();
+    $module_list = '';
+    foreach ($modules_to_enable as $module_to_enable => $dependents) {
+      $module_list .= '<strong>' . $files[$module_to_enable]->info['name'] . '. ' . t('Required by:') . '</strong>';
+      $module_list .= theme('item_list', array('items' => $dependents));
+    }
+    $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
+    $status_report .= '<p>The following Backdrop modules will be enabled in order for the site to be upgraded successfully:</p>';
+    $status_report .= $module_list;
+  }
+  return $status_report;
+}
+
+/**
+ * Enables needed dependencies.
+ */
+function update_upgrade_enable_dependencies() {
+  if (backdrop_get_installed_schema_version('system') > 7000 && !state_get('update_upgrade_enable_dependencies', FALSE)) {
+    $modules_to_enable = update_upgrade_modules_to_enable();
+    if (!empty($modules_to_enable)) {
+      update_module_enable(array_keys($modules_to_enable));
+      state_set('update_upgrade_enable_dependencies', TRUE);
+    }
+  }
+}
+
+/**
+ * Finds out which modules need to be enabled.
+ *
+ * @return array
+ *   An array keyed by the machine names of module names needed to be enabled,
+ *   whose values are arrays of the modules that depend on them.
+ */
+function update_upgrade_modules_to_enable() {
+  // Get list of enabled modules.
+  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+
+  // Get list of modules to be enabled.
+  $enabled_modules = array_keys($result->fetchAllAssoc('name'));
+
+  // Do not include any core module required by the Standard or Minimal
+  // installations. Any needed modules from those will be taken care of later.
+  $enabled_modules = array_diff($enabled_modules, array('standard', 'minimal'));
+
+  // Get information about all modules available.
+  $files = system_rebuild_module_data();
+
+  $modules_to_enable = array();
+  foreach ($enabled_modules as $enabled_module) {
+    if (!empty($files[$enabled_module]->requires)) {
+      $required_modules = array_keys($files[$enabled_module]->requires);
+      // Add required modules that are not enabled.
+      $modules_not_enabled = array_diff($required_modules, $enabled_modules);
+      foreach ($modules_not_enabled as $module_not_enabled) {
+        $modules_to_enable[$module_not_enabled][] = $files[$enabled_module]->info['name'];
+      }
+    }
+  }
+  return $modules_to_enable;
+}
+
+/**
  * Perform Drupal 7.x to Backdrop 1.x updates that are required for update.php
  * to function properly.
  *
@@ -322,6 +406,12 @@ function update_fix_requirements() {
         db_create_table('cache_views_data', $schema_cache_views_data);
       }
       update_module_enable(array('views'));
+    }
+
+    // Enable the File module if necessary, as it is a required module in
+    // Backdrop, but may be off in Drupal.
+    if (!db_query("SELECT name FROM {system} WHERE name = 'file' AND type = 'module' AND status = 1")->fetchField()) {
+      update_module_enable(array('file'));
     }
 
     // Empty a few basic caches.
@@ -566,8 +656,8 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
-      // correct place. (The updates are already sorted, so we can simply base
-      // this on the first one we come across in the above foreach loop.)
+      // correct place. (The updates are already sorted, so we can base this on
+      // the first one we come across in the above foreach loop.)
       if (isset($start[$update['module']])) {
         backdrop_set_installed_schema_version($update['module'], $update['number'] - 1);
         unset($start[$update['module']]);
@@ -683,7 +773,8 @@ function update_get_update_list() {
         if ($compare_version > $schema_version) {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
-          $description = str_replace(array("\n", '*', '/'), '', $func->getDocComment());
+          // The order of the items in the replace array is important.
+          $description = preg_replace(array('#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'), '', $func->getDocComment());
           $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
           if (!isset($ret[$module]['start'])) {
             $ret[$module]['start'] = $update;

@@ -5,7 +5,8 @@
  * Many of these styles are adapted directly from the default CKEditor theme
  * "moono".
  */
-.ckeditor-active-toolbar-configuration {
+.ckeditor-active-toolbar-configuration,
+[dir="rtl"] .ckeditor-active-toolbar-configuration {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -30,12 +31,15 @@
   min-height: 26px;
   min-width: 28px;
   list-style: none;
-
   display: inline-block;
   padding: 0;
   margin: 0;
   border: 1px solid #d1d1d1;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 0 2px rgba(255, 255, 255, .15) inset, 0 1px 0 rgba(255, 255, 255, .15) inset;
+}
+[dir="rtl"] .ckeditor-buttons {
+  padding: 0;
+  margin: 0;
 }
 .ckeditor-button,
 .ckeditor-button-placeholder,
@@ -48,7 +52,6 @@
   border: 0;
   vertical-align: middle;
   line-height: 1.6;
-
   background: #f8f8f8;
 }
 .ckeditor-buttons .ckeditor-button:first-child {
@@ -98,12 +101,13 @@
 }
 .ckeditor-row-controls {
   float: right; /* LTR */
+  text-align: right; /* LTR */
   font-size: 18px;
   width: 40px;
-  text-align: right;
 }
 [dir="rtl"] .ckeditor-row-controls {
   float: left;
+  text-align: left;
 }
 .ckeditor-row-controls a {
   display: inline-block;
@@ -177,6 +181,8 @@
   float: left; /* LTR */
 }
 [dir="rtl"] .ckeditor-toolbar-groups {
+  margin: 0;
+  padding: 0;
   float: right;
 }
 .ckeditor-toolbar-group {
@@ -211,6 +217,8 @@
   float: left; /* LTR */
 }
 [dir="rtl"] .ckeditor-toolbar-group-buttons {
+  padding: 0;
+  margin: 0;
   float: right;
 }
 .ckeditor-groupnames-toggle {
@@ -220,4 +228,3 @@
 [dir="rtl"] .ckeditor-groupnames-toggle {
   float: left;
 }
-

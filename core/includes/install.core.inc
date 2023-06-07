@@ -173,7 +173,7 @@ function install_state_defaults() {
     // established.
     'settings_verified' => FALSE,
     // Installation tasks can set this to TRUE to force the page request to
-    // end (even if there is no themable output), in the case of an interactive
+    // end (even if there is no themeable output), in the case of an interactive
     // installation. This is needed only rarely; for example, it would be used
     // by an installation task that prints JSON output rather than returning a
     // themed page. The most common example of this is during batch processing,
@@ -708,8 +708,8 @@ function install_full_redirect_url($install_state) {
  * Displays themed installer output and ends the page request.
  *
  * Installation tasks should use backdrop_set_title() to set the desired page
- * title, but otherwise this function takes care of theming the overall page
- * output during every step of the installation.
+ * title, but otherwise this function takes care of generating the page output
+ * during every step of the installation.
  *
  * @param $output
  *   The content to display on the main part of the page.
@@ -737,7 +737,7 @@ function install_display_output($output, $install_state) {
   // request has ended before tasks have even been started, so there is nothing
   // meaningful to show.
   if (isset($install_state['active_task'])) {
-    // Let the theming function know when every step of the installation has
+    // Let the theme function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
     $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
@@ -843,7 +843,7 @@ function install_system_module(&$install_state) {
   // database to utf8mb4.
   $connection = Database::getConnection();
   if ($connection->utf8mb4IsActive()) {
-    state_set('backdrop_utf8mb4_tables', TRUE);
+    state_set('database_utf8mb4_active', TRUE);
   }
 }
 
@@ -1084,6 +1084,7 @@ function install_settings_form_submit($form, &$form_state) {
 
   // Check if UTF-8 MB4 support exists in the database and add to settings.php.
   if (install_verify_database_utf8mb4()) {
+    $settings = array();
     $settings['database_charset'] = array(
       'value' => 'utf8mb4',
       'required' => TRUE,
@@ -1303,7 +1304,7 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
@@ -1351,10 +1352,10 @@ function install_select_language(&$install_state) {
         if (!empty($install_state['parameters']['translate'])) {
           $output = '<p>Follow these steps to translate Backdrop into your language:</p>';
           $output .= '<ol>';
-          $output .= '<li>Download a translation from the <a href="http://localize.drupal.org/download" target="_blank">translation server</a>.</li>';
+          $output .= '<li>Download a translation from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.</li>';
           $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
           $output .= '</ol>';
-          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="http://drupal.org/localize" target="_blank">drupal.org handbook page</a>.</p>';
+          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.</p>';
           $output .= '<p>How should the installation continue?</p>';
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
@@ -1584,10 +1585,11 @@ function install_import_translations(&$install_state) {
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
-    // our best guess. The user will be able to edit afterwards.
+    // our best guess. If required, this can be edited post-installation.
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);
@@ -1710,7 +1712,13 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $profile = backdrop_install_profile_distribution_name();
+  $message = st('Thank you for installing @profile!', array('@profile' => $profile));
+
+  // Confirming that the Dashboard module is enabled.
+  if (module_exists('dashboard')) {
+    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
+  }
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
@@ -1853,7 +1861,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
 
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => st('E-mail address'),
+    '#title' => st('Email address'),
     '#required' => TRUE,
     '#weight' => -5,
   );
@@ -1897,7 +1905,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#type' => 'checkboxes',
     '#options' => array(
       1 => st('Check for updates automatically'),
-      2 => st('Receive e-mail notifications'),
+      2 => st('Receive email notifications'),
     ),
     '#default_value' => array(1, 2),
     '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),
@@ -1939,14 +1947,26 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
+  $timezone = $form_state['values']['date_default_timezone'];
+  $timezone_country = _install_get_timezone_country($timezone);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->set('default_timezone', $timezone)
+    ->set('default_country', $timezone_country)
     ->save();
+
+  // Update the default date/time formats for different regions.
+  if ($timezone_country == 'US') {
+    config('system.date')
+      ->set('formats.long.pattern', 'l, F j, Y - g:ia')
+      ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
+      ->set('formats.short.pattern', 'm/d/Y - g:ia')
+      ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
@@ -1960,12 +1980,12 @@ function install_configure_form_submit($form, &$form_state) {
     }
   }
 
-  // We precreated user 1 with placeholder values. Let's save the real values.
+  // We pre-created user 1 with placeholder values. Let's save the real values.
   $account = user_load(1);
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();
   $account->status = 1;
-  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->timezone = $timezone;
   $account->pass = $form_state['values']['account']['pass'];
   $account->name = $form_state['values']['account']['name'];
   $account->save();

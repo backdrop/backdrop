@@ -21,7 +21,7 @@ Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
  */
 Backdrop.behaviors.AJAX = {
   attach: function (context, settings) {
-    
+
      function loadAjaxBehaviour(base) {
       if (!$('#' + base + '.ajax-processed').length) {
         var element_settings = settings.ajax[base];
@@ -112,6 +112,15 @@ Backdrop.behaviors.AJAX = {
  *      }
  *    };
  * @endcode
+ *
+ * @param string base
+ *   The unique identifier for this AJAX object. Usually this is the ID of the
+ *   HTML element receiving the newly generated HTML content.
+ * @param DOMElement element
+ *   The HTML DOM element that triggers the AJAX behavior. Usually this is an
+ *   anchor tag or submit button, but it may be any type of DOM element.
+ * @param object element_settings
+ *   An object containing configuration for the AJAX behavior.
  */
 Backdrop.ajax = function (base, element, element_settings) {
   var defaults = {
@@ -143,12 +152,17 @@ Backdrop.ajax = function (base, element, element_settings) {
     this.wrapper = '#' + this.wrapper;
   }
 
+  // Ensure element is a DOM element (and not a jQuery object).
+  if (element instanceof jQuery) {
+    element = element.get(0);
+  }
+
   this.element = element;
   this.element_settings = element_settings;
 
   // If there isn't a form, jQuery.ajax() will be used instead, allowing us to
   // bind Ajax to links as well.
-  if (this.element.form) {
+  if (this.element && this.element.form) {
     this.form = $(this.element.form);
   }
 
@@ -181,7 +195,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
-    url: ajax.url,
+    url: Backdrop.sanitizeAjaxUrl(ajax.url),
     data: ajax.submit,
     beforeSerialize: function (element_settings, options) {
       return ajax.beforeSerialize(element_settings, options);
@@ -233,6 +247,7 @@ Backdrop.ajax = function (base, element, element_settings) {
       }
     },
     dataType: 'json',
+    jsonp: false,
     accepts: {
       json: element_settings.accepts || 'application/vnd.backdrop-ajax'
     },
@@ -583,7 +598,7 @@ Backdrop.ajax.prototype.commands = {
     var settings;
 
     // We don't know what response.data contains: it might be a string of text
-    // without HTML, so don't rely on jQuery correctly iterpreting
+    // without HTML, so don't rely on jQuery correctly interpreting
     // $(response.data) as new HTML rather than a CSS selector. Also, if
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).
@@ -637,10 +652,10 @@ Backdrop.ajax.prototype.commands = {
     // Attach all JavaScript behaviors to the new content, if it was
     // successfully added to the page and the elements not part of a larger form
     // (in which case they'll be processed all at once in
-    // Drupal.ajax.prototype.success). The HTML parent check allows
+    // Drupal.ajax.prototype.success). The body parent check allows
     // #ajax['wrapper'] to be optional.
     var alreadyAttached = ajax.form && ajax.form.has(new_content).length > 0;
-    if (!alreadyAttached && new_content.parents('html').length > 0) {
+    if (!alreadyAttached && new_content.parents('body').length > 0) {
       // Apply any settings from the returned JSON if available.
       settings = response.settings || ajax.settings || Backdrop.settings;
       Backdrop.attachBehaviors(new_content, settings);

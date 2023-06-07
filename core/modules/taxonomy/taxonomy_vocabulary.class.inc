@@ -41,6 +41,14 @@ class TaxonomyVocabulary {
   public $hierarchy = TAXONOMY_HIERARCHY_DISABLED;
 
   /**
+   * The language configuration for the vocabulary.
+   *
+   * @var integer
+   */
+  public $language = 0;
+
+
+  /**
    * (optional) The weight of this vocabulary in relation to other vocabularies.
    *
    * @var integer
@@ -61,14 +69,22 @@ class TaxonomyVocabulary {
    *   vocabulary was updated.
    */
   function save() {
-    module_invoke_all('taxonomy_vocabulary_presave', $this);
-
     $config = config('taxonomy.vocabulary.' . $this->machine_name);
     $is_new = $config->isNew();
+
+    if (!$is_new) {
+      $data = $config->get();
+      $original = new TaxonomyVocabulary($data);
+      $this->original = $original;
+    }
+
+    module_invoke_all('taxonomy_vocabulary_presave', $this);
+
     $config->set('name', $this->name);
     $config->set('machine_name', $this->machine_name);
     $config->set('description', $this->description);
     $config->set('hierarchy', $this->hierarchy);
+    $config->set('language', $this->language);
     $config->set('weight', $this->weight);
     $config->save();
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_argument_search.
@@ -13,7 +12,8 @@
 class views_handler_argument_search extends views_handler_argument {
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
@@ -56,7 +56,7 @@ class views_handler_argument_search extends views_handler_argument {
       $join->construct('search_total', $search_index, 'word', 'word');
       $search_total = $this->query->add_relationship('search_total', $join, $search_index);
 
-      $this->search_score = $this->query->add_field('', "SUM($search_index.score * $search_total.count)", 'score', array('aggregate' => TRUE));
+      $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
 
       if (empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;

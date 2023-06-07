@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Relationship for groupwise maximum handler.
@@ -111,7 +110,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     );
 
 
-    // WIP: This stuff doens't work yet: namespacing issues.
+    // WIP: This stuff doesn't work yet: namespacing issues.
     // A list of suitable views to pick one as the subview.
     $views = array('' => '<none>');
     $all_views = views_get_all_views();
@@ -358,7 +357,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       }
       else {
         $def['left_query'] = $this->left_query($this->options);
-        cache('cache_views_data')->set($cid, $def['left_query']);
+        cache('views_data')->set($cid, $def['left_query']);
       }
     }
 

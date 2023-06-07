@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -117,7 +116,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid', $options) {
+  function init($base_table, $base_field, $options) {
     parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
@@ -142,17 +141,6 @@ class views_plugin_query_default extends views_plugin_query {
       'alias' => $base_table,
     );
 
-/**
- * -- we no longer want the base field to appear automatigically.
-    if ($base_field) {
-      $this->fields[$base_field] = array(
-        'table' => $base_table,
-        'field' => $base_field,
-        'alias' => $base_field,
-      );
-    }
- */
-
     $this->count_field = array(
       'table' => $base_table,
       'field' => $base_field,
@@ -167,13 +155,13 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Set the view to be distinct.
    *
-   * There are either distinct per base field or distinct in the pure sql way,
+   * There are either distinct per base field or distinct in the pure SQL way,
    * based on $pure_distinct.
    *
    * @param bool $value
-   *   Should the view by distincted.
+   *   Whether or not the view is distinct.
    * @param bool $pure_distinct
-   *   Should only the sql keyword be added.
+   *   Whether just the SQL keyword should be added.
    */
   function set_distinct($value = TRUE, $pure_distinct = FALSE) {
     if (!(isset($this->no_distinct) && $value)) {
@@ -290,7 +278,13 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    // This method may be called more than once. When called for the first time,
+    // it receives a string from the form element. That string must be exploded
+    // into an array before setting the form value.
+    if (is_string($value)) {
+      $value = explode(',', $value);
+    }
     $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
@@ -656,7 +650,6 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Have we been this way?
     if (isset($traced[$join->left_table])) {
-      // we looped. Broked.
       return FALSE;
     }
 
@@ -827,7 +820,7 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Remove all fields that may've been added; primarily used for summary
+   * Remove all fields that may have been added; primarily used for summary
    * mode where we're changing the query because we didn't get data we needed.
    */
   function clear_fields() {
@@ -890,17 +883,17 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Add a complex WHERE clause to the query.
    *
-   * The caller is reponsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table already exists in the query.
-   * Internally the dbtng method "where" is used.
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table already exists in the query. Internally,
+   * the dbtng method "where" is used.
    *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
    * @param $snippet
-   *   The snippet to check. This can be either a column or
-   *   a complex expression like "UPPER(table.field) = 'value'"
+   *   The snippet to check. This can be either a column or a complex expression
+   *   like "UPPER(table.field) = 'value'".
    * @param $args
    *   An associative array of arguments.
    *
@@ -1322,6 +1315,10 @@ class views_plugin_query_default extends views_plugin_query {
     if (count($this->having)) {
       $this->has_aggregate = TRUE;
     }
+    elseif (!$this->has_aggregate) {
+      // Allow 'GROUP BY' even no aggregation function has been set.
+      $this->has_aggregate = $this->view->display_handler->get_option('group_by');
+    }
     if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
       $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
       foreach ($groupby as $field) {
@@ -1364,6 +1361,16 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Add all query substitutions as metadata.
     $query->addMetaData('views_substitutions', module_invoke_all('views_query_substitutions', $this));
+
+    if (!$get_count) {
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large
+        // limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $query->range($offset, $limit);
+      }
+    }
 
     return $query;
   }
@@ -1469,15 +1476,7 @@ class views_plugin_query_default extends views_plugin_query {
           $this->pager->execute_count_query($count_query);
         }
 
-        // Let the pager modify the query to add limits.
         $this->pager->pre_execute($query);
-
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
 
         $result = $query->execute();
 
