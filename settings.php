@@ -16,7 +16,25 @@ $database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
- * Site configuration files location.
+ * Configuration storage
+ *
+ * By default configuration will be stored in the filesystem, using the
+ * directories specified in the $config_directories setting. Optionally,
+ * configuration can be store in the database instead of the filesystem.
+ * Switching this option on a live site is not currently supported without some
+ * manual work.
+ *
+ * Example using the database for live and file storage for staging:
+ * @code
+ * $settings['config_active_class'] = 'ConfigDatabaseStorage';
+ * $settings['config_staging_class'] = 'ConfigFileStorage';
+ * @endcode
+ */
+$settings['config_active_class'] = 'ConfigFileStorage';
+$settings['config_staging_class'] = 'ConfigFileStorage';
+
+/**
+ * Site configuration files location (if using file storage for configuration)
  *
  * By default these directories are stored within the files directory with a
  * hashed path. For the best security, these directories should be in a location
@@ -439,8 +457,8 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * such as views, content types, vocabularies, etc. may not work as expected.
  * Use any available API functions for complex systems instead.
  */
-//$config['system.core']['site_name'] = 'My Backdrop site';
-//$config['system.core']['file_temporary_path'] = '/tmp';
+// $config['system.core']['site_name'] = 'My Backdrop site';
+// $config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
  * Add Permissions-Policy header to disable Google FLoC.
@@ -453,7 +471,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * If you don't wish to disable FLoC in Chrome, you can uncomment the following
  * setting, and make sure its value is set to "FALSE".
  */
-//$config['system.core']['block_interest_cohort'] = FALSE;
+// $config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
  * File schemes whose paths should not be normalized.
@@ -471,7 +489,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * scheme does not allow unintended file access when using '/../' to move up the
  * directory tree.
  */
-//$config['system.core']['file_not_normalized_schemes'] = array('example');
+// $config['system.core']['file_not_normalized_schemes'] = array('example');
 
 /**
  * Additional public file schemes.
@@ -494,7 +512,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * variable, the result of which is that system_file_download() grants public
  * access to all files within that scheme.
  */
-//$config['system.core']['file_additional_public_schemes'] = array('example');
+// $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
  * Include a local settings file, if available.
