@@ -203,7 +203,7 @@ function config_set_multiple($config_file, $options) {
 }
 
 /**
- * Returns the path of a configuration directory.
+ * Returns the path of a configuration directory for config stored in files.
  *
  * @param string $type
  *   (optional) The type of config directory to return. Backdrop core provides
@@ -223,12 +223,6 @@ function config_get_config_directory($type = 'active') {
   }
   elseif (!empty($config_directories[$type])) {
     $path = $config_directories[$type];
-
-    // If the path contains a colon, assume it is a storage URL like
-    // db:/default/config_active and return it directly.
-    if (strpos($path, ':') !== FALSE) {
-      return $path;
-    }
 
     // If the path starts with a slash or dot, assume a normal path. If just
     // a directory name is provided, make it relative to the settings.php file.
@@ -341,20 +335,16 @@ function config_uninstall_config($module, $config_name = NULL) {
  *   A ConfigStorageInterface object managing the specified configuration type.
  */
 function config_get_config_storage($type = 'active') {
-  $directory = config_get_config_directory($type);
-  $colon_pos = strpos($directory, ':');
-  if ($colon_pos !== FALSE) {
-    $storage_type = substr($directory, 0, $colon_pos);
-    switch ($storage_type) {
-      case 'db':
-        return new ConfigDatabaseStorage($directory);
-      case 'file':
-        return new ConfigFileStorage(substr($directory, $colon_pos+1));
-      default:
-        // fall through
-    }
+  $class = settings_get('config_' . $type . '_class', 'ConfigFileStorage');
+  switch ($class) {
+    case 'ConfigDatabaseStorage':
+      $config_location = 'db:/default/' . $type . '_config';
+      break;
+    case 'ConfigFileStorage':
+    default:
+      $config_location = config_get_config_directory($type);
   }
-  return new ConfigFileStorage($directory);
+  return new $class($config_location);
 }
 
 /**
@@ -517,7 +507,7 @@ class Config {
    * Sets the name of this configuration object.
    *
    * @param string $name
-   *  The name of the configuration object.
+   *   The name of the configuration object.
    *
    * @return Config
    *   The configuration object.
@@ -531,7 +521,7 @@ class Config {
    * Validates the configuration object name.
    *
    * @param string $name
-   *  The name of the configuration object.
+   *   The name of the configuration object.
    *
    * @throws ConfigNameException
    *
@@ -1270,6 +1260,9 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   protected $database = '';
 
+  /**
+   * The database schema.
+   */
   protected function schema($name) {
     $schema = array(
       'description' => 'Stores the configuration of the site in database tables.',
@@ -1359,16 +1352,6 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   }
 
   /**
-   * Returns the path to the configuration file.
-   *
-   * @return string
-   *   The path to the configuration file.
-   */
-  public function getFilePath($name) {
-    return 'db:/' . $this->database . '/' . $this->table . '/' . $name;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function exists($name) {
@@ -1376,11 +1359,11 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       $query = db_select($this->table, 'c', array('target' => $this->database))
         ->condition('c.name', $name);
       $query->addExpression('1');
-      $value =  $query->execute()
+      $value = $query->execute()
         ->fetchField();
     }
     catch (\Exception $e) {
-      // Happens where there is no database.  Return FALSE
+      // Happens where there is no database.  Return FALSE.
       $value = FALSE;
     }
 
@@ -1433,7 +1416,6 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     // Ensure that the config name is included in the written file.
     $data = array_merge(array('_config_name' => $name), $data);
     $data = $this->encode($data) . "\n";
-    $file_path = $this->getFilePath($name);
     try {
       $result = db_merge($this->table, array('target' => $this->database))
         ->key(array('name' => $name))
@@ -1451,7 +1433,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       }
     }
     catch (\Exception $e) {
-      throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name), 0, $e);
+      throw new ConfigStorageException('Failed to write configuration to the database: ' . $this->$name, 0, $e);
     }
     return TRUE;
   }
@@ -1483,7 +1465,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         ->execute();
     }
     catch (\Exception $e) {
-      throw new ConfigStorageException('Failed to rename configuration file from: ' . $this->getFilePath($name) . ' to: ' . $this->getFilePath($new_name), 0, $e);
+      throw new ConfigStorageException('Failed to rename configuration from: ' . $name . ' to: ' . $new_name, 0, $e);
     }
     return TRUE;
   }
