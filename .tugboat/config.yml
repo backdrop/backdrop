@@ -1,6 +1,6 @@
 services:
   php:
-    image: tugboatqa/php:8.1-apache
+    image: tugboatqa/php:8.1-apache-bullseye
     default: true
     depends: mariadb
     commands:
