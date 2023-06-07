@@ -1798,10 +1798,13 @@ function system_jquery_settings() {
     '#title' => t('jQuery version'),
     '#default_value' => $config->get('jquery_version'),
     '#options' => $options,
-    '#description' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/introducing-jquery'))),
   );
   $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
   $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
 
   return system_settings_form($form);
 }

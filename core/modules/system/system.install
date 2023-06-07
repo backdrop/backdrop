@@ -3448,8 +3448,7 @@ function system_update_1090() {
 }
 
 /**
- * Set the jQuery version to the fallback to ensure existing sites do not
- * break.
+ * Set jQuery to the backwards-compatible, legacy version for existing sites.
  */
 function system_update_1091() {
   if (config_get('system.core', 'jquery_version') === NULL) {
