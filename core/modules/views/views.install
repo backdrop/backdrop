@@ -143,7 +143,7 @@ function views_update_1003() {
 
   $config->save();
 
-  // Delete the updated variables (including the 'views_skip_cache').
+  // Delete the updated variables (including 'views_skip_cache').
   $update_variables['views_skip_cache'] = $views_skip_cache;
   foreach ($update_variables as $variable => $value) {
     update_variable_del($variable);
@@ -217,7 +217,7 @@ function views_update_1007() {
 }
 
 /**
- * Add default value for 'cache_views_data' (previously 'skip_cache').
+ * Add default value for 'cache_views_data' (previously 'views_skip_cache').
  */
 function views_ui_update_1008() {
   $config = config('views.settings');
