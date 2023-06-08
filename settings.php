@@ -30,8 +30,8 @@ $database_prefix = '';
  * $settings['config_staging_class'] = 'ConfigFileStorage';
  * @endcode
  */
-$settings['config_active_class'] = 'ConfigFileStorage';
-$settings['config_staging_class'] = 'ConfigFileStorage';
+// $settings['config_active_class'] = 'ConfigFileStorage';
+// $settings['config_staging_class'] = 'ConfigFileStorage';
 
 /**
  * Site configuration files location (if using file storage for configuration)

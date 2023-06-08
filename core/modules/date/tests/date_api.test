@@ -4,7 +4,7 @@
  * Test Date API functions
  */
 
-class DateAPITestCase extends BackdropWebTestCase {
+class DateAPITestCase extends BackdropUnitTestCase {
   function setUp() {
     parent::setUp();
     require_once(BACKDROP_ROOT . '/core/includes/date.inc');

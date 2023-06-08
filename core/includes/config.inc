@@ -543,7 +543,7 @@ class Config {
     }
 
     // The name must not contain any of the following characters:
-    // : ? * < > " ' / \
+    // : ? * < > " ' / \.
     if (preg_match('/[:?*<>"\'\/\\\\]/', $name)) {
       throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
         '@name' => $name,
@@ -1140,7 +1140,7 @@ interface ConfigStorageInterface {
    * @param string $name
    *   The name of a configuration object on which the time will be checked.
    *
-   * @return int|FALSE
+   * @return int|false
    *   A timestamp indicating the last time the configuration was modified or
    *   FALSE if the named configuration object doesn't exist.
    */
@@ -1155,8 +1155,8 @@ interface ConfigStorageInterface {
    * @return string
    *   The encoded configuration data.
    *
-   * This is a publicly accessible static method to allow for alternative
-   * usages in data conversion scripts and also tests.
+   *   This is a publicly accessible static method to allow for alternative
+   *   usages in data conversion scripts and also tests.
    */
   public function encode($data);
 
@@ -1169,8 +1169,8 @@ interface ConfigStorageInterface {
    * @return array
    *   The decoded configuration data as an associative array.
    *
-   * This is a publicly accessible static method to allow for alternative
-   * usages in data conversion scripts and also tests.
+   *   This is a publicly accessible static method to allow for alternative
+   *   usages in data conversion scripts and also tests.
    */
   public function decode($raw);
 
@@ -1304,7 +1304,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *    * db:/default/config_active
    *    * db:config_active
    *    * db://config_active
-   *    * db:/config_store/config_stage
+   *    * db:/config_store/config_stage.
    */
   public function __construct($dburl) {
     $matches = array();
@@ -1336,7 +1336,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       }
       catch (\Exception $e) {
         throw new ConfigStorageException(format_string('The database table %table could not be created: @error', array(
-          '%table' => $config_directory,
+          '%table' => $this->table,
           '@error' => $e->getMessage(),
         )), 0, $e);
       }
@@ -1475,7 +1475,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function getModifiedTime($name) {
     $data = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', 'ctime')
+      ->fields('c', array('ctime'))
       ->condition('c.name', $name)
       ->execute()
       ->fetchField();
@@ -1538,7 +1538,14 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
 
     try {
       $archiver = new ArchiverTar($realpath);
-      $archiver->extract($this->directory, $archiver->listContents());
+      // @todo: Noted by @herbdool:
+      // I'm betting that importing an archive doesn't work yet. It would need
+      // to first extract the archive to a temporary directory (see
+      // exportArchive() on creating that, and then it might need to truncate
+      // and insert the config? Or is truncating a problem? If so then it needs
+      // something more complex - comparing the archive to live and
+      // updating/deleting/inserting depending on the situation.
+      $archiver->extract(file_directory_temp(), $archiver->listContents());
     }
     catch (\Exception $e) {
       watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
