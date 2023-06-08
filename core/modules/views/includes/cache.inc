@@ -181,7 +181,7 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
  *   If TRUE, the data will be cached specific to the currently active language.
  */
 function views_cache_set($cid, $data, $use_language = FALSE) {
-  if (config_get('views.settings', 'skip_cache')) {
+  if (config_get('views.settings', 'cache_views_data') == FALSE) {
     return;
   }
   if ($use_language) {
@@ -206,7 +206,7 @@ function views_cache_set($cid, $data, $use_language = FALSE) {
  *   The cache or FALSE on failure.
  */
 function views_cache_get($cid, $use_language = FALSE) {
-  if (config_get('views.settings', 'skip_cache')) {
+  if (config_get('views.settings', 'cache_views_data') == FALSE) {
     return;
   }
   if ($use_language) {

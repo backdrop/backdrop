@@ -31,9 +31,9 @@ function views_schema() {
 function views_requirements($phase) {
   $requirements = array();
 
-  if ($phase == 'runtime' && config_get('views.settings', 'skip_cache')) {
+  if ($phase == 'runtime' && config_get('views.settings', 'cache_views_data') == FALSE) {
     // Inform user about status of Views data cache.
-    $requirements['views_skip_cache'] = array(
+    $requirements['views_cache_views_data'] = array(
       'title' => t('Views data caching'),
       'value' => t('Disabled'),
       'severity' => REQUIREMENT_WARNING,
@@ -107,7 +107,6 @@ function views_update_1003() {
   $update_variables = array(
     'views_exposed_filter_any_label' => 'new_any',
     'views_show_additional_queries' => FALSE,
-    'views_skip_cache' => FALSE,
     'views_sql_signature' => FALSE,
     'views_devel_output' => FALSE,
     'views_devel_region' => 'footer',
@@ -136,9 +135,16 @@ function views_update_1003() {
     $name = str_replace('views_', '', $name);
     $config->set($name, $value);
   }
+
+  // Special handling for 'views_skip_cache': rename to 'cache_views_data', and
+  // set it to the opposite value.
+  $views_skip_cache = update_variable_get('views_skip_cache', FALSE);
+  $config->set('cache_views_data', !$views_skip_cache);
+
   $config->save();
 
-  // Delete the updated variables.
+  // Delete the updated variables (including the 'views_skip_cache').
+  $update_variables['views_skip_cache'] = $views_skip_cache;
   foreach ($update_variables as $variable => $value) {
     update_variable_del($variable);
   }
@@ -211,11 +217,11 @@ function views_update_1007() {
 }
 
 /**
- * Add default value for the skip_cache setting.
+ * Add default value for 'cache_views_data' (previously 'skip_cache').
  */
 function views_ui_update_1008() {
   $config = config('views.settings');
-  $config->set('skip_cache', FALSE);
+  $config->set('cache_views_data', TRUE);
   $config->save();
 }
 

@@ -4648,10 +4648,10 @@ function views_ui_admin_settings_advanced() {
     '#access' => user_access('flush caches'),
   );
 
-  $form['cache']['skip_cache'] = array(
+  $form['cache']['cache_views_data'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Disable Views data caching'),
-    '#default_value' => $config->get('skip_cache'),
+    '#title' => t('Cache views data'),
+    '#default_value' => $config->get('cache_views_data'),
     '#description' => t('To increase performance, Views caches data about tables, modules, and views available. Disabling the caching of this data will cause Views to always rebuild it when needed.'),
   );
   $form['cache']['skip_cache_warning'] = array(
@@ -4661,12 +4661,12 @@ function views_ui_admin_settings_advanced() {
     '#states' => array(
       // Only show this warning when Views data caching is being disabled.
       'visible' => array(
-        'input[name="skip_cache"]' => array('checked' => TRUE),
+        'input[name="cache_views_data"]' => array('checked' => FALSE),
       ),
     ),
   );
   $form['cache']['skip_cache_warning']['warning'] = array(
-    '#markup' => t('This setting can have a serious performance impact on your site, so only enable it for debugging purposes, and make sure to disable it on production environments.'),
+    '#markup' => t('Disabling the caching of views data can be useful while a site is in development, <strong>but it can also have a serious performance impact</strong>. So only disable it for debugging purposes, and make sure to enable it on production environments.'),
   );
 
   $form['cache']['clear_cache'] = array(
