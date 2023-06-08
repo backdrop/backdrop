@@ -543,7 +543,7 @@ class Config {
     }
 
     // The name must not contain any of the following characters:
-    // : ? * < > " ' / \.
+    // : ? * < > " ' / \
     if (preg_match('/[:?*<>"\'\/\\\\]/', $name)) {
       throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
         '@name' => $name,
@@ -1304,7 +1304,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *    * db:/default/config_active
    *    * db:config_active
    *    * db://config_active
-   *    * db:/config_store/config_stage.
+   *    * db:/config_store/config_stage
    */
   public function __construct($dburl) {
     $matches = array();
