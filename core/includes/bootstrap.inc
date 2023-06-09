@@ -960,6 +960,7 @@ function backdrop_settings_initialize() {
     $session_name = $cookie_domain;
   }
   else {
+    $cookie_domain = '';
     // Otherwise use $base_url as session name, without the protocol
     // to use the same session identifiers across HTTP and HTTPS.
     list( , $session_name) = explode('://', $base_url, 2);
