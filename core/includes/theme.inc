@@ -2212,16 +2212,16 @@ function theme_table(array $variables) {
   // Format the table header.
   if (!empty($header)) {
     $ts = tablesort_init($header);
-    // HTML requires that the thead tag has tr tags in it followed by tbody
+    // HTML requires that the thead tag has tr tags in it, followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
     $output .= (!empty($rows) ? ' <thead><tr>' : ' <tr>');
     $i = 0;
     foreach ($header as $cell) {
       $i++;
       // Track responsive classes for each column as needed. Only the header
-      // cells for a column are marked up with the responsive classes by a
-      // module developer or themer. The responsive classes on the header cells
-      // must be transferred to the content cells.
+      // cells for a column are marked up with the responsive classes. The
+      // responsive classes on the header cells must be transferred to the
+      // content cells.
       if (!empty($cell['class']) && is_array($cell['class'])) {
         if (in_array(RESPONSIVE_PRIORITY_MEDIUM, $cell['class'])) {
           $responsive_columns[$i] =  RESPONSIVE_PRIORITY_MEDIUM;
@@ -2252,8 +2252,8 @@ function theme_table(array $variables) {
     $sections['tfoot'] = $variables['footer'];
   }
 
-  // tbody and tfoot have the same structure, and are built using the same
-  // procedure.
+  // The tbody and tfoot tags have the same structure, and are built using the
+  // same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');

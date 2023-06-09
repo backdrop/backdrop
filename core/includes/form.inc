@@ -3861,7 +3861,6 @@ function theme_tableselect($variables) {
  *   The processed element.
  */
 function form_process_tableselect($element) {
-
   if ($element['#multiple']) {
     $value = is_array($element['#value']) ? $element['#value'] : array();
   }
@@ -3872,7 +3871,10 @@ function form_process_tableselect($element) {
 
   $element['#tree'] = TRUE;
 
-  if (count($element['#options']) > 0) {
+  if (empty($element['#options'])) {
+    $element['#value'] = array();
+  }
+  else {
     if (!isset($element['#default_value']) || $element['#default_value'] === 0) {
       $element['#default_value'] = array();
     }
@@ -3881,50 +3883,67 @@ function form_process_tableselect($element) {
     // the value of the tableselect element behaves as if it had been of type
     // checkboxes or radios.
     foreach ($element['#options'] as $key => $choice) {
-      // Do not overwrite manually created children.
-      if (!isset($element[$key])) {
-        if ($element['#multiple']) {
-          $title = '';
-          if (!empty($element['#options'][$key]['title']['data']['#title'])) {
-            $title = t('Update @title', array(
-              '@title' => $element['#options'][$key]['title']['data']['#title'],
-            ));
-          }
-          $element[$key] = array(
-            '#type' => 'checkbox',
-            '#title' => $title,
-            '#title_display' => 'invisible',
-            '#return_value' => $key,
-            '#default_value' => isset($value[$key]) ? $key : NULL,
-            '#attributes' => $element['#attributes'],
-            '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
-          );
+      // Initialize each item in #options, by adding it as a child in the array
+      // of the element, while at the same time making sure to not overwrite any
+      // items that might have already been added to the array (which is what
+      // happens when properties are defined for individual items).
+      $element += array($key => array());
+      // If properties have been added explicitly to some but not all individual
+      // #options, then these already exist as children in the array of the
+      // element. That causes them to bubble up respectively to the other
+      // children in the resulting rows of the HTML table. By moving all items
+      // at the end of the element array (one by one as they come in the
+      // #options array), we are making sure that we retain the order of the
+      // element's children (rows of the table). This is irrelevant to each
+      // item's #weight property, which may or may not have been set explicitly,
+      // and which is taken into account later in theme_table().
+      $element_key = $element[$key];
+      unset($element[$key]);
+      $element[$key] = $element_key;
+
+      if ($element['#multiple']) {
+        $title = '';
+        if (!empty($element['#options'][$key]['title']['data']['#title'])) {
+          $title = t('Update @title', array(
+            '@title' => $element['#options'][$key]['title']['data']['#title'],
+          ));
         }
-        else {
-          // Generate the parents as the autogenerator does, so we will have a
-          // unique id for each radio button.
-          $parents_for_id = array_merge($element['#parents'], array($key));
-          $element[$key] = array(
-            '#type' => 'radio',
-            '#title' => '',
-            '#return_value' => $key,
-            '#default_value' => ($element['#default_value'] == $key) ? $key : NULL,
-            '#attributes' => $element['#attributes'],
-            '#parents' => $element['#parents'],
-            '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
-            '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
-          );
-        }
-        $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
-        if (isset($element['#options'][$key]['#weight'])) {
-          $element[$key]['#weight'] = $element['#options'][$key]['#weight'];
-        }
+
+        $element[$key] += array(
+          '#type' => 'checkbox',
+          '#title' => $title,
+          '#title_display' => 'invisible',
+          '#return_value' => $key,
+          '#default_value' => isset($value[$key]) ? $key : NULL,
+          '#attributes' => $element['#attributes'],
+          '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+        );
+      }
+      else {
+        // Generate the parents as the autogenerator does, so we will have a
+        // unique HTML id for each radio button.
+        $parents_for_id = array_merge($element['#parents'], array($key));
+
+        $element[$key] += array(
+          '#type' => 'radio',
+          '#title' => '',
+          '#return_value' => $key,
+          '#default_value' => ($element['#default_value'] == $key) ? $key : NULL,
+          '#attributes' => $element['#attributes'],
+          '#parents' => $element['#parents'],
+          '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
+          '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+        );
+      }
+
+      $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
+
+      if (isset($element['#options'][$key]['#weight'])) {
+        $element[$key]['#weight'] = $element['#options'][$key]['#weight'];
       }
     }
   }
-  else {
-    $element['#value'] = array();
-  }
+
   return $element;
 }
 
