@@ -393,7 +393,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     // Check that invalid default values are rejected.
     $edit = array($element_name => '-1');
     $this->backdropPost($admin_path, $edit, t('Save settings'));
-    $this->assertText("$field_name does not accept the value -1", 'Form vaildation failed.');
+    $this->assertText("$field_name does not accept the value -1", 'Form validation failed.');
 
     // Check that the default value is saved.
     $edit = array($element_name => '1');
@@ -655,7 +655,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $this->assertNodeViewText($node, 'rss', $output['field_test_default'], "The field is displayed as expected in display modes that use 'default' settings.");
     $this->assertNodeViewNoText($node, 'teaser', $value, "The field is hidden in display modes that use custom settings.");
 
-    // Change fomatter for 'default' mode, check that the field is displayed
+    // Change formatter for 'default' mode, check that the field is displayed
     // accordingly in 'rss' mode.
     $edit = array(
       'fields[field_test][type]' => 'field_test_with_prepare_view',
@@ -729,7 +729,8 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
   }
 
   /**
-   * Asserts that a string is (not) found in the rendered nodein a display mode.
+   * Asserts that a string is (not) found in the rendered node in a display
+   * mode.
    *
    * This helper function is used by assertNodeViewText() and
    * assertNodeViewNoText().

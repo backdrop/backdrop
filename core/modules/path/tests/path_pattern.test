@@ -209,7 +209,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
 
-    // German transiteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
+    // German transliteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
     $input = 'Ärger im Büro ist möglich';
     $expected = 'aerger-im-buero-ist-moeglich';
     $output = path_clean_string($input, array('langcode' => 'de'));

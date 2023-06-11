@@ -28,7 +28,7 @@ class date_sql_handler {
   var $granularity;
 
   /**
-   * The object constuctor.
+   * The object constructor.
    */
   public function __construct($date_type = DATE_DATETIME, $local_timezone = NULL, $offset = '+00:00') {
     $this->db_type = Database::getConnection()->databaseType();
@@ -55,7 +55,7 @@ class date_sql_handler {
   }
 
   /**
-   * Set the database timzone offset.
+   * Set the database timezone offset.
    *
    * Setting the db timezone to UTC is done to ensure consistency in date
    * handling whether or not the database can do proper timezone conversion.
@@ -378,7 +378,7 @@ class date_sql_handler {
   }
 
   /**
-   * Create a where clause to compare a formated field to a formated value.
+   * Create a where clause to compare a formatted field to a formatted value.
    *
    * @param string $format
    *   The format to use on the date and the value when comparing them.
@@ -560,7 +560,7 @@ class date_sql_handler {
    *   A date format string.
    *
    * @return string
-   *   The conveted help text.
+   *   The converted help text.
    */
   function format_help($format) {
     $replace = array(

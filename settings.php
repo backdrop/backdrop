@@ -456,7 +456,25 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 //$config['system.core']['block_interest_cohort'] = FALSE;
 
 /**
- * Additional public file schemes:
+ * File schemes whose paths should not be normalized.
+ *
+ * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
+ * to prevent unintended file access. For example, 'private://css/../image.png'
+ * is normalized to 'private://image.png' before checking access to the file.
+ *
+ * On Windows, Backdrop also replaces '\' with '/' in file URIs.
+ *
+ * If file URIs with one or more scheme should not be normalized like this, then
+ * list the schemes here. For example, if 'example://path/./filename.png' should
+ * not be normalized to 'example://path/filename.png', then add 'example' to
+ * this array. In this case, make sure that the module providing the 'example'
+ * scheme does not allow unintended file access when using '/../' to move up the
+ * directory tree.
+ */
+//$config['system.core']['file_not_normalized_schemes'] = array('example');
+
+/**
+ * Additional public file schemes.
  *
  * Public schemes are URI schemes that allow download access to all users for
  * all files within that scheme.

@@ -387,7 +387,7 @@ abstract class DatabaseConnection {
    *   further up the call chain can take an appropriate action. To suppress
    *   that behavior and return NULL on failure, set this option to FALSE.
    *
-   * @return
+   * @return array
    *   An array of default query options.
    */
   protected function defaultOptions() {
@@ -407,7 +407,7 @@ abstract class DatabaseConnection {
    * is for requesting the connection information of this specific
    * open connection object.
    *
-   * @return
+   * @return array
    *   An array of the connection information. The exact list of
    *   properties is driver-dependent.
    */
@@ -2951,7 +2951,7 @@ function db_drop_table($table) {
  *   will be set to the value of the key in all rows. This is most useful for
  *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
- *   Optional. An array containing the specification for keys and indexes to be 
+ *   Optional. An array containing the specification for keys and indexes to be
  *   created on the table along with the field. The format is the same as a
  *   schema definition, but without the 'columns' element. If you are adding a
  *   'serial' type field, you MUST specify at least one key or index in this

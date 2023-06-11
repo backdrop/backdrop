@@ -53,7 +53,7 @@ class ViewsAccessTest extends ViewsSqlTest {
 
     $view->set_display('default');
 
-    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view everytime'));
+    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view every time.'));
     $this->assertTrue($view->display_handler->access($this->web_user));
     $this->assertTrue($view->display_handler->access($this->normal_user));
   }
@@ -67,7 +67,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->set_display('default');
     $access_plugin = $view->display_handler->get_plugin('access');
 
-    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view everytime'));
+    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view every time.'));
     $this->assertFalse($view->display_handler->access($this->web_user));
     $this->assertTrue($view->display_handler->access($this->normal_user));
   }
@@ -81,7 +81,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->set_display('default');
     $access_plugin = $view->display_handler->get_plugin('access');
 
-    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view everytime'));
+    $this->assertTrue($view->display_handler->access($this->admin_user), t('Admin-Account should be able to access the view every time.'));
     $this->assertFalse($view->display_handler->access($this->web_user));
     $this->assertTrue($view->display_handler->access($this->normal_user));
   }
