@@ -1309,8 +1309,8 @@ function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $locati
   if (!isset($location_parsed['host'])) {
     return FALSE;
   }
-  $strip_on_host_change = settings_get('backdrop_http_request_strip_sensitive_headers_on_host_change', TRUE);
-  $strip_on_https_downgrade = settings_get('backdrop_http_request_strip_sensitive_headers_on_https_downgrade', TRUE);
+  $strip_on_host_change = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_host_change');
+  $strip_on_https_downgrade = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_https_downgrade');
   if ($strip_on_host_change && strcasecmp($url_parsed['host'], $location_parsed['host']) !== 0) {
     return TRUE;
   }

@@ -511,8 +511,8 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * @see _backdrop_should_strip_sensitive_headers_on_http_redirect()
  * @see backdrop_http_request()
  */
-// $settings['backdrop_http_request_strip_sensitive_headers_on_host_change'] = TRUE;
-// $settings['backdrop_http_request_strip_sensitive_headers_on_https_downgrade'] = TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change']= TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade']= TRUE;
 
 /**
  * Include a local settings file, if available.
