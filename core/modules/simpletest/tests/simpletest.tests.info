@@ -298,6 +298,12 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = common.test
 
+[CommonBackdropHTTPRedirectTest]
+name = Backdrop HTTP Redirect Processing
+description = Perform unit tests on processing of http redirects.
+group = Common
+file = common.test
+
 [CommonBackdropHTTPResponseStatusLineTest]
 name = Backdrop HTTP Response Status
 description = Performs unit tests on Backdrop's HTTP Response Status.
