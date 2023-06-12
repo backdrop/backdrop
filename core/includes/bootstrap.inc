@@ -366,7 +366,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
     $this->bin = $bin;
 
     if ($cached = cache($bin)->get($this->cid)) {
-     $this->storage = $cached->data;
+      $this->storage = $cached->data;
     }
   }
 
@@ -880,7 +880,7 @@ function backdrop_settings_initialize() {
 
   $is_https = backdrop_is_https();
 
-  // Load settings specified by the server, if present
+  // Load settings specified by the server, if present.
   if (isset($_SERVER['BACKDROP_SETTINGS'])) {
     $server_settings = @json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
     if (!is_array($server_settings)) {
@@ -2221,19 +2221,19 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
     return;
   }
 
-   // Use a default value if $message is not set.
-   if (empty($message)) {
-     // The exception message is run through check_plain() by _backdrop_decode_exception().
-     $message = '%type: !message in %function (line %line of %file).';
-   }
-   // $variables must be an array so that we can add the exception information.
-   if (!is_array($variables)) {
-     $variables = array();
-   }
+  // Use a default value if $message is not set.
+  if (empty($message)) {
+    // The exception message is run through check_plain() by _backdrop_decode_exception().
+    $message = '%type: !message in %function (line %line of %file).';
+  }
+  // $variables must be an array so that we can add the exception information.
+  if (!is_array($variables)) {
+    $variables = array();
+  }
 
-   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-   $variables += _backdrop_decode_exception($exception);
-   watchdog($type, $message, $variables, $severity, $link);
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+  $variables += _backdrop_decode_exception($exception);
+  watchdog($type, $message, $variables, $severity, $link);
 }
 
 /**
@@ -2328,7 +2328,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     // The user object may not exist in all conditions, so 0 is substituted if needed.
     $user_uid = isset($user->uid) ? $user->uid : 0;
 
-    // Prepare the fields to be logged
+    // Prepare the fields to be logged.
     $log_entry = array(
       'type'        => $type,
       'message'     => $message,
@@ -2344,7 +2344,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
       'timestamp'   => time(),
     );
 
-    // Call the logging hooks to log/process the message
+    // Call the logging hooks to log/process the message.
     module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
@@ -3041,8 +3041,13 @@ function _backdrop_bootstrap_configuration() {
   // Check that the config directory is not empty.
   if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
-      $directory = config_get_config_directory('active');
-      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $exception_message = 'The configuration directory in settings.php is specified as \'%directory\', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.', array('%directory' => config_get_config_directory('active'));
+      }
+      else {
+        $exception_message = 'The active configuration location is either empty or missing crucial files. Check that the \$config_active_class variable is correct in settings.php.';
+      }
+      throw new Exception($exception_message);
     }
   }
 }
@@ -3095,7 +3100,7 @@ function _backdrop_bootstrap_page_cache() {
       ob_start();
 
       // Calls to hook_boot() on page cache requests is deprecated, though they
-      // can still be enabled via settings.php
+      // can still be enabled via settings.php.
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
         // Restore the metadata cached with the page for hook_boot().
         $_GET['q'] = $cache->data['path'];
@@ -3219,7 +3224,6 @@ function _backdrop_bootstrap_variables() {
       $GLOBALS['settings'] = array_merge($GLOBALS['settings'], $settings);
     }
   }
-
 
   // Load variables from the database, but do not overwrite variables set in settings.php.
   $conf = variable_initialize(isset($conf) ? $conf : array());
@@ -3366,7 +3370,7 @@ function backdrop_valid_test_ua() {
 
   if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
-    $check_string =  $prefix . ';' . $time . ';' . $salt;
+    $check_string = $prefix . ';' . $time . ';' . $salt;
     // We use the salt from settings.php to make the HMAC key, since the
     // database is not yet initialized and we can't access any Backdrop
     // variables. The file properties add more entropy.
@@ -3944,7 +3948,7 @@ class SchemaCache extends BackdropCacheArray {
    */
   protected function resolveCacheMiss($offset) {
     $complete_schema = backdrop_get_complete_schema();
-    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] :  NULL;
+    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] : NULL;
     $this->storage[$offset] = $value;
     $this->persist($offset);
     return $value;
@@ -4333,7 +4337,7 @@ function &backdrop_register_shutdown_function($callback = NULL) {
     }
     $args = func_get_args();
     array_shift($args);
-    // Save callback and arguments
+    // Save callback and arguments.
     $callbacks[] = array('callback' => $callback, 'arguments' => $args);
   }
   return $callbacks;
