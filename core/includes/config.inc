@@ -543,7 +543,7 @@ class Config {
     }
 
     // The name must not contain any of the following characters:
-    //   * : ? < > " ' / \
+    // ? * < > " ' / \ :
     if (preg_match('/[:?*<>"\'\/\\\\]/', $name)) {
       throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
         '@name' => $name,
