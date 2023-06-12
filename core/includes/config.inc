@@ -543,7 +543,7 @@ class Config {
     }
 
     // The name must not contain any of the following characters:
-    // : ? * < > " ' / \
+    //   * : ? < > " ' / \
     if (preg_match('/[:?*<>"\'\/\\\\]/', $name)) {
       throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
         '@name' => $name,
@@ -1296,15 +1296,16 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *
    * @param string $dburl
    *   A URL that references a backdrop connection (optional) and table. The
-   *   string has a format of db:/<database connection>/<database table>. If
-   *   no database connection is specified, then the 'default' connection is
-   *   used.
+   *   string has a format of db:/<database connection>/<database table>.
    *
    *   Examples:
    *    * db:/default/config_active
    *    * db:config_active
    *    * db://config_active
    *    * db:/config_store/config_stage
+   *
+   *   If no database connection is specified, then the 'default' connection is
+   *   used.
    */
   public function __construct($dburl) {
     $matches = array();
