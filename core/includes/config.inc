@@ -1391,7 +1391,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array('@filename' => $name, '@contents' => $data)));
+      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+        '@filename' => $name,
+        '@contents' => $data,
+      )));
     }
     return $data;
   }
@@ -1541,7 +1544,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       $archiver->extract(file_directory_temp(), $archiver->listContents());
     }
     catch (\Exception $e) {
-      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog('config', 'Could not extract the archive @uri: @error', array(
+        '@uri' => $file_uri,
+        '@error' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;
