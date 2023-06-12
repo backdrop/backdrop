@@ -3042,10 +3042,11 @@ function _backdrop_bootstrap_configuration() {
   if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
       if (is_a($config_storage, 'ConfigFileStorage')) {
-        $exception_message = 'The configuration directory in settings.php is specified as \'%directory\', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.', array('%directory' => config_get_config_directory('active'));
+        $directory = config_get_config_directory('active');
+        $exception_message = "The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.";
       }
       else {
-        $exception_message = 'The active configuration location is either empty or missing crucial information. Check that the \$config_active_class variable is correct in settings.php.';
+        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$config_active_class variable is correct in settings.php.";
       }
       throw new Exception($exception_message);
     }
