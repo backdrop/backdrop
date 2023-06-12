@@ -1275,6 +1275,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         ),
         'data' => array(
           'type' => 'text',
+          'size' => 'big',
           'not null' => TRUE,
           'description' => 'The JSON encoded value for the key.',
         ),
