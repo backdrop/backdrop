@@ -1538,13 +1538,6 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
 
     try {
       $archiver = new ArchiverTar($realpath);
-      // @todo: Noted by @herbdool:
-      // I'm betting that importing an archive doesn't work yet. It would need
-      // to first extract the archive to a temporary directory (see
-      // exportArchive() on creating that, and then it might need to truncate
-      // and insert the config? Or is truncating a problem? If so then it needs
-      // something more complex - comparing the archive to live and
-      // updating/deleting/inserting depending on the situation.
       $archiver->extract(file_directory_temp(), $archiver->listContents());
     }
     catch (\Exception $e) {
