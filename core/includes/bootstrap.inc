@@ -3045,7 +3045,7 @@ function _backdrop_bootstrap_configuration() {
         $exception_message = 'The configuration directory in settings.php is specified as \'%directory\', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.', array('%directory' => config_get_config_directory('active'));
       }
       else {
-        $exception_message = 'The active configuration location is either empty or missing crucial files. Check that the \$config_active_class variable is correct in settings.php.';
+        $exception_message = 'The active configuration location is either empty or missing crucial information. Check that the \$config_active_class variable is correct in settings.php.';
       }
       throw new Exception($exception_message);
     }
