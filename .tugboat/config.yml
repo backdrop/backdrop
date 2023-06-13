@@ -34,6 +34,7 @@ services:
         # Generate and store a random password for the admin user.
         - openssl rand -hex 6 > $TUGBOAT_ROOT/.tugboat/password
         # Install Backdrop.
+        - chmod +x $TUGBOAT_ROOT/core/scripts/install.sh
         - cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=`cat .tugboat/password`
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
