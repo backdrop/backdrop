@@ -341,7 +341,7 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
   });
 
   // Do not allow the last item to be removed.
-  if ($rows.size() == 1) {
+  if ($rows.length == 1) {
     $rows.find('a.remove').css('display', 'none')
   }
 
@@ -562,7 +562,7 @@ Backdrop.optionsElement.prototype.optionsToText = function() {
   var $rows = $('tbody tr', this.optionsElement);
   var output = '';
   var inGroup = false;
-  var rowCount = $rows.size();
+  var rowCount = $rows.length;
   var defaultValues = [];
 
   for (var rowIndex = 0; rowIndex < rowCount; rowIndex++) {
