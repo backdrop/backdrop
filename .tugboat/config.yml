@@ -21,10 +21,11 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config/active
         - mkdir $TUGBOAT_ROOT/files/config/staging
       update:
-        # Set appropriate file permissions/ownership.
-        - chown -R www-data:www-data $TUGBOAT_ROOT
-        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
-        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
+        # Set appropriate file permissions/ownership for installer/self-updater.
+        - cd $TUGBOAT_ROOT
+        - chown -R www-data:www-data files layouts modules themes core
+        - find files layouts modules themes core -type d -exec chmod 2775 {} \;
+        - find files layouts modules themes core -type f -exec chmod 0664 {} \;
       build:
         # Delete previous comments in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
