@@ -22,10 +22,9 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config/staging
       update:
         # Set appropriate file permissions/ownership for installer/self-updater.
-        - cd $TUGBOAT_ROOT
-        - chown -R www-data:www-data files layouts modules themes core
-        - find files layouts modules themes core -type d -exec chmod 2775 {} \;
-        - find files layouts modules themes core -type f -exec chmod 0664 {} \;
+        - cd $TUGBOAT_ROOT && chown -R www-data:www-data files layouts modules themes core
+        - cd $TUGBOAT_ROOT && find files layouts modules themes core -type d -exec chmod 2775 {} \;
+        - cd $TUGBOAT_ROOT && find files layouts modules themes core -type f -exec chmod 0664 {} \;
       build:
         # Delete previous comments in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
@@ -43,7 +42,7 @@ services:
         # Post a comment in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./post-comment.sh
   mariadb:
-    image: tugboatqa/mariadb:latest
+    image: tugboatqa/mariadb:lts
     commands:
       init:
         # Configure database for UTF-8: https://docs.backdropcms.org/documentation/database-configuration#utf8mb4
