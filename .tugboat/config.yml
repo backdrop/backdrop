@@ -50,4 +50,4 @@ services:
         - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
       build:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
-        - mysqladmin -f drop tugboat && mysqladmin create tugboat
+        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
