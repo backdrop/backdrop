@@ -166,6 +166,19 @@
   padding-right: 28px;
 }
 
+/* Locale link in Admin bar */
+#admin-bar .dropdown .admin-bar-locale-links > span {
+  background: transparent url(../images/language--white--64.png) 95% center no-repeat;
+  background-size: 20px;
+  padding-right: 30px; /* LTR */
+}
+
+[dir="rtl"] #admin-bar .dropdown .admin-bar-locale-links > span {
+  background-position: 5% center;
+  padding-right: 10px;
+  padding-left: 30px;
+}
+
 /* Page link. */
 #admin-bar .dropdown .admin-bar-page-links > span {
   background: transparent url(../images/page--white--64.png) 90% center no-repeat;

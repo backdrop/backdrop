@@ -129,7 +129,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // AJAX behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');

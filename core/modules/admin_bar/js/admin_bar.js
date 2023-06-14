@@ -428,7 +428,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   function resultsHandler(e) {
     var $this = $(this);
     var show = e.type === 'mouseenter' || e.type === 'focusin' || e.type === 'touchstart';
-    // Supress the normal click handling on first touch, only highlighting.
+    // Suppress the normal click handling on first touch, only highlighting.
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
@@ -524,7 +524,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   ) {
     sessionStorage.setItem(
       "escapeAdminPath",
-      settings.admin_bar.current_path
+      window.location
     );
   }
 
@@ -538,7 +538,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
     escapeAdminPath !== null
   ) {
     $toolbarEscape.addClass("escape");
-    $toolbarEscape.attr("href", settings.basePath + escapeAdminPath);
+    $toolbarEscape.attr("href", escapeAdminPath);
     $toolbarEscape.text(Backdrop.t("Back to site"));
   }
 };

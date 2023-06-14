@@ -145,7 +145,7 @@ function link_field_instance_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('URL Display Cutoff'),
     '#default_value' => $instance['settings']['display']['url_cutoff'],
-    '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an elipsis (&hellip;)? Leave blank for no limit.'),
+    '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an ellipsis (&hellip;)? Leave blank for no limit.'),
     '#maxlength' => 3,
     '#size' => 3,
   );
@@ -207,7 +207,7 @@ function link_field_instance_settings_form($field, $instance) {
         ':input[name="instance[settings][attributes][configurable_title]"]' => array('checked' => TRUE),
       ),
     ),
-    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
+    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for link conformance. Tokens values will be evaluated.'),
     '#default_value' => $instance['settings']['attributes']['title'],
     '#field_prefix' => 'title = "',
     '#field_suffix' => '"',
@@ -430,7 +430,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     );
   }
 
-  // In a totally bizzaro case, where URLs and titles are optional but the field
+  // In a totally bizarre case, where URLs and titles are optional but the field
   // is required, ensure there is at least one link.
   if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && (strlen(trim($item['url'])) !== 0 || strlen(trim($item['title'])) !== 0)) {
     $optional_field_found = TRUE;
@@ -569,7 +569,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
     $item['attributes'] = array();
   }
 
-  // Unserialize attributtes array if it has not been unserialized yet.
+  // Unserialize attributes array if it has not been unserialized yet.
   if (!is_array($item['attributes'])) {
     $item['attributes'] = (array) unserialize($item['attributes']);
   }
@@ -890,7 +890,7 @@ function link_field_process($element, $form_state, $complete_form) {
     );
   }
 
-  // If the title field is avaliable or there are field accepts multiple values
+  // If the title field is available or there are field accepts multiple values
   // then allow the individual field items display the required asterisk if needed.
   if (isset($element['title']) || isset($element['_weight'])) {
     // To prevent an extra required indicator, disable the required flag on the

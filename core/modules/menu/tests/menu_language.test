@@ -35,7 +35,7 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
    * @param array $current_options
    *   The parent options contained in the select list.
    * @param string $langcode
-   *   The langage code of the current item, could be menu item or node.
+   *   The language code of the current item, could be menu item or node.
    * @param string $skip_title
    *   Optional, the menu item title to exclude from result.
    *

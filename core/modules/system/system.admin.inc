@@ -1644,7 +1644,7 @@ function system_logging_settings($form, &$form_state) {
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_CRITICAL => t('Critical'),
       WATCHDOG_ERROR => t('Error'),
       WATCHDOG_WARNING => t('Warning'),
       WATCHDOG_NOTICE => t('Notice'),
@@ -1775,6 +1775,36 @@ function system_performance_settings($form, &$form_state) {
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $options = array(
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
+  );
+  $form['jquery_version'] = array(
+    '#type' => 'radios',
+    '#title' => t('jQuery version'),
+    '#default_value' => $config->get('jquery_version'),
+    '#options' => $options,
+  );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
 
   return system_settings_form($form);
 }
@@ -2298,7 +2328,7 @@ function system_run_cron() {
  * Menu callback: return information about PHP.
  */
 function system_php() {
-  phpinfo();
+  phpinfo(~(INFO_VARIABLES | INFO_ENVIRONMENT));
   backdrop_exit();
 }
 
@@ -2844,4 +2874,3 @@ function system_transliterate_ajax_access() {
   $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
-

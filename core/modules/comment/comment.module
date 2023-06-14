@@ -1095,7 +1095,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 25,
     );
-    // Unlike coment_form_node_form_alter(), all of these settings are applied
+    // Unlike comment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
     $form['comment']['comment_default'] = array(
@@ -1500,7 +1500,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
- *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *   TRUE if the current user has access to the comment, FALSE otherwise.
  *
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
@@ -1667,7 +1667,7 @@ function comment_get_display_ordinal($cid, $node_type) {
 
   if ($mode == COMMENT_MODE_FLAT) {
     // For flat comments, cid is used for ordering comments due to
-    // unpredicatable behavior with timestamp, so we make the same assumption
+    // unpredictable behavior with timestamp, so we make the same assumption
     // here.
     $query->condition('c1.cid', $cid, '<');
   }

@@ -249,7 +249,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
     // Check the arguments
     // @todo
 
-    // Check the sort criterias
+    // Check the sort criteria
     // @todo
 
     // Check the relationships
@@ -431,7 +431,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     }
     $view->destroy();
 
-    // Test delta limit + custom seperator.
+    // Test delta limit + custom separator.
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_first_last'] = FALSE;
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['delta_limit'] = 3;
     $view->display['default']->display_options['fields'][$this->fields[3]['field_name']]['group_rows'] = TRUE;
@@ -490,4 +490,3 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
   }
 
 }
-
