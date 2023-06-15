@@ -719,7 +719,7 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
 /**
  * Prepares variables for Page Component block templates.
  */
-function system_preprocess_page_components(&$variables) {
+function template_preprocess_page_components(&$variables) {
   $settings = $variables['settings'];
   $child_delta = $variables['child_delta'];
   $variables += array(
