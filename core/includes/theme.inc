@@ -2252,8 +2252,8 @@ function theme_table(array $variables) {
     $sections['tfoot'] = $variables['footer'];
   }
 
-  // tbody and tfoot have the same structure, and are built using the same
-  // procedure.
+  // The <tbody> and <tfoot> HTMLtags have the same structure, and are built
+  // using the same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');

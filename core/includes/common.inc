@@ -7810,7 +7810,15 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array('uri' => NULL, 'path' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
+      'variables' => array(
+        'uri' => NULL,
+        'path' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+      ),
     ),
     'breadcrumb' => array(
       'variables' => array('breadcrumb' => NULL),
@@ -7819,7 +7827,15 @@ function backdrop_common_theme() {
       'variables' => array('markup' => NULL),
     ),
     'table' => array(
-      'variables' => array('header' => NULL, 'footer' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
+      'variables' => array(
+        'header' => NULL,
+        'footer' => NULL,
+        'rows' => NULL,
+        'attributes' => array(),
+        'caption' => NULL,
+        'colgroups' => array(),
+        'sticky' => TRUE,
+        'empty' => ''),
     ),
     'tablesort_indicator' => array(
       'variables' => array('style' => NULL),
@@ -7828,7 +7844,14 @@ function backdrop_common_theme() {
       'variables' => array('type' => MARK_NEW),
     ),
     'item_list' => array(
-      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'wrapper_attributes' => array(), 'empty' => NULL),
+      'variables' => array(
+        'items' => array(),
+        'title' => '',
+        'type' => 'ul',
+        'attributes' => array(),
+        'wrapper_attributes' => array(),
+        'empty' => NULL,
+      ),
     ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
