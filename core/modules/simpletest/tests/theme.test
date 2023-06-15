@@ -277,6 +277,15 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected = '<div class="item-list"><h3>Some title</h3>No items found.</div>';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates empty string with title.');
 
+    // Verify that additional attributes can be added to the wrapper div.
+    $attribute_name = $this->randomName();
+    $attribute_value = $this->randomString();
+    $another_css_class = $this->randomName();
+    $variables = array();
+    $variables['wrapper_attributes'] = array($attribute_name => $attribute_value, 'class' => $another_css_class);
+    $expected = '<div ' . $attribute_name . '="' . $attribute_value . '" class="' . $another_css_class . ' item-list"></div>';
+    $this->assertThemeOutput('item_list', $variables, $expected, 'Additional attributes added to the wrapper div.');
+
     // Verify nested item lists.
     $variables = array();
     $variables['title'] = 'Some title';

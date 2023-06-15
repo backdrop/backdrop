@@ -2387,16 +2387,21 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - wrapper_attributes: Any additional attributes that should be applied to
+ *       the wrapper div around the list element (the "item-list" CSS class is
+ *       added by default).
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
+ * @since 1.??.?: added the "wrapper_attributes" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
   $title = $variables['title'];
   $type = $variables['type'];
   $list_attributes = $variables['attributes'];
+  $wrapper_attributes = $variables['wrapper_attributes'];
 
   $output = '';
   if ($items) {
@@ -2454,14 +2459,17 @@ function theme_item_list($variables) {
     $output .= render($variables['empty']);
   }
 
-  // Only output the list container and title, if there are any list items.
-  // Check to see whether the block title exists before adding a header.
-  // Empty headers are not semantic and present accessibility challenges.
+  // Only output the list container and title if there are any list items.
   if ($output !== '') {
+    // Check to see whether the list title exists before adding a header. Empty
+    // headers are not semantic and present accessibility challenges.
     if (isset($title) && $title !== '') {
       $title = '<h3>' . $title . '</h3>';
     }
-    $output = '<div class="item-list">' . $title . $output . '</div>';
+    // Add any attributes specified for the wrapper div tag. Include a default
+    // CSS class "item-list".
+    $wrapper_attributes['class'][] = 'item-list';
+    $output = '<div' . backdrop_attributes($wrapper_attributes) . '>' . $title . $output . '</div>';
   }
 
   return $output;
