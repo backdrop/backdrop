@@ -389,7 +389,7 @@ EOF;
     // Check that the $this->cookies property is populated when a user logs in.
     $user = $this->backdropCreateUser();
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
-    $this->backdropPost('<front>', $edit, t('Log in'));
+    $this->backdropPost('user/login', $edit, t('Log in'));
     $this->assertEqual(count($this->cookies), 1, 'A cookie is set when the user logs in.');
 
     // Check that the name and value of the cookie match the request data.
