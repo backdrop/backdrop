@@ -1,11 +1,9 @@
-import { Plugin } from 'ckeditor5/src/core';
+(function (CKEditor5) {
 
 /**
  * Backdrop-specific plugin to alter the CKEditor 5 basic tags.
- *
- * @private
  */
-class BackdropBasicStyles extends Plugin {
+class BackdropBasicStyles extends CKEditor5.core.Plugin {
   /**
    * @inheritdoc
    */
@@ -17,23 +15,46 @@ class BackdropBasicStyles extends Plugin {
    * @inheritdoc
    */
   init() {
+    // CKEditor prefers <i> but Backdrop prefers <em>.
     this.editor.conversion.for('downcast').attributeToElement({
       model: 'italic',
       view: 'em',
       converterPriority: 'high',
     });
+    // CKEditor prefers <s> but Backdrop prefers <del>.
     this.editor.conversion.for('downcast').attributeToElement({
       model: 'strikethrough',
       view: 'del',
       converterPriority: 'high',
     });
-    this.editor.conversion.for('downcast').attributeToElement({
+    // Backdrop previously preferred <span class="underline">. This converts it
+    // to <u> tags preferred by CKEditor 5.
+    this.editor.conversion.for('upcast').elementToAttribute({
       model: 'underline',
-      // @todo: Determine how to add class underline to this element.
-      view: 'span',
-      converterPriority: 'high',
+      view: {
+        name: 'span',
+        classes: ['underline'],
+      },
+      converterPriority: 'low',
     });
+
+    // Support a minimum height option on the editor.
+    // See https://stackoverflow.com/a/56550285/845793
+    const minHeight = this.editor.config.get('minHeight');
+    if (minHeight) {
+      this.editor.ui.view.editable.extendTemplate({
+        attributes: {
+          style: {
+            minHeight: minHeight,
+          }
+        }
+      });
+    }
   }
 }
 
-export default BackdropBasicStyles;
+CKEditor5.backdropBasicStyles = {
+  'BackdropBasicStyles': BackdropBasicStyles
+};
+
+})(CKEditor5);

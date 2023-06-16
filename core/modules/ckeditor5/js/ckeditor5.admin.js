@@ -58,10 +58,10 @@ Backdrop.behaviors.ckeditor5Admin = {
       function adminToolbarAddRow(event) {
         var $rows = $(this).closest('.ckeditor5-toolbar-active').find('.ckeditor5-row');
         var $newRow = $rows.last().clone();
+        $newRow.find('li').remove();
         $newRow.insertAfter($rows.last());
         $newRow.find('.ckeditor5-buttons').sortable(sortableSettings);
         $newRow.find('.ckeditor5-row-controls a').show();
-        redrawToolbarGradient();
         event.preventDefault();
       }
 
@@ -83,20 +83,9 @@ Backdrop.behaviors.ckeditor5Admin = {
           });
           $lastRow.find('.ckeditor5-buttons').sortable('destroy');
           $lastRow.remove();
-          redrawToolbarGradient();
           adminToolbarUpdateValue();
         }
         event.preventDefault();
-      }
-
-      /**
-       * Browser quirk work-around to redraw CSS3 gradients.
-       */
-      function redrawToolbarGradient() {
-        $wrapper.find('.ckeditor5-toolbar-active').css('position', 'relative');
-        window.setTimeout(function() {
-          $wrapper.find('.ckeditor5-toolbar-active').css('position', '');
-        }, 10);
       }
 
       /**

@@ -1,4 +1,4 @@
-(function (Backdrop, ClassicEditor, $) {
+(function (Backdrop, CKEditor5, $) {
 
   "use strict";
 
@@ -9,7 +9,6 @@
         $('<div id="ckeditor5-modal" />').hide().appendTo('body');
       }
 
-      this._loadExternalPlugins(format);
       // Set a title on the CKEditor instance that includes the text field's
       // label so that screen readers say something that is understandable
       // for end users.
@@ -23,18 +22,33 @@
       // that case, for the CKEditor instance that's about to be created.
       editorSettings.readOnly = element.hasAttribute('readonly');
 
-      // Try to match the textarea height on which we're replacing.
-      editorSettings.height = $(element).height();
+      // Try to match the textarea height on which we're replacing. Note this
+      // minHeight property is enforced by the BackdropBasicStyles plugin.
+      editorSettings.minHeight = $(element).height() + 'px';
 
       editorSettings.licenseKey = '';
+
+      // Convert the plugin list from strings to variable names. Each CKEditor
+      // plugin is located under "CKEditor5.[packageName].[moduleName]". So
+      // we convert the list of strings to match the expected variable name.
+      editorSettings.plugins = [];
+      editorSettings.pluginList.forEach(function(pluginItem) {
+        var [packageName,moduleName] = pluginItem.split('.');
+        editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
+      });
 
       // Hide the resizable grippie while CKEditor is active.
       $(element).siblings('.grippie').hide();
 
-      ClassicEditor
+      CKEditor5.editorClassic.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
-          window.editor = editor;
+
+          // Set the offset to account for admin toolbar.
+          // @todo: Bind to document offsettopchange event to update.
+          editor.ui.viewportOffset.top = Backdrop.ckeditor5.computeOffsetTop();
+
+          element.ckeditorAttachedEditor = editor;
           return true;
         })
         .catch(error => {
@@ -51,26 +65,18 @@
       // During detachment, other behaviors may also modify the source textarea,
       // causing CKEditor to lose track of the editor. Therefore pass "false"
       // to use the more aggressive attempt to find the editor instance.
-      var editor = CKEDITOR.dom.element.get(element).getEditor(false);
+      var editor = element.ckeditorAttachedEditor;
       if (!editor) {
         return false;
       }
 
-      var height = $(editor.container.$).find('iframe').height();
-
       if (editor) {
         if (trigger === 'serialize') {
-          editor.updateElement();
+          editor.updateSourceElement();
         }
         else {
           editor.destroy();
-          element.removeAttribute('contentEditable');
         }
-      }
-
-      // Set the textarea height to match the potentially resized CKEditor.
-      if (height) {
-        $(element).height(height);
       }
 
       // Restore the resize grippie.
@@ -79,31 +85,14 @@
     },
 
     onChange: function (element, callback) {
-      var editor = CKEDITOR.dom.element.get(element).getEditor();
-      var timeout;
+      var editor = element.ckeditorAttachedEditor;
       if (editor) {
-        editor.on('change', function() {
-          window.clearTimeout(timeout);
-          timeout = window.setTimeout(function () {
-            callback(editor.getData());
-          }, 400);
+        editor.model.document.on('change:data', function() {
+          Backdrop.debounce(callback, 400)(editor.getData());
         });
       }
       return !!editor;
     },
-
-    _loadExternalPlugins: function (format) {
-      var externalPlugins = format.editorSettings.backdrop.externalPlugins;
-      // Register and load additional CKEditor plugins as necessary.
-      if (externalPlugins) {
-        for (var pluginName in externalPlugins) {
-          if (externalPlugins.hasOwnProperty(pluginName)) {
-            CKEDITOR.plugins.addExternal(pluginName, Backdrop.settings.basePath + externalPlugins[pluginName]['path'] + '/', externalPlugins[pluginName]['file']);
-          }
-        }
-      }
-    }
-
   };
 
   Backdrop.ckeditor5 = {
@@ -174,6 +163,17 @@
 
       // Store the save callback to be executed when this dialog is closed.
       Backdrop.ckeditor5.saveCallback = saveCallback;
+    },
+
+    computeOffsetTop: function () {
+      var $offsets = $('[data-offset-top]');
+      var value, sum = 0;
+      for (var i = 0, il = $offsets.length; i < il; i++) {
+        value = parseInt($offsets[i].getAttribute('data-offset-top'), 10);
+        sum += !isNaN(value) ? value : 0;
+      }
+      this.offsetTop = sum;
+      return sum;
     }
   };
 
@@ -198,4 +198,4 @@
     }
   });
 
-})(Backdrop, ClassicEditor, jQuery);
+})(Backdrop, CKEditor5, jQuery);

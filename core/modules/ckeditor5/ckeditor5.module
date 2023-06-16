@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '31.0.0');
+define('CKEDITOR5_VERSION', '38.0.1');
 
 /**
  * Implements hook_menu().
@@ -104,11 +104,47 @@ function ckeditor5_library_info() {
       array('filter', 'filter'),
       array('system', 'backdrop.ajax'),
       array('ckeditor5', 'ckeditor5'),
+      // CKEditor 5 does not provide its own plugin loader, so any added
+      // potentially needed plugins are added as dependencies.
+      array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
+      array('ckeditor5', 'backdrop.ckeditor5.backdrop-image'),
+      array('ckeditor5', 'backdrop.ckeditor5.backdrop-image-caption'),
+      array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
     ),
   );
+
+  $libraries['backdrop.ckeditor5.backdrop-basic-styles'] = array(
+    'title' => 'CKEditor plugin to convert basic HTML tags to preferred tags.',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-basic-styles/backdrop-basic-styles.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-image'] = array(
+    'title' => 'Integrates uploading images with CKEditor 5.',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-image/backdrop-image.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-image-caption'] = array(
+    'title' => 'Extends CKEditor image caption handling.',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-image-caption/backdrop-image-caption.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-link'] = array(
+    'title' => 'Provides a CKEditor 5 plugin for linking with a dialog.',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-link/backdrop-link.js' => array(),
+    ),
+  );
+
   $libraries['ckeditor5'] = array(
     'title' => 'Loads the main CKEditor library.',
-    'version' => CKEDITOR_VERSION,
+    'version' => CKEDITOR5_VERSION,
     'js' => array(
       // CKEditor is a large library but already compressed. Do not aggregate.
       $module_path . '/lib/ckeditor5/build/ckeditor.js' => array('preprocess' => FALSE, 'group' => JS_LIBRARY),
@@ -152,45 +188,43 @@ function ckeditor5_ckeditor5_plugins() {
     'bold' => array(
       'label' => t('Bold'),
       'required_html' => array(array('tags' => array('strong'))),
+      'plugins' => array('basicStyles.Bold'),
     ),
     'italic' => array(
       'label' => t('Italic'),
       // CKEditor defaults to <i>, we convert it to <em> for
       // backward-compatibility.
       'required_html' => array(array('tags' => array('em'))),
-//      'dependencies' => array('Italic', 'BackdropBasicStyles'),
-//      'dependencies' => array('Italic'),
+      'plugins' => array('basicStyles.Italic', 'backdropBasicStyles.BackdropBasicStyles'),
     ),
     'underline' => array(
       'label' => t('Underline'),
-      // CKEditor defaults to <u>, we convert it to <span class="underline"> for
-      // backward-compatibility.
-      'required_html' => array(array('tags' => array('span'))),
-//      'dependencies' => array('Underline', 'BackdropBasicStyles'),
-//      'dependencies' => array('Underline'),
+      // Unlike CKEditor 4, we conform to CKEditor 5's preference for the <u>
+      // tag for underlined content.
+      'required_html' => array(array('tags' => array('u'))),
+      'plugins' => array('basicStyles.Underline', 'backdropBasicStyles.BackdropBasicStyles'),
     ),
     'strikethrough' => array(
       'label' => t('Strike-through'),
       // CKEditor defaults to <s>, we convert it to <del> for
       // backward-compatibility.
       'required_html' => array(array('tags' => array('del'))),
-//      'dependencies' => array('Strikethrough', 'BackdropBasicStyles'),
-//      'dependencies' => array('Strikethrough'),
+      'plugins' => array('basicStyles.Strikethrough', 'backdropBasicStyles.BackdropBasicStyles'),
     ),
     'code' => array(
       'label' => t('Code'),
       'required_html' => array(array('tags' => array('code'))),
-      'dependencies' => array('Code'),
+      'plugins' => array('basicStyles.Code'),
     ),
     'subscript' => array(
       'label' => t('Subscript'),
       'required_html' => array(array('tags' => array('sub'))),
-      'dependencies' => array('Subscript'),
+      'plugins' => array('basicStyles.Subscript'),
     ),
     'superscript' => array(
       'label' => t('Superscript'),
       'required_html' => array(array('tags' => array('sup'))),
-      'dependencies' => array('Superscript'),
+      'plugins' => array('basicStyles.Superscript'),
     ),
     // Provided by the text-alignment plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/text-alignment.html
@@ -198,31 +232,31 @@ function ckeditor5_ckeditor5_plugins() {
       'label' => t('Alignment'),
       'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Alignment') . '<span class="ckeditor5-button-arrow"></span></span>',
       'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify'))),
-      'dependencies' => array('Alignment'),
+      'plugins' => array('alignment.Alignment'),
     ),
-    'alignmentLeft' => array(
+    'alignment:left' => array(
       'label' => t('Align left'),
       'image' =>  $image_prefix . '/align-left.svg',
       'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-left'))),
-      'dependencies' => array('Alignment'),
+      'plugins' => array('alignment.Alignment'),
     ),
-    'alignmentCenter' => array(
+    'alignment:center' => array(
       'label' => t('Align center'),
       'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-center'))),
       'image' =>  $image_prefix . '/align-center.svg',
-      'dependencies' => array('Alignment'),
+      'plugins' => array('alignment.Alignment'),
     ),
-    'alignmentRight' => array(
+    'alignment:right' => array(
       'label' => t('Align right'),
       'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-right'))),
       'image' =>  $image_prefix . '/align-right.svg',
-      'dependencies' => array('Alignment'),
+      'plugins' => array('alignment.Alignment'),
     ),
-    'alignmentJustify' => array(
+    'alignment:justify' => array(
       'label' => t('Justify'),
       'required_html' => array(array('tags' => array('p'), 'classes' => array('text-align-justify'))),
       'image' =>  $image_prefix . '/align-justify.svg',
-      'dependencies' => array('Alignment'),
+      'plugins' => array('alignment.Alignment'),
     ),
     // Provided by the document-list plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/lists/document-lists.html
@@ -230,73 +264,101 @@ function ckeditor5_ckeditor5_plugins() {
       'label' => t('Bullet list'),
       'image_rtl' => $image_prefix . '/bulletedlist-rtl.svg',
       'required_html' => array(array('tags' => array('ul', 'li'))),
+      'plugins' => array('list.DocumentList', 'list.DocumentListProperties'),
     ),
     'numberedList' => array(
       'label' => t('Numbered list'),
       'image_rtl' => $image_prefix . '/numberedlist-rtl.svg',
       'required_html' => array(array('tags' => array('ol', 'li'))),
+      'plugins' => array('list.DocumentList', 'list.DocumentListProperties'),
     ),
     // Provided by the undo plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/undo-redo.html
     'undo' => array(
       'label' => t('Undo'),
       'image_rtl' => $image_prefix . '/undo-rtl.svg',
+      'plugins' => array('undo.Undo'),
     ),
     'redo' => array(
       'label' => t('Redo'),
       'image_rtl' => $image_prefix . '/redo-rtl.svg',
+      'plugins' => array('undo.Undo'),
     ),
+
+    // Provided by the code-block plugin.
+    // See https://ckeditor.com/docs/ckeditor5/latest/features/code-blocks.html
+    'codeBlock' => array(
+      'label' => t('Code'),
+      'required_html' => array(array('tags' => array('code', 'pre'))),
+      'plugins' => array('codeBlock.CodeBlock'),
+    ),
+
     // Provided by the block-quote plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/block-quote.html
     'blockQuote' => array(
       'label' => t('Blockquote'),
       'required_html' => array(array('tags' => array('blockquote'))),
+      'plugins' => array('blockQuote.BlockQuote'),
     ),
     // Provided by source-editing plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/source-editing.html
     'sourceEditing' => array(
       'label' => t('Source'),
+      'plugins' => array('sourceEditing.SourceEditing'),
     ),
     // Provided by the horizontal-line plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/horizontal-line.html
     'horizontalLine' => array(
       'label' => t('Horizontal line'),
       'required_html' => array(array('tags' => array('hr'))),
+      'plugins' => array('horizontalLine.HorizontalLine'),
     ),
     // Provided by the remove-fromat plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/remove-format.html
     'removeFormat' => array(
       'label' => t('Remove format'),
+      'plugins' => array('removeFormat.RemoveFormat'),
     ),
     // Provided by the special-characters plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/special-characters.html
     'specialCharacters' => array(
       'label' => t('Special characters'),
+      'plugins' => array('specialCharacters.SpecialCharacters', 'specialCharacters.SpecialCharactersEssentials'),
     ),
     // Provided by the headings plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/headings.html
     'heading' => array(
       'label' => t('Headings'),
       'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Headings') . '<span class="ckeditor5-button-arrow"></span></span>',
+      'plugins' => array('heading.Heading'),
     ),
     // Provided by the style plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/style.html
     'style' => array(
       'label' => t('Font style'),
       'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Styles') . '<span class="ckeditor5-button-arrow"></span></span>',
+      'plugins' => array('style.Style', 'htmlSupport.GeneralHtmlSupport'),
     ),
     // Provided by the table plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/tables/tables.html
     'table' => array(
       'label' => t('Table'),
       'required_html' => array(array('tags' => array('table', 'thead', 'tbody', 'tr', 'td', 'th'))),
+      'plugins' => array('table.Table', 'table.TableCaption', 'table.TableCellProperties', 'table.TableColumnResize', 'table.TableProperties'),
     ),
-    // Separator part of toolbar core.
+    // Separator, part of toolbar core.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#separating-toolbar-items
     '|' => array(
       'label' => t('Separator'),
       'image_alternative' => '<span class="ckeditor5-separator" title="' . t('Button separator') . '" aria-label="' . t('Button separator') . '">&nbsp;</span>',
       'attributes' => array('class' => array('ckeditor5-button-separator')),
+      'multiple' => TRUE,
+    ),
+    // Line break, part of toolbar core.
+    // See https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#multiline-wrapping-toolbar
+    '-' => array(
+      'label' => t('Line Break'),
+      'image_alternative' => '<span class="ckeditor5-line-break" title="' . t('Line break') . '" aria-label="' . t('Line break') . '">&nbsp;</span>',
       'multiple' => TRUE,
     ),
   );
@@ -316,10 +378,16 @@ function ckeditor5_ckeditor5_plugins() {
     'internal' => TRUE,
   );
 
-  // The backdropimage plugin replaces normal image functionality.
-  $plugins['backdrop-image'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor5') . '/js/plugins/backdrop-image',
-    'file' => 'backdrop-image.js',
+  // Plugin that converts CKEditor preferred tags to Backdrop preferred tags,
+  // such as converting <s> to <del> or <i> to <em>.
+  $plugins['BackdropBasicStyles'] = array(
+    'library' => 'backdrop.ckeditor5.backdrop-basic-styles',
+  );
+
+  // The BackdropImage plugin extends the default CKEditor Image plugin.
+  $plugins['BackdropImage'] = array(
+    'library' => 'backdrop.ckeditor5.backdrop-image',
+    'enabled callback' => 'ckeditor5_image_plugin_check',
     'buttons' => array(
       'backdropImage' => array(
         'label' => t('Image'),
@@ -334,12 +402,10 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
-  // The backdropImageCaption plugin provides consistent behaviors for image
+  // The BackdropImageCaption plugin provides consistent behaviors for image
   // captions.
-  $plugins['backdropImageCaption'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor5') . '/js/plugins/backdrop-image-caption',
-    'file' => 'plugin.js',
-    'css' => array(backdrop_get_path('module', 'ckeditor5') . '/css/ckeditor5-caption.css'),
+  $plugins['BackdropImageCaption'] = array(
+    'library' => 'backdrop.ckeditor5.backdrop-image-caption',
     'enabled callback' => 'ckeditor5_image_plugin_check',
     'required_html' => array(
       array(
@@ -353,10 +419,9 @@ function ckeditor5_ckeditor5_plugins() {
     )
   );
 
-  // The backdropLink plugin replaces normal link functionality.
-  $plugins['backdropLink'] = array(
-    'path' => backdrop_get_path('module', 'ckeditor5') . '/js/plugins/backdrop-link',
-    'file' => 'backdrop-link.js',
+  // The BackdropLink plugin replaces normal link functionality.
+  $plugins['BackdropLink'] = array(
+    'library' => 'backdrop.ckeditor5.backdrop-link',
     'buttons' => array(
       'backdropLink' => array(
         'label' => t('Link'),
@@ -435,16 +500,13 @@ function ckeditor5_get_settings($format, $existing_settings) {
   $external_plugins = array();
   $external_css = array();
   $all_buttons = array();
-  $dependencies = array();
+  $plugins = array();
+  $libraries = array();
   foreach ($plugin_info as $plugin_name => $plugin) {
     // Check if this plugin should be enabled.
     if (isset($plugin['enabled callback'])) {
-      if ($plugin['enabled callback'] === TRUE || $plugin['enabled callback']($format, $plugin_name) && !empty($plugin['path'])) {
-        $external_plugins[$plugin_name]['file'] = $plugin['file'];
-        $external_plugins[$plugin_name]['path'] = $plugin['path'];
-        if (isset($plugin['css'])) {
-          $external_css = array_merge($external_css, $plugin['css']);
-        }
+      if ($plugin['enabled callback'] === TRUE || $plugin['enabled callback']($format, $plugin_name) && !empty($plugin['library'])) {
+        $libraries[] = $plugin['library'];
       }
     }
     // Associate each plugin with its button.
@@ -478,9 +540,9 @@ function ckeditor5_get_settings($format, $existing_settings) {
         }
       }
 
-      // Add in dependencies.
-      if (isset($all_buttons[$button_name]['dependencies'])) {
-        $dependencies = array_merge($dependencies, $all_buttons[$button_name]['dependencies']);
+      // Add in plugins.
+      if (isset($all_buttons[$button_name]['plugins'])) {
+        $plugins = array_merge($plugins, $all_buttons[$button_name]['plugins']);
       }
     }
     $toolbar[] = $button_name;
@@ -505,41 +567,44 @@ function ckeditor5_get_settings($format, $existing_settings) {
     $css[$key] = base_path() . $css_path;
   }
 
-  // Default plugins that should be removed unless requested explicitly.
-  $excluded = array(
-    'image',
-    'tabletools',
-    'tableresize',
-    'contextmenu',
-  );
-  $excluded_plugins = array_diff($excluded, $dependencies);
-  $extra_plugins = array_unique(array_merge(array_keys($external_plugins), $dependencies));
+  // Add essentials, which is required.
+  array_unshift($plugins, 'essentials.Essentials');
+  $pluginList = array_values(array_unique(array_merge($plugins, array_keys($external_plugins))));
 
   // Initialize reasonable defaults that provide expected basic behavior.
   $settings = array(
     'toolbar' => array(
       'items' => $toolbar,
+      'shouldNotGroupWhenFull' => TRUE,
     ),
+    'pluginList' => $pluginList,
     //'extraPlugins' => implode(',', $extra_plugins),
     //'removePlugins' => implode(',', $excluded_plugins),
-    //'removeButtons' => '',
-    // Empty custom config must be a string.
-    // See http://docs.ckeditor5.com/#!/guide/dev_configuration.
-    //'customConfig' => '',
+    // @todo: Move these properties to be controlled by hook_ckeditor_plugins().
+    'list' => array(
+      'properties' => array(
+        'reversed' => TRUE,
+        'startIndex' => TRUE,
+        'styles' => array('useAttribute' => TRUE),
+      )
+    ),
+
     // Empty styles must be an array.
-    // See http://docs.ckeditor5.com/#!/guide/dev_styles.
+    // See http://docs.ckeditor.com/#!/guide/dev_styles.
     //'stylesSet' => $style_list,
     //'contentsCss' => array_values($css),
-    //'pasteFromWordPromptCleanup' => TRUE,
     //'entities' => FALSE,
     //'indentClasses' => array('indent1', 'indent2', 'indent3'),
-    //'justifyClasses' => array('text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify'),
-    //'coreStyles_strike' => array('element' => 'del'),
-    //'coreStyles_underline' => array('element' => 'span', 'attributes' => array('class' => 'underline')),
+    'alignment' => array(
+      'options' => array(
+        array('name' => 'left', 'className' => 'text-align-left'),
+        array('name' => 'center', 'className' => 'text-align-center'),
+        array('name' => 'right', 'className' => 'text-align-right'),
+        array('name' => 'justify', 'className' => 'text-align-justify'),
+      ),
+    ),
     //'format_tags' => implode(';', $format->editor_settings['format_list']),
     //'language' => $language->langcode,
-    //'resize_dir' => 'vertical',
-    //'disableNativeSpellChecker' => FALSE,
   );
 
   // Add the allowedContent setting, which ensures CKEditor only allows tags

@@ -28,25 +28,14 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
       }
     }
   }
-  $button_groups = array();
+
   $active_buttons = array();
   $settings = $format->editor_settings;
-  foreach ($settings['toolbar'] as $row_number => $row) {
-    $button_groups[$row_number] = array();
-    foreach ($row as $group) {
-      foreach ($group['items'] as $button_name) {
-        if (isset($buttons[$button_name])) {
-          // Save a reference to the button's configured toolbar group.
-          $buttons[$button_name]['group'] = $group['name'];
-          $active_buttons[$row_number][] = $buttons[$button_name];
-          if (empty($buttons[$button_name]['multiple'])) {
-            unset($buttons[$button_name]);
-          }
-          // Create a list of all the toolbar button groups.
-          if (!in_array($group['name'], $button_groups[$row_number])) {
-            array_push($button_groups[$row_number], $group['name']);
-          }
-        }
+  foreach ($settings['toolbar'] as $button_name) {
+    if (isset($buttons[$button_name])) {
+      $active_buttons[] = $buttons[$button_name];
+      if (empty($buttons[$button_name]['multiple'])) {
+        unset($buttons[$button_name]);
       }
     }
   }
@@ -70,7 +59,7 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
         $src = file_create_url($button['image']);
       }
       $value = '<img src="'. $src . '" title="' . check_plain($button['label']) . '" />';
-      $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '"><span class="cke_button_icon">' . $value . '</span></a>';
+      $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '">' . $value . '</a>';
     }
     else {
       $value = '?';
@@ -96,10 +85,6 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
       'contents' => $value,
       'attributes' => $attributes,
     );
-    // If this button has group information, add it to the attributes.
-    if (!empty($button['group'])) {
-      $button_item['group'] = $button['group'];
-    }
 
     // Set additional flag on the button if it can occur multiple times.
     if (!empty($button['multiple'])) {
@@ -109,32 +94,23 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     return $button_item;
   };
 
-  // Assemble list of disabled buttons (which are always a single row).
+  // Assemble list of active buttons.
   $variables['active_buttons'] = array();
-  foreach ($active_buttons as $row_number => $button_row) {
-    foreach ($button_groups[$row_number] as $group_name) {
-      $group_name = (string) $group_name;
-      $variables['active_buttons'][$row_number][$group_name] = array(
-        'group_name_class' => backdrop_clean_css_identifier($group_name),
-        'buttons' => array(),
-      );
-      $buttons = array_filter($button_row, function ($button) use ($group_name) {
-        return (string) $button['group'] === $group_name;
-      });
-      foreach ($buttons as $button) {
-        $variables['active_buttons'][$row_number][$group_name]['buttons'][] = $build_button_item($button, $rtl);
-      }
-    }
+  foreach ($active_buttons as $button) {
+    $variables['active_buttons'][] = $build_button_item($button, $rtl);
   }
-  // Assemble list of disabled buttons (which are always a single row).
+
+  // Assemble list of disabled buttons.
   $variables['disabled_buttons'] = array();
   foreach ($disabled_buttons as $button) {
     $variables['disabled_buttons'][] = $build_button_item($button, $rtl);
   }
   // Assemble list of multiple buttons that may be added multiple times.
   $variables['multiple_buttons'] = array();
-  foreach ($multiple_buttons as $button) {
-    $variables['multiple_buttons'][] = $build_button_item($button, $rtl);
+  foreach ($multiple_buttons as $button_name => $button) {
+    if ($button_name != '-') {
+      $variables['multiple_buttons'][] = $build_button_item($button, $rtl);
+    }
   }
 }
 
@@ -142,63 +118,63 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
  * Displays the toolbar configuration for CKEditor.
  */
 function theme_ckeditor5_settings_toolbar($variables) {
-  $row_controls = '';
-  $row_controls .= '<span class="ckeditor5-row-controls">';
+  // Controls for adding or removing a row.
+  $row_controls = '<span class="ckeditor5-row-controls">';
   $row_controls .= '<a href="#" class="ckeditor5-row-remove" title="' . t('Remove row') . '">-</a>';
   $row_controls .= '<a href="#" class="ckeditor5-row-add" title="' . t('Add row') . '">+</a>';
   $row_controls .= '</span>';
-dsm($variables);
-  // We don't use theme_item_list() below in case there are no buttons in the
-  // active or disabled list, as theme_item_list() will not print an empty UL.
+
+  // theme_item_list() is avoided here because it cannot output an empty <ul>
+  // tag, and the wrapping <div class="item-list"> can cause styling issues.
+  $button_row = array();
+  $button_rows = array();
+
+  // Add a line break at the end of the list.
+  $variables['active_buttons'][] = array(
+    'attributes' => array('data-button-name' => '-'),
+  );
+  foreach ($variables['active_buttons'] as $button) {
+    // CKEditor 5 uses a dash to indicate a line break in the toolbar.
+    if ($button['attributes']['data-button-name'] === '-') {
+      $rendered_row = '<ul class="ckeditor5-buttons">';
+      $rendered_row .= implode('', $button_row);
+      $rendered_row .= '</ul>';
+      $rendered_row .= $row_controls;
+
+      // Start a new row and go to the next item.
+      $button_rows[] = $rendered_row;
+      $button_row = array();
+    }
+    else {
+      $button_row[] = '<li' . backdrop_attributes($button['attributes']) . '>' . $button['contents'] . '</li>';
+    }
+  }
+
   $output = '';
+
+  // Active toolbar buttons.
   $output .= '<strong>' . t('Active toolbar') . '</strong>';
   $output .= '<div class="ckeditor5-toolbar-active clearfix">';
   $output .= '<ul class="ckeditor5-active-toolbar-configuration">';
-  $button_row = array();
-  $button_rows = array();
-  foreach ($variables['active_buttons'] as $button_name => $button) {
-    if ($button_name === '-') {
-      $button_rows[] = $button_row;
-    }
-
-    $button_row[] = array(
-      'data' => $button['contents'],
-      'attributes' => $button['attributes'],
-    );
-    $output = theme('item_list', $button_row);
-    $output .= $row_controls;
-  }
-  if (empty($variables['active_buttons'])) {
-    $output .= '<li class="ckeditor5-row">';
-    $output .= '<ul class="ckeditor5-toolbar-groups">';
-    $output .= '<li class="ckeditor5-toolbar-group" data-group-name="' . check_plain($button_group_name) . '">';
-    $output .= '<h3 class="ckeditor5-toolbar-group-name">' . check_plain($button_group_name) . '</h3>';
-    $output .= '<ul class="ckeditor5-buttons ckeditor5-toolbar-group-buttons">';
-    $output .= '</ul>';
-    $output .= '</li>';
-    $output .= '</ul>';
-    $output .= $add_group;
-    $output .= $row_controls;
-    $output .= '</li>';
+  foreach ($button_rows as $button_row) {
+    $output .= '<li class="ckeditor5-row">' . $button_row . '</li>';
   }
   $output .= '</ul>';
-
   $output .= '</div>';
 
+  // Disabled/available buttons.
   $output .= '<strong>' . t('Available buttons') . '</strong>';
   $output .= '<div class="ckeditor5-toolbar-disabled clearfix">';
   $output .= '<ul class="ckeditor5-buttons">';
   foreach ($variables['disabled_buttons'] as $button) {
-    $contents = $button['contents'];
-    $attributes = backdrop_attributes($button['attributes']);
-    $output .= '<li' . $attributes . '>' . $contents . '</li>';
+    $output .= '<li' . backdrop_attributes($button['attributes']) . '>' . $button['contents'] . '</li>';
   }
   $output .= '</ul>';
+
+  // Buttons that may be placed multiple times.
   $output .= '<ul class="ckeditor5-multiple-buttons">';
   foreach ($variables['multiple_buttons'] as $button) {
-    $contents = $button['contents'];
-    $attributes = backdrop_attributes($button['attributes']);
-    $output .= '<li' . $attributes . '>' . $contents . '</li>';
+    $output .= '<li' . backdrop_attributes($button['attributes']) . '>' . $button['contents'] . '</li>';
   }
   $output .= '</ul>';
   $output .= '</div>';
