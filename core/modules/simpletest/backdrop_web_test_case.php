@@ -993,7 +993,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $cookieFile = NULL;
 
   /**
-   * An array of cookies set in the most recent cURL request.
+   * The cookies of the page currently loaded in the internal browser.
    *
    * @var array
    */
@@ -1926,8 +1926,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $language = $this->originalLanguage;
     $language_url = $this->originalLanguageUrl;
 
-    // Close the CURL handler.
+    // Close the CURL handler and reset the cookies array, so that test classes
+    // containing multiple tests are not polluted.
     $this->curlClose();
+    $this->cookies = array();
   }
 
   /**
