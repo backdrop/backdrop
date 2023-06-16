@@ -403,7 +403,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#type' => 'checkbox',
     '#title' => t('Show as expanded'),
     '#default_value' => $item['expanded'],
-    '#description' => t("When displayed in a 'hierarchial tree' menu style, children of expanded menu links will always be visible."),
+    '#description' => t("When displayed in a 'hierarchical tree' menu style, children of expanded menu links will always be visible."),
   );
 
   // Generate a list of possible parents (not including this link or descendants).
