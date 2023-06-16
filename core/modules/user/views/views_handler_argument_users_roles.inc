@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * Allow role names as an argument.
  *
  * @ingroup views_argument_handlers

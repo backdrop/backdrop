@@ -6,7 +6,7 @@
 class Color {
 
   /**
-   * Validates whether a hexadecimal color value is syntatically correct.
+   * Validates whether a hexadecimal color value is syntactically correct.
    *
    * @param $hex
    *   The hexadecimal string to validate. May contain a leading '#'. May use
@@ -47,7 +47,7 @@ class Color {
     // Ignore '#' prefixes.
     $hex = ltrim($hex, '#');
 
-    // Convert shorhands like '#abc' to '#aabbcc'.
+    // Expand shorthand colors; for example '#abc' to '#aabbcc'.
     if (strlen($hex) == 3) {
       $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
     }

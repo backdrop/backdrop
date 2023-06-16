@@ -1074,7 +1074,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    */
   function testCustomLogo() {
     $file_public_path = config_get('system.core', 'file_public_path');
-    
+
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
     $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));
@@ -1309,7 +1309,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Verify that custom site offline message is not displayed on user/password.
     $this->backdropGet('user/password');
-    $this->assertText('Username or e-mail address', 'Anonymous users can access user/password');
+    $this->assertText('Username or email address', 'Anonymous users can access user/password');
 
     // Submit password reset form.
     $edit = array(
@@ -1575,7 +1575,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     // Make sure that the 3rd node is no longer on frontpage.
     $this->backdropGet('');
-    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
+    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting frontpage listing to 2 nodes.');
 
     // Change the home page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');

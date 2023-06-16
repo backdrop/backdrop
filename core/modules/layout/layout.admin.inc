@@ -14,13 +14,47 @@ function layout_list_page() {
   $layout_template_info = layout_get_layout_template_info();
 
   // Group layouts by path.
+  $layout_paths = array();
   $path_groups = array();
+  $path_groups_end = array();
   foreach ($layouts as $layout) {
-    $path_groups[$layout->getPath()][$layout->name] = $layout;
+    $path = $layout->getPath();
+    // Move admin layouts to the bottom of the list. Note that default layout
+    // has a NULL path, which path_is_admin() won't like in PHP 8.1.
+    if (is_null($path) || path_is_admin($path)) {
+      $path_groups_end[$path][$layout->name] = $layout;
+    }
+    else {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+    // Build a list of all layout paths to check callbacks.
+    if ($path) {
+      $layout_paths[] = $path;
+    }
+  }
+
+  // Put admin layouts at the bottom of the list.
+  foreach ($path_groups_end as $path => $name) {
+    foreach ($name as $layout) {
+      $path_groups[$path][$layout->name] = $layout;
+    }
+  }
+
+  if (!empty($layout_paths)) {
+  $page_callbacks = db_query('
+    SELECT path, page_callback
+    FROM {menu_router}
+    WHERE path IN (:paths)
+    ', array(':paths' => $layout_paths))
+    ->fetchAllKeyed();
+  }
+  else {
+    $page_callbacks = array();
   }
 
   // Assemble the rows of the table.
-  $rows = array();
+  $override_rows = array();
+  $stand_alone_rows = array();
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
@@ -38,20 +72,38 @@ function layout_list_page() {
       $row[] = '';
     }
     else {
-      $path_link = strpos($path, '%') === FALSE ? l($path, $path) : check_plain($path);
-      $row[] = array('data' => $path_link);
+      if (strpos($path, '%') === FALSE) {
+         $path_link = t('Path: ') . l($path, $path);
+       }
+       else {
+         $path_link = t('System path: ') . check_plain($path);
+       }
+
+       $class = array();
+       if (!$page_callbacks[$path]) {
+         $class[] = 'missing-path';
+         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
+       }
+       $row[] = array('data' => $path_link, 'class' => $class);
       // Empty columns are intentional.
       $row[] = '';
       $row[] = '';
       $row[] = '';
     }
+
     if (count($operations['#links']) !== 0) {
       $row[] = backdrop_render($operations);
     }
     else {
       $row[] = '';
     }
-    $rows[] = array('data' => $row, 'class' => array('layout-group'));
+
+    if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+      $stand_alone_rows[] = array('data' => $row, 'class' => array('layout-group'));
+    }
+    else {
+      $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
+    }
 
     foreach ($group as $layout) {
       $operations = array(
@@ -82,19 +134,30 @@ function layout_list_page() {
       if ($layout->disabled) {
         $class[] = 'disabled';
       }
-      $rows[] = array('data' => $row, 'class' => $class);
+
+      if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
+        $stand_alone_rows[] = array('data' => $row, 'class' => $class);
+      }
+      else {
+        $override_rows[] = array('data' => $row, 'class' => $class);
+      }
     }
   }
 
   $header = array(
-    array('data' => t('Path and layout'), 'class' => array('layout-title')),
+    array('data' => t('Layout'), 'class' => array('layout-title')),
     array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
     array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
+  $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
+  $help_items = array();
+  $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
+  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
+  $help .= theme('item_list', array('items' => $help_items));
+  $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
   $help_items[] = array(
     'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and <em>Visibility conditions</em> are evaluated.'),
@@ -120,15 +183,34 @@ function layout_list_page() {
     '#attributes' => array(
       'class' => array('description'),
     ),
+    '#weight' => -1,
   );
-
   $page['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
-  $page['table'] = array(
+  $page['stand_alone'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Layout pages') . '</h2>' . t('These layouts will create new stand-alone pages on the site.'),
+    '#weight' => 0,
+  );
+  $page['stand_alone_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
-    '#rows' => $rows,
+    '#rows' => $stand_alone_rows,
+     '#attributes' => array('class' =>   array('layout-list')),
+     '#empty' => t('No layout pages have been created yet.'),
+     '#weight' => 1,
+   );
+   $page['override'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site.'),
+    '#weight' => 2,
+   );
+   $page['override_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $override_rows,
     '#attributes' => array('class' =>   array('layout-list')),
-    '#empty' => t('No layouts have been created yet.'),
+    '#empty' => t('No layout overrides have been created yet.'),
+    '#weight' => 3,
   );
   return $page;
 }
@@ -140,7 +222,7 @@ function _layout_get_operations(Layout $layout) {
   $links = array();
   if ($layout->disabled && !$layout->isDefault()) {
     $links['enable'] = array(
-      'title' => t('Enable Layout'),
+      'title' => t('Enable layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/enable',
       'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
     );
@@ -150,17 +232,17 @@ function _layout_get_operations(Layout $layout) {
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
   );
   $links['settings'] = array(
-    'title' => t('Configure Layout'),
+    'title' => t('Configure layout'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
   );
   if (!$layout->isDefault()) {
     $links['clone'] = array(
-      'title' => t('Clone Layout'),
+      'title' => t('Clone layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
-        'title' => t('Export Layout'),
+        'title' => t('Export layout'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
           'group' => 'Layouts',
@@ -170,14 +252,14 @@ function _layout_get_operations(Layout $layout) {
     }
     if (!$layout->disabled) {
       $links['disable'] = array(
-        'title' => t('Disable Layout'),
+        'title' => t('Disable layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/disable',
         'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
       );
     }
     if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
       $links['delete'] = array(
-        'title' => t('Delete Layout'),
+        'title' => t('Delete layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
       );
     }
@@ -185,7 +267,7 @@ function _layout_get_operations(Layout $layout) {
 
   if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
     $links['revert'] = array(
-      'title' => t('Revert Layout'),
+      'title' => t('Revert layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
     );
   }
@@ -312,7 +394,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // toggleable placeholder examples.
   $path = isset($form_state['values']['path']) ? $form_state['values']['path'] : $layout->getPath();
   $is_new = isset($layout->is_new) && $layout->is_new;
-  $has_placeholder = strpos($path, '%') !== FALSE;
+  $has_placeholder = strpos((string) $path, '%') !== FALSE;
   if (empty($path)) {
     $path_matches_text = t('Please enter a path.');
   }
@@ -598,13 +680,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
-  if ($router_item && $router_item['path'] !== $layout_path && substr_count($router_item['path'], '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item['path'])) {
-    $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
-    if (backdrop_is_ajax()) {
-      backdrop_set_message($message, 'warning');
-    }
-    else {
-      $form['messages']['#messages']['warning'][] = $message;
+  if ($router_item && $layout_path) {
+    $router_item_path = (string) $router_item['path'];
+    if ($router_item_path !== $layout_path && substr_count($router_item_path, '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item_path)) {
+      $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
+      if (backdrop_is_ajax()) {
+        backdrop_set_message($message, 'warning');
+      }
+      else {
+        $form['messages']['#messages']['warning'][] = $message;
+      }
     }
   }
 
@@ -1379,11 +1464,10 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
     '#maxlength' => 255,
   );
 
-  $all_blocks = layout_get_block_info();
   $block_options = array();
   foreach ($layout->content as $uuid => $block) {
-    $title = $all_blocks[$block->module][$block->delta]['info'];
-    if (!empty($title) && $title !== 'Custom block' && !is_a($block, 'PageComponents')) {
+    $title = strip_tags($block->getAdminTitle());
+    if (!empty($title) && $block->delta !== 'custom_block' && !is_a($block, 'PageComponents')) {
       $block_options[$uuid] = $title;
     }
   }
@@ -1852,6 +1936,40 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
   }
 }
 
+/**
+ * Menu callback; Set a block as disabled.
+ */
+function layout_block_disable_page(Layout $layout, Block $block, $renderer_name) {
+  if (backdrop_get_token('layout-' . $layout->name) !== $_GET['token']) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  $uuid = $block->uuid;
+  $layout->content[$uuid]->status = $block->status ? BLOCK_DISABLED : BLOCK_ENABLED;
+  layout_set_layout_tempstore($layout);
+
+  $renderer = layout_create_renderer($renderer_name, $layout);
+  $replace_block = $renderer->renderBlock($block);
+
+  if (backdrop_is_ajax()) {
+    if ($message = layout_locked_message($layout, 'layout')) {
+      backdrop_set_message($message, 'warning');
+      $commands[] = ajax_command_remove('#messages');
+      $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+    }
+
+    $commands[] = ajax_command_replace('#layout-editor-block-' . $block->uuid, $replace_block);
+    return array(
+      '#type' => 'ajax',
+      '#commands' => $commands,
+    );
+  }
+  else {
+    backdrop_set_message(t('Block "@title" disabled.', array('@title' => $block->getAdminTitle())));
+    backdrop_goto('admin/structure/layouts/manage/' . $layout->name);
+  }
+
+}
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
  *
@@ -3018,7 +3136,7 @@ function layout_settings_page($form, &$form_state) {
     'operations' => t('Operations'),
   );
 
-  backdrop_set_title(t('Layout settings'));
+  backdrop_set_title(t('Layout templates'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
   $rows = array();
@@ -3071,7 +3189,6 @@ function layout_settings_page($form, &$form_state) {
   return $form;
 }
 
-
 /**
  * Validation for layout settings page.
  *
@@ -3122,12 +3239,12 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
         'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'Flexible layout templates',
+          'group' => t('Flexible layout templates'),
           'name' => 'layout.flexible.' . $template_info['name'],
         ),
       );
