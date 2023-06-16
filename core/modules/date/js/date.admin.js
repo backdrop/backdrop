@@ -28,7 +28,7 @@ Backdrop.dateAdmin.TimezoneHandler = function ($checkbox) {
   this.storeTimezoneHandling();
   // Toggle the timezone handling section when the user clicks the "Hour"
   // checkbox.
-  this.$checkbox.bind('click', $.proxy(this.clickHandler, this));
+  this.$checkbox.on('click', $.proxy(this.clickHandler, this));
   // Trigger the click handler so that if the checkbox is unchecked on initial
   // page load, the timezone handling section will be hidden.
   this.clickHandler();

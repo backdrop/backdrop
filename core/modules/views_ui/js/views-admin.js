@@ -444,7 +444,7 @@ Backdrop.behaviors.viewsUiPreview = {
  */
 Backdrop.behaviors.viewsUiRemoveLink = {
   attach: function (context) {
-    $('a.views-remove-link').once('views-processed').click(function(event) {
+    $('a.views-remove-link').once('views-processed').on('click', function(event) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
@@ -820,7 +820,7 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
 Backdrop.behaviors.viewsImplicitFormSubmission = {
   attach: function (context, settings) {
     $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
-      $(this).keypress(function(event) {
+      $(this).on('keypress', function(event) {
         if (event.which == 13) {
           var formId = this.form.id;
           if (formId && settings.viewsImplicitFormSubmission && settings.viewsImplicitFormSubmission[formId] && settings.viewsImplicitFormSubmission[formId].defaultButton) {
@@ -832,7 +832,7 @@ Backdrop.behaviors.viewsImplicitFormSubmission = {
                 $button.trigger(Backdrop.ajax[buttonId].element_settings.event);
               }
               else {
-                $button.click();
+                $button.trigger('click');
               }
             }
           }
@@ -907,7 +907,7 @@ Backdrop.viewsUi.Checkboxifier = function (button) {
   this.$button.hide();
   this.$parent.find('.exposed-description, .grouped-description').hide();
 
-  this.$input.click($.proxy(this, 'clickHandler'));
+  this.$input.on('click', $.proxy(this, 'clickHandler'));
 };
 
 /**

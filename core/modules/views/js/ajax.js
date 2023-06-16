@@ -64,9 +64,9 @@
    */
   Backdrop.behaviors.livePreview = {
     attach: function (context) {
-      $('input#edit-displays-live-preview', context).once('views-ajax-processed').click(function() {
+      $('input#edit-displays-live-preview', context).once('views-ajax-processed').on('click', function() {
         if ($(this).is(':checked')) {
-          $('#preview-submit').click();
+          $('#preview-submit').trigger('click');
         }
       });
     }
@@ -77,7 +77,7 @@
    */
   Backdrop.behaviors.syncPreviewDisplay = {
     attach: function (context) {
-      $("#views-tabset a").once('views-ajax-processed').click(function() {
+      $("#views-tabset a").once('views-ajax-processed').on('click', function() {
         var href = $(this).attr('href');
         // Cut of #views-tabset.
         var display_id = href.substr(11);
