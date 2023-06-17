@@ -50,20 +50,15 @@
  *     times to the toolbar. This typically is only applicable for dividers and
  *     group indicators.
  *   - required_html: If this button requires certain HTML tags or attributes
- *     to be allowed, specify an nested array for each set of tags that should
- *     be allowed. For example:
+ *     to be allowed, specify an array for each set of tags that should be
+ *     allowed. For example:
  *     @code
  *     array(
- *       array(
- *         'tags' => array('a'),
- *         'attributes' => array('href', 'alt'),
- *         'styles' => array('color', 'text-decoration'),
- *         'classes' => array('external', 'internal'),
- *       ),
+ *       '<a href alt class="external internal">'
  *     );
  *     @endcode
- *     Note that this must be a nested array, to allow for the button to require
- *     different attributes on different tags.
+ *     Note this differs from the CKEditor 4 configuration, which used a nested
+ *     array.
  *   - dependencies: An array of other plugin names on which this button
  *     depends. A common use is to add the "contextmenu" plugin, if the button
  *     makes options available only via contextual menu.
@@ -80,20 +75,16 @@
  */
 function hook_ckeditor5_plugins() {
   $plugins['myplugin'] = array(
-    'path' => backdrop_get_path('module', 'mymodule') . '/js/myplugin',
-    'file' => 'plugin.js',
+    'library' => array('mymodule', 'mymodule.ckeditor5.myplugin'),
     'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
     'enabled callback' => 'mymodule_myplugin_plugin_check',
     'buttons' => array(
       'MyPlugin' => array(
         'label' => t('My custom button'),
         'required_html' => array(
-          'tags' => array('a'),
-          'attributes' => array('href', 'alt'),
-          'styles' => array('color', 'text-decoration'),
-          'classes' => array('external', 'internal'),
+          '<a href alt class="external internal">',
         ),
-        'dependencies' => array('contextmenu'),
+        'plugins' => array('myPlugin.MyPlugin'),
       ),
     ),
   );

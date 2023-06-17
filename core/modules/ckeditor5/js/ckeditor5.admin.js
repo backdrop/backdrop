@@ -119,41 +119,59 @@ Backdrop.behaviors.ckeditor5Admin = {
       }
 
       /**
+       * Convert a string of CKEditor tag syntax into an object.
+       *
+       * @param string htmlTag
+       *   An HTML string such as '<a href class="external internal">'.
+       * @return object
+       *   An object with the following keys:
+       *   - tags: An array of the tags passed in (only one is supported).
+       *   - attributes: An array of attributes on the tags.
+       *   - styles: An array of style attributes on the tags.
+       *   - classes: An array of all class names from this tag.
+       */
+      function adminToolbarSplitTag(htmlTag) {
+        // Match everything outside of quotes within the tag.
+        var attributes = htmlTag.match(/([a-z\-]+)(?:=?['"].*?['"])?/ig);
+        // Pop off the first match, which is the tag name itself.
+        var tagName = attributes.shift();
+        var classList = [], styleList = [];
+        if (attributes.indexOf('class') > -1) {
+          classList = htmlTag.match(/class=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+        }
+        if (attributes.indexOf('style') > -1) {
+          styleList = htmlTag.match(/style=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+        }
+        return {
+          attributes: attributes,
+          tags: [tagName],
+          classes: classList,
+          styles: styleList,
+        };
+      }
+
+      /**
        * Create a Backdrop.EditorFeatureHTMLRule instance based on a button DOM element.
        */
       function adminToolbarButtonCreateFeature($element) {
-        var requiredHtml = $element.data('required-html');
-        var optionalHtml = $element.data('optional-html');
+        var requiredHtml = $element.data('required-html') || [];
+        var optionalHtml = $element.data('optional-html') || [];
         var buttonName = $element.data('button-name');
         var buttonFeature, buttonRule, buttonRuleDefinition;
         if (buttonName) {
           buttonFeature = new Backdrop.EditorFeature(buttonName);
-          if (requiredHtml) {
-            for (var n = 0; n < requiredHtml.length; n++) {
-              buttonRuleDefinition = requiredHtml[n];
-              buttonRuleDefinition.required = true;
-
-              // If there are any styles or classes, that means that an
-              // attribute for "style" or "class" must be added.
-              buttonRuleDefinition.attributes = buttonRuleDefinition.attributes || [];
-              if (buttonRuleDefinition.styles && buttonRuleDefinition.styles.length) {
-                buttonRuleDefinition.attributes.push('style');
-              }
-              if (buttonRuleDefinition.classes && buttonRuleDefinition.classes.length) {
-                buttonRuleDefinition.attributes.push('class');
-              }
-              buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
-              buttonFeature.addHTMLRule(buttonRule);
-            }
-          }
-          if (optionalHtml) {
-            for (var n = 0; n < optionalHtml.length; n++) {
-              buttonRuleDefinition = optionalHtml[n];
-              buttonRuleDefinition.required = false;
-              buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
-              buttonFeature.addHTMLRule(buttonRule);
-            }
-          }
+          requiredHtml.forEach(htmlTag => {
+            buttonRuleDefinition = adminToolbarSplitTag(htmlTag);
+            buttonRuleDefinition.required = true;
+            buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
+            buttonFeature.addHTMLRule(buttonRule);
+          });
+          optionalHtml.forEach(htmlTag => {
+            buttonRuleDefinition = adminToolbarSplitTag(htmlTag);
+            buttonRuleDefinition.required = false;
+            buttonRule = new Backdrop.EditorFeatureHTMLRule(buttonRuleDefinition);
+            buttonFeature.addHTMLRule(buttonRule);
+          });
         }
         else {
           buttonFeature = false;
