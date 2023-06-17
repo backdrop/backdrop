@@ -1,28 +1,171 @@
 /**
  * @file
- * Backdrop Image plugin.
- *
- * This alters the existing CKEditor image2 widget plugin to:
- * - require a data-file-id attribute (which Backdrop uses to track where images
- *   are being used)
- * - use a Backdrop-native dialog (that is in fact just an alterable Backdrop form
- *   like any other) instead of CKEditor's own dialogs.
- *   @see \Backdrop\editor\Form\EditorImageDialog
+ * Contains BackdropImage CKEditor 5 plugin and its dependent classes.
  */
 (function (CKEditor5) {
 
 /**
- * @typedef {function} converterHandler
+ * BackdropImage CKEditor 5 plugin.
  *
- * Callback for a CKEditor 5 event.
+ * This complex plugin provides several pieces of key functionality:
  *
- * @param {Event} event
- *  The CKEditor 5 event object.
- * @param {object} data
- *  The data associated with the event.
- * @param {module:engine/conversion/downcastdispatcher~DowncastConversionApi} conversionApi
- *  The CKEditor 5 conversion API object.
+ * - Provides an image upload adapter to save images to Backdrop's file system.
+ * - Saves data-file-id attributes on img tags which Backdrop uses to track
+ *   where files are being used.
+ * - Connects to a Backdrop-native dialog via an AJAX request.
+ *
+ * If this were developed under the normal CKEditor build process, this would
+ * likely be split into multiple plugins and files. Backdrop does not use a
+ * compilation step, so what is normally 5-8 files is all done in a single file.
  */
+class BackdropImage extends CKEditor5.core.Plugin {
+  /**
+   * @inheritdoc
+   */
+  static get requires() {
+    return ['ImageUtils', 'FileRepository'];
+  }
+
+  /**
+   * @inheritdoc
+   */
+  static get pluginName() {
+    return 'BackdropImage';
+  }
+
+  /**
+   * @inheritdoc
+   */
+  init() {
+    const editor = this.editor;
+    const { conversion } = editor;
+    const { schema } = editor.model;
+    const options = editor.config.get('backdropImage');
+
+    if (schema.isRegistered('imageInline')) {
+      schema.extend('imageInline', {
+        allowAttributes: [
+          'dataFileId',
+          'isDecorative',
+          'width',
+          'height',
+        ],
+      });
+    }
+
+    if (schema.isRegistered('imageBlock')) {
+      schema.extend('imageBlock', {
+        allowAttributes: [
+          'dataFileId',
+          'isDecorative',
+          'width',
+          'height',
+        ],
+      });
+    }
+
+    // Conversion.
+    conversion
+      .for('upcast')
+      .add(viewImageToModelImage(editor))
+      .attributeToAttribute({
+        view: {
+          name: 'img',
+          key: 'width',
+        },
+        model: {
+          key: 'width',
+          value: (viewElement) => {
+            if (isNumberString(viewElement.getAttribute('width'))) {
+              return `${viewElement.getAttribute('width')}px`;
+            }
+            return `${viewElement.getAttribute('width')}`;
+          },
+        },
+      })
+      .attributeToAttribute({
+        view: {
+          name: 'img',
+          key: 'height',
+        },
+        model: {
+          key: 'height',
+          value: (viewElement) => {
+            if (isNumberString(viewElement.getAttribute('height'))) {
+              return `${viewElement.getAttribute('height')}px`;
+            }
+            return `${viewElement.getAttribute('height')}`;
+          },
+        },
+      });
+
+    conversion
+      .for('downcast')
+      .add(modelFileIdToDataAttribute());
+
+    conversion
+      .for('dataDowncast')
+      .add(viewCaptionToCaptionAttribute(editor))
+      .elementToElement({
+        model: 'imageBlock',
+        view: (modelElement, { writer }) =>
+          createImageViewElement(writer, 'imageBlock'),
+        converterPriority: 'high',
+      })
+      .elementToElement({
+        model: 'imageInline',
+        view: (modelElement, { writer }) =>
+          createImageViewElement(writer, 'imageInline'),
+        converterPriority: 'high',
+      })
+      .add(modelImageStyleToDataAttribute())
+      .add(modelImageWidthToAttribute())
+      .add(modelImageHeightToAttribute())
+      .add(downcastBlockImageLink());
+
+    // Add the backdropImage toolbar button.
+    editor.ui.componentFactory.add('backdropImage', () => {
+      // Use upstream insertImage component when ImageInsertUI is enabled. The
+      // upstream insertImage button supports inserting of external images
+      // and uploading images. Out-of-the-box Drupal only uses the insertImage
+      // button for inserting external images.
+      if (editor.plugins.has('ImageInsertUI')) {
+        return editor.ui.componentFactory.create('insertImage');
+      }
+      // If ImageInsertUI plugin is not enabled, fallback to using uploadImage
+      // upstream button.
+      if (editor.plugins.has('ImageUpload')) {
+        return editor.ui.componentFactory.create('uploadImage');
+      }
+
+      throw new Error(
+        'backdropImage requires either ImageUpload or ImageInsertUI plugin to be enabled.',
+      );
+    });
+
+    // Attach the file upload adapter to handle saving files.
+    if (!options.uploadUrl) {
+      throw new Error('Missing backdropImage.uploadUrl configuration option.');
+    }
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+      return new BackdropImageUploadAdapter(loader, options);
+    };
+
+    // Upon completing an uploaded file, save the returned File ID.
+    const imageUploadEditing = editor.plugins.get('ImageUploadEditing');
+    imageUploadEditing.on('uploadComplete', (evt, { data, imageElement }) => {
+      editor.model.change((writer) => {
+        writer.setAttribute('dataFileId', data.response.fileId, imageElement);
+      });
+    });
+
+  }
+}
+
+// Expose the plugin to the CKEditor5 namespace.
+CKEditor5.backdropImage = {
+  'BackdropImage': BackdropImage
+};
 
 /**
  * Helper function for the downcast converter.
@@ -166,9 +309,6 @@ function viewCaptionToCaptionAttribute(editor) {
   return (dispatcher) => {
     dispatcher.on(
       'insert:caption',
-      /**
-       * @type {converterHandler}
-       */
       (event, data, conversionApi) => {
         const { consumable, writer, mapper } = conversionApi;
         const imageUtils = editor.plugins.get('ImageUtils');
@@ -261,8 +401,6 @@ function modelImageStyleToDataAttribute() {
    * Callback for the attribute:imageStyle event.
    *
    * Saves the alignment value to the data-align attribute.
-   *
-   * @type {converterHandler}
    */
   function converter(event, data, conversionApi) {
     const { item } = data;
@@ -308,8 +446,6 @@ function modelImageWidthToAttribute() {
    * Callback for the attribute:width event.
    *
    * Saves the width value to the width attribute.
-   *
-   * @type {converterHandler}
    */
   function converter(event, data, conversionApi) {
     const { item } = data;
@@ -355,8 +491,6 @@ function modelImageHeightToAttribute() {
    * Callback for the attribute:height event.
    *
    * Saves the height value to the height attribute.
-   *
-   * @type {converterHandler}
    */
   function converter(event, data, conversionApi) {
     const { item } = data;
@@ -401,8 +535,6 @@ function viewImageToModelImage(editor) {
    * Callback for the element:img event.
    *
    * Handles the Backdrop specific attributes.
-   *
-   * @type {converterHandler}
    */
   function converter(event, data, conversionApi) {
     const { viewItem } = data;
@@ -531,8 +663,6 @@ function viewImageToModelImage(editor) {
 function downcastBlockImageLink() {
   /**
    * Callback for the attribute:linkHref event.
-   *
-   * @type {converterHandler}
    */
   function converter(event, data, conversionApi) {
     if (!conversionApi.consumable.consume(data.item, event.name)) {
@@ -580,9 +710,9 @@ function downcastBlockImageLink() {
 }
 
 /**
- * Upload adapter.
+ * CKEditor upload adapter that sends a request to Backdrop on file upload.
  *
- * Copied from @ckeditor5/ckeditor5-upload/src/adapters/simpleuploadadapter
+ * Adapted from @ckeditor5/ckeditor5-upload/src/adapters/simpleuploadadapter
  *
  * @private
  * @implements module:upload/filerepository~UploadAdapter
@@ -731,158 +861,5 @@ class BackdropImageUploadAdapter {
     this.xhr.send(data);
   }
 }
-
-/**
- * Add handling of 'dataFileId', 'isDecorative', 'width', 'height' attributes
- * on image elements.
- */
-class BackdropImage extends CKEditor5.core.Plugin {
-  /**
-   * @inheritdoc
-   */
-  static get requires() {
-    return ['ImageUtils', 'FileRepository'];
-  }
-
-  /**
-   * @inheritdoc
-   */
-  static get pluginName() {
-    return 'BackdropImage';
-  }
-
-  /**
-   * @inheritdoc
-   */
-  init() {
-    const editor = this.editor;
-    const { conversion } = editor;
-    const { schema } = editor.model;
-    const options = editor.config.get('backdropImage');
-
-    if (schema.isRegistered('imageInline')) {
-      schema.extend('imageInline', {
-        allowAttributes: [
-          'dataFileId',
-          'isDecorative',
-          'width',
-          'height',
-        ],
-      });
-    }
-
-    if (schema.isRegistered('imageBlock')) {
-      schema.extend('imageBlock', {
-        allowAttributes: [
-          'dataFileId',
-          'isDecorative',
-          'width',
-          'height',
-        ],
-      });
-    }
-
-    // Conversion.
-    conversion
-      .for('upcast')
-      .add(viewImageToModelImage(editor))
-      .attributeToAttribute({
-        view: {
-          name: 'img',
-          key: 'width',
-        },
-        model: {
-          key: 'width',
-          value: (viewElement) => {
-            if (isNumberString(viewElement.getAttribute('width'))) {
-              return `${viewElement.getAttribute('width')}px`;
-            }
-            return `${viewElement.getAttribute('width')}`;
-          },
-        },
-      })
-      .attributeToAttribute({
-        view: {
-          name: 'img',
-          key: 'height',
-        },
-        model: {
-          key: 'height',
-          value: (viewElement) => {
-            if (isNumberString(viewElement.getAttribute('height'))) {
-              return `${viewElement.getAttribute('height')}px`;
-            }
-            return `${viewElement.getAttribute('height')}`;
-          },
-        },
-      });
-
-    conversion
-      .for('downcast')
-      .add(modelFileIdToDataAttribute());
-
-    conversion
-      .for('dataDowncast')
-      .add(viewCaptionToCaptionAttribute(editor))
-      .elementToElement({
-        model: 'imageBlock',
-        view: (modelElement, { writer }) =>
-          createImageViewElement(writer, 'imageBlock'),
-        converterPriority: 'high',
-      })
-      .elementToElement({
-        model: 'imageInline',
-        view: (modelElement, { writer }) =>
-          createImageViewElement(writer, 'imageInline'),
-        converterPriority: 'high',
-      })
-      .add(modelImageStyleToDataAttribute())
-      .add(modelImageWidthToAttribute())
-      .add(modelImageHeightToAttribute())
-      .add(downcastBlockImageLink());
-
-    // Add the backdropImage toolbar button.
-    editor.ui.componentFactory.add('backdropImage', () => {
-      // Use upstream insertImage component when ImageInsertUI is enabled. The
-      // upstream insertImage button supports inserting of external images
-      // and uploading images. Out-of-the-box Drupal only uses the insertImage
-      // button for inserting external images.
-      if (editor.plugins.has('ImageInsertUI')) {
-        return editor.ui.componentFactory.create('insertImage');
-      }
-      // If ImageInsertUI plugin is not enabled, fallback to using uploadImage
-      // upstream button.
-      if (editor.plugins.has('ImageUpload')) {
-        return editor.ui.componentFactory.create('uploadImage');
-      }
-
-      throw new Error(
-        'backdropImage requires either ImageUpload or ImageInsertUI plugin to be enabled.',
-      );
-    });
-
-    // Attach the file upload adapter to handle saving files.
-    if (!options.uploadUrl) {
-      throw new Error('Missing backdropImage.uploadUrl configuration option.');
-    }
-    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-      return new BackdropImageUploadAdapter(loader, options);
-    };
-
-    //
-    const imageUploadEditing = editor.plugins.get('ImageUploadEditing');
-    imageUploadEditing.on('uploadComplete', (evt, { data, imageElement }) => {
-      editor.model.change((writer) => {
-        writer.setAttribute('dataFileId', data.response.fileId, imageElement);
-      });
-    });
-
-  }
-}
-
-// Expose the plugin to the CKEditor5 namespace.
-CKEditor5.backdropImage = {
-  'BackdropImage': BackdropImage
-};
 
 })(CKEditor5);
