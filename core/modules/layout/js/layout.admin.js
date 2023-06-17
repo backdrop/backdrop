@@ -61,7 +61,7 @@ Backdrop.behaviors.layoutConfigure = {
         $('input[data-layout-path-update]').triggerHandler('mousedown');
 
       // (Re)install placeholder examples toggle handler.
-      $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
+      $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
 
       };
       // Update contexts after a slight typing delay.

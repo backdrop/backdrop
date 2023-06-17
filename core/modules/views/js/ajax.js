@@ -131,7 +131,7 @@
       //   of the main Edit form.
       $('div#views-live-preview input[type=submit]')
         .once('views-ajax-processed').each(function(event) {
-        $(this).click(function () {
+        $(this).on('click', function () {
           this.form.clk = this;
           return true;
         });

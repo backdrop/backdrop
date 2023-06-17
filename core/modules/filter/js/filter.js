@@ -189,7 +189,7 @@ Backdrop.behaviors.editorImageDialog = {
       var $newItem = $allItems.eq(offset).filter(':hidden').show();
       // Focus the first shown new element. This keeps focus on the dialog and
       // allows it to be closed with the escape key.
-      $newItem.find('input, textarea, select').filter(':focusable').first().focus();
+      $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $newItem.trigger('editor-image-show');
 
       return false;
@@ -234,7 +234,7 @@ Backdrop.behaviors.editorImageDialog = {
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
           $('form.filter-format-editor-image-form').after('<div class="editor-image-library"></div>');
-          $('[name=library_open]').click();
+          $('[name=library_open]').trigger('click');
         }
       }
       else {

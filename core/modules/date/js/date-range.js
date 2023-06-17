@@ -143,7 +143,7 @@ Backdrop.date.EndDateHandler.prototype.endFocusHandler = function (event) {
       this.selects[id].start.off('click.endDateHandler');
     }
   }
-  $(event.target).off('focus');
+  $(event.target).off('focus', this.endFocusHandler);
 };
 
 Backdrop.date.EndDateHandler.prototype.syncEndDate = function () {

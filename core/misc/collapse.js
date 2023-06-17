@@ -70,7 +70,7 @@ Backdrop.behaviors.collapse = {
       var summary = $('<span class="summary"></span>');
       $fieldset.
         on('summaryUpdated', function () {
-          var text = $fieldset.backdropGetSummary().trim();
+          var text = $fieldset.backdropGetSummary();
           summary.html(text ? text : '');
         })
         .trigger('summaryUpdated');

@@ -540,7 +540,7 @@ $(document).on('state:checked', function(e) {
 $(document).on('state:collapsed', function(e) {
   if (e.trigger) {
     if ($(e.target).is('.collapsed') !== e.value) {
-      $('> legend a', e.target).click();
+      $('> legend a', e.target).trigger('click');
     }
   }
 });
