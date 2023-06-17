@@ -161,9 +161,14 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $name = $variables['name'];
   $type = $variables['type'];
 
@@ -241,9 +246,6 @@ function template_preprocess_node(&$variables) {
     }
   }
 
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
-
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
   if ($variables['promote']) {
@@ -267,5 +269,9 @@ function template_preprocess_node(&$variables) {
 
   // Add an extra theme hook suggestion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
-}
 
+  // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
+  if (strstr($variables['theme_hook_original'], 'node_block')) {
+    $variables['theme_hook_suggestions'][] = 'node__block_' . $node->nid;
+  }
+}

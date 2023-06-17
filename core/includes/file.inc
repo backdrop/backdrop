@@ -196,7 +196,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @see file_uri_target()
  */
 function file_uri_scheme($uri) {
-  $position = strpos($uri, '://');
+  $position = strpos((string) $uri, '://');
   return $position ? substr($uri, 0, $position) : FALSE;
 }
 
@@ -456,7 +456,10 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
     if (($options & FILE_CREATE_DIRECTORY) && @backdrop_mkdir($directory, NULL, TRUE)) {
       return backdrop_chmod($directory);
     }
-    return FALSE;
+    // Race conditions could lead to the directory having been created by
+    // another request. Check if the directory exists again after failing.
+    // See https://github.com/backdrop/backdrop-issues/issues/5631
+    return is_dir($directory) && is_writable($directory);
   }
   // The directory exists, so check to see if it is writable.
   $writable = is_writable($directory);
@@ -524,6 +527,9 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 /**
  * Returns the standard .htaccess lines that Backdrop adds to file directories.
  *
+ * This .htaccess code block is replicated in files/.htaccess. If you update
+ * this code block then make sure you also update files/.htaccess.
+ *
  * @param $private
  *   (Optional) Set to FALSE to return the .htaccess lines for an open and
  *   public directory. The default is TRUE, which returns the .htaccess lines
@@ -553,6 +559,10 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 <IfModule mod_php7.c>
   php_flag engine off
 </IfModule>
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+
 EOF;
 
   if ($private) {
@@ -872,9 +882,6 @@ function file_valid_uri($uri) {
  * - If the $source and $destination are equal, the behavior depends on the
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
- * - Works around a PHP 5.3 bug where copy() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1139,9 +1146,6 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *   is reported.
  * - If file already exists in $destination either the call will error out,
  *   replace the file or rename the file based on the $replace parameter.
- * - Works around a PHP 5.3 bug where rename() does not properly support streams
- *   if safe_mode or open_basedir are enabled.
- *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -1228,11 +1232,11 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // Remove any null bytes. See http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
-    $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
+    $allowlist = array_unique(explode(' ', strtolower(trim($extensions))));
 
     // Remove unsafe extensions from the list of allowed extensions. The list is
     // copied from file_save_upload().
-    $whitelist = array_diff($whitelist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
+    $allowlist = array_diff($allowlist, explode('|', 'php|phar|pl|py|cgi|asp|js'));
 
     // Split the filename up by periods. The first part becomes the basename
     // the last part the final extension.
@@ -1245,7 +1249,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     // of allowed extensions.
     foreach ($filename_parts as $filename_part) {
       $new_filename .= '.' . $filename_part;
-      if (!in_array(strtolower($filename_part), $whitelist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
+      if (!in_array(strtolower($filename_part), $allowlist) && preg_match("/^[a-zA-Z]{2,5}\d?$/", $filename_part)) {
         $new_filename .= '_';
       }
     }
@@ -1575,7 +1579,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   else {
     // No validator was provided, so add one using the default list.
     // Build a default non-munged safe list for file_munge_filename().
-    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+
     $validators['file_validate_extensions'] = array();
     $validators['file_validate_extensions'][0] = $extensions;
   }
@@ -1879,7 +1884,8 @@ function file_validate_is_image(File $file) {
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {
-    $errors[] = t('Only JPEG, PNG and GIF images are allowed.');
+    $supported_extensions = image_get_supported_extensions();
+    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
   }
 
   return $errors;
@@ -2165,6 +2171,7 @@ function file_download() {
   $scheme = array_shift($args);
   $target = implode('/', $args);
   $uri = $scheme . '://' . $target;
+  $uri = file_uri_normalize_dot_segments($uri);
   if (file_stream_wrapper_valid_scheme($scheme) && file_exists($uri)) {
     $headers = file_download_headers($uri);
     if (count($headers)) {
@@ -2528,10 +2535,12 @@ function backdrop_dirname($uri) {
 /**
  * Gets the filename from a given path.
  *
- * PHP's basename() does not properly support streams or filenames beginning
- * with a non-US-ASCII character.
+ * Similar to PHP's basename() with the following differences:
+ *   - Any trailing slashes are automatically trimmed.
+ *   - Is not locale-aware, and works with all UTF-8 characters. Where PHP might
+ *     not process file paths with non-Latin characters unless allowed through
+ *     setlocale(), this function will remove the extensions from any string.
  *
- * @see http://bugs.php.net/bug.php?id=37738
  * @see basename()
  *
  * @ingroup php_wrappers
@@ -2727,6 +2736,55 @@ function file_get_content_headers(File $file) {
     'Content-Length' => $file->filesize,
     'Cache-Control' => 'private',
   );
+}
+
+/**
+ * Normalize dot segments in a URI.
+ *
+ * @param $uri
+ *   A stream, referenced as "scheme://target".
+ *
+ * @return string
+ *   The URI with dot segments removed and slashes as directory separator.
+ */
+function file_uri_normalize_dot_segments($uri) {
+  $scheme = file_uri_scheme($uri);
+
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (empty($skip_schemes) || !in_array($scheme, $skip_schemes)) {
+        // URIs should always use '/' for separating directories in paths.
+        $class = file_stream_wrapper_get_class($scheme);
+        if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+          $target = str_replace(DIRECTORY_SEPARATOR, '/', $target);
+
+          // Remove '.' and '..' from the path.
+          $parts = explode('/', $target);
+          $normalized = array();
+          foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+              continue;
+            }
+            elseif ($part === '..') {
+              array_pop($normalized);
+            }
+            else {
+              $normalized[] = $part;
+            }
+          }
+
+          $target = implode('/', $normalized);
+        }
+
+        $uri = $scheme . '://' . $target;
+      }
+    }
+  }
+
+  return $uri;
 }
 
 /**

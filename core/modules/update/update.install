@@ -17,7 +17,7 @@
  *   optionally 'description'), this array will contain a 'reason' attribute,
  *   which is an integer constant to indicate why the given status is being
  *   returned (UPDATE_NOT_SECURE, UPDATE_NOT_CURRENT, or UPDATE_UNKNOWN). This
- *   is used for generating the appropriate e-mail notification messages during
+ *   is used for generating the appropriate email notification messages during
  *   update_cron(), and might be useful for other modules that invoke
  *   update_requirements() to find out if the site is up to date or not.
  *
@@ -237,6 +237,39 @@ function update_update_1004() {
     $config->set('update_threshold', 'all');
   }
   $config->save();
+}
+
+/**
+ * Check for a faulty installer.settings.json and fix it or remove it if needed.
+ */
+function update_update_1005() {
+  // Saving the Available Update settings form at admin/reports/updates/settings
+  // used to create a defective copy of installer.settings.json in earlier
+  // Backdrop versions. This update hook fixes or removes this defective file.
+  // @see https://github.com/backdrop/backdrop-issues/issues/5690
+  $config = config('installer.settings');
+  // Only act if the config file exists. If isNew() returns TRUE, this means
+  // the config object is new, and therefore the file doesn't exist, in
+  // which case, we skip processing.
+  if (!$config->isNew()) {
+    // Now check to see if installer is installed.
+    // We must do this by getting the current schema version, as module_exists()
+    // doesn't tell us if the module is disabled or uninstalled.
+    $schema_version = backdrop_get_installed_schema_version('installer');
+    if ($schema_version < 0) {
+      // Installer is uninstalled. Remove the faulty config file.
+      $config->delete();
+    }
+    elseif (empty($config->get('installer_server'))) {
+      // Installer is installed.
+      // Fix the config file only if the key installer_server is not present.
+      $config->set('installer_server', array(
+        'url' => 'https://projects.backdropcms.org',
+        'name' => 'Backdrop',
+      ));
+      $config->save();
+    }
+  }
 }
 
 /**
