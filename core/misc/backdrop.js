@@ -121,7 +121,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
   trigger = trigger || 'unload';
   // Execute all of them.
   $.each(Backdrop.behaviors, function () {
-    if ($.isFunction(this.detach)) {
+    if (typeof this.detach === 'function') {
       this.detach(context, settings, trigger);
     }
   });

@@ -309,7 +309,7 @@ Backdrop.viewsUi.OptionsSearch = function ($form) {
   this.$form = $form;
   // Add a keyup handler to the search box.
   this.$searchBox = this.$form.find('#edit-options-search');
-  this.$searchBox.keyup($.proxy(this.handleKeyup, this));
+  this.$searchBox.on('keyup', $.proxy(this.handleKeyup, this));
   // Get a list of option labels and their corresponding divs and maintain it
   // in memory, so we have as little overhead as possible at keyup time.
   this.options = this.getOptions(this.$form.find('.filterable-option'));
@@ -318,7 +318,7 @@ Backdrop.viewsUi.OptionsSearch = function ($form) {
 
   // Add a change handler to the filter group select.
   this.$filterGroup = this.$form.find('select[name="group"]');
-  this.$filterGroup.change($.proxy(this.filterGroup, this));
+  this.$filterGroup.on('change', $.proxy(this.filterGroup, this));
   // Trap the ENTER key in the search box so that it doesn't submit the form.
   this.$searchBox.on('keypress', function (event) {
     if (event.which == 13) {
@@ -914,8 +914,8 @@ Backdrop.viewsUi.Checkboxifier = function (button) {
  * When the checkbox is checked or unchecked, simulate a button press.
  */
 Backdrop.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
-  this.$button.mousedown();
-  this.$button.submit();
+  this.$button.trigger('mousedown');
+  this.$button.trigger('submit');
 };
 
 /**
