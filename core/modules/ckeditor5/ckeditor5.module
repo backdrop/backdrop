@@ -108,7 +108,6 @@ function ckeditor5_library_info() {
       // potentially needed plugins are added as dependencies.
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-image'),
-      array('ckeditor5', 'backdrop.ckeditor5.backdrop-image-caption'),
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
     ),
   );
@@ -125,13 +124,6 @@ function ckeditor5_library_info() {
     'version' => BACKDROP_VERSION,
     'js' => array(
       $module_path . '/js/plugins/backdrop-image/backdrop-image.js' => array(),
-    ),
-  );
-  $libraries['backdrop.ckeditor5.backdrop-image-caption'] = array(
-    'title' => 'Extends CKEditor image caption handling.',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      $module_path . '/js/plugins/backdrop-image-caption/backdrop-image-caption.js' => array(),
     ),
   );
   $libraries['backdrop.ckeditor5.backdrop-link'] = array(
@@ -341,10 +333,11 @@ function ckeditor5_ckeditor5_plugins() {
     ),
     // Provided by the table plugin.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/tables/tables.html
-    'table' => array(
+    'insertTable' => array(
       'label' => t('Table'),
+      'image' => $image_prefix . '/table.svg',
       'required_html' => array(array('tags' => array('table', 'thead', 'tbody', 'tr', 'td', 'th'))),
-      'plugins' => array('table.Table', 'table.TableCaption', 'table.TableCellProperties', 'table.TableColumnResize', 'table.TableProperties'),
+      'plugins' => array('table.Table', 'table.TableToolbar', 'table.TableCaption', 'table.PlainTableOutput', 'table.TableCellProperties', 'table.TableColumnResize', 'table.TableProperties'),
     ),
     // Separator, part of toolbar core.
     // See https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#separating-toolbar-items
@@ -387,10 +380,16 @@ function ckeditor5_ckeditor5_plugins() {
   // The BackdropImage plugin extends the default CKEditor Image plugin.
   $plugins['BackdropImage'] = array(
     'library' => 'backdrop.ckeditor5.backdrop-image',
-    'enabled callback' => 'ckeditor5_image_plugin_check',
     'buttons' => array(
       'backdropImage' => array(
         'label' => t('Image'),
+        'plugins' => array(
+          'image.Image',
+          'image.ImageToolbar',
+          'image.ImageInsertUI',
+          'image.ImageUpload',
+          'backdropImage.BackdropImage',
+        ),
         'required_html' => array(
           array(
             'tags' => array('img'),
@@ -404,8 +403,11 @@ function ckeditor5_ckeditor5_plugins() {
 
   // The BackdropImageCaption plugin provides consistent behaviors for image
   // captions.
+  // @todo: This plugin is now merged with the main backdrop-image plugin.
+  // Move the required_html to be added in ckeditor5_get_settings()
+  // or elsewhere.
   $plugins['BackdropImageCaption'] = array(
-    'library' => 'backdrop.ckeditor5.backdrop-image-caption',
+    //'library' => 'backdrop.ckeditor5.backdrop-image-caption',
     'enabled callback' => 'ckeditor5_image_plugin_check',
     'required_html' => array(
       array(
@@ -569,6 +571,7 @@ function ckeditor5_get_settings($format, $existing_settings) {
 
   // Add essentials, which is required.
   array_unshift($plugins, 'essentials.Essentials');
+  $plugins[] = 'autoformat.Autoformat';
   $pluginList = array_values(array_unique(array_merge($plugins, array_keys($external_plugins))));
 
   // Initialize reasonable defaults that provide expected basic behavior.
@@ -577,9 +580,9 @@ function ckeditor5_get_settings($format, $existing_settings) {
       'items' => $toolbar,
       'shouldNotGroupWhenFull' => TRUE,
     ),
+    // Plugin list is not a "real" CKEditor configuration value. It is converted
+    // from an array of strings to variables references in the ckeditor.js file.
     'pluginList' => $pluginList,
-    //'extraPlugins' => implode(',', $extra_plugins),
-    //'removePlugins' => implode(',', $excluded_plugins),
     // @todo: Move these properties to be controlled by hook_ckeditor_plugins().
     'list' => array(
       'properties' => array(
@@ -611,6 +614,27 @@ function ckeditor5_get_settings($format, $existing_settings) {
   // and attributes that are allowed by the text format for this text editor.
   //list($settings['allowedContent'], $settings['disallowedContent']) = ckeditor5_get_acf_settings($format);
 
+
+  if (in_array('image.ImageToolbar', $pluginList)) {
+    $settings['image']['toolbar'] = array(
+      'toggleImageCaption',
+      'imageTextAlternative',
+    );
+  }
+
+  if (in_array('image.ImageUpload', $pluginList)) {
+    $settings['image']['upload']['types'] = image_get_supported_extensions();
+  }
+
+  if (in_array('table.TableToolbar', $pluginList)) {
+    $settings['table']['contentToolbar'] = array(
+      'tableColumn',
+      'tableRow',
+      'mergeTableCells',
+      'toggleTableCaption',
+    );
+  }
+
   // These settings are used specifically by Backdrop.
   $settings['backdrop'] = array(
     'externalPlugins' => $external_plugins,
@@ -618,19 +642,19 @@ function ckeditor5_get_settings($format, $existing_settings) {
   );
 
   // Create a token for access to dialogs.
-  if (isset($external_plugins['backdroplink'])) {
+  if (in_array('backdropLink.BackdropLink', $pluginList)) {
     $link_token = filter_editor_dialog_token($format, 'link');
-    $settings['backdrop']['linkDialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));
+    $settings['backdropLink']['dialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));
   }
-  if (isset($external_plugins['backdropimage'])) {
+  if (in_array('backdropImage.BackdropImage', $pluginList)) {
     $image_token = filter_editor_dialog_token($format, 'image');
-    $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
-    $settings['imageUploadUrl'] = url('ckeditor5/upload/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
+    $settings['backdropImage']['dialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
+    $settings['backdropImage']['uploadUrl'] = url('ckeditor5/upload/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
   }
-  if (isset($external_plugins['backdropimagecaption'])) {
-    $settings['backdrop']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
-    $settings['backdrop']['alignFilterEnabled'] = !empty($format->filters['filter_image_align']->status);
-    $settings['backdrop']['imageCaptionPlaceholderText'] = t('Enter caption text here.');
+  if (in_array('backdropImageCaption.BackdropImageCaption', $pluginList)) {
+    $settings['backdropImageCaption']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
+    $settings['backdropImageCaption']['alignFilterEnabled'] = !empty($format->filters['filter_image_align']->status);
+    $settings['backdropImageCaption']['imageCaptionPlaceholderText'] = t('Enter caption text here.');
     $settings['image2_captionedClass'] = 'caption caption-img';
     $settings['image2_alignClasses'] = array('align-left', 'align-center', 'align-right');
   }

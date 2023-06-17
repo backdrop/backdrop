@@ -20,7 +20,10 @@ function ckeditor5_image_upload($format) {
   // identifier. The file_save_upload() function requires data be within a
   // "files" array, so we move the data so it is in the expected location.
   if (isset($_FILES['upload'])) {
-    $_FILES['files'] = $_FILES;
+    foreach ($_FILES['upload'] as $file_key => $file_value) {
+      $_FILES['files'][$file_key]['upload'] = $file_value;
+    }
+    unset($_FILES['upload']);
   }
 
   $destination = $upload_settings['scheme'] . '://' .  $upload_settings['directory'];

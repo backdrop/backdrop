@@ -35,7 +35,7 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#title' => t('Image uploading'),
     '#attributes' => array(
       'class' => array('ckeditor5-plugin-backdropimage'),
-      'data-ckeditor5-feature-dependency' => 'BackdropImage',
+      'data-ckeditor5-feature-dependency' => 'backdropImage',
     ),
     '#parents' => array('editor_settings', 'image_upload'),
   );
@@ -46,7 +46,7 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#title' => t('File uploading'),
     '#attributes' => array(
       'class' => array('ckeditor5-plugin-backdroplink'),
-      'data-ckeditor5-feature-dependency' => 'BackdropLink',
+      'data-ckeditor5-feature-dependency' => 'backdropLink',
     ),
     '#parents' => array('editor_settings', 'file_upload'),
   );
