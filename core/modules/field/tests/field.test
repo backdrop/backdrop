@@ -1199,7 +1199,7 @@ class FieldInfoTestCase extends FieldTestCase {
   }
 
   /**
-   * Test that field types and field definitions are correcly cached.
+   * Test that field types and field definitions are correctly cached.
    */
   function testFieldInfo() {
     // Test that field_test module's fields, widgets, and formatters show up.
@@ -1409,7 +1409,7 @@ class FieldInfoTestCase extends FieldTestCase {
     );
     field_create_instance($instance_definition);
 
-    // Disable coment module. This clears field_info cache.
+    // Disable the Comment module. This clears field_info cache.
     module_disable(array('comment'));
     $this->assertNull(field_info_instance('comment', 'field', 'comment_node_post'), 'No instances are returned on disabled entity types.');
   }
@@ -1583,14 +1583,14 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertNoField("{$this->field_name}[$langcode][1][value]", 'No extraneous widget is displayed');
 
     // Press 'add more' button -> 2 widgets.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
     $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget 1 is displayed');
     $this->assertFieldByName("{$this->field_name}[$langcode][1][value]", '', 'New widget is displayed');
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
-    // TODO : check that non-field inpurs are preserved ('title')...
+    // @todo: Check that non-field inputs are preserved ('title').
 
     // Yet another time so that we can play with more values -> 3 widgets.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Prepare values and weights.
     $count = 3;
@@ -1614,7 +1614,7 @@ class FieldFormTestCase extends FieldTestCase {
     }
 
     // Press 'add more' button -> 4 widgets
-    $this->backdropPost(NULL, $edit, t('Add another item'));
+    $this->backdropPost(NULL, $edit, t('Add another'));
     for ($delta = 0; $delta <= $delta_range; $delta++) {
       $this->assertFieldByName("$this->field_name[$langcode][$delta][value]", $values[$delta], "Widget $delta is displayed and has the right value");
       $this->assertFieldByName("$this->field_name[$langcode][$delta][_weight]", $weights[$delta], "Widget $delta has the right weight");
@@ -1643,6 +1643,32 @@ class FieldFormTestCase extends FieldTestCase {
     // Re-submit: check that the field can be emptied.
 
     // Test with several multiple fields in a form
+  }
+
+  /**
+   * Tests the position of the "required" symbol and the validation error text.
+   */
+  public function testFieldFormUnlimitedRequired() {
+    $this->field = $this->field_unlimited;
+    $this->field_name = $this->field['field_name'];
+    $this->instance['field_name'] = $this->field_name;
+    $this->instance['required'] = TRUE;
+    field_create_field($this->field);
+    field_create_instance($this->instance);
+    $instance = field_read_instance('test_entity', $this->instance['field_name'], $this->instance['bundle']);
+
+    // Display creation form -> 1 widget.
+    $this->backdropGet('test-entity/add/test-bundle');
+    $result = $this->xpath("//label[not(contains(@class, 'element-invisible')) and contains(text(), :label)]/abbr/text()", array(':label' => $this->instance['label']));
+    $this->assertEqual($result[0], '*', t('Required symbol added to field label.'));
+    // Check that the label of the field input is visually hidden and contains
+    // the field title and an indication of the delta for a11y.
+    $result = $this->xpath("//label[contains(@class, 'element-invisible') and contains(text(), :label)]/abbr/text()", array(':label' => $this->instance['label']));
+    $this->assertEqual($result[0], '*', t('Required symbol and field label are visually hidden.'));
+
+    // Click "Add another" button
+    $this->backdropPost(NULL, array(), t('Add another'));
+    $this->assertText(t('@name field is required.', array('@name' => $instance['label'])), t('Validation error for required unlimited field includes the name of the field.'));
   }
 
   /**
@@ -1679,7 +1705,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->backdropGet('test-entity/add/test-bundle');
 
     // Press the 'Add more' button.
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Verify that no error is thrown by the radio element.
     $this->assertNoFieldByXpath('//div[contains(@class, "error")]', FALSE, 'No error message is displayed.');
@@ -1704,8 +1730,8 @@ class FieldFormTestCase extends FieldTestCase {
     // Press 'add more' button a couple times -> 3 widgets.
     // backdropPostAJAX() will not work iteratively, so we add those through
     // non-JS submission.
-    $this->backdropPost(NULL, array(), t('Add another item'));
-    $this->backdropPost(NULL, array(), t('Add another item'));
+    $this->backdropPost(NULL, array(), t('Add another'));
+    $this->backdropPost(NULL, array(), t('Add another'));
 
     // Prepare values and weights.
     $count = 3;
@@ -1957,7 +1983,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertFieldByName('entity_2[field_unlimited][und][1][value]', 14, 'Entity 2: field_unlimited value 1 appears correctly is the form.');
     $this->assertFieldByName('entity_2[field_unlimited][und][2][value]', 15, 'Entity 2: field_unlimited value 2 appears correctly is the form.');
     $this->assertFieldByName('entity_2[field_unlimited][und][3][value]', '', 'Entity 2: an empty widget was added for field_unlimited value 3.');
-    // Save the form and check values are saved correclty.
+    // Save the form and check values are saved correctly.
     $this->backdropPost(NULL, array(), t('Save'));
     field_cache_clear();
     $this->assertFieldValues($entity_1, 'field_unlimited', LANGUAGE_NONE, array(3, 2));
@@ -2540,7 +2566,7 @@ class FieldCrudTestCase extends FieldTestCase {
    * @param $field_definition
    *   A field definition.
    * @param $modules
-   *   An aray of module names. The field will be tested to be inactive as long
+   *   An array of module names. The field will be tested to be inactive as long
    *   as any of those modules is disabled.
    */
   function _testActiveHelper($field_definition, $modules) {
@@ -3080,7 +3106,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
     foreach ($instances as $instance) {
       $field_name = $instance['field_name'];
       $langcode = $display_language[$field_name];
-      // As the requested language was not assinged to any field, if the
+      // As the requested language was not assigned to any field, if the
       // returned language is defined for the current field, core fallback rules
       // were successfully applied.
       $this->assertTrue(isset($entity->{$field_name}[$langcode]) && $langcode != $requested_language, format_string('The display language for the field %field_name is %language.', array('%field_name' => $field_name, '%language' => $langcode)));

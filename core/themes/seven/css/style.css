@@ -431,8 +431,8 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
-main {
-  margin-bottom: 20px;
+.l-wrapper {
+  padding-bottom: 80px;
 }
 
 /* Administration page listings. */
@@ -752,10 +752,12 @@ fieldset .fieldset-wrapper::before {
   left: auto;
   right: .6em;
 }
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
+  /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
 .fieldset-legend span.summary:not(:empty):before {
@@ -766,9 +768,11 @@ fieldset .fieldset-wrapper::before {
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
+    /* Show the summary on wider screens. */
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed .fieldset-legend a:before {
   left: .8em;
@@ -781,6 +785,27 @@ fieldset .fieldset-wrapper::before {
   right: .8em;
   border-left-color: transparent;
   border-right-color: black;
+}
+
+/**
+ * HTML5 details element.
+ */
+details {
+  padding: 6px 15px;
+  border-radius: 0 0 4px 4px;
+  border: 2px solid #EAEAEA;
+  margin: 1em 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  display: table-cell;
+}
+details summary span {
+  color: #0074bd;
+  font-size: 120%;
+}
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 10px 0;
 }
 
 /**
@@ -841,7 +866,8 @@ form.views-exposed-form {
 div.teaser-checkbox .form-item,
 .form-item .form-item {
   padding: 5px 0;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   border: 0;
 }
 .form-type-checkbox {
@@ -864,7 +890,14 @@ div.teaser-checkbox .form-item,
 .form-item input.form-radio,
 .form-item input.form-checkbox {
   vertical-align: middle;
-  margin-right: 5px;
+}
+.form-item input.form-radio,
+.form-item input.form-checkbox {
+  margin-right: 5px; /* LTR */
+}
+[dir="rtl"] .form-item input.form-radio,
+[dir="rtl"] .form-item input.form-checkbox {
+  margin-left: 5px;
 }
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
@@ -943,6 +976,7 @@ a.button {
   text-align: center;
   text-transform: uppercase;
   color: #444b53;
+  cursor: pointer;
   background: #e5e5e6;
   letter-spacing: 0.4px;
   line-height: 43px;
@@ -1023,6 +1057,22 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
@@ -1135,6 +1185,27 @@ textarea.form-textarea:focus {
   color: #000;
   border-color: #43afe4;
 }
+input.form-color {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input.form-color::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input.form-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input.form-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
 ul.action-links {
   margin: 1em 0;
   padding: 0 20px 0 20px; /* LTR */
@@ -1215,6 +1286,14 @@ div.filter-options select {
   .admin-panel h3 {
     margin: 15px;
   }
+}
+
+.block-dashboard-welcome h3 {
+  margin: 4px 0;
+  padding: 6px 0;
+  font-size: 1.154em;
+  text-transform: none;
+  background: none;
 }
 
 /* Add special icons for admin/config */
@@ -1302,7 +1381,8 @@ div.filter-options select {
   margin: 0;
   background: none;
 }
-#layout-edit-main .l-header:before {
+#layout-edit-main .l-header:before,
+#layout-flexible-edit-main .l-header:before {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1710,6 +1790,7 @@ div.add-or-remove-shortcuts {
   background: #e9e8e8;
 }
 .ui-dialog {
+  position: absolute;
   border: 1px solid #d0d0d0;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -1891,4 +1972,22 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+
+/**
+ * Labels & machine names in admin listing tables.
+ */
+table .label {
+  font-weight: bold;
+}
+table .machine-name {
+  color: #666;
+}
+.tabledrag-handles-shown .label,
+.tabledrag-handles-shown .machine-name {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] .tabledrag-handles-shown .label,
+[dir="rtl"] .tabledrag-handles-shown .machine-name {
+  padding-right: 28px;
 }
