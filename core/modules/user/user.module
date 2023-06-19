@@ -1175,6 +1175,9 @@ function user_login_block($form) {
     '#required' => TRUE,
     '#weight' => 2,
     '#password_toggle' => TRUE,
+    '#attributes' => array(
+      'spellcheck' => 'false',
+    ),
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -1760,6 +1763,9 @@ function user_login($form, &$form_state) {
     '#title' => t('Password'),
     '#required' => TRUE,
     '#password_toggle' => TRUE,
+    '#attributes' => array(
+      'spellcheck' => 'false',
+    ),
   );
   $form['#validate'] = user_login_default_validators();
   $form['actions'] = array('#type' => 'actions');

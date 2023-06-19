@@ -51,6 +51,8 @@ function user_pass() {
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      'autocorrect' => 'none',
+      'spellcheck' => 'false',
     ),
   );
   // Allow logged in users to request this also.
@@ -233,6 +235,9 @@ function user_pass_reset_form($form, &$form_state, $account) {
     '#type' => 'password_confirm',
     '#required' => TRUE,
     '#description' => $description,
+    '#attributes' => array(
+      'spellcheck' => 'false',
+    ),
   );
   $form['actions'] = array(
     '#type' => 'actions',
