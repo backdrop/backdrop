@@ -789,7 +789,6 @@ function user_account_form(&$form, &$form_state) {
     '#maxlength' => USERNAME_MAX_LENGTH,
     '#description' => t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
     '#required' => TRUE,
-    // '#attributes' => array('class' => array('username')),
     '#attributes' => array(
       'class' => array('username'),
       'autocapitalize' => 'none',
