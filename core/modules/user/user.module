@@ -1162,6 +1162,11 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
+    '#attributes' => array(
+      'autocapitalize' => 'none',
+      'autocorrect' => 'none',
+      'spellcheck' => 'false',
+    ),
   );
   $form['pass'] = array(
     '#type' => 'password',
@@ -1744,6 +1749,9 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      'autocapitalize' => 'none',
+      'autocorrect' => 'none',
+      'spellcheck' => 'false',
     ),
   );
 
