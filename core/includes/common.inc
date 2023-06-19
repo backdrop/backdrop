@@ -2913,14 +2913,14 @@ function l($text, $path, array $options = array()) {
   $attributes = backdrop_attributes($options['attributes']);
   unset($options['attributes']);
 
-  $url = url($variables['path'], $variables['options']);
+  $url = url($path, $options);
   $skip_js_paths = array(
     'javascript:void()',
     'javascript:void();',
     'javascript:void(0)',
     'javascript:void(0);'
   );
-  if (!in_array(strtolower($variables['path']), $skip_js_paths)) {
+  if (!in_array(strtolower($path), $skip_js_paths)) {
     $url = check_url($url);
   }
 
