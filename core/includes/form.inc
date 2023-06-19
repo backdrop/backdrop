@@ -3027,6 +3027,7 @@ function form_process_password_confirm($element) {
     '#password_strength' => TRUE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
+    '#spellcheck' => 'false',
   );
   $element['pass2'] =  array(
     '#type' => 'password',
@@ -3037,6 +3038,7 @@ function form_process_password_confirm($element) {
     '#password_strength' => FALSE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
+    '#spellcheck' => 'false',
   );
   $element['#element_validate'] = array('password_confirm_validate');
   $element['#tree'] = TRUE;
@@ -4749,7 +4751,10 @@ function theme_textarea($variables) {
  */
 function theme_password($variables) {
   $element = $variables['element'];
-  $element['#attributes']['type'] = 'password';
+  $element['#attributes'] = array(
+    'type' => 'password',
+    'spellcheck' => 'false',
+  );
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
   _form_set_class($element, array('form-text'));
 

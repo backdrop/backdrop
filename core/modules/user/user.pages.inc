@@ -50,8 +50,8 @@ function user_pass() {
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
-      'autofocus' => 'autofocus',
-      'autocorrect' => 'none',
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
       'spellcheck' => 'false',
     ),
   );
@@ -235,9 +235,6 @@ function user_pass_reset_form($form, &$form_state, $account) {
     '#type' => 'password_confirm',
     '#required' => TRUE,
     '#description' => $description,
-    '#attributes' => array(
-      'spellcheck' => 'false',
-    ),
   );
   $form['actions'] = array(
     '#type' => 'actions',
