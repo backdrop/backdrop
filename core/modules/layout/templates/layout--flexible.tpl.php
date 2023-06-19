@@ -12,7 +12,7 @@
  * - $classes: Array of classes to be added to the layout wrapper.
  * - $attributes: Additional attributes to be added to the layout wrapper.
  * - $row_data: An array of information about each row. Each item in the array
- *   contains the folowing information:
+ *   contains the following information:
  *   - $row_data['region_md']: the row region widths in Bootstrap format.
  *   - $row_data['region_name']: the region name.
  *   - $row_data['region_classes']: the region classes.
@@ -40,7 +40,10 @@
             <div class="layout-flexible-region-top clearfix">
               <div class="layout-editor-block-title clearfix">
                 <span class="handle"></span>
-                <span class="text"><?php print t('Row'); ?></span>
+                <span class="text"><?php print $row['row_label']; ?></span>
+                <?php if (array_key_exists($row['container'], $row_widths)): ?>
+                  <small><?php print '(' . $row_widths[$row['container']] . ')'; ?></small>
+                <?php endif; ?>
                 <span class="buttons">
                   <?php print $region_buttons[$name]; ?>
                 </span>

@@ -93,7 +93,7 @@ class ConfigurationTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that a config setting can be overidden.
+   * Tests that a config setting can be overridden.
    */
   public function testOverrideConfig() {
     $original_data = array(
@@ -594,4 +594,3 @@ class ConfigurationSyncTest extends BackdropWebTestCase {
     $this->assertText('Test value in the new field');
   }
 }
-
