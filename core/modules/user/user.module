@@ -815,10 +815,9 @@ function user_account_form(&$form, &$form_state) {
   );
   // Add attributes to field to prevent spell-jacking and unwanted automatic
   // changes caused by the browser.
-  $element = $form['account']['mail'];
-  $element['#attributes']['autocapitalize'] = 'none';
-  $element['#attributes']['autocorrect'] = 'off';
-  $element['#attributes']['spellcheck'] = 'false';
+  $form['account']['mail']['#attributes']['autocapitalize'] = 'none';
+  $form['account']['mail']['#attributes']['autocorrect'] = 'off';
+  $form['account']['mail']['#attributes']['spellcheck'] = 'false';
 
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.

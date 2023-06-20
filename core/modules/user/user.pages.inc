@@ -52,10 +52,9 @@ function user_pass() {
   );
   // Add attributes to field to prevent spell-jacking and unwanted automatic
   // changes caused by the browser.
-  $element = $form['name'];
-  $element['#attributes']['autocapitalize'] = 'none';
-  $element['#attributes']['autocorrect'] = 'off';
-  $element['#attributes']['spellcheck'] = 'false';
+  $form['name']['#attributes']['autocapitalize'] = 'none';
+  $form['name']['#attributes']['autocorrect'] = 'off';
+  $form['name']['#attributes']['spellcheck'] = 'false';
 
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
