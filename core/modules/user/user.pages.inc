@@ -49,12 +49,14 @@ function user_pass() {
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
+    '#attributes' => array(
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
   );
-  // Add attributes to field to prevent spell-jacking and unwanted automatic
-  // changes caused by the browser.
-  $form['name']['#attributes']['autocapitalize'] = 'none';
-  $form['name']['#attributes']['autocorrect'] = 'off';
-  $form['name']['#attributes']['spellcheck'] = 'false';
 
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
