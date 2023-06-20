@@ -791,6 +791,8 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array(
       'class' => array('username'),
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
       'autocapitalize' => 'none',
       'autocorrect' => 'off',
       'spellcheck' => 'false',
@@ -810,12 +812,13 @@ function user_account_form(&$form, &$form_state) {
     '#description' => t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
     '#required' => TRUE,
     '#default_value' => (!$register ? $account->mail : ''),
-    '#attributes' => array(
-      'autocapitalize' => 'none',
-      'autocorrect' => 'off',
-      'spellcheck' => 'false',
-    ),
   );
+  // Add attributes to field to prevent spell-jacking and unwanted automatic
+  // changes caused by the browser.
+  $element = $form['account']['mail'];
+  $element['#attributes']['autocapitalize'] = 'none';
+  $element['#attributes']['autocorrect'] = 'off';
+  $element['#attributes']['spellcheck'] = 'false';
 
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
@@ -1172,12 +1175,14 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
-    '#attributes' => array(
-      'autocapitalize' => 'none',
-      'autocorrect' => 'off',
-      'spellcheck' => 'false',
-    ),
   );
+  // Add attributes to field to prevent spell-jacking and unwanted automatic
+  // changes caused by the browser.
+  $element = $form['name'];
+  $element['#attributes']['autocapitalize'] = 'none';
+  $element['#attributes']['autocorrect'] = 'off';
+  $element['#attributes']['spellcheck'] = 'false';
+
   $form['pass'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
@@ -1759,6 +1764,8 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
       'autocapitalize' => 'none',
       'autocorrect' => 'off',
       'spellcheck' => 'false',

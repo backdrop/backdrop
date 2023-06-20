@@ -3023,22 +3023,26 @@ function form_process_password_confirm($element) {
     '#title' => t('New password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-field')),
+    '#attributes' => array(
+      'class' => array('password-confirm'),
+      'spellcheck' => 'false',
+    ),
     '#password_strength' => TRUE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
-    '#spellcheck' => 'false',
   );
   $element['pass2'] =  array(
     '#type' => 'password',
     '#title' => t('Confirm new password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-confirm')),
+    '#attributes' => array(
+      'class' => array('password-confirm'),
+      'spellcheck' => 'false',
+    ),
     '#password_strength' => FALSE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
-    '#spellcheck' => 'false',
   );
   $element['#element_validate'] = array('password_confirm_validate');
   $element['#tree'] = TRUE;
@@ -4751,7 +4755,7 @@ function theme_textarea($variables) {
  */
 function theme_password($variables) {
   $element = $variables['element'];
-  $element['#attributes'] = array(
+  $element['#attributes'] += array(
     'type' => 'password',
     'spellcheck' => 'false',
   );
