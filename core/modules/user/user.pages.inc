@@ -51,6 +51,9 @@ function user_pass() {
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
   // Allow logged in users to request this also.
