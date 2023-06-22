@@ -141,13 +141,13 @@ class BackdropLink extends CKEditor5.core.Plugin {
             }
           }
         });
-      } );
+      });
     }, { priority: 'high' } );
   }
 
   _removeExtraAttributeOnUnlinkCommandExecute(modelName) {
     const editor = this.editor;
-    const unlinkCommand = editor.commands.get( 'unlink' );
+    const unlinkCommand = editor.commands.get('unlink');
     const model = this.editor.model;
     const selection = model.document.selection;
 
@@ -215,23 +215,30 @@ class BackdropLink extends CKEditor5.core.Plugin {
     const editor = this.editor;
     const contextualBalloonPlugin = editor.plugins.get('ContextualBalloon');
     const linkUI = editor.plugins.get('LinkUI');
+    let additionalUiSet = false;
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
       if (visibleView === linkUI.formView) {
-        // Detach the listener.
-        this.stopListening(contextualBalloonPlugin, 'change:visibleView');
+        if (!additionalUiSet) {
+          additionalUiSet = true;
+          this.button = this._createButton(extraAttributes);
 
-        this.button = this._createButton(extraAttributes);
+          // Render button's template.
+          this.button.render();
 
-        // Render button's template.
-        this.button.render();
+          // Register the button under the link form view, it will handle its destruction.
+          linkUI.formView.registerChild(this.button);
 
-        // Register the button under the link form view, it will handle its destruction.
-        linkUI.formView.registerChild(this.button);
+          // Inject the element into DOM.
+          linkUI.formView.element.insertBefore(this.button.element, linkUI.formView.saveButtonView.element);
+        }
 
-        // Inject the element into DOM.
-        linkUI.formView.element.insertBefore(this.button.element, linkUI.formView.saveButtonView.element);
+        // Immediately click the newly added button.
+        this.button.fire('execute');
+
+        // @todo: Find a way to close the balloon but maintain focus.
+        // linkUI._hideUI();
       }
     });
   }
@@ -266,33 +273,33 @@ class BackdropLink extends CKEditor5.core.Plugin {
         existingValues[attributeName] = linkCommand[modelName];
       })
 
-      Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, this.saveCallback, dialogSettings);
+      // Prepare a save callback to be used upon saving the dialog.
+      const saveCallback = function(returnValues) {
+        const linkCommand = editor.commands.get('link');
+        const newHref = returnValues.attributes.href;
+        delete returnValues.href;
+        // Ignore a disabled target attribute.
+        if (returnValues.attributes.target === 0) {
+          delete returnValues.attributes.target;
+        }
+        // Remove empty file IDs.
+        if (!returnValues.attributes['data-file-id']) {
+          delete returnValues.attributes['data-file-id'];
+        }
+
+        // The normal link command does not support a 3rd argument natively.
+        // This has been extended in _addExtraAttributeOnLinkCommandExecute()
+        // to also accept an array of attributes to be saved.
+        // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
+        // There is also a feature request to make this native to CKEditor
+        // here: https://github.com/ckeditor/ckeditor5/issues/9730
+        linkCommand.execute(newHref, {}, returnValues.attributes);
+      }
+
+      Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
     });
 
     return button;
-  }
-
-  // Prepare a save callback to be used upon saving the dialog.
-  _saveCallback(returnValues) {
-    const linkCommand = editor.commands.get('link');
-    const newHref = returnValues.attributes.href;
-    delete returnValues.href;
-    // Ignore a disabled target attribute.
-    if (returnValues.attributes.target === 0) {
-      delete returnValues.attributes.target;
-    }
-    // Remove empty file IDs.
-    if (!returnValues.attributes['data-file-id']) {
-      delete returnValues.attributes['data-file-id'];
-    }
-
-    // The normal link command does not support a 3rd argument natively.
-    // This has been extended in _addExtraAttributeOnLinkCommandExecute()
-    // to also accept an array of attributes to be saved.
-    // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
-    // There is also a feature request to make this native to CKEditor
-    // here: https://github.com/ckeditor/ckeditor5/issues/9730
-    linkCommand.execute(newHref, {}, returnValues.attributes);
   }
 }
 

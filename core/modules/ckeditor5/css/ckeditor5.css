@@ -1,6 +1,10 @@
 /**
  * CSS needed when displaying a CKEditor instance.
  */
+.ck-powered-by {
+  display: none;
+}
+
 .ckeditor5-dialog-loading {
   position: absolute;
   top: 0;

@@ -523,7 +523,7 @@ function ckeditor5_ckeditor5_plugins() {
       'link' => array(
         'label' => t('Link'),
         'image' => $image_prefix . '/link.svg',
-        'required_html' => array('<a href>'),
+        'required_html' => array('<a href target class id title rel data-file-id>'),
         'plugin_dependencies' => array('backdropLink.BackdropLink'),
       ),
     ),
@@ -539,8 +539,10 @@ function ckeditor5_ckeditor5_plugins() {
         'extraAttributes' => array(
           'linkTarget' => 'target',
           'linkClass' => 'class',
+          'linkTitle' => 'title',
           'linkId' => 'id',
-          'linkRel' => 'rel'
+          'linkRel' => 'rel',
+          'linkDataFileId' => 'data-file-id',
         ),
       ),
     ),
@@ -562,6 +564,19 @@ function ckeditor5_form_filter_format_editor_image_form_alter(&$form, $form_stat
   $format = $form_state['format'];
   if ($format->editor === 'ckeditor5') {
     $form['caption']['#description'] = t('If checked, a caption area will appear in the editor.');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Manipulate the link dialog form to remove setting the link text, which is
+ * not (yet) supported).
+ */
+function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state) {
+  $format = $form_state['format'];
+  if ($format->editor === 'ckeditor5') {
+    $form['text']['#access'] = FALSE;
   }
 }
 
@@ -678,7 +693,6 @@ function ckeditor5_get_config($format, $existing_settings) {
   // when passed to the front-end JavaScript.
   $plugin_list = array_values(array_unique($plugins));
 
-dsm($plugin_list);
   // Initialize reasonable defaults that provide expected basic behavior.
   $config = array(
     'toolbar' => array(
