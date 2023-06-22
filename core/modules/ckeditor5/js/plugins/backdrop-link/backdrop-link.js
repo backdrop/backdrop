@@ -26,76 +26,225 @@ class BackdropLink extends CKEditor5.core.Plugin {
   /**
    * @inheritdoc
    */
+
   init() {
-    const editor = this.editor;
-    const contextualBalloonPlugin = editor.plugins.get('ContextualBalloon');
-    const options = editor.config.get('backdropLink');
-    const supportedAttributes = new Map(Object.entries(options.extraAttributes || {}));
-    this.linkUI = editor.plugins.get('LinkUI');
+    const config = this.editor.config.get('backdropLink');
 
-    // Add the backdropLink command using the class specified in this file.
-    editor.commands.add('backdropLink', new BackdropLinkCommand(editor));
+    if (!config.extraAttributes) {
+      return;
+    }
+    // Convert attributes to map for easier looping.
+    const extraAttributes = new Map(Object.entries(config.extraAttributes));
 
-    // Add support for each of the attributes defined in
-    // config.backdropLink.extraAttributes.
-    supportedAttributes.forEach((attributeName, modelName) => {
-      // Extend the schema to allow these attributes.
-      editor.model.schema.extend('$text', {
-        allowAttributes: modelName,
-      });
-
-      // See DowncastHelpers.attributeToElement().
-      // https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_conversion_downcasthelpers-DowncastHelpers.html#function-attributeToElement
-      editor.conversion.for('downcast').attributeToElement({
-        model: modelName,
-        view: (attributeValue, conversionApi) => {
-          const { writer } = conversionApi;
-          let attributeMap = {};
-          attributeMap[attributeName] = attributeValue;
-          return writer.createAttributeElement('a', attributeMap, { priority: 5 });
-        },
-        converterPriority: 'low'
-      });
-
-      editor.conversion.for('upcast').attributeToAttribute({
-        view: {
-          name: 'a',
-          key: attributeName
-        },
-        model: modelName,
-        converterPriority: 'low'
-      });
+    extraAttributes.forEach((attributeName, modelName) => {
+      this._allowAndConvertExtraAttribute(modelName, attributeName);
+      this._removeExtraAttributeOnUnlinkCommandExecute(modelName);
+      this._refreshExtraAttributeValue(modelName);
     });
 
-    // Bind to the contextual
+    this._addExtraAttributeOnLinkCommandExecute(extraAttributes);
+    this._bindBalloon(extraAttributes);
+  }
+
+  _allowAndConvertExtraAttribute(modelName, viewName) {
+    const editor = this.editor;
+
+    editor.model.schema.extend('$text', { allowAttributes: modelName });
+
+    // Model -> View (DOM)
+    editor.conversion.for('downcast').attributeToElement({
+      model: modelName,
+      view: (value, { writer }) => {
+        const linkViewElement = writer.createAttributeElement('a', {
+          [ viewName ]: value
+        }, { priority: 5 });
+
+        // Without it the isLinkElement() will not recognize the link and the UI will not show up
+        // when the user clicks a link.
+        writer.setCustomProperty('link', true, linkViewElement);
+
+        return linkViewElement;
+      }
+    });
+
+    // View (DOM/DATA) -> Model
+    editor.conversion.for('upcast').elementToAttribute({
+      view: {
+        name: 'a',
+        attributes: {
+          [ viewName ]: true
+        }
+      },
+      model: {
+        key: modelName,
+        value: viewElement => viewElement.getAttribute(viewName)
+      }
+    });
+  }
+
+  _addExtraAttributeOnLinkCommandExecute(extraAttributes) {
+    const editor = this.editor;
+    const linkCommand = editor.commands.get( 'link' );
+    let linkCommandExecuting = false;
+
+    linkCommand.on('execute', (evt, args) => {
+      // Custom handling is only required if an extra attribute was passed into
+      // editor.execute('link', ...).
+      if (args.length < 3) {
+        return;
+      }
+      if (linkCommandExecuting) {
+        linkCommandExecuting = false;
+        return;
+      }
+
+      // If the additional attribute was passed, we stop the default execution
+      // of the LinkCommand. We're going to create Model#change() block for undo
+      // and execute the LinkCommand together with setting the extra attribute.
+      evt.stop();
+
+      // Prevent infinite recursion by keeping records of when link command is
+      // being executed by this function.
+      linkCommandExecuting = true;
+      const extraAttributeValues = args[args.length - 1];
+      const model = this.editor.model;
+      const selection = model.document.selection;
+
+      // Wrapping the original command execution in a model.change() block to make sure there's a single undo step
+      // when the extra attribute is added.
+      model.change(writer => {
+        editor.execute('link', ...args);
+
+        const firstPosition = selection.getFirstPosition();
+
+        extraAttributes.forEach((attributeName, modelName) => {
+          if (selection.isCollapsed) {
+            const node = firstPosition.textNode || firstPosition.nodeBefore;
+
+            if (extraAttributeValues[attributeName]) {
+              writer.setAttribute(modelName, extraAttributeValues[attributeName], writer.createRangeOn(node));
+            } else {
+              writer.removeAttribute(modelName, writer.createRangeOn(node));
+            }
+
+            writer.removeSelectionAttribute(modelName);
+          }
+          else {
+            const ranges = model.schema.getValidRanges(selection.getRanges(), modelName);
+
+            for (const range of ranges) {
+              if (extraAttributeValues[attributeName]) {
+                writer.setAttribute(modelName, extraAttributeValues[attributeName], range);
+              } else {
+                writer.removeAttribute(modelName, range);
+              }
+            }
+          }
+        });
+      } );
+    }, { priority: 'high' } );
+  }
+
+  _removeExtraAttributeOnUnlinkCommandExecute(modelName) {
+    const editor = this.editor;
+    const unlinkCommand = editor.commands.get( 'unlink' );
+    const model = this.editor.model;
+    const selection = model.document.selection;
+
+    let isUnlinkingInProgress = false;
+
+    // Make sure all changes are in a single undo step so cancel the original unlink first in the high priority.
+    unlinkCommand.on('execute', evt => {
+      if (isUnlinkingInProgress) {
+        return;
+      }
+
+      evt.stop();
+
+      // This single block wraps all changes that should be in a single undo step.
+      model.change(() => {
+        // Now, in this single "undo block" let the unlink command flow naturally.
+        isUnlinkingInProgress = true;
+
+        // Do the unlinking within a single undo step.
+        editor.execute('unlink');
+
+        // Let's make sure the next unlinking will also be handled.
+        isUnlinkingInProgress = false;
+
+        // The actual integration that removes the extra attribute.
+        model.change(writer => {
+          // Get ranges to unlink.
+          let ranges;
+
+          if (selection.isCollapsed) {
+            ranges = [CKEditor5.typing.findAttributeRange(
+              selection.getFirstPosition(),
+              modelName,
+              selection.getAttribute( modelName ),
+              model
+            )];
+          }
+          else {
+            ranges = model.schema.getValidRanges(selection.getRanges(), modelName);
+          }
+
+          // Remove the extra attribute from specified ranges.
+          for (const range of ranges) {
+            writer.removeAttribute(modelName, range);
+          }
+        });
+      });
+    }, { priority: 'high' });
+  }
+
+  _refreshExtraAttributeValue(modelName) {
+    const editor = this.editor;
+    const linkCommand = editor.commands.get('link');
+    const model = this.editor.model;
+    const selection = model.document.selection;
+
+    linkCommand.set(modelName, null);
+
+    model.document.on('change', () => {
+      linkCommand[modelName] = selection.getAttribute(modelName);
+    });
+  }
+
+  _bindBalloon(extraAttributes) {
+    const editor = this.editor;
+    const contextualBalloonPlugin = editor.plugins.get('ContextualBalloon');
+    const linkUI = editor.plugins.get('LinkUI');
+
+    // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
-      if (visibleView === this.linkUI.formView) {
-        console.log(evt);
+      if (visibleView === linkUI.formView) {
         // Detach the listener.
         this.stopListening(contextualBalloonPlugin, 'change:visibleView');
 
-        this.button = this._createButton();
+        this.button = this._createButton(extraAttributes);
 
         // Render button's template.
         this.button.render();
 
         // Register the button under the link form view, it will handle its destruction.
-        this.linkUI.formView.registerChild(this.button);
+        linkUI.formView.registerChild(this.button);
 
         // Inject the element into DOM.
-        this.linkUI.formView.element.insertBefore(this.button.element, this.linkUI.formView.saveButtonView.element);
+        linkUI.formView.element.insertBefore(this.button.element, linkUI.formView.saveButtonView.element);
       }
     });
   }
 
-  _createButton() {
+  _createButton(extraAttributes) {
     const editor = this.editor;
     const button = new CKEditor5.ui.ButtonView(this.locale);
     const linkCommand = editor.commands.get('link');
-    const options = editor.config.get('backdropLink');
+    const linkUI = editor.plugins.get('LinkUI');
+    const config = this.editor.config.get('backdropLink')
 
     button.set({
-      label: options.buttonLabel || 'Advanced',
+      label: config.buttonLabel || 'Advanced',
       withText: true,
       tooltip: true
     });
@@ -105,283 +254,51 @@ class BackdropLink extends CKEditor5.core.Plugin {
     button.bind('isEnabled').to(linkCommand);
 
     button.on('execute', () => {
-      // Attempts at getting the selected element:
-      // const selection = editor.model.document.selection;
-      // const selectedParent = selection.anchor.parent;
-      // const selectedElement = selection.getSelectedElement() || CKEditor5.utils.first(selection.getSelectedBlocks());
-      // const selectedContent = editor.model.getSelectedContent(selection);
-      // const linkHref = selectedContent.getAttribute('linkHref');
-
       const dialogSettings = {
         dialogClass: 'editor-link-dialog'
       };
+
+      // Pull in existing values from the model to be sent to the dialog.
       let existingValues = {
-        'href': this.linkUI.formView.urlInputView.fieldView.value
+        'href': linkUI.formView.urlInputView.fieldView.value,
       };
+      extraAttributes.forEach((attributeName, modelName) => {
+        existingValues[attributeName] = linkCommand[modelName];
+      })
 
-      // Prepare a save callback to be used upon saving the dialog.
-      var saveCallback = function(returnValues) {
-        console.log(returnValues);
-
-        const linkCommand = editor.commands.get('backdropLink');
-        const newHref = returnValues.attributes.href;
-        delete returnValues.href;
-        // Ignore a disabled target attribute.
-        if (returnValues.attributes.target === 0) {
-          delete returnValues.attributes.target;
-        }
-
-        // Update the selected text with the returned href. The link.execute()
-        // command takes the href attribute, plus an object mapping decorators,
-        // which are not useful for setting attributes.
-        // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
-        linkCommand.execute(newHref, returnValues.attributes);
-
-        // Set other attributes on the link from the returned values.
-        // See https://github.com/rhysstubbs/ckeditor5-add-attribute-to-element/blob/main/src/add-attribute-to-element-command.js
-        // const element = editor.model.document.selection.getSelectedElement();
-        // editor.model.change(writer => {
-        //   writer.setAttribute('linkTarget', '_blank', element);
-        // });
-
-        return;
-
-        // If an image widget is focused, we're not editing an independent
-        // link, but we're wrapping an image widget in a link.
-        if (focusedImageWidget) {
-          // Remove attributes that are inappropriate.
-          delete returnValues.attributes['data-file-id'];
-          delete returnValues.attributes.text;
-          focusedImageWidget.setData('link', CKEDITOR.tools.extend(returnValues.attributes, focusedImageWidget.data.link));
-          return;
-        }
-        else {
-          // Create the new link by applying a style to the new text.
-          // Remove attributes that are not required.
-          if (!returnValues.attributes['data-file-id']) {
-            delete returnValues.attributes['data-file-id'];
-          }
-          delete returnValues.attributes.text;
-        }
-      }
-
-      Backdrop.ckeditor5.openDialog(editor, options.dialogUrl, existingValues, saveCallback, dialogSettings);
+      Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, this.saveCallback, dialogSettings);
     });
 
     return button;
   }
-}
 
-
-/**
- * Provides a command to apply a link to a selections.
- *
- * Ideally we would not need to have our own link command. But the core
- * LinkCommand cannot set attributes beyond those provided by link decorators,
- * which only support on/off toggles. See
- * https://github.com/ckeditor/ckeditor5/issues/9730
- *
- * Heavily copied from CKEditor's built-in LinkCommand. See
- * https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
- */
-class BackdropLinkCommand extends CKEditor5.core.Command {
-
-  /**
-   * @inheritDoc
-   */
-  refresh() {
-    const model = this.editor.model;
-    const selection = model.document.selection;
-    const selectedElement = selection.getSelectedElement() || CKEditor5.utils.first(selection.getSelectedBlocks());
-
-    // A check for any integration that allows linking elements (e.g. `LinkImage`).
-    // Currently the selection reads attributes from text nodes only. See #7429 and #7465.
-    if (model.schema.checkAttribute(selectedElement.name, 'linkHref')) {
-      this.value = selectedElement.getAttribute('linkHref') || undefined;
-      this.isEnabled = model.schema.checkAttribute(selectedElement, 'linkHref');
+  // Prepare a save callback to be used upon saving the dialog.
+  _saveCallback(returnValues) {
+    const linkCommand = editor.commands.get('link');
+    const newHref = returnValues.attributes.href;
+    delete returnValues.href;
+    // Ignore a disabled target attribute.
+    if (returnValues.attributes.target === 0) {
+      delete returnValues.attributes.target;
     }
-    else {
-      this.value = selection.getAttribute('linkHref') || undefined;
-      this.isEnabled = model.schema.checkAttributeInSelection(selection, 'linkHref');
-    }
-  }
-
-  /**
-   * Executes a command to apply a link.
-   *
-   * @param newHref Link destination.
-   * @param newAttributes Specific attributes to be set on the target link.
-   */
-  execute(newHref, newAttributes) {
-    const editor = this.editor;
-    const model = editor.model;
-    const selection = model.document.selection;
-    const options = editor.config.get('backdropLink');
-    const supportedAttributes = new Map(Object.entries(options.extraAttributes || {}));
-
-    model.change(writer => {
-      const findAttributeRange = CKEditor5.typing.findAttributeRange;
-
-      // If selection is collapsed then update selected link or insert new one at the place of caret.
-      if (selection.isCollapsed) {
-        const position = selection.getFirstPosition();
-
-        // When selection is inside text with `linkHref` attribute.
-        if (selection.hasAttribute('linkHref')) {
-          const linkText = extractTextFromSelection(selection);
-          // Then update `linkHref` value.
-          let linkRange = findAttributeRange( position, 'linkHref', selection.getAttribute( 'linkHref' ), model );
-
-          if (selection.getAttribute('linkHref') === linkText ) {
-            linkRange = this._updateLinkContent(model, writer, linkRange, newHref);
-          }
-
-          writer.setAttribute('linkHref', newHref, linkRange);
-          supportedAttributes.forEach((attributeName, modelName) => {
-            if (newAttributes.hasOwnProperty(attributeName))  {
-              writer.setAttribute(modelName, newAttributes[attributeName], linkRange);
-            }
-          });
-
-          // Put the selection at the end of the updated link.
-          writer.setSelection(writer.createPositionAfter(linkRange.end.nodeBefore));
-        }
-        // If not then insert text node with `linkHref` attribute in place of caret.
-        // However, since selection is collapsed, attribute value will be used as data for text node.
-        // So, if `href` is empty, do not create text node.
-        else if (newHref !== '') {
-          const attributes = CKEditor5.utils.toMap(selection.getAttributes());
-
-          attributes.set('linkHref', newHref);
-          supportedAttributes.forEach((attributeName, modelName) => {
-            if (newAttributes.hasOwnProperty(attributeName))  {
-              attributes.set(modelName, newAttributes[attributeName]);
-            }
-          });
-
-          const { end: positionAfter } = model.insertContent(writer.createText(newHref, attributes), position);
-
-          // Put the selection at the end of the inserted link.
-          // Using end of range returned from insertContent in case nodes with the same attributes got merged.
-          writer.setSelection(positionAfter);
-        }
-
-        // Remove the `linkHref` attribute and all link decorators from the selection.
-        // It stops adding a new content into the link element.
-        //[ 'linkHref', ...truthyManualDecorators, ...falsyManualDecorators ].forEach(item => {
-        [ 'linkHref' ].forEach(item => {
-          writer.removeSelectionAttribute(item);
-        });
-      }
-      else {
-        // If selection has non-collapsed ranges, we change attribute on nodes inside those ranges
-        // omitting nodes where the `linkHref` attribute is disallowed.
-        const ranges = model.schema.getValidRanges(selection.getRanges(), 'linkHref');
-
-        // But for the first, check whether the `linkHref` attribute is allowed on selected blocks (e.g. the "image" element).
-        const allowedRanges = [];
-
-        for (const element of selection.getSelectedBlocks()) {
-          if (model.schema.checkAttribute( element, 'linkHref')) {
-            allowedRanges.push(writer.createRangeOn(element));
-          }
-        }
-
-        // Ranges that accept the `linkHref` attribute. Since we will iterate over `allowedRanges`, let's clone it.
-        const rangesToUpdate = allowedRanges.slice();
-
-        // For all selection ranges we want to check whether given range is inside an element that accepts the `linkHref` attribute.
-        // If so, we don't want to propagate applying the attribute to its children.
-        for (const range of ranges) {
-          if (this._isRangeToUpdate( range, allowedRanges)) {
-            rangesToUpdate.push( range );
-          }
-        }
-
-        for (const range of rangesToUpdate) {
-          let linkRange = range;
-
-          if (rangesToUpdate.length === 1) {
-            // Current text of the link in the document.
-            const linkText = extractTextFromSelection(selection);
-
-            if (selection.getAttribute('linkHref') === linkText) {
-              linkRange = this._updateLinkContent(model, writer, range, newHref);
-              writer.setSelection(writer.createSelection(linkRange));
-            }
-          }
-
-          writer.setAttribute('linkHref', newHref, linkRange);
-          supportedAttributes.forEach((attributeName, modelName) => {
-            if (newAttributes.hasOwnProperty(attributeName))  {
-              writer.setAttribute(modelName, newAttributes[attributeName], linkRange);
-            }
-          });
-        }
-      }
-    });
-  }
-
-  /**
-   * Checks whether specified `range` is inside an element that accepts the `linkHref` attribute.
-   *
-   * @param range A range to check.
-   * @param allowedRanges An array of ranges created on elements where the attribute is accepted.
-   */
-  _isRangeToUpdate(range, allowedRanges) {
-    for (const allowedRange of allowedRanges) {
-      // A range is inside an element that will have the `linkHref` attribute. Do not modify its nodes.
-      if ( allowedRange.containsRange( range ) ) {
-        return false;
-      }
+    // Remove empty file IDs.
+    if (!returnValues.attributes['data-file-id']) {
+      delete returnValues.attributes['data-file-id'];
     }
 
-    return true;
-  }
-
-  /**
-   * Updates selected link with a new value as its content and as its href attribute.
-   *
-   * @param model Model is need to insert content.
-   * @param writer Writer is need to create text element in model.
-   * @param range A range where should be inserted content.
-   * @param href A link value which should be in the href attribute and in the content.
-   */
-  _updateLinkContent(model, writer, range, href) {
-    const text = writer.createText( href, { linkHref: href } );
-    return model.insertContent( text, range );
-  }
-
-}
-
-// Returns a text of a link under the collapsed selection or a selection that contains the entire link.
-function extractTextFromSelection( selection ) {
-  if ( selection.isCollapsed ) {
-    const firstPosition = selection.getFirstPosition();
-
-    return firstPosition.textNode && firstPosition.textNode.data;
-  }
-  else {
-    const rangeItems = Array.from(selection.getFirstRange().getItems());
-
-    if (rangeItems.length > 1) {
-      return null;
-    }
-
-    const firstNode = rangeItems[ 0 ];
-
-    if (firstNode.is('$text') || firstNode.is('$textProxy')) {
-      return firstNode.data;
-    }
-
-    return null;
+    // The normal link command does not support a 3rd argument natively.
+    // This has been extended in _addExtraAttributeOnLinkCommandExecute()
+    // to also accept an array of attributes to be saved.
+    // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
+    // There is also a feature request to make this native to CKEditor
+    // here: https://github.com/ckeditor/ckeditor5/issues/9730
+    linkCommand.execute(newHref, {}, returnValues.attributes);
   }
 }
 
 // Expose the plugin to the CKEditor5 namespace.
 CKEditor5.backdropLink = {
-  'BackdropLink': BackdropLink,
-  'BackdropLinkCommand': BackdropLinkCommand,
+  'BackdropLink': BackdropLink
 };
 
 })(Backdrop, CKEditor5);

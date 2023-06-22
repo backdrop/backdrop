@@ -524,7 +524,7 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Link'),
         'image' => $image_prefix . '/link.svg',
         'required_html' => array('<a href>'),
-        'plugin_dependencies' => array('backdropLink.BackdropLink', 'backdropLink.BackdropLinkCommand'),
+        'plugin_dependencies' => array('backdropLink.BackdropLink'),
       ),
     ),
     // Append the "Link" button to the image balloon toolbar.
