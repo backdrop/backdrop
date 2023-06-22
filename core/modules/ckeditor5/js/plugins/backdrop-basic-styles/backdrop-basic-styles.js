@@ -42,6 +42,7 @@ class BackdropBasicStyles extends CKEditor5.core.Plugin {
 
     // Support a minimum height option on the editor.
     // See https://stackoverflow.com/a/56550285/845793
+    // @todo: Move this functionality or rename the entire plugin?
     const minHeight = editor.config.get('minHeight');
     if (minHeight) {
       editor.ui.view.editable.extendTemplate({

@@ -517,16 +517,37 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
-  // The BackdropLink plugin replaces normal link functionality.
-  $plugins['backdropLink.BackdropLink'] = array(
-    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
+  // The BackdropLink plugin extends the build in link button.
+  $plugins['link.Link'] = array(
     'buttons' => array(
-      'backdropLink' => array(
+      'link' => array(
         'label' => t('Link'),
         'image' => $image_prefix . '/link.svg',
         'required_html' => array('<a href>'),
+        'plugin_dependencies' => array('backdropLink.BackdropLink', 'backdropLink.BackdropLinkCommand'),
       ),
     ),
+    // Append the "Link" button to the image balloon toolbar.
+    'config' => array(
+      'image' => array(
+        'toolbar' => array('|', 'linkImage'),
+      ),
+      'backdropLink' => array(
+        // Specify an array of CKEditor model name => attribute name values.
+        // These attributes are then allowed to be changed via the Backdrop
+        // link dialog.
+        'extraAttributes' => array(
+          'linkTarget' => 'target',
+          'linkClass' => 'class',
+          'linkId' => 'id',
+          'linkRel' => 'rel'
+        ),
+      ),
+    ),
+  );
+
+  $plugins['backdropLink.BackdropLink'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
   );
 
   return $plugins;
@@ -657,8 +678,7 @@ function ckeditor5_get_config($format, $existing_settings) {
   // when passed to the front-end JavaScript.
   $plugin_list = array_values(array_unique($plugins));
 
-  $plugin_list[] = 'autoformat.Autoformat';
-
+dsm($plugin_list);
   // Initialize reasonable defaults that provide expected basic behavior.
   $config = array(
     'toolbar' => array(
@@ -695,6 +715,7 @@ function ckeditor5_get_config($format, $existing_settings) {
   if (in_array('backdropLink.BackdropLink', $plugin_list)) {
     $link_token = filter_editor_dialog_token($format, 'link');
     $config['backdropLink']['dialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));
+    $config['backdropLink']['buttonLabel'] = t('Advanced');
   }
   if (in_array('backdropImage.BackdropImage', $plugin_list)) {
     $image_token = filter_editor_dialog_token($format, 'image');

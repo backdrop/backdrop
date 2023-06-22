@@ -121,13 +121,10 @@
      */
     openDialog: function (editor, url, existingValues, saveCallback, dialogSettings) {
       // Locate a suitable place to display our loading indicator.
-      var $target = $(editor.container.$);
-      if (editor.elementMode === CKEDITOR.ELEMENT_MODE_REPLACE) {
-        $target = $target.find('.cke_contents');
-      }
+      var $toolbar = $(editor.ui.view.toolbar.element);
 
       // Remove any previous loading indicator.
-      $target.css('position', 'relative').find('.ckeditor5-dialog-loading').remove();
+      $toolbar.find('.ckeditor5-dialog-loading').remove();
 
       // Add a consistent dialog class.
       var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
@@ -140,7 +137,7 @@
       // Add a "Loading…" message, hide it underneath the CKEditor toolbar, create
       // a Backdrop.ajax instance to load the dialog and trigger it.
       var $content = $('<div class="ckeditor5-dialog-loading"><span style="top: -40px;" class="ckeditor5-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div>');
-      $content.appendTo($target);
+      $toolbar.append($content);
       new Backdrop.ajax('ckeditor5-dialog', $content.find('a').get(0), {
         accepts: 'application/vnd.backdrop-dialog',
         dialog: dialogSettings,
