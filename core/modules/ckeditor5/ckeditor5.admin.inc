@@ -56,7 +56,7 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#title' => t('Style list'),
     '#attributes' => array(
       'class' => array('ckeditor5-plugin-style'),
-      'data-ckeditor5-feature-dependency' => 'Styles',
+      'data-ckeditor5-feature-dependency' => 'style',
     ),
   );
   $style_list = '';
@@ -88,7 +88,7 @@ function ckeditor5_settings_form_validate($form, &$form_state) {
 
   $styles = _ckeditor5_settings_parse_style_list($settings['plugins']['style']['style_list']);
   foreach ($styles as $style) {
-    if (empty($style['name']) || empty($style['element']) || empty($style['attributes']['class'])) {
+    if (empty($style['name']) || empty($style['element']) || empty($style['classes'])) {
       form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
     }
   }
@@ -115,9 +115,7 @@ function ckeditor5_settings_form_submit($form, &$form_state) {
  *   An unindexed array of styles with the following keys:
  *   - name: The label of the style.
  *   - element: The type of element this still will use.
- *   - attributes: An attributes array including the class that will be used.
- *     Note that the class is not an array, as this configuration is passed
- *     directly to CKEditor.
+ *   - classes: An array of classes to be applied to the element.
  */
 function _ckeditor5_settings_parse_style_list($style_list_string) {
   $styles = array();
@@ -125,11 +123,13 @@ function _ckeditor5_settings_parse_style_list($style_list_string) {
     $style = trim($style);
     if ($style) {
       @list($element, $label) = explode('|', $style, 2);
-      @list($element, $class) = explode('.', $element, 2);
+      @list($element, $classes) = explode('.', $element, 2);
       $styles[] = array(
         'name' => $label,
         'element' => $element,
-        'attributes' => array('class' => $class),
+        // Note CKEditor 4 used 'attributes' => array('class' => $class).
+        // CKEditor 5 simplified this down to just a list of classes.
+        'classes' => explode(' ', $classes),
       );
     }
   }
@@ -149,7 +149,7 @@ function _ckeditor5_settings_stringify_style_list(array $style_list = NULL) {
   $string = '';
   if ($style_list) {
     foreach ($style_list as $style) {
-      $string .= $style['element'] . '.' . $style['attributes']['class'] . '|' . $style['name'] . "\n";
+      $string .= $style['element'] . '.' . implode(' ', $style['classes']) . '|' . $style['name'] . "\n";
     }
   }
   return $string;

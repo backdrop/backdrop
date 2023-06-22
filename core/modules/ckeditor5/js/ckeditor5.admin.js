@@ -137,10 +137,16 @@ Backdrop.behaviors.ckeditor5Admin = {
         var tagName = attributes.shift();
         var classList = [], styleList = [];
         if (attributes.indexOf('class') > -1) {
-          classList = htmlTag.match(/class=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+          var classMatches = htmlTag.match(/class=\"([a-z_\- ]+)\"/);
+          if (classMatches) {
+            classList = classMatches[1].split(/\s/)
+          }
         }
         if (attributes.indexOf('style') > -1) {
-          styleList = htmlTag.match(/style=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+          var styleMatches = htmlTag.match(/style=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+          if (styleMatches) {
+            styleList = styleMatches[1].split(/\s/)
+          }
         }
         return {
           attributes: attributes,

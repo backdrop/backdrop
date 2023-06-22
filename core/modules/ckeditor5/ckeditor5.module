@@ -33,32 +33,11 @@ function ckeditor5_editor_info() {
     'library' => array('ckeditor5', 'backdrop.ckeditor5'),
     'default settings' => array(
       'toolbar' => array(
-        array(
-          array(
-            'name' => 'Formatting',
-            'items' => array('Bold', 'Italic', 'Blockquote', 'Format'),
-          ),
-          array(
-            'name' => 'Lists',
-            'items' => array('BulletedList', 'NumberedList'),
-          ),
-          array(
-            'name' => 'Alignment',
-            'items' => array('JustifyLeft', 'JustifyCenter', 'JustifyRight'),
-          ),
-          array(
-            'name' => 'Linking',
-            'items' => array('BackdropLink', 'BackdropUnlink'),
-          ),
-          array(
-            'name' => 'Media',
-            'items' => array('BackdropImage'),
-          ),
-          array(
-            'name' => 'Tools',
-            'items' => array('Source', 'Maximize'),
-          ),
-        ),
+        'bold', 'italic', 'blockQuote', 'heading', '|',
+        'bulletedList', 'numberedList', '|',
+        'alignment:left', 'alignment:center', 'alignment:right', '|',
+        'link', 'backdropImage', '|',
+        'sourceEditing', 'removeFormat'
       ),
       'format_list' => array('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'),
       'style_list' => array(),
@@ -106,6 +85,7 @@ function ckeditor5_library_info() {
       array('ckeditor5', 'ckeditor5'),
       // CKEditor 5 does not provide its own plugin loader, so any added
       // potentially needed plugins are added as dependencies.
+      // @todo: Improve loading to use libraries only when needed.
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-image'),
       array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
@@ -292,6 +272,29 @@ function ckeditor5_ckeditor5_plugins() {
           array('name' => 'right', 'className' => 'text-align-right'),
           array('name' => 'justify', 'className' => 'text-align-justify'),
         ),
+      ),
+    ),
+  );
+
+  // See https://ckeditor.com/docs/ckeditor5/latest/features/indent.html
+  $plugins['indent.Indent'] = array(
+    'buttons' => array(
+      'indent' => array(
+        'label' => t('Indent'),
+        'image' => $image_prefix . '/indent.svg',
+        'required_html' => array('<p class="indent1 indent2 indent3">'),
+        'plugin_dependencies' => array('indent.IndentBlock'),
+      ),
+      'outdent' => array(
+        'label' => t('Outdent'),
+        'image' => $image_prefix . '/outdent.svg',
+        'required_html' => array('<p class="indent1 indent2 indent3">'),
+        'plugin_dependencies' => array('indent.IndentBlock'),
+      ),
+    ),
+    'config' => array(
+      'indentBlock' => array(
+        'classes' => array('indent1', 'indent2', 'indent3'),
       ),
     ),
   );
@@ -669,13 +672,6 @@ function ckeditor5_get_config($format, $existing_settings) {
     }
     $toolbar[] = $button_name;
   }
-
-  // Add the style list if configured.
-  $style_list = array();
-  if (!empty($format->editor_settings['plugins']['style']['style_list'])) {
-    $style_list = $format->editor_settings['plugins']['style']['style_list'];
-  }
-
   // Collect a list of CSS files to be added to the editor instance.
   $css = array(
     backdrop_get_path('module', 'system') . '/css/system.css',
@@ -703,12 +699,8 @@ function ckeditor5_get_config($format, $existing_settings) {
     // from an array of strings to variables references in the ckeditor.js file.
     'pluginList' => $plugin_list,
 
-    // Empty styles must be an array.
-    // See http://docs.ckeditor.com/#!/guide/dev_styles.
-    //'stylesSet' => $style_list,
     //'contentsCss' => array_values($css),
     //'entities' => FALSE,
-    //'indentClasses' => array('indent1', 'indent2', 'indent3'),
 
     //'format_tags' => implode(';', $format->editor_settings['format_list']),
     //'language' => $language->langcode,
@@ -741,6 +733,14 @@ function ckeditor5_get_config($format, $existing_settings) {
     $config['backdropImageCaption']['alignFilterEnabled'] = !empty($format->filters['filter_image_align']->status);
     $config['backdropImageCaption']['imageCaptionPlaceholderText'] = t('Enter caption text here.');
   }
+  // Add the style list if configured.
+  if (in_array('style.Style', $plugin_list)) {
+    if (!empty($format->editor_settings['plugins']['style']['style_list'])) {
+      $style_list = $format->editor_settings['plugins']['style']['style_list'];
+      $config['style']['definitions'] = $style_list;
+    }
+  }
+
 
   backdrop_alter('ckeditor5_config', $config, $format);
 
