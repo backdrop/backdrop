@@ -745,7 +745,6 @@ function ckeditor5_get_config($format, $existing_settings) {
     $html_restrictions = filter_format_allowed_html($format);
     $heading_list = $format->editor_settings['heading_list'];
     $possible_headings = array(
-      'p' => array('model' => 'paragraph', 'title' => t('Paragraph')),
       'h1' => array('model' => 'heading1', 'view' => 'h1', 'title' => t('Heading 1')),
       'h2' => array('model' => 'heading2', 'view' => 'h2', 'title' => t('Heading 2')),
       'h3' => array('model' => 'heading3', 'view' => 'h3', 'title' => t('Heading 3')),
@@ -764,6 +763,11 @@ function ckeditor5_get_config($format, $existing_settings) {
       }
     }
     $config['heading']['options'] = array_values($possible_headings);
+    // Add the always required normal paragraph formatting.
+    array_unshift($config['heading']['options'], array(
+      'model' => 'paragraph',
+      'title' => t('Paragraph'),
+    ));
   }
 
   backdrop_alter('ckeditor5_config', $config, $format);
