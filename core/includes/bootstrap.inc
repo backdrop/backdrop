@@ -3011,6 +3011,7 @@ function _backdrop_exception_handler($exception) {
  */
 function _backdrop_bootstrap_configuration() {
   backdrop_environment_initialize();
+
   // Start a page timer:
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
@@ -3038,15 +3039,21 @@ function _backdrop_bootstrap_configuration() {
     throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
+  // Bootstrap the database if it is needed but not yet available.
+  $config_storage = config_get_config_storage('active');
+  if (is_a($config_storage, 'ConfigDatabaseStorage') && (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE)) {
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+  }
+
   // Check that the config directory is not empty.
-  if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+  if (!defined('MAINTENANCE_MODE') && (!empty($config_storage))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
       if (is_a($config_storage, 'ConfigFileStorage')) {
         $directory = config_get_config_directory('active');
         $exception_message = "The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.";
       }
       else {
-        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$config_active_class variable is correct in settings.php.";
+        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$settings['config_active_class'] variable is correct in settings.php.";
       }
       throw new Exception($exception_message);
     }
