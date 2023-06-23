@@ -43,11 +43,8 @@
       CKEditor5.editorClassic.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
-
-          // Set the offset to account for admin toolbar.
-          // @todo: Bind to document offsettopchange event to update.
-          editor.ui.viewportOffset.top = Backdrop.ckeditor5.computeOffsetTop();
-
+          Backdrop.ckeditor5.setEditorOffset(editor);
+          Backdrop.ckeditor5.instances.set(editor.id, editor);
           element.ckeditorAttachedEditor = editor;
           return true;
         })
@@ -70,13 +67,12 @@
         return false;
       }
 
-      if (editor) {
-        if (trigger === 'serialize') {
-          editor.updateSourceElement();
-        }
-        else {
-          editor.destroy();
-        }
+      if (trigger === 'serialize') {
+        editor.updateSourceElement();
+      }
+      else {
+        editor.destroy();
+        Backdrop.ckeditor5.instances.delete(editor.id);
       }
 
       // Restore the resize grippie.
@@ -100,6 +96,11 @@
      * Variable storing the current dialog's save callback.
      */
     saveCallback: null,
+
+    /**
+     * Key-value map of all active instances of CKEditor 5.
+     */
+    instances: new Map(),
 
     /**
      * Open a dialog for a Backdrop-based plugin.
@@ -136,7 +137,7 @@
 
       // Add a "Loading…" message, hide it underneath the CKEditor toolbar, create
       // a Backdrop.ajax instance to load the dialog and trigger it.
-      var $content = $('<div class="ckeditor5-dialog-loading"><span style="top: -40px;" class="ckeditor5-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div>');
+      var $content = $('<div class="ck-reset_all-excluded ckeditor5-dialog-loading-wrapper" style="display: none;"><div class="ckeditor5-dialog-loading"><span class="ckeditor5-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div></div>');
       $toolbar.append($content);
       new Backdrop.ajax('ckeditor5-dialog', $content.find('a').get(0), {
         accepts: 'application/vnd.backdrop-dialog',
@@ -155,7 +156,7 @@
 
       // After a short delay, show "Loading…" message.
       window.setTimeout(function () {
-        $content.find('span').animate({top: '0px'});
+        $content.css('display', 'block');
       }, 500);
 
       // Store the save callback to be executed when this dialog is closed.
@@ -171,14 +172,21 @@
       }
       this.offsetTop = sum;
       return sum;
+    },
+
+    setEditorOffset: function (editor) {
+      editor.ui.viewportOffset = {
+        'bottom': 0,
+        'left': 0,
+        'right': 0,
+        'top': Backdrop.ckeditor5.computeOffsetTop()
+      };
     }
   };
 
   // Respond to new dialogs that are opened by CKEditor, closing the AJAX loader.
   $(window).on('dialog:beforecreate', function (e, dialog, $element, settings) {
-    $('.ckeditor5-dialog-loading').animate({top: '-40px'}, function () {
-      $(this).remove();
-    });
+    $('.ckeditor5-dialog-loading-wrapper').remove();
   });
 
   // Respond to dialogs that are saved, sending data back to CKEditor.
@@ -193,6 +201,13 @@
     if (Backdrop.ckeditor5.saveCallback) {
       Backdrop.ckeditor5.saveCallback = null;
     }
+  });
+
+  // Set the offset to account for admin toolbar.
+  $(document).on('offsettopchange', function() {
+    Backdrop.ckeditor5.instances.forEach(function(instance) {
+      Backdrop.ckeditor5.setEditorOffset(instance);
+    });
   });
 
 })(Backdrop, CKEditor5, jQuery);
