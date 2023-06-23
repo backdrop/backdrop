@@ -39,7 +39,7 @@ function ckeditor5_editor_info() {
         'link', 'backdropImage', '|',
         'sourceEditing', 'removeFormat'
       ),
-      'format_list' => array('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'),
+      'heading_list' => array('p', 'h3', 'h4', 'h5'),
       'style_list' => array(),
     ),
     'file' => 'ckeditor5.admin.inc',
@@ -702,7 +702,6 @@ function ckeditor5_get_config($format, $existing_settings) {
     //'contentsCss' => array_values($css),
     //'entities' => FALSE,
 
-    //'format_tags' => implode(';', $format->editor_settings['format_list']),
     //'language' => $language->langcode,
   );
 
@@ -735,12 +734,37 @@ function ckeditor5_get_config($format, $existing_settings) {
   }
   // Add the style list if configured.
   if (in_array('style.Style', $plugin_list)) {
-    if (!empty($format->editor_settings['plugins']['style']['style_list'])) {
-      $style_list = $format->editor_settings['plugins']['style']['style_list'];
+    if (!empty($format->editor_settings['style_list'])) {
+      $style_list = $format->editor_settings['style_list'];
       $config['style']['definitions'] = $style_list;
     }
   }
 
+  // Add heading list if configured.
+  if (in_array('heading.Heading', $plugin_list)) {
+    $html_restrictions = filter_format_allowed_html($format);
+    $heading_list = $format->editor_settings['heading_list'];
+    $possible_headings = array(
+      'p' => array('model' => 'paragraph', 'title' => t('Paragraph')),
+      'h1' => array('model' => 'heading1', 'view' => 'h1', 'title' => t('Heading 1')),
+      'h2' => array('model' => 'heading2', 'view' => 'h2', 'title' => t('Heading 2')),
+      'h3' => array('model' => 'heading3', 'view' => 'h3', 'title' => t('Heading 3')),
+      'h4' => array('model' => 'heading4', 'view' => 'h4', 'title' => t('Heading 4')),
+      'h5' => array('model' => 'heading5', 'view' => 'h5', 'title' => t('Heading 5')),
+      'h6' => array('model' => 'heading6', 'view' => 'h6', 'title' => t('Heading 6')),
+    );
+    foreach ($possible_headings as $tag => $heading_config) {
+      // Remove if not enabled in the editor settings.
+      if (!in_array($tag, $heading_list)) {
+        unset($possible_headings[$tag]);
+      }
+      // Or remove if the HTML filter does not allow it.
+      if (is_array($html_restrictions) && !isset($html_restrictions['allowed'][$tag])) {
+        unset($possible_headings[$tag]);
+      }
+    }
+    $config['heading']['options'] = array_values($possible_headings);
+  }
 
   backdrop_alter('ckeditor5_config', $config, $format);
 

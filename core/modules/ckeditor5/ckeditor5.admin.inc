@@ -28,6 +28,10 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#attributes' => array('class' => array('ckeditor5-toolbar-textarea')),
   );
 
+  $elements['plugins'] = array(
+    '#type' => 'vertical_tabs',
+  );
+
   // @todo: Have this settings form be provided via a plugin hook.
   $elements['plugins']['image'] = filter_editor_image_upload_settings_form($format);
   $elements['plugins']['image'] += array(
@@ -60,14 +64,40 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     ),
   );
   $style_list = '';
-  if (isset($format->editor_settings['plugins']['style']['style_list'])) {
-    $style_list = _ckeditor5_settings_stringify_style_list($format->editor_settings['plugins']['style']['style_list']);
+  if (isset($format->editor_settings['style_list'])) {
+    $style_list = _ckeditor5_settings_stringify_style_list($format->editor_settings['style_list']);
   }
   $elements['plugins']['style']['style_list'] = array(
     '#type' => 'textarea',
     '#rows' => 4,
     '#default_value' => $style_list,
     '#description' => t('A list of classes that will be provided in the "Styles" dropdown. Enter one class on each line in the format: element.class|Label. Example: h1.title|Title.') . '<br />' . t('Each style should be in your theme\'s main CSS as well as in your theme\'s ckeditor5-iframe.css file.'),
+    '#parents' => array('editor_settings', 'style_list'),
+  );
+
+  $elements['plugins']['heading'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Headings'),
+    '#attributes' => array(
+      'class' => array('ckeditor5-plugin-heading'),
+      'data-ckeditor5-feature-dependency' => 'heading',
+    ),
+  );
+  $elements['plugins']['heading']['heading_list'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Enabled headings'),
+    '#default_value' => $format->editor_settings['heading_list'],
+    '#options' => array(
+      'h1' => t('Heading 1'),
+      'h2' => t('Heading 2'),
+      'h3' => t('Heading 3'),
+      'h4' => t('Heading 4'),
+      'h5' => t('Heading 5'),
+      'h6' => t('Heading 6'),
+    ),
+    '#description' => t('Select heading tags that are shown in the Headings toolbar button. Usually Heading 1 is reserved for the page title and is not shown in the editor.'),
+    '#attributes' => array('class' => array('ckeditor5-heading-list')),
+    '#parents' => array('editor_settings', 'heading_list'),
   );
 
   array_unshift($form['#validate'], 'ckeditor5_settings_form_validate');
@@ -99,10 +129,17 @@ function ckeditor5_settings_form_validate($form, &$form_state) {
  */
 function ckeditor5_settings_form_submit($form, &$form_state) {
   $settings = $form_state['values']['editor_settings'];
+
+  // Convert JSON toolbar settings to an array.
   form_set_value($form['editor_settings']['toolbar'], json_decode($settings['toolbar'], TRUE), $form_state);
 
-  $styles = _ckeditor5_settings_parse_style_list($settings['plugins']['style']['style_list']);
+  // Convert string style list into an array.
+  $styles = _ckeditor5_settings_parse_style_list($settings['style_list']);
   form_set_value($form['editor_settings']['plugins']['style']['style_list'], $styles, $form_state);
+
+  // Convert heading list to simple unindexed array.
+  $heading_list = array_filter($settings['heading_list']);
+  form_set_value($form['editor_settings']['plugins']['heading']['heading_list'], $heading_list, $form_state);
 }
 
 /**

@@ -5,6 +5,8 @@
 Backdrop.behaviors.ckeditor5Admin = {
   attach: function (context, settings) {
     var $context = $(context);
+
+    // Set up toolbar drag-and-drop interface and add/remove allowed HTML tags.
     $context.find('.ckeditor5-toolbar-configuration').once('ckeditor5-toolbar', function() {
       var $wrapper = $(this);
       var $textareaWrapper = $(this).find('.form-item-editor-settings-toolbar').hide();
@@ -257,6 +259,34 @@ Backdrop.behaviors.ckeditor5Admin = {
         });
       }
     });
+
+    // Adding or removing a heading option needs to add matching HTML tag.
+    $context.find('.ckeditor5-heading-list').once('ckeditor5-heading-list', function() {
+      var $checkboxes = $(this).find('input:checkbox');
+      var headingFeatures = {};
+      $checkboxes.each(function() {
+        var headingLevel = this.value;
+        var headingFeature = new Backdrop.EditorFeature(headingLevel);
+        var headingRule = new Backdrop.EditorFeatureHTMLRule({
+          'required': true,
+          'tags': [headingLevel]
+        });
+        headingFeature.addHTMLRule(headingRule)
+        Backdrop.editorConfiguration.initFeature(headingFeature);
+        headingFeatures[headingLevel] = headingFeature;
+      });
+
+      $checkboxes.on('change', function() {
+        var headingLevel = this.value;
+        var headingFeature = headingFeatures[headingLevel];
+        if (this.checked) {
+          Backdrop.editorConfiguration.addedFeature(headingFeature);
+        }
+        else {
+          Backdrop.editorConfiguration.removedFeature(headingFeature);
+        }
+      });
+    });
   }
 };
 
@@ -272,12 +302,15 @@ Backdrop.behaviors.ckeditor5AdminToggle = {
       $('[data-ckeditor5-feature-dependency]').each(function() {
         var $element = $(this);
         var dependency = $element.data('ckeditor5-feature-dependency');
+        var tab = $element.data('verticalTab');
         if (dependency === featureName) {
           if (enabled) {
             $element.show();
+            tab && tab.tabShow();
           }
           else {
             $element.hide();
+            tab && tab.tabHide();
           }
         }
       });
