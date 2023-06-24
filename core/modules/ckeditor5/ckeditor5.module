@@ -139,6 +139,32 @@ function ckeditor5_theme() {
 }
 
 /**
+ * Implements hook_js_alter().
+ *
+ * Adds a matching CKEditor 5 translation file if the UI is non-English.
+ */
+function ckeditor5_js_alter(&$javascript) {
+  global $language;
+  if ($language->langcode === 'en') {
+    return;
+  }
+
+  $module_path = backdrop_get_path('module', 'ckeditor5');
+  $build_path = $module_path . '/lib/ckeditor5/build';
+  $js_path = $build_path . '/ckeditor.js';
+  $translation_path = $build_path . '/translations/' . $language->langcode . '.js';
+
+  // If the ckeditor.js library is present AND a translation file exists for
+  // the current language, append the translation file to the JavaScript array.
+  if (isset($javascript[$js_path]) && file_exists($translation_path)) {
+    // Copy the CKEditor library settings, which will be nearly identical the
+    // translation settings (same preprocessing, scope, weight, version, etc.)
+    $javascript[$translation_path] = $javascript[$js_path];
+    $javascript[$translation_path]['data'] = $translation_path;
+  }
+}
+
+/**
  * Retrieves the full list of installed CKEditor plugins.
  */
 function ckeditor5_plugins() {
@@ -691,6 +717,7 @@ function ckeditor5_get_config($format, $existing_settings) {
 
   // Initialize reasonable defaults that provide expected basic behavior.
   $config = array(
+    'language' => $language->langcode,
     'toolbar' => array(
       'items' => $toolbar,
       'shouldNotGroupWhenFull' => TRUE,
@@ -700,9 +727,6 @@ function ckeditor5_get_config($format, $existing_settings) {
     'pluginList' => $plugin_list,
 
     //'contentsCss' => array_values($css),
-    //'entities' => FALSE,
-
-    //'language' => $language->langcode,
   );
 
   // Add default settings from plugins.
