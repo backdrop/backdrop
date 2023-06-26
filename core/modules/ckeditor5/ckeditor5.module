@@ -470,22 +470,6 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
-  // See https://ckeditor.com/docs/ckeditor5/latest/features/undo-redo.html
-  $plugins['undo.Undo'] = array(
-    'buttons' => array(
-      'undo' => array(
-        'label' => t('Undo'),
-        'image' => $image_prefix . '/undo.svg',
-        'image_rtl' => $image_prefix . '/undo-rtl.svg',
-      ),
-      'redo' => array(
-        'label' => t('Redo'),
-        'image' => $image_prefix . '/redo.svg',
-        'image_rtl' => $image_prefix . '/redo-rtl.svg',
-      ),
-    ),
-  );
-
   // Plugin that converts CKEditor preferred tags to Backdrop preferred tags,
   // such as converting <s> to <del> or <i> to <em>.
   $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
@@ -544,7 +528,9 @@ function ckeditor5_ckeditor5_plugins() {
       'link' => array(
         'label' => t('Link'),
         'image' => $image_prefix . '/link.svg',
-        'required_html' => array('<a href target class id title rel data-file-id>'),
+        // @todo: The id attribute is being flagged as disallowed by core's
+        // blocking of on* attributes. It should be included here.
+        'required_html' => array('<a href target class title rel data-file-id>'),
         'plugin_dependencies' => array('backdropLink.BackdropLink'),
       ),
     ),
@@ -572,6 +558,22 @@ function ckeditor5_ckeditor5_plugins() {
 
   $plugins['backdropLink.BackdropLink'] = array(
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
+  );
+
+  // See https://ckeditor.com/docs/ckeditor5/latest/features/undo-redo.html
+  $plugins['undo.Undo'] = array(
+    'buttons' => array(
+      'undo' => array(
+        'label' => t('Undo'),
+        'image' => $image_prefix . '/undo.svg',
+        'image_rtl' => $image_prefix . '/undo-rtl.svg',
+      ),
+      'redo' => array(
+        'label' => t('Redo'),
+        'image' => $image_prefix . '/redo.svg',
+        'image_rtl' => $image_prefix . '/redo-rtl.svg',
+      ),
+    ),
   );
 
   return $plugins;
