@@ -681,16 +681,22 @@ function ckeditor5_get_config($format, $existing_settings) {
   foreach ($format->editor_settings['toolbar'] as $button_name) {
     // Sanity check that the button exists in our installation.
     if (isset($all_buttons[$button_name])) {
-      // Add in plugin dependencies for this particular button.
+      // Add in the button parent's overall plugin and its dependencies.
       if (isset($all_buttons[$button_name]['plugin']['name'])) {
-        $plugins[] = $all_buttons[$button_name]['plugin']['name'];
+        $plugin_name = $all_buttons[$button_name]['plugin']['name'];
+        $plugins[] = $plugin_name;
+        if (isset($plugin_info[$plugin_name]['plugin_dependencies'])) {
+          $plugins = array_merge($plugins, $plugin_info[$plugin_name]['plugin_dependencies']);
+        }
       }
+      // Add in plugin dependencies for this specific button.
       if (isset($all_buttons[$button_name]['plugin_dependencies'])) {
         $plugins = array_merge($plugins, $all_buttons[$button_name]['plugin_dependencies']);
       }
     }
     $toolbar[] = $button_name;
   }
+
   // Collect a list of CSS files to be added to the editor instance.
   $css = array(
     backdrop_get_path('module', 'system') . '/css/system.css',

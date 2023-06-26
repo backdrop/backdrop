@@ -219,7 +219,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
-      if (visibleView === linkUI.formView) {
+      if (linkUI.formView && visibleView === linkUI.formView) {
         if (!additionalUiSet) {
           additionalUiSet = true;
           this.button = this._createButton(extraAttributes);
