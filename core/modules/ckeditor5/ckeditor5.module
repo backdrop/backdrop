@@ -263,33 +263,29 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Alignment'),
         'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Alignment') . '<span class="ckeditor5-button-arrow"></span></span>',
         'required_html' => array('<p class="text-align-left text-align-center text-align-right text-align-justify">'),
-        'plugin_dependencies' => array('alignment.Alignment'),
       ),
       'alignment:left' => array(
         'label' => t('Align left'),
         'image' => $image_prefix . '/align-left.svg',
         'required_html' => array('<p class="text-align-left">'),
-        'plugin_dependencies' => array('alignment.Alignment'),
       ),
       'alignment:center' => array(
         'label' => t('Align center'),
         'required_html' => array('<p class="text-align-center">'),
         'image' => $image_prefix . '/align-center.svg',
-        'plugin_dependencies' => array('alignment.Alignment'),
       ),
       'alignment:right' => array(
         'label' => t('Align right'),
         'required_html' => array('<p class="text-align-right">'),
         'image' => $image_prefix . '/align-right.svg',
-        'plugin_dependencies' => array('alignment.Alignment'),
       ),
       'alignment:justify' => array(
         'label' => t('Justify'),
         'required_html' => array('<p class="text-align-justify">'),
         'image' => $image_prefix . '/align-justify.svg',
-        'plugin_dependencies' => array('alignment.Alignment'),
       ),
     ),
+    'plugin_dependencies' => array('alignment.Alignment'),
     'config' => array(
       'alignment' => array(
         'options' => array(
@@ -309,15 +305,14 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Indent'),
         'image' => $image_prefix . '/indent.svg',
         'required_html' => array('<p class="indent1 indent2 indent3">'),
-        'plugin_dependencies' => array('indent.IndentBlock'),
       ),
       'outdent' => array(
         'label' => t('Outdent'),
         'image' => $image_prefix . '/outdent.svg',
         'required_html' => array('<p class="indent1 indent2 indent3">'),
-        'plugin_dependencies' => array('indent.IndentBlock'),
       ),
     ),
+    'plugin_dependencies' => array('indent.IndentBlock'),
     'config' => array(
       'indentBlock' => array(
         'classes' => array('indent1', 'indent2', 'indent3'),
@@ -333,16 +328,15 @@ function ckeditor5_ckeditor5_plugins() {
         'image' => $image_prefix . '/bulleted-list.svg',
         'image_rtl' => $image_prefix . '/bulleted-list-rtl.svg',
         'required_html' => array('<ul>', '<li>'),
-        'plugin_dependencies' => array('list.DocumentListProperties'),
       ),
       'numberedList' => array(
         'label' => t('Numbered list'),
         'image' => $image_prefix . '/numbered-list.svg',
         'image_rtl' => $image_prefix . '/numbered-list-rtl.svg',
         'required_html' => array('<ol>', '<li>'),
-        'plugin_dependencies' => array('list.DocumentListProperties'),
       ),
     ),
+    'plugin_dependencies' => array('list.DocumentListProperties'),
     'config' => array(
       'list' => array(
         'properties' => array(
@@ -483,13 +477,11 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Undo'),
         'image' => $image_prefix . '/undo.svg',
         'image_rtl' => $image_prefix . '/undo-rtl.svg',
-        'plugin_dependencies' => array('undo.Undo'),
       ),
       'redo' => array(
         'label' => t('Redo'),
         'image' => $image_prefix . '/redo.svg',
         'image_rtl' => $image_prefix . '/redo-rtl.svg',
-        'plugin_dependencies' => array('undo.Undo'),
       ),
     ),
   );
@@ -564,7 +556,8 @@ function ckeditor5_ckeditor5_plugins() {
       'backdropLink' => array(
         // Specify an array of CKEditor model name => attribute name values.
         // These attributes are then allowed to be changed via the Backdrop
-        // link dialog.
+        // link dialog. Additional attributes can be added here to prevent
+        // CKEditor from striping out attributes on anchor tags.
         'extraAttributes' => array(
           'linkTarget' => 'target',
           'linkClass' => 'class',
@@ -665,9 +658,9 @@ function ckeditor5_get_config($format, $existing_settings) {
     if (isset($plugin['enabled callback'])) {
       if ($plugin['enabled callback'] === TRUE || $plugin['enabled callback']($format, $plugin_name)) {
         $libraries[] = $plugin['library'];
+        $plugins[] = $plugin_name;
         if ($plugin['plugin_dependencies']) {
           // Add the plugin and its dependencies to the list of plugins.
-          $plugins[] = $plugin_name;
           $plugins = array_merge($plugins, $plugin['plugin_dependencies']);
         }
       }
