@@ -116,7 +116,7 @@ function ckeditor5_settings_form_validate($form, &$form_state) {
     form_error($form['editor_settings']['toolbar'], t('The CKEditor toolbar configuration could not be saved.'));
   }
 
-  $styles = _ckeditor5_settings_parse_style_list($settings['plugins']['style']['style_list']);
+  $styles = _ckeditor5_settings_parse_style_list($settings['style_list']);
   foreach ($styles as $style) {
     if (empty($style['name']) || empty($style['element']) || empty($style['classes'])) {
       form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
@@ -164,9 +164,11 @@ function _ckeditor5_settings_parse_style_list($style_list_string) {
       $styles[] = array(
         'name' => $label,
         'element' => $element,
-        // Note CKEditor 4 used 'attributes' => array('class' => $class).
+        // Note: CKEditor 4 used 'attributes' => array('class' => $class).
         // CKEditor 5 simplified this down to just a list of classes.
-        'classes' => explode(' ', $classes),
+        // We are casting $classes to a string in order to avoid deprecation
+        // warnings for the second parameter of explode() in PHP >= 8.1.
+        'classes' => explode(' ', (string) $classes),
       );
     }
   }
