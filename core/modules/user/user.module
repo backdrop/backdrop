@@ -567,19 +567,23 @@ function user_permission() {
     'administer permissions' =>  array(
       'title' => t('Administer permissions'),
       'restrict access' => TRUE,
+      'warning' => t('Grant any permission to any user role.'),
     ),
     'administer users' => array(
       'title' => t('Administer user accounts'),
       'restrict access' => TRUE,
+      'warning' => t('Create, edit and delete user accounts.'),
     ),
     'assign roles' => array(
       'title' => t('Assign user roles'),
       'restrict access' => TRUE,
+      'warning' => t('Assign any user role to any user account.'),
     ),
     'administer account settings' => array(
       'title' => t('Administer user account settings'),
       'description' => t('Manage settings that apply to all user accounts.'),
       'restrict access' => TRUE,
+      'warning' => t('Change the way user account registrations work, potentially avoiding administrator approval.'),
     ),
     'access user profiles' => array(
       'title' => t('View user profiles'),
@@ -594,6 +598,7 @@ function user_permission() {
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
       'restrict access' => TRUE,
+      'warning' => t('Allows people to choose to permanently delete their user account and all content created by them (potential for irreversible data loss).'),
     ),
   );
 }
@@ -796,8 +801,8 @@ function user_account_form(&$form, &$form_state) {
 
   $form['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail address'),
-    '#description' => t('A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.'),
+    '#title' => t('Email address'),
+    '#description' => t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
     '#required' => TRUE,
     '#default_value' => (!$register ? $account->mail : ''),
   );
@@ -895,12 +900,19 @@ function user_account_form(&$form, &$form_state) {
   }
   $form['account']['pass']['#description'] = $description;
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'user') . '/js/user.admin.js'),
+    ),
+  );
+
   $form['account_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
     '#weight' => 1,
     '#access' => $admin_users || $admin_roles,
-    '#collapsible' => TRUE,
     '#group' => 'additional_settings',
   );
 
@@ -918,62 +930,77 @@ function user_account_form(&$form, &$form_state) {
     '#access' => $admin_users,
   );
 
-  $roles = array_map('check_plain', user_roles(TRUE));
+  $roles = user_roles(TRUE, NULL, TRUE);
   $form['account_settings']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
     '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
-    '#options' => $roles,
-    '#access' => $roles && $admin_roles,
+    '#options' => array(),
+    '#access' => count($roles) && $admin_roles,
   );
+  // Lock the authenticated role, which cannot be removed.
   $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
   );
+  // Add each role as a checkbox option with a description.
+  foreach ($roles as $role_name => $role) {
+    $form['account_settings']['roles']['#options'][$role_name] = $role->label;
+    if (strlen($role->description)) {
+      $form['account_settings']['roles'][$role_name]['#description'] = filter_xss_admin($role->description);
+    }
+  }
 
+  $form['personalization'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Personalization'),
+    '#weight' => 2,
+    '#access' => (!$register && ($site_config->get('user_signatures') || $site_config->get('user_pictures'))),
+    '#group' => 'additional_settings',
+  );
   // Signature.
-  $form['signature_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Signature settings'),
-    '#weight' => 2,
-    '#access' => (!$register && $site_config->get('user_signatures')),
-  );
-
-  $form['signature_settings']['signature'] = array(
-    '#type' => 'text_format',
-    '#title' => t('Signature'),
-    '#default_value' => isset($account->signature) ? $account->signature : '',
-    '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
-    '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
-  );
-
+  if ($site_config->get('user_signatures')) {
+    $form['personalization']['signature'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Signature'),
+      '#default_value' => isset($account->signature) ? $account->signature : '',
+      '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
+      '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
+    );
+  }
   // Picture/avatar.
-  $form['picture'] = array(
+  if ($site_config->get('user_pictures')) {
+    $form['personalization']['picture'] = array(
+      '#type' => 'value',
+      '#value' => isset($account->picture) ? $account->picture : NULL,
+    );
+    $form['personalization']['picture_current'] = array(
+      '#markup' => theme('user_picture', array('account' => $account)),
+    );
+    $form['personalization']['picture_delete'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete picture'),
+      '#access' => !empty($account->picture->fid),
+      '#description' => t('Check this box to delete your current picture.'),
+    );
+    $form['personalization']['picture_upload'] = array(
+      '#type' => 'file',
+      '#title' => t('Upload picture'),
+      '#size' => 48,
+      '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
+    );
+    $form['#validate'][] = 'user_validate_picture';
+  }
+
+  $form['region_language'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Picture'),
-    '#weight' => 2,
-    '#access' => (!$register && $site_config->get('user_pictures')),
+    '#title' => t('Region and language'),
+    '#weight' => 6,
+    '#access' => (!$register && config_get('system.date', 'user_configurable_timezones')) || (module_exists('locale') && language_multilingual()),
+    '#group' => 'additional_settings',
   );
-  $form['picture']['picture'] = array(
-    '#type' => 'value',
-    '#value' => isset($account->picture) ? $account->picture : NULL,
-  );
-  $form['picture']['picture_current'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
-  );
-  $form['picture']['picture_delete'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Delete picture'),
-    '#access' => !empty($account->picture->fid),
-    '#description' => t('Check this box to delete your current picture.'),
-  );
-  $form['picture']['picture_upload'] = array(
-    '#type' => 'file',
-    '#title' => t('Upload picture'),
-    '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $site_config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($site_config->get('user_picture_guidelines')),
-  );
-  $form['#validate'][] = 'user_validate_picture';
+  // See system_user_timezone() and locale_language_selector_form() for the form
+  // items displayed here.
 }
 
 /**
@@ -1051,10 +1078,10 @@ function user_account_form_validate($form, &$form_state) {
     if ($mail_taken) {
       // Format error message dependent on whether the user is logged in or not.
       if ($GLOBALS['user']->uid) {
-        form_set_error('mail', t('The e-mail address %email is already taken.', array('%email' => $mail)));
+        form_set_error('mail', t('The email address %email is already taken.', array('%email' => $mail)));
       }
       else {
-        form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
+        form_set_error('mail', t('The email address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $mail, '@password' => url('user/password'))));
       }
     }
   }
@@ -1116,7 +1143,7 @@ function user_password_policy_validate($form, &$form_state) {
     form_set_error('username_pass', t('The password cannot be the same as the username.'));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-    form_set_error('email_pass', t('The password cannot be the same as the e-mail.'));
+    form_set_error('email_pass', t('The password cannot be the same as the email.'));
   }
 }
 
@@ -1130,7 +1157,7 @@ function user_login_block($form) {
   $form['#submit'][] = 'user_login_submit';
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
@@ -1350,20 +1377,19 @@ function user_menu() {
 
   $items['user/register'] = array(
     'title' => 'Create new account',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_register_form'),
+    'page callback' => 'user_register_page',
     'access callback' => 'user_register_access',
     'type' => MENU_LOCAL_TASK,
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_pass'),
+    'page callback' => 'user_pass_page',
     'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'file' => 'user.pages.inc',
   );
+
   $items['user/reset/%/%/%'] = array(
     'title' => 'Reset password',
     'page callback' => 'user_pass_reset',
@@ -1402,7 +1428,6 @@ function user_menu() {
   $items['admin/config/people'] = array(
     'title' => 'User accounts',
     'description' => 'Configure user accounts.',
-    'position' => 'left',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1555,14 +1580,12 @@ function user_menu_alter(&$items) {
 }
 
 /**
- * Implements hook_admin_menu_output_alter().
+ * Implements hook_admin_bar_output_alter().
  */
-function user_admin_menu_output_alter(&$content) {
-  // Admin menu shows both the parent menu item and its children, remove the
-  // duplicate child element show "Manage fields" doesn't show up twice.
-  if (isset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields'])) {
-    unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage/fields']);
-  }
+function user_admin_bar_output_alter(&$content) {
+  // Admin menu shows both the parent menu item and its children.
+  // Remove the duplicate child element so "Manage fields" doesn't show up twice.
+  unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage']['admin/config/people/manage/fields']);
 }
 
 /**
@@ -1715,7 +1738,7 @@ function user_login($form, &$form_state) {
   // Display login form:
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
-    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,
@@ -1783,7 +1806,7 @@ function user_login_name_validate($form, &$form_state) {
       }
       // If can't find account, check if valid email address.
       elseif ($credentials === USER_LOGIN_EMAIL_ONLY && !valid_email_address($name)) {
-        form_set_error('name', t('The e-mail address %email is not valid.', array('%email' => $name)));
+        form_set_error('name', t('The email address %email is not valid.', array('%email' => $name)));
       }
     }
     // If can find account, check if user is blocked.
@@ -1875,11 +1898,17 @@ function user_login_final_validate($form, &$form_state) {
     if (isset($form_state['flood_control_triggered'])) {
       if ($form_state['flood_control_triggered'] == 'user') {
         form_set_error('name', format_plural($flood_config->get('flood_user_limit'), 'Sorry, there has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', 'Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
+        module_invoke_all('user_flood_control', ip_address(), $form_state['values']['name']);
       }
       else {
         // We did not find a uid, so the limit is IP-based.
         form_set_error('name', t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
+        module_invoke_all('user_flood_control', ip_address());
       }
+      // We cannot call backdrop_access_denied() here, as that can result in an
+      // infinite loop if the login form is rendered on the 403 page (e.g. in a
+      // block). So add the 403 header, and allow form processing to finish.
+      backdrop_add_http_header('Status', '403 Forbidden');
     }
     elseif (empty($form_state['account_found'])) {
       $login_method = config_get('system.core', 'user_login_method');
@@ -1900,6 +1929,20 @@ function user_login_final_validate($form, &$form_state) {
     // Clear past failures for this user so as not to block a user who might
     // log in and out more than once in an hour.
     flood_clear_event('failed_login_attempt_user', $form_state['flood_control_user_identifier']);
+  }
+}
+
+/**
+ * Implements hook_user_flood_control().
+ */
+function user_user_flood_control($ip, $username = FALSE) {
+  if (config_get('user.flood', 'flood_log_failed_attempts')) {
+    if (!empty($username)) {
+      watchdog('user', 'Flood control blocked login attempt for %user from %ip.', array('%user' => $username, '%ip' => $ip));
+    }
+    else {
+      watchdog('user', 'Flood control blocked login attempt from %ip.', array('%ip' => $ip));
+    }
   }
 }
 
@@ -2368,9 +2411,10 @@ function user_mail_tokens(&$replacements, $data, $options) {
  * @param $full_objects
  *   TRUE to return complete role objects; FALSE to return role labels.
  *
- * @return
+ * @return array
  *   An associative array of role objects (or role labels, depending on
- *   $full_objects) indexed by role names.
+ *   $full_objects) indexed by role names. Labels and descriptions will already
+ *   be translated in the returned values.
  */
 function user_roles($members_only = FALSE, $permission = NULL, $full_objects = FALSE) {
   $user_roles = &backdrop_static(__FUNCTION__);
@@ -2386,6 +2430,7 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
       $role_data = $config->get();
       $role_data += array(
         'weight' => 0,
+        'description' => '',
         'permissions' => array(),
       );
       $user_roles[$role_name] = $role_data;
@@ -2397,6 +2442,7 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
     foreach ($user_roles as $role_name => $role_data) {
       $user_roles[$role_name] = (object) $user_roles[$role_name];
       $user_roles[$role_name]->label = t($role_data['label']);
+      $user_roles[$role_name]->description = t($role_data['description']);
     }
   }
 
@@ -2440,7 +2486,7 @@ function user_role_load($role_name) {
 /**
  * Legacy wrapper function preserved for backwards-compatibility. This function
  * is no longer used by Backdrop core, since all roles are loaded by name now.
- * See https://api.backdropcms.org/change-records/converted-user-roles-cmi
+ * See https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi
  *
  * Do not call this function; use user_role_load() instead.
  *
@@ -2456,25 +2502,25 @@ function user_role_load($role_name) {
  * @deprecated since 1.0.0
  */
 function user_role_load_by_name($role_name) {
-  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://api.backdropcms.org/change-records/converted-user-roles-cmi', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://docs.backdropcms.org/change-records/converted-user-roles-to-cmi', array('attributes' => array('target' => '_blank'))));
   user_role_load($role_name);
 }
 
 /**
  * Save a user role to the database.
  *
- * @param $role
+ * @param stdClass $role
  *   A role object to modify or add.
- * @return
- *   Status constant indicating if role was created or updated.
- *   Failure to write the user role record will return FALSE. Otherwise.
- *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation
+ * @return int
+ *   Status constant indicating if role was created or updated. The constant
+ *   SAVED_NEW or SAVED_UPDATED will be returned depending on the operation
  *   performed.
  */
 function user_role_save($role) {
   // Trim spaces from names.
   $role->name = trim($role->name);
   $role->label = trim($role->label);
+  $role->description = isset($role->description) ? trim($role->description) : '';
 
   if (!isset($role->weight)) {
     // Set a role weight to make this new role last.
@@ -2491,6 +2537,7 @@ function user_role_save($role) {
   $config = config('user.role.' . $role->name);
   $config->set('name', $role->name);
   $config->set('label', $role->label);
+  $config->set('description', $role->description);
   $config->set('weight', $role->weight);
   if (isset($role->permissions)) {
     $config->set('permissions', $role->permissions);
@@ -3071,6 +3118,19 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 }
 
 /**
+ * Menu callback to create a new account.
+ *
+ * @since 1.23.1 Replaces user_register_form() as menu callback.
+ *
+ * @see user_register_form()
+ */
+function user_register_page() {
+  // We need to set the page title because this menu entry is a local task.
+  backdrop_set_title(t('Create new account'));
+  return backdrop_get_form('user_register_form');
+}
+
+/**
  * Form builder; the user registration form.
  *
  * @ingroup forms
@@ -3080,9 +3140,6 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
  */
 function user_register_form($form, &$form_state) {
   global $user;
-  // We need to set the page title bc this menu entry is a local task.
-  backdrop_set_title(t('Create new account'));
-
   $admin = user_access('administer users');
 
   // Pass access information to the submit handler. Running an access check
@@ -3217,7 +3274,7 @@ function user_register_submit($form, &$form_state) {
   // New administrative account without notification.
   $uri = $account->uri();
   if ($admin && !$notify) {
-    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No e-mail has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+    backdrop_set_message(t('Created a new user account for <a href="@url">%name</a>. No email has been sent.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
   }
   // No email verification required; log in user immediately.
   elseif (!$admin && !$user_email_verification && $account->status) {
@@ -3232,17 +3289,17 @@ function user_register_submit($form, &$form_state) {
     $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
     _user_mail_notify($op, $account);
     if ($notify) {
-      backdrop_set_message(t('A welcome message with further instructions has been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
+      backdrop_set_message(t('A welcome message with further instructions has been emailed to the new user <a href="@url">%name</a>.', array('@url' => url($uri['path'], $uri['options']), '%name' => $account->name)));
     }
     else {
-      backdrop_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      backdrop_set_message(t('A welcome message with further instructions has been sent to your email address.'));
       $form_state['redirect'] = '';
     }
   }
   // Administrator approval required.
   else {
     _user_mail_notify('register_pending_approval', $account);
-    backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
+    backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your email address.'));
     $form_state['redirect'] = '';
   }
 }

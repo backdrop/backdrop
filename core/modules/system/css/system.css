@@ -148,6 +148,42 @@ div.indentation {
   margin: -1em -0.4em -1em 0.2em;
   padding: 1em 0.6em 1em 0;
 }
+div.form-item-indentation-0 {
+  margin-left: 0;
+}
+[dir="rtl"] div.form-item-indentation-0 {
+  margin-right: 0;
+}
+div.form-item-indentation-1 {
+  margin-left: 1em;
+}
+[dir="rtl"] div.form-item-indentation-1 {
+  margin-right: 1em;
+}
+div.form-item-indentation-2 {
+  margin-left: 2em;
+}
+[dir="rtl"] div.form-item-indentation-2 {
+  margin-right: 2em;
+}
+div.form-item-indentation-3 {
+  margin-left: 3em;
+}
+[dir="rtl"] div.form-item-indentation-3 {
+  margin-right: 3em;
+}
+div.form-item-indentation-4 {
+  margin-left: 4em;
+}
+[dir="rtl"] div.form-item-indentation-4 {
+  margin-right: 4em;
+}
+div.form-item-indentation-5 {
+  margin-left: 5em;
+}
+[dir="rtl"] div.form-item-indentation-5 {
+  margin-right: 5em;
+}
 div.tree-child {
   background: url(../../../misc/tree.png) no-repeat 11px center; /* LTR */
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test module for Taxonomy hooks and functions not used in core.

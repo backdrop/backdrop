@@ -10,6 +10,7 @@ Backdrop.behaviors.moduleFilter = {
   attach: function(context, settings) {
     var $input = $('input.table-filter-text').once('table-filter-text');
     var $form = $('#system-modules');
+    var $resetLink = $form.find('.search-reset')
     var $rowsAndFieldsets, $rows, $fieldsets;
 
     // Hide the package <fieldset> if it doesn't have any visible rows within.
@@ -19,7 +20,7 @@ Backdrop.behaviors.moduleFilter = {
       $fieldset.toggle($visibleRows.length > 0);
     }
 
-    // Fliter the list of modules by provided search string.
+    // Filter the list of modules by provided search string.
     function filterModuleList() {
       var query = $input.val().toLowerCase();
 
@@ -73,6 +74,12 @@ Backdrop.behaviors.moduleFilter = {
       }
     }
 
+    // Clear out the input field when clicking the reset button.
+    function resetModuleList(e) {
+      $input.val('').triggerHandler('keyup');
+      e.preventDefault();
+    }
+
     if ($form.length) {
       $rowsAndFieldsets = $form.find('tr, fieldset');
       $rows = $form.find('tbody tr');
@@ -81,6 +88,8 @@ Backdrop.behaviors.moduleFilter = {
       // @todo Use autofocus attribute when possible.
       $input.focus().on('keyup', filterModuleList);
       $input.triggerHandler('keyup');
+
+      $resetLink.on('click', resetModuleList);
     }
   }
 };

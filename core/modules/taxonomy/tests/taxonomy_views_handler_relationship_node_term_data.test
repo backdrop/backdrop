@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsHandlerRelationshipNodeTermDataTest.
@@ -25,8 +24,8 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     return $term;
   }
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     //$web_user = $this->backdropCreateUser(array('create post content'));
     //$this->backdropLogin($web_user);
