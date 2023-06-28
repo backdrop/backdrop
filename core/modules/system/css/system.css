@@ -431,7 +431,7 @@ details.more-less-toggle summary::-webkit-details-marker {
   display: none;
 }
 
-details.more-less-toggle summary span.more-less-toggle-label {
+details.more-less-toggle summary span.more-less-toggle-button {
   background-color: white;
   border: 1px solid #828188;
   border-radius: 5px;
@@ -443,7 +443,7 @@ details.more-less-toggle summary span.more-less-toggle-label {
   /* Prevent the more/less text from being split from the toggle icon. */
   white-space: nowrap;
 }
-details.more-less-toggle summary span.more-less-toggle-label:hover {
+details.more-less-toggle summary span.more-less-toggle-button:hover {
   background-color: #f7f7f7;
 }
 /* Allow any links within the summary text to be clickable. */
@@ -451,33 +451,33 @@ details.more-less-toggle summary a {
   pointer-events: auto;
 }
 
-details.more-less-toggle summary > span.more-less-toggle-label::before,
-details.more-less-toggle summary > span.more-less-toggle-label::after {
+details.more-less-toggle summary > span.more-less-toggle-button::before,
+details.more-less-toggle summary > span.more-less-toggle-button::after {
   color: #0074bd;
   cursor: pointer;
   padding: 0 2px;
 }
-details.more-less-toggle[open] summary .more-less-toggle-label::before {
+details.more-less-toggle[open] summary .more-less-toggle-button::before {
   content: attr(data-close-label);
 }
-details.more-less-toggle:not([open]) summary .more-less-toggle-label::before {
+details.more-less-toggle:not([open]) summary .more-less-toggle-button::before {
   content: attr(data-open-label);
 }
-[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::after {
+[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-button::after {
   content: attr(data-close-label);
 }
-[dir="rtl"] details.more-less-toggle:not([open]) summary .more-less-toggle-label::after {
+[dir="rtl"] details.more-less-toggle:not([open]) summary .more-less-toggle-button::after {
   content: attr(data-open-label);
 }
 
 /* The open/close icons next to the more/less toggle label. */
-details.more-less-toggle summary .more-less-toggle-label::after,
-[dir="rtl"] details.more-less-toggle summary .more-less-toggle-label::before {
+details.more-less-toggle summary .more-less-toggle-button::after,
+[dir="rtl"] details.more-less-toggle summary .more-less-toggle-button::before {
   content: '...';
   display: inline-block;
 }
-details.more-less-toggle[open] summary .more-less-toggle-label::after,
-[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::before {
+details.more-less-toggle[open] summary .more-less-toggle-button::after,
+[dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-button::before {
   content: '✕';
 }
 

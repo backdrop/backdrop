@@ -3725,6 +3725,11 @@ function form_process_details($element, &$form_state) {
  * renderable element, to surround it with a <details> tag and add attributes
  * such as classes or an HTML id.
  *
+ * Since version 1.26.0, you can specify the optional #open_label and
+ * #close_label properties, which then style the details element with a
+ * "more"/"less" toggle (or whatever you called the open/close labels), like the
+ * ones being used in the modules listing and the site status report page.
+ *
  * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
@@ -3772,25 +3777,26 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
-  $summary_content = '<span>' . $element['#summary'] . '</span>';
+  $summary_content = '<span class="details-summary-text">' . $element['#summary'] . '</span>';
 
   // Custom labels for the open/close toggle.
   $more_less_toggle = '';
   if (isset($element['#open_label']) && isset($element['#close_label'])) {
+    $element['#attributes']['class'][] = 'more-less-toggle';
     // Remove keyboard focus from the summary element.
-    $element['#summary_attributes']['tabindex'][] = -1;
+    $element['#summary_attributes']['tabindex'] = -1;
 
     $more_less_toggle_attributes = array(
-      'class' => array('more-less-toggle-label'),
-      'role' => 'button',
+      'class' => array('more-less-toggle-button'),
       'data-open-label' => $element['#open_label'],
       'data-close-label' => $element['#close_label'],
-      // Add keyboard focus to the more/less <span> toggle. Focus only works out
-      // of the box for interactive elements (e.g. inputs, buttons, links, ...).
+      // Add keyboard focus to the more/less toggle. This is needed because
+      // focus normally only works out of the box for interactive elements (e.g.
+      // inputs, buttons, links, etc.).
+      'role' => 'button',
       'tabindex' => 0,
     );
     $more_less_toggle = '<span ' . backdrop_attributes($more_less_toggle_attributes) . '></span>';
-    $element['#attributes']['class'][] = 'more-less-toggle';
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
