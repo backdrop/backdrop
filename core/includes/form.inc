@@ -3742,7 +3742,10 @@ function form_process_details($element, &$form_state) {
  * @return string
  *   The rendered HTML output.
  *
- * @since 1.26.0 support for a #summary_attributes property added.
+ * @since 1.26.0:
+ *   - Support for a #summary_attributes property added.
+ *   - #open_label and #close_label properties added to support the special
+ *     more/less toggle type of details element.
  * @ingroup themeable
  */
 function theme_details($variables) {
@@ -3774,7 +3777,12 @@ function theme_details($variables) {
   // Custom labels for the open/close toggle.
   $more_less_toggle = '';
   if (isset($element['#open_label']) && isset($element['#close_label'])) {
-    $more_less_toggle = '<span class="more-less-toggle-label" data-open-label="' . $element['#open_label'] . '" data-close-label="' . $element['#close_label'] . '"></span>';
+    $more_less_toggle_attributes = array(
+      'class' => array('more-less-toggle-label'),
+      'data-open-label' => $element['#open_label'],
+      'data-close-label' => $element['#close_label'],
+    );
+    $more_less_toggle = '<span ' . backdrop_attributes($more_less_toggle_attributes) . '></span>';
     $element['#attributes']['class'][] = 'more-less-toggle';
   }
 
