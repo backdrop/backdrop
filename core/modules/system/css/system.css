@@ -435,7 +435,7 @@ details.more-less-toggle summary span.more-less-toggle-label {
   background-color: white;
   border: 1px solid #828188;
   border-radius: 5px;
-  font-size: 85%;
+  font-size: 80%;
   margin: 0 5px;
   padding: 0 3px;
   /* Specifically trigger open/close of the details via the more/less toggle. */
