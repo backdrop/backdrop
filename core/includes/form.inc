@@ -3734,6 +3734,7 @@ function form_process_details($element, &$form_state) {
  *     - #children
  *     - #id
  *     - #attributes
+ *     - #summary_attributes
  *     - #open
  *     - #open_label
  *     - #close_label
@@ -3741,12 +3742,16 @@ function form_process_details($element, &$form_state) {
  * @return string
  *   The rendered HTML output.
  *
+ * @since 1.26.0 support for a #summary_attributes property added.
  * @ingroup themeable
  */
 function theme_details($variables) {
   $element = $variables['element'];
-  // Ensure #attributes is set.
-  $element += array('#attributes' => array());
+  // Ensure #attributes and #summary_attributes are set.
+  $element += array(
+    '#attributes' => array(),
+    '#summary_attributes' => array(),
+  );
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
@@ -3774,7 +3779,10 @@ function theme_details($variables) {
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary>' . $summary_content . $more_less_toggle . '</summary>';
+  if (!empty($more_less_toggle)) {
+    $element['#summary_attributes']['class'][] = 'more-less-toggle';
+  }
+  $output .= '<summary' . backdrop_attributes($element['#summary_attributes']) . '>' . $summary_content . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }
