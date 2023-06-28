@@ -3777,7 +3777,7 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
-  $summary_content = '<span class="details-summary-text">' . $element['#summary'] . '</span>';
+  $summary_content = '<span>' . $element['#summary'] . '</span>';
 
   // Custom labels for the open/close toggle.
   $more_less_toggle = '';
