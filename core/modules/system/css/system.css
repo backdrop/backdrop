@@ -432,11 +432,19 @@ details.more-less-toggle summary::-webkit-details-marker {
 }
 
 details.more-less-toggle summary span.more-less-toggle-label {
+  background-color: white;
+  border: 1px solid #828188;
+  border-radius: 5px;
+  font-size: 0.923em;
+  margin: 0 5px;
   padding: 0 3px;
   /* Specifically trigger open/close of the details via the more/less toggle. */
   pointer-events: auto;
   /* Prevent the more/less text from being split from the toggle icon. */
   white-space: nowrap;
+}
+details.more-less-toggle summary span.more-less-toggle-label:hover {
+  background-color: #f7f7f7;
 }
 /* Allow any links within the summary text to be clickable. */
 details.more-less-toggle summary a {
@@ -462,28 +470,15 @@ details.more-less-toggle:not([open]) summary .more-less-toggle-label::before {
   content: attr(data-open-label);
 }
 
-/* The arrow icon next to the more/less toggle label. */
-details.more-less-toggle summary .more-less-toggle-label::after {
-  content: '▶';
-  display: inline-block;
-  font-size: 80%;
-  transition: 0.2s;
-}
+/* The open/close icons next to the more/less toggle label. */
+details.more-less-toggle summary .more-less-toggle-label::after,
 [dir="rtl"] details.more-less-toggle summary .more-less-toggle-label::before {
-  content: '◀';
+  content: '...';
   display: inline-block;
-  font-size: 80%;
-  transition: 0.2s;
 }
-details.more-less-toggle[open] summary .more-less-toggle-label::after {
-  transform: rotate(90deg);
-}
-[dir="rtl"] details.more-less-toggle summary .more-less-toggle-label::after {
-  font-size: 100%;
-  transform: none;
-}
+details.more-less-toggle[open] summary .more-less-toggle-label::after,
 [dir="rtl"] details.more-less-toggle[open] summary .more-less-toggle-label::before {
-  transform: rotate(-90deg);
+  content: '✕';
 }
 
 details.more-less-toggle .details-content-wrapper {
