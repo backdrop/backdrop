@@ -3750,7 +3750,7 @@ function form_process_details($element, &$form_state) {
  * @since 1.26.0:
  *   - Support for a #summary_attributes property added.
  *   - #open_label and #close_label properties added to support the special
- *     more/less toggle type of details element.
+ *     "more"/"less" toggle type of details element.
  * @ingroup themeable
  */
 function theme_details($variables) {
@@ -3782,15 +3782,15 @@ function theme_details($variables) {
   // Custom labels for the open/close toggle.
   $more_less_toggle = '';
   if (isset($element['#open_label']) && isset($element['#close_label'])) {
-    $element['#attributes']['class'][] = 'more-less-toggle';
+    $element['#attributes']['class'][] = 'open-close-toggle';
     // Remove keyboard focus from the summary element.
     $element['#summary_attributes']['tabindex'] = -1;
 
     $more_less_toggle_attributes = array(
-      'class' => array('more-less-toggle-button'),
+      'class' => array('open-close-button'),
       'data-open-label' => $element['#open_label'],
       'data-close-label' => $element['#close_label'],
-      // Add keyboard focus to the more/less toggle. This is needed because
+      // Add keyboard focus to the open/close toggle. This is needed because
       // focus normally only works out of the box for interactive elements (e.g.
       // inputs, buttons, links, etc.).
       'role' => 'button',

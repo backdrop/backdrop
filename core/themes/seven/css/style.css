@@ -808,7 +808,7 @@ details {
  * - the status page (needs to be black).
  * - ...any other place where blue text for the details summary is not required.
  */
-details:not(.more-less-toggle) summary span {
+details:not(.open-close-toggle) summary span {
   color: #0074bd;
   font-size: 120%;
 }
