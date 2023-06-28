@@ -3777,19 +3777,23 @@ function theme_details($variables) {
   // Custom labels for the open/close toggle.
   $more_less_toggle = '';
   if (isset($element['#open_label']) && isset($element['#close_label'])) {
+    // Remove keyboard focus from the summary element.
+    $element['#summary_attributes']['tabindex'][] = -1;
+
     $more_less_toggle_attributes = array(
       'class' => array('more-less-toggle-label'),
+      'role' => 'button',
       'data-open-label' => $element['#open_label'],
       'data-close-label' => $element['#close_label'],
+      // Add keyboard focus to the more/less <span> toggle. Focus only works out
+      // of the box for interactive elements (e.g. inputs, buttons, links, ...).
+      'tabindex' => 0,
     );
     $more_less_toggle = '<span ' . backdrop_attributes($more_less_toggle_attributes) . '></span>';
     $element['#attributes']['class'][] = 'more-less-toggle';
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  if (!empty($more_less_toggle)) {
-    $element['#summary_attributes']['class'][] = 'more-less-toggle';
-  }
   $output .= '<summary' . backdrop_attributes($element['#summary_attributes']) . '>' . $summary_content . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
