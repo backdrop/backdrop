@@ -185,7 +185,8 @@ function theme_system_modules_fieldset($variables) {
     $requirements .= '</div>';
 
     $module_details = array(
-      '#summary' => '<span class="text table-filter-text-source">' . $module['description']['#markup'] . '</span>',
+      '#summary' => $module['description']['#markup'],
+      '#summary_attributes' => array('class' => array('text', 'table-filter-text-source')),
       '#details' => $requirements,
       '#open' => FALSE,
       '#open_label' => t('more'),
