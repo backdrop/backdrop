@@ -1348,8 +1348,6 @@ function system_library_info() {
     'version' => '3.7.0',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // @todo Remove before merge:
-      'jquery-migrate-3.4.1.js' => array('group' => JS_LIBRARY, 'weight' => -20),
     ),
   );
 
