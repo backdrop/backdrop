@@ -384,7 +384,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     backdrop_static_reset('locale_language_url_rewrite_url');
     $languages = language_list();
     $url = url('node/' . $french_node->nid, array('language' => $languages[$french_node->langcode]));
-    $this->assertTrue(strpos($url, $edit['path[alias]']), 'URL contains the path alias.');
+    $this->assertTrue(strpos($url, $edit['path[alias]']), 'URL contains the URL alias.');
 
     // Confirm that the alias works even when changing language negotiation
     // options. Enable User language detection and selection over URL one.
@@ -404,9 +404,9 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // current UI and content language, while URL language is English (since we
     // do not have a path prefix we fall back to the site's default language).
     // We need to ensure that the user language preference is not taken into
-    // account while determining the path alias language, because if this
-    // happens we have no way to check that the path alias is valid: there is no
-    // path alias for French matching the english alias. So backdrop_lookup_path()
+    // account while determining the URL alias language, because if this
+    // happens we have no way to check that the URL alias is valid: there is no
+    // URL alias for French matching the english alias. So backdrop_lookup_path()
     // needs to use the URL language to check whether the alias is valid.
     $this->backdropGet($english_alias);
     $this->assertText($english_node->title, 'Alias for English translation works.');
@@ -449,7 +449,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
 }
 
 /**
- * Tests the user interface for creating path aliases, with languages.
+ * Tests the user interface for creating URL aliases, with languages.
  */
 class PathLanguageUITestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
@@ -619,20 +619,20 @@ class PathHooksTestCase extends BackdropWebTestCase {
     $edit['alias'] = $alias2;
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
-    // Extract the path ID from the second path alias.
+    // Extract the path ID from the second URL alias.
     $inserted_path = state_get('path_test_inserted_path', array());
     $pid2 = $inserted_path['pid'];
 
-    // Update the second path alias and test that hook_path_update() is called.
+    // Update the second URL alias and test that hook_path_update() is called.
     $edit['alias'] = $alias2 = $this->randomName(8);
     $this->backdropPost('admin/config/urls/path/edit/' . $pid2, $edit, t('Save URL alias'));
     $this->assertRaw('path_test_path_update(): ' . $edit['alias'] . ' => ' . $edit['source'], t('hook_path_update() was called.'));
 
     // Delete the node and test that hook_path_delete() is called once for each
-    // path alias.
+    // URL alias.
     $this->backdropPost('node/' . $node1->nid . '/delete', array(), t('Delete'));
-    $this->assertRaw('path_test_path_delete(): ' . $alias1 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the first path alias.'));
-    $this->assertRaw('path_test_path_delete(): ' . $alias2 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the second path alias.'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias1 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the first URL alias.'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias2 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the second URL alias.'));
 
     // Test that hook_path_delete() is not called if the node has no path
     // aliases.

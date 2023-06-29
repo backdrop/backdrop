@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers that aren't tied to any other module.
@@ -119,7 +118,7 @@ function views_views_data() {
 
   $data['views']['fields_compare'] = array(
     'title' => t('Fields comparison'),
-    'help' => t('Compare database fields against eachother.'),
+    'help' => t('Compare database fields against each other.'),
     'filter' => array(
       'help' => t('Use fields comparison to filter the result of the view.'),
       'handler' => 'views_handler_filter_fields_compare',
@@ -469,6 +468,25 @@ function views_views_plugins() {
         'help topic' => 'pager-mini',
         'uses options' => TRUE,
         'parent' => 'full',
+      ),
+    ),
+    'localization' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_localization',
+        'parent' => '',
+      ),
+      'none' => array(
+        'title' => t('None'),
+        'help' => t('Do not pass admin strings for translation.'),
+        'handler' => 'views_plugin_localization_none',
+        'help topic' => 'localization-none',
+      ),
+      'core' => array(
+        'title' => t('Core'),
+        'help' => t("Use Backdrop core t() function. It doesn't support updates to existing strings."),
+        'handler' => 'views_plugin_localization_core',
+        'help topic' => 'localization-core',
       ),
     ),
   );

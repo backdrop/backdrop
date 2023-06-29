@@ -197,7 +197,7 @@ Backdrop.jsAC.prototype.populatePopup = function () {
 
   // Add the popup to the page and position.
   $("body").prepend(this.popup);
-  var autocompletInstance = this;
+  var autocompleteInstance = this;
   positionPopup();
   Backdrop.optimizedResize.add(positionPopup, 'autocompletePopup');
 
@@ -207,7 +207,7 @@ Backdrop.jsAC.prototype.populatePopup = function () {
 
   function positionPopup() {
     // If the popup has been removed, remove this resize handler.
-    if (!autocompletInstance.popup) {
+    if (!autocompleteInstance.popup) {
       Backdrop.optimizedResize.remove('autocompletePopup');
       return;
     }
@@ -217,13 +217,13 @@ Backdrop.jsAC.prototype.populatePopup = function () {
     var paddingRight = parseInt($input.css('padding-right').replace('px', ''), 10);
     var paddingWidth = paddingLeft + paddingRight;
 
-    // Because we use "fixed" position, the final location is the offset from
-    // the document and the height of the element, minus scroll bar position.
-    $(autocompletInstance.popup).css({
-      top: ($input.outerHeight() + offset.top - $(document).scrollTop()) + 'px',
-      left: (offset.left - $(document).scrollLeft()) + 'px',
+    // Position "absolute" instead of "fixed" for mobile Safari compatibility.
+    // See https://github.com/backdrop/backdrop-issues/issues/6050
+    $(autocompleteInstance.popup).css({
+      top: ($input.outerHeight() + offset.top) + 'px',
+      left: offset.left + 'px',
       width: ($input.width() + paddingWidth) + 'px',
-      position: 'fixed'
+      position: 'absolute'
     });
   }
 };
@@ -320,8 +320,9 @@ Backdrop.ACDB.prototype.search = function (searchString) {
     // Ajax GET request for autocompletion.
     $.ajax({
       type: 'GET',
-      url: db.uri + '/' + encodeURIComponent(searchString),
+      url: Backdrop.sanitizeAjaxUrl(db.uri + '/' + encodeURIComponent(searchString)),
       dataType: 'json',
+      jsonp: false,
       success: function (matches) {
         if (typeof matches.status === 'undefined' || matches.status !== 0) {
           db.cache[searchString] = matches;

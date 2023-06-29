@@ -21,7 +21,7 @@
  * @see BackdropCacheInterface
  */
 function cache($bin = 'cache') {
-  // Temporary backwards compatibiltiy layer, allow old style prefixed cache
+  // Temporary backwards compatibility layer, allow old style prefixed cache
   // bin names to be passed as arguments.
   $bin = str_replace('cache_', '', $bin);
 
@@ -169,9 +169,7 @@ function cache_flush($bin) {
 function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
   // Default value cache flush.
   if (!isset($cid) && !isset($bin)) {
-    if (module_exists('layout')) {
-      cache('layout_path')->flush();
-    }
+    cache('layout_path')->flush();
     cache('page')->flush();
     return;
   }

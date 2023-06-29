@@ -21,7 +21,7 @@ Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
  */
 Backdrop.behaviors.AJAX = {
   attach: function (context, settings) {
-    
+
      function loadAjaxBehaviour(base) {
       if (!$('#' + base + '.ajax-processed').length) {
         var element_settings = settings.ajax[base];
@@ -195,7 +195,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
-    url: ajax.url,
+    url: Backdrop.sanitizeAjaxUrl(ajax.url),
     data: ajax.submit,
     beforeSerialize: function (element_settings, options) {
       return ajax.beforeSerialize(element_settings, options);
@@ -247,6 +247,7 @@ Backdrop.ajax = function (base, element, element_settings) {
       }
     },
     dataType: 'json',
+    jsonp: false,
     accepts: {
       json: element_settings.accepts || 'application/vnd.backdrop-ajax'
     },
@@ -597,7 +598,7 @@ Backdrop.ajax.prototype.commands = {
     var settings;
 
     // We don't know what response.data contains: it might be a string of text
-    // without HTML, so don't rely on jQuery correctly iterpreting
+    // without HTML, so don't rely on jQuery correctly interpreting
     // $(response.data) as new HTML rather than a CSS selector. Also, if
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).
