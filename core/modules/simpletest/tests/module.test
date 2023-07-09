@@ -8,6 +8,7 @@
  * Unit tests for the module API.
  */
 class ModuleUnitTest extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -272,6 +273,7 @@ class ModuleInstallTestCase extends BackdropWebTestCase {
  * Unit tests for module uninstallation and related hooks.
  */
 class ModuleUninstallTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

@@ -372,6 +372,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
  * Tests appearance of different types of links.
  */
 class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
+
   /**
    * @var User
    */
@@ -419,6 +420,7 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
  * Tests customized menu links.
  */
 class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
+
   /**
    * @var User
    */

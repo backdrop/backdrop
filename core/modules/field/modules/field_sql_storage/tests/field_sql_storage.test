@@ -11,6 +11,7 @@
  * Tests field storage.
  */
 class FieldSqlStorageTestCase extends BackdropWebTestCase {
+
   /**
    * @var string
    */

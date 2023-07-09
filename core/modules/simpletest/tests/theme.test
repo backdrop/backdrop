@@ -533,6 +533,7 @@ class ThemeHookInitUnitTest extends BackdropWebTestCase {
  * Tests autocompletion not loading registry.
  */
 class ThemeFastTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

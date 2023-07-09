@@ -812,6 +812,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
  * Tests that the correct layout is used for node previews.
  */
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
+
   /**
    * @var object
    */
@@ -995,6 +996,7 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
  * Tests that the correct layout is used for node revisions.
  */
 class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
   /**
    * @var array
    */
@@ -1648,6 +1650,7 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
+
   /**
    * @var array
    */
@@ -2308,6 +2311,7 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2618,6 +2622,7 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2662,6 +2667,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -3484,6 +3490,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -3533,6 +3540,7 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+
   /**
    * @var User
    */
@@ -3840,6 +3848,7 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  * node instances.
  */
 class NodePublishScheduling extends BackdropWebTestCase {
+
   /**
    * @var User
    */

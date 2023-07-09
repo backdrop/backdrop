@@ -1212,6 +1212,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  * Tests site maintenance functionality.
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -1348,6 +1349,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
  * Tests generic date and time handling capabilities of Backdrop.
  */
 class DateTimeFunctionalTest extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -1545,6 +1547,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
  * Test home page functionality and administration.
  */
 class FrontPageTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2400,6 +2403,7 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
  * Tests administrative overview pages.
  */
 class SystemAdminTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2496,6 +2500,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
  * Tests authorize.php and related hooks.
  */
 class SystemAuthorizeCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2785,6 +2790,7 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
  * Test menu block settings.
  */
 class MenuBlockTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

@@ -258,6 +258,7 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
  * Tests the UI for syncing, importing, and exporting.
  */
 class ConfigurationUITest extends BackdropWebTestCase {
+
   /**
    * @var User
    */

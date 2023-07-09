@@ -640,6 +640,7 @@ class MenuTestCase extends BackdropWebTestCase {
  * Test menu settings for nodes.
  */
 class MenuNodeTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

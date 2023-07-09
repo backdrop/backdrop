@@ -1714,6 +1714,7 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
  * @todo Add tests for other aspects of form rebuilding.
  */
 class FormsRebuildTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

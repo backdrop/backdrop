@@ -380,6 +380,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
 }
 
 class TextSummaryTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -544,6 +545,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 }
 
 class TextTranslationTestCase extends BackdropWebTestCase {
+
   /**
    * @var object
    */

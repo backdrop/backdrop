@@ -143,6 +143,7 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
  * Tests the administrative functionality of the Filter module.
  */
 class FilterAdminTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -925,6 +926,7 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */

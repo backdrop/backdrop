@@ -45,6 +45,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
  * Tests the taxonomy vocabulary interface.
  */
 class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -272,6 +273,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
  * Tests for taxonomy vocabulary functions.
  */
 class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
+
   /**
    * @var TaxonomyVocabulary
    */
@@ -489,6 +491,7 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
  * Test for legacy node bug.
  */
 class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -525,6 +528,7 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
  * Tests for taxonomy term functions.
  */
 class TaxonomyTermTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -986,6 +990,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
  * Tests the rendering of term reference fields in RSS feeds.
  */
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -1085,6 +1090,7 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
  * Tests the hook implementations that maintain the taxonomy index.
  */
 class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -1327,6 +1333,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
  * Test the taxonomy_term_load_multiple() function.
  */
 class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -1688,6 +1695,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
  * Test taxonomy token replacement in strings.
  */
 class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -1845,6 +1853,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests setting languages for taxonomy.
  */
 class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */
@@ -2002,6 +2011,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
  * Tests the functionality of EntityFieldQuery for taxonomy entities.
  */
 class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
+
   /**
    * @var User
    */

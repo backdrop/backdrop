@@ -1221,6 +1221,7 @@ class LocaleInstallTest extends BackdropWebTestCase {
  * Locale uninstall with English UI functional test.
  */
 class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
+
   /**
    * @var string
    */
@@ -2364,6 +2365,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
  * Test that URL rewriting works as expected.
  */
 class LocaleUrlRewritingTest extends BackdropWebTestCase {
+
   /**
    * @var User
    */

@@ -624,6 +624,7 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
+
   /**
    * @var User
    */
@@ -2139,6 +2140,7 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends BackdropWebTestCase {
+
   /**
    * @var object
    */

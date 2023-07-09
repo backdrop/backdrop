@@ -4,6 +4,7 @@
  * Plugin to provide access control based upon entity ID.
  */
 class EntityIDLayoutAccess extends LayoutAccessNegatable {
+
   /**
    * @var string
    */

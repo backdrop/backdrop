@@ -8,6 +8,7 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends BackdropWebTestCase {
+
   /**
    * @var array
    */

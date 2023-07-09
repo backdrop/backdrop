@@ -12,10 +12,12 @@
  * functionality. (See testQueryFetchClass() below)
  */
 class FakeRecord {
+
   /**
    * @var string
    */
   public $name;
+
 }
 
 /**

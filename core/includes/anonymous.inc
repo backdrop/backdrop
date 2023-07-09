@@ -10,6 +10,7 @@
  * listed together.
  */
 class AnonymousUser extends stdClass implements UserInterface {
+
   public $uid = 0;
   public $name = NULL;
   public $hostname = NULL;

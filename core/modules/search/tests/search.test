@@ -1160,6 +1160,7 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
  * Tests keywords and conditions.
  */
 class SearchKeywordsConditions extends BackdropWebTestCase {
+
   /**
    * @var User
    */

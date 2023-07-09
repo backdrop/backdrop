@@ -342,6 +342,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 }
 
 class CommentInterfaceTest extends CommentHelperCase {
+
   /**
    * @var User
    */
