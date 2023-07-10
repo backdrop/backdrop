@@ -80,7 +80,7 @@ Backdrop.behaviors.color = {
     $('#system-theme-settings').addClass('has-preview').after(settings.colorPreviewMarkup);
     // Wait for the iframe to be loaded before attempting to apply the preview
     // settings for the first time.
-    $('#preview').load(function () {
+    $(window).on('load', function () {
       updatePreview();
     });
 
