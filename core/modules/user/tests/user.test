@@ -1426,7 +1426,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
 
     // Create a new content type and confirm the permissions are added.
     $this->backdropGet('admin/structure/types/add');
-    $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete any content of this type.', array(
+    $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.', array(
       '%admin' => $this->admin_role_name,
       '%editor' => $this->editor_role_name
     )));
@@ -1448,8 +1448,10 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     );
     foreach ($content_type_permissions as $type_permission) {
       foreach ($role_names as $role_name) {
-        $checkbox_id = backdrop_strtolower(str_replace(' ', '-', "edit $role_name $type_permission"));
-        $this->assertFieldChecked($checkbox_id);
+        if (!($type_permission == 'delete any content' && $role_name == $this->editor_role_name)) {
+          $checkbox_id = backdrop_strtolower(str_replace(' ', '-', "edit $role_name $type_permission"));
+          $this->assertFieldChecked($checkbox_id);
+        }
       }
     }
 
@@ -1471,7 +1473,9 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     foreach ($content_type_permissions as $type_permission) {
       $permission_name = backdrop_strtolower(str_replace('content', "$content_type_name content", $type_permission));
       foreach ($user_accounts as $user_account) {
-        $this->assertTrue(user_access($permission_name, $user_account));
+        if (!($type_permission == 'delete any content' && $user_account == $this->editor_user)) {
+          $this->assertTrue(user_access($permission_name, $user_account));
+        }
       }
     }
   }
