@@ -385,10 +385,10 @@ function user_login_settings($form, &$form_state) {
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
     '1' => array(
-      '#description' => 'More secure, more likely to lock out users.',
+      '#description' => t('More secure, more likely to lock out users.'),
     ),
     '0' => array(
-      '#description' => ' Less secure, less likely to lock out users.',
+      '#description' => t('Less secure, less likely to lock out users.'),
     ),
   );
 
