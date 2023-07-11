@@ -56,7 +56,7 @@ class TaxonomyVocabulary {
   public $weight = 0;
 
   /**
-   * @var null|TaxonomyVocabulary
+   * @var TaxonomyVocabulary|null
    */
   public $original;
 

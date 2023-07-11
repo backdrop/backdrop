@@ -8,6 +8,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   protected $instance;
   protected $admin_user;
   protected $web_user;
+
   /**
    * @var array
    */

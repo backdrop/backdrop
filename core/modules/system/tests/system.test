@@ -1217,6 +1217,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
    * @var User
    */
   protected $user;
+
   protected $admin_user;
   protected $profile = 'testing';
 
