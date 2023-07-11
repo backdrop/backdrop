@@ -524,7 +524,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   ) {
     sessionStorage.setItem(
       "escapeAdminPath",
-      settings.admin_bar.current_path
+      window.location
     );
   }
 
@@ -538,7 +538,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
     escapeAdminPath !== null
   ) {
     $toolbarEscape.addClass("escape");
-    $toolbarEscape.attr("href", settings.basePath + escapeAdminPath);
+    $toolbarEscape.attr("href", escapeAdminPath);
     $toolbarEscape.text(Backdrop.t("Back to site"));
   }
 };

@@ -2887,7 +2887,7 @@ function form_select_options($element, $choices = NULL) {
     else {
       $key = (string) $key;
       $option_attributes = array();
-      $option_attributes['value'] = check_plain($key);
+      $option_attributes['value'] = $key;
       if ($value_valid && (!$value_is_array && (string) $element['#value'] === $key || ($value_is_array && in_array($key, $element['#value'])))) {
         $option_attributes['selected'] = 'selected';
       }
@@ -3311,6 +3311,29 @@ function html_date_validate($element, &$form_state) {
       form_error($element, t('%date is not a valid date.', array('%date' => $date)));
     }
   }
+}
+
+/**
+ * Element value callback for html_date and html_time elements.
+ */
+function html_date_or_time_value_callback($element, $input = FALSE, &$form_state = array()) {
+  $return = '';
+  if ($input !== FALSE) {
+    $return = $input;
+  }
+  elseif (!empty($element['#default_value'])) {
+    if (is_array($element['#default_value'])) {
+      // Since #default_value for elements with #access set to FALSE or with
+      // #disabled set to TRUE is often an array, extract the actual value and
+      // return it.
+      $type = str_replace('html_', '', $element['#type']);
+      $return = $element['#default_value'][$type];
+    }
+    else {
+      $return = $element['#default_value'];
+    }
+  }
+  return $return;
 }
 
 /**
