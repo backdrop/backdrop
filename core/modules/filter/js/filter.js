@@ -351,7 +351,7 @@ Backdrop.behaviors.editorImageLibrary = {
     $('.filter-format-editor-image-form [name="attributes[height]"]').val('');
   },
   /**
-   * Helper funtion to set width and height values.
+   * Helper function to set width and height values.
    */
   imageDimensionsSet: function(values) {
     $('.filter-format-editor-image-form [name="attributes[width]"]').val(values.width);
