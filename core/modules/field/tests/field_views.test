@@ -104,6 +104,16 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   var $fields;
 
+  /**
+   * @var array
+   */
+  protected $nodes;
+
+  /**
+   * @var array
+   */
+  protected $users;
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
