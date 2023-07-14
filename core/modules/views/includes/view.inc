@@ -15,7 +15,7 @@
  * An object to contain all of the data to generate a view, plus the member
  * functions to build the view query, execute the query and render the output.
  */
-#[AllowDynamicProperties]
+#[\AllowDynamicProperties]
 class view {
   var $base_table = 'node';
   var $base_field = 'nid';
@@ -2305,7 +2305,7 @@ class view {
 /**
  * A display type in a view.
  */
-#[AllowDynamicProperties]
+#[\AllowDynamicProperties]
 class views_display {
 
   /**
