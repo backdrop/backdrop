@@ -258,6 +258,12 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
  * Tests the UI for syncing, importing, and exporting.
  */
 class ConfigurationUITest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
   function setUp() {
     parent::setUp(array('config_test'));
 
@@ -459,7 +465,16 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $files = file_scan_directory($directory, '/.*\.json/');
     foreach ($files as $filepath => $file) {
       $config_data = json_decode(file_get_contents($filepath), TRUE);
-      $config_data['config_test_addition'] = 'test';
+      // The Layout and TaxonomyVocabulary class don't allow dynamic properties.
+      if (strpos($file->name, 'layout.layout.') === 0) {
+        $config_data['layout_template'] = 'simmons';
+      }
+      elseif (strpos($file->name, 'taxonomy.vocabulary.') === 0) {
+        $config_data['description'] = 'config_test_addition';
+      }
+      else {
+        $config_data['config_test_addition'] = 'test';
+      }
       file_put_contents($filepath, backdrop_json_encode($config_data, TRUE));
     }
 
@@ -548,12 +563,17 @@ class ConfigurationUITest extends BackdropWebTestCase {
 class ConfigurationSyncTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   protected function setUp() {
     parent::setUp(array('config_test_hooks'));
 
     // Create a blank content type into which our new config-based field will be
     // added.
-    $this->content_type = $this->backdropCreateContentType(array(
+    $this->backdropCreateContentType(array(
       'type' => 'post',
       'name' => 'Post',
     ));
