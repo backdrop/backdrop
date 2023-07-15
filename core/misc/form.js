@@ -5,7 +5,8 @@
  */
 $.fn.backdropGetSummary = function () {
   var callback = this.data('summaryCallback');
-  return (this[0] && callback) ? callback(this[0]).trim() : '';
+  var returnValue = (this[0] && callback) ? callback(this[0]) : '';
+  return typeof returnValue === 'string' ? returnValue.trim() : '';
 };
 
 /**
