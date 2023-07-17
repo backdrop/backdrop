@@ -919,10 +919,10 @@ function node_object_prepare(Node $node) {
       $node->status = (int) $node_type->settings['status_default'];
     }
     if (!isset($node->promote)) {
-      $node->promote = (int) ($node_type->settings['promote_enabled']) ? $node_type->settings['promote_default'] : 0;
+      $node->promote = (int) $node_type->settings['promote_default'];
     }
     if (!isset($node->sticky)) {
-      $node->sticky = (int) ($node_type->settings['sticky_enabled']) ? $node_type->settings['sticky_default'] : 0;
+      $node->sticky = (int) $node_type->settings['sticky_default'];
     }
     global $user;
     $node->uid = $user->uid;
@@ -934,7 +934,7 @@ function node_object_prepare(Node $node) {
     $node->log = NULL;
   }
   // Always use the default revision setting.
-  $node->revision = $node_type->settings['revision_enabled'] ? $node_type->settings['revision_default'] : FALSE;
+  $node->revision = $node_type->settings['revision_default'];
 
   node_invoke($node, 'prepare');
   module_invoke_all('node_prepare', $node);
