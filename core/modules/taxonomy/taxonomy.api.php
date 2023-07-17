@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Taxonomy module.
@@ -200,7 +199,7 @@ function hook_taxonomy_term_update(TaxonomyTerm $term) {
  * @see taxonomy_term_delete()
  */
 function hook_taxonomy_term_predelete(TaxonomyTerm $term) {
-  db_delete('term_synoynm')->condition('tid', $term->tid)->execute();
+  db_delete('term_synonym')->condition('tid', $term->tid)->execute();
 }
 
 /**
