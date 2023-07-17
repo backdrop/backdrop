@@ -1,0 +1,30 @@
+/**
+ * @file
+ * HTML5 widget styles.
+ */
+.field-widget-date-html5 .fieldset-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.5rem;
+}
+.field-widget-date-html5 .fieldset-wrapper::before,
+.field-widget-date-html5 .fieldset-description {
+  width: 100%;
+}
+.field-widget-date-html5 fieldset .form-item {
+  margin: 0;
+}
+.field-widget-date-html5 .field-multiple-table .field-multiple-drag + td {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+.field-widget-date-html5 .field-multiple-table td .ajax-new-content {
+  width: 100%;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+}
+.field-widget-date-html5 .form-type-date-timezone .form-item {
+  padding: 0;
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop core implementations of MailSystemInterface.
@@ -10,7 +9,7 @@
  */
 class DefaultMailSystem implements MailSystemInterface {
   /**
-   * Concatenate and wrap the e-mail body for plain-text mails.
+   * Concatenate and wrap the email body for plain-text mails.
    *
    * @param $message
    *   A message array, as described in hook_mail_alter().
@@ -29,7 +28,7 @@ class DefaultMailSystem implements MailSystemInterface {
   }
 
   /**
-   * Send an e-mail message, using Backdrop variables and default settings.
+   * Send an email message, using Backdrop variables and default settings.
    *
    * @see http://php.net/manual/function.mail.php
    * @see backdrop_mail()
@@ -42,8 +41,7 @@ class DefaultMailSystem implements MailSystemInterface {
   public function mail(array $message) {
     // If 'Return-Path' isn't already set in php.ini, we pass it separately
     // as an additional parameter instead of in the header.
-    // However, if PHP's 'safe_mode' is on, this is not allowed.
-    if (isset($message['headers']['Return-Path']) && !ini_get('safe_mode')) {
+    if (isset($message['headers']['Return-Path'])) {
       $return_path_set = strpos(ini_get('sendmail_path'), ' -f');
       if (!$return_path_set) {
         $message['Return-Path'] = $message['headers']['Return-Path'];
@@ -57,7 +55,7 @@ class DefaultMailSystem implements MailSystemInterface {
     $line_endings = settings_get('mail_line_endings', MAIL_LINE_ENDINGS);
     // Prepare mail commands.
     $mail_subject = mime_header_encode($message['subject']);
-    // Note: e-mail uses CRLF for line-endings. PHP's API requires LF
+    // Note: email uses CRLF for line-endings. PHP's API requires LF
     // on Unix and CRLF on Windows. Backdrop automatically guesses the
     // line-ending format appropriate for your system. If you need to
     // override this, adjust $settings['mail_line_endings'] in settings.php.
@@ -72,30 +70,21 @@ class DefaultMailSystem implements MailSystemInterface {
     if (!isset($_SERVER['WINDIR']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Win32') === FALSE) {
       // We validate the return path, unless it is equal to the site mail, which
       // we assume to be safe.
-      if (isset($message['Return-Path']) && !ini_get('safe_mode') && (config_get('system.core', 'site_mail') === $message['Return-Path'] || self::_isShellSafe($message['Return-Path']))) {
-
+      $additional_params = NULL;
+      if (isset($message['Return-Path']) && (config_get('system.core', 'site_mail') === $message['Return-Path'] || self::_isShellSafe($message['Return-Path']))) {
         // On most non-Windows systems, the "-f" option to the sendmail command
         // is used to set the Return-Path. There is no space between -f and
         // the value of the return path.
-        $mail_result = @mail(
-          $message['to'],
-          $mail_subject,
-          $mail_body,
-          $mail_headers,
-          '-f' . $message['Return-Path']
-        );
+        $additional_params = '-f' . $message['Return-Path'];
       }
-      else {
-        // The optional $additional_parameters argument to mail() is not
-        // allowed if safe_mode is enabled. Passing any value throws a PHP
-        // warning and makes mail() return FALSE.
-        $mail_result = @mail(
-          $message['to'],
-          $mail_subject,
-          $mail_body,
-          $mail_headers
-        );
-      }
+
+      $mail_result = @mail(
+        $message['to'],
+        $mail_subject,
+        $mail_body,
+        $mail_headers,
+        $additional_params
+      );
     }
     else {
       // On Windows, PHP will use the value of sendmail_from for the
@@ -150,10 +139,10 @@ class DefaultMailSystem implements MailSystemInterface {
  */
 class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface {
   /**
-   * Accept an e-mail message and store it in a variable.
+   * Accept an email message and store it in a variable.
    *
    * @param $message
-   *   An e-mail message.
+   *   An email message.
    */
   public function mail(array $message) {
     $captured_emails = state_get('test_email_collector', array());

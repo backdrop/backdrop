@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the basic 'node' field handler.

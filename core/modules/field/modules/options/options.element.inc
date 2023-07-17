@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * All logic for options form elements.

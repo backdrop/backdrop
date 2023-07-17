@@ -636,14 +636,15 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
-  $info = node_type_get_type($type);
-  $config = config('node.type.' . $type);
-  $config->delete();
-  field_attach_delete_bundle('node', $type);
-  module_invoke_all('node_type_delete', $info);
+  if ($info = node_type_get_type($type)) {
+    $config = config('node.type.' . $type);
+    $config->delete();
+    field_attach_delete_bundle('node', $type);
+    module_invoke_all('node_type_delete', $info);
 
-  // Clear the node type cache.
-  node_type_cache_reset();
+    // Clear the node type cache.
+    node_type_cache_reset();
+  }
 }
 
 /**
@@ -754,7 +755,7 @@ function node_type_cache_reset() {
 /**
  * Sets the default values for a node type.
  *
- * The defaults are appropriate for a type defined through hook_node_info(),
+ * The defaults are appropriate for a type defined through node_type_save(),
  * since 'custom' is TRUE for types defined in the user interface, and FALSE
  * for types defined by modules. (The 'module' flag prevents types from being
  * deleted through the user interface.) Also, the default for 'locked' is TRUE,
@@ -762,7 +763,7 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   See node_type_save() for details on what the array elements mean. Defaults
  *   to an empty array.
  *
  * @return
@@ -855,15 +856,16 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * from the database. Nodes are loaded into memory and will not require database
  * access if loaded again during the same page request.
  *
- * @param $nids
- *   (optional) An array of node IDs.
- * @param $conditions
+ * @param array|false $nids
+ *   (optional) An array of node IDs or FALSE to load all the nodes. Using an
+ *   empty array (the default value), the function will return an empty array.
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the {node}
  *   table, where the keys are the database fields and the values are the
  *   values those fields must have. Instead, it is preferable to use
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
- * @param $reset
+ * @param bool $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *
  * @return Node[]
@@ -1201,14 +1203,17 @@ function node_permission() {
       'title' => t('Bypass content access control'),
       'description' => t('View, edit and delete all content regardless of permission restrictions.'),
       'restrict access' => TRUE,
+      'warning' => t('Bypass all other node permissions.'),
     ),
     'administer content types' => array(
       'title' => t('Administer content types'),
       'restrict access' => TRUE,
+      'warning' => t('Define custom content types and delete existing ones.'),
     ),
     'administer nodes' => array(
       'title' => t('Administer content'),
       'restrict access' => TRUE,
+      'warning' => t('Edit or delete any content, which may cause irreversible data loss.'),
     ),
     'access content overview' => array(
       'title' => t('Access the content overview page'),
@@ -1658,39 +1663,78 @@ function node_layout_context_info() {
  *
  * When creating node preview pages, the path will be of the form
  * node/preview/<type>/<id>, where <type> is the node type and <id> is the
- * tempstore ID of the node begin previewed. But we want to display it using a
+ * tempstore ID of the node being previewed. But we want to display it using a
  * layout whose system path is node/%. So we choose those layouts and set the
  * context from the tempstore node.
+ *
+ * When viewing old node revisions, the path will be of the form
+ * node/<nid>/revisions/<vid>/view, where <nid> is the node ID and <vid> is the
+ * revision ID. As with previews, we want to display it using a layout whose
+ * system path is node/%.
  */
 function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
   $map = $router_item['map'];
-  if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
-    return;
-  }
-  $path_is_preview = FALSE;
-  foreach (node_type_get_types() as $type_obj) {
-    if ($type_obj->type == $map[2]) {
-      $path_is_preview = TRUE;
-      break;
+
+  // Check for node previews.
+  if (count($map) == 4 && $map[0] == 'node' && $map[1] == 'preview') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node from the tempstore.
+    $path_is_preview = FALSE;
+    foreach (node_type_get_types() as $type_obj) {
+      if ($type_obj->type == $map[2]) {
+        $path_is_preview = TRUE;
+        break;
+      }
     }
-  }
-  if (!$path_is_preview) {
-    return;
-  }
-  $tempstore_id = $map[3];
-  $temp_node = node_get_node_tempstore($tempstore_id);
-  if ($temp_node) {
-    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
-    if ($node_layouts) {
-      $layouts = $node_layouts;
-      foreach ($layouts as $layout) {
-        foreach ($layout->getContexts() as $context) {
-          if (isset($context->position)) {
-            $context->setData($temp_node);
+    if (!$path_is_preview) {
+      return;
+    }
+    $tempstore_id = $map[3];
+    $temp_node = node_get_node_tempstore($tempstore_id);
+    if ($temp_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($temp_node);
+            }
           }
         }
       }
     }
+  }
+
+  // Check for node revisions.
+  if (count($map) == 5 && $map[0] == 'node' && $map[2] == 'revisions' && $map[4] == 'view') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node revision.
+    $rev_node = $map[1];
+    if ($rev_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($rev_node);
+            }
+          }
+        }
+      }
+    }
+  }
+  // If either default was passed in originally, move it to the end of the list.
+  if (isset($layouts['admin_default'])) {
+    $admin_default = $layouts['admin_default'];
+    unset($layouts['admin_default']);
+    $layouts['admin_default'] = $admin_default;
+  }
+  if (isset($layouts['default'])) {
+    $default = $layouts['default'];
+    unset($layouts['default']);
+    $layouts['default'] = $default;
   }
 }
 
@@ -2373,6 +2417,12 @@ function node_page_view(Node $node) {
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
 
+  // Show a message if the content type is configured to have a hidden path.
+  if ($type->settings['hidden_path']) {
+    $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
+    backdrop_set_message($message, 'info');
+  }
+
   return node_show($node);
 }
 
@@ -2405,7 +2455,7 @@ function _node_index_node(Node $node) {
 
   // Save the changed time of the most recent indexed node, for the search
   // results half-life calculation.
-  state_set('node_cron_last', $node->changed);
+  state_set('node_cron_last', (int) $node->changed);
 
   // Render the node.
   $build = node_view($node, 'search_index');
@@ -3411,9 +3461,6 @@ function node_content_form(Node $node, $form_state) {
       '#default_value' => $node->title,
       '#maxlength' => 255,
       '#weight' => -5,
-      '#attributes' => array(
-        'autofocus' => TRUE,
-      ),
     );
   }
 
@@ -3495,23 +3542,41 @@ function node_action_info() {
 function node_requirements($phase) {
   $requirements = array();
   if ($phase === 'runtime') {
-    // Only show rebuild button if there are either 0, or 2 or more, rows
-    // in the {node_access} table, or if there are modules that
-    // implement hook_node_grants().
+    $needs_rebuild = node_access_needs_rebuild();
     $grant_count = db_query('SELECT COUNT(*) FROM {node_access}')->fetchField();
-    if ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
+
+    // Show an error message if permissions need to be rebuilt. Otherwise
+    // show a permission count if there are either 0, or 2 or more, rows in the
+    // {node_access} table, or if there are modules that implement
+    // hook_node_grants().
+    if ($needs_rebuild) {
+      $value = t('Access permissions need to be rebuilt.');
+    }
+    elseif ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
       $value = format_plural($grant_count, 'One permission in use', '@count permissions in use', array('@count' => $grant_count));
     }
     else {
       $value = t('Disabled');
     }
     $value .= ' (' . l(t('Rebuild permissions'), 'admin/reports/status/rebuild') . ')';
-    $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache. Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
+
+    if ($needs_rebuild) {
+      $description = t('Node access permissions need to be rebuilt.');
+      $severity = REQUIREMENT_ERROR;
+    }
+    else {
+      $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache.');
+      $severity = REQUIREMENT_OK;
+    }
+
+    // Add further information.
+    $description .= ' ' . t('Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
 
     $requirements['node_access'] = array(
       'title' => t('Node Access Permissions'),
       'value' => $value,
       'description' => $description,
+      'severity' => $severity
     );
   }
   return $requirements;
@@ -3627,7 +3692,7 @@ function node_config_info() {
   $prefixes['node.type'] = array(
     'name_key' => 'type',
     'label_key' => 'name',
-    'group' => t('Node types'),
+    'group' => t('Content types'),
   );
   return $prefixes;
 }

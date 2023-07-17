@@ -68,7 +68,7 @@ function theme_image_style_list($variables) {
       'title' => t('Configure'),
       'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
