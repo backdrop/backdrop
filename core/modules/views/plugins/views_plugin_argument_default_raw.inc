@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the raw value argument default plugin.
