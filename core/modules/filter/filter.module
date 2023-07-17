@@ -149,6 +149,14 @@ function filter_menu() {
     'access arguments' => array(4),
     'file' => 'filter.admin.inc',
   );
+  $items['admin/config/content/formats/%filter_format/delete'] = array(
+    'title' => 'Delete text format',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_admin_delete', 4),
+    'access callback' => '_filter_delete_format_access',
+    'access arguments' => array(4),
+    'file' => 'filter.admin.inc',
+  );
   $items['admin/config/content/formats/%filter_format/filter-settings/%'] = array(
     'title callback' => 'filter_admin_format_title',
     'title arguments' => array(4),
@@ -191,6 +199,24 @@ function filter_format_access($format) {
 function _filter_disable_format_access($format) {
   // The fallback format can never be disabled.
   return user_access('administer filters') && ($format->format != filter_fallback_format());
+}
+
+/**
+ * Access callback: Checks access for deleting text formats.
+ *
+ * @param $format
+ *   A text format object.
+ *
+ * @return
+ *   TRUE if the text format can be deleted by the current user, FALSE
+ *   otherwise.
+ *
+ * @see filter_menu()
+ */
+function _filter_delete_format_access($format) {
+  // The fallback format can never be deleted, and only disabled formats can be
+  // deleted.
+  return user_access('administer filters') && ($format->format != filter_fallback_format()) && ($format->status == 0);
 }
 
 /**
@@ -450,6 +476,25 @@ function filter_format_disable($format) {
   module_invoke_all('filter_format_disable', $format);
 
   // Clear the filter cache whenever a text format is disabled.
+  filter_formats_reset();
+  cache('filter')->deletePrefix($format->format . ':');
+}
+
+/**
+ * Deletes a text format.
+ *
+ * The format is completely removed from config.
+ *
+ * @param $format
+ *   The text format object to be deleted.
+ */
+function filter_format_delete($format) {
+  config('filter.format.' . $format->format)->delete();
+
+  // Allow modules to react on text format deletion.
+  module_invoke_all('filter_format_delete', $format);
+
+  // Clear the filter cache whenever a text format is deleted.
   filter_formats_reset();
   cache('filter')->deletePrefix($format->format . ':');
 }
