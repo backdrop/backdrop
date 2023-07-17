@@ -431,7 +431,7 @@ function hook_user_role_delete($role) {
  * Alter the requirement for rejecting weak passwords.
  *
  * Called by user_password_reject_weak() to allow modules to alter
- * wheather to reject weak passwords. Can be used to only reject
+ * whether to reject weak passwords. Can be used to only reject
  * passwords for certain roles. For instance, administrators
  * may be required to set strong passwords.
  *

@@ -11,6 +11,7 @@
  *   - max_length: the maximum length for a varchar field.
  * Instance settings:
  *   - text_processing: whether text input filters should be used.
+ *   - allowed_formats: a list of text formats authors can select from.
  *   - display_summary: whether the summary field should be displayed.
  *     When empty and not displayed the summary will take its value from the
  *     trimmed value of the main text field.
@@ -21,7 +22,10 @@ function text_field_info() {
       'label' => t('Text (short)'),
       'description' => t('This field stores varchar text in the database.'),
       'settings' => array('max_length' => 255),
-      'instance_settings' => array('text_processing' => 0),
+      'instance_settings' => array(
+        'text_processing' => 0,
+        'allowed_formats' => array(),
+      ),
       'default_widget' => 'text_textfield',
       'default_formatter' => 'text_default',
       'default_token_formatter' => 'text_default',
@@ -29,7 +33,10 @@ function text_field_info() {
     'text_long' => array(
       'label' => t('Text (long)'),
       'description' => t('This field stores long text in the database.'),
-      'instance_settings' => array('text_processing' => 0),
+      'instance_settings' => array(
+        'text_processing' => 0,
+        'allowed_formats' => array(),
+      ),
       'default_widget' => 'text_textarea',
       'default_formatter' => 'text_default',
       'default_token_formatter' => 'text_default',
@@ -37,7 +44,11 @@ function text_field_info() {
     'text_with_summary' => array(
       'label' => t('Text (long with summary)'),
       'description' => t('This field stores long text in the database along with optional summary text.'),
-      'instance_settings' => array('text_processing' => 1, 'display_summary' => 0),
+      'instance_settings' => array(
+        'text_processing' => 1,
+        'allowed_formats' => array(),
+        'display_summary' => 0,
+      ),
       'default_widget' => 'text_textarea_with_summary',
       'default_formatter' => 'text_default',
       'default_token_formatter' => 'text_default',
@@ -74,6 +85,15 @@ function text_field_settings_form($field, $instance, $has_data) {
  */
 function text_field_instance_settings_form($field, $instance) {
   $settings = $instance['settings'];
+  $fallback_format = filter_fallback_format();
+
+  $format_options = array();
+  foreach (filter_formats() as $format) {
+    $format_options[$format->format] = $format->name;
+  }
+  $format_options[$fallback_format] .= ' ' . t('(fallback format)');
+
+  $form['#element_validate'][] = 'text_field_instance_settings_form_validate';
 
   $form['text_processing'] = array(
     '#type' => 'radios',
@@ -83,17 +103,57 @@ function text_field_instance_settings_form($field, $instance) {
       t('Plain text'),
       t('Filtered text (user selects text format)'),
     ),
+    '#weight' => -2,
   );
+
+  // An empty array of formats indicates all formats are allowed.
+  $allowed_formats = empty($settings['allowed_formats']) ?
+    array_keys($format_options) : $settings['allowed_formats'];
+
+  $form['allowed_formats'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed text formats'),
+    '#default_value' => $allowed_formats,
+    '#description' => t('Choose which <a href="@text_formats">text formats</a> should be available for authors. If an author does not have permission to a format on existing content, the field will be locked.', array('@text_formats' => url('admin/config/content/formats'))),
+    '#options' => $format_options,
+    '#states' => array(
+      'visible' => array(
+        'input[name="instance[settings][text_processing]"]' => array('value' => 1),
+      ),
+    ),
+    '#weight' => -1,
+  );
+
+  // Display the fallback format as disabled but locked in the enabled state.
+  $form['allowed_formats'][$fallback_format]['#value'] = 'plain_text';
+  $form['allowed_formats'][$fallback_format]['#disabled'] = TRUE;
+
   if ($field['type'] == 'text_with_summary') {
     $form['display_summary'] = array(
       '#type' => 'checkbox',
       '#title' => t('Summary input'),
       '#default_value' => $settings['display_summary'],
       '#description' => t('This allows authors to input an explicit summary, to be displayed instead of the automatically trimmed text when using the "Summary or trimmed" display type.'),
+      '#weight' => 0,
     );
   }
 
   return $form;
+}
+
+/**
+ * Element validate handler for text_field_instance_settings_form().
+ */
+function text_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
+  $all_formats = array_keys($element['allowed_formats']['#options']);
+  $enabled_formats = array_keys(array_filter($element['allowed_formats']['#value']));
+  $enabled_formats[] = filter_fallback_format();
+  // If all formats are enabled, save as an empty array, which implies no
+  // restrictions on this field's formats.
+  if ($all_formats == $enabled_formats) {
+    $enabled_formats = array();
+  }
+  form_set_value($element['allowed_formats'], $enabled_formats, $form_state);
 }
 
 /**
@@ -546,6 +606,7 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $element = $main_widget;
       $element['#type'] = 'text_format';
       $element['#format'] = isset($items[$delta]['format']) ? $items[$delta]['format'] : NULL;
+      $element['#allowed_formats'] = $instance['settings']['allowed_formats'];
       $element['#editor_uploads'] = TRUE;
       $element['#base_type'] = $main_widget['#type'];
     }

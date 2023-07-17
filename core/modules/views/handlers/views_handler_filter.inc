@@ -43,7 +43,7 @@ class views_handler_filter extends views_handler {
   var $operator = '=';
 
   /**
-   * Contains the information of the selected item in a gruped filter.
+   * Contains the information of the selected item in a grouped filter.
    */
   var $group_info = NULL;
 
@@ -1172,13 +1172,13 @@ class views_handler_filter extends views_handler {
   /*
    * Transform the input from a grouped filter into a standard filter.
    *
-   * When a filter is a group, find the set of operator and values
-   * that the choosed item represents, and inform views that a normal
-   * filter was submitted by telling the operator and the value selected.
+   * When a filter is a group, find the set of operator and values that the
+   * chosen item represents, and inform views that a normal filter was submitted
+   * by telling the operator and the value selected.
    *
    * The param $selected_group_id is only passed when the filter uses the
-   * checkboxes widget, and this function will be called for each item
-   * choosed in the checkboxes.
+   * checkboxes widget, and this function will be called for each item chosen
+   * in the checkboxes.
    */
   function convert_exposed_input(&$input, $selected_group_id = NULL) {
     if ($this->is_a_group()) {

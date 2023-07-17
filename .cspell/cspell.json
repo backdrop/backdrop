@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "dictionaryDefinitions": [
+    {
+      "name": "backdrop",
+      "path": "backdrop.dic"
+    },
+    {
+      "name": "drupal",
+      "path": "https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/misc/cspell/dictionary.txt"
+    }
+  ],
+  "dictionaries": [
+    "backdrop",
+    "drupal",
+    "css",
+    "en-gb",
+    "en-us",
+    "fullstack",
+    "html",
+    "lorem-ipsum",
+    "php",
+    "sql"
+  ],
+  "globRoot": "../",
+  "ignorePaths": [
+    "*.svg",
+    "/.*/",
+    "/core/includes/file.mimetypes.inc",
+    "/core/includes/standard.inc",
+    "/core/includes/transliteration/",
+    "/core/misc/ckeditor/",
+    "/core/misc/jquery.js",
+    "/core/misc/jquery-extend*",
+    "/core/misc/jquery-html-prefilter*",
+    "/core/misc/jquery.*.js",
+    "/core/misc/opensans/",
+    "/core/misc/smartmenus/",
+    "/core/misc/ui/",
+    "/core/modules/search/tests/UnicodeTest.txt",
+    "/core/themes/bartik/color/preview.html",
+    "/files/",
+    "/.*"
+  ],
+  "overrides": [
+    {
+      "filename": "/core/themes/bartik/color/color.inc",
+      "ignoreWords": ["Blackdrop"]
+    }
+  ]
+}
