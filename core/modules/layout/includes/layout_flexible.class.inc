@@ -40,6 +40,11 @@ class LayoutFlexibleTemplate {
   var $rows = array();
 
   /**
+   * @var bool
+   */
+  public $is_new;
+
+  /**
    * Constructor for a LayoutFlexibleTemplate class.
    *
    * @param array $config

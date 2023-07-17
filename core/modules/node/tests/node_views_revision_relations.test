@@ -13,8 +13,8 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
-    parent::setUp();
+  function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Create content type for testing.
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));

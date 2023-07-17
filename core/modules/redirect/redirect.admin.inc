@@ -375,7 +375,10 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   $form['source'] = array(
     '#type' => 'textfield',
     '#title' => t('From'),
-    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array('%example1' => 'node/123', '%example2' => 'taxonomy/term/123', '%anchor' => '#anchor')),
+    '#description' => t('Enter an internal Backdrop path or URL alias to redirect (e.g. %example1 or %example2). Fragment anchors (e.g. %anchor) are <strong>not</strong> allowed.', array(
+      '%example1' => 'node/123',
+      '%example2' => 'taxonomy/term/123',
+      '%anchor' => '#anchor')),
     '#maxlength' => 560,
     '#default_value' => $redirect->rid || $redirect->source ? redirect_url($redirect->source, $redirect->source_options + array('alter' => FALSE)) : '',
     '#required' => TRUE,
@@ -436,7 +439,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#parents' => array('override'),
   );
 
-  if (!empty($form_state['storage']['override_messages']) && !count(form_get_errors())) {
+  if (!empty($form_state['storage']['override_messages']) && !form_get_errors()) {
     $form['override']['#access'] = TRUE;
     if (count($form_state['storage']['override_messages']) > 1) {
       $message_output = theme('item_list', array('items' => $form_state['storage']['override_messages']));
@@ -575,7 +578,11 @@ function _redirect_extract_url_options(&$element, &$form_state) {
  */
 function redirect_edit_form_validate($form, &$form_state) {
   form_state_values_clean($form_state);
-  $redirect = new Redirect($form_state['values']);
+  $values = $form_state['values'];
+  // Get rid of form values not appropriate for Redirect creation.
+  unset($values['override']);
+  unset($values['delete']);
+  $redirect = new Redirect($values);
 
   if (empty($form_state['values']['override'])) {
     if ($existing = redirect_load_by_source($redirect->source, $redirect->langcode)) {
@@ -664,7 +671,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
-    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
+    '#description' => t('This setting is most commonly used when replacing existing URL aliases under "Update action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/urls/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
   $form['passthrough_querystring'] = array(
