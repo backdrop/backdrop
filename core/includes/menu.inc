@@ -164,15 +164,25 @@ define('MENU_SUGGESTED_ITEM', MENU_VISIBLE_IN_BREADCRUMB | 0x0010);
  *
  * Local tasks are menu items that describe actions to be performed on their
  * parent item. An example is the path "node/52/edit", which performs the
- * "edit" task on "node/52".
+ * "edit" task on "node/52". Another local task is the path "node/52/view";
+ * this is the default local task, which links to the parent, "node/52".
+ *
+ * If a parent item has one or more local tasks, one of them should be the
+ * default local task with type MENU_DEFAULT_LOCAL_TASK; the rest will be simply
+ * type MENU_LOCAL_TASK.
  */
 define('MENU_LOCAL_TASK', MENU_IS_LOCAL_TASK | MENU_VISIBLE_IN_BREADCRUMB);
 
 /**
- * Menu type -- The "default" local task, which is initially active.
+ * Menu type -- The default local task, which is initially active.
  *
- * Every set of local tasks should provide one "default" task, that links to the
- * same path as its parent when clicked.
+ * Local tasks are menu items that describe actions to be performed on their
+ * parent item. An example is the path "node/52/edit", which performs the
+ * "edit" task on "node/52".
+ *
+ * Every set of local tasks should provide one default task, which links to the
+ * same path as its parent when clicked. Additional local tasks should have type
+ * MENU_LOCAL_TASK.
  */
 define('MENU_DEFAULT_LOCAL_TASK', MENU_IS_LOCAL_TASK | MENU_LINKS_TO_PARENT | MENU_VISIBLE_IN_BREADCRUMB);
 
