@@ -1085,8 +1085,15 @@ function node_update_1010() {
   $default_langcode = $site_config->get('language_default');
   $other_languages = db_query("SELECT COUNT(langcode) FROM {node} WHERE langcode NOT IN (:list)", array(':list' => array('und', $default_langcode)))->fetchField();
   if ($language_count == 1 && $other_languages == 0) {
-    db_query("UPDATE {node} SET langcode = 'und' WHERE langcode = :default", array('default' => $default_langcode));
-    db_query("UPDATE {url_alias} SET langcode = 'und' WHERE source LIKE 'node/%' AND langcode = :default", array('default' => $default_langcode));
+    db_update('node')
+      ->fields(array('langcode' => 'und'))
+      ->condition('langcode', $default_langcode)
+      ->execute();
+    db_update('url_alias')
+      ->fields(array('langcode' => 'und'))
+      ->condition('source', 'node/%', 'LIKE')
+      ->condition('langcode', $default_langcode)
+      ->execute();
   }
 }
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsModuleTest.
@@ -11,8 +10,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests basic functions from the Views module.
  */
 class ViewsModuleTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
     backdrop_theme_rebuild();
   }
 
@@ -43,7 +42,7 @@ class ViewsModuleTest extends ViewsSqlTest {
       'сд асд асд ас',
       'асд асд асд ас'
     );
-    // Just test maxlength without word boundry.
+    // Just test maxlength without word boundary.
     $alter = array(
       'max_length' => 10,
     );

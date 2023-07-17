@@ -14,6 +14,25 @@ function theme_admin_bar_icon($variables) {
 }
 
 /**
+* Renders a page icon to display in the administration bar.
+*
+* @ingroup themeable
+*/
+function theme_admin_bar_icon_page($variables) {
+ return t('This page');
+}
+
+/**
+* Renders a language icon to display in the administration bar.
+*
+* @ingroup themeable
+*/
+function theme_admin_bar_icon_locale($variables) {
+  global $language;
+  return isset($language->native) ? $language->native : $language->name;
+}
+
+/**
  * Render a themed list of links.
  *
  * @param $variables

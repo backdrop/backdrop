@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handling of universally unique identifiers.
@@ -14,7 +13,7 @@ interface UuidInterface {
    * Generates a Universally Unique IDentifier (UUID).
    *
    * @return
-   *   A 32 byte integer represented as a hex string formatted with 4 hypens.
+   *   A 32 byte integer represented as a hex string formatted with 4 hyphens.
    */
   public function generate();
 
