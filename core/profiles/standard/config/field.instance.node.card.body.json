@@ -1,0 +1,50 @@
+{
+    "_config_name": "field.instance.node.card.body",
+    "field_name": "body",
+    "entity_type": "node",
+    "bundle": "card",
+    "label": "Body",
+    "widget": {
+        "weight": 2,
+        "type": "text_textarea_with_summary",
+        "module": "text",
+        "active": 1,
+        "settings": {
+            "rows": "10",
+            "summary_rows": 5
+        }
+    },
+    "settings": {
+        "text_processing": "1",
+        "allowed_formats": [],
+        "display_summary": 0,
+        "user_register_form": false
+    },
+    "display": {
+        "default": {
+            "label": "hidden",
+            "type": "text_default",
+            "settings": [],
+            "module": "text",
+            "weight": 0
+        },
+        "teaser": {
+            "label": "hidden",
+            "type": "text_default",
+            "weight": "0",
+            "settings": [],
+            "module": "text"
+        }
+    },
+    "description": "Cards usually work best with a relatively short body field.",
+    "required": 0,
+    "deleted": 0,
+    "default_value": [
+        {
+            "summary": "",
+            "value": "",
+            "format": "filtered_html"
+        }
+    ],
+    "default_value_function": null
+}

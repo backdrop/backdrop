@@ -313,8 +313,8 @@ function date_pager_url($view, $date_type = NULL, $date_arg = NULL, $force_view_
     }
   }
 
-  // Normal views may need querystrings appended to them
-  // if they use exposed filters.
+  // Normal views may need query strings appended to them if they use exposed
+  // filters.
   return url($view->get_url($args), array(
     'query' => date_views_querystring($view),
     'absolute' => $absolute,
