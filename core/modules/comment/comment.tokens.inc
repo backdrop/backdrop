@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Builds placeholder replacement tokens for comment-related data.

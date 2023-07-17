@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API functions for installing modules and themes.
@@ -115,7 +114,7 @@ function backdrop_get_schema_versions($module) {
     // Narrow this down to functions ending with an integer, since all
     // hook_update_N() functions end this way, and there are other
     // possible functions which match '_update_'. We use preg_grep() here
-    // instead of foreaching through all defined functions, since the loop
+    // instead of iterating through all defined functions, since the loop
     // through all PHP functions can take significant page execution time
     // and this function is called on every administrative page via
     // system_requirements().
@@ -503,7 +502,10 @@ abstract class DatabaseTasks {
       Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
       try {
         Database::getConnection()->createDatabase($database);
-        $last_exception = FALSE;
+        // After creating the database, we must run DatabaseTasks::connect()
+        // again to be sure a connection to the new database can be established.
+        Database::removeConnection('default');
+        return $this->connect();
       }
       catch (PDOException $e) {
         $last_exception = $e;

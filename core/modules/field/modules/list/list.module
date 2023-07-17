@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines list field types that can be used with the Options module.

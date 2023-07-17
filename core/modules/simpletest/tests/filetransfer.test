@@ -1,11 +1,16 @@
 <?php
 
 
-class FileTranferTest extends BackdropWebTestCase {
+class FileTransferTest extends BackdropWebTestCase {
   protected $hostname = 'localhost';
   protected $username = 'backdrop';
   protected $password = 'password';
   protected $port = '42';
+
+  /**
+   * @var TestFileTransfer
+   */
+  protected $testConnection;
 
   function setUp() {
     parent::setUp();
@@ -83,6 +88,7 @@ class FileTranferTest extends BackdropWebTestCase {
 /**
  * Mock FileTransfer object for test case.
  */
+#[\AllowDynamicProperties]
 class TestFileTransfer extends FileTransfer {
   protected $host = NULL;
   protected $username = NULL;

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handles incoming requests to fire off regularly-scheduled tasks (cron jobs).

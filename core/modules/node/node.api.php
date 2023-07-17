@@ -18,7 +18,7 @@
  * During node operations (create, update, view, delete, etc.), there are
  * several sets of hooks that get invoked to allow modules to modify the base
  * node operation:
- * - Node-type-specific hooks: When defining a node type, hook_node_info()
+ * - Node-type-specific hooks: When defining a node type, node_type_save()
  *   returns a 'base' component. Node-type-specific hooks are named
  *   base_hookname() instead of mymodule_hookname() (in a module called
  *   'mymodule' for example). Only the node type's corresponding implementation
@@ -937,7 +937,7 @@ function hook_node_type_update($info) {
   // Update a setting that pointed at the old type name to the new type name.
   if (!empty($info->old_type) && $info->old_type != $info->type) {
     $config = config('my_module.settings');
-    $default_type = $config->get('defaut_node_type');
+    $default_type = $config->get('default_node_type');
     if ($default_type === $info->old_type) {
       $config->set('default_node_type', $info->type);
     }

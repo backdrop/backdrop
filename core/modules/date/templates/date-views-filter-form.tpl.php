@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Template to display the Views date filter form.

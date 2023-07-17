@@ -32,29 +32,29 @@ Backdrop.behaviors.menuLinkAutomaticTitle = {
       // If there is a link title already, mark it as overridden. The user expects
       // that toggling the checkbox twice will take over the node's title.
       if ($checkbox.is(':checked') && $link_title.val().length) {
-        $link_title.data('menuLinkAutomaticTitleOveridden', true);
+        $link_title.data('menuLinkAutomaticTitleOverridden', true);
       }
       // Whenever the value is changed manually, disable this behavior.
       $link_title.keyup(function () {
-        $link_title.data('menuLinkAutomaticTitleOveridden', true);
+        $link_title.data('menuLinkAutomaticTitleOverridden', true);
       });
       // Global trigger on checkbox (do not fill-in a value when disabled).
       $checkbox.change(function () {
         if ($checkbox.is(':checked')) {
-          if (!$link_title.data('menuLinkAutomaticTitleOveridden')) {
+          if (!$link_title.data('menuLinkAutomaticTitleOverridden')) {
             $link_title.val($title.val());
           }
         }
         else {
           $link_title.val('');
-          $link_title.removeData('menuLinkAutomaticTitleOveridden');
+          $link_title.removeData('menuLinkAutomaticTitleOverridden');
         }
         $checkbox.closest('fieldset.vertical-tabs-pane').trigger('summaryUpdated');
         $checkbox.trigger('formUpdated');
       });
       // Take over any title change.
       $title.keyup(function () {
-        if (!$link_title.data('menuLinkAutomaticTitleOveridden') && $checkbox.is(':checked')) {
+        if (!$link_title.data('menuLinkAutomaticTitleOverridden') && $checkbox.is(':checked')) {
           $link_title.val($title.val());
           $link_title.val($title.val()).trigger('formUpdated');
         }
