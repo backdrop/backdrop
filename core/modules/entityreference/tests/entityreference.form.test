@@ -1,0 +1,199 @@
+<?php
+/**
+ * @file
+ * Contains EntityReferenceFormTestCase.
+ */
+
+/**
+ * Test for Entity Reference form.
+ */
+class EntityReferenceFormTestCase extends BackdropWebTestCase {
+  public $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    // Enable entityreference module after views module is enabled to load
+    // the selection plugin EntityReference_SelectionHandler_Views.
+    parent::setUp(array('entity', 'views'));
+    module_enable(array('entityreference', 'entityreference_views_test'));
+
+    // Create test user.
+    $this->admin_user = $this->backdropCreateUser(array('bypass node access'));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the Generic autocomplete widget validates the value properly.
+   */
+  public function testAutocompleteValidationWithGenericSelectionHandler() {
+    $type_referenced = $this->backdropCreateContentType();
+    $type_referencing = $this->backdropCreateContentType();
+
+    $field_name = 'field_' . $type_referenced->type;
+    $field = array(
+      'field_name' => $field_name,
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'node',
+        'handler_settings' => array(
+          'target_bundles' => array($type_referenced->type),
+        ),
+      ),
+    );
+    $field_instance = array(
+      'field_name' => $field_name,
+      'bundle' => $type_referencing->type,
+    );
+    $this->createEntityReferenceFieldForNode($field, $field_instance);
+
+    $node = $this->backdropCreateNode(array('type' => $type_referenced->type));
+    $title_valid = $node->title;
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_valid);
+    $this->assertNoText('There are no entities matching "' . $title_valid . '"',
+      'No validation error occurs for a valid title.');
+
+    $title_invalid = $this->randomName();
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_invalid);
+    $this->assertText('There are no entities matching "' . $title_invalid . '"',
+      'A validation error occurs for an invalid title.');
+
+    $title_many_nodes_has = $this->randomName();
+    for ($i = 0; $i < 6; $i++) {
+      $node = $this->backdropCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_many_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_many_nodes_has);
+    $this->assertText('Many entities are called ' . $title_many_nodes_has . '.',
+      'A validation error occurs for a title shared by too many nodes.');
+
+    $title_several_nodes_has = $this->randomName();
+    for ($i = 0; $i < 2; $i++) {
+      $node = $this->backdropCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_several_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_several_nodes_has);
+    $this->assertText('Multiple entities match this reference; ',
+      'A validation error occurs for a title shared by several nodes.');
+  }
+
+  /**
+   * Test that the Views autocomplete widget validates the value properly.
+   */
+  public function testAutocompleteValidationWithViewsSelectionHandler() {
+    $type_referenced = $this->backdropCreateContentType();
+    $type_referencing = $this->backdropCreateContentType();
+
+    $field_name = 'field_' . $type_referenced->type;
+    $field = array(
+      'field_name' => $field_name,
+      'settings' => array(
+        "handler" => "views",
+        "target_type" => "node",
+        "handler_settings" => array(
+          "view" => array(
+            "view_name" => "test_entityreference_select_node",
+            "display_name" => "entityreference_1",
+            "args" => array(),
+          ),
+          "behaviors" => array(
+            "views-select-list" => array(
+              "status" => 0,
+            ),
+          ),
+        ),
+      ),
+    );
+    $field_instance = array(
+      'field_name' => $field_name,
+      'bundle' => $type_referencing->type,
+    );
+    $this->createEntityReferenceFieldForNode($field, $field_instance);
+
+    $node = $this->backdropCreateNode(array('type' => $type_referenced->type));
+    $title_valid = $node->title;
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_valid);
+    $this->assertNoText('No items found for ' . $field_name,
+      'No validation error occurs for a valid title.');
+
+    $title_invalid = $this->randomName();
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_invalid);
+    $this->assertText('No items found for ' . $field_name,
+      'A validation error occurs for an invalid title.');
+
+    $title_many_nodes_has = $this->randomName();
+    for ($i = 0; $i < 6; $i++) {
+      $node = $this->backdropCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_many_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_many_nodes_has);
+    $this->assertText('Too many items found for ' . $field_name . '.',
+      'A validation error occurs for a title shared by too many nodes.');
+
+    $title_several_nodes_has = $this->randomName();
+    for ($i = 0; $i < 2; $i++) {
+      $node = $this->backdropCreateNode(array(
+        'type' => $type_referenced->type,
+        'title' => $title_several_nodes_has,
+      ));
+    }
+    $this->postNodeFormWithEntityReference($type_referencing, $field_name, $title_several_nodes_has);
+    $this->assertText('Multiple items found for ' . $field_name . ':',
+      'A validation error occurs for a title shared by several nodes.');
+  }
+
+  /**
+   * Helper method to create a base field and field instance.
+   *
+   * @param array $field
+   *   The field to be created.
+   * @param array $field_instance
+   *   The field instance to be created.
+   */
+  protected function createEntityReferenceFieldForNode(array $field, array $field_instance) {
+
+    // Add the common settings.
+    $field += array(
+      'type' => 'entityreference',
+      'translatable' => FALSE,
+      'entity_types' => array('node'),
+    );
+    $field_instance += array(
+      'entity_type' => 'node',
+      'widget' => array(
+        'type' => 'entityreference_autocomplete',
+        'module' => 'entityreference',
+      ),
+    );
+
+    $field = field_create_field($field);
+    field_create_instance($field_instance);
+  }
+
+  /**
+   * Helper method to submit node creation form.
+   *
+   * @param object $type
+   *   Node type object.
+   * @param string $field_name
+   *   Name of the Entity Reference field.
+   * @param string $title
+   *   The node title to enter into the Entity Reference field.
+   */
+  protected function postNodeFormWithEntityReference($type, $field_name, $title) {
+    $type_path = 'node/add/' . str_replace('_', '-', $type->type);
+    $edit = array(
+      $field_name . '[und][0][target_id]' => $title,
+    );
+
+    $this->backdropPost($type_path, $edit, t('Save'));
+  }
+
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User session handling functions.
@@ -14,6 +13,8 @@
  * are assigned by session_set_save_handler() in bootstrap.inc and are called
  * automatically by PHP. These functions should not be called directly. Session
  * data should instead be accessed via the $_SESSION superglobal.
+ *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
  */
 
 /**
@@ -60,6 +61,8 @@ function _backdrop_session_close() {
  * Doing so may result in logging out the current user, corrupting session data
  * or other unexpected behavior. Session data must always be accessed via the
  * $_SESSION superglobal.
+ *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
  *
  * @param $sid
  *   The session ID of the session to retrieve.
@@ -145,6 +148,8 @@ function _backdrop_session_read($sid) {
  * This function is an internal function and must not be called directly.
  * Doing so may result in corrupted session data or other unexpected behavior.
  * Session data must always be accessed via the $_SESSION superglobal.
+ *
+ * @see https://www.php.net/manual/en/reserved.variables.session.php
  *
  * @param $sid
  *   The session ID of the session to write to.
@@ -238,10 +243,8 @@ function backdrop_session_initialize() {
   global $user, $is_https;
 
   // Calling session_set_save_handler() multiple times will cause errors on
-  // PHP 7.2+. But checking a session status is only available 5.4+, so if the
-  // status cannot be checked, or the status indicates that there is no session,
-  // set session handlers.
-  if (!function_exists('session_status') || session_status() === PHP_SESSION_NONE) {
+  // PHP 7.2+.
+  if (session_status() === PHP_SESSION_NONE) {
     session_set_save_handler('_backdrop_session_open', '_backdrop_session_close', '_backdrop_session_read', '_backdrop_session_write', '_backdrop_session_destroy', '_backdrop_session_garbage_collection');
   }
 
@@ -356,7 +359,7 @@ function backdrop_session_regenerate() {
   global $user, $is_https;
   // Nothing to do if we are not allowed to change the session.
   if (!backdrop_save_session()) {
-    return TRUE;
+    return;
   }
 
   if ($is_https && settings_get('https', FALSE)) {
@@ -418,7 +421,6 @@ function backdrop_session_regenerate() {
     $user = $account;
   }
   date_default_timezone_set(backdrop_get_user_timezone());
-  return TRUE;
 }
 
 /**
