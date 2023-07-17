@@ -133,27 +133,52 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Who can register accounts?'),
     '#default_value' => $config->get('user_register'),
     '#options' => array(
-      USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
-      USER_REGISTER_VISITORS => t('Visitors'),
-      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+      USER_REGISTER_ADMINISTRATORS_ONLY => t('Authorized people only'),
+      USER_REGISTER_VISITORS => t('Anonymous visitors'),
+      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Anonymous visitors, but approval from authorized people is required'),
     )
+  );
+  $form['registration_cancellation']['user_register'][USER_REGISTER_ADMINISTRATORS_ONLY]['#description'] = t('Only people with the <a href="@permission-url">%administer-users permission</a> can create accounts.', array('%administer-users' => t('Administer user accounts'), '@permission-url' => url('admin/config/people/permissions', array(
+    'query' => array('search' => 'administer user accounts')))));
+  $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS]['#description'] = t('New accounts will be active directly after their creation. No approval required.');
+  $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL]['#description'] = t('New accounts will be created as inactive/blocked. Someone with the <a href="@permission-url">%administer-users permission</a> will need to review and enable them.', array('%administer-users' => t('Administer user accounts'), '@permission-url' => url('admin/config/people/permissions', array(
+    'query' => array('search' => 'administer user accounts')))));
+
+  $help_items = array(
+    t('Any new user account will be assigned a system-generated password. Before being able to log into the site, the account will need to be verified via the email address used to create it.'),
+    t('With this setting disabled, the account owner will be able to log into the site immediately after registration/approval, and they will be able to select their own password during registration.'),
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Require email verification when a visitor creates an account.'),
+    '#title' => t('Require email verification when a visitor creates an account'),
     '#default_value' => $config->get('user_email_verification'),
-    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+    '#indentation' => 1,
+    '#description' => theme('item_list', array('items' => $help_items)),
+    // Only show this checkbox when accounts are allowed to be created by
+    // anonymous visitors.
+    '#states' => array(
+      'visible' => array(
+        array(
+          array(':input[name="user_register"]' => array('value' => USER_REGISTER_VISITORS)),
+          'or',
+          array(':input[name="user_register"]' => array('value' => USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)),
+        ),
+      ),
+    ),
   );
+
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
     '#title' => t('When an email address is used as username, require a matching email address.'),
     '#default_value' => $config->get('user_email_match'),
   );
+
   module_load_include('inc', 'user', 'user.pages');
   $form['registration_cancellation']['user_cancel_method'] = array(
     '#type' => 'item',
     '#title' => t('When cancelling a user account'),
-    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer user accounts'), '@permissions-url' => url('admin/config/people/permissions'))),
+    '#description' => t('Anyone with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer user accounts'), '@permissions-url' => url('admin/config/people/permissions', array(
+    'query' => array('search' => 'account'))))),
   );
   $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
   foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
@@ -653,7 +678,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
