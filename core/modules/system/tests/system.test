@@ -1074,7 +1074,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
    */
   function testCustomLogo() {
     $file_public_path = config_get('system.core', 'file_public_path');
-    
+
     // Specify a filesystem path to be used for the logo.
     $file = current($this->backdropGetTestFiles('image'));
     $file_relative = strtr($file->uri, array('public://' => $file_public_path . '/'));
@@ -1212,6 +1212,12 @@ class CustomLogoTestCase extends BackdropWebTestCase {
  * Tests site maintenance functionality.
  */
 class SiteMaintenanceTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $user;
+
   protected $admin_user;
   protected $profile = 'testing';
 
@@ -1309,7 +1315,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Verify that custom site offline message is not displayed on user/password.
     $this->backdropGet('user/password');
-    $this->assertText('Username or e-mail address', 'Anonymous users can access user/password');
+    $this->assertText('Username or email address', 'Anonymous users can access user/password');
 
     // Submit password reset form.
     $edit = array(
@@ -1344,6 +1350,12 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
  * Tests generic date and time handling capabilities of Backdrop.
  */
 class DateTimeFunctionalTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('locale'));
 
@@ -1536,6 +1548,17 @@ class PageTitleFiltering extends BackdropWebTestCase {
  * Test home page functionality and administration.
  */
 class FrontPageTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var string
+   */
+  protected $node_path;
+
   function setUp() {
     parent::setUp('system_test');
 
@@ -1575,7 +1598,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     // Make sure that the 3rd node is no longer on frontpage.
     $this->backdropGet('');
-    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
+    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting frontpage listing to 2 nodes.');
 
     // Change the home page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
@@ -1720,6 +1743,16 @@ class SystemMainContentFallback extends BackdropWebTestCase {
  */
 class SystemThemeFunctionalTest extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var Node
+   */
+  protected $node;
 
   function setUp() {
     parent::setUp(array('node', 'block'));
@@ -2371,6 +2404,17 @@ class ShutdownFunctionsTest extends BackdropWebTestCase {
  * Tests administrative overview pages.
  */
 class SystemAdminTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     // testAdminPages() requires Locale module.
     parent::setUp(array('locale'));
@@ -2457,6 +2501,12 @@ class SystemAdminTestCase extends BackdropWebTestCase {
  * Tests authorize.php and related hooks.
  */
 class SystemAuthorizeCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('system_test'));
 
@@ -2741,6 +2791,12 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
  * Test menu block settings.
  */
 class MenuBlockTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('menu');
 

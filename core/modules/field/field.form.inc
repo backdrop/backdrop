@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field forms management.

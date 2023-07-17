@@ -50,7 +50,7 @@ Backdrop.menu_update_parent_list = function () {
     success: function (options) {
       // Save key of last selected element.
       var selected = $('fieldset#edit-menu #edit-menu-parent :selected').val();
-      // Remove all exisiting options from dropdown.
+      // Remove all existing options from dropdown.
       var selectForm = $('fieldset#edit-menu #edit-menu-parent');
       selectForm.children().remove();
       // Add new options to dropdown.
