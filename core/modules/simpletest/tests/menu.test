@@ -562,7 +562,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
         2 => NULL,
         3 => NULL,
       ),
-      // Explicit loader arguments should not be overriden by parent.
+      // Explicit loader arguments should not be overridden by parent.
       'menu-test/arguments/%/%/explicit-arguments' => array(
         2 => array('menu_test_argument_load' => array()),
         3 => NULL,
@@ -665,7 +665,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     $this->assertMenuLinkParents($links, $expected_hierarchy);
 
     // Start over, and move child-1 under child-2, and check that all the
-    // childs of child-1 have been moved too.
+    // children of child-1 have been moved too.
     $links = $this->createLinkHierarchy($module);
     $links['child-1']['plid'] = $links['child-2']['mlid'];
     menu_link_save($links['child-1']);
@@ -738,7 +738,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     // menu routers.
     $this->testMenuLinkReparenting('system');
 
-    // Additionnaly, test reparenting based on path.
+    // Additionally, test reparenting based on path.
     $links = $this->createLinkHierarchy('system');
 
     // Move child-1-2 has a child of child-2, making the link hierarchy

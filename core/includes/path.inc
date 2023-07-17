@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions to handle paths in Backdrop, including URL aliasing.
@@ -312,7 +311,7 @@ function backdrop_match_path($path, $patterns) {
     $patterns_quoted = preg_quote($patterns, '/');
     $regexps[$patterns] = '/^(' . preg_replace($to_replace, $replacements, $patterns_quoted) . ')$/';
   }
-  return (bool)preg_match($regexps[$patterns], $path);
+  return (bool) preg_match($regexps[$patterns], (string) $path);
 }
 
 /**
