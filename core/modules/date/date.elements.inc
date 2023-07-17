@@ -354,7 +354,7 @@ function date_text_element_process($element, &$form_state, $form) {
 
   $element['#tree'] = TRUE;
   $element['#theme_wrappers'] = array('date_text');
-  $element['date']['#value'] = $element['#value']['date'];
+  $element['date']['#value'] = isset($element['#value']['date']) ? $element['#value']['date'] : '';
   $element['date']['#type'] = 'textfield';
   $element['date']['#weight'] = !empty($element['date']['#weight']) ? $element['date']['#weight'] : $element['#weight'];
   $element['date']['#attributes'] = array('class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += array('date-date') : array('date-date'));
