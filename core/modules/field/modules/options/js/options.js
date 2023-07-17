@@ -341,7 +341,7 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
   });
 
   // Do not allow the last item to be removed.
-  if ($rows.size() == 1) {
+  if ($rows.length == 1) {
     $rows.find('a.remove').css('display', 'none')
   }
 
@@ -356,7 +356,7 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
  */
 Backdrop.optionsElement.prototype.addOption = function(currentOption) {
   var self = this;
-  var windowHieght = $(document).height();
+  var windowHeight = $(document).height();
   var newOption = $(currentOption).clone()
     .find('input.option-key').val(self.keyType == 'numeric' ? self.nextNumericKey() : '').end()
     .find('input.option-value').val('').end()
@@ -366,8 +366,8 @@ Backdrop.optionsElement.prototype.addOption = function(currentOption) {
     .insertAfter(currentOption)
     .get(0);
 
-  // Scroll down to accomidate the new option.
-  $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHieght);
+  // Scroll down to accommodate the new option.
+  $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHeight);
 
   // Make the new option draggable.
   Backdrop.tableDrag[this.identifier].makeDraggable(newOption);
@@ -562,7 +562,7 @@ Backdrop.optionsElement.prototype.optionsToText = function() {
   var $rows = $('tbody tr', this.optionsElement);
   var output = '';
   var inGroup = false;
-  var rowCount = $rows.size();
+  var rowCount = $rows.length;
   var defaultValues = [];
 
   for (var rowIndex = 0; rowIndex < rowCount; rowIndex++) {

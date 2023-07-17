@@ -32,6 +32,12 @@
 .js .contextual-links-wrapper {
   display: block;
 }
+
+/** Prevents interference with dismiss option on notifications. **/ 
+.layout .l-messages {
+    padding-top: 1em;
+}
+
 .contextual-links-trigger {
   background: transparent url(../images/gear-select.png) no-repeat 2px 0;
   border: 1px solid transparent;

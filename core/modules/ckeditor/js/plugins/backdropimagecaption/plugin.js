@@ -58,7 +58,7 @@ CKEDITOR.plugins.add('backdropimagecaption', {
       // Override downcast(): ensure we *only* output <img>, but also ensure
       // we include the data-file-id, data-align, and data-caption attributes.
       widgetDefinition.downcast = function (element) {
-        // Find an image element in the one being downcasted (can be itself).
+        // Find an image element in the one being downcast (can be itself).
         var img = findElementByName(element, 'img');
         var caption = this.editables.caption;
         var captionHtml = caption && caption.getData();

@@ -246,9 +246,6 @@ function template_preprocess_node(&$variables) {
     }
   }
 
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
-
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
   if ($variables['promote']) {
