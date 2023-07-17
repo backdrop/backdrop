@@ -397,7 +397,7 @@ function system_theme_default() {
 }
 
 /**
- * Form builder; display theme configuration for entire site and individual themes.
+ * Form builder; display configuration for individual themes.
  *
  * @param $key
  *   A theme name.
@@ -627,8 +627,12 @@ function system_modules($form, $form_state = array()) {
         $requires_name = $files[$requires]->info['name'];
 
         // Disable this module if it is incompatible with the dependency's version.
-        $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
-        if ($incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
+        $version_string = FALSE;
+        // Make sure the version string of the dependency is available.
+        if (!empty($files[$requires]->info['version'])) {
+          $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
+        }
+        if ($version_string && $incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
             '@module' => $requires_name . ' ' . $incompatible_version,
             '@version' => $version_string,
@@ -786,6 +790,9 @@ function _system_modules_build_row($info, $extra) {
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
   $form['#required_by_distribution'] = $extra['required_by_distribution'];
+  if (!empty($info['project'])) {
+    $form['#project'] = $info['project'];
+  }
 
   // Check the compatibilities.
   $compatible = TRUE;
@@ -1039,7 +1046,7 @@ function system_modules_submit($form, &$form_state) {
     $parameter = $form_state['values']['search'];
     $form_state['redirect'] = array(
       'admin/modules',
-      array('query' => array('search' => $parameter))
+      array('query' => array('search' => $parameter)),
     );
   }
   else {
@@ -1290,9 +1297,9 @@ function system_site_information_settings($form, &$form_state) {
 
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail address'),
+    '#title' => t('Email address'),
     '#default_value' => $site_mail,
-    '#description' => t("The <em>From</em> address in automated e-mails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this e-mail being flagged as spam.)"),
+    '#description' => t("The <em>From</em> address in automated emails sent during registration and new password requests, and other notifications. (Use an address ending in your site's domain to help prevent this email being flagged as spam.)"),
     '#required' => TRUE,
   );
 
@@ -1383,7 +1390,8 @@ function system_site_information_settings_validate($form, &$form_state) {
   // Handle file uploads.
   $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
-  // Check for a new uploaded logo.
+  // Check for a new uploaded logo, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_logo_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1397,7 +1405,8 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for a new uploaded favicon.
+  // Check for a new uploaded favicon, create a temporary File entity for
+  // validation.
   $file = file_save_upload('site_favicon_upload', $validators);
   if (isset($file)) {
     // File upload was attempted.
@@ -1496,6 +1505,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   if ($form_state['values']['site_logo_path']) {
@@ -1519,6 +1530,8 @@ function system_site_information_settings_submit($form, &$form_state) {
     $filename = file_unmanaged_copy($file->uri);
     $form_state['values']['site_favicon_theme'] = 0;
     $form_state['values']['site_favicon_path'] = $filename;
+    // Delete the file entity record.
+    $file->delete();
   }
 
   // If the user entered a path relative to the system files directory for
@@ -1631,7 +1644,7 @@ function system_logging_settings($form, &$form_state) {
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_CRITICAL => t('Critical'),
       WATCHDOG_ERROR => t('Error'),
       WATCHDOG_WARNING => t('Warning'),
       WATCHDOG_NOTICE => t('Notice'),
@@ -1762,6 +1775,36 @@ function system_performance_settings($form, &$form_state) {
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $options = array(
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
+  );
+  $form['jquery_version'] = array(
+    '#type' => 'radios',
+    '#title' => t('jQuery version'),
+    '#default_value' => $config->get('jquery_version'),
+    '#options' => $options,
+  );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
 
   return system_settings_form($form);
 }
@@ -2285,7 +2328,7 @@ function system_run_cron() {
  * Menu callback: return information about PHP.
  */
 function system_php() {
-  phpinfo();
+  phpinfo(~(INFO_VARIABLES | INFO_ENVIRONMENT));
   backdrop_exit();
 }
 
@@ -2831,4 +2874,3 @@ function system_transliterate_ajax_access() {
   $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
-

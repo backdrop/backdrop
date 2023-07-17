@@ -234,7 +234,7 @@ function search_menu() {
     'file' => 'search.admin.inc',
   );
   $items['admin/config/search/settings/reindex'] = array(
-    'title' => 'Invalidate search index',
+    'title' => 'Rebuild search index',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_reindex_confirm'),
     'access arguments' => array('administer search'),
@@ -496,7 +496,7 @@ function search_simplify($text) {
   $text = preg_replace('/([' . PREG_CLASS_NUMBERS . ']+)[' . PREG_CLASS_PUNCTUATION . ']+(?=[' . PREG_CLASS_NUMBERS . '])/u', '\1', $text);
 
   // Multiple dot and dash groups are word boundaries and replaced with space.
-  // No need to use the unicode modifer here because 0-127 ASCII characters
+  // No need to use the unicode modifier here because 0-127 ASCII characters
   // can't match higher UTF-8 characters as the leftmost bit of those are 1.
   $text = preg_replace('/[.-]{2,}/', ' ', $text);
 
@@ -994,8 +994,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * @param $action
  *   Form action. Defaults to "search/$path", where $path is the search path
- *   associated with the module in its hook_search_info(). This will be
- *   run through url().
+ *   associated with the module in its hook_search_info(). This will be run
+ *   through url().
  * @param $keys
  *   The search string entered by the user, containing keywords for the search.
  * @param $module
@@ -1036,6 +1036,9 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   $form_state['action'] = $action;
   $form['module'] = array('#type' => 'value', '#value' => $module);
   $form['basic'] = array('#type' => 'container', '#attributes' => array('class' => array('container-inline')));
+
+  // This field is not required because it may be populated by the advanced
+  // search fields provided by other modules (such as node module).
   $form['basic']['keys'] = array(
     '#type' => 'search',
     '#title' => $prompt,
@@ -1059,13 +1062,15 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
  * @see search_box_form_submit()
  */
 function search_box($form, &$form_state, $form_id) {
+  // The #required property is not set here, so that the user is taken to the
+  // search page before any error is shown.
   $form[$form_id] = array(
     '#type' => 'search',
     '#title' => t('Search'),
     '#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => '',
-    '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+    '#attributes' => array('title' => t('Enter the keywords you wish to search for.')),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
@@ -1088,10 +1093,8 @@ function search_box_form_submit($form, &$form_state) {
 
   // Check to see if the form was submitted empty.
   // If it is empty, display an error message.
-  // (This method is used instead of setting #required to TRUE for this field
-  // because that results in a confusing error message.  It would say a plain
-  // "field is required" because the search keywords field has no title.
-  // The error message would also complain about a missing #title field.)
+  // This method is used instead of the #required property so that the user
+  // will be taken to the search page before the error is shown.
   if ($form_state['values']['search_block_form'] == '') {
     form_set_error('keys', t('Please enter some keywords.'));
   }
@@ -1418,4 +1421,94 @@ function search_config_info() {
     'group' => t('Configuration'),
   );
   return $prefixes;
+}
+
+/**
+ * Gets stats for total and remaining items to be indexed.
+ *
+ * @param array $modules
+ *  An array of module names whose index stats we are getting.
+ *
+ * @return array
+ *  An array with the following keys:
+ *  - remaining: The number of remaining items to be indexed.
+ *  - total: The total number of indexable items.
+ */
+function search_get_stats($modules = array()) {
+  if (empty($module)) {
+    $modules = config_get('search.settings', 'search_active_modules');
+  }
+  $remaining = 0;
+  $total = 0;
+  foreach ($modules as $module) {
+    if ($status = module_invoke($module, 'search_status')) {
+      $remaining += $status['remaining'];
+      $total += $status['total'];
+    }
+  }
+
+  return array(
+    'remaining' => $remaining,
+    'total' => $total,
+  );
+}
+
+/**
+ * Batch operation to rebuild the search index.
+ *
+ * @see search_reindex_confirm()
+ * @see search_reindex_confirm_submit()
+ */
+function search_reindex_batch($passes_needed, $search_active_modules, &$context) {
+  if (!isset($context['sandbox']['current_pass'])) {
+    $context['sandbox']['current_pass'] = 0;
+  }
+
+  // Invoke hook_update_index for all search active modules.
+  if ($context['sandbox']['current_pass'] < $passes_needed) {
+    // Register a shutdown function to ensure that search_total is up-to-date.
+    backdrop_register_shutdown_function('search_update_totals');
+    foreach ($search_active_modules as $module) {
+      module_invoke($module, 'update_index');
+    }
+    $context['sandbox']['current_pass']++;
+    $context['message'] = t('Now processing pass %pass of %needed', array('%pass' => $context['sandbox']['current_pass'], '%needed' => $passes_needed));
+    $context['finished'] = $context['sandbox']['current_pass'] / $passes_needed;
+  }
+}
+
+/**
+ * Batch 'finished' callback for rebuilding the search index.
+ *
+ * @see search_reindex_batch()
+ */
+function search_reindex_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $config = config('search.settings');
+    // Collect some stats
+    $remaining = 0;
+    $total = 0;
+    foreach ($config->get('search_active_modules') as $module) {
+      if ($status = module_invoke($module, 'search_status')) {
+        $remaining += $status['remaining'];
+        $total += $status['total'];
+      }
+    }
+    $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
+    $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+    $message = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
+    backdrop_set_message($message);
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    backdrop_set_message(
+      t('An error occurred while processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      )
+    );
+  }
 }
