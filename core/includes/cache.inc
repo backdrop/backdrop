@@ -165,8 +165,12 @@ function cache_flush($bin) {
  *   functionality.
  *
  * @see cache_flush()
+ *
+ * @deprecated since 1.24.0
  */
 function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
+  watchdog_deprecated_function('cache', __FUNCTION__);
+
   // Default value cache flush.
   if (!isset($cid) && !isset($bin)) {
     cache('layout_path')->flush();

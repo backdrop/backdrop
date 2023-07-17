@@ -382,7 +382,10 @@ function system_theme_default() {
       }
 
       // Clear caches after changing the theme.
-      cache_clear_all();
+      if (module_exists('layout')) {
+        cache_flush('layout_path');
+      }
+      cache_flush('page');
       if (user_access('flush caches')) {
         backdrop_set_message(t('All caches have been cleared.'));
       }
@@ -478,7 +481,10 @@ function system_theme_settings_submit($form, &$form_state) {
   }
   $config->save();
   backdrop_set_message(t('The configuration options have been saved.'));
-  cache_clear_all();
+  if (module_exists('layout')) {
+    cache_flush('layout_path');
+  }
+  cache_flush('page');
 }
 
 /**
