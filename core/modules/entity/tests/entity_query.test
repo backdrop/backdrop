@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Unit test file for the entity API.
@@ -9,6 +8,17 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $fields;
+
+  /**
+   * @var array
+   */
+  protected $field_names;
+
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
@@ -85,7 +95,6 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $instances[1]['bundle'] = $instances[1]['entity_type'] = 'test_entity_bundle';
     field_create_instance($instances[1]);
 
-    $this->instances = $instances;
     // Write entity base table if there is one.
     $entities = array();
 
@@ -1172,7 +1181,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], 'en', '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1180,7 +1189,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '<', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1188,7 +1197,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisfied).');
 
     // Test grouping with another field to ensure that grouping cache is reset
     // properly.
@@ -1237,7 +1246,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'test_entity_bundle_key');
     // Add a flag that will be caught by field_test_entity_query_alter().
-    $query->alterMyExecuteCallbackPlease = TRUE;
+    $query->addTag('alterMyExecuteCallbackPlease');
     $this->assertEntityFieldQuery($query, array(
       array('user', 1),
     ), 'executeCallback can override the query handler when set in a hook_entity_query_alter().');

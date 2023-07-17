@@ -6,6 +6,17 @@
 class Block extends LayoutHandler {
 
   /**
+   * The block disabled status indicator.
+   *
+   * Disabled blocks are not visible at the layout path, but remain on the
+   * layout block add page.
+   * The value is either BLOCK_ENABLED or BLOCK_DISABLED.
+   *
+   * @var integer
+   */
+  var $status;
+
+  /**
    * The module that provides this block.
    *
    * @var string
@@ -55,6 +66,14 @@ class Block extends LayoutHandler {
   var $contexts = array();
 
   /**
+   * The Layout's title a block is used in.
+   *
+   * Only used on the block usage report page.
+   * @var string
+   */
+  public $layout_title;
+
+  /**
    * Create a new Block object.
    *
    * @param string $plugin_name
@@ -86,10 +105,11 @@ class Block extends LayoutHandler {
       'contexts' => array(),
     );
 
-    // Initialize basics, module, delta, UUID, and childDelta.
+    // Initialize basics, module, delta, UUID, status, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
     $this->uuid = isset($data['uuid']) ? $data['uuid'] : NULL;
     $this->is_new = !$this->uuid;
+    $this->status = isset($data['status']) ? $data['status'] : BLOCK_ENABLED;
     $parts = explode(':', $this->plugin, 3);
     $this->childDelta = isset($parts[2]) ? $parts[2] : NULL;
 
@@ -183,7 +203,7 @@ class Block extends LayoutHandler {
     // If this is a child block, merge in its child-specific data.
     if ($this->childDelta) {
       $children_blocks = $this->getChildren();
-      $block_info = array_merge($block_info, $children_blocks[$this->childDelta]);
+      $block_info = isset($children_blocks) ? array_merge($block_info, $children_blocks[$this->childDelta]) : NULL;
     }
 
     return $block_info;
@@ -319,6 +339,7 @@ class Block extends LayoutHandler {
    */
   function toArray() {
     $array = array(
+      'status' => $this->status,
       'module' => $this->module,
       'delta' => $this->delta,
       'settings' => $this->settings,
@@ -400,7 +421,7 @@ class Block extends LayoutHandler {
    * all. An empty array means that a block may provide children, but that there
    * are none currently.
    *
-   * return array|NULL
+   * @return array|null
    */
   function getChildren() {
     return NULL;

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity API controller classes and interface.
@@ -79,7 +78,7 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    * @param bool|NULL $page
    *   (optional) If set will control if the entity is rendered: if TRUE
-   *   the entity will be rendered without its title, so that it can be embeded
+   *   the entity will be rendered without its title, so that it can be embedded
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
@@ -365,7 +364,11 @@ class DefaultEntityController implements EntityControllerInterface {
         $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
         if (!empty($queried_entities_by_id)) {
           foreach ($queried_entities_by_id as $id => $item) {
-            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            $bundle_name = !empty($item->bundle()) ? $item->bundle() : $this->entityType;
+            $bundle_cache = isset($this->entityInfo['bundles'][$bundle_name]['bundle cache']) ? $this->entityInfo['bundles'][$bundle_name]['bundle cache'] : TRUE;
+            if ($bundle_cache) {
+              cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            }
           }
         }
       }

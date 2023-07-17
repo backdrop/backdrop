@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Mock module for locale layer tests.
