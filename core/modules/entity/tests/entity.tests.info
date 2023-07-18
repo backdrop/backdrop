@@ -27,3 +27,9 @@ name = Entity loading
 description = Tests the entity_load() function.
 group = Entity API
 file = entity_crud.test
+
+[EntityAccessTestCase]
+name = Entity access checks
+description = Tests that the access returned by entity_access is the same as the individual access check.
+group = Entity API
+file = entity.test
