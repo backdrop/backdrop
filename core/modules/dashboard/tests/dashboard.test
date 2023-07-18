@@ -170,7 +170,7 @@ class DashboardTest extends BackdropWebTestCase {
     $this->assertText('0 Foo items', 'No Foo items found.');
 
     // Create a new admin user with Foo and 2 access.
-    $this->new_admin_user = $this->backdropCreateUser(array(
+    $new_admin_user = $this->backdropCreateUser(array(
       'access content',
       'access dashboard',
       'access administration pages',
@@ -181,7 +181,7 @@ class DashboardTest extends BackdropWebTestCase {
       'administer content types',
       'administer nodes',
     ));
-    $this->backdropLogin($this->new_admin_user);
+    $this->backdropLogin($new_admin_user);
 
     // After login, administrator is redirected to the Dashboard.
     $this->assertTitle(t('Dashboard | Backdrop CMS'), 'Page title is "Dashboard".');
@@ -258,7 +258,7 @@ class DashboardTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save configuration'));
 
     // Create a another new user.
-    $this->another_admin_user = $this->backdropCreateUser(array(
+    $another_admin_user = $this->backdropCreateUser(array(
       'access content',
       'access dashboard',
       'access administration pages',
@@ -266,7 +266,7 @@ class DashboardTest extends BackdropWebTestCase {
       'create test_content_type_2 content',
       'administer layouts',
     ));
-    $this->backdropLogin($this->another_admin_user);
+    $this->backdropLogin($another_admin_user);
     $this->assertNoTitle(t('Dashboard | Backdrop CMS'), 'Page title is "Dashboard".');
 
     // Check that the dashboard is not accessible once the layout is disabled.

@@ -243,6 +243,7 @@ function taxonomy_update_1001() {
       $vid = $vocabulary_data['vid'];
       $machine_name = $vocabulary_data['machine_name'];
       unset($vocabulary_data['vid']);
+      unset($vocabulary_data['module']);
 
       // Save the vocabulary as config.
       $config = config('taxonomy.vocabulary.'. $machine_name);
