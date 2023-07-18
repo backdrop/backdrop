@@ -143,6 +143,17 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
  * Tests the administrative functionality of the Filter module.
  */
 class FilterAdminTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -915,6 +926,12 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));

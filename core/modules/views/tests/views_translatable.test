@@ -14,6 +14,11 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   protected $strings;
 
   /**
+   * @var array
+   */
+  protected $string_keys;
+
+  /**
    * The views plugin definition. Override it if you test provides a plugin.
    */
   public function viewsPlugins() {
