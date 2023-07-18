@@ -30,6 +30,11 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
   protected $langcodes = array();
 
   /**
+   * @var array
+   */
+  protected $items;
+
+  /**
    * Verify that the items provided in the select list are usable as parents.
    *
    * @param array $current_options
