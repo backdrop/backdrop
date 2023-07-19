@@ -198,7 +198,7 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $stand_alone_rows,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
     '#empty' => t('No layout pages have been created yet.'),
     '#weight' => 1,
   );
