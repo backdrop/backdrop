@@ -41,12 +41,12 @@ function layout_list_page() {
   }
 
   if (!empty($layout_paths)) {
-  $page_callbacks = db_query('
-    SELECT path, page_callback
-    FROM {menu_router}
-    WHERE path IN (:paths)
-    ', array(':paths' => $layout_paths))
-    ->fetchAllKeyed();
+    $page_callbacks = db_query('
+      SELECT path, page_callback
+      FROM {menu_router}
+      WHERE path IN (:paths)
+      ', array(':paths' => $layout_paths))
+      ->fetchAllKeyed();
   }
   else {
     $page_callbacks = array();
@@ -74,17 +74,17 @@ function layout_list_page() {
     else {
       if (strpos($path, '%') === FALSE) {
          $path_link = t('Path: ') . l($path, $path);
-       }
-       else {
-         $path_link = t('System path: ') . check_plain($path);
-       }
+      }
+      else {
+        $path_link = t('System path: ') . check_plain($path);
+      }
 
-       $class = array();
-       if (!$page_callbacks[$path]) {
-         $class[] = 'missing-path';
-         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
-       }
-       $row[] = array('data' => $path_link, 'class' => $class);
+      $class = array();
+      if (!$page_callbacks[$path]) {
+        $class[] = 'missing-path';
+        $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
+      }
+      $row[] = array('data' => $path_link, 'class' => $class);
       // Empty columns are intentional.
       $row[] = '';
       $row[] = '';
@@ -99,7 +99,10 @@ function layout_list_page() {
     }
 
     if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
-      $stand_alone_rows[] = array('data' => $row, 'class' => array('layout-group'));
+      $stand_alone_rows[] = array(
+        'data' => $row,
+        'class' => array('layout-group'),
+      );
     }
     else {
       $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
@@ -195,16 +198,16 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $stand_alone_rows,
-     '#attributes' => array('class' =>   array('layout-list')),
-     '#empty' => t('No layout pages have been created yet.'),
-     '#weight' => 1,
-   );
-   $page['override'] = array(
+    '#attributes' => array('class' =>   array('layout-list')),
+    '#empty' => t('No layout pages have been created yet.'),
+    '#weight' => 1,
+  );
+  $page['override'] = array(
     '#type' => 'help',
     '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site.'),
     '#weight' => 2,
-   );
-   $page['override_table'] = array(
+  );
+  $page['override_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $override_rows,
@@ -2674,7 +2677,7 @@ function layout_removal_removes_page($layout) {
  * @param string $path
  *   The path of the layout (that was just deleted or disabled).
  * @param string $op
- *    One of 'delete' or 'disable'.
+ *   One of 'delete' or 'disable'.
  */
 function layout_warn_if_site_info_path($path, $op) {
   $site_config = config('system.core');
@@ -2692,15 +2695,15 @@ function layout_warn_if_site_info_path($path, $op) {
       break;
 
     case 'disable':
-        if ($path == $site_config->get('site_frontpage')) {
-          backdrop_set_message(t('You have disabled the page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-front-page', t('home page')), 'warning');
-        }
-        if ($path == $site_config->get('site_403')) {
-          backdrop_set_message(t('You have disabled the page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page')), 'warning');
-        }
-        if ($path == $site_config->get('site_404')) {
+      if ($path == $site_config->get('site_frontpage')) {
+        backdrop_set_message(t('You have disabled the page at %path that is used as the home page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-front-page', t('home page')), 'warning');
+      }
+      if ($path == $site_config->get('site_403')) {
+        backdrop_set_message(t('You have disabled the page at %path that is used as the default 403 (access denied) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('403 page')), 'warning');
+      }
+      if ($path == $site_config->get('site_404')) {
           backdrop_set_message(t('You have disabled the the page at %path that is used as the default 404 (not found) page of the site.', array('%path' => $path)) . ' ' . _layout_site_info_page_message('edit-error-page', t('404 page')), 'warning');
-        }
+      }
       break;
   }
 }
@@ -2719,7 +2722,10 @@ function layout_warn_if_site_info_path($path, $op) {
  */
 function _layout_site_info_page_message($id, $setting_type) {
   $url = url('admin/config/system/site-information') . '#' . $id;
-  return t('You should also change the @setting_type setting under <a href="!url">site information</a>.', array('@setting_type' => $setting_type, '!url' => $url));
+  return t('You should also change the @setting_type setting under <a href="!url">site information</a>.', array(
+    '@setting_type' => $setting_type,
+    '!url' => $url,
+  ));
 }
 
 /**
