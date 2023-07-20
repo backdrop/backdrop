@@ -2388,7 +2388,6 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
 
     // Test ordinary role-based selection.
-
     // Create a layout at a custom path.
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name;
@@ -2618,6 +2617,10 @@ class LayoutCloneTest extends BackdropWebTestCase {
  * Tests the upgrade path from block-based regions to layouts.
  */
 class LayoutUpgradePathTest extends UpgradePathTestCase {
+
+  /**
+   * Set up environment.
+   */
   public function setUp() {
     // Path to the database dump files.
     $this->databaseDumpFiles = array(
@@ -3491,6 +3494,9 @@ class LayoutPathTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
+  /**
+   * Set up environment.
+   */
   public function setUp() {
     parent::setUp(array('layout_test'));
 
@@ -3530,6 +3536,9 @@ class LayoutDeletionTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
+  /**
+   * Set up environment.
+   */
   public function setUp() {
     parent::setUp(array('layout_test'));
 
