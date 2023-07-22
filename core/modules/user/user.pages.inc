@@ -532,19 +532,19 @@ function user_cancel_methods() {
   $anonymous_name = $site_config->get('anonymous');
   $methods = array(
     'user_cancel_block' => array(
-      'title' => t('Disable the account and keep its content.'),
+      'title' => t('Disable the account and keep its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
     ),
     'user_cancel_block_unpublish' => array(
-      'title' => t('Disable the account and unpublish its content.'),
+      'title' => t('Disable the account and unpublish its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
     ),
     'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'title' => t('Delete the account and make its content belong to the %anonymous-name user', array('%anonymous-name' => $anonymous_name)),
       'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
     ),
     'user_cancel_delete' => array(
-      'title' => t('Delete the account and its content.'),
+      'title' => t('Delete the account and its content'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
       'access' => user_access('administer users'),
     ),
