@@ -398,7 +398,7 @@ function user_validate_name($name) {
 }
 
 /**
- * Validates an image uploaded by a user.
+ * Validates images uploaded via the user account form.
  *
  * @see user_account_form()
  */

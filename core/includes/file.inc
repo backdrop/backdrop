@@ -1577,26 +1577,33 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     }
   }
   else {
-    // No validator was provided, so add one using the default list.
-    // Build a default non-munged safe list for file_munge_filename().
-    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
-
-    $validators['file_validate_extensions'] = array();
-    $validators['file_validate_extensions'][0] = $extensions;
+    // Build a default non-munged safe extension list for file_munge_filename(),
+    // and conditionally add a validator, depending on whether a check for
+    // 'file_validate_is_image' has been added or not.
+    if (isset($validators['file_validate_is_image'])) {
+      $extensions = implode(' ', image_get_supported_extensions());
+      // No need to add a validator for extensions, as that happens for images
+      // in file_validate_is_image().
+    }
+    else {
+      $extensions = implode(' ', file_get_default_extensions());
+      // No validator was provided, so add one.
+      $validators['file_validate_extensions'] = array();
+      $validators['file_validate_extensions'][0] = $extensions;
+    }
   }
-
 
   if (!settings_get('allow_insecure_uploads', 0)) {
     if (!empty($extensions)) {
-      // Munge the filename to protect against possible malicious extension hiding
-      // within an unknown file type (ie: filename.html.foo).
+      // Munge the filename to protect against possible malicious extension
+      // hiding within an unknown file type (i.e.: filename.html.foo).
       $file->filename = file_munge_filename($file->filename, $extensions);
     }
 
     // Rename potentially executable files, to help prevent exploits (i.e. will
     // rename filename.php.foo and filename.php to filename.php_.foo_.txt and
-    // filename.php_.txt, respectively). Don't rename if 'allow_insecure_uploads'
-    // evaluates to TRUE.
+    // filename.php_.txt, respectively). Don't rename if
+    // 'allow_insecure_uploads' evaluates to TRUE.
     if (preg_match('/\.(php|phar|pl|py|cgi|asp|js)(\.|$)/i', $file->filename)) {
       // If the file will be rejected anyway due to a disallowed extension, it
       // should not be renamed; rather, we'll let file_validate_extensions()
@@ -1609,8 +1616,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
         }
         $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
         backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
-        // The .txt extension may not be in the allowed list of extensions. We have
-        // to add it here or else the file upload will fail.
+        // The .txt extension may not be in the allowed list of extensions. We
+        // have to add it here or else the file upload will fail.
         if (!empty($validators['file_validate_extensions'][0])) {
           $validators['file_validate_extensions'][0] .= ' txt';
         }
@@ -1703,6 +1710,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $upload_cache[$form_field_name] = $file;
     return $file;
   }
+}
+
+function file_get_default_extensions() {
+  $image_extensions = image_get_supported_extensions();
+  $file_extensions = array('txt', 'pdf', 'doc', 'docx', 'docm', 'xls', 'xlsx', 'xlsm', 'ppt', 'pps', 'pptx', 'pptm', 'odt', 'ods', 'odp');
+
+  return array_merge($image_extensions, $file_extensions);
 }
 
 /**
