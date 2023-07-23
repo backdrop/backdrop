@@ -673,7 +673,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
