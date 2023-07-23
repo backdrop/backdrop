@@ -161,7 +161,6 @@ function user_admin_settings($form, &$form_state) {
 
   module_load_include('inc', 'user', 'user.pages');
   $user_cancel_methods = user_cancel_methods();
-dpm($user_cancel_methods);
   foreach ($user_cancel_methods as $name => $method) {
     // Skip all account cancellation methods that have #access defined, as those
     // cannot be configured as default method.
@@ -169,7 +168,6 @@ dpm($user_cancel_methods);
       $options[$name] = $method['title'];
     }
   }
-dpm($options);
   $form['registration_cancellation']['user_cancel_method'] = array(
     '#type' => 'radios',
     '#title' => t('When cancelling a user account'),
