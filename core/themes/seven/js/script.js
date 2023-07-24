@@ -45,7 +45,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
             '<span class="expand-dropdown-tabs-label"></span>' +
           '</div>'
         );
-        $('.expand-dropdown-tabs-control', $tabsWrapper).click(function(){
+        $('.expand-dropdown-tabs-control', $tabsWrapper).on('click', function(){
           $tabsWrapper.toggleClass('expand-dropdown-tabs');
           $(this).toggleClass('js-active');
           // If there's not enough room for mobile tabs.
@@ -273,7 +273,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     }
 
     // If they click outside of the responsive tabs, shut them
-    $('html').click(function(e){
+    $('html').on('click', function(e){
       var $target = $(e.target);
       if (responsiveTabs && !$target.is('.responsive-tabs-processed') && $target.parents('.responsive-tabs-processed').length < 1) {
         closeTabsDropdown();

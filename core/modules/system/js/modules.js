@@ -17,7 +17,7 @@ Backdrop.behaviors.moduleFilter = {
     $form.find('.requirements').hide();
 
     // Toggle the requirements info.
-    $('a.requirements-toggle').click(function(e) {
+    $('a.requirements-toggle').on('click', function(e) {
       var $requirements = $(this).closest('td').find('.requirements').toggle();
       if ($requirements.is(':visible')) {
         $(this).text(Backdrop.t('less')).append('<span class="arrow close"></span>');
@@ -102,7 +102,7 @@ Backdrop.behaviors.moduleFilter = {
       $fieldsets = $form.find('fieldset');
 
       // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterModuleList);
+      $input.trigger('focus').on('keyup', filterModuleList);
       $input.triggerHandler('keyup');
 
       $resetLink.on('click', resetModuleList);
