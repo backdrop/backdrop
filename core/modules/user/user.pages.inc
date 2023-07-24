@@ -464,6 +464,12 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
       '#default_value' => $default_user_cancel_method,
     );
   }
+  else {
+    // If the user performing the action is not allowed to select a cancellation
+    // method, store the default cancellation method as a form value so that it
+    // can be used later in user_cancel_confirm_form_submit().
+    $form['user_cancel_method'] = array('#type' => 'value', '#value' => $default_user_cancel_method);
+  }
 
   // Allow user administrators to skip the account cancellation confirmation
   // mail (by default), as long as they do not attempt to cancel their own
