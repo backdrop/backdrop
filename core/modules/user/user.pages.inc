@@ -439,7 +439,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   }
 
   // Prepare the description of the confirmation form. If the user is not
-  // allowed to select an account cancellation method, add if a 'description'
+  // allowed to select an account cancellation method, and if a 'description'
   // text has been provided for whichever method has been set as the default
   // cancellation method, then that text will be used as an explanation of
   // what will happen to the account and its content. See user_cancel_methods()
