@@ -116,7 +116,7 @@ states.Dependent.prototype = {
         this.values[selector][state.name] = null;
 
         // Monitor state changes of the specified state for this dependee.
-        $(selector).bind('state:' + state, {selector: selector, state: state}, stateEventHandler);
+        $(selector).on('state:' + state, {selector: selector, state: state}, stateEventHandler);
 
         // Make sure the event we just bound ourselves to is actually fired.
         new states.Trigger({ selector: selector, state: state });
@@ -204,7 +204,7 @@ states.Dependent.prototype = {
    */
   verifyConstraints: function(constraints, selector) {
     var result;
-    if ($.isArray(constraints)) {
+    if (Array.isArray(constraints)) {
       // This constraint is an array (OR or XOR).
       var hasXor = $.inArray('xor', constraints) === -1;
       for (var i = 0, len = constraints.length; i < len; i++) {
@@ -346,7 +346,7 @@ states.Trigger.prototype = {
     var oldValue = valueFn.call(this.element);
 
     // Attach the event callback.
-    this.element.bind(event, $.proxy(function (e) {
+    this.element.on(event, $.proxy(function (e) {
       var value = valueFn.call(this.element, e);
       // Only trigger the event if the value has actually changed.
       if (oldValue !== value) {
@@ -496,7 +496,7 @@ states.State.prototype = {
  * can override these state change handlers for particular parts of a page.
  */
 
-$(document).bind('state:disabled', function(e) {
+$(document).on('state:disabled', function(e) {
   // Only act when this change was triggered by a dependency and not by the
   // element monitoring itself.
   if (e.trigger) {
@@ -510,7 +510,7 @@ $(document).bind('state:disabled', function(e) {
   }
 });
 
-$(document).bind('state:required', function(e) {
+$(document).on('state:required', function(e) {
   if (e.trigger) {
     if (e.value) {
       var $label = $(e.target).closest('.form-item, .form-wrapper').find('label');
@@ -525,22 +525,22 @@ $(document).bind('state:required', function(e) {
   }
 });
 
-$(document).bind('state:visible', function(e) {
+$(document).on('state:visible', function(e) {
   if (e.trigger) {
     $(e.target).closest('.form-item, .form-submit, .form-wrapper').toggle(e.value);
   }
 });
 
-$(document).bind('state:checked', function(e) {
+$(document).on('state:checked', function(e) {
   if (e.trigger) {
     $(e.target).prop('checked', e.value);
   }
 });
 
-$(document).bind('state:collapsed', function(e) {
+$(document).on('state:collapsed', function(e) {
   if (e.trigger) {
     if ($(e.target).is('.collapsed') !== e.value) {
-      $('> legend a', e.target).click();
+      $('> legend a', e.target).trigger('click');
     }
   }
 });
