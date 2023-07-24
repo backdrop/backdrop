@@ -447,29 +447,24 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   $description = !$can_select_method && isset($user_cancel_methods[$default_user_cancel_method]['description']) ? $user_cancel_methods[$default_user_cancel_method]['description'] . ' ' : '';
   $description .= t('This action cannot be undone.');
 
-  // Display account cancellation method selection, if allowed.
-  if ($can_select_method) {
-    foreach ($user_cancel_methods as $name => $method) {
-      // Exclude any account cancellation method(s) that the current user does
-      // not have permission to use.
-      $user_has_access = isset($method['access']) && $method['access'];
-      if (!isset($method['access']) || $user_has_access) {
-        $options[$name] = $method['title'];
-      }
+  // Prepare the account cancellation method options.
+  foreach ($user_cancel_methods as $name => $method) {
+    // Include only account cancellation method(s) that either have no explicit
+    // '#access' specified, or that the current user has the necessary
+    // permission(s) required to use.
+    $method_not_allowed = isset($method['access']) && $method['access'] == FALSE;
+    if (!$method_not_allowed) {
+      $options[$name] = $method['title'];
     }
-    $form['user_cancel_method'] = array(
-      '#type' => 'radios',
-      '#title' => $user_cancel_method_title,
-      '#options' => $options,
-      '#default_value' => $default_user_cancel_method,
-    );
   }
-  else {
-    // If the user performing the action is not allowed to select a cancellation
-    // method, store the default cancellation method as a form value so that it
-    // can be used later in user_cancel_confirm_form_submit().
-    $form['user_cancel_method'] = array('#type' => 'value', '#value' => $default_user_cancel_method);
-  }
+  $form['user_cancel_method'] = array(
+    '#type' => 'radios',
+    '#title' => $user_cancel_method_title,
+    '#options' => $options,
+    '#default_value' => $default_user_cancel_method,
+    // Only show the account cancellation method options if allowed.
+    '#access' => $can_select_method,
+  );
 
   // Allow user administrators to skip the account cancellation confirmation
   // mail (by default), as long as they do not attempt to cancel their own
