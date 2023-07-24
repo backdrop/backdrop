@@ -165,6 +165,7 @@ function dashboard_layout_context_info() {
     'menu paths' => array(
       'admin/dashboard',
     ),
+    'path placeholder' => NULL,
   );
   return $info;
 }
