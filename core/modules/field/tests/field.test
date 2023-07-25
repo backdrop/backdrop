@@ -3593,6 +3593,36 @@ class FieldGetValueTestCase extends FieldTestCase {
   protected $admin_user;
   protected $node;
 
+  /**
+   * @var string
+   */
+  protected $test_field_name;
+
+  /**
+   * @var string
+   */
+  protected $test_email_field_name;
+
+  /**
+   * @var int
+   */
+  protected $value1;
+
+  /**
+   * @var int
+   */
+  protected $value2;
+
+  /**
+   * @var string
+   */
+  protected $value_email1;
+
+  /**
+   * @var string
+   */
+  protected $value_email2;
+
   function setUp() {
     parent::setUp(array('node', 'field', 'field_test', 'email'));
 
@@ -3705,6 +3735,11 @@ class FieldTokenTestCase extends FieldTestCase {
   protected $test_date_field_name;
   protected $admin_user;
   protected $node;
+
+  /**
+   * @var object
+   */
+  protected $content_type;
 
   function setUp() {
     parent::setUp(array('node', 'field', 'field_ui', 'field_test', 'date', 'path'));

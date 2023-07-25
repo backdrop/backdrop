@@ -8,6 +8,12 @@
  * Unit tests for the module API.
  */
 class ModuleUnitTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $user;
+
   /**
    * The basic functionality of module_list().
    */
@@ -267,6 +273,12 @@ class ModuleInstallTestCase extends BackdropWebTestCase {
  * Unit tests for module uninstallation and related hooks.
  */
 class ModuleUninstallTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('module_test', 'user');
   }
