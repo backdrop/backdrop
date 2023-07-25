@@ -704,16 +704,11 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
           $module_label = $modules[$project['name']]->info['name'];
           $module_version = $modules[$project['name']]->info['version'];
           if ($dependency_check) {
-            $module_label = array(
-              '#type' => 'head_tag',
-              '#tag' => 'label',
-              '#value' => $module_label,
-              '#attributes' => array(
-                'for' => 'edit-modules-' . backdrop_html_class($modules[$project['name']]->name),
-              ),
-            );
+            $label_for_attribute = backdrop_html_class('edit-modules-' . $modules[$project['name']]->name);
+            $module_label = '<label for="' . $label_for_attribute . '">' . $module_label . '</label>';
+
             $options[$project['name']] = array(
-              array('data' => backdrop_render($module_label)),
+              array('data' => $module_label),
               array('data' => $module_version),
               array('data' => implode(', ', $dependencies)),
             );
@@ -755,8 +750,6 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       '#header' => $headers,
       '#options' => $all_options,
       '#empty' => t('No new modules installed.'),
-      '#multiple' => TRUE,
-      '#js_select' => TRUE,
       '#weight' => 1,
     );
 
@@ -797,6 +790,17 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       backdrop_set_message(t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'), 'warning');
     }
   }
+
+$form['table'] = array(
+  '#type' => 'tableselect',
+  '#header' => $headers,
+  '#options' => $all_options,
+  // '#js_select' => FALSE,
+);
+foreach ($all_options as $key => $value) {
+  $form['table'][$key]['#disabled'] = TRUE;
+}
+
 
   return $form;
 }
