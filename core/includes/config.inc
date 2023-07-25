@@ -1320,6 +1320,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     // Bootstrap the database if it is not yet available.
     if (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
       require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
+      backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
     }
   }
 
