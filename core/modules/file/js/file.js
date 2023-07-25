@@ -27,8 +27,8 @@ Backdrop.behaviors.fileUploadChange = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').on('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').on('mousedown', Backdrop.file.progressBar);
   }
 };
 
@@ -37,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 

@@ -3078,6 +3078,11 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
+  /**
+   * @var User
+   */
+  protected $no_flex_user;
+
   function setUp() {
     parent::setUp('layout', 'layout_test');
 

@@ -624,6 +624,12 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   /**
    * Attempt to cancel account without permission.
    */
@@ -1684,6 +1690,16 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
 class UserAutocompleteTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $unprivileged_user;
+
+  /**
+   * @var User
+   */
+  protected $privileged_user;
+
   function setUp() {
     parent::setUp();
 
@@ -2124,6 +2140,27 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var object
+   */
+  protected $full_html_format;
+
+  /**
+   * @var object
+   */
+  protected $filtered_html_format;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('comment');
 
@@ -2260,6 +2297,11 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
  */
 class UserRoleAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function setUp() {
     parent::setUp();
@@ -2695,6 +2737,16 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
  */
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $account;
+
+  /**
+   * @var AnonymousUser
+   */
+  protected $anonymous;
 
   function setUp() {
     parent::setUp();
