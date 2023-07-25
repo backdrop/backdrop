@@ -7,7 +7,6 @@
 /**
  * Basic definition for many views objects.
  */
-#[\AllowDynamicProperties]
 class views_object {
   /**
    * Except for displays, options for the object will be held here.

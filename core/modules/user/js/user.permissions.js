@@ -54,7 +54,7 @@ Backdrop.behaviors.permissionsFilter = {
     }
 
     if ($form.length) {
-      $input.trigger('focus').on('keyup', filterPermissionsList);
+      $input.focus().on('keyup', filterPermissionsList);
       $input.triggerHandler('keyup');
       $resetLink.on('click', resetPermissionsList);
     }

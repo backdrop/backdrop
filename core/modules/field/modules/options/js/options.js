@@ -62,27 +62,27 @@ Backdrop.optionsElement = function(element) {
   }
 
   // Enable add item link.
-  $(this.optionAddElement).find('a').on('click', function() {
+  $(this.optionAddElement).find('a').click(function() {
     var newOption = self.addOption($('table tr:last', self.optionsElement).get(0));
-    $(newOption).find('input[type=text]:visible:first').trigger('focus');
+    $(newOption).find('input[type=text]:visible:first').focus();
     return false;
   });
 
   // Enable the toggle action for manual entry of options.
-  $(this.optionsToggleElement).find('a').on('click', function() {
+  $(this.optionsToggleElement).find('a').click(function() {
     self.toggleMode();
     return false;
   });
 
   // Enable the remove default link.
-  $(this.removeDefaultElement).find('a').on('click', function() {
+  $(this.removeDefaultElement).find('a').click(function() {
     $(self.element).find('input.option-default').prop('checked', false).trigger('change');
     return false;
   });
 
   // Add a handler for key type changes.
   if (this.keyTypeToggle) {
-    $(this.keyTypeToggle).on('click', function() {
+    $(this.keyTypeToggle).click(function() {
       var checked = $(this).prop('checked');
       // Before switching the key type, ensure we're not destroying user keys.
       if (!checked) {
@@ -176,26 +176,26 @@ Backdrop.optionsElement.prototype.updateWidgetElements = function() {
   }
 
   // Enable button for adding options.
-  $('a.add', this.optionsElement).on('click', function() {
+  $('a.add', this.optionsElement).click(function() {
     var newOption = self.addOption($(this).parents('tr:first').get(0));
-    $(newOption).find('input[type=text]:visible:first').trigger('focus');
+    $(newOption).find('input[type=text]:visible:first').focus();
     return false;
   });
 
   // Enable button for removing options.
-  $('a.remove', this.optionsElement).on('click', function() {
+  $('a.remove', this.optionsElement).click(function() {
     self.removeOption($(this).parents('tr:first').get(0));
     return false;
   });
 
   // Add the same update action to all textfields and radios.
-  $('input', this.optionsElement).on('change', function() {
+  $('input', this.optionsElement).change(function() {
     self.updateOptionElements();
     self.updateManualElements();
   });
 
   // Add a delayed update to textfields.
-  $('input.option-value', this.optionsElement).on('keyup', function(e) {
+  $('input.option-value', this.optionsElement).keyup(function(e) {
     self.pendingUpdate(e);
   });
 
@@ -280,7 +280,7 @@ Backdrop.optionsElement.prototype.updateManualElements = function() {
     }
   }
 
-  $(this.manualOptionsElement).trigger('change');
+  $(this.manualOptionsElement).change();
 }
 
 /**
@@ -373,26 +373,26 @@ Backdrop.optionsElement.prototype.addOption = function(currentOption) {
   Backdrop.tableDrag[this.identifier].makeDraggable(newOption);
 
   // Enable button for adding options.
-  $('a.add', newOption).on('click', function() {
+  $('a.add', newOption).click(function() {
     var newOption = self.addOption($(this).parents('tr:first').get(0));
     $(newOption).find('input[type=text]:visible:first').focus();
     return false;
   });
 
   // Enable buttons for removing options.
-  $('a.remove', newOption).on('click', function() {
+  $('a.remove', newOption).click(function() {
     self.removeOption(newOption);
     return false;
   });
 
   // Add the update action to all textfields and radios.
-  $('input', newOption).on('change', function() {
+  $('input', newOption).change(function() {
     self.updateOptionElements();
     self.updateManualElements();
   });
 
   // Add a delayed update to textfields.
-  $('input.option-value', newOption).on('keyup', function(e) {
+  $('input.option-value', newOption).keyup(function(e) {
     self.pendingUpdate(e);
   });
 
@@ -824,7 +824,7 @@ Backdrop.behaviors.optionsElementFieldUI = {};
 Backdrop.behaviors.optionsElementFieldUI.attach = function(context) {
   var $cardinalityField = $(context).find('#edit-field-cardinality');
   if ($cardinalityField.length) {
-    $cardinalityField.on('change', function() {
+    $cardinalityField.change(function() {
       var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
       if (Backdrop.optionElements[optionsElementId]) {
         Backdrop.optionElements[optionsElementId].setMultiple(this.value == -1);
@@ -833,7 +833,7 @@ Backdrop.behaviors.optionsElementFieldUI.attach = function(context) {
   }
   var $cardinalityFieldNumber = $(context).find('#edit-field-cardinality-number');
   if ($cardinalityFieldNumber.length && $cardinalityField.length && $cardinalityField.val() != -1) {
-    $cardinalityFieldNumber.on('change', function() {
+    $cardinalityFieldNumber.change(function() {
       var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
       if (Backdrop.optionElements[optionsElementId]) {
         Backdrop.optionElements[optionsElementId].setMultiple(this.value != 1);

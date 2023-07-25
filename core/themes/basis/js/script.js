@@ -6,7 +6,7 @@ Backdrop.behaviors.toggles = {
   attach: function(context, settings) {
     var $toggles = $(context).find('[data-toggle]').once('toggle');
 
-    $toggles.on('click', function(){
+    $toggles.click(function(){
       var $this = $(this);
       var $target = $('[data-toggleable="' + $this.attr('data-toggle') + '"]');
       $target.toggleClass('js-toggled');

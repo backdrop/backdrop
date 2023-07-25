@@ -578,11 +578,7 @@ function _redirect_extract_url_options(&$element, &$form_state) {
  */
 function redirect_edit_form_validate($form, &$form_state) {
   form_state_values_clean($form_state);
-  $values = $form_state['values'];
-  // Get rid of form values not appropriate for Redirect creation.
-  unset($values['override']);
-  unset($values['delete']);
-  $redirect = new Redirect($values);
+  $redirect = new Redirect($form_state['values']);
 
   if (empty($form_state['values']['override'])) {
     if ($existing = redirect_load_by_source($redirect->source, $redirect->langcode)) {

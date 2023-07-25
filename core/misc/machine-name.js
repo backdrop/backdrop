@@ -16,9 +16,9 @@ Backdrop.behaviors.machineName = {
        var data = e.data;
        e.preventDefault();
        data.$wrapper.show();
-       data.$target.trigger('focus');
+       data.$target.focus();
        data.$suffix.hide();
-       data.$source.off('.machineName');
+       data.$source.unbind('.machineName');
      }
 
      function machineNameHandler(e) {
@@ -126,16 +126,16 @@ Backdrop.behaviors.machineName = {
       }
 
       // If it is editable, append an edit link.
-      var $link = $('<span class="admin-link"><a href="#">' + Backdrop.t('Edit') + '</a></span>').on('click', eventData, clickEditHandler);
+      var $link = $('<span class="admin-link"><a href="#">' + Backdrop.t('Edit') + '</a></span>').bind('click', eventData, clickEditHandler);
       $suffix.append(' ').append($link);
 
       // Preview the machine name in realtime when the human-readable name
       // changes, but only if there is no machine name yet; i.e., only upon
       // initial creation, not when editing.
       if ($target.val() === '') {
-        $source.on('keyup.machineName change.machineName', eventData, machineNameHandler)
+        $source.bind('keyup.machineName change.machineName', eventData, machineNameHandler)
         // Initialize machine name preview.
-        .trigger('keyup');
+        .keyup();
       }
     });
   },

@@ -639,7 +639,6 @@ class views_handler extends views_object {
  *            queries.
  *
  */
-#[\AllowDynamicProperties]
 class views_many_to_one_helper {
   /**
    * Contains possible existing placeholders used by the query.
@@ -1000,7 +999,6 @@ class views_many_to_one_helper {
  *   - - numeric: If true, the value will not be surrounded in quotes.
  *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
-#[\AllowDynamicProperties]
 class views_join {
   var $table = NULL;
   var $left_table = NULL;

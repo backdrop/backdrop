@@ -343,6 +343,8 @@ function locale_update_1004() {
 
   $config->save();
 
+  state_set('locale_translation_plurals', update_variable_get('locale_translation_plurals', array()));
+
   // Moved to config:
   update_variable_del('locale_language_negotiation_url_type');
   update_variable_del('locale_language_providers_weight_language');
@@ -356,6 +358,7 @@ function locale_update_1004() {
   update_variable_del('locale_cache_strings');
 
   // Moved to state:
+  update_variable_del('locale_translation_plurals');
   update_variable_del('locale_translation_javascript');
 }
 

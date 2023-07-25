@@ -796,11 +796,6 @@ class TokenUserTestCase extends TokenTestHelper {
 
 class TokenEntityTestCase extends TokenTestHelper {
 
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocab;
-
   public function setUp($modules = array()) {
     $modules[] = 'taxonomy';
     parent::setUp($modules);

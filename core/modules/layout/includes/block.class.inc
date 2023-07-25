@@ -66,14 +66,6 @@ class Block extends LayoutHandler {
   var $contexts = array();
 
   /**
-   * The Layout's title a block is used in.
-   *
-   * Only used on the block usage report page.
-   * @var string
-   */
-  public $layout_title;
-
-  /**
    * Create a new Block object.
    *
    * @param string $plugin_name

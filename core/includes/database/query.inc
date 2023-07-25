@@ -1284,13 +1284,6 @@ class MergeQuery extends Query implements QueryConditionInterface {
   protected $table;
 
   /**
-   * The condition object for this query.
-   *
-   * @var DatabaseCondition
-   */
-  protected $condition;
-
-  /**
    * An array of fields on which to insert.
    *
    * @var array

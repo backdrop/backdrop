@@ -35,11 +35,11 @@ Backdrop.behaviors.menuLinkAutomaticTitle = {
         $link_title.data('menuLinkAutomaticTitleOverridden', true);
       }
       // Whenever the value is changed manually, disable this behavior.
-      $link_title.on('keyup', function () {
+      $link_title.keyup(function () {
         $link_title.data('menuLinkAutomaticTitleOverridden', true);
       });
       // Global trigger on checkbox (do not fill-in a value when disabled).
-      $checkbox.on('change', function () {
+      $checkbox.change(function () {
         if ($checkbox.is(':checked')) {
           if (!$link_title.data('menuLinkAutomaticTitleOverridden')) {
             $link_title.val($title.val());
@@ -53,7 +53,7 @@ Backdrop.behaviors.menuLinkAutomaticTitle = {
         $checkbox.trigger('formUpdated');
       });
       // Take over any title change.
-      $title.on('keyup', function () {
+      $title.keyup(function () {
         if (!$link_title.data('menuLinkAutomaticTitleOverridden') && $checkbox.is(':checked')) {
           $link_title.val($title.val());
           $link_title.val($title.val()).trigger('formUpdated');

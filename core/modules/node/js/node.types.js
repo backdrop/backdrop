@@ -15,7 +15,7 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-workflow').backdropSetSummary(function() {
       var vals = [];
       var defaultStatus = $context.find('input[name="status_default"]:checked').parent().find('label').text();
-      vals.push(Backdrop.checkPlain(defaultStatus.trim()));
+      vals.push(Backdrop.checkPlain($.trim(defaultStatus)));
       if ($context.find('input[name="sticky_default"]:checked').length) {
         vals.push(Backdrop.t('Sticky'));
       }
@@ -29,7 +29,7 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-multilingual').backdropSetSummary(function() {
       var vals = [];
       var multilingualSupport = $context.find('input[name="language"]:checked').parent().find('label').text();
-      vals.push(Backdrop.checkPlain(multilingualSupport.trim()));
+      vals.push(Backdrop.checkPlain($.trim(multilingualSupport)));
       return vals.join(', ');
     });
 

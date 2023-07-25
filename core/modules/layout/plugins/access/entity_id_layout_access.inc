@@ -4,17 +4,6 @@
  * Plugin to provide access control based upon entity ID.
  */
 class EntityIDLayoutAccess extends LayoutAccessNegatable {
-
-  /**
-   * @var string
-   */
-  protected $entity_type;
-
-  /**
-   * @var array
-   */
-  protected $entity_info;
-
   /**
    * Constructor for a Layout access rule.
    */

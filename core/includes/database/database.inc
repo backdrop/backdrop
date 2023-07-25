@@ -737,12 +737,12 @@ abstract class DatabaseConnection {
       if ($options['throw_exception']) {
         // Add additional debug information.
         if ($query instanceof DatabaseStatementInterface) {
-          $e->errorInfo['query_string'] = $stmt->getQueryString();
+          $e->query_string = $stmt->getQueryString();
         }
         else {
-          $e->errorInfo['query_string'] = $query;
+          $e->query_string = $query;
         }
-        $e->errorInfo['args'] = $args;
+        $e->args = $args;
         throw $e;
       }
       return NULL;

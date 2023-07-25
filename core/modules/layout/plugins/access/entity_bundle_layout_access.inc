@@ -4,12 +4,6 @@
  * Plugin to provide access control based upon entity bundle.
  */
 class EntityBundleLayoutAccess extends LayoutAccess {
-
-  /**
-   * @var string
-   */
-  protected $entity_type;
-
   /**
    * Constructor for a Layout access rule.
    */

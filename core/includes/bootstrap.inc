@@ -3041,6 +3041,9 @@ function _backdrop_bootstrap_configuration() {
 
   // Bootstrap the database if it is needed but not yet available.
   $config_storage = config_get_config_storage('active');
+  if (is_a($config_storage, 'ConfigDatabaseStorage') && (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE)) {
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+  }
 
   // Check that the config directory is not empty.
   if (!defined('MAINTENANCE_MODE') && (!empty($config_storage))) {

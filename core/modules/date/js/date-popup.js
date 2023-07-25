@@ -12,7 +12,7 @@
         bindFocusHandler(this, 'timeentry', 'timeEntry');
       });
       for (var id in Backdrop.settings.datePopup) {
-        $('#'+ id).on('focus', Backdrop.settings.datePopup[id], makeFocusHandler);
+        $('#'+ id).bind('focus', Backdrop.settings.datePopup[id], makeFocusHandler);
       }
     }
   };
@@ -36,7 +36,7 @@
    */
   function bindFocusHandler(element, data_attribute, method) {
     var $element = $(element);
-    $element.on('focus', function() {
+    $element.bind('focus', function() {
       if (!$element.hasClass('date-popup-init')) {
         $element[method]($element.data(data_attribute)).addClass('date-popup-init').trigger('focus');
       }

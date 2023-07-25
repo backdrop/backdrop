@@ -16,7 +16,7 @@ Backdrop.behaviors.contextualLinks = {
       var $wrapper = $(this);
       var $region = $wrapper.closest('.contextual-links-region');
       var $links = $wrapper.find('ul.contextual-links');
-      var $trigger = $('<a class="contextual-links-trigger" href="#" />').text(Backdrop.t('Configure')).on('click',
+      var $trigger = $('<a class="contextual-links-trigger" href="#" />').text(Backdrop.t('Configure')).click(
         function () {
           $links.stop(true, true).slideToggle(100);
           $wrapper.toggleClass('contextual-links-active');
@@ -24,13 +24,13 @@ Backdrop.behaviors.contextualLinks = {
         }
       );
       // Attach hover behavior to trigger and ul.contextual-links.
-      $trigger.add($links).on('hover',
+      $trigger.add($links).hover(
         function () { $region.addClass('contextual-links-region-active'); },
         function () { $region.removeClass('contextual-links-region-active'); }
       );
       // Hide the contextual links when user clicks a link or rolls out of the .contextual-links-region.
-      $region.on('mouseleave click', Backdrop.contextualLinks.mouseleave);
-      $region.on('hover',
+      $region.bind('mouseleave click', Backdrop.contextualLinks.mouseleave);
+      $region.hover(
         function() { $trigger.addClass('contextual-links-trigger-active'); },
         function() { $trigger.removeClass('contextual-links-trigger-active'); }
       );

@@ -69,8 +69,8 @@ Backdrop.behaviors.collapse = {
 
       var summary = $('<span class="summary"></span>');
       $fieldset.
-        on('summaryUpdated', function () {
-          var text = $fieldset.backdropGetSummary();
+        bind('summaryUpdated', function () {
+          var text = $.trim($fieldset.backdropGetSummary());
           summary.html(text ? text : '');
         })
         .trigger('summaryUpdated');
@@ -88,7 +88,7 @@ Backdrop.behaviors.collapse = {
       var $link = $('<a class="fieldset-title" href="#"></a>')
         .prepend($legend.contents())
         .appendTo($legend)
-        .on('click', function () {
+        .click(function () {
           var fieldset = $fieldset.get(0);
           // Don't animate multiple times.
           if (!fieldset.animating) {

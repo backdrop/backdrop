@@ -2739,11 +2739,6 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
 class CommonFormatDateTestCase extends BackdropWebTestCase {
 
   /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
    * Arbitrary langcode for a custom language.
    */
   const LANGCODE = 'xx';

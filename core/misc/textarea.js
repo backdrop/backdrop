@@ -5,14 +5,14 @@ Backdrop.behaviors.textarea = {
     $('.form-textarea-wrapper.resizable', context).once('textarea', function () {
       var staticOffset = null;
       var textarea = $(this).addClass('resizable-textarea').find('textarea');
-      var grippie = $('<div class="grippie"></div>').on('mousedown', startDrag);
+      var grippie = $('<div class="grippie"></div>').mousedown(startDrag);
 
       grippie.insertAfter(textarea);
 
       function startDrag(e) {
         staticOffset = textarea.height() - e.pageY;
         textarea.css('opacity', 0.25);
-        $(document).on('mousemove', performDrag).on('mouseup', endDrag);
+        $(document).mousemove(performDrag).mouseup(endDrag);
         return false;
       }
 

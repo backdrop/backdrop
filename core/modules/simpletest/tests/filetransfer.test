@@ -7,11 +7,6 @@ class FileTransferTest extends BackdropWebTestCase {
   protected $password = 'password';
   protected $port = '42';
 
-  /**
-   * @var TestFileTransfer
-   */
-  protected $testConnection;
-
   function setUp() {
     parent::setUp();
     $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
@@ -88,7 +83,6 @@ class FileTransferTest extends BackdropWebTestCase {
 /**
  * Mock FileTransfer object for test case.
  */
-#[\AllowDynamicProperties]
 class TestFileTransfer extends FileTransfer {
   protected $host = NULL;
   protected $username = NULL;

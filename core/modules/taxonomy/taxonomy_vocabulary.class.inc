@@ -55,11 +55,6 @@ class TaxonomyVocabulary {
    */
   public $weight = 0;
 
-  /**
-   * @var TaxonomyVocabulary|null
-   */
-  public $original;
-
   function __construct($config = array()) {
     foreach ($config as $key => $value) {
       $this->$key = $value;

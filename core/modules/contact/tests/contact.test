@@ -10,11 +10,6 @@
 class ContactSitewideTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
   function setUp() {
     parent::setUp('contact');
 

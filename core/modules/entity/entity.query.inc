@@ -953,7 +953,7 @@ class EntityFieldQuery {
         $ids->bundle = NULL;
       }
       $return[$ids->entity_type][$ids->$id_key] = $ids;
-      $this->orderedResults[] = $ids;
+      $this->ordered_results[] = $ids;
     }
     return $return;
   }

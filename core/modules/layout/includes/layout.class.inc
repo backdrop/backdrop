@@ -194,16 +194,6 @@ class Layout {
   var $removed_blocks = array();
 
   /**
-   * @var bool
-   */
-  public $is_new;
-
-  /**
-   * @var string
-   */
-  public $original_name;
-
-  /**
    * Constructor for a Layout class.
    *
    * @param array $config

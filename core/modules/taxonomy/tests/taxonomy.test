@@ -45,17 +45,6 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
  * Tests the taxonomy vocabulary interface.
  */
 class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));
@@ -273,12 +262,6 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
  * Tests for taxonomy vocabulary functions.
  */
 class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
   function setUp() {
     parent::setUp('taxonomy', 'field_test');
     $admin_user = $this->backdropCreateUser(array('create post content', 'administer taxonomy'));
@@ -384,20 +367,16 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   function testUninstallReinstall() {
     // Fields and field instances attached to taxonomy term bundles should be
     // removed when the module is uninstalled.
-    $field_name = backdrop_strtolower($this->randomName() . '_field_name');
-    $field = array(
-      'field_name' => $field_name,
-      'type' => 'text',
-      'cardinality' => 4,
-    );
-    $field = field_create_field($field);
-    $instance = array(
-      'field_name' => $field_name,
+    $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $this->field = array('field_name' => $this->field_name, 'type' => 'text', 'cardinality' => 4);
+    $this->field = field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field_name,
       'entity_type' => 'taxonomy_term',
       'bundle' => $this->vocabulary->machine_name,
       'label' => $this->randomName() . '_label',
     );
-    field_create_instance($instance);
+    field_create_instance($this->instance);
 
     module_disable(array('taxonomy'));
     require_once BACKDROP_ROOT . '/core/includes/install.inc';
@@ -409,9 +388,9 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     // module was uninstalled. Creating a new field with the same name and
     // an instance of this field on the same bundle name should be successful.
     taxonomy_vocabulary_save($this->vocabulary);
-    unset($field['id']);
-    field_create_field($field);
-    field_create_instance($instance);
+    unset($this->field['id']);
+    field_create_field($this->field);
+    field_create_instance($this->instance);
   }
 
 }
@@ -491,12 +470,6 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
  * Test for legacy node bug.
  */
 class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
@@ -528,22 +501,6 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
  * Tests for taxonomy term functions.
  */
 class TaxonomyTermTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
-  /**
-   * @var array
-   */
-  protected $instance;
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -990,22 +947,6 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
  * Tests the rendering of term reference fields in RSS feeds.
  */
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
-  /**
-   * @var array
-   */
-  protected $instance;
-
   function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields', 'administer view modes'));
@@ -1090,47 +1031,6 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
  * Tests the hook implementations that maintain the taxonomy index.
  */
 class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
-  /**
-   * @var string
-   */
-  protected $field_name_1;
-
-  /**
-   * @var array
-   */
-  protected $field_1;
-
-  /**
-   * @var array
-   */
-  protected $instance_1;
-
-  /**
-   * @var string
-   */
-  protected $field_name_2;
-
-  /**
-   * @var array
-   */
-  protected $field_2;
-
-  /**
-   * @var array
-   */
-  protected $instance_2;
-
   function setUp() {
     parent::setUp('taxonomy');
 
@@ -1333,12 +1233,6 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
  * Test the taxonomy_term_load_multiple() function.
  */
 class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $taxonomy_admin;
-
   function setUp() {
     parent::setUp();
     $this->taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
@@ -1455,16 +1349,6 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   protected $instance;
   protected $vocabulary;
 
-  /**
-   * @var string
-   */
-  protected $field_name;
-
-  /**
-   * @var array
-   */
-  protected $field;
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -1576,16 +1460,6 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
   protected $vocabulary1;
   protected $vocabulary2;
 
-  /**
-   * @var string
-   */
-  protected $field_name;
-
-  /**
-   * @var array
-   */
-  protected $field;
-
   function setUp() {
     parent::setUp('field_test');
 
@@ -1695,27 +1569,6 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
  * Test taxonomy token replacement in strings.
  */
 class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
-  /**
-   * @var string
-   */
-  protected $langcode;
-
-  /**
-   * @var array
-   */
-  protected $instance;
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
@@ -1853,17 +1706,6 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests setting languages for taxonomy.
  */
 class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
   function setUp() {
     parent::setUp('node', 'language');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer languages', 'administer content types', 'administer fields'));
@@ -2011,17 +1853,6 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
  * Tests the functionality of EntityFieldQuery for taxonomy entities.
  */
 class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
-
-  /**
-   * @var User
-   */
-  protected $admin_user;
-
-  /**
-   * @var TaxonomyVocabulary
-   */
-  protected $vocabulary;
-
   function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));

@@ -104,11 +104,6 @@ class Redirect {
   public $is_new = FALSE;
 
   /**
-   * @var Redirect
-   */
-  public $original;
-
-  /**
    * Constructor for creating a new redirect.
    *
    * @param array $values
