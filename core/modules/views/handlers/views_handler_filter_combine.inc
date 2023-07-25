@@ -62,7 +62,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
       // Always add the table of the selected fields to be sure a table alias
       // exists.
       $field->ensure_my_table();
-      if (!empty($field->field_alias) && !empty($field->field_alias)) {
+      if (!empty($field->field_alias)) {
         $fields[] = "$field->table_alias.$field->real_field";
       }
     }
