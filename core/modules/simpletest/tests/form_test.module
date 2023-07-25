@@ -197,6 +197,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_h5datetime'),
     'access callback' => TRUE,
   );
+  $items['form-test/no-access-h5date-h5time'] = array(
+    'title' => 'HTML5 no-access date and time fields',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_no_access_h5date_h5time'),
+    'access callback' => TRUE,
+  );
   $items['form-test/url'] = array(
     'title' => t('URL'),
     'page callback' => 'backdrop_get_form',
@@ -1712,6 +1718,63 @@ function form_test_h5datetime($form, &$form_state) {
  * Form submission handler for form_test_h5datetime().
  */
 function form_test_h5datetime_submit($form, &$form_state) {
+  backdrop_json_output($form_state['values']);
+  exit();
+}
+
+/**
+ * Form constructor for disabled html_date and html_time elements.
+ *
+ * @see form_test_no_access_h5date_h5time_submit()
+ */
+function form_test_no_access_h5date_h5time($form, &$form_state) {
+  $form['no_access_h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+    '#default_value' => array(
+      'date' => '2023-01-01',
+    ),
+    '#access' => FALSE,
+  );
+  $form['no_access_h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+    '#default_value' => array(
+      'time' => '20:30',
+    ),
+    '#access' => FALSE,
+  );
+  $form['disabled_h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+    '#default_value' => array(
+      'date' => '2023-01-01',
+    ),
+    '#disabled' => TRUE,
+  );
+  $form['disabled_h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+    '#default_value' => array(
+      'time' => '20:30',
+    ),
+    '#disabled' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_disabled_h5datetime().
+ */
+function form_test_no_access_h5date_h5time_submit($form, &$form_state) {
   backdrop_json_output($form_state['values']);
   exit();
 }

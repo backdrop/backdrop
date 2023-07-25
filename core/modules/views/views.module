@@ -84,6 +84,7 @@ function views_theme($existing, $type, $theme, $path) {
   $hooks['views_mini_pager'] = $base + array(
     'variables' => array('tags' => array(), 'element' => 0, 'parameters' => array()),
     'pattern' => 'views_mini_pager__',
+    'file' => 'views.theme.inc',
   );
 
   $variables = array(

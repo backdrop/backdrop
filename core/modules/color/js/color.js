@@ -50,7 +50,7 @@ Backdrop.behaviors.color = {
     }
 
     // Set up colorScheme selector.
-    $('#edit-scheme', form).change(function () {
+    $('#edit-scheme', form).on('change', function () {
       var schemeName = this.value;
       if (schemeName !== '' && schemes[schemeName]) {
         // Get colors of active scheme.
@@ -67,7 +67,7 @@ Backdrop.behaviors.color = {
       }
     });
 
-    $('input[data-color-name]').change(function () {
+    $('input[data-color-name]').on('change', function () {
       var schemeName =  document.getElementById('edit-scheme').value;
       var key = this.dataset.colorName;
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
@@ -80,7 +80,7 @@ Backdrop.behaviors.color = {
     $('#system-theme-settings').addClass('has-preview').after(settings.colorPreviewMarkup);
     // Wait for the iframe to be loaded before attempting to apply the preview
     // settings for the first time.
-    $('#preview').load(function () {
+    $(window).on('load', function () {
       updatePreview();
     });
 
