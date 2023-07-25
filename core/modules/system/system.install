@@ -3451,15 +3451,6 @@ function system_update_1090() {
 }
 
 /**
- * Set jQuery to the backwards-compatible, legacy version for existing sites.
- */
-function system_update_1091() {
-  if (config_get('system.core', 'jquery_version') === NULL) {
-    config_set('system.core', 'jquery_version', 'legacy');
-  }
-}
-
-/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

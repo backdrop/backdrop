@@ -12,7 +12,7 @@ Backdrop.behaviors.dismiss = {
       event.preventDefault();
 
       $(this).parent().fadeOut('fast', function() {
-        if ($('.l-messages').children(':visible').length == 0) {
+        if ($('.l-messages').children(':visible').size() == 0) {
           $('.l-messages').hide();
         }
       });
