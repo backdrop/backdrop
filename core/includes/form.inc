@@ -3775,13 +3775,41 @@ function theme_details($variables) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties and children of
- *     the tableselect element. Properties used: #header, #options, #empty,
- *     and #js_select. The #options property is an array of selection options;
- *     each array element of #options is an array of properties. These
- *     properties can include #attributes, which is added to the
- *     table row's HTML attributes; see theme_table(). An example of per-row
- *     options:
+ *     the tableselect element. Properties used (should match the respective
+ *     variables passed to theme_table()):
+ *     - #header: An array with the labels/headers of the table columns. Can be
+ *       keyed or not. Each element of the array can be either a localized
+ *       string, or an associative array with the same keys as those supported
+ *       in the 'header' variable passed to theme_table().
+ *     - #options: An array of selection options (table rows); each array
+ *       element of #options is an array of properties. These properties can
+ *       include #attributes, which is added to the table row's HTML attributes
+ *       (see theme_table()). See further down for code examples.
+ *     - #multiple: Boolean. If TRUE, #options elements will be rendered as
+ *       checkboxes. If FALSE, #options elements will be rendered as radios. See
+ *       form_process_tableselect().
+ *     - #footer: An array of table rows (same format as the #options array).
+ *       To fully comply with the HTML spec, it should be limited to a single
+ *       row. That however is not enforced in theme_table(), so all footer rows
+ *       will be rendered within the <tfoot> tag if multiple are provided.
+ *     - #caption: A localized string used for the <caption> tag.
+ *     - #attributes: An array of HTML attributes to apply to the <table> tag.
+ *     - #empty: The localized text to be shown when #options are empty (only
+ *       the #header and any #caption and #footer will be rendered).
+ *     - #js_select: Boolean. If TRUE and #multiple is also TRUE (checkboxes
+ *       instead of radios), then the "Select all" checkbox will be added to the
+ *       first cell of the header row.
+ *     - #sticky: Boolean: If TRUE, a "sticky" header will be provided.
+ *     - #colgroups: An array of column groups. See the respective 'colgroups'
+ *       variable in theme_table().
+ *
+ *     An example of per-row options:
  *     @code
+ *     $header = array(
+ *       'title' => t('Title'),
+ *       'content_type' => t('Content type'),
+ *       'status' => t('Status'),
+ *     );
  *     $options = array(
  *       array(
  *         'title' => 'How to Learn Backdrop',
@@ -3796,11 +3824,6 @@ function theme_details($variables) {
  *         '#attributes' => array('class' => array('page-row')),
  *       ),
  *     );
- *     $header = array(
- *       'title' => t('Title'),
- *       'content_type' => t('Content type'),
- *       'status' => t('Status'),
- *     );
  *     $form['table'] = array(
  *       '#type' => 'tableselect',
  *       '#header' => $header,
@@ -3809,33 +3832,62 @@ function theme_details($variables) {
  *     );
  *     @endcode
  *
+ *     An example with a non-keyed header array and keyed options/rows array:
+ *     @code
+ *     $header = array(t('Column 1'), t('Column 2'));
+ *     $rows = array(
+ *       'foo' => array(
+ *         array('data' => t('Checkbox A')),
+ *         array('data' => t('This is foo')),
+ *       ),
+ *       'bar' => array(
+ *         array('data' => t('Checkbox B')),
+ *         array('data' => t('This is bar')),
+ *       ),
+ *     );
+ *     $form['table'] = array(
+ *       '#type' => 'tableselect',
+ *       '#header' => $header,
+ *       '#options' => $rows,
+ *       '#empty' => t('No options available.'),
+ *     );
+ *     @endcode
+ *
  * @ingroup themeable
+ * @since 1.26.0 added support for the following properties: #footer, #caption,
+ *   #sticky, and #colgroups. Properties should generally now match the
+ *   variables passed to theme_table().
  */
 function theme_tableselect($variables) {
   $element = $variables['element'];
-  $rows = array();
   $header = $element['#header'];
-  if (!empty($element['#options'])) {
+  $options = isset($element['#options']) ? $element['#options'] : array();
+  $footer = isset($element['#footer']) ? $element['#footer'] : array();
+
+  $rows = array();
+  if (!empty($options)) {
     // Generate a table row for each selectable item in #options.
     foreach (element_children($element) as $key) {
       $row = array();
 
       $row['data'] = array();
-      if (isset($element['#options'][$key]['#attributes'])) {
-        $row += $element['#options'][$key]['#attributes'];
+      if (isset($options[$key]['#attributes'])) {
+        $row += $options[$key]['#attributes'];
       }
       // Render the checkbox / radio element.
       $row['data'][] = backdrop_render($element[$key]);
 
       // As theme_table only maps header and row columns by order, create the
       // correct order by iterating over the header fields.
-      foreach ($element['#header'] as $fieldname => $title) {
-        $row['data'][] = $element['#options'][$key][$fieldname];
+      foreach ($header as $fieldname => $title) {
+        $row['data'][] = $options[$key][$fieldname];
       }
       $rows[] = $row;
     }
-    // Add an empty header or a "Select all" checkbox to provide room for the
-    // checkboxes/radios in the first table column.
+
+    // Add an empty header cell or a cell with a "Select all" checkbox, to match
+    // the number of table columns when the additional column with the
+    // checkboxes/radios is added.
     if ($element['#js_select']) {
       // Add a "Select all" checkbox.
       backdrop_add_js('core/misc/tableselect.js');
@@ -3843,20 +3895,35 @@ function theme_tableselect($variables) {
     }
     else {
       // Add an empty header when radio buttons are displayed or a "Select all"
-      // checkbox is not desired.
+      // checkbox is not present.
       array_unshift($header, '');
     }
+
+    // Similarly to the addition of the empty header cell in the code above, add
+    // a matching empty footer cell.
+    if (!empty($footer)) {
+      // The HTML spec dictates only a single <tfoot> per <table>, however there
+      // is nothing to prevent several being added (and theme_table() will
+      // happily render all of them).
+      foreach ($footer as $footer_row => $footer_cells) {
+        array_unshift($footer[$footer_row], '');
+      }
+    }
   }
+
+  $caption = isset($element['#caption']) ? $element['#caption'] : '';
 
   $theme_table_vars = array(
     'header' => $header,
     'rows' => $rows,
-    'footer' => isset($element['#footer']) ? $element['#footer'] : array(),
+    'footer' => $footer,
     'attributes' => $element['#attributes'],
-    'caption' => isset($element['#caption']) ? $element['#caption'] : '',
+    // If no #caption has been explicitly specified, use #title as a caption (if
+    // it was provided).
+    'caption' => !empty($caption) ? $caption : (isset($element['#title']) ? $element['#title'] : ''),
     'colgroups' => isset($element['#colgroups']) ? $element['#colgroups'] : array(),
     'sticky' => isset($element['#sticky']) ? $element['#sticky'] : TRUE,
-    'empty' => $element['#empty'],
+    'empty' => isset($element['#empty']) ? $element['#empty'] : '',
   );
 
   return theme('table', $theme_table_vars);
@@ -3873,7 +3940,6 @@ function theme_tableselect($variables) {
  *   The processed element.
  */
 function form_process_tableselect($element) {
-
   if ($element['#multiple']) {
     $value = is_array($element['#value']) ? $element['#value'] : array();
   }
@@ -3937,6 +4003,7 @@ function form_process_tableselect($element) {
   else {
     $element['#value'] = array();
   }
+
   return $element;
 }
 
