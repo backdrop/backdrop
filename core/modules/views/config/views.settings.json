@@ -2,6 +2,7 @@
     "_config_name": "views.settings",
     "exposed_filter_any_label": false,
     "show_additional_queries": false,
+    "cache_views_data": true,
     "sql_signature": false,
     "devel_output": false,
     "devel_region": "footer",
