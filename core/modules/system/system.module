@@ -2029,8 +2029,8 @@ function system_library_info() {
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
-    'version' => '0.2.3',
+    'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
+    'version' => '1.0.9',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
