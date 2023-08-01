@@ -461,7 +461,7 @@ function user_password($length = 10) {
  * @param string $permission_name
  *   The permission to check.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the role has the permission, FALSE if it does not have the
  *   permission.
  */
