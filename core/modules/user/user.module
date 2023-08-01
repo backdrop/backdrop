@@ -467,7 +467,7 @@ function user_password($length = 10) {
  */
 function user_role_has_permission(string $role_name, string $permission_name) {
   $role = user_role_load($role_name);
-  return in_array($permission_name, $role->permissions);
+  return ($role) ? in_array($permission_name, $role->permissions) : FALSE;
 }
 
 /**
