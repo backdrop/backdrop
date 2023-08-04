@@ -688,7 +688,7 @@ function token_element_validate(&$element, &$form_state) {
 
   // Validate if an element must have a minimum number of tokens.
   if (isset($element['#min_tokens']) && count($tokens) < $element['#min_tokens']) {
-    $error = format_plural($element['#min_tokens'], 'The %element-title must contain at least one token.', 'The %element-title must contain at least @count tokens.', array('%element-title' => $title));
+    $error = format_plural($element['#min_tokens'], 'The %element-title field must contain at least one token.', 'The %element-title field must contain at least @count tokens.', array('%element-title' => $title));
     form_error($element, $error);
   }
 
