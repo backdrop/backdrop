@@ -694,11 +694,12 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
   $row['id'] = backdrop_clean_css_identifier($token);
   $row['data']['name']['data'] = $token_info['name'];
   $row['data']['name']['class'][] = 'token-name';
+  $token_description = isset($token_info['description']) ? '<span class="token-group-description">' . $token_info['description'] . '</span>' : '';
 
   if ($is_group) {
     // This is a token type/group.
     $row['class'][] = 'token-group';
-    $row['data']['token']['data'] = '<span class="token-group-description">' . $token_info['description'] . '</span>';
+    $row['data']['token']['data'] = $token_description;
   }
   else {
     // This is a token.
@@ -710,7 +711,7 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
     if (!empty($token_info['parent'])) {
       $row['parent'] = backdrop_clean_css_identifier($token_info['parent']);
     }
-    $row['data']['token']['data'] .= '<span class="token-description">' . $token_info['description'] . '</span>';
+    $row['data']['token']['data'] .= $token_description;
   }
 
   return $row;
