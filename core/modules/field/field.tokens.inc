@@ -93,7 +93,7 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
 /**
  * Pre-render callback for field output used with tokens.
  */
-function field_pre_render_token(&$elements) {
+function field_pre_render_token($elements) {
   // Remove the field theme hook, attachments, and JavaScript states.
   unset($elements['#theme']);
   unset($elements['#states']);
