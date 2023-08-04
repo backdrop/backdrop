@@ -698,9 +698,9 @@ function token_element_validate(&$element, &$form_state) {
   // Validate if an element must have a maximum number of tokens.
   if (isset($element['#max_tokens']) && count($tokens) > $element['#max_tokens']) {
     $error = format_plural($element['#max_tokens'],
-    '%name must contain at most one token.',
-    '%name must contain at most @count tokens.',
-    array('%name' => $title));
+      '%name must contain at most one token.',
+      '%name must contain at most @count tokens.',
+      array('%name' => $title));
     form_error($element, $error);
   }
 
