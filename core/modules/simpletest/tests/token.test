@@ -950,6 +950,7 @@ class TokenArrayTestCase extends TokenTestHelper {
       'last' => 'b',
       'value:0' => 'a',
       'value:2' => 'c',
+      'value:#property' => NULL,
       'count' => 4,
       'keys' => '2, 0, 4, 1',
       'keys:value:3' => '1',
