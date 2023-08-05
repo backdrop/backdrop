@@ -687,6 +687,7 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
       'name' => array(),
       'token' => array(),
       'value' => '',
+      'description' => '',
     ),
   );
 
