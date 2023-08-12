@@ -414,6 +414,21 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
     field_create_instance($instance);
   }
 
+  /**
+   * Test that adding properties via hook_taxonomy_vocabulary_load() works.
+   */
+  protected function testTaxonomyVocabularyLoadProp() {
+    module_enable(array('taxonomy_vocab_load_test'));
+    // Create two more vocabularies to load.
+    $this->createVocabulary();
+    $this->createVocabulary();
+
+    $vocabs = taxonomy_vocabulary_load_multiple(FALSE);
+    foreach ($vocabs as $name => $vocab) {
+      $this->assertTrue(!empty($vocab->dynamicProp), 'Dynamic property via load hook is set.');
+    }
+  }
+
 }
 
 /**
