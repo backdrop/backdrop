@@ -2,7 +2,12 @@
  * @file
  * jQuery Once Plugin
  *
- * Forked from v1.2.6 of http://github.com/robloach/jquery-once.
+ * Forked from v1.2.6 of http://github.com/robloach/jquery-once, which was dual
+ * licensed.
+ *
+ * Dual licensed under the MIT and GPL licenses:
+ *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
  */
 
 (function (factory) {
