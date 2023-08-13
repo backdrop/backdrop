@@ -1,10 +1,8 @@
 /**
- * jQuery Once Plugin 1.2.6
- * http://github.com/robloach/jquery-once
+ * @file
+ * jQuery Once Plugin
  *
- * Dual licensed under the MIT and GPL licenses:
- *   http://www.opensource.org/licenses/mit-license.php
- *   http://www.gnu.org/licenses/gpl.html
+ * Forked from v1.2.6 of http://github.com/robloach/jquery-once.
  */
 
 (function (factory) {
@@ -63,7 +61,7 @@
     var name = id + '-processed';
     var elements = this.not('.' + name).addClass(name);
 
-    return $.isFunction(fn) ? elements.each(fn) : elements;
+    return typeof fn == 'function' ? elements.each(fn) : elements;
   };
 
   /**
@@ -87,6 +85,6 @@
     var name = id + '-processed';
     var elements = this.filter('.' + name).removeClass(name);
 
-    return $.isFunction(fn) ? elements.each(fn) : elements;
+    return typeof fn == 'function' ? elements.each(fn) : elements;
   };
 }));
