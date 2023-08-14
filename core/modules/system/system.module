@@ -1493,28 +1493,32 @@ function system_library_info() {
   );
 
   // jQuery UI.
+  $ui_js_settings = array(
+    'group' => JS_LIBRARY,
+    'weight' => -11,
+  );
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
     'version' => '1.13.0',
     'js' => array(
-      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.form.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.labels.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.tabbable.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.unique-id.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.version.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.focusable.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.ie.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.keycode.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.plugin.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => $ui_js_settings,
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => $ui_js_settings,
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1829,7 +1833,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
+      'core/misc/ui/jquery.ui.widget.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -10,
+      ),
     ),
     'dependencies' => array(
       array('system', 'ui'),
@@ -1844,7 +1851,10 @@ function system_library_info() {
     'website' => 'https://github.com/jquery/jquery-color',
     'version' => '2.2.0',
     'js' => array(
-      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/jquery.color.js'  => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
   );
 
@@ -1853,7 +1863,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
     'dependencies' => array(
       array('system', 'jquery.color'),
