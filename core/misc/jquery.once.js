@@ -1,15 +1,15 @@
 /**
- * @file
- * jQuery Once Plugin
- *
- * Forked from v1.2.6 of http://github.com/robloach/jquery-once, which was dual
- * licensed.
+ * jQuery Once Plugin 1.2.6
+ * http://github.com/robloach/jquery-once
  *
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  */
 
+/**
+ * Forked for Backdrop to fix jQuery compatibility issues.
+ */
 (function (factory) {
   "use strict";
   if (typeof exports === 'object') {
