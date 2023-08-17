@@ -359,7 +359,7 @@ function backdrop_session_regenerate() {
   global $user, $is_https;
   // Nothing to do if we are not allowed to change the session.
   if (!backdrop_save_session()) {
-    return TRUE;
+    return;
   }
 
   if ($is_https && settings_get('https', FALSE)) {
@@ -421,7 +421,6 @@ function backdrop_session_regenerate() {
     $user = $account;
   }
   date_default_timezone_set(backdrop_get_user_timezone());
-  return TRUE;
 }
 
 /**

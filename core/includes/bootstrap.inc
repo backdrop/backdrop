@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.25.x-dev');
+define('BACKDROP_VERSION', '1.26.x-dev');
 
 /**
  * Core API compatibility.
@@ -598,11 +598,14 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  * which directory should be used based on the hostname. If not using multisite,
  * the path returned will be a single period (indicating the current directory).
  *
- * @param $http_host
+ * @param string $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
- * @param $script_name
+ * @param string $script_name
  *   The part of the url following the hostname, including the leading slash.
+ * @param bool $require_settings
+ *   Only configuration directories with an existing settings.php file
+ *   will be recognized. Defaults to TRUE.
  *
  * @return
  *   The relative path of the matching configuration directory.

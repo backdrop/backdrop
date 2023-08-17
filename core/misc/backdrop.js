@@ -69,7 +69,7 @@ Backdrop.attachBehaviors = function (context, settings) {
   settings = settings || Backdrop.settings;
   // Execute all of them.
   $.each(Backdrop.behaviors, function () {
-    if ($.isFunction(this.attach)) {
+    if (typeof this.attach === 'function') {
       this.attach(context, settings);
     }
   });
@@ -121,7 +121,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
   trigger = trigger || 'unload';
   // Execute all of them.
   $.each(Backdrop.behaviors, function () {
-    if ($.isFunction(this.detach)) {
+    if (typeof this.detach === 'function') {
       this.detach(context, settings, trigger);
     }
   });
@@ -250,7 +250,7 @@ Backdrop.stringReplace = function (str, args, keys) {
   }
 
   // If the array of keys is not passed then collect the keys from the args.
-  if (!$.isArray(keys)) {
+  if (!Array.isArray(keys)) {
     keys = [];
     for (var k in args) {
       if (args.hasOwnProperty(k)) {
@@ -551,7 +551,7 @@ Backdrop.getSelection = function (element) {
  * This is primarily used by Backdrop.displayAjaxError().
  */
 Backdrop.beforeUnloadCalled = false;
-$(window).bind('beforeunload pagehide', function () {
+$(window).on('beforeunload pagehide', function () {
     Backdrop.beforeUnloadCalled = true;
 });
 

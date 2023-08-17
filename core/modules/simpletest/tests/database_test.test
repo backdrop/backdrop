@@ -11,7 +11,14 @@
  * rather than just a stdClass or array. This class is for testing that
  * functionality. (See testQueryFetchClass() below)
  */
-class FakeRecord { }
+class FakeRecord {
+
+  /**
+   * @var string
+   */
+  public $name;
+
+}
 
 /**
  * Base test class for databases.
@@ -3908,6 +3915,16 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
 
   protected $monitor;
   protected $originalCount;
+
+  /**
+   * @var string
+   */
+  protected $originalTarget;
+
+  /**
+   * @var bool
+   */
+  protected $skipTest;
 
   function setUp() {
     parent::setUp();

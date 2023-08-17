@@ -393,38 +393,25 @@ function theme_status_report($variables) {
  * @param $variables
  *   An associative array containing:
  *   - blocks: An array of blocks to display. Each array should include a
- *     'title', a 'description', a formatted 'content' and a 'position' which
- *     will control which container it will be in. This is usually 'left' or
- *     'right'.
+ *     'title', a 'description' and a formatted 'content'.
  *
  * @ingroup themeable
  */
 function theme_admin_page($variables) {
   $blocks = $variables['blocks'];
-
-  $stripe = 0;
   $container = array();
 
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (empty($block['position'])) {
-        // perform automatic striping.
-        $block['position'] = ++$stripe % 2 ? 'left' : 'right';
-      }
-      if (!isset($container[$block['position']])) {
-        $container[$block['position']] = '';
-      }
-      $container[$block['position']] .= $block_output;
+      $container[] = $block_output;
     }
   }
 
   if (!empty($container)) {
     $output = '<div class="admin clearfix">';
-      foreach ($container as $id => $data) {
-        $output .= '<div class="' . $id . ' clearfix">';
-        $output .= $data;
-        $output .= '</div>';
-      }
+    foreach ($container as $data) {
+      $output .= $data;
+    }
     $output .= '</div>';
   }
   else {
@@ -519,11 +506,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
+  $blocks = array();
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -538,21 +521,14 @@ function theme_system_admin_index($variables) {
       $block['show'] = TRUE;
 
       if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
+        $blocks[] = $block_output;
       }
     }
   }
 
   $output = '<div class="admin clearfix">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
+  foreach ($blocks as $block) {
+    $output .= $block;
   }
   $output .= '</div>';
 
