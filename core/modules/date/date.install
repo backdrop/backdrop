@@ -113,6 +113,9 @@ function date_update_1002() {
       db_delete('field_data_' . $field_name)
         ->isNull($field_name . '_value')
         ->execute();
+      db_delete('field_revision_' . $field_name)
+        ->isNull($field_name . '_value')
+        ->execute();
     }
   }
 }
