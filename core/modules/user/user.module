@@ -464,6 +464,8 @@ function user_password($length = 10) {
  * @return bool
  *   TRUE if the role has the permission, FALSE if it does not have the
  *   permission.
+ *
+ * @since 1.26.0 Function added
  */
 function user_role_has_permission(string $role_name, string $permission_name) {
   $role = user_role_load($role_name);
