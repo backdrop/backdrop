@@ -247,11 +247,11 @@ class views_plugin_pager_full extends views_plugin_pager {
   }
 
   function query() {
-    if ($this->items_per_page_exposed()) {
-      if (!empty($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
+    if ($this->items_per_page_exposed() && !empty($_GET['items_per_page'])) {
+      if (is_numeric($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
         $this->options['items_per_page'] = $_GET['items_per_page'];
       }
-      elseif (!empty($_GET['items_per_page']) && $_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
+      elseif ($_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
         $this->options['items_per_page'] = 0;
       }
     }
