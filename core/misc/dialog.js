@@ -85,8 +85,7 @@ Backdrop.dialog = function (element, options) {
         // again, but prevent infinite loops for dialogs that use a different
         // overflow. 
         if (cssOverflowProperty != 'auto' && cssOverflowProperty != 'hidden' && counter < 10) {
-          counter++;
-          setTimeout(waitForCss, 10, counter);
+          setTimeout(waitForCss, 10, ++counter);
         }
         else {
           resetPosition();
