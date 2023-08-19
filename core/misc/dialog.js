@@ -82,7 +82,7 @@ Backdrop.dialog = function (element, options) {
       var waitForCss = function() {
         var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
         // If the overflow is not 'auto' yet, schedule this function again.
-        if (cssOverflowProperty != 'auto') {
+        if (cssOverflowProperty != 'auto' && cssOverflowProperty != 'hidden') {
           setTimeout(waitForCss, 10);
         }
         else {
