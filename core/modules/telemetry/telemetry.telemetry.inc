@@ -33,7 +33,37 @@ function telemetry_telemetry_info() {
     'description' => t('The profile that was used to install your site.'),
     'project' => 'backdrop',
   );
+
+  // Telemetry currently cannot handle arrays of data, so we need to report back
+  // each core module as an individual metric.
+  $module_info = system_rebuild_module_data();
+  $telemetry_modules = _telemetry_core_module_list();
+  foreach ($telemetry_modules as $module) {
+    $info['core_module_' . $module] = array(
+      'label' => t('Core module: @module', array('@module' => $module_info[$module]->info['name'])),
+      'description' => $module_info[$module]->info['description'],
+      'project' => 'backdrop',
+    );
+  }
+
   return $info;
+}
+
+/**
+ * Helper function that returns a list of core module that we are interested to
+ * get metrics on whether they are enabled/disabled on the majority of sites.
+ */
+function _telemetry_core_module_list() {
+  return array(
+    'book',
+    'contact',
+    'translation',
+    'entityreference',
+    'language',
+    'locale',
+    'syslog',
+    // 'simpletest',
+  );
 }
 
 /**
@@ -62,5 +92,11 @@ function telemetry_telemetry_data($key) {
       }
     case 'install_profile':
       return backdrop_get_profile();
+  }
+
+  $module = preg_replace('/^(core_module_)(.*)$/', '${2}', $key);
+  $telemetry_modules = _telemetry_core_module_list();
+  if (in_array($module, $telemetry_modules)) {
+    return module_exists($module) ? 'enabled' : 'disabled';
   }
 }
