@@ -207,7 +207,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
     // If the editor changed, update the format settings accordingly.
     $current_editor = $form_state['values']['editor'];
-    if ($format->editor != $current_editor) {
+    if ($format->editor != $current_editor && isset($editors[$current_editor])) {
       $format->editor = $current_editor;
       $format->editor_settings = $editors[$current_editor]['default settings'];
     }
