@@ -49,7 +49,7 @@ https://github.com/backdrop-contrib/ckeditor5/issues.
 Current Maintainers
 -------------------
 - [Nate Lampton](https://github.com/quicksketch)
-
+- [Indigoxela](https://github.com/indigoxela)
 
 Credits
 -------
