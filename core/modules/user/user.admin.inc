@@ -808,7 +808,6 @@ function user_admin_role_delete_confirm_submit($form, &$form_state) {
  */
 function user_settings_email($form, &$form_state) {
   $config = config('system.core');
-  $mail_config = config('user.mail');
   $form['email_title'] = array(
     '#type' => 'item',
     '#title' => t('Emails'),
@@ -836,7 +835,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_admin_created']['user_mail_register_admin_created_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('register_admin_created_subject'),
+    '#default_value' => config_get_translated('user.mail', 'register_admin_created_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -844,7 +843,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_admin_created']['user_mail_register_admin_created_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('register_admin_created_body'),
+    '#default_value' => config_get_translated('user.mail', 'register_admin_created_body'),
     '#rows' => 15,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -861,7 +860,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_pending_approval']['user_mail_register_pending_approval_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('register_pending_approval_subject'),
+    '#default_value' => config_get_translated('user.mail', 'register_pending_approval_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -869,7 +868,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_pending_approval']['user_mail_register_pending_approval_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('register_pending_approval_body'),
+    '#default_value' => config_get_translated('user.mail', 'register_pending_approval_body'),
     '#rows' => 8,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -886,7 +885,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('register_pending_approval_admin_subject'),
+    '#default_value' => config_get_translated('user.mail', 'register_pending_approval_admin_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -894,7 +893,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('register_pending_approval_admin_body'),
+    '#default_value' => config_get_translated('user.mail', 'register_pending_approval_admin_body'),
     '#rows' => 8,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -911,7 +910,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_no_approval_required']['user_mail_register_no_approval_required_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('register_no_approval_required_subject'),
+    '#default_value' => config_get_translated('user.mail', 'register_no_approval_required_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -919,7 +918,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_no_approval_required']['user_mail_register_no_approval_required_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('register_no_approval_required_body'),
+    '#default_value' => config_get_translated('user.mail', 'register_no_approval_required_body'),
     '#rows' => 15,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -937,7 +936,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_password_reset']['user_mail_password_reset_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('password_reset_subject'),
+    '#default_value' => config_get_translated('user.mail', 'password_reset_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -945,7 +944,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_password_reset']['user_mail_password_reset_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('password_reset_body'),
+    '#default_value' => config_get_translated('user.mail', 'password_reset_body'),
     '#rows' => 12,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -976,7 +975,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_activated']['settings']['user_mail_status_activated_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('status_activated_subject'),
+    '#default_value' => config_get_translated('user.mail', 'status_activated_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -984,7 +983,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_activated']['settings']['user_mail_status_activated_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('status_activated_body'),
+    '#default_value' => config_get_translated('user.mail', 'status_activated_body'),
     '#rows' => 15,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1015,7 +1014,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_blocked']['settings']['user_mail_status_blocked_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('status_blocked_subject'),
+    '#default_value' => config_get_translated('user.mail', 'status_blocked_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1023,7 +1022,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_blocked']['settings']['user_mail_status_blocked_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('status_blocked_body'),
+    '#default_value' => config_get_translated('user.mail', 'status_blocked_body'),
     '#rows' => 3,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1040,7 +1039,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_cancel_confirm']['user_mail_cancel_confirm_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('cancel_confirm_subject'),
+    '#default_value' => config_get_translated('user.mail', 'cancel_confirm_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1048,7 +1047,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_cancel_confirm']['user_mail_cancel_confirm_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('cancel_confirm_body'),
+    '#default_value' => config_get_translated('user.mail', 'cancel_confirm_body'),
     '#rows' => 3,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1079,7 +1078,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_canceled']['settings']['user_mail_status_canceled_subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Subject'),
-    '#default_value' => $mail_config->get('status_canceled_subject'),
+    '#default_value' => config_get_translated('user.mail', 'status_canceled_subject'),
     '#maxlength' => 180,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
@@ -1087,7 +1086,7 @@ function user_settings_email($form, &$form_state) {
   $form['email_canceled']['settings']['user_mail_status_canceled_body'] = array(
     '#type' => 'textarea',
     '#title' => t('Body'),
-    '#default_value' => $mail_config->get('status_canceled_body'),
+    '#default_value' => config_get_translated('user.mail', 'status_canceled_body'),
     '#rows' => 3,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
