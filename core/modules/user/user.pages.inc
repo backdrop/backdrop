@@ -21,6 +21,18 @@ function user_autocomplete($string = '') {
 }
 
 /**
+ * Menu callback for reset password form.
+ *
+ * @since 1.23.1 Replaces user_pass() as menu callback.
+ *
+ * @see user_pass()
+ */
+function user_pass_page() {
+  backdrop_set_title(t('Reset password'));
+  return backdrop_get_form('user_pass');
+}
+
+/**
  * Form builder; request a password reset.
  *
  * @ingroup forms
@@ -29,8 +41,6 @@ function user_autocomplete($string = '') {
  */
 function user_pass() {
   global $user;
-
-  backdrop_set_title(t('Reset password'));
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -49,7 +59,7 @@ function user_pass() {
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
-      '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
+      '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
   }
@@ -65,6 +75,17 @@ function user_pass() {
  * @see user_pass_submit()
  */
 function user_pass_validate($form, &$form_state) {
+  $config = config('user.flood');
+
+  // Do not allow any password reset from the current IP if the limit has been
+  // reached.
+  if (!flood_is_allowed('pass_reset_ip', $config->get('flood_ip_limit'), $config->get('flood_ip_window'))) {
+    form_set_error('name', t('Sorry, too many password reset attempts from your IP address. Try again later.'));
+    return;
+  }
+  // Always register a per-IP event.
+  flood_register_event('pass_reset_ip', $config->get('flood_ip_window'));
+
   $name = trim($form_state['values']['name']);
   // Try to load by email.
   $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
@@ -75,6 +96,18 @@ function user_pass_validate($form, &$form_state) {
     $account = reset($users);
   }
   if (isset($account->uid)) {
+    // Register user flood events based on the uid only, so they can be cleared
+    // when a password is reset successfully.
+    $identifier = $account->uid;
+    // Don't allow password reset if the limit for this user has been reached.
+    // Default is to allow 5 passwords resets every 6 hours.
+    if (!flood_is_allowed('pass_reset_user', $config->get('flood_user_limit'), $config->get('flood_user_window'), $identifier)) {
+      form_set_error('name', t('Sorry, too many password reset attempts for this account. Try again later.'));
+      return;
+    }
+    // Register a per-user event.
+    flood_register_event('pass_reset_user', $config->get('flood_user_window'), $identifier);
+
     form_set_value(array('#parents' => array('account')), $account, $form_state);
   }
   else {
@@ -103,7 +136,8 @@ function user_pass_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback; process one time login link and redirects to the user page on success.
+ * Menu callback; process one time login link and redirects to the user page on
+ * success.
  *
  * @param int $uid
  *   User ID for the user who would like their password reset.
@@ -128,8 +162,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     else {
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
-        backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
-          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
+        backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
+          array('!logout' => url('user/logout'))), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
@@ -153,6 +187,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         if ($immediate_login) {
           $user = $account;
           user_login_finalize();
+          // Clear any password reset flood events for this user.
+          flood_clear_event('pass_reset_user', $account->uid);
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
           watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
           backdrop_goto();
@@ -220,6 +256,8 @@ function user_pass_reset_form_submit($form, &$form_state) {
   // user_login_finalize() also updates the login timestamp of the user, which
   // invalidates further use of the one-time login link.
   user_login_finalize();
+  // Clear any password reset flood events for this user.
+  flood_clear_event('pass_reset_user', $user->uid);
   backdrop_set_message(t('Your account password has been updated.'));
   watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
   backdrop_goto();

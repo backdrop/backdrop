@@ -17,7 +17,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $view->pre_execute();
     $view->init_handlers();
     $this->assertTrue($view->argument['null']->validate_arg($string));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
   }
@@ -28,7 +28,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $view->pre_execute();
     $view->init_handlers();
     $this->assertFalse($view->argument['null']->validate_arg($this->randomString()));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     $this->assertTrue($view->argument['null']->validate_arg(12));
   }

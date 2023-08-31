@@ -520,8 +520,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'help' => '',
-      'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
 
@@ -815,8 +813,29 @@ class PagePreviewTestCase extends BackdropWebTestCase {
  */
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 
-  function setUp() {
-    parent::setUp('node_layout_preview_test');
+  /**
+   * @var object
+   */
+  protected $content_type;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+    // Module node_layout_preview_revision_test is a helper module that creates
+    // three layouts used in testing previews and revisions:
+    //
+    // Layout custom_node has path node/% and uses the Taylor template.
+    // Layout custom_node_preview has path node/preview/page/% and uses the
+    //   Sutro template. It is initially disabled.
+    // Layout custom_node_revision has path node/%/revisions/%/view and uses the
+    //   Sutro template. It is initially disabled.
 
     // Create a content type for checking node/edit page layouts.
     $this->content_type = $this->backdropCreateContentType();
@@ -829,9 +848,24 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Returns the NID of the most recently created node of our content type.
+   */
+  public function lastNid() {
+    return db_query('
+      SELECT nid FROM {node}
+      WHERE type = :type
+      ORDER BY nid DESC
+      LIMIT 1
+      ', array(':type' => $this->content_type->type))
+      ->fetchField();
+  }
+
+  /**
    * Tests that the correct layout is used for node add and node edit previews.
    */
-  function testNodeLayoutPreview() {
+  public function testNodeLayoutPreview() {
+
+    // The node preview should use the 'custom_node' layout with path node/%.
 
     // Create a node to test through the admin interface.
     $this->backdropGet('node/add/' . $this->content_type->type);
@@ -852,9 +886,13 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     // layout.
     $this->assertText('Node body field', '"Node body field" found.');
 
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
     // Look for the body text, which appears only in that field if the context
     // was set properly.
-    $this->assertText($body, "\"{$body}\" found.");
+    $this->assertText($body, "Body text \"{$body}\" found.");
 
     // Create a new node; fill in its title and body, then save.
     $this->backdropGet('node/add/' . $this->content_type->type);
@@ -866,8 +904,8 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    // Edit the node with a new random body content, then preview.
-    $this->backdropGet('node/1/edit');
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
     $body = $this->randomName();
     $edit = array(
       'body[und][0][value]' => $body,
@@ -880,6 +918,168 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
     // Look for the heading of the field body block that exists only in our
     // layout.
     $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Now enable the 'custom_node_preview' layout; give it path
+    // node/preview/{$this->content_type->type}/%, and run the same tests.
+
+    $layouts = layout_load_all();
+    $preview_layout = $layouts['custom_node_preview'];
+    $preview_layout->enable();
+    $preview_layout->setPath('node/preview/' . $this->content_type->type . '/%');
+    $preview_layout->save();
+
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+
+  }
+}
+
+/**
+ * Tests that the correct layout is used for node revisions.
+ */
+class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodes;
+
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+
+    // Create and login user.
+    $web_user = $this->backdropCreateUser(array(
+      'view revisions',
+    ));
+    $this->backdropLogin($web_user);
+    $nodes = array();
+
+    // Create initial node.
+    $node = $this->backdropCreateNode();
+    $settings = get_object_vars($node);
+    $settings['revision'] = 1;
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    // Create a revision with random title and body and update variables.
+    $this->backdropCreateNode($settings);
+    // Make sure we get revision information.
+    $node = node_load($node->nid);
+    $settings = get_object_vars($node);
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    $this->nodes = $nodes;
+  }
+
+  /**
+   * Tests that the correct layout is used for node revisions.
+   */
+  public function testNodeLayoutRevisions() {
+    $nodes = $this->nodes;
+
+    // The node revision should use the 'custom_node' layout with path node/%.
+
+    // Confirm that our layout shows up on both the original node and its
+    // revision.
+    foreach ($nodes as $node) {
+      $body = $node->body[LANGUAGE_NONE][0]['value'];
+      $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+      $this->assertText($body, 'Correct body text displays for version.');
+
+      // Look for the taylor template (only exists in our layout).
+      $this->assertText('taylor', 'Layout template "taylor" found.');
+
+      // Look for the heading of the field body block that exists only in our
+      // layout.
+      $this->assertText('Node body field', '"Node body field" found.');
+
+      // Look for the body text, which appears only in that field if the context
+      // was set properly.
+      $this->assertText($body, "\"{$body}\" found.");
+    }
+
+    // Enable the node revision override layout 'custom_node_revision' with
+    // path node/%/revisions/%/view.
+
+    $layouts = layout_load_all();
+    $revision_layout = $layouts['custom_node_revision'];
+    $revision_layout->enable();
+    $revision_layout->save();
+
+    // Check the old revision to see that it uses our override layout.
+    $node = $nodes[0];
+    $body = $node->body[LANGUAGE_NONE][0]['value'];
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+    $this->assertText($body, 'Correct body text displays for version.');
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Revision layout title', '"Custom Node Revision layout title" found.');
 
     // Look for the body text, which appears only in that field if the context
     // was set properly.
@@ -1450,6 +1650,32 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodesByUser;
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
+  /**
+   * @var int
+   */
+  protected $publicTid;
+
+  /**
+   * @var int
+   */
+  protected $privateTid;
+
+  /**
+   * @var array
+   */
+  protected $nids_visible;
+
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
@@ -1602,6 +1828,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
 class NodeSaveTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('node_test');
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
@@ -1703,8 +1934,8 @@ class NodeSaveTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests determing changes in hook_node_presave() and verifies the static node
-   * load cache is cleared upon save.
+   * Tests determining changes in hook_node_presave() and verifies the static
+   * node load cache is cleared upon save.
    */
   function testDeterminingChanges() {
     // Initial creation.
@@ -1742,7 +1973,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    * @see node_test_node_insert()
    */
   function testNodeSaveOnInsert() {
-    // node_test_node_insert() tiggers a save on insert if the title equals
+    // node_test_node_insert() triggers a save on insert if the title equals
     // 'new'.
     $node = $this->backdropCreateNode(array('title' => 'new'));
     $this->assertEqual($node->title, 'Node ' . $node->nid, 'Node saved on node insert.');
@@ -1770,7 +2001,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
 
-    // Create a content type programmaticaly.
+    // Create a content type programmatically.
     $type = $this->backdropCreateContentType();
 
     $config = config('node.type.' . $type->type);
@@ -2080,6 +2311,12 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -2104,6 +2341,31 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
+  /**
+   * @var User
+   */
+  protected $base_user_4;
 
   function setUp() {
     parent::setUp();
@@ -2273,7 +2535,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
     }
 
-    // Verify 'view any unpubished content' allows view but not edit or delete.
+    // Verify 'view any unpublished content' allows view but not edit or delete.
     $this->backdropLogout();
     $this->backdropLogin($this->base_user_4);
     $this->backdropGet('admin/content');
@@ -2360,6 +2622,12 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('node', 'system');
 
@@ -2399,6 +2667,16 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node', 'block');
@@ -2761,6 +3039,11 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * @var object
    */
   protected $noAccessUser;
+
+  /**
+   * @var User
+   */
+  protected $noAccessUser2;
 
   function setUp() {
     parent::setUp('node_access_test');
@@ -3207,6 +3490,12 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
@@ -3251,6 +3540,32 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $content_admin_user;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
@@ -3462,6 +3777,47 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropGet($node_path);
     $this->assertResponse(404);
   }
+
+  /**
+   * Test node update and insert with entity cache.
+   *
+   * Make sure that creating a new node does not affect existing entity cache
+   * records, and updating a node only acts on the affected cid.
+   */
+  function testNodeUpdateInsertCache() {
+    $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
+    $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
+    $ids = array($node_one->nid, $node_two->nid);
+    $query = 'SELECT * FROM {cache_entity_node}';
+
+    // Trigger caching for both nodes and get cache records.
+    node_load_multiple($ids);
+    $cached = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached), 2, 'Both nodes have a record in table cache_entity_node.');
+
+    // Update one of the nodes.
+    $this->backdropLogin($this->admin_user);
+    $updated_title = 'Node two updated';
+    $edit = array('title' => $updated_title);
+    $this->backdropPost('node/' . $node_two->nid . '/edit', $edit, t('Save'));
+
+    // Check records in the entity cache database table after updating a node.
+    $cached_after_update = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_update), 2, 'Both nodes still have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_update[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+    $this->assertNotEqual($cached_after_update[2]->created, $cached[2]->created, 'Cache timestamp of node 2 has changed after updating.');
+    $node_data = unserialize($cached_after_update[2]->data);
+    $this->assertEqual($node_data->title, $updated_title, 'Cached node title is correct after updating.');
+
+    // Create a new page node.
+    $edit = array('title' => 'Node three');
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+
+    // Check records again.
+    $cached_after_insert = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_insert), 3, 'All three nodes have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_insert[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+  }
 }
 
 /**
@@ -3492,6 +3848,11 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  * node instances.
  */
 class NodePublishScheduling extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function testNodeTypeCreateDefaultDraft() {
     // Create a content type of fooba via the user interface.

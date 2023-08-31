@@ -199,7 +199,7 @@ function node_multiple_delete_confirm($form, &$form_state) {
     $form['node_list']['#items'][] = check_plain($title);
   }
 
-  $confirm_question = format_plural(count($rows), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
+  $confirm_question = format_plural(count($rows), 'Are you sure you want to delete this content item?', 'Are you sure you want to delete these content items?');
   return confirm_form($form, $confirm_question, 'admin/content', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
 }
 
@@ -210,8 +210,8 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
   node_delete_multiple(array_keys($form_state['values']['nodes']));
   cache_clear_all();
   $count = count($form_state['values']['nodes']);
-  watchdog('content', 'Deleted @count posts.', array('@count' => $count));
+  watchdog('content', 'Deleted @count content items.', array('@count' => $count));
 
-  backdrop_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));
+  backdrop_set_message(format_plural($count, 'Deleted 1 content item.', 'Deleted @count content items.'));
   $form_state['redirect'] = 'admin/content';
 }

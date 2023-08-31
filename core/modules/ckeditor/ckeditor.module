@@ -319,7 +319,7 @@ function ckeditor_ckeditor_plugins() {
     )
   );
 
-  // The backdroplink plugin replaces normal link funcitonality.
+  // The backdroplink plugin replaces normal link functionality.
   $plugins['backdroplink'] = array(
     'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdroplink',
     'file' => 'plugin.js',

@@ -531,11 +531,13 @@ function hook_block_info_alter(&$blocks) {
 /**
  * Define a configuration form for a block.
  *
- * @param $delta
+ * @param string $delta
  *   Which block is being configured. This is a unique identifier for the block
  *   within the module, defined in hook_block_info().
+ * @param array $settings
+ *   An array of settings for this block.
  *
- * @return
+ * @return array
  *   A configuration form, if one is needed for your block beyond the standard
  *   elements that the block module provides (block title, visibility, etc.).
  *
@@ -543,6 +545,8 @@ function hook_block_info_alter(&$blocks) {
  *
  * @see hook_block_info()
  * @see hook_block_save()
+ *
+ * @since 1.0.6 $settings parameter added.
  */
 function hook_block_configure($delta = '', $settings = array()) {
   // This example comes from node.module.
@@ -682,8 +686,10 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- *   - settings: All block settings as defined for this instance of the block.
- *   - contexts: All layout contexts available for the layout.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
@@ -719,8 +725,10 @@ function hook_block_view_alter(&$data, $block) {
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_alter()
  * @see hook_block_view()
