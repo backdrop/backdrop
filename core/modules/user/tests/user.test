@@ -425,7 +425,10 @@ class UserValidationTestCase extends BackdropUnitTestCase {
 class UserLoginTestCase extends UserLoginTestBase {
   protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * Set up environment.
+   */
+  protected function setUp() {
     parent::setUp('user_session_test');
   }
 
@@ -573,7 +576,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test logging in when an anon session already exists.
    */
-  function testLoginWithAnonSession() {
+  public function testLoginWithAnonSession() {
     // Visit the callback to generate a session for this anon user.
     $this->backdropGet('user_session_test_anon_session');
     // Now login.
@@ -956,7 +959,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $account->uid . '/edit');
     $this->backdropPost(NULL, NULL, t('Cancel account'));
     $this->assertRaw(t('Are you sure you want to cancel the account %name?', array('%name' => $account->name)), 'Confirmation form to cancel account displayed.');
-    $this->assertText(t('Select the method to cancel the account above.'), 'Allows to select account cancellation method.');
+    $this->assertText(t('When cancelling the account'), 'Allows to select account cancellation method.');
 
     // Confirm deletion.
     $this->backdropPost(NULL, NULL, t('Cancel account'));
@@ -1351,7 +1354,14 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer content types', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer permissions',
+      'access user profiles',
+      'administer site configuration',
+      'administer account settings',
+      'administer content types',
+      'administer modules',
+    ));
     $this->editor_user = $this->backdropCreateUser(array('access content'));
 
     // Find the new role names.
@@ -1414,7 +1424,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Test assigning of permissions for the editor role.
    */
-  function testEditorRole() {
+  public function testEditorRole() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/roles');
 
@@ -1434,7 +1444,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.', array(
       '%admin' => $this->admin_role_name,
-      '%editor' => $this->editor_role_name
+      '%editor' => $this->editor_role_name,
     )));
     // Opposite of the above assertNoFieldByXPath(), confirm that there are at
     // least some permission checkboxes checked.

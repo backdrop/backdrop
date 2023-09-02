@@ -11,6 +11,8 @@
  * @see user_cancel_user_action()
  */
 function user_multiple_cancel_confirm($form, &$form_state) {
+  $config = config('system.core');
+
   if (isset($_SESSION['user_cancel_action']['timestamp']) && (REQUEST_TIME - $_SESSION['user_cancel_action']['timestamp'] < 6000)) {
     $uids = $_SESSION['user_cancel_action']['uids'];
   }
@@ -50,16 +52,22 @@ function user_multiple_cancel_confirm($form, &$form_state) {
   }
 
   module_load_include('inc', 'user', 'user.pages');
-  $form['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling these accounts'),
-  );
-  $form['user_cancel_method'] += user_cancel_methods();
-
-  // Remove method descriptions.
-  foreach (element_children($form['user_cancel_method']) as $element) {
-    unset($form['user_cancel_method'][$element]['#description']);
+  $user_cancel_methods = user_cancel_methods();
+  foreach ($user_cancel_methods as $name => $method) {
+    // Exclude any account cancellation methods that the current user does not
+    // have permission to use.
+    $user_has_access = isset($method['access']) && $method['access'];
+    if (!isset($method['access']) || $user_has_access) {
+      $options[$name] = $method['title'];
+    }
   }
+
+  $form['user_cancel_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('When cancelling these accounts'),
+    '#options' => $options,
+    '#default_value' => $config->get('user_cancel_method'),
+  );
 
   // Allow to send the account cancellation confirmation mail.
   $form['user_cancel_confirm'] = array(
@@ -73,7 +81,7 @@ function user_multiple_cancel_confirm($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
     '#default_value' => FALSE,
-    '#access' => config_get('system.core', 'user_mail_status_canceled_notify'),
+    '#access' => $config->get('user_mail_status_canceled_notify'),
     '#description' => t('When enabled, the user will receive an email notification after the account has been cancelled.'),
   );
 
@@ -95,7 +103,8 @@ function user_multiple_cancel_confirm_submit($form, &$form_state) {
     if ($uid <= 1) {
       continue;
     }
-    // Prevent user administrators from deleting themselves without confirmation.
+    // Prevent user administrators from deleting themselves without
+    // confirmation.
     if ($uid == $user->uid) {
       $admin_form_state = $form_state;
       unset($admin_form_state['values']['user_cancel_confirm']);
@@ -149,13 +158,24 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('When an email address is used as username, require a matching email address.'),
     '#default_value' => $config->get('user_email_match'),
   );
+
   module_load_include('inc', 'user', 'user.pages');
+  $user_cancel_methods = user_cancel_methods();
+  foreach ($user_cancel_methods as $name => $method) {
+    // Skip all account cancellation methods that have #access defined, as those
+    // cannot be configured as default method.
+    if (!isset($method['access'])) {
+      $options[$name] = $method['title'];
+    }
+  }
   $form['registration_cancellation']['user_cancel_method'] = array(
-    '#type' => 'item',
+    '#type' => 'radios',
     '#title' => t('When cancelling a user account'),
+    '#options' => $options,
+    '#default_value' => $config->get('user_cancel_method'),
     '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer user accounts'), '@permissions-url' => url('admin/config/people/permissions'))),
   );
-  $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
+
   foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
     // Remove all account cancellation methods that have #access defined, as
     // those cannot be configured as default method.
@@ -653,7 +673,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
