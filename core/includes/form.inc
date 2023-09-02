@@ -4750,6 +4750,8 @@ function theme_textarea($variables) {
 function theme_password($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'password';
+  $element['#attributes']['spellcheck'] = !empty($element['#attributes']['spellcheck']) ? $element['#attributes']['spellcheck'] : 'false';
+
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
   _form_set_class($element, array('form-text'));
 
