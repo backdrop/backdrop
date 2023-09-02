@@ -50,9 +50,14 @@ function user_pass() {
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
-      'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
+
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
     $form['name']['#type'] = 'value';
