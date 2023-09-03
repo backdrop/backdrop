@@ -351,6 +351,9 @@ function template_preprocess_username(&$variables) {
     $variables['link_path'] = $account->homepage;
     $variables['homepage'] = $account->homepage;
   }
+  elseif (!isset($variables['link_attributes'])) {
+    $variables['link_attributes'] = array();
+  }
   // We do not want the l() function to check_plain() a second time.
   $variables['link_options']['html'] = TRUE;
   // Set a default class.
