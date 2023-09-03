@@ -61,6 +61,8 @@ function theme_user_signature($variables) {
  *   - extra: Additional text to append to the user's name, sanitized.
  *   - link_path: The path or URL of the user's profile page, home page, or
  *     other desired page to link to for more information about the user.
+ *   - link_attributes: attributes that should only be applied if linking the
+ *     user's name to the user's page.
  *   - link_options: An array of options to pass to the l() function's $options
  *     parameter if linking the user's name to the user's page.
  *   - attributes: An array of attributes to pass to the
