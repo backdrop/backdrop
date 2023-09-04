@@ -1499,6 +1499,9 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *   TRUE if the theme has settings, FALSE otherwise.
  */
 function theme_has_settings($theme) {
+  if (config_get_names_with_prefix($theme . '.settings')) {
+    return TRUE;
+  }
   $themes = list_themes();
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {

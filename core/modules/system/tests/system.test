@@ -1822,7 +1822,8 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    */
   function testThemeSettings() {
     theme_enable(array('basis'));
-    module_enable(array('color'));
+    module_enable(array('color', 'theme_test'));
+    backdrop_flush_all_caches();
     // Change Basis settings so config file is created.
     $edit = array();
     $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));
@@ -1837,6 +1838,17 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     // Check that config file no longer exists.
     $config_after = config('basis.settings');
     $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
+
+    // Test that the theme-specific settings form can be saved and that the
+    // theme-specific checkbox is checked and unchecked as appropriate.
+    module_enable(array('theme_test'));
+    backdrop_flush_all_caches();
+    theme_enable(array('test_theme_config'));
+
+    $this->backdropGet('admin/appearance/settings/test_theme_config');
+    $this->assertFieldChecked('edit-test-theme-checkbox-one', 'The checkbox one setting is checked.');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox-two', 'The checkbox two setting is unchecked.');
+    $this->assertFieldById('edit-test-theme-textfield', 'Default field value');
   }
 }
 
