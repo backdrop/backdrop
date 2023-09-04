@@ -1839,8 +1839,9 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $config_after = config('basis.settings');
     $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
 
-    // Test that the theme-specific settings form can be saved and that the
-    // theme-specific checkbox is checked and unchecked as appropriate.
+    // Test that the theme-specific settings form appears and has correct
+    // values pulled from a config file, without a settings array in the info
+    // file.
     module_enable(array('theme_test'));
     backdrop_flush_all_caches();
     theme_enable(array('test_theme_config'));
