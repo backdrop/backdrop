@@ -52,7 +52,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function checkAccess() {
+  public function checkAccess() {
     if (empty($this->contexts) || count($this->contexts) != 2 || empty($this->contexts['user1']->data) || empty($this->contexts['user2']->data)) {
       return FALSE;
     }
@@ -69,7 +69,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
   /**
    * {@inheritdoc}
    */
-  function form(&$form, &$form_state) {
+  public function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
     // Move logged-in user account to be the first option in the first list.
