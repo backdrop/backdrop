@@ -17,6 +17,16 @@ abstract class FileTransfer {
   protected $port;
 
   /**
+   * @var string
+   */
+  protected $jail;
+
+  /**
+   * @var string
+   */
+  protected $chroot;
+
+  /**
    * The constructor for the UpdateConnection class. This method is also called
    * from the classes that extend this class and override this method.
    */

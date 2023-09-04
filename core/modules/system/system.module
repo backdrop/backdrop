@@ -454,12 +454,14 @@ function system_element_info() {
     '#element_validate' => array('html_date_validate'),
     '#theme' => 'html_date',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_time'] = array(
     '#input' => TRUE,
     '#element_validate' => array('html_time_validate'),
     '#theme' => 'html_time',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_datetime'] = array(
     '#input' => TRUE,
@@ -835,6 +837,15 @@ function system_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'weight' => -15,
+  );
+  $items['admin/config/development/jquery'] = array(
+    'title' => 'jQuery',
+    'description' => 'Configure settings related to the jQuery version.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_jquery_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'weight' => -10,
   );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
@@ -1334,13 +1345,9 @@ function system_library_info() {
   $libraries['jquery'] = array(
     'title' => 'jQuery',
     'website' => 'http://jquery.com',
-    'version' => '1.12.4',
+    'version' => '3.7.0',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // These include security fixes, so assign a weight that makes them load
-      // as soon after jquery.js is loaded as possible.
-      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
@@ -1358,7 +1365,7 @@ function system_library_info() {
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
     'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
+    'version' => '4.3.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
     ),
@@ -1492,23 +1499,74 @@ function system_library_info() {
     'website' => 'http://jqueryui.com',
     'version' => '1.13.0',
     'js' => array(
-      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.labels.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.tabbable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.unique-id.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.version.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.focusable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.ie.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.keycode.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.plugin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1823,7 +1881,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
+      'core/misc/ui/jquery.ui.widget.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -10,
+      ),
     ),
     'dependencies' => array(
       array('system', 'ui'),
@@ -1838,7 +1899,10 @@ function system_library_info() {
     'website' => 'https://github.com/jquery/jquery-color',
     'version' => '2.2.0',
     'js' => array(
-      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/jquery.color.js'  => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
   );
 
@@ -1847,7 +1911,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
     'dependencies' => array(
       array('system', 'jquery.color'),
@@ -2022,8 +2089,8 @@ function system_library_info() {
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
-    'version' => '0.2.3',
+    'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
+    'version' => '1.0.9',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2064,6 +2131,39 @@ function system_library_info() {
   );
 
   return $libraries;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function system_library_info_alter(&$libraries, $module) {
+  // Immediately return if not modifying the system libraries.
+  if ($module !== 'system') {
+    return;
+  }
+  $config = config('system.core');
+
+  // Don't replace anything if default jQuery should be used.
+  if ($config->get('jquery_version') == 'legacy') {
+    $libraries['jquery']['version'] = '1.12.4';
+    $libraries['jquery']['js'] = array(
+      'core/misc/jquery.1.12.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -20,
+      ),
+      // These include security fixes, so assign a weight that makes them load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+      'core/misc/jquery-html-prefilter-3.5.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+    );
+  }
+
 }
 
 /**

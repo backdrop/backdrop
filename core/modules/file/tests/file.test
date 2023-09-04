@@ -2511,6 +2511,21 @@ class FileUploadWizardTestCase extends FileTestHelper {
 class FileAdminTestCase extends FileTestHelper {
   protected $profile = 'minimal';
 
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
   function setUp() {
     parent::setUp();
 

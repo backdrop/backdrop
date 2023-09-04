@@ -72,6 +72,16 @@ abstract class Updater implements BackdropUpdaterInterface {
    */
   public $source;
 
+  /**
+   * @var string
+   */
+  protected $name;
+
+  /**
+   * @var string
+   */
+  protected $title;
+
   public function __construct($source) {
     $this->source = $source;
     $this->name = self::getProjectName($source);

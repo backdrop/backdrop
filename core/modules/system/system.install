@@ -3437,6 +3437,26 @@ function system_update_1089() {
 }
 
 /**
+ * Set a default value for the new user_editor_role setting on existing sites.
+ */
+function system_update_1090() {
+  $config = config('system.core');
+  if ($config->get('user_editor_role') === NULL) {
+    $config->set('user_editor_role', '');
+    $config->save();
+  }
+}
+
+/**
+ * Set jQuery to the backwards-compatible, legacy version for existing sites.
+ */
+function system_update_1091() {
+  if (config_get('system.core', 'jquery_version') === NULL) {
+    config_set('system.core', 'jquery_version', 'legacy');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
