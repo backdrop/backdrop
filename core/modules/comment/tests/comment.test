@@ -74,7 +74,7 @@ class CommentHelperCase extends BackdropWebTestCase {
 
     // Disable safety cron run that can affect the updating of comment "new"
     // status during shutdown functions when cron takes a long time.
-    config_set('system.core', 'auto_cron_enabled', 0);
+    config_get('system.core', 'cron_safe_threshold', 0);
   }
 
   /**

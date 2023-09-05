@@ -1569,19 +1569,20 @@ function system_cron_settings($form, &$form_state) {
   $config = config('system.core');
 
   $form['last_run'] = array(
-    '#type' => 'help',
+    '#type' => 'markup',
     '#markup' => t('Last run: %cron-last ago.', array(
       '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)),
   );
 
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search. The preferred way to run such tasks is by <a href="https://en.wikipedia.org/wiki/Cron">setting up native cron jobs</a>. If that is not an available option with your hosting provider, then the following methods are alternatives.'),
+    '#markup' => t('On your Backdrop site, cron runs will take care of periodic tasks like checking for module updates, and indexing your website content for search. The recommended way to run cron is by setting up a cron job on the server.'),
   );
 
   $form['manual'] = array(
     '#type' => 'fieldset',
     '#title' => t('Manual cron'),
+    '#description' => t('Use the button below when you need to execute a cron run immediately.'),
   );
   $form['manual']['run'] = array(
     '#type' => 'submit',
@@ -1592,7 +1593,7 @@ function system_cron_settings($form, &$form_state) {
   $form['external'] = array(
     '#type' => 'fieldset',
     '#title' => t('External cron'),
-    '#description' => t('The link below allows you to run cron from outside the site, e.g., from a third-party service. You can also use this URL to run cron via a native cron job.'),
+    '#description' => t('Use the link below to run cron from outside this site, e.g., from a third-party service, or via a cron job on the server.'),
   );
   $url = url($base_url . '/core/cron.php', array(
     'external' => TRUE,
@@ -1605,19 +1606,62 @@ function system_cron_settings($form, &$form_state) {
   $form['automatic'] = array(
     '#type' => 'fieldset',
     '#title' => t('Automatic cron'),
-    '#description' => t('Enabling this option will trigger cron runs as page requests are made on your site. Cron runs happen in the background, based on a threshold you specify. To find out how that works, read more in <a href="@url">the cron section of the User Guide</a>. If you have configured cron to run from an external trigger, you should disable this option.', array('@url' => url('https://backdropcms.org/cron'))),
+    '#description' => '<p>' . t('Use the option below to trigger cron runs as page requests are made on your site.') . '</p><p>' . t('If you have configured cron to run from outside this site, you should disable this option, or increase the threshold to serve as an emergency fallback.', array('@url' => url('https://backdropcms.org/cron'))),
   );
-  $form['automatic']['auto_cron_enabled'] = array(
+
+  $interval = $config->get('cron_safe_threshold');
+  $form['automatic']['cron_safe_threshold'] = array(
+    '#type' => 'value',
+    '#value' => $interval,
+  );
+
+  // Set a sensible default for number and interval.
+  $enabled_default = TRUE;
+  $units_default = 60; // minutes.
+  $interval_number = 5;
+
+  // Determine enabled state based on stored value of interval.
+  if ($interval === -1) {
+    $enabled_default = FALSE;
+  }
+  $form['automatic']['cron_auto_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enabled'),
-    '#default_value' => $config->get('auto_cron_enabled'),
+    '#default_value' => $enabled_default,
   );
+
+  // Set options as number of seconds for easy math.
+  $unit_options = array(
+    604800 => t('weeks'),
+    86400 => t('days'),
+    3600 => t('hours'),
+    60 => t('minutes'),
+  );
+
+  if ($enabled_default) {
+    // Determine inerval number and units based on stored value of interval.
+    $units_default = $config->get('cron_interval_units');
+
+    if ($units_default) {
+      $interval_number = $interval / $units_default;
+    }
+    else {
+      foreach ($unit_options as $key => $value) {
+        if (($interval % $key) == 0) {
+          $units_default = $key;
+          $interval_number = $interval / $key;
+          break;
+        }
+      }
+    }
+  }
+
   $form['automatic']['interval'] = array(
     '#type' => 'container',
     '#id' => 'automatic-cron-interval',
     '#states' => array(
       'visible' => array(
-        '#edit-auto-cron-enabled' => array('checked' => TRUE),
+        '#edit-cron-auto-enabled' => array('checked' => TRUE),
       ),
     ),
   );
@@ -1626,23 +1670,25 @@ function system_cron_settings($form, &$form_state) {
   );
   $form['automatic']['interval']['cron_interval_num'] = array(
     '#type' => 'number',
-    '#default_value' => $config->get('cron_interval_num'),
+    '#default_value' => $interval_number,
     '#min' => 0,
     '#step' => 1,
     '#size' => 3,
   );
+  // Sort the intervals from shortest to longest for UI.
+  ksort($unit_options, SORT_NUMERIC);
   $form['automatic']['interval']['cron_interval_units'] = array(
     '#type' => 'select',
-    '#default_value' => $config->get('cron_interval_units'),
-    '#options' => array(
-      60 => t('minutes'),
-      3600 => t('hours'),
-      86400 => t('days'),
-      604800 => t('weeks'),
-    ),
+    '#default_value' => $units_default,
+    '#options' => $unit_options,
+    '#field_suffix' => t('ago') . ',',
   );
   $form['automatic']['interval']['cron_interval_post'] = array(
-    '#markup' => t('ago, run cron on the next page request.'),
+    '#markup' => t('run cron on the next page request.'),
+  );
+  $form['automatic']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Automatic cron runs will happen in the background, based on the threshold specified. To find out more on that works, see <a href="@url">the cron section of the User Guide</a>.'),
   );
 
   return system_settings_form($form);
@@ -1652,11 +1698,31 @@ function system_cron_settings($form, &$form_state) {
  * Extra validation for system_cron_settings form.
  */
 function system_cron_settings_validate($form, &$form_state) {
-  $enabled = $form_state['values']['auto_cron_enabled'];
+  $enabled = $form_state['values']['cron_auto_enabled'];
   $interval_num = $form_state['values']['cron_interval_num'];
-  if ($enabled && !$interval_num) {
-    form_set_error('cron_interval_num', t('You must enter a nonzero value for the time interval if you have enabled automatic cron.'));
+  $interval_units = $form_state['values']['cron_interval_units'];
+
+  if ($form_state['values']['cron_auto_enabled'] == FALSE) {
+    $form_state['values']['cron_safe_threshold'] = -1;
   }
+
+  else {
+    if ($enabled && !$interval_num) {
+      $error = t('You must enter a nonzero value for the time interval if you have enabled automatic cron.');
+      form_set_error('cron_interval_num', $error);
+    }
+
+    // Convert interval number and units to number of seconds for storage.
+    $interval = $interval_num * $interval_units;
+    if ($interval != $form_state['values']['cron_safe_threshold']) {
+      $form_state['values']['cron_safe_threshold'] = $interval;
+    }
+  }
+
+  // Remove form values we are not saving.
+  unset($form_state['values']['cron_auto_enabled']);
+  unset($form_state['values']['cron_interval_num']);
+  // Save preferred units for a better UI.
 }
 
 /**
