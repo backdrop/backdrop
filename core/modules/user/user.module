@@ -454,6 +454,25 @@ function user_password($length = 10) {
 }
 
 /**
+ * Checks if a user role has a permission.
+ *
+ * @param string $role_name
+ *   The role machine name.
+ * @param string $permission_name
+ *   The permission to check.
+ *
+ * @return bool
+ *   TRUE if the role has the permission, FALSE if it does not have the
+ *   permission.
+ *
+ * @since 1.26.0 Function added
+ */
+function user_role_has_permission($role_name, $permission_name) {
+  $role = user_role_load($role_name);
+  return $role ? in_array($permission_name, $role->permissions) : FALSE;
+}
+
+/**
  * Determine the permissions for one or more roles.
  *
  * @param $role_names
