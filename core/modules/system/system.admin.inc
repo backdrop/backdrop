@@ -1575,7 +1575,7 @@ function system_cron_settings($form, &$form_state) {
 
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search. The preferred way to run such tasks is by setting up native cron jobs. If that is not an available option with your hosting provider, then the following methods are alternatives.'),
+    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.'),
   );
 
   $form['manual'] = array(
