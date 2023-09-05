@@ -77,9 +77,10 @@ class UserCompareLayoutAccess extends LayoutAccess {
       $option_label = $form['contexts']['user1']['#options']['current_user'];
       $form['contexts']['user1']['#options'] = array_merge(
         array('current_user' => $option_label),
-        $form['contexts']['user1']['#options'],
+        $form['contexts']['user1']['#options']
       );
     }
+
     // If there are only two options, remove the second one.
     if (count($form['contexts']['user1']['#options']) === 2) {
       array_pop($form['contexts']['user1']['#options']);
