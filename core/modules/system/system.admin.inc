@@ -1569,14 +1569,13 @@ function system_cron_settings($form, &$form_state) {
   $config = config('system.core');
 
   $form['last_run'] = array(
-    '#type' => 'help',
     '#markup' => t('Last run: %cron-last ago.', array(
       '%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)),
   );
 
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search. The preferred way to run such tasks is by <a href="https://en.wikipedia.org/wiki/Cron">setting up native cron jobs</a>. If that is not an available option with your hosting provider, then the following methods are alternatives.'),
+    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search. The preferred way to run such tasks is by setting up native cron jobs. If that is not an available option with your hosting provider, then the following methods are alternatives.'),
   );
 
   $form['manual'] = array(
