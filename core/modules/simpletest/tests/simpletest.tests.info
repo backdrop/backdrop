@@ -1,4 +1,4 @@
-; This info file contains an enourmous number of tests. They are ordered by:
+; This info file contains an enormous number of tests. They are ordered by:
 ; 1) The main SimpleTest tests from the simpletest.test file.
 ; 2) The list of all *.test files in the /tests directory, alphabetically.
 ; 3) Within each *.test file, matching the declaration order of each class.
@@ -838,7 +838,7 @@ description = Tests stream wrapper functions.
 group = File API
 file = file.test
 
-[FileTranferTest]
+[FileTransferTest]
 name = FileTransfer unit tests
 description = Test that the jail is respected and that protocols using recursive file move operations work.
 group = System

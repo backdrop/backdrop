@@ -147,12 +147,12 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     // Verify that the select field contains a node-related action.
     $this->assertOption('edit-action', 'node_delete_action');
 
-    // Verify that the view contains bulk form checboxes with values that match
+    // Verify that the view contains bulk form checkboxes with values that match
     // the ids of the correct entity (in this case, nid).
     $this->assertCorrectBulkFormEntityIds('nid', 'node');
 
     // Verify that the available actions in the bulk form configuration form
-    // belong to node entities by checking that the node_delete_action eixists.
+    // belong to node entities by checking that the node_delete_action exists.
     $this->backdropGet('admin/structure/views/nojs/config-item/test_bulk_form/page_1/field/bulk_form');
     $this->assertFieldByName('options[selected_actions][node_delete_action]', 'node_delete_action', 'Found a checkbox for node_delete_action in the Bulk configuration form.');
   }
@@ -191,7 +191,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     $this->view->save();
     $this->backdropGet('test-bulk-form');
 
-    // Verify that the view contains bulk form checboxes with values that match
+    // Verify that the view contains bulk form checkboxes with values that match
     // the ids of the correct entity (in this case, uid).
     $this->assertCorrectBulkFormEntityIds('uid', 'user');
 
@@ -244,7 +244,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
 
     $this->backdropGet('test-bulk-form');
 
-    // Verify that the view contains bulk form checboxes with values that match
+    // Verify that the view contains bulk form checkboxes with values that match
     // the ids of the views_test entities.
     $this->assertCorrectBulkFormEntityIds('id', 'views_test');
 

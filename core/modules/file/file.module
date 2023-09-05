@@ -429,6 +429,15 @@ function file_menu() {
     'file' => 'file.pages.inc',
   );
 
+  $items['admin/structure/file-types/classify'] = array(
+    'title' => 'Classify file types',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_type_classify_confirm'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'file' => 'file.admin.inc',
+  );
+
   return $items;
 }
 
@@ -512,8 +521,7 @@ function file_entity_info() {
  * URI callback for file entities.
  */
 function file_uri($file) {
-  $uri['path'] = 'file/' . $file->fid;
-  return $uri;
+  return $file->uri();
 }
 
 /**
@@ -2615,16 +2623,6 @@ function _file_sort_array_by_weight(&$a) {
 }
 
 /*
- * Implements hook_cron_queue_info().
- */
-function file_cron_queue_info() {
-  $queues['file_type_determine'] = array(
-    'worker callback' => 'file_type_determine',
-  );
-  return $queues;
-}
-
-/*
  * Determines file type for a given file ID and saves the file.
  *
  * @param $fid
@@ -2789,101 +2787,40 @@ function file_get_type($file) {
 /**
  * Determines if a user may perform the given operation on the specified file.
  *
- * @param $op
+ * @param string $op
  *   The operation to be performed on the file. Possible values are:
  *   - "view"
  *   - "download"
  *   - "update"
  *   - "delete"
  *   - "create"
- * @param $file
+ * @param File|string|NULL $file
  *   The file object on which the operation is to be performed, or file type
  *   (e.g. 'image') for "create" operation.
- * @param $account
+ * @param User|AnonymousUser $account
  *   Optional, a user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function file_access($op, $file = NULL, $account = NULL) {
-  $rights = &backdrop_static(__FUNCTION__, array());
-
-  if (!$file && !in_array($op, array('view', 'download', 'update', 'delete', 'create'), TRUE)) {
-    // If there was no file to check against, and the $op was not one of the
-    // supported ones, we return access denied.
-    return FALSE;
-  }
-
-  // If no user object is supplied, the access check is for the current user.
-  if (empty($account)) {
-    $account = $GLOBALS['user'];
-  }
-
-  // $file may be either an object or a file type. Since file types cannot be
-  // an integer, use either fid or type as the static cache id.
-  $cache_id = NULL;
-  if (!empty($file->id)) {
-    $cache_id = $file->id;
-  }
-  elseif (is_string($file) && $op == 'create') {
-    $cache_id = $file;
-  }
-  else {
-    $cache_id = backdrop_hash_base64(serialize($file));
-  }
-
-  // If we've already checked access for this file, user and op, return from
-  // cache.
-  if (isset($rights[$account->uid][$cache_id][$op])) {
-    return $rights[$account->uid][$cache_id][$op];
-  }
-
-  if (user_access('bypass file access', $account)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
-  }
-
-  // We grant access to the file if both of the following conditions are met:
-  // - No modules say to deny access.
-  // - At least one module says to grant access.
-  $access = module_invoke_all('file_access', $op, $file, $account);
-  if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = FALSE;
-  }
-  elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
-    return $rights[$account->uid][$cache_id][$op] = TRUE;
-  }
-
-
-  // Fall back to default behaviors on view.
-  if ($op == 'view' && is_object($file)) {
-    $scheme = file_uri_scheme($file->uri);
-    $wrapper = file_get_stream_wrapper($scheme);
-
-    if (!empty($wrapper['private'])) {
-      // For private files, users can view private files if the
-      // user has the 'view private files' permission.
-      if (user_access('view private files', $account)) {
-        return $rights[$account->uid][$cache_id][$op] = TRUE;
-      }
-
-      // For private files, users can view their own private files if the
-      // user is not anonymous, and has the 'view own private files' permission.
-      if (!empty($account->uid) && $file->uid == $account->uid && user_access('view own private files', $account)) {
-        return $rights[$account->uid][$cache_id][$op] = TRUE;
-      }
+  if ($op == 'create') {
+    // In some cases a File object, a bundle string, or NULL is provided.
+    if ($file == NULL) {
+      $bundle = NULL;
     }
-    elseif ($file->status == FILE_STATUS_PERMANENT && $file->uid == $account->uid && user_access('view own files', $account)) {
-      // For non-private files, allow to see if user owns the file.
-      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    elseif (is_string($file)) {
+      $bundle = $file;
     }
-    elseif ($file->status == FILE_STATUS_PERMANENT && user_access('view files', $account)) {
-      // For non-private files, users can view if they have the 'view files'
-      // permission.
-      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    else {
+      $bundle = $file->bundle();
     }
+    return File::createAccess($bundle, $account);
   }
-
+  elseif ($file instanceof File) {
+    return $file->access($op, $account);
+  }
   return FALSE;
 }
 
@@ -2895,7 +2832,7 @@ function file_access($op, $file = NULL, $account = NULL) {
  * @deprecated since 1.14.0
  */
 function file_entity_access($op, $file = NULL, $account = NULL) {
-  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://api.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://docs.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
   return file_access($op, $file, $account);
 }
 
@@ -2930,17 +2867,11 @@ function file_stream_wrappers_alter(&$wrappers) {
  */
 function file_file_access($op, $file, $account) {
   // If the file URI is invalid, deny access.
-  if (is_object($file) && isset($file->uri) && !file_valid_uri($file->uri)) {
-    if(isset($file->is_new) && $file->is_new == true && user_access('create files', $account)) {
+  if ($file instanceof File && isset($file->uri) && !file_valid_uri($file->uri)) {
+    if (isset($file->is_new) && $file->is_new == TRUE && user_access('create files', $account)) {
       return FILE_ACCESS_ALLOW;
     }
     return FILE_ACCESS_DENY;
-  }
-
-  if ($op == 'create') {
-    if (user_access('create files', $account)) {
-      return FILE_ACCESS_ALLOW;
-    }
   }
 
   if (!empty($file)) {
@@ -2948,19 +2879,19 @@ function file_file_access($op, $file, $account) {
 
     if (in_array($type, file_permissions_get_configured_types())) {
       if ($op == 'download') {
-        if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+        if (user_access('download any ' . $type . ' files', $account) || $file instanceof File && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
           return FILE_ACCESS_ALLOW;
         }
       }
 
       if ($op == 'update') {
-        if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || ($file instanceof File && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
           return FILE_ACCESS_ALLOW;
         }
       }
 
       if ($op == 'delete') {
-        if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+        if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || ($file instanceof File && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
           return FILE_ACCESS_ALLOW;
         }
       }
@@ -3398,4 +3329,85 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   );
 
   return $element;
+}
+
+
+/**
+ * Toggles or reads the value of a flag for classifying the file types.
+ *
+ * When the flag is set, a message is displayed to users with 'access
+ * administration pages' permission, pointing to the 'classify' confirm form.
+ * That form will trigger the type classification of managed files that do not
+ * currently have a type. This is often the case after upgrading from Drupal 7.
+ *
+ * @param $classify
+ *   (optional) The boolean value to be written.
+ *
+ * @return bool|NULL
+ *   The current value of the flag if no value was provided for $rebuild.
+ *
+ * @see 
+ */
+function file_needs_type_classification($rebuild = NULL) {
+  if (!isset($rebuild)) {
+    return state_get('file_needs_classification', FALSE);
+  }
+  elseif ($rebuild) {
+    state_set('file_needs_classification', TRUE);
+  }
+  else {
+    state_del('file_needs_classification');
+  }
+}
+
+/**
+ * Batch operation callback to classify the types of managed files.
+ *
+ * Unlike Drupal 7, the file_managed table in Backdrop contains a type column. 
+ * This process classifies the file types when upgrading from a D7 site.  
+ *
+ * @see file_needs_type_classification()
+ */
+function file_type_classify_batch($fids, &$context) {
+  if (!isset($context['sandbox']['current_item'])) {
+    $context['sandbox']['current_item'] = 0;
+    $context['sandbox']['count'] = count($fids);
+  }
+
+  // Process 15 files at a time.
+  $limit = min($context['sandbox']['current_item'] + 15, $context['sandbox']['count']);
+  while ($context['sandbox']['current_item'] < $limit) {
+    $fid = $fids[$context['sandbox']['current_item']];
+    file_type_determine($fid);
+    $context['results'][] = $fid;
+    $context['message'] = t('Now processing file ID %fid', array('%fid' => $fid));
+    $context['sandbox']['current_item']++;
+  }
+  $context['finished'] = $context['sandbox']['current_item'] / $context['sandbox']['count'];
+}
+
+/**
+ * Batch 'finished' callback.
+ * 
+ * @see file_type_classify_batch()
+ * @see file_needs_type_classification()
+ */
+function file_type_classify_finished($success, $results, $operations) {
+  if ($success) {
+    $message = format_plural(count($results), 'One file processed.', '@count files processed.');
+    backdrop_set_message($message);
+    file_needs_type_classification(FALSE);
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    backdrop_set_message(
+      t('An error occurred while processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      )
+    );
+  }
 }

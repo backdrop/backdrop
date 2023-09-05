@@ -21,6 +21,18 @@ function user_autocomplete($string = '') {
 }
 
 /**
+ * Menu callback for reset password form.
+ *
+ * @since 1.23.1 Replaces user_pass() as menu callback.
+ *
+ * @see user_pass()
+ */
+function user_pass_page() {
+  backdrop_set_title(t('Reset password'));
+  return backdrop_get_form('user_pass');
+}
+
+/**
  * Form builder; request a password reset.
  *
  * @ingroup forms
@@ -30,8 +42,6 @@ function user_autocomplete($string = '') {
 function user_pass() {
   global $user;
 
-  backdrop_set_title(t('Reset password'));
-
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username or email address'),
@@ -40,16 +50,21 @@ function user_pass() {
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
-      'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
+
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
     $form['name']['#type'] = 'value';
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
-      '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
+      '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
   }
@@ -126,7 +141,8 @@ function user_pass_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback; process one time login link and redirects to the user page on success.
+ * Menu callback; process one time login link and redirects to the user page on
+ * success.
  *
  * @param int $uid
  *   User ID for the user who would like their password reset.
@@ -151,8 +167,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     else {
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
-        backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
-          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
+        backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
+          array('!logout' => url('user/logout'))), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
