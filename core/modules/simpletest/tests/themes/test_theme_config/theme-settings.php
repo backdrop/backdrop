@@ -3,6 +3,7 @@
  * @file
  * Theme settings file for the test_theme_config theme.
  */
+
 $form['test_theme_checkbox_one'] = array(
   '#type' => 'checkbox',
   '#title' => 'Test theme checkbox one',
