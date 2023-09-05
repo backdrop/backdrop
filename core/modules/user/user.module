@@ -467,7 +467,7 @@ function user_password($length = 10) {
  *
  * @since 1.26.0 Function added
  */
-function user_role_has_permission(string $role_name, string $permission_name) {
+function user_role_has_permission($role_name, $permission_name) {
   $role = user_role_load($role_name);
   return $role ? in_array($permission_name, $role->permissions) : FALSE;
 }
