@@ -5,11 +5,13 @@
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
+ *
+ * This library changed its function signature in its 2.x branch. This is a
+ * forked version that is jQuery 3.x compatible.
+ *
+ * See https://github.com/backdrop/backdrop-issues/issues/6195
  */
 
-/**
- * Forked for Backdrop to fix jQuery compatibility issues.
- */
 (function (factory) {
   "use strict";
   if (typeof exports === 'object') {

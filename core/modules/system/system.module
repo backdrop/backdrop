@@ -1353,8 +1353,8 @@ function system_library_info() {
 
   // jQuery Once.
   $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once Backdrop fork',
-    'version' => BACKDROP_VERSION,
+    'title' => 'jQuery Once (Backdrop fork)',
+    'version' => '1.2.6',
     'js' => array(
       'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
