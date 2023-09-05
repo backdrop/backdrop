@@ -452,8 +452,7 @@ table.screenshot {
 /**
  * Cron settings.
  */
-#automatic-cron-interval .form-item-cron-interval-num,
-#automatic-cron-interval .form-item-cron-interval-units {
+#automatic-cron-interval .form-item {
   display: inline-block;
   margin: 0 0.25em;
 }

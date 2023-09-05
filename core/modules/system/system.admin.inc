@@ -1617,7 +1617,7 @@ function system_cron_settings($form, &$form_state) {
 
   // Set a sensible default for number and interval.
   $enabled_default = TRUE;
-  $units_default = 60; // minutes.
+  $units_default = 60; // Minutes.
   $interval_number = 5;
 
   // Determine enabled state based on stored value of interval.
@@ -1639,13 +1639,13 @@ function system_cron_settings($form, &$form_state) {
   );
 
   if ($enabled_default) {
-    // Determine inerval number and units based on stored value of interval.
+    // Determine inerval number based on optional stored unit preference.
     $units_default = $config->get('cron_interval_units');
-
     if ($units_default) {
       $interval_number = $interval / $units_default;
     }
     else {
+      // Otherwise, select the uint that leaves a whole number.
       foreach ($unit_options as $key => $value) {
         if (($interval % $key) == 0) {
           $units_default = $key;
@@ -1665,27 +1665,36 @@ function system_cron_settings($form, &$form_state) {
       ),
     ),
   );
-  $form['automatic']['interval']['cron_interval_pre'] = array(
-    '#markup' => t('If the last cron run was more than'),
-  );
-  $form['automatic']['interval']['cron_interval_num'] = array(
+
+  $number_element = array(
     '#type' => 'number',
     '#default_value' => $interval_number,
     '#min' => 0,
     '#step' => 1,
     '#size' => 3,
+    '#attributes' => array('aria-label' => t('Cron run time interval')),
   );
+
   // Sort the intervals from shortest to longest for UI.
   ksort($unit_options, SORT_NUMERIC);
-  $form['automatic']['interval']['cron_interval_units'] = array(
+  $unit_element = array(
     '#type' => 'select',
     '#default_value' => $units_default,
     '#options' => $unit_options,
-    '#field_suffix' => t('ago') . ',',
+    '#attributes' => array('aria-label' => t('Cron run time units')),
   );
-  $form['automatic']['interval']['cron_interval_post'] = array(
-    '#markup' => t('run cron on the next page request.'),
+
+  $sentence = 'If the last cron run was more than !number !unit ago, run cron on the next page request.';
+  $form['automatic']['interval']['sentence'] = array(
+    '#type' => 'container',
+    '#theme' => 'cron_interval_sentence',
+    '#children' => array(
+      'number' => $number_element,
+      'unit' => $unit_element,
+      'sentence' => $sentence,
+    ),
   );
+
   $form['automatic']['help'] = array(
     '#type' => 'help',
     '#markup' => t('Automatic cron runs will happen in the background, based on the threshold specified. To find out more on that works, see <a href="@url">the cron section of the User Guide</a>.'),

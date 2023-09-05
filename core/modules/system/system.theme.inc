@@ -822,3 +822,24 @@ function theme_label_machine_name($variables) {
 
   return $output;
 }
+
+/**
+ * Returns HTML for the cron interval sentence.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: The form element being rendered.
+ *
+ * @ingroup themeable
+ */
+function theme_cron_interval_sentence($variables) {
+  $element = $variables['element'];
+
+  $sentence = $element['#children']['sentence'];
+  $number = backdrop_render($element['#children']['number']);
+  $unit = backdrop_render($element['#children']['unit']);
+
+  $output = t($sentence, array('!number' => $number, '!unit' => $unit));
+
+  return $output;
+}
