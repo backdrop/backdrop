@@ -3350,7 +3350,7 @@ function system_update_1085() {
  * Initialize the number and units of cron setting from the existing possible
  * values.
  */
-function system_update_1086() {
+function system_update_1092() {
   $config = config('system.core');
   $threshold = $config->get('cron_safe_threshold');
   // These are the former values of the cron_safe_threshold select options.
