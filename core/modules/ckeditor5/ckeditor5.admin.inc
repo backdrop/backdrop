@@ -21,10 +21,10 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     ),
     '#attributes' => array('class' => array('ckeditor5-toolbar-configuration')),
   );
-  $elements['toolbar'] = array(
+  $elements['cketoolbar'] = array(
     '#type' => 'textarea',
     '#title' => t('Toolbar configuration'),
-    '#default_value' => json_encode($format->editor_settings['toolbar']),
+    '#default_value' => json_encode($format->editor_settings['cketoolbar']),
     '#attributes' => array('class' => array('ckeditor5-toolbar-textarea')),
   );
 
@@ -110,10 +110,10 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
  */
 function ckeditor5_settings_form_validate($form, &$form_state) {
   $settings = $form_state['values']['editor_settings'];
-  $toolbar_string = $settings['toolbar'];
+  $toolbar_string = $settings['cketoolbar'];
   $result = json_decode($toolbar_string, TRUE);
   if (empty($result)) {
-    form_error($form['editor_settings']['toolbar'], t('The CKEditor toolbar configuration could not be saved.'));
+    form_error($form['editor_settings']['cketoolbar'], t('The CKEditor toolbar configuration could not be saved.'));
   }
 
   $styles = _ckeditor5_settings_parse_style_list($settings['style_list']);
@@ -131,7 +131,7 @@ function ckeditor5_settings_form_submit($form, &$form_state) {
   $settings = $form_state['values']['editor_settings'];
 
   // Convert JSON toolbar settings to an array.
-  form_set_value($form['editor_settings']['toolbar'], json_decode($settings['toolbar'], TRUE), $form_state);
+  form_set_value($form['editor_settings']['cketoolbar'], json_decode($settings['cketoolbar'], TRUE), $form_state);
 
   // Convert string style list into an array.
   $styles = _ckeditor5_settings_parse_style_list($settings['style_list']);

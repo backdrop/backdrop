@@ -34,7 +34,9 @@
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         var [packageName,moduleName] = pluginItem.split('.');
-        editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
+        if (typeof CKEditor5[packageName] != 'undefined') {
+          editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
+        }
       });
 
       // Hide the resizable grippie while CKEditor is active.

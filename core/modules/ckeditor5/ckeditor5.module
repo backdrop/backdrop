@@ -32,7 +32,7 @@ function ckeditor5_editor_info() {
     'label' => t('CKEditor 5'),
     'library' => array('ckeditor5', 'backdrop.ckeditor5'),
     'default settings' => array(
-      'toolbar' => array(
+      'cketoolbar' => array(
         'bold', 'italic', 'blockQuote', 'heading', '|',
         'bulletedList', 'numberedList', '|',
         'alignment:left', 'alignment:center', 'alignment:right', '|',
@@ -122,6 +122,13 @@ function ckeditor5_library_info() {
       $module_path . '/lib/ckeditor5/build/ckeditor.js' => array('preprocess' => FALSE, 'group' => JS_LIBRARY),
     ),
   );
+  if (module_exists('ckeditor')) {
+    $libraries['ckeditor5']['js'][$module_path . '/js/ckeditor5.compat.js'] = array(
+      'preprocess' => FALSE,
+      'group' => JS_LIBRARY,
+      'weight' => -1,
+    );
+  }
 
   return $libraries;
 }
@@ -620,12 +627,8 @@ function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state
  */
 function ckeditor5_image_plugin_check($format, $plugin_name) {
   // Automatically enable caption support if the BackdropImage button is enabled.
-  foreach ($format->editor_settings['toolbar'] as $row) {
-    foreach ($row as $button_group) {
-      if (in_array('BackdropImage', $button_group['items'])) {
-        return TRUE;
-      }
-    }
+  if (in_array('backdropImage', $format->editor_settings['cketoolbar'])) {
+    return TRUE;
   }
   return FALSE;
 }
@@ -659,9 +662,11 @@ function ckeditor5_get_config($format, $existing_settings) {
     // Check if this plugin should be enabled.
     if (isset($plugin['enabled callback'])) {
       if ($plugin['enabled callback'] === TRUE || $plugin['enabled callback']($format, $plugin_name)) {
-        $libraries[] = $plugin['library'];
         $plugins[] = $plugin_name;
-        if ($plugin['plugin_dependencies']) {
+        if (isset($plugin['library'])) {
+          $libraries[] = $plugin['library'];
+        }
+        if (isset($plugin['plugin_dependencies'])) {
           // Add the plugin and its dependencies to the list of plugins.
           $plugins = array_merge($plugins, $plugin['plugin_dependencies']);
         }
@@ -680,7 +685,7 @@ function ckeditor5_get_config($format, $existing_settings) {
 
   // Record needed plugins based on use in the toolbar.
   $toolbar = array();
-  foreach ($format->editor_settings['toolbar'] as $button_name) {
+  foreach ($format->editor_settings['cketoolbar'] as $button_name) {
     // Sanity check that the button exists in our installation.
     if (isset($all_buttons[$button_name])) {
       // Add in the button parent's overall plugin and its dependencies.
