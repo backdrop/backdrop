@@ -3493,7 +3493,7 @@ function system_update_1093() {
   $config->set('date_views_month_format_with_year', 'F Y');
   $config->set('date_views_month_format_without_year', 'F');
   $config->set('date_views_date_format_with_year', 'l, F j, Y');
-  $config->set('date_views_day_format_without_year', 'date_views_day_format_without_year', 'l, F j');
+  $config->set('date_views_day_format_without_year', 'l, F j');
   $config->set('date_views_week_format_with_year', 'F j, Y');
   $config->set('date_views_week_format_without_year', 'F j');
   $config->save();
