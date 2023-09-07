@@ -20,6 +20,30 @@
  */
 
 /**
+ * Retrieves the schema for a field.
+ *
+ * @param array $field
+ *   The field array to get the schema definition against.
+ * @return array
+ *   The field schema definition array.
+ */
+function field_retrieve_schema($field) {
+  // Make sure the installation API is available.
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  module_load_all_includes('install');
+  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
+  $schema += array(
+    'columns' => array(),
+    'indexes' => array(),
+    'foreign keys' => array()
+  );
+  // Give other modules a chance to alter this definition.
+  // @see hook_field_schema_alter()
+  backdrop_alter('field_schema', $schema, $field);
+  return $schema;
+}
+
+/**
  * Creates a field.
  *
  * This function does not bind the field to any bundle; use
@@ -97,13 +121,7 @@ function field_create_field($field) {
   $config->save();
 
   // Collect storage information.
-  module_load_install($field['module']);
-  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array(
-    'columns' => array(),
-    'indexes' => array(),
-    'foreign keys' => array(),
-  );
+  $schema = field_retrieve_schema($field);
   $field['columns'] = $schema['columns'];
   $field['foreign keys'] = $schema['foreign keys'];
   $field['indexes'] = $schema['indexes'];
@@ -190,13 +208,7 @@ function field_update_field($field) {
 
   // Collect the new storage information, since what is in
   // $prior_field may no longer be right.
-  module_load_install($field['module']);
-  $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-  $schema += array(
-    'columns' => array(),
-    'indexes' => array(),
-    'foreign keys' => array(),
-  );
+  $schema = field_retrieve_schema($field);
   $field['columns'] = $schema['columns'];
   $field['foreign keys'] = $schema['foreign keys'];
   $field['indexes'] = $schema['indexes'];
@@ -373,13 +385,7 @@ function field_read_fields($params = array(), $include_additional = array()) {
     module_invoke_all('field_read_field', $field);
 
     // Populate storage information.
-    module_load_install($field['module']);
-    $schema = (array) module_invoke($field['module'], 'field_schema', $field);
-    $schema += array(
-      'columns' => array(),
-      'indexes' => array(),
-      'foreign keys' => array(),
-    );
+    $schema = field_retrieve_schema($field);
     $field['columns'] = $schema['columns'];
     $field['indexes'] = $schema['indexes'];
     $field['foreign keys'] = $schema['foreign keys'];
