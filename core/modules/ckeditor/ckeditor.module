@@ -785,7 +785,7 @@ function ckeditor_telemetry_info() {
   $info['ckeditor_version'] = array(
     'label' => t('CKEditor Version'),
     'description' => t('The current version of CKEditor in use.'),
-    'project' => 'telemetry',
+    'project' => 'backdrop',
   );
   return $info;
 }
