@@ -783,7 +783,7 @@ function _ckeditor_theme_css($theme = NULL) {
  */
 function ckeditor_telemetry_info() {
   $info['ckeditor_version'] = array(
-    'label' => t('CKeditor Version'),
+    'label' => t('CKEditor Version'),
     'description' => t('The current version of CKEditor in use.'),
     'project' => 'telemetry',
   );
