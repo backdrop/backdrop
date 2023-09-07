@@ -13,7 +13,7 @@ function ckeditor_requirements($phase) {
 
   if ($phase == 'runtime') {
 
-    // @todo - update when cke5 goes into core.
+    // @todo: Update the description and severity when CKEditor 5 is part of core.
     $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
     $requirements['ckeditor_version'] = array(
       'title' => $t('CKEditor'),
