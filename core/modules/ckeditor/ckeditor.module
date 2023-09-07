@@ -782,7 +782,7 @@ function _ckeditor_theme_css($theme = NULL) {
  * Implements hook_telemetry_info().
  */
 function ckeditor_telemetry_info() {
-  $info['cke_version'] = array(
+  $info['ckeditor_version'] = array(
     'label' => t('CKeditor Version'),
     'description' => t('The current version of CKEditor in use.'),
     'project' => 'telemetry',
