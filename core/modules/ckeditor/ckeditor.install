@@ -14,11 +14,11 @@ function ckeditor_requirements($phase) {
   if ($phase == 'runtime') {
 
     // @todo - update when cke5 goes into core.
-    $cke_version = $t('Version: !version', array('!version' => '4.18.0'));
+    $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
     $requirements['ckeditor_version'] = array(
       'title' => $t('CKEditor'),
-      'value' => $cke_version,
-      'description' => $t('CKEditor 4 reached its official end-of-life in June 2023. It will continue to be supported for Open Source projects like Backdrop and Drupal until November, 2023. To switch to CKeditor 5, please use the !module.', array('!module' => l(t('ckeditor5 contrib module'), 'https://backdropcms.org/project/ckeditor5'))),
+      'value' => $ckeditor_version,
+      'description' => $t('CKEditor 4 reached its official end-of-life in June 2023. It will continue to be supported for Open Source projects like Backdrop and Drupal until November 2023. Backdrop core will include CKEditor 5 in the future. To switch to CKEditor 5 earlier, please use the !module.', array('!module' => l(t('CKEditor 5 contrib module'), 'https://backdropcms.org/project/ckeditor5'))),
       'severity' => REQUIREMENT_INFO,
     );
 
