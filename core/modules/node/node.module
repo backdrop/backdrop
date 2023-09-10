@@ -874,7 +874,7 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * @see entity_load()
  * @see EntityFieldQuery
  */
-function node_load_multiple($nids = array(), $conditions = array(), $reset = FALSE) {
+function node_load_multiple($nids = FALSE, $conditions = array(), $reset = FALSE) {
   return entity_load('node', $nids, $conditions, $reset);
 }
 
