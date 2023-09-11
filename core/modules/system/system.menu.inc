@@ -121,11 +121,17 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  if (!isset($config['clickdown']) || !$config['clickdown']) {
+    $config['clickdown'] = 0;
+  }
   $form['clickdown'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use a click to open, instead of a hover'),
+    '#type' => 'radios',
+    '#title' => t('Dropdown menu trigger'),
+    '#options' => array(
+      0 => t('Open menu with touch or hover'),
+      1 => t('Open menu with touch or click'),
+    ),
     '#default_value' => $config['clickdown'],
-    '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
