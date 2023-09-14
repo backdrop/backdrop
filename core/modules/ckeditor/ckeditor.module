@@ -795,7 +795,7 @@ function ckeditor_telemetry_info() {
  */
 function ckeditor_telemetry_data($telemetry_key) {
   switch ($telemetry_key) {
-    case 'cke_version':
+    case 'ckeditor_version':
       return CKEDITOR_VERSION;
   }
 }
