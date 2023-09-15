@@ -116,7 +116,7 @@ Backdrop.behaviors.contextualLinks = {
       }
     }
     $(document).ready(adjustContextualLinks);
-    $(window).on('resize', adjustContextualLinks);
+    Backdrop.optimizedResize.add(adjustContextualLinks, 'adjustContextualLinks');
   }
 };
 
