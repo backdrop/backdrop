@@ -65,7 +65,7 @@ Backdrop.behaviors.contextualLinks = {
       var n = allWrappers.length;
       for (let i = 0; i < n; i++) {
         var follower = allWrappers[i];
-        // Compare follower against all of its precedessors in the list (any of
+        // Compare follower against all of its predecessors in the list (any of
         // which may have already been adjusted).
         for (let j = 0; j < i; j++) {
           var leader = allWrappers[j];
