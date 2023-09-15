@@ -2511,6 +2511,21 @@ class FileUploadWizardTestCase extends FileTestHelper {
 class FileAdminTestCase extends FileTestHelper {
   protected $profile = 'minimal';
 
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
   function setUp() {
     parent::setUp();
 
@@ -3343,7 +3358,7 @@ class FileAccessTestCase extends FileTestHelper {
   /**
    * Helper for testFilePrivateDownloadAccess() test.
    *
-   * Defines several cases for accesing private files.
+   * Defines several cases for accessing private files.
    *
    * @return array
    *   Array of associative arrays, each one having the next keys:

@@ -866,7 +866,8 @@ form.views-exposed-form {
 div.teaser-checkbox .form-item,
 .form-item .form-item {
   padding: 5px 0;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   border: 0;
 }
 .form-type-checkbox {
@@ -889,7 +890,14 @@ div.teaser-checkbox .form-item,
 .form-item input.form-radio,
 .form-item input.form-checkbox {
   vertical-align: middle;
-  margin-right: 5px;
+}
+.form-item input.form-radio,
+.form-item input.form-checkbox {
+  margin-right: 5px; /* LTR */
+}
+[dir="rtl"] .form-item input.form-radio,
+[dir="rtl"] .form-item input.form-checkbox {
+  margin-left: 5px;
 }
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,

@@ -1981,7 +1981,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $hero_title_1 = 'Wonderwoman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
-    $hero_content_2 = "This isnt gonna end well...";
+    $hero_content_2 = "Whatever it takes.";
 
     // Create some sample images.
     $good_image = imagecreate(2400, 400);
@@ -2242,7 +2242,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
     $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
 
-    // Edit the node to get a system mesage.
+    // Edit the node to get a system message.
     $this->backdropPost("node/1/edit", array(), t('Save'));
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
@@ -3077,6 +3077,11 @@ class LayoutRendererTest extends BackdropWebTestCase {
 class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $no_flex_user;
 
   function setUp() {
     parent::setUp('layout', 'layout_test');

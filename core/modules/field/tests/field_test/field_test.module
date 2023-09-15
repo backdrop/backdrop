@@ -185,7 +185,7 @@ function field_test_field_create_field($field) {
  * Implements hook_entity_query_alter().
  */
 function field_test_entity_query_alter(&$query) {
-  if (!empty($query->alterMyExecuteCallbackPlease)) {
+  if (isset($query->tags['alterMyExecuteCallbackPlease'])) {
     $query->executeCallback = 'field_test_dummy_field_storage_query';
   }
 }

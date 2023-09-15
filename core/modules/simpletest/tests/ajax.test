@@ -359,6 +359,12 @@ class AJAXCommandsTestCase extends AJAXTestCase {
  * Test that $form_state['values'] is properly delivered to $ajax['callback'].
  */
 class AJAXFormValuesTestCase extends AJAXTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -402,6 +408,12 @@ class AJAXFormValuesTestCase extends AJAXTestCase {
  * Tests that Ajax-enabled forms work when multiple instances of the same form are on a page.
  */
 class AJAXMultiFormTestCase extends AJAXTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp(array('form_test'));
 
@@ -566,6 +578,11 @@ class AJAXElementValidation extends AJAXTestCase {
  */
 class AJAXDialogTest extends AJAXTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp();

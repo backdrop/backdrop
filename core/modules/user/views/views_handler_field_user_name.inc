@@ -66,7 +66,7 @@ class views_handler_field_user_name extends views_handler_field_user {
     $account->name = $this->get_value($values);
     if (!empty($this->options['link_to_user']) || !empty($this->options['overwrite_anonymous'])) {
       if (!empty($this->options['overwrite_anonymous']) && !$account->uid) {
-        // This is an anonymous user, and we're overriting the text.
+        // This is an anonymous user, and we're overwriting the text.
         return check_plain($this->options['anonymous_text']);
       }
       elseif (!empty($this->options['link_to_user'])) {

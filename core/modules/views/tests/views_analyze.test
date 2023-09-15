@@ -10,6 +10,12 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the views analyze system.
  */
 class ViewsAnalyzeTest extends ViewsSqlTest {
+
+  /**
+   * @var User
+   */
+  protected $admin;
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 

@@ -662,6 +662,11 @@ function _book_update_outline(Node $node) {
         backdrop_static_reset('book_get_books');
       }
     }
+    // Get all nodes that are part of this book and flush their caches.
+    $affected_nids = db_query("SELECT nid FROM {book} WHERE bid = :bid", array(
+      ':bid' => $node->book['bid'],
+    ))->fetchAllAssoc('nid');
+    entity_get_controller('node')->resetCache(array_keys($affected_nids));
 
     return TRUE;
   }
@@ -1211,7 +1216,7 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
  * Gets the data representing a subtree of the book hierarchy.
  *
  * The root of the subtree will be the link passed as a parameter, so the
- * returned tree will contain this item and all its descendents in the menu
+ * returned tree will contain this item and all its descendants in the menu
  * tree.
  *
  * @param $link

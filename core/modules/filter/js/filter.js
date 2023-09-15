@@ -18,12 +18,12 @@ Backdrop.behaviors.filterGuidelines = {
     $('.filter-guidelines', context).once('filter-guidelines')
       .find(':header').hide()
       .closest('.filter-wrapper').find('select.filter-list')
-      .bind('change', function () {
+      .on('change', function () {
         $(this).closest('.filter-wrapper')
           .find('.filter-guidelines-item').hide()
           .siblings('.filter-guidelines-' + this.value).show();
       })
-      .change();
+      .trigger('change');
   }
 };
 
@@ -58,7 +58,7 @@ Backdrop.behaviors.filterEditors = {
       }
       // Attach onChange handlers to input format selector elements.
       if ($this.is('select')) {
-        $this.change(function() {
+        $this.on('change', function() {
           // Detach the current editor (if any) and attach a new editor.
           if (Backdrop.settings.filter.formats[activeEditor]) {
             Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor]);
@@ -70,7 +70,7 @@ Backdrop.behaviors.filterEditors = {
         });
       }
       // Detach any editor when the containing form is submitted.
-      $this.parents('form').submit(function (event) {
+      $this.parents('form').on('submit', function (event) {
         // Do not detach if the event was canceled.
         if (event.isDefaultPrevented()) {
           return;
@@ -189,7 +189,7 @@ Backdrop.behaviors.editorImageDialog = {
       var $newItem = $allItems.eq(offset).filter(':hidden').show();
       // Focus the first shown new element. This keeps focus on the dialog and
       // allows it to be closed with the escape key.
-      $newItem.find('input, textarea, select').filter(':focusable').first().focus();
+      $newItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $newItem.trigger('editor-image-show');
 
       return false;
@@ -234,7 +234,7 @@ Backdrop.behaviors.editorImageDialog = {
           // Display the library view.
           $('.editor-image-fields').removeClass('editor-image-fields-full');
           $('form.filter-format-editor-image-form').after('<div class="editor-image-library"></div>');
-          $('[name=library_open]').click();
+          $('[name=library_open]').trigger('click');
         }
       }
       else {
@@ -322,27 +322,27 @@ $(window).on('dialog:aftercreate', function () {
     // If any errors are present in the form, pre-select that tab.
     if ($errorItem.length) {
       $visibleItems.not($errorItem).hide().trigger('editor-image-hide');
-      $errorItem.find('input, textarea, select').filter(':focusable').first().focus();
+      $errorItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $errorItem.trigger('editor-image-show');
     }
     // If an FID is not provided but a src attribute is, highlight the tab
     // that contains the src attribute field.
     if (($fidField.val() === '0' || !$fidField.val()) && $srcField.length > 0 && $srcField.val().length > 0) {
       $visibleItems.not($srcItem).hide().trigger('editor-image-hide');
-      $srcItem.find('input, textarea, select').filter(':focusable').first().focus();
+      $srcItem.find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $srcItem.trigger('editor-image-show');
     }
     // Otherwise, show the first tab and hide all the others.
     else {
       $visibleItems.not(':first').hide().trigger('editor-image-hide');
-      $visibleItems.first().find('input, textarea, select').filter(':focusable').first().focus();
+      $visibleItems.first().find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $visibleItems.first().trigger('editor-image-show');
     }
   }
   // If no element is visible show the first tab.
   else {
     $('[data-editor-image-toggle]').not(':first').hide().trigger('editor-image-hide');
-    $('[data-editor-image-toggle]').first().show().find('input, textarea, select').filter(':focusable').first().focus();
+    $('[data-editor-image-toggle]').first().show().find('input, textarea, select').filter(':focusable').first().trigger('focus');
     $('[data-editor-image-toggle]').first().trigger('editor-image-show');
   }
 });

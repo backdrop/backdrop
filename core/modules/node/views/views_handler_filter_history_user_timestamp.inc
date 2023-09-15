@@ -7,8 +7,8 @@
 /**
  * Filter for new content.
  *
- * The handler is named history_user, because of compability reasons, the table
- * is history.
+ * The handler is named history_user, because of compatibility reasons, the
+ * table is history.
  *
  * @ingroup views_filter_handlers
  */
@@ -55,9 +55,8 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
       return;
     }
 
-    // Hey, Backdrop kills old history, so nodes that haven't been updated
-    // since NODE_NEW_LIMIT are bzzzzzzzt outta here!
-
+    // Backdrop kills old history, so nodes that haven't been updated since
+    // NODE_NEW_LIMIT are filtered out.
     $limit = REQUEST_TIME - NODE_NEW_LIMIT;
 
     $this->ensure_my_table();
