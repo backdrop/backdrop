@@ -48,8 +48,8 @@ Backdrop.behaviors.contextualLinks = {
         allWrappers.push({
           'wrapper': $(this),
           'regionOffsetBottom': $(this).parent().offset().top + $(this).parent().height(),
-          'hshift': 0,
-          'vshift': 0
+          'hShift': 0,
+          'vShift': 0
         });
       });
 
@@ -60,8 +60,8 @@ Backdrop.behaviors.contextualLinks = {
 
       // Recalculate margins to avoid collisions.
       var dir = $('html').attr('dir');
-      const hsize = 28; // width of trigger wrapper
-      const vsize = 19; // height of trigger wrapper
+      const hSize = 28; // width of trigger wrapper
+      const vSize = 19; // height of trigger wrapper
       var n = allWrappers.length;
       for (let i = 0; i < n; i++) {
         var follower = allWrappers[i];
@@ -73,42 +73,42 @@ Backdrop.behaviors.contextualLinks = {
           // with leader.
           var leaderOffset = leader.wrapper.offset();
           var followerOffset = follower.wrapper.offset();
-          var verticalOverlap = followerOffset.top >= leaderOffset.top && followerOffset.top < leaderOffset.top + vsize;
+          var verticalOverlap = followerOffset.top >= leaderOffset.top && followerOffset.top < leaderOffset.top + vSize;
           if (dir == 'ltr') {
-            var horizontalOverlap = followerOffset.left >= leaderOffset.left - hsize && followerOffset.left < leaderOffset.left + hsize;
+            var horizontalOverlap = followerOffset.left >= leaderOffset.left - hSize && followerOffset.left < leaderOffset.left + hSize;
             if (verticalOverlap && horizontalOverlap) {
               // We have a collision; shift the follower down if there's room,
               // otherwise left.
-              if (followerOffset.top + 2 * vsize <= follower.regionOffsetBottom) {
+              if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
                 // Shift down
-                follower.vshift += vsize;
-                follower.wrapper.css('margin-top', follower.vshift);
+                follower.vShift += vSize;
+                follower.wrapper.css('margin-top', follower.vShift);
               }
               else {
                 // Shift left and start a new column.
-                follower.vshift = 0;
-                follower.hshift += hsize;
-                follower.wrapper.css('margin-top', follower.vshift);
-                follower.wrapper.css('margin-right', follower.hshift);
+                follower.vShift = 0;
+                follower.hShift += hSize;
+                follower.wrapper.css('margin-top', follower.vShift);
+                follower.wrapper.css('margin-right', follower.hShift);
               }
             }
           }
           else { // rtl
-            var horizontalOverlap = followerOffset.left > leaderOffset.left - hsize && followerOffset.left <= leaderOffset.left + hsize;
+            var horizontalOverlap = followerOffset.left > leaderOffset.left - hSize && followerOffset.left <= leaderOffset.left + hSize;
             if (verticalOverlap && horizontalOverlap) {
               // We have a collision; shift the follower down if there's room,
               // otherwise right.
-              if (followerOffset.top + 2 * vsize <= follower.regionOffsetBottom) {
+              if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
                 // Shift down
-                follower.vshift += vsize;
-                follower.wrapper.css('margin-top', follower.vshift);
+                follower.vShift += vSize;
+                follower.wrapper.css('margin-top', follower.vShift);
               }
               else {
                 // Shift right and start a new column.
-                follower.vshift = 0;
-                follower.hshift += hsize;
-                follower.wrapper.css('margin-top', follower.vshift);
-                follower.wrapper.css('margin-left', follower.hshift);
+                follower.vShift = 0;
+                follower.hShift += hSize;
+                follower.wrapper.css('margin-top', follower.vShift);
+                follower.wrapper.css('margin-left', follower.hShift);
               }
             }
           }
