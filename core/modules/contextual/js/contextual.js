@@ -73,10 +73,13 @@ Backdrop.behaviors.contextualLinks = {
           // with leader.
           var leaderOffset = leader.wrapper.offset();
           var followerOffset = follower.wrapper.offset();
-          var verticalOverlap = followerOffset.top >= leaderOffset.top && followerOffset.top < leaderOffset.top + vSize;
+          // Check vertical overlap.
+          if (!(followerOffset.top >= leaderOffset.top && followerOffset.top < leaderOffset.top + vSize)) {
+            continue;
+          }
           if (dir == 'ltr') {
-            var horizontalOverlap = followerOffset.left >= leaderOffset.left - hSize && followerOffset.left < leaderOffset.left + hSize;
-            if (verticalOverlap && horizontalOverlap) {
+            // Check horizontal overlap.
+            if (followerOffset.left >= leaderOffset.left - hSize && followerOffset.left < leaderOffset.left + hSize) {
               // We have a collision; shift the follower down if there's room,
               // otherwise left.
               if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
@@ -94,8 +97,8 @@ Backdrop.behaviors.contextualLinks = {
             }
           }
           else { // rtl
-            var horizontalOverlap = followerOffset.left > leaderOffset.left - hSize && followerOffset.left <= leaderOffset.left + hSize;
-            if (verticalOverlap && horizontalOverlap) {
+            // Check horizontal overlap.
+            if (followerOffset.left > leaderOffset.left - hSize && followerOffset.left <= leaderOffset.left + hSize) {
               // We have a collision; shift the follower down if there's room,
               // otherwise right.
               if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
