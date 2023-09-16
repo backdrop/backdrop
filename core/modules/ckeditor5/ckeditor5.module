@@ -55,10 +55,11 @@ function ckeditor5_editor_info() {
  */
 function ckeditor5_library_info() {
   $module_path = backdrop_get_path('module', 'ckeditor5');
+  $info = system_get_info('module', 'ckeditor5');
 
   $libraries['backdrop.ckeditor5.admin'] = array(
     'title' => 'Administrative library for configuring CKEditor.',
-    'version' => BACKDROP_VERSION,
+    'version' => $info['version'],
     'js' => array(
       $module_path . '/js/ckeditor5.admin.js' => array(),
     ),
@@ -72,7 +73,7 @@ function ckeditor5_library_info() {
   );
   $libraries['backdrop.ckeditor5'] = array(
     'title' => 'Backdrop behavior to enable CKEditor on textareas.',
-    'version' => BACKDROP_VERSION,
+    'version' => $info['version'],
     'js' => array(
       $module_path . '/js/ckeditor5.js' => array(),
     ),
@@ -94,21 +95,21 @@ function ckeditor5_library_info() {
 
   $libraries['backdrop.ckeditor5.backdrop-basic-styles'] = array(
     'title' => 'CKEditor plugin to convert basic HTML tags to preferred tags.',
-    'version' => BACKDROP_VERSION,
+    'version' => $info['version'],
     'js' => array(
       $module_path . '/js/plugins/backdrop-basic-styles/backdrop-basic-styles.js' => array(),
     ),
   );
   $libraries['backdrop.ckeditor5.backdrop-image'] = array(
     'title' => 'Integrates uploading images with CKEditor 5.',
-    'version' => BACKDROP_VERSION,
+    'version' => $info['version'],
     'js' => array(
       $module_path . '/js/plugins/backdrop-image/backdrop-image.js' => array(),
     ),
   );
   $libraries['backdrop.ckeditor5.backdrop-link'] = array(
     'title' => 'Provides a CKEditor 5 plugin for linking with a dialog.',
-    'version' => BACKDROP_VERSION,
+    'version' => $info['version'],
     'js' => array(
       $module_path . '/js/plugins/backdrop-link/backdrop-link.js' => array(),
     ),
@@ -116,7 +117,7 @@ function ckeditor5_library_info() {
 
   $libraries['ckeditor5'] = array(
     'title' => 'Loads the main CKEditor library.',
-    'version' => CKEDITOR5_VERSION,
+    'version' => $info['version'],
     'js' => array(
       // CKEditor is a large library but already compressed. Do not aggregate.
       $module_path . '/lib/ckeditor5/build/ckeditor.js' => array('preprocess' => FALSE, 'group' => JS_LIBRARY),

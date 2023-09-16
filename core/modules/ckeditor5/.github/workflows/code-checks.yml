@@ -1,0 +1,37 @@
+name: Code Checks
+on: [pull_request]
+jobs:
+  codechecks:
+    name: phpcs
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    steps:
+      - name: Setup env
+        run: |
+          echo "REPO_NAME=${PWD##*/}" >> $GITHUB_ENV
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          # No composer, but we need phpcs.
+          tools: none, phpcs:3.7
+
+      # The checkout action refuses to put it outside, so we have to do it in
+      # two steps.
+      - name: Checkout coding standard
+        uses: actions/checkout@v3
+        with:
+          repository: backdrop-ops/phpcs
+          ref: 1.0.0-beta2
+          path: phpcs
+      - name: Move standard outside current dir
+        run: mv phpcs ..
+
+      - name: Checkout module
+        uses: actions/checkout@v3
+
+      - name: Run CodeSniffer
+        run: |
+          cd ${{ env.REPO_NAME }}
+          phpcs --standard=../../phpcs/Backdrop --report=.github/misc/Github.php -n --basepath=. *

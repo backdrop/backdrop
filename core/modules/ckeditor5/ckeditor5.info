@@ -5,7 +5,6 @@ package = User Interface
 tags[] = Filters
 tags[] = Formats
 tags[] = Text Editors
-version = BACKDROP_VERSION
 backdrop = 1.x
-
+dependencies[] = filter
 configure = admin/config/content/formats
