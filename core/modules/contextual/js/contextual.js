@@ -32,7 +32,8 @@ Backdrop.behaviors.contextualLinks = {
         $region.removeClass('contextual-links-region-active');
       });
 
-      // Hide the contextual links when user clicks a link or rolls out of the .contextual-links-region.
+      // Hide the contextual links when user clicks a link or rolls out of the
+      // .contextual-links-region.
       $region.on('mouseleave click', Backdrop.contextualLinks.mouseleave);
       $region.on('mouseenter', function() {
         $trigger.addClass('contextual-links-trigger-active');
@@ -53,7 +54,7 @@ Backdrop.behaviors.contextualLinks = {
       var allWrappers = [];
       $('.contextual-links-wrapper', context).each(function() {
         allWrappers.push({
-          'wrapper': $(this),
+          '$wrapper': $(this),
           'regionOffsetBottom': $(this).parent().offset().top + $(this).parent().height(),
           'hShift': 0,
           'vShift': 0
@@ -62,7 +63,7 @@ Backdrop.behaviors.contextualLinks = {
 
       // Reset margins on all wrappers.
       allWrappers.forEach(function(info) {
-        info.wrapper.css('margin', '0');
+        info.$wrapper.css('margin', '0');
       });
 
       // Recalculate margins to avoid collisions.
@@ -78,8 +79,8 @@ Backdrop.behaviors.contextualLinks = {
           var leader = allWrappers[j];
           // Adjust the position of follower if necessary to avoid collision
           // with leader.
-          var leaderOffset = leader.wrapper.offset();
-          var followerOffset = follower.wrapper.offset();
+          var leaderOffset = leader.$wrapper.offset();
+          var followerOffset = follower.$wrapper.offset();
           // Check vertical overlap.
           if (!(followerOffset.top >= leaderOffset.top && followerOffset.top < leaderOffset.top + vSize)) {
             continue;
@@ -92,14 +93,14 @@ Backdrop.behaviors.contextualLinks = {
               if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
                 // Shift down
                 follower.vShift += vSize;
-                follower.wrapper.css('margin-top', follower.vShift);
+                follower.$wrapper.css('margin-top', follower.vShift);
               }
               else {
                 // Shift left and start a new column.
                 follower.vShift = 0;
                 follower.hShift += hSize;
-                follower.wrapper.css('margin-top', follower.vShift);
-                follower.wrapper.css('margin-right', follower.hShift);
+                follower.$wrapper.css('margin-top', follower.vShift);
+                follower.$wrapper.css('margin-right', follower.hShift);
               }
             }
           }
@@ -111,14 +112,14 @@ Backdrop.behaviors.contextualLinks = {
               if (followerOffset.top + 2 * vSize <= follower.regionOffsetBottom) {
                 // Shift down
                 follower.vShift += vSize;
-                follower.wrapper.css('margin-top', follower.vShift);
+                follower.$wrapper.css('margin-top', follower.vShift);
               }
               else {
                 // Shift right and start a new column.
                 follower.vShift = 0;
                 follower.hShift += hSize;
-                follower.wrapper.css('margin-top', follower.vShift);
-                follower.wrapper.css('margin-left', follower.hShift);
+                follower.$wrapper.css('margin-top', follower.vShift);
+                follower.$wrapper.css('margin-left', follower.hShift);
               }
             }
           }
