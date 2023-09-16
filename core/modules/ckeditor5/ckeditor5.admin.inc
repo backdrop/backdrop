@@ -9,14 +9,24 @@
  */
 function ckeditor5_settings_form(&$form, $form_state, $format) {
   $plugins = ckeditor5_plugins();
-  $toolbar_element = theme('ckeditor5_settings_toolbar', array('format' => $format, 'plugins' => $plugins));
+  $toolbar_element = theme('ckeditor5_settings_toolbar', array(
+    'format' => $format,
+    'plugins' => $plugins,
+  ));
   $elements = array(
     '#attached' => array(
       'library' => array(
         array('ckeditor5', 'backdrop.ckeditor5.admin'),
       ),
       'js' => array(
-        array('data' => array('ckeditor5' => array('toolbarAdmin' => $toolbar_element)), 'type' => 'setting')
+        array(
+          'data' => array(
+            'ckeditor5' => array(
+              'toolbarAdmin' => $toolbar_element,
+            ),
+          ),
+          'type' => 'setting',
+        ),
       ),
     ),
     '#attributes' => array('class' => array('ckeditor5-toolbar-configuration')),

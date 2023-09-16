@@ -98,7 +98,7 @@ function hook_ckeditor5_plugins() {
  * This hook may be used to modify plugin properties after they have been
  * specified by other modules.
  *
- * @param $plugins
+ * @param array $plugins
  *   An array of all the existing plugin definitions, passed by reference.
  *
  * @see hook_ckeditor5_plugins()
@@ -124,10 +124,10 @@ function hook_ckeditor5_plugins_alter(array &$plugins) {
  * ckeditor5_stylesheets[] = css/ckeditor5-iframe.css
  * @endcode
  *
- * @param $css
+ * @param array $css
  *   An array of CSS files, passed by reference. This is a flat list of file
  *   paths relative to the Backdrop root.
- * @param $format
+ * @param object $format
  *   The corresponding text format object as returned by filter_format_load()
  *   for which the current text editor is being displayed.
  *
@@ -148,7 +148,7 @@ function hook_ckeditor5_css_alter(array &$css, $format) {
  *
  * @param array $settings
  *   The array of settings that will be passed to CKEditor.
- * @param $format
+ * @param object $format
  *   The filter format object containing this editor's settings.
  */
 function hook_ckeditor5_settings_alter(array &$settings, $format) {
@@ -173,8 +173,8 @@ function hook_ckeditor5_settings_alter(array &$settings, $format) {
  * Enabled callback for hook_ckeditor5_plugins().
  *
  * Note: This is not really a hook. The function name is manually specified via
- * 'enabled callback' in hook_ckeditor5_plugins(), with this recommended callback
- * name pattern. It is called from ckeditor5_add_settings().
+ * 'enabled callback' in hook_ckeditor5_plugins(), with this recommended
+ * callback name pattern. It is called from ckeditor5_add_settings().
  *
  * This callback should determine if a plugin should be enabled for a CKEditor
  * instance. Plugins may be enabled based off an explicit setting, or enable

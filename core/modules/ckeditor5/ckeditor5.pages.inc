@@ -71,6 +71,5 @@ function ckeditor5_image_upload($format) {
     $response['error']['message'] = $message_string;
   }
 
-
   return $response;
 }

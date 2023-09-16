@@ -1,15 +1,20 @@
 <?php
-
 /**
  * @file
- * Tests for ckeditor.module.
+ * Tests for ckeditor5.module.
  */
 
+/**
+ * Functional tests for CKEditor5 module.
+ */
 class CKEditorTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     parent::setUp('ckeditor');
 
     // Create Article node type.
@@ -36,7 +41,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
    * With no JavaScript level testing, we can only ensure the library is present
    * on the page.
    */
-  function testLibrary() {
+  protected function testLibrary() {
     $this->backdropGet('admin/config/content/formats');
     $this->clickLink(t('Add text format'));
 
@@ -88,8 +93,16 @@ class CKEditorTestCase extends BackdropWebTestCase {
     $this->assertEqual($format_settings['editorSettings']['extraPlugins'], 'backdropimagecaption,backdropimage', 'Added custom plugins include custom image caption support.');
     $this->assertEqual($format_settings['editorSettings']['removePlugins'], 'image,tabletools,tableresize,contextmenu');
     $style_list = array(
-      array('name' => 'Title', 'element' => 'h1', 'attributes' => array('class' => 'title')),
-      array('name' => 'Custom class', 'element' => 'p', 'attributes' => array('class' => 'custom-class')),
+      array(
+        'name' => 'Title',
+        'element' => 'h1',
+        'attributes' => array('class' => 'title'),
+      ),
+      array(
+        'name' => 'Custom class',
+        'element' => 'p',
+        'attributes' => array('class' => 'custom-class'),
+      ),
     );
     $this->assertEqual($format_settings['editorSettings']['stylesSet'], $style_list, 'Style list settings correct');
 

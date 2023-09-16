@@ -24,7 +24,7 @@ function ckeditor5_requirements($phase) {
       $requirements['ckeditor5_not_enabled'] = array(
         'title' => $t('CKEditor'),
         'value' => $t('CKEditor is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
-        'severity' => REQUIREMENT_WARNING
+        'severity' => REQUIREMENT_WARNING,
       );
     }
   }
