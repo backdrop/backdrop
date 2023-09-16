@@ -370,7 +370,7 @@ function module_load_all_includes($type, $name = NULL) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules the
  *     passed-in module(s) depend on will be automatically added and enabled in
  *     the correct order. If any dependencies are unavailable, the passed-in
@@ -534,7 +534,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules
  *     dependent on the passed-in module(s) will be automatically added and
  *     disabled in the correct order. Note that dependency-checking incurs a
