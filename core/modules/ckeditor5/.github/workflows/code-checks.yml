@@ -33,5 +33,4 @@ jobs:
 
       - name: Run CodeSniffer
         run: |
-          cd ${{ env.REPO_NAME }}
-          phpcs --standard=../../phpcs/Backdrop --report=.github/misc/Github.php -n --basepath=. *
+          phpcs --standard=../phpcs/Backdrop --report=.github/misc/Github.php -n --basepath=. *
