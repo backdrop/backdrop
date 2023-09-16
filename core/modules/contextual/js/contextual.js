@@ -126,7 +126,11 @@ Backdrop.behaviors.contextualLinks = {
       }
     }
     $(document).ready(adjustContextualLinks);
-    Backdrop.optimizedResize.add(adjustContextualLinks, 'adjustContextualLinks');
+
+    // Usually Backdrop.optimizedResize() would be used for a window resize
+    // event, but this potentially expensive operation should be limited to
+    // firing infrequently, so Backdrop.debounce() is used here instead.
+    $(window).on('resize', Backdrop.debounce(adjustContextualLinks, 500));
   }
 };
 
