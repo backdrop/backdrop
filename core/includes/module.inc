@@ -308,8 +308,8 @@ function module_load_install($module) {
  *
  * Do not use this function to load an install file, use module_load_install()
  * instead. Do not use this function in a global context since it requires
- * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT . '/path/file'
- * instead.
+ * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT .
+ * '/path/file' instead.
  *
  * @param $type
  *   The include file's type (file extension).
@@ -321,31 +321,19 @@ function module_load_install($module) {
  *
  * @return
  *   The name of the included file, if successful; FALSE otherwise.
+ *
+ * @deprecated since 1.22.0
+ *
+ * @see backdrop_include_file()
  */
 function module_load_include($type, $module, $name = NULL) {
-  static $files = array();
-
   if (!isset($name)) {
     $name = $module;
   }
 
-  $key = $type . ':' . $module . ':' . $name;
-  if (isset($files[$key])) {
-    return $files[$key];
-  }
+  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
 
-  if (function_exists('backdrop_get_path')) {
-    $file = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module) . "/$name.$type";
-    if (is_file($file)) {
-      require_once $file;
-      $files[$key] = $file;
-      return $file;
-    }
-    else {
-      $files[$key] = FALSE;
-    }
-  }
-  return FALSE;
+  backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**
