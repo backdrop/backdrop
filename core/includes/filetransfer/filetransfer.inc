@@ -128,7 +128,7 @@ abstract class FileTransfer {
   /**
    * {@inheritdoc}
    */
-  public function __set(string $name, $value) {
+  public function __set($name, $value) {
     if ($name == 'connection') {
       $this->connectionHandle = $value;
     }
@@ -140,7 +140,7 @@ abstract class FileTransfer {
   /**
    * {@inheritdoc}
    */
-  public function __isset(string $name) {
+  public function __isset($name) {
     if ($name == 'connection') {
       return isset($this->connectionHandle);
     }
@@ -153,7 +153,7 @@ abstract class FileTransfer {
   /**
    * {@inheritdoc}
    */
-  public function __unset(string $name): void {
+  public function __unset($name) {
     if ($name == 'connection') {
       unset($this->connectionHandle);
     }
