@@ -116,7 +116,7 @@ abstract class FileTransfer {
   function __get($name) {
     if ($name == 'connection') {
       $this->connect();
-      return $this->connection;
+      return $this->connectionHandle;
     }
 
     if ($name == 'chroot') {
