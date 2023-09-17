@@ -23,17 +23,24 @@ Backdrop.behaviors.contextualLinks = {
           return false;
         }
       );
+
       // Attach hover behavior to trigger and ul.contextual-links.
-      $trigger.add($links).on('hover',
-        function () { $region.addClass('contextual-links-region-active'); },
-        function () { $region.removeClass('contextual-links-region-active'); }
-      );
+      $trigger.add($links).on('mouseenter', function () {
+        $region.addClass('contextual-links-region-active');
+      });
+      $trigger.add($links).on('mouseleave', function () {
+        $region.removeClass('contextual-links-region-active');
+      });
+
       // Hide the contextual links when user clicks a link or rolls out of the .contextual-links-region.
       $region.on('mouseleave click', Backdrop.contextualLinks.mouseleave);
-      $region.on('hover',
-        function() { $trigger.addClass('contextual-links-trigger-active'); },
-        function() { $trigger.removeClass('contextual-links-trigger-active'); }
-      );
+      $region.on('mouseenter', function() {
+        $trigger.addClass('contextual-links-trigger-active');
+      });
+      $region.on('mouseleave', function() {
+        $trigger.removeClass('contextual-links-trigger-active');
+      });
+
       // Prepend the trigger.
       $wrapper.prepend($trigger);
 

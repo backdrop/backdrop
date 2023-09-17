@@ -1499,6 +1499,9 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *   TRUE if the theme has settings, FALSE otherwise.
  */
 function theme_has_settings($theme) {
+  if (config_get_names_with_prefix($theme . '.settings')) {
+    return TRUE;
+  }
   $themes = list_themes();
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {
@@ -1643,6 +1646,9 @@ function theme_enable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    // Copy any default configuration data to the system config directory.
+    config_install_default_config($key);
   }
 
   list_themes(TRUE);
@@ -1676,6 +1682,8 @@ function theme_disable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    config_uninstall_config($key);
   }
 
   list_themes(TRUE);
