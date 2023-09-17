@@ -1665,7 +1665,7 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * refers to the time of the request. If the user accesses Backdrop via a proxy
  * server, and the proxy already has a cached copy of the anonymous page with an
  * older Last-Modified date, the proxy may respond with 304 Not Modified, making
- * the client think that the anonymous and authenticated pageviews are
+ * the client think that the anonymous and authenticated page views are
  * identical.
  *
  * @return bool
