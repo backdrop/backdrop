@@ -333,7 +333,7 @@ function module_load_include($type, $module, $name = NULL) {
 
   watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
 
-  backdrop_include_file('module', $module, $name . '.' . $type);
+  return backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**
