@@ -322,7 +322,7 @@ function module_load_install($module) {
  * @return
  *   The name of the included file, if successful; FALSE otherwise.
  *
- * @deprecated since 1.22.0
+ * @deprecated since 1.27.0
  *
  * @see backdrop_include_file()
  */
@@ -331,15 +331,26 @@ function module_load_include($type, $module, $name = NULL) {
     $name = $module;
   }
 
-//  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
 
   return backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**
  * Loads an include file for each module enabled in the {system} table.
+ *
+ * @param $type
+ *   The include file's type (file extension).
+ * @param $name
+ *   (optional) The base file name (without the $type extension). If omitted,
+ *   $module is used; i.e., resulting in "$module.$type" by default.
+ *
+ * @deprecated since 1.27.0
  */
 function module_load_all_includes($type, $name = NULL) {
+
+  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
+
   $modules = module_list();
   foreach ($modules as $module) {
     module_load_include($type, $module, $name);
