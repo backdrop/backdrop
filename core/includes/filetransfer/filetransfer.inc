@@ -23,14 +23,14 @@ abstract class FileTransfer {
    * The password for this file transfer.
    *
    * @var string
-   */  
+   */
   protected $password;
 
   /**
    * The hostname for this file transfer.
    *
    * @var string
-   */  
+   */
   protected $hostname = 'localhost';
 
   /**
@@ -63,11 +63,11 @@ abstract class FileTransfer {
 
   /**
    * The constructor for the FileTransfer class.
-   * 
+   *
    * This method is also called from the classes that extend this class and
    * override this method.
-   * 
-   * @param $jail
+   *
+   * @param string $jail
    *   The full path where all file operations performed by this object will
    *   be restricted to. This prevents the FileTransfer classes from being
    *   able to touch other parts of the filesystem.
@@ -78,7 +78,7 @@ abstract class FileTransfer {
 
   /**
    * Defines a factory method for this class.
-   * 
+   *
    * Classes that extend this class must override the factory() static method.
    * They should return a new instance of the appropriate FileTransfer subclass.
    *
@@ -106,7 +106,7 @@ abstract class FileTransfer {
    * If the connection isn't set to anything, this will call the connect() method
    * and set it to and return the result; afterwards, the connection will be
    * returned directly without using this method.
-   * 
+   *
    * @param string $name
    *   The name of the variable to return.
    *
@@ -161,7 +161,7 @@ abstract class FileTransfer {
       unset($this->chrootPath);
     }
   }
-  
+
   /**
    * Connects to the server.
    */
@@ -193,7 +193,7 @@ abstract class FileTransfer {
    *   Pass TRUE to recursively chmod the entire directory specified in $path.
    *
    * @throws FileTransferException
-   * 
+   *
    * @see http://php.net/chmod
    */
   final public function chmod($path, $mode, $recursive = FALSE) {
@@ -442,7 +442,7 @@ abstract class FileTransfer {
    *
    * Implementing classes can either extend this form with fields collecting the
    * specific information they need, or override it entirely.
-   * 
+   *
    * @return array
    *   An array that contains a Form API definition.
    */
