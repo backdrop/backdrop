@@ -82,10 +82,10 @@ class UserCompareLayoutAccess extends LayoutAccess {
     }
     $form['equality'] = array(
       '#type' => 'radios',
-      '#title' => t('Display this block if the above user account is'),
+      '#title' => t('Comparison mode '),
       '#options' => array(
-        1 => t('the same as the logged-in user account.'),
-        0 => t('different from the logged-in user account.'),
+        1 => t('Display if this account is the logged-in user account.'),
+        0 => t('Display if this account is different from the logged-in user account.'),
       ),
       '#default_value' => $this->settings['equality'],
     );
