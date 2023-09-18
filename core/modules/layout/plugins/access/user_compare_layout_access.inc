@@ -1,6 +1,10 @@
 <?php
 /**
  * @file
+ * Contains UserCompareLayoutAccess class.
+ */
+
+/**
  * Plugin to provide access if two user account contexts are the same.
  */
 class UserCompareLayoutAccess extends LayoutAccess {
@@ -67,7 +71,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['helptext'] = array(
+    $form['help_text'] = array(
       '#type' => 'help',
       '#value' => t('Compare a user account to the currently logged-in user account. For someone viewing their own profile page, for example, choose "User account being viewed" and say "Display if the above user account is" and "the same as the logged-in user account".'),
     );
