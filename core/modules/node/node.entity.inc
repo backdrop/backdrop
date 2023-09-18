@@ -497,8 +497,13 @@ class NodeStorageController extends EntityDatabaseStorageController {
         $this->resetCache(array($entity->{$this->idKey}));
       }
 
-      $this->postSave($entity, $op == 'update');
       $this->invokeHook($op, $entity);
+  
+      // Update the node access table for this node, but only if it is the
+      // active revision.
+      if ($entity->isActiveRevision()) {
+        node_access_acquire_grants($entity);
+      }
 
       // Ignore slave server temporarily.
       db_ignore_slave();
@@ -655,21 +660,6 @@ class NodeStorageController extends EntityDatabaseStorageController {
       if (!isset($node->revision_uid)) {
         $node->revision_uid = $GLOBALS['user']->uid;
       }
-    }
-  }
-
-  /**
-   * Overrides EntityDatabaseStorageController::postSave().
-   *
-   * @param Node $node
-   *   The node object that has just been saved.
-   */
-  function postSave(EntityInterface $node, $update) {
-    // Update the node access table for this node, but only if it is the
-    // active revision. There's no need to delete existing records if the node
-    // is new.
-    if ($node->isActiveRevision()) {
-      node_access_acquire_grants($node, $update);
     }
   }
 
