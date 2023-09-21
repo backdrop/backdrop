@@ -306,7 +306,7 @@ function module_load_install($module) {
  *   module_load_include('inc', 'node', 'content_types');
  * @endcode
  *
-  * This function may be deprecated in a future version of Backdrop. Use
+ * This function may be deprecated in a future version of Backdrop. Use
  * backdrop_include_file() instead.
  *
  * Old:
