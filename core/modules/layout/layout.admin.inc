@@ -1318,7 +1318,7 @@ function layout_content_form_submit($form, &$form_state) {
   // Delete the tempstore copy of the layout.
   layout_clear_layout_tempstore($layout->name);
 
-  backdrop_set_message(t('Layout content saved.'));
+  backdrop_set_message(t('Layout saved.'));
 }
 
 /**
