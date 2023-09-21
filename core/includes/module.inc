@@ -323,11 +323,11 @@ function module_load_install($module) {
  * Backdrop to be fully bootstrapped; use require_once BACKDROP_ROOT .
  * '/path/file' instead.
  *
- * @param $type
+ * @param string $type
  *   The include file's type (file extension).
- * @param $module
+ * @param string $module
  *   The module to which the include file belongs.
- * @param $name
+ * @param string $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
@@ -348,9 +348,9 @@ function module_load_include($type, $module, $name = NULL) {
  *
  * This function may be deprecated in a future version of Backdrop.
  *
- * @param $type
+ * @param string $type
  *   The include file's type (file extension).
- * @param $name
+ * @param string $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
