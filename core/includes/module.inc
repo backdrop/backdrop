@@ -306,9 +306,21 @@ function module_load_install($module) {
  *   module_load_include('inc', 'node', 'content_types');
  * @endcode
  *
+  * This function may be deprecated in a future version of Backdrop. Use
+ * backdrop_include_file() instead.
+ *
+ * Old:
+ * @code
+ *   module_load_include('inc', 'node', 'node.admin');
+ * @endcode
+ * Preferred:
+ * @code
+ *   backdrop_include_file('module', 'node', 'node.admin.inc');
+ * @endcode
+ *
  * Do not use this function to load an install file, use module_load_install()
  * instead. Do not use this function in a global context since it requires
- * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT .
+ * Backdrop to be fully bootstrapped; use require_once BACKDROP_ROOT .
  * '/path/file' instead.
  *
  * @param $type
@@ -322,22 +334,19 @@ function module_load_install($module) {
  * @return
  *   The name of the included file, if successful; FALSE otherwise.
  *
- * @deprecated since 1.27.0
- *
  * @see backdrop_include_file()
  */
 function module_load_include($type, $module, $name = NULL) {
   if (!isset($name)) {
     $name = $module;
   }
-
-//  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
-
   return backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**
  * Loads an include file for each module enabled in the {system} table.
+ *
+ * This function may be deprecated in a future version of Backdrop.
  *
  * @param $type
  *   The include file's type (file extension).
@@ -348,9 +357,6 @@ function module_load_include($type, $module, $name = NULL) {
  * @deprecated since 1.27.0
  */
 function module_load_all_includes($type, $name = NULL) {
-
-  watchdog_deprecated_function('common', __FUNCTION__, t('Change record:') . ' ' . l(t('Replaced module_load_include() with backdrop_include_file().'), 'https://docs.backdropcms.org/change-records/blah-blah-blah', array('attributes' => array('target' => '_blank'))));
-
   $modules = module_list();
   foreach ($modules as $module) {
     module_load_include($type, $module, $name);
