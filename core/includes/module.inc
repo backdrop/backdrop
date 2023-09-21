@@ -331,7 +331,7 @@ function module_load_install($module) {
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|bool
  *   The name of the included file, if successful; FALSE otherwise.
  *
  * @see backdrop_include_file()
@@ -353,8 +353,6 @@ function module_load_include($type, $module, $name = NULL) {
  * @param string $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
- *
- * @deprecated since 1.27.0
  */
 function module_load_all_includes($type, $name = NULL) {
   $modules = module_list();
