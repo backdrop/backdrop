@@ -107,7 +107,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[0],
-    '#size' => 10,
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
