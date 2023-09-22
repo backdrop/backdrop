@@ -2358,5 +2358,18 @@ function user_update_1025() {
 }
 
 /**
+ * Correct the default config value for the "flood_uid_only" setting.
+ */
+function user_update_1026() {
+  $config = config('user.flood');
+
+  // Only update if the value is exactly the string "false".
+  if ($config->get('flood_uid_only') === 'false') {
+    $config->set('flood_uid_only', '0');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
