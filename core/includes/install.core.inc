@@ -1080,17 +1080,13 @@ function install_settings_form_submit($form, &$form_state) {
   $settings['database_prefix'] = array(
     'value' => $db_settings['prefix'],
   );
-  backdrop_rewrite_settings($settings);
 
-  // Check if UTF-8 MB4 support exists in the database and add to settings.php.
-  if (install_verify_database_utf8mb4()) {
-    $settings = array();
-    $settings['database_charset'] = array(
-      'value' => 'utf8mb4',
-      'required' => TRUE,
-    );
-    backdrop_rewrite_settings($settings);
-  }
+  // Check if UTF-8 MB4 support exists and automatically save into settings.php.
+  $settings['database_charset'] = array(
+    'value' => install_verify_database_utf8mb4() ? 'utf8mb4' : 'utf8',
+    'required' => TRUE,
+  );
+  backdrop_rewrite_settings($settings);
 
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
