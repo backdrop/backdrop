@@ -117,7 +117,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[1],
-    '#size' => 10,
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
