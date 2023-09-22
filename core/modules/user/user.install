@@ -2358,7 +2358,7 @@ function user_update_1025() {
 }
 
 /**
- * Correct the default config value for "flood_uid_only" setting.
+ * Correct the default config value for the "flood_uid_only" setting.
  */
 function user_update_1026() {
   $config = config('user.flood');
