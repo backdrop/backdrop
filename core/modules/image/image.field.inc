@@ -140,7 +140,6 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
     '#default_value' => $min_dimensions[0],
-    '#size' => 10,
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
