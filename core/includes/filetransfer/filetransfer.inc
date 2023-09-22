@@ -127,7 +127,7 @@ abstract class FileTransfer {
 
   /**
    * Implementation of the magic __set() method.
-   * 
+   *
    * @param string $name
    *   The name of the variable to set.
    *
@@ -145,7 +145,7 @@ abstract class FileTransfer {
 
   /**
    * Implementation of the magic __isset() method.
-   * 
+   *
    * @param string $name
    *   The name of the variable to check.
    */
@@ -161,7 +161,7 @@ abstract class FileTransfer {
 
   /**
    * Implementation of the magic __unset() method.
-   * 
+   *
    * @param string $name
    *   The name of the variable to unset.
    */
