@@ -109,7 +109,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $max_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
     '#placeholder' => t('Width'),
   );
   $form['max_dimensions']['y'] = array(
@@ -142,7 +142,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $min_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
     '#placeholder' => t('Width'),
   );
   $form['min_dimensions']['y'] = array(
