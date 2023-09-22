@@ -47,7 +47,7 @@ abstract class FileTransfer {
    */
   protected $jail;
 
-    /**
+  /**
    * Path to connection chroot.
    *
    * @var string|false|null
@@ -126,7 +126,13 @@ abstract class FileTransfer {
   }
 
   /**
-   * {@inheritdoc}
+   * Implementation of the magic __set() method.
+   * 
+   * @param string $name
+   *   The name of the variable to set.
+   *
+   * @param string|object|false|null $value
+   *   The value to be assigned to the variable.
    */
   public function __set($name, $value) {
     if ($name == 'connection') {
@@ -138,7 +144,10 @@ abstract class FileTransfer {
   }
 
   /**
-   * {@inheritdoc}
+   * Implementation of the magic __isset() method.
+   * 
+   * @param string $name
+   *   The name of the variable to check.
    */
   public function __isset($name) {
     if ($name == 'connection') {
@@ -151,7 +160,10 @@ abstract class FileTransfer {
   }
 
   /**
-   * {@inheritdoc}
+   * Implementation of the magic __unset() method.
+   * 
+   * @param string $name
+   *   The name of the variable to unset.
    */
   public function __unset($name) {
     if ($name == 'connection') {
