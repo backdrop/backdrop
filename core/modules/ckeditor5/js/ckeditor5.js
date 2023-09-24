@@ -28,6 +28,28 @@
 
       editorSettings.licenseKey = '';
 
+      // If filter_html is turned on, and the htmlSupport plugin's available, we
+      // prevent on* attributes.
+      if (editorSettings.pluginList.includes('htmlSupport.GeneralHtmlSupport')) {
+        if (editorSettings.htmlSupport.allow.length) {
+          let patternOnEvents = {
+            'name': /.*/,
+            'attributes': /^on.*/
+          }
+          editorSettings.htmlSupport.disallow.push(patternOnEvents);
+        }
+        // Restore CKEditor4 behavior to allow anything if filter_html isn't set.
+        else {
+          let patternAllowAll = {
+            name: /.*/,
+            attributes: true,
+            classes: true,
+            styles: true
+          }
+          editorSettings.htmlSupport.allow.push(patternAllowAll);
+        }
+      }
+
       // Convert the plugin list from strings to variable names. Each CKEditor
       // plugin is located under "CKEditor5.[packageName].[moduleName]". So
       // we convert the list of strings to match the expected variable name.

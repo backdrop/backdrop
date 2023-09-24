@@ -742,6 +742,11 @@ function ckeditor5_get_config($format, array $existing_settings) {
   // when passed to the front-end JavaScript.
   $plugin_list = array_values(array_unique($plugins));
 
+  // We always load the GeneralHtmlSupport plugin.
+  if (!in_array('htmlSupport.GeneralHtmlSupport', $plugin_list)) {
+    $plugin_list[] = 'htmlSupport.GeneralHtmlSupport';
+  }
+
   // Initialize reasonable defaults that provide expected basic behavior.
   $config = array(
     'language' => $language->langcode,
@@ -763,9 +768,11 @@ function ckeditor5_get_config($format, array $existing_settings) {
     }
   }
 
-  // Add the allowedContent setting, which ensures CKEditor only allows tags
-  // and attributes that are allowed by the text format for this text editor.
-  // list($config['allowedContent'], $config['disallowedContent']) = ckeditor5_get_acf_settings($format);
+  // Add "allow" and "disallow" for CKEditor GeneralHtmlSupportConfig to apply
+  // settings from the Filter module. Prevents data loss for content not handled
+  // by editor plugins.
+  $config['htmlSupport'] = array();
+  list($config['htmlSupport']['allow'], $config['htmlSupport']['disallow']) = ckeditor5_get_generic_html_settings($format);
 
   // Create a token for access to dialogs.
   if (in_array('backdropLink.BackdropLink', $plugin_list)) {
@@ -871,18 +878,18 @@ function ckeditor5_get_config($format, array $existing_settings) {
  *
  * @return array
  *   An array with two values:
- *   - the first value is the "allowedContent" setting: a well-formatted array
- *     or TRUE. The latter indicates that anything is allowed.
- *   - the second value is the "disallowedContent" setting: a well-formatted
- *     array or FALSE. The latter indicates that nothing is disallowed.
+ *   - Configuration array of allowed content rules used by the editor's
+ *     General HTML Support "allow" setting.
+ *   - Configuration array of disallowed content rules used by the editor's
+ *     General HTML Support "disallow" setting.
  */
-function ckeditor5_get_acf_settings($format) {
+function ckeditor5_get_generic_html_settings($format) {
   $html_restrictions = filter_format_allowed_html($format);
 
-  // When all HTML is allowed, also set allowedContent to true and
-  // disallowedContent to false.
+  // When all HTML is allowed, we return empty arrays. This case gets handled in
+  // js/ckeditor5.js.
   if ($html_restrictions === TRUE) {
-    return array(TRUE, FALSE);
+    return array(array(), array());
   }
 
   // Converts Backdrop-stored attribute values to CKEditor attribute lists.
@@ -896,7 +903,7 @@ function ckeditor5_get_acf_settings($format) {
       }
     }));
     if (count($values)) {
-      return implode(',', $values);
+      return $values;
     }
     else {
       return NULL;
@@ -907,13 +914,16 @@ function ckeditor5_get_acf_settings($format) {
   $disallowed = array();
   if (isset($html_restrictions['forbidden'])) {
     foreach ($html_restrictions['forbidden'] as $tag) {
-      $disallowed[$tag] = TRUE;
+      $disallowed[$tag] = array(
+        'name' => $tag,
+      );
     }
   }
   foreach ($html_restrictions['allowed'] as $tag => $attributes) {
     // Tell CKEditor the tag is allowed, but no attributes.
     if ($attributes === FALSE) {
       $allowed[$tag] = array(
+        'name' => $tag,
         'attributes' => FALSE,
         'styles' => FALSE,
         'classes' => FALSE,
@@ -926,6 +936,7 @@ function ckeditor5_get_acf_settings($format) {
     // allowed. Or, in this case: any value for them is allowed.
     elseif ($attributes === TRUE) {
       $allowed[$tag] = array(
+        'name' => $tag,
         'attributes' => TRUE,
         'styles' => TRUE,
         'classes' => TRUE,
@@ -989,18 +1000,15 @@ function ckeditor5_get_acf_settings($format) {
         return $value !== FALSE;
       });
       if (count($allowed_attributes)) {
-        $allowed[$tag]['attributes'] = implode(',', array_keys($allowed_attributes));
-      }
-      if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
-        $allowed_styles = $get_attribute_values($allowed_attributes['style'], TRUE);
-        if (isset($allowed_styles)) {
-          $allowed[$tag]['styles'] = $allowed_styles;
+        $allowed[$tag]['name'] = $tag;
+        if (isset($allowed[$tag]['attributes'])) {
+          $allowed[$tag]['attributes'] = $allowed_attributes['attributes'];
         }
-      }
-      if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
-        $allowed_classes = $get_attribute_values($allowed_attributes['class'], TRUE);
-        if (isset($allowed_classes)) {
-          $allowed[$tag]['classes'] = $allowed_classes;
+        if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
+          $allowed[$tag]['styles'] = $allowed_attributes['style'];
+        }
+        if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
+          $allowed[$tag]['classes'] = $allowed_attributes['class'];
         }
       }
 
@@ -1014,7 +1022,14 @@ function ckeditor5_get_acf_settings($format) {
         return $value === FALSE;
       });
       if (count($disallowed_attributes)) {
-        // No need to blacklist the 'class' or 'style' attributes; CKEditor
+        // A simple "*" placeholder has no meaning for CKEditor5, we catch that
+        // in js/ckeditor5.js by using proper RegExp.
+        // @see https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_view_matcher-MatcherPattern.html
+        if ($tag == '*') {
+          continue;
+        }
+        $disallowed[$tag]['name'] = $tag;
+        // No need to disallow the 'class' or 'style' attributes; CKEditor
         // handles them separately (if no specific class or style attribute
         // values are allowed, then those attributes are disallowed).
         if (isset($disallowed_attributes['class'])) {
@@ -1023,7 +1038,7 @@ function ckeditor5_get_acf_settings($format) {
         if (isset($disallowed_attributes['style'])) {
           unset($disallowed_attributes['style']);
         }
-        $disallowed[$tag]['attributes'] = implode(',', array_keys($disallowed_attributes));
+        $disallowed[$tag]['attributes'] = $disallowed_attributes;
       }
       if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
         $disallowed_styles = $get_attribute_values($allowed_attributes['style'], FALSE);
@@ -1039,6 +1054,10 @@ function ckeditor5_get_acf_settings($format) {
       }
     }
   }
+
+  // CKEditor htmlSupport arrays are not supposed to be keyed.
+  $allowed = array_values($allowed);
+  $disallowed = array_values($disallowed);
 
   return array($allowed, $disallowed);
 }
