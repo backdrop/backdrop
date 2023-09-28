@@ -8939,12 +8939,13 @@ function backdrop_get_filetransfer_info() {
  *   backdrop_include_file('theme', 'basis', 'template.php');
  * @endcode
  *
- * Do not use this function to include an install file. Instead use:
+ * Do not use this function to include a module's install file in any situation
+ * where the module might not be enabled. Instead use:
  * @code
  *   module_load_install()
  * @endcode
- * Do not use this function in a global context, since it requires Backdrop to
- * be fully bootstrapped. Instead use:
+ * Do not use this function in a global context since it requires Backdrop to be
+ * fully bootstrapped. Instead use:
  * @code
  *   require_once BACKDROP_ROOT . '/path/file'
  * @endcode
