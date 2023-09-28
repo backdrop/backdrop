@@ -318,10 +318,16 @@ function module_load_install($module) {
  *   backdrop_include_file('module', 'node', 'node.admin.inc');
  * @endcode
  *
- * Do not use this function to load an install file, use module_load_install()
- * instead. Do not use this function in a global context since it requires
- * Backdrop to be fully bootstrapped; use require_once BACKDROP_ROOT .
- * '/path/file' instead.
+ * Do not use this function to load a module's install file in any situation
+ * where the module might not be enabled. Instead use:
+ * @code
+ *   module_load_install()
+ * @endcode
+ * Do not use this function in a global context since it requires Backdrop to be
+ * fully bootstrapped; instead use:
+ * @code
+ *   require_once BACKDROP_ROOT . '/path/file'.
+ * @endcode
  *
  * @param string $type
  *   The include file's type (file extension).
