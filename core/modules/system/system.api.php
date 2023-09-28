@@ -2878,9 +2878,16 @@ function hook_install() {
  * name, you should never renumber update functions. It may result in updates
  * being either skipped or run twice.
  *
- * Not all module functions are available from within a hook_update_N() function.
- * In order to call a function from your mymodule.module or an include file,
- * you need to explicitly load that file first.
+ * Module functions not in the install file cannot be counted on to be available
+ * from within a hook_update_N() function. In order to call a function from your
+ * mymodule.module or an include file, you need to explicitly load that file
+ * first.
+ *
+ * This is because if a module was previously enabled but is now disabled (and
+ * has not been uninstalled), update hooks will still be called for that module
+ * during system updates, but the mymodule.module file (and any other files
+ * loaded by that one, including, for example, autoload information) will not
+ * have been loaded.
  *
  * During database updates the schema of any module could be out of date. For
  * this reason, caution is needed when using any API function within an update
@@ -2902,9 +2909,9 @@ function hook_install() {
  *   Stores information for multipass updates. See above for more information.
  *
  * @throws BackdropUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of BackdropUpdateException
- *   with a meaningful message for the user. If a database query fails for whatever
- *   reason, it will throw a PDOException.
+ *   In case of error, update hooks should throw an instance of
+ *   BackdropUpdateException with a meaningful message for the user. If a
+ *   database query fails for whatever reason, it will throw a PDOException.
  *
  * @return
  *   Optionally, update hooks may return a translated string that will be
