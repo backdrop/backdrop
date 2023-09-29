@@ -89,7 +89,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
       'javascript:void();',
       'javascript:void(0)',
       'javascript:void(0);',
-      'JavaScript:Void(0)'
+      'JavaScript:Void(0)',
     );
     foreach ($special_case_js_paths as $path) {
       $text = $this->randomName();

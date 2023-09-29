@@ -2918,7 +2918,7 @@ function l($text, $path, array $options = array()) {
     'javascript:void()',
     'javascript:void();',
     'javascript:void(0)',
-    'javascript:void(0);'
+    'javascript:void(0);',
   );
   if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
     $url = check_url($url);
