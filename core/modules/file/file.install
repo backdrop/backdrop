@@ -1214,7 +1214,7 @@ function file_update_1008() {
   db_create_table('cache_entity_file', $table);
 }
 
-/** 
+/**
  * Remove the file_type_determine queue.
  */
 function file_update_1009() {
@@ -1235,18 +1235,20 @@ function file_update_1010() {
   // format for that text is a valid format and if it isn't, use the fallback
   // format. Check the format for all displays, in case the user has modified
   // the page from the default.
-  $view = views_get_view('file_admin');
-  if ($view) {
+  $config = config('views.view.file_admin');
+  $displays = $config->get('display');
+  if (!empty($displays)) {
     $filter_format_configs = config_get_names_with_prefix('filter.format.');
-    foreach ($view->display as &$display) {
-      if (isset($display->display_options['empty']['area']['format'])) {
-        $format = $display->display_options['empty']['area']['format'];
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['empty']['area']['format'])) {
+        $format = $display['display_options']['empty']['area']['format'];
         if (in_array('filter.format.' . $format, $filter_format_configs)) {
           continue;
         }
-        $display->display_options['empty']['area']['format'] = filter_fallback_format();
+        $display['display_options']['empty']['area']['format'] = filter_fallback_format();
       }
     }
-    $view->save();
+    $config->set('display', $displays);
+    $config->save();
   }
 }
