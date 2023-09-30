@@ -319,7 +319,7 @@ function ckeditor_ckeditor_plugins() {
     )
   );
 
-  // The backdroplink plugin replaces normal link funcitonality.
+  // The backdroplink plugin replaces normal link functionality.
   $plugins['backdroplink'] = array(
     'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdroplink',
     'file' => 'plugin.js',
@@ -776,4 +776,26 @@ function _ckeditor_theme_css($theme = NULL) {
     }
   }
   return $css;
+}
+
+/**
+ * Implements hook_telemetry_info().
+ */
+function ckeditor_telemetry_info() {
+  $info['ckeditor_version'] = array(
+    'label' => t('CKEditor Version'),
+    'description' => t('The current version of CKEditor in use.'),
+    'project' => 'backdrop',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_telemetry_data().
+ */
+function ckeditor_telemetry_data($telemetry_key) {
+  switch ($telemetry_key) {
+    case 'ckeditor_version':
+      return CKEDITOR_VERSION;
+  }
 }

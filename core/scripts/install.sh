@@ -122,16 +122,24 @@ if (empty($options['db-url'])) {
   exit;
 }
 $url = parse_url($options['db-url']);
+
+$url = array_map('urldecode', $url);
+
+// Check if the driver is set to mysql and report error if it is not.
+if ($url['scheme'] != 'mysql') {
+  print "Only mysql connections are supported. Specify one as --db-url=mysql://user:pass@host_name/db_name.\n";
+  exit;
+}
+
 $url += array(
-  'driver' => NULL,
   'user' => NULL,
   'pass' => NULL,
   'host' => NULL,
   'port' => NULL,
-  'path' => NULL,
-  'database' => NULL,
 );
-$url = (object)array_map('urldecode', $url);
+
+$url = (object)$url;
+
 $db_spec = array(
   'driver' => 'mysql',
   'username' => $url->user,
@@ -141,7 +149,6 @@ $db_spec = array(
   // Remove leading / character from database names.
   'database' => substr($url->path, 1),
 );
-
 
 $settings = array(
   'parameters' => array(

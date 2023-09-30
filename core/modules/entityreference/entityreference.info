@@ -5,6 +5,5 @@ backdrop = 1.x
 type = module
 version = BACKDROP_VERSION
 
-dependencies[] = system (>= 1.21.0)
 dependencies[] = field
 dependencies[] = entity

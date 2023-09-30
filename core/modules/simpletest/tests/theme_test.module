@@ -31,6 +31,7 @@ function theme_test_system_theme_info() {
   $themes['test_theme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_theme/test_theme.info';
   $themes['test_basetheme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_basetheme/test_basetheme.info';
   $themes['test_subtheme'] = backdrop_get_path('module', 'theme_test') . '/themes/test_subtheme/test_subtheme.info';
+  $themes['test_theme_config'] = backdrop_get_path('module', 'theme_test') . '/themes/test_theme_config/test_theme_config.info';
   return $themes;
 }
 
@@ -109,7 +110,7 @@ function theme_test_hook_init_page_callback() {
 }
 
 /**
- * Menu callback for testing template overridding based on filename.
+ * Menu callback for testing template overriding based on filename.
  */
 function theme_test_template_test_page_callback() {
   return theme('theme_test_template_test');

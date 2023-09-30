@@ -12,7 +12,8 @@
 class views_handler_argument_search extends views_handler_argument {
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
