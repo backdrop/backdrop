@@ -1991,7 +1991,20 @@ function theme_dropbutton_wrapper($variables) {
 function template_preprocess_image(&$variables) {
   // Accept either URI or path key. But both are handled by file_create_url().
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
+  $image_real_path = backdrop_realpath($path_or_uri);
   $variables['attributes']['src'] = file_create_url($path_or_uri);
+
+  // If the image is an unmanaged file, it will not have an entry in the
+  // file_managed table, hence no timestamp attribute either.
+  if (!isset($variables['timestamp']) && file_exists($image_real_path)) {
+    // In that case, get the timestamp from the file system.
+    $variables['timestamp'] = filemtime($image_real_path);
+  }
+
+  // Append the timestamp of the image to its src attribute, as a URL query.
+  // This prevents situations where browser cache may serve stale versions of
+  // images.
+  $variables['attributes']['src'] .= (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
 
   // Convert all other variables into the attributes array.
   foreach (array('width', 'height', 'alt', 'title') as $key) {
@@ -2026,12 +2039,18 @@ function template_preprocess_image(&$variables) {
  *     - http://dev.w3.org/html5/spec/Overview.html#alt
  *   - title: The title text is displayed when the image is hovered in some
  *     popular browsers.
+ *   - timestamp: The changed date of the image file. It busts the browser
+ *     cache, if the image file has been modified, by appending the date in the
+ *     query string.
  *   - attributes: Associative array of attributes to be placed in the img tag.
  *     All attributes should be populated with the correct values that match
  *     the other input variables.
  *
  * @since 1.8.0 Added support for $variables['path']. All variables are now
  *   populated into $variables['attributes'] in template_preprocess_image().
+ * @since 1.14.1 Added support for $variables['timestamp']. Allows appending a
+ *   unique string to the image src attribute, as a query parameter. That in
+ *   turn prevents stale versions of images being served by browser cache.
  */
 function theme_image($variables) {
   return '<img' . backdrop_attributes($variables['attributes']) . ' />';
