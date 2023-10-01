@@ -161,12 +161,20 @@ ul.links,
 }
 
 .links.inline li:after {
+<<<<<<< HEAD
   content: '|';
+=======
+  content: '•';
+>>>>>>> Remove conditional capitalization, use dots for delimiters
   position: static;
   display: inline;
   transform: none;
   border: 0;
+<<<<<<< HEAD
   padding: 0 0 0 0.6em;
+=======
+  padding: 0 0 0 0.5em;
+>>>>>>> Remove conditional capitalization, use dots for delimiters
 }
 
 .links.inline li:last-child:after {
