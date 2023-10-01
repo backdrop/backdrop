@@ -171,10 +171,14 @@ ul.links,
   transform: none;
   border: 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
   padding: 0 0 0 0.6em;
 =======
   padding: 0 0 0 0.5em;
 >>>>>>> Remove conditional capitalization, use dots for delimiters
+=======
+  padding: 0 0 0 0.6em;
+>>>>>>> Adjust padding.
 }
 
 .links.inline li:last-child:after {
