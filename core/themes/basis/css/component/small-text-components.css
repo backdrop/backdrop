@@ -176,12 +176,13 @@ ul.links,
 }
 
 .links.inline li:after {
-  content: ',';
+  content: '•';
   position: static;
   display: inline;
   -webkit-transform: none;
   transform: none;
   border: 0;
+  padding: 0 0 0 0.5em;
 }
 
 .links.inline li:last-child:after {
