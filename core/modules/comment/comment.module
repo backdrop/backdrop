@@ -671,8 +671,9 @@ function comment_node_view(Node $node, $view_mode) {
       if ($node->comment == COMMENT_NODE_OPEN) {
         $comment_form_location = $node_type->settings['comment_form_location'];
         if (Comment::createAccess()) {
+          $title = (empty($links)) ? t('Add comment') : t('add comment');
           $links['comment-add'] = array(
-            'title' => t('Add comment'),
+            'title' => $title,
             'href' => "node/$node->nid",
             'attributes' => array('title' => t('Add a new comment to this page.')),
             'fragment' => 'comment-form',

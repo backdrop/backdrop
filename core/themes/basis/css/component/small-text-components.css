@@ -187,11 +187,3 @@ ul.links,
 .links.inline li:last-child:after {
   content: '';
 }
-
-.links.inline .node-readmore {
-  display: block;
-}
-
-.links.inline .node-readmore:after {
-  content: '';
-}
