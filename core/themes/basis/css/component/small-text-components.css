@@ -182,7 +182,7 @@ ul.links,
   -webkit-transform: none;
   transform: none;
   border: 0;
-  padding: 0 0 0 0.5em;
+  padding: 0 0 0 0.6em;
 }
 
 .links.inline li:last-child:after {
