@@ -1745,7 +1745,7 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $commands = array();
   $commands[] = ajax_command_settings($settings, TRUE);
-  $commands[] = ajax_command_open_dialog('#backdrop-browser-modal', $title, $html, $options);;
+  $commands[] = ajax_command_open_dialog('#backdrop-browser-modal', $title, $html, $options);
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
