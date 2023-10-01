@@ -25,7 +25,7 @@ class DashboardLayoutContext extends LayoutContext {
    */
   function formSubmit($form, &$form_state) {
     $this->name = 'dashboard';
-    $this->settings = 'dashboard';
+    $this->settings['id'] = 'dashboard';
   }
 
   /**
