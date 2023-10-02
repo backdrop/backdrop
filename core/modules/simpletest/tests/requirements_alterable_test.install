@@ -3,7 +3,7 @@
 /**
  * Implements hook_requirements().
  */
-function requirements1_test_requirements($phase) {
+function requirements_alterable_test_requirements($phase) {
   $requirements = array();
 
   $requirements['requirements_test_alterable'] = array(
