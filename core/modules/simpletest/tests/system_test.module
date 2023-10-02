@@ -353,15 +353,15 @@ function system_test_system_info_alter(&$info, $file, $type) {
 
   // Make various test modules visible by default (for the purpose of tests).
   $test_modules = array(
-    'system_project_namespace_test',
-    'system_dependencies_test',
-    'system_incompatible_module_version_dependencies_test',
-    'system_incompatible_core_version_dependencies_test',
-    'system_incompatible_module_version_test',
-    'system_incompatible_core_version_test',
+    'requirements_alterable_test',
     'requirements1_test',
     'requirements2_test',
-    'requirements_alterable_test'
+    'system_dependencies_test',
+    'system_incompatible_core_version_dependencies_test',
+    'system_incompatible_core_version_test',
+    'system_incompatible_module_version_dependencies_test',
+    'system_incompatible_module_version_test',
+    'system_project_namespace_test',
   );
   if (in_array($file->name, $test_modules)) {
     $info['hidden'] = FALSE;
