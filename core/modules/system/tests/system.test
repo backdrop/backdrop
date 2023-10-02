@@ -331,11 +331,17 @@ class HookRequirementsTestCase extends ModuleTestCase {
    * Tests requirements data altering/deleting.
    */
   function testHookRequirementsAlter() {
+    // Install the requirements_test_alterable module.
+    $edit = array();
+    $edit['modules[Testing][requirements_test][enable]'] = 'requirements_test_alterable';
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertModules(array('requirements_test_alterable'), TRUE);
+
     $requirements = system_get_requirements();
-    // @see requirements1_test_requirements_alter()
-    $this->assertEqual('Requirements 1 Test - Changed', $requirements['requirements1_test_alterable']['title'], 'Requirements title altered.');
-    $this->assertEqual(REQUIREMENT_WARNING, $requirements['requirements1_test_alterable']['severity'], 'Requirements severity altered.');
-    $this->assertFalse(isset($requirements['requirements1_test_deletable']), 'Requirements entry deleted.');
+    // @see requirements_test_alterable_requirements_alter()
+    $this->assertEqual($requirements['requirements_test_alterable']['title'], 'Requirements 1 Test - Changed', 'Requirements title altered.');
+    $this->assertEqual($requirements['requirements_test_alterable']['severity'], REQUIREMENT_WARNING, 'Requirements severity altered.');
+    $this->assertFalse(isset($requirements['requirements_test_deletable']), 'Requirements entry deleted.');
   }
 }
 
