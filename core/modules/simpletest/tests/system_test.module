@@ -361,7 +361,7 @@ function system_test_system_info_alter(&$info, $file, $type) {
     'system_incompatible_core_version_test',
     'requirements1_test',
     'requirements2_test',
-    'requirements_test_alterable'
+    'requirements_alterable_test'
   );
   if (in_array($file->name, $test_modules)) {
     $info['hidden'] = FALSE;
