@@ -333,9 +333,9 @@ class HookRequirementsTestCase extends ModuleTestCase {
   function testHookRequirementsAlter() {
     $requirements = system_get_requirements();
     // @see requirements1_test_requirements_alter()
-    $this->assertEquals('Requirements 1 Test - Changed', $requirements['requirements1_test_alterable']['title']);
-    $this->assertEquals(REQUIREMENT_WARNING, $requirements['requirements1_test_alterable']['severity']);
-    $this->assertFalse(isset($requirements['requirements1_test_deletable']));
+    $this->assertEqual('Requirements 1 Test - Changed', $requirements['requirements1_test_alterable']['title'], 'Requirements title altered.');
+    $this->assertEqual(REQUIREMENT_WARNING, $requirements['requirements1_test_alterable']['severity'], 'Requirements severity altered.');
+    $this->assertFalse(isset($requirements['requirements1_test_deletable']), 'Requirements entry deleted.');
   }
 }
 
