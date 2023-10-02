@@ -1,4 +1,9 @@
 <?php
+/**
+ * @file
+ * Install, update and uninstall functions for the requirements_alterable_test
+ * module.
+ */
 
 /**
  * Implements hook_requirements().
