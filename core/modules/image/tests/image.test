@@ -778,7 +778,10 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // Test the image linked to content formatter.
     $instance['display']['default']['settings']['image_link'] = 'content';
     field_update_instance($instance);
-    $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'active')));
+    $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array(
+      'class' => 'active',
+      'aria-current' => 'page',
+    )));
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
