@@ -335,7 +335,7 @@ class HookRequirementsTestCase extends ModuleTestCase {
     // @see requirements1_test_requirements_alter()
     $this->assertEquals('Requirements 1 Test - Changed', $requirements['requirements1_test_alterable']['title']);
     $this->assertEquals(REQUIREMENT_WARNING, $requirements['requirements1_test_alterable']['severity']);
-    $this->assertArrayNotHasKey('requirements1_test_deletable', $requirements);
+    $this->assertFalse(isset($requirements['requirements1_test_deletable']));
   }
 }
 
