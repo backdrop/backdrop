@@ -323,17 +323,17 @@ class HookRequirementsTestCase extends ModuleTestCase {
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the module was NOT installed.
-    $this->assertText(t('Requirements 1 Test failed requirements'), 'Modules status has been updated.');
+    $this->assertText(t('Requirements 1 Test failed requirements'), 'Error shown about module having failed requirements.');
     $this->assertModules(array('requirements1_test'), FALSE);
   }
 
   /**
-   * Tests requirements data altering/deleting.
+   * Assert that requirements data have been altered/deleted.
    */
   function testHookRequirementsAlter() {
     // Install the requirements_test_alterable module.
     $edit = array();
-    $edit['modules[Testing][requirements_test][enable]'] = 'requirements_test_alterable';
+    $edit['modules[Testing][requirements_test_alterable][enable]'] = 'requirements_test_alterable';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('requirements_test_alterable'), TRUE);
 
