@@ -17,5 +17,17 @@ function requirements1_test_requirements($phase) {
     );
   }
 
+  $requirements['requirements1_test_alterable'] = array(
+    'title' => t('Requirements 1 Test Alterable'),
+    'severity' => REQUIREMENT_ERROR,
+    'description' => t('A requirement that will be altered.'),
+  );
+
+  $requirements['requirements1_test_deletable'] = array(
+    'title' => t('Requirements 1 Test Deletable'),
+    'severity' => REQUIREMENT_INFO,
+    'description' => t('A requirement that will be deleted.'),
+  );
+
   return $requirements;
 }

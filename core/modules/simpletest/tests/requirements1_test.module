@@ -2,5 +2,17 @@
 /**
  * @file
  * Tests that a module is not installed when it fails
- * hook_requirements('install').
+ * hook_requirements('install'). Also tests requirements data altering/deleting.
  */
+
+/**
+ * Implements hook_requirements_alter().
+ */
+function requirements1_test_requirements_alter(array &$requirements) {
+  // Change the title of the 'requirements1_test_alterable' entry.
+  $requirements['requirements1_test_alterable']['title'] = t('Requirements 1 Test - Changed');
+  // Decrease the severity of the 'requirements1_test_alterable' entry.
+  $requirements['requirements1_test_alterable']['severity'] = REQUIREMENT_WARNING;
+  // Delete the 'requirements1_test_deletable' entry altogether.
+  unset($requirements['requirements1_test_deletable']);
+}

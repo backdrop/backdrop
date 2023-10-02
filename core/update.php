@@ -437,6 +437,9 @@ function update_extra_requirements($requirements = NULL) {
 function update_check_requirements($skip_warnings = FALSE) {
   // Check requirements of all loaded modules.
   $requirements = module_invoke_all('requirements', 'update');
+  // Provide a way to alter the requirements arrays of other modules (core or
+  // otherwise).
+  backdrop_alter('requirements', $requirements);
   $requirements += update_extra_requirements();
   $severity = backdrop_requirements_severity($requirements);
 

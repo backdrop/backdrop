@@ -1385,13 +1385,19 @@ function backdrop_requirements_severity(&$requirements) {
  *
  * @return
  *   An array of requirements in the same format as is returned by
- *   hook_requirements().
+ *   hook_requirements(). The title, value, description or severity of various
+ *   requirements defined by hook_requirements() implementations can be altered
+ *   or even removed via hook_requirements_alter() implementations.
  */
 function system_get_requirements() {
   backdrop_load_updates();
 
   // Check run-time requirements and status information.
   $requirements = module_invoke_all('requirements', 'runtime');
+  // Provide a way to alter the requirements arrays of other modules (core or
+  // otherwise).
+  backdrop_alter('requirements', $requirements);
+  // Sort the requirements array.
   usort($requirements, '_system_sort_requirements');
 
   return $requirements;
