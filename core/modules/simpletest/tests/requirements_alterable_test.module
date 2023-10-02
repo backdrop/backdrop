@@ -9,9 +9,9 @@
  */
 function requirements_alterable_test_requirements_alter(array &$requirements) {
   // Change the title of the 'requirements_alterable_test' entry.
-  $requirements['requirements_alterable_test']['title'] = t('Requirements 1 Test - Changed');
+  $requirements['requirements_test_alterable']['title'] = t('Requirements Test - Changed');
   // Decrease the severity of the 'requirements_alterable_test' entry.
-  $requirements['requirements_alterable_test']['severity'] = REQUIREMENT_WARNING;
+  $requirements['requirements_test_alterable']['severity'] = REQUIREMENT_WARNING;
   // Delete the 'requirements_test_deletable' entry altogether.
   unset($requirements['requirements_test_deletable']);
 }

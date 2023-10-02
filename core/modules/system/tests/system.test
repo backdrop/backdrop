@@ -339,8 +339,8 @@ class HookRequirementsTestCase extends ModuleTestCase {
 
     $requirements = system_get_requirements();
     // @see requirements_alterable_test_requirements_alter()
-    $this->assertEqual($requirements['requirements_alterable_test']['title'], 'Requirements 1 Test - Changed', 'Requirements title altered.');
-    $this->assertEqual($requirements['requirements_alterable_test']['severity'], REQUIREMENT_WARNING, 'Requirements severity altered.');
+    $this->assertEqual($requirements['requirements_test_alterable']['title'], 'Requirements Test - Changed', 'Requirements title altered.');
+    $this->assertEqual($requirements['requirements_test_alterable']['severity'], REQUIREMENT_WARNING, 'Requirements severity altered.');
     $this->assertFalse(isset($requirements['requirements_test_deletable']), 'Requirements entry deleted.');
   }
 }
@@ -461,7 +461,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the modules were NOT installed.
-    $this->assertText(t('Requirements 1 Test failed requirements'), 'Modules status has been updated.');
+    $this->assertText(t('Requirements 1 Test failed requirements'), 'Error shown about module having failed requirements.');
     $this->assertModules(array('requirements1_test'), FALSE);
     $this->assertModules(array('requirements2_test'), FALSE);
 
