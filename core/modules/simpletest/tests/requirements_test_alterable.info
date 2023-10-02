@@ -1,5 +1,5 @@
 name = Requirements Alterable Test
-description = "Tests that a requirement entries can be altered/deleted."
+description = "Tests that requirement entries can be altered/deleted."
 package = Testing
 version = BACKDROP_VERSION
 type = module

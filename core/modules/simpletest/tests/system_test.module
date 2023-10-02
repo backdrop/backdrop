@@ -351,22 +351,19 @@ function system_test_system_info_alter(&$info, $file, $type) {
     }
   }
 
-  if ($file->name == 'system_project_namespace_test') {
-    $info['hidden'] = FALSE;
-  }
-  // Make the system_dependencies_test visible by default.
-  if ($file->name == 'system_dependencies_test') {
-    $info['hidden'] = FALSE;
-  }
-  if (in_array($file->name, array(
+  // Make various test modules visible by default (for the purpose of tests).
+  $test_modules = array(
+    'system_project_namespace_test',
+    'system_dependencies_test',
     'system_incompatible_module_version_dependencies_test',
     'system_incompatible_core_version_dependencies_test',
     'system_incompatible_module_version_test',
     'system_incompatible_core_version_test',
-  ))) {
-    $info['hidden'] = FALSE;
-  }
-  if ($file->name == 'requirements1_test' || $file->name == 'requirements2_test') {
+    'requirements1_test',
+    'requirements2_test',
+    'requirements_test_alterable'
+  );
+  if (in_array($file->name, $test_modules)) {
     $info['hidden'] = FALSE;
   }
 }
