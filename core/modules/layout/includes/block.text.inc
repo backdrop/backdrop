@@ -79,10 +79,15 @@ class BlockText extends Block {
         '#weight' => 2,
         '#parents' => array(),
       );
+      $reusable_block_notes = array(
+        '<strong>' . t('Making a block reusable is an action that cannot be reverted!') . '</strong>',
+        '<strong>' . t('Updating the content of a reusable block in one place will affect all places where that block is used!') . '</strong> ' ,
+        t('Once made reusable, you may edit the block title and description either directly on this layout, or via the !reusable_blocks_page page, which lists all reusable blocks available on the site.', array('!reusable_blocks_page' => l(t('Custom blocks'), 'admin/structure/block'))),
+      );
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Make this block reusable'),
-        '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#title' => t('Make this block reusable across different layouts'),
+        '#description' => theme('item_list', array('items' => $reusable_block_notes)),
         '#weight' => 1,
       );
       // Add a notice for translation.
