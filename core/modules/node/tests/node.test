@@ -3784,7 +3784,7 @@ class NodePageCacheTest extends NodeWebTestCase {
    * Make sure that creating a new node does not affect existing entity cache
    * records, and updating a node only acts on the affected cid.
    */
-  function testNodeUpdateInsertCache() {
+  protected function testNodeUpdateInsertCache() {
     $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
     $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
     $ids = array($node_one->nid, $node_two->nid);
