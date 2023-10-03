@@ -1546,7 +1546,8 @@ function node_user_predelete($account) {
  * Implements hook_user_update().
  */
 function node_user_update($account) {
-  if ($account->name != $account->original->name) {
+  $orig = $account->original;
+  if ($account->name != $orig->name || $account->picture != $orig->picture || $account->data != $orig->data) {
     $nids = db_select('node', 'n')
       ->fields('n', array('nid'))
       ->condition('uid', $account->uid)
@@ -1555,7 +1556,7 @@ function node_user_update($account) {
 
     if (!empty($nids)) {
       // Flush entity cache of nodes this user authored, to prevent outdated
-      // username in cached info.
+      // info (like old username) in cached data.
       cache('entity_node')->deleteMultiple($nids);
     }
   }
