@@ -305,7 +305,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Display title'),
     '#default_value' => $edit['title'],
     '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#description' => t('Optional block title to be shown to site visitors.'),
   );
   $form['body'] = array(
     '#type' => 'text_format',
