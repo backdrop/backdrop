@@ -3560,11 +3560,13 @@ function hook_page_delivery_callback_alter(&$callback) {
 function hook_system_themes_page_alter(&$theme_groups) {
   foreach ($theme_groups as $state => &$group) {
     foreach ($theme_groups[$state] as &$theme) {
-      // Add a foo link to each list of theme operations.
-      $theme->operations[] = array(
+      // Add a foo link to each list of theme operations. 'foo' is also added as
+      // an additional class to the operation link's <li> HTML tag.
+      $theme->operations['foo'] = array(
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name)
+        'query' => array('theme' => $theme->name),
+        'attributes' => array('title' => t('Perform operation foo')),
       );
     }
   }
