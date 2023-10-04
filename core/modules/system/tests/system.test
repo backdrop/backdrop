@@ -331,15 +331,14 @@ class HookRequirementsTestCase extends ModuleTestCase {
    * Assert that requirements data have been altered/deleted.
    */
   function testHookRequirementsAlter() {
-    // Install the requirements_alterable_test module.
-    $edit = array();
-    $edit['modules[Testing][requirements_alterable_test][enable]'] = 'requirements_alterable_test';
-    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
-    $this->assertModules(array('requirements_alterable_test'), TRUE);
+    // Install the requirements_alterable_test module. No need to do this via
+    // the UI for the purposes of this test, since we are testing only whether
+    // requirements data are updated properly via hook_requirements_alter().
+    module_enable(array('requirements_alterable_test'));
 
     $requirements = system_get_requirements();
     // @see requirements_alterable_test_requirements_alter()
-    $this->assertEqual($requirements['requirements_test_alterable']['title'], 'Requirements Test - Changed', 'Requirements title altered.');
+    $this->assertEqual($requirements['requirements_test_alterable']['title'], 'Requirements Test Alterable - Changed', 'Requirements title altered.');
     $this->assertEqual($requirements['requirements_test_alterable']['severity'], REQUIREMENT_WARNING, 'Requirements severity altered.');
     $this->assertFalse(isset($requirements['requirements_test_deletable']), 'Requirements entry deleted.');
   }
