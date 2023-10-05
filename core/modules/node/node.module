@@ -1543,6 +1543,26 @@ function node_user_predelete($account) {
 }
 
 /**
+ * Implements hook_user_update().
+ */
+function node_user_update($account) {
+  $orig = $account->original;
+  if ($account->name != $orig->name || $account->picture != $orig->picture || $account->data != $orig->data) {
+    $nids = db_select('node', 'n')
+      ->fields('n', array('nid'))
+      ->condition('uid', $account->uid)
+      ->execute()
+      ->fetchCol();
+
+    if (!empty($nids)) {
+      // Flush entity cache of nodes this user authored, to prevent outdated
+      // info (like old username) in cached data.
+      cache('entity_node')->deleteMultiple($nids);
+    }
+  }
+}
+
+/**
  * Access callback: Checks node revision access.
  *
  * @param Node $node
