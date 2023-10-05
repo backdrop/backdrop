@@ -161,7 +161,7 @@ ul.links,
 }
 
 .links.inline li:after {
-  content: '•';
+  content: '|';
   position: static;
   display: inline;
   transform: none;
