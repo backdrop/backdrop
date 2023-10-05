@@ -162,10 +162,14 @@ ul.links,
 
 .links.inline li:after {
 <<<<<<< HEAD
+<<<<<<< HEAD
   content: '|';
 =======
   content: '•';
 >>>>>>> Remove conditional capitalization, use dots for delimiters
+=======
+  content: '|';
+>>>>>>> Use pipes instead of dots.
   position: static;
   display: inline;
   transform: none;
