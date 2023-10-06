@@ -19,12 +19,12 @@ Backdrop.behaviors.tokenTree = {
 Backdrop.behaviors.tokenInsert = {
   attach: function (context, settings) {
     // Keep track of which textfield was last selected/focused.
-    $(context).find('textarea, input[type="text"]').focus(function() {
+    $(context).find('textarea, input[type="text"]').on('focus', function() {
       Backdrop.settings.tokenFocusedField = this;
     });
 
     $(context).find('.token-click-insert .token-key').once('token-click-insert', function() {
-      var newThis = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').click(function(){
+      var newThis = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').on('click', function(){
         if (typeof Backdrop.settings.tokenFocusedField == 'undefined') {
           alert(Backdrop.t('First click a text field into which the token should be inserted.'));
         }
@@ -70,7 +70,7 @@ Backdrop.behaviors.tokenInsert = {
     }
     $(context).find('.token-description').each(function() {
       var $moreLink = $link.clone();
-      $moreLink.click(toggleDescription);
+      $moreLink.on('click', toggleDescription);
       $(this).css('display', 'none').before(' ').before($moreLink);
     });
   }

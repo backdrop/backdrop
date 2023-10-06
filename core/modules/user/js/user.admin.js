@@ -15,13 +15,13 @@ Backdrop.behaviors.userFieldsetSummaries = {
 
       // Status.
       var status = $context.find('input[name="status"]:checked').parent().find('label').text();
-      vals.push($.trim(status));
+      vals.push(status.trim());
 
       // Roles.
       var roles = [];
       var $checkedRoles = $context.find('input[name^="roles"]:not([disabled]):checked');
       $checkedRoles.each(function() {
-        roles.push($.trim($(this).parent().find('label').text()));
+        roles.push($(this).parent().find('label').text().trim());
       });
       if (roles.length) {
         var rolesText = Backdrop.t('Roles:') + ' ' + roles.join(', ');

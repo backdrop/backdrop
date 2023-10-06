@@ -4,6 +4,12 @@
  * Provides relationship to relate the Author from a piece of content (node).
  */
 class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
+
+  /**
+   * @var bool;
+   */
+  public $storage = FALSE;
+
   /**
    * Get the context from this relationship.
    *

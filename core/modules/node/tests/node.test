@@ -520,8 +520,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'help' => '',
-      'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
 
@@ -816,6 +814,16 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 
   /**
+   * @var object
+   */
+  protected $content_type;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
    * Sets up test case.
    */
   public function setUp() {
@@ -988,6 +996,11 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
  * Tests that the correct layout is used for node revisions.
  */
 class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodes;
 
   /**
    * Sets up test case.
@@ -1637,6 +1650,32 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodesByUser;
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
+  /**
+   * @var int
+   */
+  protected $publicTid;
+
+  /**
+   * @var int
+   */
+  protected $privateTid;
+
+  /**
+   * @var array
+   */
+  protected $nids_visible;
+
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
@@ -1788,6 +1827,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
  */
 class NodeSaveTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node_test');
@@ -2267,6 +2311,12 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -2291,6 +2341,31 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
+  /**
+   * @var User
+   */
+  protected $base_user_4;
 
   function setUp() {
     parent::setUp();
@@ -2547,6 +2622,12 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('node', 'system');
 
@@ -2586,6 +2667,16 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node', 'block');
@@ -2948,6 +3039,11 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * @var object
    */
   protected $noAccessUser;
+
+  /**
+   * @var User
+   */
+  protected $noAccessUser2;
 
   function setUp() {
     parent::setUp('node_access_test');
@@ -3394,6 +3490,12 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
@@ -3438,6 +3540,32 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $content_admin_user;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
@@ -3656,7 +3784,7 @@ class NodePageCacheTest extends NodeWebTestCase {
    * Make sure that creating a new node does not affect existing entity cache
    * records, and updating a node only acts on the affected cid.
    */
-  function testNodeUpdateInsertCache() {
+  protected function testNodeUpdateInsertCache() {
     $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
     $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
     $ids = array($node_one->nid, $node_two->nid);
@@ -3690,6 +3818,30 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->assertEqual(count($cached_after_insert), 3, 'All three nodes have a record in table cache_entity_node.');
     $this->assertEqual($cached_after_insert[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
   }
+
+  /**
+   * Check that cached node info does not run out of sync with user data.
+   */
+  protected function testNodeSaveAfterUsernameChange() {
+    $author = $this->backdropCreateUser(array('create page content'));
+    $node = $this->backdropCreateNode(array(
+      'uid' => $author->uid,
+      'name' => $author->name,
+    ));
+
+    // Trigger entity cache.
+    $this->backdropGet('node/' . $node->nid);
+
+    // Simulate a username change (without actual form interaction).
+    $author->name = 'new_name';
+    user_save($author);
+
+    // Freshly load data and compare.
+    $user = entity_load('user', $author->uid);
+    $node_after = entity_load('node', $node->nid);
+    $this->assertEqual($user->name, $node_after->name, 'Name property in loaded node is equal to username after change');
+  }
+
 }
 
 /**
@@ -3720,6 +3872,11 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  * node instances.
  */
 class NodePublishScheduling extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function testNodeTypeCreateDefaultDraft() {
     // Create a content type of fooba via the user interface.

@@ -44,7 +44,6 @@ Backdrop.behaviors.layoutConfigure = {
           ajax.cleanUp(ajax.currentRequests[n]);
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
-
       };
       // Update contexts after a slight typing delay.
       var timer = 0;
@@ -288,7 +287,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     } else {
       $('span.field-suffix').hide();
     }
-    $('input[name="reusable"]').change(function() {
+    $('input[name="reusable"]').on('change', function() {
       $('span.field-suffix').toggle();
     });
   },
@@ -369,7 +368,7 @@ Backdrop.behaviors.blockListFilterByText = {
       });
 
       // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterBlockList);
+      $input.trigger('focus').on('keyup', filterBlockList);
     }
   }
 }

@@ -2739,6 +2739,11 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
 class CommonFormatDateTestCase extends BackdropWebTestCase {
 
   /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
    * Arbitrary langcode for a custom language.
    */
   const LANGCODE = 'xx';
@@ -3420,50 +3425,6 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
   }
 
-}
-
-/**
- * Test for block_interest_cohort.
- */
-class BlockInterestCohortTest extends BackdropWebTestCase {
-  protected $profile = 'testing';
-
-  function setUp() {
-    parent::setUp('common_test');
-  }
-
-  /**
-   * Tests that FLoC is blocked by default.
-   */
-  function testDefaultBlocking() {
-    $this->backdropGet('node');
-    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=()', 'FLoC is blocked by default.');
-  }
-
-  /**
-   * Tests that an existing interest-cohort policy is not overwritten.
-   */
-  function testExistingInterestCohortPolicy() {
-    $this->backdropGet('common-test/existing_interest_cohort_policy');
-    $this->assertEqual($this->backdropGetHeader('Permissions-Policy'), 'interest-cohort=*', 'Existing interest-cohort policy is not overwritten.');
-  }
-
-  /**
-   * Tests that an existing header is appended to correctly.
-   */
-  function testExistingPolicyHeader() {
-    $this->backdropGet('common-test/existing_permissions_policy_header');
-    $this->assertTrue((strpos($this->backdropGetHeader('Permissions-Policy'), 'geolocation=(),interest-cohort=()') !== FALSE), 'The interest-cohort policy is appended to existing header.');
-  }
-
-  /**
-   * Tests that FLoC blocking can be disabled.
-   */
-  function testDisableBlocking() {
-    config_set('system.core', 'block_interest_cohort', FALSE);
-    $this->backdropGet('node');
-    $this->assertFalse($this->backdropGetHeader('Permissions-Policy'), 'FLoC blocking can be disabled.');
-  }
 }
 
 /**

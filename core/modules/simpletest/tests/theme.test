@@ -533,6 +533,12 @@ class ThemeHookInitUnitTest extends BackdropWebTestCase {
  * Tests autocompletion not loading registry.
  */
 class ThemeFastTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $account;
+
   function setUp() {
     parent::setUp('theme_test');
     $this->account = $this->backdropCreateUser(array('access user profiles'));
