@@ -705,11 +705,6 @@ ul.menu-tree > li.has-children > a {
   display: inline-block;
 }
 
-
-.menu-tree > li.has-children > ul ul {
-  /*padding-left: 15px;*/
-}
-
 /* ------------------- Main ------------------- */
 
 .l-container {
