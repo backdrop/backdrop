@@ -142,12 +142,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // is shown for both the checkbox and the text field.
   $form['description_description'] = array(
     '#type' => 'item',
-    // Fields of #type 'item' do not support #attributes, so we need to use
-    // #prefix and #suffix instead, in order to style this form item/text as
-    // help text.
-    '#prefix' => '<div class="description form-item-description">',
+    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    // Fields of #type 'item' do not support #attributes - use
+    // #wrapper_attributes instead.
     '#markup' => t('This text will be shown on the <a href="@url"><em>Add content</em></a> page.', array('@url' => url('node/add'))),
-    '#suffix' => '</div>',
   );
 
   // Prepare various messages about automatic permission assignment, and
@@ -286,12 +284,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // is shown for both the checkbox and the text field.
   $form['submission']['help_description'] = array(
     '#type' => 'item',
-    // Fields of #type 'item' do not support #attributes, so we need to use
-    // #prefix and #suffix instead, in order to style this form item/text as
-    // help text.
-    '#prefix' => '<div class="description form-item-description">',
+    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    // Fields of #type 'item' do not support #attributes - use
+    // #wrapper_attributes instead.
     '#markup' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
-    '#suffix' => '</div>',
   );
 
   $form['submission']['node_preview'] = array(
