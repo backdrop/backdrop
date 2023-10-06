@@ -2295,6 +2295,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   function testValidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
+      /* cspell:disable */
       'example.com',
       'www.example.com',
       'ex-ample.com',
@@ -2313,6 +2314,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
       'example.org/~,$\'*;',
       'caf%C3%A9.example.org',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html',
+      /* cspell:enable */
     );
 
     foreach ($url_schemes as $scheme) {
