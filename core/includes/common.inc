@@ -2913,7 +2913,16 @@ function l($text, $path, array $options = array()) {
   $attributes = backdrop_attributes($options['attributes']);
   unset($options['attributes']);
 
-  $url = check_plain(url($path, $options));
+  $url = url($path, $options);
+  $skip_js_paths = array(
+    'javascript:void()',
+    'javascript:void();',
+    'javascript:void(0)',
+    'javascript:void(0);',
+  );
+  if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
+    $url = check_url($url);
+  }
 
   // Sanitize the link text if necessary.
   if (!$options['html']) {
