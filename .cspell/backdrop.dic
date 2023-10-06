@@ -271,6 +271,7 @@ microweights
 mimeheaders
 minadjustment
 mindate
+mlids
 modif
 modulename
 moeglich
@@ -301,6 +302,8 @@ mytable
 mytokens
 mytype
 myusername
+myverylongurl
+myverylongurlexample
 natu
 nccc
 NCHUNKS
@@ -521,11 +524,13 @@ WCAG
 wday
 weba
 wesl
+WINDIR
 withslash
 Wonderwoman
 wõrd
 wordlength
 workkeys
+wordsafe
 xbeg
 xchanged
 xfff
