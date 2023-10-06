@@ -1,0 +1,49 @@
+name: Coding standards
+on:
+  pull_request:
+    branches: [1.x]
+
+jobs:
+  phpcs:
+    name: Run phpcs
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup PHP with CodeSniffer tool
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: phpcs:3.7
+
+      # The checkout action refuses to put it outside, so we have to do it in
+      # two steps.
+      - name: Checkout coding standard
+        uses: actions/checkout@v3
+        with:
+          repository: backdrop-ops/phpcs
+          ref: 1.0.0-beta1
+          path: phpcs
+
+      - name: Move standard outside current dir
+        run: mv phpcs ..
+
+      - name: Checkout code with full depth
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: thenabeel/action-phpcs@v8
+        with:
+          files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
+          standard: ../phpcs/Backdrop
+          fail_on_warnings: false
+
+  spellcheck:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout code
+    - uses: streetsidesoftware/cspell-action@v2
+      name: Run CSpell
+      with:
+        config: '.cspell/cspell.json'

@@ -294,19 +294,19 @@ function update_module_add_to_system($modules = array()) {
   }
 }
 
-/** 
+/**
  * Checks for disabled dependencies during a Drupal 7 upgrade.
- * 
+ *
  * @return string
  *   A themed message that lists modules that will be enabled, to be displayed
- *   in the 'info' page of the update process. 
+ *   in the 'info' page of the update process.
  */
 
 function update_upgrade_check_dependencies() {
   $status_report = '';
   if (backdrop_get_installed_schema_version('system') > 7000) {
     $modules_to_enable = update_upgrade_modules_to_enable();
-    
+
     if (empty($modules_to_enable)) {
       return '';
     }
@@ -337,20 +337,20 @@ function update_upgrade_enable_dependencies() {
   }
 }
 
-/** 
+/**
  * Finds out which modules need to be enabled.
- * 
+ *
  * @return array
  *   An array keyed by the machine names of module names needed to be enabled,
  *   whose values are arrays of the modules that depend on them.
  */
 function update_upgrade_modules_to_enable() {
-  // Get list of enabled modules. 
+  // Get list of enabled modules.
   $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
-    
+
   // Get list of modules to be enabled.
   $enabled_modules = array_keys($result->fetchAllAssoc('name'));
-  
+
   // Do not include any core module required by the Standard or Minimal
   // installations. Any needed modules from those will be taken care of later.
   $enabled_modules = array_diff($enabled_modules, array('standard', 'minimal'));
@@ -406,6 +406,12 @@ function update_fix_requirements() {
         db_create_table('cache_views_data', $schema_cache_views_data);
       }
       update_module_enable(array('views'));
+    }
+
+    // Enable the File module if necessary, as it is a required module in
+    // Backdrop, but may be off in Drupal.
+    if (!db_query("SELECT name FROM {system} WHERE name = 'file' AND type = 'module' AND status = 1")->fetchField()) {
+      update_module_enable(array('file'));
     }
 
     // Empty a few basic caches.
@@ -767,7 +773,8 @@ function update_get_update_list() {
         if ($compare_version > $schema_version) {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
-          $description = str_replace(array("\n", '*', '/'), '', $func->getDocComment());
+          // The order of the items in the replace array is important.
+          $description = preg_replace(array('#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'), '', $func->getDocComment());
           $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
           if (!isset($ret[$module]['start'])) {
             $ret[$module]['start'] = $update;

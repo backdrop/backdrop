@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of UserViewsArgumentValidate.
@@ -11,6 +10,12 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests views user argument argument handler.
  */
 class UserViewsArgumentValidate extends ViewsSqlTest {
+
+  /**
+   * @var User
+   */
+  protected $account;
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
     $this->account = $this->backdropCreateUser();
@@ -24,11 +29,11 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $view->pre_execute();
     $view->init_handlers();
     $this->assertTrue($view->argument['null']->validate_arg($account->uid));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a string variable since type is 'uid'
     $this->assertFalse($view->argument['null']->validate_arg($account->name));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a valid numeric, but for a user that doesn't exist
     $this->assertFalse($view->argument['null']->validate_arg(32));
@@ -42,11 +47,11 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $view->pre_execute();
     $view->init_handlers();
     $this->assertTrue($view->argument['null']->validate_arg($account->name));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a uid variable since type is 'name'
     $this->assertFalse($view->argument['null']->validate_arg($account->uid));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a valid string, but for a user that doesn't exist
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
@@ -60,15 +65,15 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $view->pre_execute();
     $view->init_handlers();
     $this->assertTrue($view->argument['null']->validate_arg($account->name));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a uid variable since type is 'name'
     $this->assertTrue($view->argument['null']->validate_arg($account->uid));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a valid string, but for a user that doesn't exist
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
-    // Reset safed argument validation.
+    // Reset safe argument validation.
     $view->argument['null']->argument_validated = NULL;
     // Fail for a valid uid, but for a user that doesn't exist
     $this->assertFalse($view->argument['null']->validate_arg(32));

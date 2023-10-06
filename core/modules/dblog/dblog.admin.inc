@@ -7,8 +7,8 @@
 /**
  * Page callback: Displays a listing of database log messages.
  *
- * Messages are truncated at 56 chars. Full-length messages can be viewed on the
- * message details page.
+ * Messages are truncated at the length determined by the 'log_max_length'
+ * setting. Full-length messages can be viewed on the message details page.
  *
  * @see dblog_clear_log_form()
  * @see dblog_event()
@@ -314,8 +314,8 @@ function dblog_format_message($event, $is_link = FALSE) {
     // special characters by using filter_xss() without any allowed tags.
     // If not, use filter_xss_admin() to allow some tags.
     if ($is_link && isset($event->wid)) {
-      // Truncate message to 56 chars after stripping all the tags.
-      $output = truncate_utf8(filter_xss($output, array()), 56, TRUE, TRUE);
+      // Truncate message after stripping all the tags.
+      $output = truncate_utf8(filter_xss($output, array()), config_get('system.core', 'log_max_length'), TRUE, TRUE);
       $output = l($output, 'admin/reports/event/' . $event->wid, array('html' => TRUE));
     }
     else {

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of viewsPluginStyleJumpMenuTest.
@@ -19,6 +18,11 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
    * @var array
    */
   var $nodes;
+
+  /**
+   * @var array
+   */
+  protected $nodeTitles;
 
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);

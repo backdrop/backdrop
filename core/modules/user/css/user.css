@@ -1,4 +1,25 @@
+/**
+ * Permissions page.
+ */
+#user-admin-permissions .form-item-search {
+  display: inline-block;
+}
+#user-admin-permissions .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
+#user-admin-permissions .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 
+/**
+ * Permissions matrix, used on permissions page, node type, and other places.
+ */
 #permissions td.module {
   font-weight: bold;
   background: #dddddd;
@@ -19,6 +40,20 @@
 #permissions tr.even .form-item {
   white-space: normal;
 }
+.permissions-matrix {
+  overflow-x: auto;
+}
+
+/**
+ * Roles page.
+ */
+#user-roles .role-name {
+  white-space: nowrap;
+}
+
+/**
+ * Site-wide account configuration.
+ */
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
   padding-bottom: .5em;
@@ -28,9 +63,6 @@
 }
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
-}
-.permissions-matrix {
-  overflow-x: auto;
 }
 
 /**

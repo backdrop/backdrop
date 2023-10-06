@@ -517,6 +517,7 @@ button.form-submit,
   text-align: center;
   text-transform: uppercase;
   color: #333333;
+  cursor: pointer;
   letter-spacing: 0.025em;
   line-height: 2.875;
   background: #d5d5d5;

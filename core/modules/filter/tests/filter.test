@@ -143,6 +143,17 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
  * Tests the administrative functionality of the Filter module.
  */
 class FilterAdminTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -700,7 +711,6 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     config_set('path.settings', 'node_page_pattern', '');
 
     $langcode = LANGUAGE_NONE;
-    $title_key = "title";
     $body_value_key = "body[$langcode][0][value]";
     $body_format_key = "body[$langcode][0][format]";
 
@@ -916,6 +926,12 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
@@ -1117,7 +1133,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- a malformed image tag.');
 
     $f = filter_xss('<blockquote><script>alert(0)</script></blockquote>', array('blockquote'));
-    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockqoute.');
+    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockquote.');
 
     $f = filter_xss("<!--[if true]><script>alert(0)</script><![endif]-->");
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script within a comment.');

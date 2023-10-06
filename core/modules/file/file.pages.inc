@@ -198,13 +198,13 @@ function file_add_form_validate($form, &$form_state) {
  *
  * Only filetypes for which the user has access to create entities are returned.
  *
- * @param array $file
+ * @param File $file
  *   An upload file array from form_state.
  *
  * @return array
  *   An array of file type bundles that support the file's mime type.
  */
-function file_get_filetype_candidates($file, $selected_files = array()) {
+function file_get_filetype_candidates(File $file, $selected_files = array()) {
   $types = module_invoke_all('file_type', $file);
   backdrop_alter('file_type', $types, $file);
 
@@ -322,7 +322,7 @@ function file_add_form_submit($form, &$form_state) {
   }
 
   // Form id's can vary depending on how many other forms are displayed, so we
-  // need to do string comparissons. e.g edit-submit--2.
+  // need to do string comparisons. e.g edit-submit--2.
   if ($triggered_next) {
     $form_state['step'] = $form['#step'] + 1;
   }
@@ -994,7 +994,7 @@ function _file_usage_get_total(File $file) {
  */
 function file_usage_page($file) {
   $rows = array();
-  $occured_entities = array();
+  $occurred_entities = array();
 
   // Determine all of the locations where a file is used, then loop through the
   // occurrences and filter out any duplicates.
@@ -1009,8 +1009,8 @@ function file_usage_page($file) {
         // If this entity has already been listed in the table, just add any
         // additional usage to the total count column in the table row and
         // continue on to the next iteration of the loop.
-        if (isset($occured_entities[$entity_type][$entity_id])) {
-          $rows[$occured_entities[$entity_type][$entity_id]][2] += $count;
+        if (isset($occurred_entities[$entity_type][$entity_id])) {
+          $rows[$occurred_entities[$entity_type][$entity_id]][2] += $count;
           continue;
         }
 
@@ -1020,16 +1020,7 @@ function file_usage_page($file) {
 
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
-          // Unlike Node or Term entities File entities have a stream wrapper
-          // to the file set as their path, but the path to the entities' page
-          // is "path/[fid]".
-          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
-          if ($entity_type == 'file') {
-            $uri = 'file/' . $entity_id;
-          }
-          else {
-            $uri = $entity_uri['path'];
-          }
+          $uri = $entity_uri['path'];
           $entity_label = l($label, $uri);
         }
         else {
@@ -1040,7 +1031,7 @@ function file_usage_page($file) {
 
         // Record the occurrence of the entity to ensure that it isn't listed in
         // the table again.
-        $occured_entities[$entity_type][$entity_id] = count($rows) - 1;
+        $occurred_entities[$entity_type][$entity_id] = count($rows) - 1;
       }
     }
   }

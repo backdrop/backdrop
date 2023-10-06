@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Installation code for MySQL embedded database engine.
