@@ -225,7 +225,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tests that the 'footer' option works correctly.
    */
-  function testThemeTableFooter() {
+  public function testThemeTableFooter() {
     $footer = array(
       array(
         'data' => array(1),
