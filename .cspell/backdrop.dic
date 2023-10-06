@@ -526,11 +526,13 @@ Wonderwoman
 wõrd
 wordlength
 workkeys
+xbeg
 xchanged
 xfff
 xhash
 xind
 xlarge
+xlen
 XLIM
 XOFF
 XOFFSET
@@ -546,10 +548,12 @@ xzread
 xzseek
 xztell
 xzwrite
+ybeg
 ychanged
 yhash
 yigejiandandejuzi
 yind
+ylen
 YLIM
 ymatches
 ymid
