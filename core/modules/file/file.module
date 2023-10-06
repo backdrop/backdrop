@@ -1409,11 +1409,14 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#size' => $element['#size'],
     '#theme_wrappers' => array(),
     '#weight' => -10,
+    // Set the id attribute here, since we need it for the 'for' attribute of
+    // the managed file field (see bellow).
+    '#attributes' => array('id' => backdrop_html_id('edit-' . implode('-', array_merge($element['#parents'], array('upload'))))),
   );
 
-  // Indicate that $element['#title'] should be used as the HTML label for the
-  // file upload field.
-  $element['#label_for'] = backdrop_html_id('edit-' . implode('-', array_merge($element['#parents'], array('upload'))));
+  // Use the id attribute of the upload field as the 'for' attribute of the
+  // parent managed file field.
+  $element['#label_for'] = $element['upload']['#attributes']['id'];
 
   if ($fid && $element['#file']) {
     $element['filename'] = array(
