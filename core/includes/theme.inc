@@ -2049,7 +2049,7 @@ function theme_breadcrumb($variables) {
   $output = '';
   if (!empty($breadcrumb)) {
     $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
-    $output .= '<ol><li>' . implode(' » </li><li>', $breadcrumb) . '</li></ol>';
+    $output .= '<ol><li>' . implode('<span class="breadcrumb-separator" aria-hidden="true"> » </span></li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
   return $output;
