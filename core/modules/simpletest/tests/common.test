@@ -2396,9 +2396,11 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidRelative() {
     $invalid_relative_urls = array(
+      /* cspell:disable */
       'ex^mple',
       'example<>',
       'ex%ample',
+      /* cspell:enable */
     );
 
     foreach (array('', '/') as $front) {
