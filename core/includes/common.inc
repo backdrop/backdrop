@@ -1288,7 +1288,7 @@ function backdrop_http_request($url, array $options = array()) {
  *
  * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
  *
- * @param string $respone
+ * @param string $response
  *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
  *
  * @return array
@@ -1463,7 +1463,7 @@ function valid_url($url, $absolute = FALSE) {
  *   given step, integer or float.
  *
  * @return bool
- *   TRUE if no step mismatch has occured, or FALSE otherwise.
+ *   TRUE if no step mismatch has occurred, or FALSE otherwise.
  */
 function valid_number_step($value, $step, $offset = 0.0) {
   // Avoid division by zero.
@@ -2270,8 +2270,8 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
 
   // Get the plural index through the gettext formula.
   $index = (function_exists('locale_get_plural')) ? locale_get_plural($count, isset($options['langcode']) ? $options['langcode'] : NULL) : -1;
-  // If the index cannot be computed, use the plural as a fallback (which
-  // allows for most flexiblity with the replaceable @count value).
+  // If the index cannot be computed, use the plural as a fallback (which allows
+  // for the most flexibility with the replaceable @count value).
   if ($index < 0) {
     return t($plural, $args, $options);
   }
@@ -2889,16 +2889,8 @@ function backdrop_attributes(array $attributes = array()) {
 function l($text, $path, array $options = array()) {
   global $language_url;
 
-  // Build a variables array to keep the structure of the alter consistent with
-  // theme_link().
-  $variables = array(
-    'text' => $text,
-    'path' => $path,
-    'options' => $options,
-  );
-
   // Merge in default options.
-  $variables['options'] += array(
+  $options += array(
     'attributes' => array(),
     'query' => array(),
     'html' => FALSE,
@@ -2908,23 +2900,34 @@ function l($text, $path, array $options = array()) {
   // Append active class.
   if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
       (empty($options['language']) || $options['language']->langcode == $language_url->langcode)) {
-    $variables['options']['attributes']['class'][] = 'active';
+    $options['attributes']['class'][] = 'active';
   }
 
   // Remove all HTML and PHP tags from a tooltip, calling expensive strip_tags()
   // only when a quick strpos() gives suspicion tags are present.
-  if (isset($variables['options']['attributes']['title']) && strpos($variables['options']['attributes']['title'], '<') !== FALSE) {
-    $variables['options']['attributes']['title'] = strip_tags($variables['options']['attributes']['title']);
+  if (isset($options['attributes']['title']) && strpos($options['attributes']['title'], '<') !== FALSE) {
+    $options['attributes']['title'] = strip_tags($options['attributes']['title']);
   }
 
   // Move attributes out of options. url() doesn't need them.
-  $attributes = backdrop_attributes($variables['options']['attributes']);
-  unset($variables['options']['attributes']);
+  $attributes = backdrop_attributes($options['attributes']);
+  unset($options['attributes']);
 
-  $url = check_plain(url($variables['path'], $variables['options']));
+  $url = url($path, $options);
+  $skip_js_paths = array(
+    'javascript:void()',
+    'javascript:void();',
+    'javascript:void(0)',
+    'javascript:void(0);',
+  );
+  if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
+    $url = check_url($url);
+  }
 
   // Sanitize the link text if necessary.
-  $text = $variables['options']['html'] ? $variables['text'] : check_plain($variables['text']);
+  if (!$options['html']) {
+    $text = check_plain($text);
+  }
 
   return '<a href="' . $url . '"' . $attributes . '>' . $text . '</a>';
 }
@@ -3048,19 +3051,6 @@ function backdrop_deliver_html_page($page_callback_result) {
   $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
-  }
-
-  if ($site_config->get('block_interest_cohort')) {
-    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
-    if (is_null($permissions_policy)) {
-      backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
-    }
-    else {
-      // Only add interest-cohort if the header does not contain it already.
-      if (strpos($permissions_policy, 'interest-cohort') === FALSE) {
-        backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()', TRUE);
-      }
-    }
   }
 
   // Menu status constants are integers; page content is a string or array.
@@ -3442,7 +3432,7 @@ function backdrop_css_defaults($data = NULL) {
  *     The group number serves as a weight: the markup for loading a stylesheet
  *     within a lower weight group is output to the page before the markup for
  *     loading a stylesheet within a higher weight group, so CSS within higher
- *     weight groups take precendence over CSS within lower weight groups.
+ *     weight groups take precedence over CSS within lower weight groups.
  *   - 'every_page': For optimal front-end performance when aggregation is
  *     enabled, this should be set to TRUE if the stylesheet is present on every
  *     page of the website for users for whom it is present at all. This
@@ -3871,7 +3861,7 @@ function backdrop_pre_render_styles($elements) {
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
     switch ($group['type']) {
-      // For file items, there are three possibilites.
+      // For file items, there are three possibilities.
       // - The group has been aggregated: in this case, output a LINK tag for
       //   the aggregate file.
       // - The group can be aggregated but has not been (most likely because
@@ -4175,7 +4165,7 @@ function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRU
     $content = backdrop_load_stylesheet_content($contents, $_optimize);
   }
 
-  // Restore the parent base path as the file and its childen are processed.
+  // Restore the parent base path as the file and its children are processed.
   $basepath = $parent_base_path;
   return $content;
 }
@@ -5323,6 +5313,12 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  * - untouched
  * - readwrite
  * - readonly
+ *
+ * Note that the 'required' and 'optional' states only affect the display of the
+ * required indicator (i.e. the red asterisk). They *do not* affect validation
+ * in any way. If you need a form element to be required based on the state of
+ * another element, you must implement your own form validation to account for
+ * that.
  *
  * When referencing select lists and radio buttons in remote conditions, a
  * 'value' condition must be used:
@@ -8715,7 +8711,10 @@ function backdrop_parse_dependency($dependency) {
               $matches['minor']++;
             }
             if ($op == '=' || $op == '==') {
-              $value['versions'][] = array('op' => '<', 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x');
+              $value['versions'][] = array(
+                'op' => '<',
+                'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x',
+              );
               $op = '>=';
             }
           }

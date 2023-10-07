@@ -17,7 +17,7 @@ Backdrop.behaviors.moduleFilter = {
     $form.find('.requirements').hide();
 
     // Toggle the requirements info.
-    $('a.requirements-toggle').click(function(e) {
+    $('a.requirements-toggle').on('click', function(e) {
       var $requirements = $(this).closest('td').find('.requirements').toggle();
       if ($requirements.is(':visible')) {
         $(this).text(Backdrop.t('less')).append('<span class="arrow close"></span>');
@@ -90,10 +90,17 @@ Backdrop.behaviors.moduleFilter = {
       }
     }
 
-    // Clear out the input field when clicking the reset button.
+    // Clear out the input field and search query when clicking the reset
+    // button.
     function resetModuleList(e) {
+      // Clear the input field.
       $input.val('').triggerHandler('keyup');
       e.preventDefault();
+
+      // Clear the search query.
+      var currentUrl = new URL(window.location);
+      currentUrl.searchParams.delete('search');
+      window.history.replaceState({}, '', currentUrl);
     }
 
     if ($form.length) {
@@ -102,7 +109,7 @@ Backdrop.behaviors.moduleFilter = {
       $fieldsets = $form.find('fieldset');
 
       // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterModuleList);
+      $input.trigger('focus').on('keyup', filterModuleList);
       $input.triggerHandler('keyup');
 
       $resetLink.on('click', resetModuleList);

@@ -10,6 +10,12 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Basic test for pluggable argument default.
  */
 class ViewsArgumentDefaultTest extends ViewsSqlTest {
+
+  /**
+   * @var string
+   */
+  protected $random;
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
     $this->random = $this->randomString();

@@ -189,7 +189,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/reports/event/1');
     $this->assertResponse($response);
     if ($response == 200) {
-      $this->assertText(t('Details'), 'DBLog event node was displayed');
+      $this->assertText(t('Log message #'), 'DBLog event node was displayed');
     }
 
     // Check the date format on the database log report page.

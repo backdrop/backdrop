@@ -780,7 +780,7 @@ function views_ui_views_wizard_defaults() {
     'title' => '',
     'base_table' => NULL,
     // This is a callback that takes the wizard as argument and returns
-    // an instantiazed Views UI form wizard object.
+    // an instantiated Views UI form wizard object.
     'get_instance' => 'views_ui_get_form_wizard_instance',
     'form_wizard_class' => array(
       'file' => 'views_ui_base_views_wizard',
@@ -987,7 +987,7 @@ function _views_ui_get_displays($view) {
               $path_sort = strtolower($one_path);
             }
             // If the view is not disabled, and the path does not contain
-            // argumet placeholders...
+            // argument placeholders...
             if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
               // ...convert the display path to a link.
               $display_path = l('/' . $one_path, $one_path);

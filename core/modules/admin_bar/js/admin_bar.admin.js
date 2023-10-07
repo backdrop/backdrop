@@ -18,14 +18,14 @@ Backdrop.behaviors.adminBarPermissionsSetupHelp = {
       var $menu = $(this).find('input[name$="[access administration bar]"]');
 
       // Retrieve the permission label - without description.
-      var adminPermission = $.trim($admin.eq(0).parents('td').prev().children().get(0).firstChild.textContent);
-      var menuPermission = $.trim($menu.eq(0).parents('td').prev().children().get(0).firstChild.textContent);
+      var adminPermission = $admin.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
+      var menuPermission = $menu.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
 
       $admin.each(function (index) {
         // Only proceed if both are not enabled already.
         if (!(this.checked && $menu[index].checked)) {
           // Stack both checkboxes and attach a click event handler to both.
-          $(this).add($menu[index]).click(function () {
+          $(this).add($menu[index]).on('click', function () {
             // Do nothing when disabling a permission.
             if (this.checked) {
               // Figure out which is the other, check whether it still disabled,

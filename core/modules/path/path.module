@@ -445,7 +445,7 @@ function path_entity_insert(Entity $entity) {
   $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
   $uri = $entity->uri();
 
-  // Only generate alais if entity has a uri
+  // Only generate alias if entity has a URI.
   if (!empty($uri)) {
     $path = array();
     if (isset($entity->path)) {

@@ -2503,7 +2503,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   // Finally, we never want these cached -- our object cache does that for us.
   $form['#no_cache'] = TRUE;
 
-  // If this isn't an ajaxy form, then we want to set the title.
+  // If this isn't an AJAX form, then we want to set the title.
   if (!empty($form['#title'])) {
     backdrop_set_title($form['#title']);
   }

@@ -280,7 +280,7 @@ function standard_install() {
 
     'settings' => array(
       'file_directory' => 'field/image',
-      'file_extensions' => 'png gif jpg jpeg',
+      'file_extensions' => implode(' ', image_get_supported_extensions()),
       'max_filesize' => '',
       'max_resolution' => '',
       'min_resolution' => '',
@@ -328,7 +328,7 @@ function standard_install() {
 
     'settings' => array(
       'file_directory' => 'field/image',
-      'file_extensions' => 'png gif jpg jpeg',
+      'file_extensions' => implode(' ', image_get_supported_extensions()),
       'max_filesize' => '',
       'max_resolution' => '',
       'min_resolution' => '',
@@ -374,7 +374,7 @@ function standard_install() {
         LANGUAGE_NONE => array(
           array(
             'value' => st('This is your first post! You may edit or delete it.'),
-            'format' => 'filtered_html'
+            'format' => 'filtered_html',
           ),
         ),
       ),
@@ -416,8 +416,6 @@ function standard_install() {
 
   // Creating three default Card nodes.
   // Special thanks to @indigoxela for providing the icons.
-
-
   $field_image_dir = 'public://field/image';
   file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
 
@@ -437,7 +435,7 @@ function standard_install() {
   );
 
   foreach ($cards as $image_filename => $info) {
-    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/' . 'images/'. $image_filename;
+    $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/images/' . $image_filename;
     $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
 
     $file = entity_create('file', array(
@@ -527,17 +525,14 @@ function standard_install() {
     'edit own page content',
     'edit any page content',
     'delete own page content',
-    'delete any page content',
     'create post content',
     'edit own post content',
     'edit any post content',
     'delete own post content',
-    'delete any post content',
     'create card content',
     'edit own card content',
     'edit any card content',
     'delete own card content',
-    'delete any card content',
     'view hidden paths',
     'access dashboard',
     'view the administration theme',
