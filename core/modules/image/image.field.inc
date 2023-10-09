@@ -438,6 +438,8 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $elements = file_field_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   $settings = $instance['settings'];
+  $allowed_extensions = explode(' ', $settings['file_extensions']);
+  $svg_allowed = in_array('svg', $allowed_extensions);
 
   foreach (element_children($elements) as $delta) {
     // Add adjustment of orientation before resizing because EXIF data is needed.
@@ -454,6 +456,9 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
+    if ($svg_allowed) {
+      $extensions[] = 'svg';
+    }
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
 
     // Set any view used as a browser.
@@ -617,22 +622,28 @@ function _image_field_widget_alt_validate($element, &$form_state) {
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
-  $formatters = array(
-    'image' => array(
-      'label' => t('Image'),
-      'field types' => array('image'),
-      'settings' => array(
-        'image_style' => '',
-        'image_link' => '',
-        'image_float' => '',
-        'image_load' => 'auto',
-      ),
-	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
-	  'file formatter' => array(
-        'mime types' => array('image/*'),
-      ),
+  $image_formatter = array(
+    'label' => t('Image'),
+    'field types' => array('image'),
+    'settings' => array(
+      'image_style' => '',
+      'image_link' => '',
+      'image_float' => '',
+      'image_load' => 'auto',
+    ),
+  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+  'file formatter' => array(
+      'mime types' => array('image/*'),
     ),
   );
+  $formatters['image'] = $image_formatter;
+
+  $image_formatter['label'] = t('Image (SVG Support)');
+  $image_formatter['settings']['svg_settings'] = array(
+    'width' => '',
+    'height' => '',
+  );
+  $formatters['svg_image'] = $image_formatter;
 
   return $formatters;
 }
@@ -695,6 +706,28 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
+  $element['svg_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('SVG Images dimensions (attributes)'),
+    '#tree' => TRUE,
+  );
+
+  $element['svg_settings']['width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#size' => 10,
+    '#field_suffix' => 'px',
+    '#default_value' => $settings['svg_settings']['width'],
+  );
+
+  $element['svg_settings']['height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#size' => 10,
+    '#field_suffix' => 'px',
+    '#default_value' => $settings['svg_settings']['height'],
+  );
+
   return $element;
 }
 
@@ -737,6 +770,20 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = t('Loading: @speed', array('@speed' => $settings['image_load']));
   }
 
+  $formatter_settings = $instance['display'][$view_mode]['settings'];
+
+  if (!empty($formatter_settings['svg_settings']['width'])
+    || !empty($formatter_settings['svg_settings']['width'])) {
+    $summary[] = t(
+      'SVG images attributes: <br /> Width: @widthpx,<br /> Height: @heightpx',
+      array(
+        '@width' => (int) $formatter_settings['svg_settings']['width'],
+        '@height' => (int) $formatter_settings['svg_settings']['height'],
+      )
+    );
+  }
+
+
   return implode('<br />', $summary);
 }
 
@@ -775,6 +822,20 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
         'options' => array(),
       );
     }
+
+    $is_svg = image_is_svg($item['uri']);
+
+    // Add custom attributes only for SVG images.
+    if ($is_svg) {
+      $svg_settings = $display['settings']['svg_settings'];
+
+      foreach ($svg_settings as $attribute => $attribute_value) {
+        if (!empty($attribute)) {
+          $item[$attribute] = (int) $attribute_value;
+        }
+      }
+    }
+
     $element[$delta] = array(
       '#theme' => 'image_formatter',
       '#item' => $item,
