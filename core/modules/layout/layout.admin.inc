@@ -2619,7 +2619,7 @@ function layout_delete_form_submit(&$form, &$form_state) {
   $path = $layout->getPath();
   $removal_removes_page = layout_removal_removes_page($layout);
 
-  switch($form_state['clicked_button']['#value']) {
+  switch ($form_state['clicked_button']['#value']) {
     case t('Delete layout'):
       $layout->delete();
       backdrop_set_message(t('Layout %title has been deleted.', array('%title' => $title)));
