@@ -492,8 +492,10 @@ class NodeStorageController extends EntityDatabaseStorageController {
         $this->saveRevision($entity);
       }
 
-      // Reset general caches, but keep caches specific to certain entities.
-      $this->resetCache($op == 'update' ? array($entity->{$this->idKey}): array());
+      // Reset the persistent and static cache for this node.
+      if ($op == 'update') {
+        $this->resetCache(array($entity->{$this->idKey}));
+      }
 
       $this->postSave($entity, $op == 'update');
       $this->invokeHook($op, $entity);

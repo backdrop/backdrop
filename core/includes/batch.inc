@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Batch processing API for processes to run in multiple HTTP requests.

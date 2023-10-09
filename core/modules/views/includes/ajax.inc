@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handles the server side AJAX interactions of Views.

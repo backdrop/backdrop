@@ -98,7 +98,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
-      '#default_value' => TRUE,
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.page'),
       '#id' => 'edit-page-create',
     );
 
@@ -249,6 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.block'),
       '#id' => 'edit-block-create',
     );
 
@@ -762,7 +763,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Don't add a sort if there is no form value or the user selected none as sort.
     if (!empty($form_state['values']['show']['sort']) && $form_state['values']['show']['sort'] != 'none') {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
-      // Column either be a column-name or the table-columnn-ame.
+      // $column is either [column name] or [table]-[column name].
       $column = explode('-', $column);
       if (count($column) > 1) {
         $table = $column[0];

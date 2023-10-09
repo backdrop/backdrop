@@ -183,7 +183,7 @@ class SearchQuery extends SelectQueryExtender {
    * We build two queries that match the dataset bodies.
    */
   protected function parseSearchExpression() {
-    // Matchs words optionally prefixed by a dash. A word in this case is
+    // Matches words optionally prefixed by a dash. A word in this case is
     // something between two spaces, optionally quoted.
     preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' .  $this->searchExpression , $keywords, PREG_SET_ORDER);
 

@@ -37,14 +37,26 @@ function views_ui_update_1000() {
 }
 
 /**
- * Rename the 'always show master' display setting to 'always show default'.
+ * Add new default display(s) setting.
  */
 function views_ui_update_1001() {
   $config = config('views_ui.settings');
-  $value = $config->get('views_ui_show_master_display');
-  $config->set('views_ui_show_default_display', $value);
-  $config->clear('views_ui_show_master_display');
+  $config->set('wizard_default_display.page', 'page');
+  $config->set('wizard_default_display.block', 0);
   $config->save();
+}
+
+/**
+ * Rename the 'always show master' display setting to 'always show default'.
+ */
+function views_ui_update_1002() {
+  $config = config('views_ui.settings');
+  $value = $config->get('views_ui_show_master_display');
+  if (!is_null($value)) {
+    $config->set('views_ui_show_default_display', $value);
+    $config->clear('views_ui_show_master_display');
+    $config->save();
+  }
 }
 
 /**

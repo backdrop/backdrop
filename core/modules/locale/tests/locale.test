@@ -52,7 +52,7 @@ class LocaleConfigurationTest extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-site-default-en', 'Default language updated.');
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), 'Correct page redirection.');
 
-    // Check if a valid language prefix is added afrer changing the default
+    // Check if a valid language prefix is added after changing the default
     // language.
     $this->backdropGet('admin/config/regional/language/detection/url');
     $this->assertFieldByXPath('//input[@name="prefix[en]"]', 'en', 'A valid path prefix has been added to the previous default language.');
@@ -636,7 +636,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
     backdrop_static_reset('locale_get_plural');
     backdrop_static_reset('locale_get_plural:plurals');
 
-    // Test locale_get_plural() for English (no formula presnt).
+    // Test locale_get_plural() for English (no formula present).
     $this->assertIdentical(locale_get_plural(1, 'en'), 0, "Computed plural index for 'en' with count 1 is 0.");
     $this->assertIdentical(locale_get_plural(0, 'en'), 1, "Computed plural index for 'en' with count 0 is 1.");
     $this->assertIdentical(locale_get_plural(5, 'en'), 1, "Computed plural index for 'en' with count 5 is 1.");
@@ -1221,10 +1221,11 @@ class LocaleInstallTest extends BackdropWebTestCase {
  * Locale uninstall with English UI functional test.
  */
 class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
+
   /**
-   * The default language set for the UI before uninstall.
+   * @var string
    */
-  protected $language;
+  protected $langcode;
 
   function setUp() {
     parent::setUp('locale');
@@ -1700,7 +1701,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
 }
 
 /**
- * Functional tests for configuring a different path alias per language.
+ * Functional tests for configuring a different URL alias per language.
  */
 class LocalePathFunctionalTest extends BackdropWebTestCase {
   function setUp() {
@@ -1708,7 +1709,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test if a language can be associated with a path alias.
+   * Test if a language can be associated with a URL alias.
    */
   function testPathLanguageConfiguration() {
     global $base_url;
@@ -1740,12 +1741,12 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     // Check that the "xx" home page is readily available because path prefix
     // negotiation is pre-configured.
     $this->backdropGet($prefix);
-    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readibly available.');
+    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readily available.');
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
 
-    // Create a path alias in default language (English).
+    // Create a URL alias in default language (English).
     $path = 'admin/config/urls/path/add';
     $english_path = $this->randomName(8);
     $edit = array(
@@ -1755,7 +1756,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save URL alias'));
 
-    // Create a path alias in new custom language.
+    // Create a URL alias in new custom language.
     $custom_language_path = $this->randomName(8);
     $edit = array(
       'source'   => 'node/' . $node->nid,
@@ -1764,11 +1765,11 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     $this->backdropPost($path, $edit, t('Save URL alias'));
 
-    // Confirm English language path alias works.
+    // Confirm English language URL alias works.
     $this->backdropGet($english_path);
     $this->assertText($node->title, 'English alias works.');
 
-    // Confirm custom language path alias works.
+    // Confirm custom language URL alias works.
     $this->backdropGet($prefix . '/' . $custom_language_path);
     $this->assertText($node->title, 'Custom language alias works.');
 
@@ -1793,7 +1794,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     $first_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $second_node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
-    // Assign a custom path alias to the first node with the English language.
+    // Assign a custom URL alias to the first node with the English language.
     $edit = array(
       'source'   => 'node/' . $first_node->nid,
       'alias'    => $custom_path,
@@ -1801,7 +1802,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     path_save($edit);
 
-    // Assign a custom path alias to second node with LANGUAGE_NONE.
+    // Assign a custom URL alias to second node with LANGUAGE_NONE.
     $edit = array(
       'source'   => 'node/' . $second_node->nid,
       'alias'    => $custom_path,
@@ -1809,13 +1810,13 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     );
     path_save($edit);
 
-    // Test that both node titles link to our path alias.
+    // Test that both node titles link to our URL alias.
     $this->backdropGet('<front>');
     $custom_path_url = base_path() . (config_get('system.core', 'clean_url') ? $custom_path : '?q=' . $custom_path);
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $first_node->title));
-    $this->assertTrue(!empty($elements), 'First node links to the path alias.');
+    $this->assertTrue(!empty($elements), 'First node links to the URL alias.');
     $elements = $this->xpath('//a[@href=:href and .=:title]', array(':href' => $custom_path_url, ':title' => $second_node->title));
-    $this->assertTrue(!empty($elements), 'Second node links to the path alias.');
+    $this->assertTrue(!empty($elements), 'Second node links to the URL alias.');
 
     // Confirm that the custom path leads to the first node.
     $this->backdropGet($custom_path);
@@ -2179,7 +2180,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
         'expect' => $language_string,
         'expected_provider' => LANGUAGE_NEGOTIATION_URL,
         'http_header' => $http_header_browser_fallback,
-        'message' => 'URL (PATH) > BROWSER: with langage prefix, UI language is based on path prefix',
+        'message' => 'URL (PATH) > BROWSER: with language prefix, UI language is based on path prefix',
       ),
       // Default, browser language preference is not one of site's lang.
       array(
@@ -2364,6 +2365,12 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
  * Test that URL rewriting works as expected.
  */
 class LocaleUrlRewritingTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('locale');
 
@@ -2483,7 +2490,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
 
     $this->assertEqual($url, $expected, 'The right port is used.');
 
-    // If we set the port explicitly in url(), it should not be overriden.
+    // If we set the port explicitly in url(), it should not be overridden.
     $url = url('', array(
       'absolute' => TRUE,
       'language' => $language,
@@ -2493,7 +2500,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $expected = 'http://example.fr:90/';
     $expected .= $index_php ? 'index.php/' : '';
 
-    $this->assertEqual($url, $expected, 'A given port is not overriden.');
+    $this->assertEqual($url, $expected, 'A given port is not overridden.');
 
     // Restore HTTP_HOST.
     $_SERVER['HTTP_HOST'] = $http_host;
@@ -2943,4 +2950,3 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $this->assertTrue($result);
   }
 }
-

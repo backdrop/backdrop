@@ -59,7 +59,7 @@ function book_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
   $form['book_child_type'] = array(
-    '#type' => 'radios',
+    '#type' => 'select',
     '#title' => t('Content type for child pages'),
     '#default_value' => $config->get('book_child_type'),
     '#options' => $types,
@@ -94,6 +94,7 @@ function book_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('book_links'),
     '#options' => array(
       'book_add_child' => t('Add child page'),
+      'book_reorder' => t('Reorder book'),
     ),
   );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
@@ -354,6 +355,11 @@ function theme_book_admin_table($variables) {
       $links['delete'] = array(
         'title' => t('Delete'),
         'href' => "node/$nid/delete",
+        'query' => $destination,
+      );
+      $links['remove'] = array(
+        'title' => t('Remove'),
+        'href' => "node/$nid/outline-remove",
         'query' => $destination,
       );
     }

@@ -96,7 +96,8 @@ class views_handler_filter_search extends views_handler_filter {
   }
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
@@ -144,7 +145,7 @@ class views_handler_filter_search extends views_handler_filter {
       $search_condition = db_and();
 
       if (!$this->options['remove_score']) {
-        // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
+        // Create a new join to relate the 'search_total' table to our current 'search_index' table.
         $join = new views_join;
         $join->construct('search_total', $search_index, 'word', 'word');
         $search_total = $this->query->add_relationship('search_total', $join, $search_index);
