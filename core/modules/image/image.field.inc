@@ -630,6 +630,7 @@ function image_field_formatter_info() {
       'image_link' => '',
       'image_float' => '',
       'image_load' => 'auto',
+      'image_svg_settings' => array(),
     ),
   'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
   'file formatter' => array(
@@ -639,7 +640,7 @@ function image_field_formatter_info() {
   $formatters['image'] = $image_formatter;
 
   $image_formatter['label'] = t('Image (SVG Support)');
-  $image_formatter['settings']['svg_settings'] = array(
+  $image_formatter['settings']['image_svg_settings'] = array(
     'width' => '',
     'height' => '',
   );
@@ -706,26 +707,26 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
-  $element['svg_settings'] = array(
+  $element['image_svg_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('SVG Images dimensions (attributes)'),
     '#tree' => TRUE,
   );
 
-  $element['svg_settings']['width'] = array(
+  $element['image_svg_settings']['width'] = array(
     '#type' => 'textfield',
     '#title' => t('Width'),
     '#size' => 10,
     '#field_suffix' => 'px',
-    '#default_value' => $settings['svg_settings']['width'],
+    '#default_value' => $settings['image_svg_settings']['width'],
   );
 
-  $element['svg_settings']['height'] = array(
+  $element['image_svg_settings']['height'] = array(
     '#type' => 'textfield',
     '#title' => t('Height'),
     '#size' => 10,
     '#field_suffix' => 'px',
-    '#default_value' => $settings['svg_settings']['height'],
+    '#default_value' => $settings['image_svg_settings']['height'],
   );
 
   return $element;
@@ -772,13 +773,13 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $formatter_settings = $instance['display'][$view_mode]['settings'];
 
-  if (!empty($formatter_settings['svg_settings']['width'])
-    || !empty($formatter_settings['svg_settings']['width'])) {
+  if (!empty($formatter_settings['image_svg_settings']['width'])
+    || !empty($formatter_settings['image_svg_settings']['width'])) {
     $summary[] = t(
       'SVG images attributes: <br /> Width: @widthpx,<br /> Height: @heightpx',
       array(
-        '@width' => (int) $formatter_settings['svg_settings']['width'],
-        '@height' => (int) $formatter_settings['svg_settings']['height'],
+        '@width' => (int) $formatter_settings['image_svg_settings']['width'],
+        '@height' => (int) $formatter_settings['image_svg_settings']['height'],
       )
     );
   }
@@ -827,9 +828,9 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
     // Add custom attributes only for SVG images.
     if ($is_svg) {
-      $svg_settings = $display['settings']['svg_settings'];
+      $image_svg_settings = $display['settings']['image_svg_settings'];
 
-      foreach ($svg_settings as $attribute => $attribute_value) {
+      foreach ($image_svg_settings as $attribute => $attribute_value) {
         if (!empty($attribute)) {
           $item[$attribute] = (int) $attribute_value;
         }
