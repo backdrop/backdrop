@@ -824,15 +824,17 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       );
     }
 
-    $is_svg = image_is_svg($item['uri']);
+    if ($item) {
+      $is_svg = image_is_svg($item['uri']);
 
-    // Add custom attributes only for SVG images.
-    if ($is_svg) {
-      $image_svg_settings = $display['settings']['image_svg_settings'];
+      // Add custom attributes only for SVG images.
+      if ($is_svg) {
+        $image_svg_settings = $display['settings']['image_svg_settings'];
 
-      foreach ($image_svg_settings as $attribute => $attribute_value) {
-        if (!empty($attribute)) {
-          $item[$attribute] = (int) $attribute_value;
+        foreach ($image_svg_settings as $attribute => $attribute_value) {
+          if (!empty($attribute)) {
+            $item[$attribute] = (int) $attribute_value;
+          }
         }
       }
     }
