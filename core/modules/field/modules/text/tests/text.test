@@ -430,16 +430,16 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     // Using no text format:
     $expected = array(
       "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
-      "<",
-      "<p",
-      "<p>",
-      "<p>\n",
-      "<p>\nH",
-      "<p>\nHi",
-      "<p>\nHi\n",
-      "<p>\nHi\n<",
-      "<p>\nHi\n</",
-      "<p>\nHi\n</p",
+      "",
+      "<p></p>",
+      "<p></p>",
+      "<p>\n</p>",
+      "<p>\nH</p>",
+      "<p>\nHi</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
@@ -513,7 +513,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
-      $this->assertTextSummary($text, $expected[$i],    NULL, $i);
+      $this->assertTextSummary($text, $expected[$i], NULL, $i);
       $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
     }
   }
