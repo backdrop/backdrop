@@ -24,6 +24,16 @@ define('IMAGE_STORAGE_DEFAULT', 4);
  */
 define('IMAGE_STORAGE_MODULE', IMAGE_STORAGE_OVERRIDE | IMAGE_STORAGE_DEFAULT);
 
+/**
+ * Default width for SVG images.
+ */
+define('SVG_IMAGE_DEFAULT_WIDTH', 200);
+
+/**
+ * Default height for SVG images.
+ */
+define('SVG_IMAGE_DEFAULT_HEIGHT', 200);
+
 // Load all Field module hooks for Image.
 require_once BACKDROP_ROOT . '/core/modules/image/image.field.inc';
 
@@ -1359,15 +1369,21 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
  */
 function image_preprocess_image_style(&$variables) {
   $uri = $variables['path'];
-  $is_svg = image_is_svg($uri);
+  // Only try to get file information if $uri is not empty.
+  if (!empty($uri)) {
+    $is_svg = image_is_svg($uri);
 
-  if ($is_svg && empty($variables['width']) && empty($variables['height'])) {
-    if ($dimensions = image_get_svg_dimensions($uri)) {
-      $variables['width'] = $dimensions['width'];
-      $variables['height'] = $dimensions['height'];
+    if ($is_svg && empty($variables['width']) && empty($variables['height'])) {
+      if ($dimensions = image_get_svg_dimensions($uri)) {
+        $variables['width'] = $dimensions['width'];
+        $variables['height'] = $dimensions['height'];
+      }
+      else {
+        $variables['width'] = SVG_IMAGE_DEFAULT_WIDTH;
+        $variables['height'] = SVG_IMAGE_DEFAULT_HEIGHT;
+      }
     }
-  }
-}
+  }}
 
 /**
  * Implements hook_file_presave().
