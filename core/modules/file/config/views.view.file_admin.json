@@ -4,7 +4,7 @@
     "description": "Administrative listing for managing files.",
     "module": "file",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "file_managed",
     "human_name": "Administer files",

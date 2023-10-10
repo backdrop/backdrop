@@ -4,7 +4,7 @@
     "description": "Administrative listing for managing content.",
     "module": "node",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "node",
     "human_name": "Administer content",
