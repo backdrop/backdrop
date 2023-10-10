@@ -803,28 +803,28 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
-    // Add class for floating the image
-    if (!empty($display['settings']['image_float'])) {
-      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
-    }
-
-    if (!empty($display['settings']['image_load'])) {
-      // Although available in Chromium, the 'auto' value is not mentioned in
-      // the specification. Since it may be subject to change, we recommend not
-      // to use it until it gets officially included.
-      if ($display['settings']['image_load'] != 'auto') {
-        $item['attributes']['loading'] = $display['settings']['image_load'];
+    if (!empty($item)) {
+      // Add class for floating the image
+      if (!empty($display['settings']['image_float'])) {
+        $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
       }
-    }
 
-    if (isset($link_file)) {
-      $uri = array(
-        'path' => file_create_url($item['uri']),
-        'options' => array(),
-      );
-    }
+      if (!empty($display['settings']['image_load'])) {
+        // Although available in Chromium, the 'auto' value is not mentioned in
+        // the specification. Since it may be subject to change, we recommend not
+        // to use it until it gets officially included.
+        if ($display['settings']['image_load'] != 'auto') {
+          $item['attributes']['loading'] = $display['settings']['image_load'];
+        }
+      }
 
-    if ($item) {
+      if (isset($link_file)) {
+        $uri = array(
+          'path' => file_create_url($item['uri']),
+          'options' => array(),
+        );
+      }
+
       $is_svg = image_is_svg($item['uri']);
 
       // Add custom attributes only for SVG images.
