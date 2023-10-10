@@ -1408,11 +1408,11 @@ function image_field_attach_presave($entity_type, $entity) {
   foreach ($bundle_field_info as $field_name => $instance_info) {
     $field_info = field_info_field($field_name);
     if ($field_info['type'] === 'image') {
-      // The language should normally be LANGUAGE_NONE for an image field, but
-      // check the language property just to be certain.
+      // The langcode should normally be LANGUAGE_NONE for an image field, but
+      // check the langcode property just to be certain.
       $langcode = LANGUAGE_NONE;
-      if (isset($entity->language) && isset($entity->{$field_name}[$entity->language])) {
-        $langcode = $entity->language;
+      if (isset($entity->langcode) && isset($entity->{$field_name}[$entity->langcode])) {
+        $langcode = $entity->langcode;
       }
       if (!isset($entity->{$field_name}[$langcode])) {
         continue;
