@@ -1383,7 +1383,8 @@ function image_preprocess_image_style(&$variables) {
         $variables['height'] = SVG_IMAGE_DEFAULT_HEIGHT;
       }
     }
-  }}
+  }
+}
 
 /**
  * Implements hook_file_presave().

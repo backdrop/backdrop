@@ -786,7 +786,6 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     );
   }
 
-
   return implode('<br />', $summary);
 }
 
@@ -806,7 +805,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
   foreach ($items as $delta => $item) {
     if (!empty($item)) {
-      // Add class for floating the image
+      // Add class for floating the image.
       if (!empty($display['settings']['image_float'])) {
         $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
       }
