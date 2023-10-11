@@ -221,8 +221,10 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate handler for image_field_instance_settings_form().
  */
 function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
-  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
-  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+  $min = $form_state['values']['instance']['settings']['min_dimensions'];
+  $max = $form_state['values']['instance']['settings']['max_dimensions'];
+  $min_dimensions = explode('x', $min) + array('', '');
+  $max_dimensions = explode('x', $max) + array('', '');
 
   $min_dimensions_x = (int) $min_dimensions[0];
   $min_dimensions_y = (int) $min_dimensions[1];
@@ -632,8 +634,8 @@ function image_field_formatter_info() {
       'image_load' => 'auto',
       'image_svg_settings' => array(),
     ),
-  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
-  'file formatter' => array(
+    'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+    'file formatter' => array(
       'mime types' => array('image/*'),
     ),
   );
@@ -811,8 +813,8 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
       if (!empty($display['settings']['image_load'])) {
         // Although available in Chromium, the 'auto' value is not mentioned in
-        // the specification. Since it may be subject to change, we recommend not
-        // to use it until it gets officially included.
+        // the specification. Since it may be subject to change, we recommend
+        // not to use it until it gets officially included.
         if ($display['settings']['image_load'] != 'auto') {
           $item['attributes']['loading'] = $display['settings']['image_load'];
         }
