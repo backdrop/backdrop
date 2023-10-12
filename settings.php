@@ -22,8 +22,6 @@ $database_prefix = '';
  * hashed path. For the best security, these directories should be in a location
  * that is not publicly accessible through a web browser.
  *
- * Adding the word "slave" in an inline comment, as a test...
- *
  * Example using directories one parent level up:
  * @code
  * $config_directories['active'] = '../config/active';
@@ -38,8 +36,6 @@ $database_prefix = '';
  */
 $config_directories['active'] = 'files/config_' . md5($database) . '/active';
 $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
-
-$webmaster = array('whitelist', 'blacklist');
 
 /**
  * Skip the configuration staging directory cleanup
