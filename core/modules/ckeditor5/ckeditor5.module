@@ -515,6 +515,7 @@ function ckeditor5_ckeditor5_plugins() {
           'image.ImageToolbar',
           'image.ImageInsertUI',
           'image.ImageUpload',
+          'image.ImageResize',
         ),
         'required_html' => array(
           '<img src alt height width data-file-id>',
@@ -524,12 +525,31 @@ function ckeditor5_ckeditor5_plugins() {
     ),
     'config' => array(
       'image' => array(
+        // Configure the balloon toolbar items shown when an image is selected.
         'toolbar' => array(
-          'toggleImageCaption',
           'imageTextAlternative',
+          'editBackdropImage',
         ),
         'upload' => array(
           'type' => image_get_supported_extensions(),
+        ),
+        'resizeUnit' => 'px',
+      ),
+      'backdropImage' => array(
+        'editLabel' => t('Edit Image'),
+        'insertLabel' => t('Insert Image'),
+        // Specify an array of CKEditor model name => attribute name values.
+        // These attributes are then allowed to be changed via the Backdrop
+        // image dialog. Additional attributes can be added here to prevent
+        // CKEditor from striping out attributes on img tags.
+        'extraAttributes' => array(
+          'dataAlign' => 'data-align',
+          'dataFileId' => 'data-file-id',
+          'dataHasCaption' => 'data-has-caption',
+          'alt' => 'alt',
+          'src' => 'src',
+          'width' => 'width',
+          'height' => 'height',
         ),
       ),
     ),
