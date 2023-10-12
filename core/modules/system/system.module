@@ -2453,10 +2453,12 @@ function system_init() {
   // can be re-enabled.
 
   // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
     $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
     unset($_SESSION['ignore_slave_server']);
   }
+  // cspell:enable
 
   if (isset($_SESSION['ignore_replica_server'])) {
     if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {

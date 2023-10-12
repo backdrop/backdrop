@@ -3158,8 +3158,10 @@ function db_ignore_replica() {
  * Backwards-compatible wrapper function.
  *
  * @deprecated since 1.20.4
+ * cspell:disable
  */
 function db_ignore_slave() {
+  // cspell:enable
   db_ignore_replica();
 }
 
@@ -3174,5 +3176,7 @@ function db_ignore_slave() {
  */
 function _db_is_replica($db_options) {
   // @todo Remove deprecated terminology "slave" in Backdrop 2.0.
+  // cspell:disable
   return empty($db_options['target']) || $db_options['target'] == 'slave' || $options['target'] == 'replica';
+  // cspell:enable
 }

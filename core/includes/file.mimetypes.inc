@@ -95,7 +95,9 @@ function file_default_mimetype_mapping() {
       55 => 'application/vnd.oasis.opendocument.spreadsheet',
       56 => 'application/vnd.oasis.opendocument.spreadsheet-template',
       57 => 'application/vnd.oasis.opendocument.text',
+      // cspell:disable
       58 => 'application/vnd.oasis.opendocument.text-master',
+      // cspell:enable
       59 => 'application/vnd.oasis.opendocument.text-template',
       60 => 'application/vnd.oasis.opendocument.text-web',
       61 => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',

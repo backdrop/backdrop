@@ -1905,7 +1905,9 @@ function file_icon_map(File $file) {
     case 'application/vnd.ms-word.document.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.text':
     case 'application/vnd.oasis.opendocument.text-template':
+    // cspell:disable
     case 'application/vnd.oasis.opendocument.text-master':
+    // cspell:enable
     case 'application/vnd.oasis.opendocument.text-web':
     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
     case 'application/vnd.stardivision.writer':

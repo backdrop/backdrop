@@ -383,7 +383,7 @@ function clipboardIntegration(editor) {
     // Nearly all code below is adapted from the CKEditor "uploadimage"
     // plugin. It has been modified to include the Backdrop "data-file-id"
     // attribute when writing the HTML. Original source code is available at
-    // https://github.com/ckeditor/ckeditor-dev/blob/master/plugins/uploadimage/plugin.js
+    // https://github.com/ckeditor/ckeditor4/blob/HEAD/plugins/uploadimage/plugin.js
     var fileTools = CKEDITOR.fileTools;
     var uploadUrl = fileTools.getUploadUrl(editor.config, 'image');
     if (!uploadUrl) {
