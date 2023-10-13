@@ -6,7 +6,7 @@ on:
 jobs:
   phpcs:
     name: Run phpcs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Setup PHP with CodeSniffer tool
         uses: shivammathur/setup-php@v2
