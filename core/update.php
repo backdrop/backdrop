@@ -78,17 +78,22 @@ function update_script_selection_form($form, &$form_state) {
   $updates = update_get_update_list();
   $starting_updates = array();
   $incompatible_updates_exist = FALSE;
+  $modules_that_cannot_be_updated = array();
   foreach ($updates as $module => $update) {
+    $item_list_title = $update['name'] . ' ' . t('module');
     if (!isset($update['start'])) {
       $form['start'][$module] = array(
-        '#type' => 'item',
-        '#title' => '<strong>' . $module . ' </strong>',
-        '#markup'  => $update['warning'],
+        '#theme' => 'item_list',
+        '#title' => $item_list_title,
+        '#attributes' => array('class' => 'message_list'),
+      );
+      $form['start'][$module]['#items']['warning'] = array(
+        'data' => '<div class="messages warning">' . $update['warning'] . '</div>',
+        'class' => array('message_list_item'),
       );
       $incompatible_count++;
       $incompatible_updates_exist = TRUE;
-      $warning = t('The <em>!module</em> module cannot be updated.', array('!module' => $module));
-      backdrop_set_message($warning, 'warning');
+      $modules_that_cannot_be_updated[] = $update['name'];
       continue;
     }
     if (!empty($update['pending'])) {
@@ -100,12 +105,17 @@ function update_script_selection_form($form, &$form_state) {
       $form['start'][$module . '_updates'] = array(
         '#theme' => 'item_list',
         '#items' => $update['pending'],
-        '#title' => $module . ' module',
+        '#title' => $item_list_title,
       );
     }
     if (isset($update['pending'])) {
       $count = $count + count($update['pending']);
     }
+  }
+  if (!empty($modules_that_cannot_be_updated)) {
+    $warning = t('The following modules cannot be updated:');
+    $warning .= theme('item_list', array('items' => $modules_that_cannot_be_updated));
+    backdrop_set_message($warning, 'warning');
   }
 
   // Find and label any incompatible updates.
@@ -116,10 +126,11 @@ function update_script_selection_form($form, &$form_state) {
       $module_update_key = $data['module'] . '_updates';
       if (isset($form['start'][$module_update_key]['#items'][$data['number']])) {
         if ($data['missing_dependencies']) {
-          $text = 'This update will be skipped due to the following missing dependencies: <em>' . implode(', ', $data['missing_dependencies']) . '</em>';
+          $missing_dependencies = implode(', ', $data['missing_dependencies']);
+          $text = t('This update will be skipped due to the following missing dependencies: %missing_dependencies', array('%missing_dependencies' => $missing_dependencies));
         }
         else {
-          $text = 'This update will be skipped due to an error in the module code.';
+          $text = t('This update will be skipped due to an error in the module code.');
         }
         $form['start'][$module_update_key]['#items'][$data['number']] .= '<div class="warning">' . $text . '</div>';
       }
@@ -162,7 +173,7 @@ function update_script_selection_form($form, &$form_state) {
     else {
       $form['help'] = array(
         '#type' => 'help',
-        '#markup' => 'Updates have been found that need to be applied. You may review these updates below.',
+        '#markup' => t('Updates have been found that need to be applied. You may review these updates below.'),
         '#weight' => -5,
       );
       $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');

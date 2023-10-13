@@ -559,11 +559,11 @@ function update_do_one($module, $number, $dependency_map, &$context) {
     return;
   }
 
-  $ret = array();
+  $updates_report = array();
   if (function_exists($function)) {
     try {
-      $ret['results']['query'] = $function($context['sandbox']);
-      $ret['results']['success'] = TRUE;
+      $updates_report['results']['query'] = $function($context['sandbox']);
+      $updates_report['results']['success'] = TRUE;
     }
     // @TODO We may want to do different error handling for different
     // exception types, but for now we'll just log the exception and
@@ -574,7 +574,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
       require_once BACKDROP_ROOT . '/core/includes/errors.inc';
       $variables = _backdrop_decode_exception($e);
       // The exception message is run through check_plain() by _backdrop_decode_exception().
-      $ret['#abort'] = array('success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables));
+      $updates_report['#abort'] = array('success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables));
     }
   }
 
@@ -589,15 +589,15 @@ function update_do_one($module, $number, $dependency_map, &$context) {
   if (!isset($context['results'][$module][$number])) {
     $context['results'][$module][$number] = array();
   }
-  $context['results'][$module][$number] = array_merge($context['results'][$module][$number], $ret);
+  $context['results'][$module][$number] = array_merge($context['results'][$module][$number], $updates_report);
 
-  if (!empty($ret['#abort'])) {
+  if (!empty($updates_report['#abort'])) {
     // Record this function in the list of updates that were aborted.
     $context['results']['#abort'][] = $function;
   }
 
   // Record the schema update if it was completed successfully.
-  if ($context['finished'] == 1 && empty($ret['#abort'])) {
+  if ($context['finished'] == 1 && empty($updates_report['#abort'])) {
     backdrop_set_installed_schema_version($module, $number);
   }
 
@@ -732,10 +732,13 @@ function update_finished($success, $results, $operations) {
  */
 function update_get_update_list() {
   // Make sure that the system module is first in the list of updates.
-  $ret = array('system' => array());
+  $updates_list = array('system' => array());
 
   $modules = backdrop_get_installed_schema_version(NULL, FALSE, TRUE);
   foreach ($modules as $module => $schema_version) {
+    $module_info = system_get_info('module', $module);
+    // Get the human-readable name of the module if available.
+    $module_name = $module_info ? $module_info['name'] : $module;
     // Skip uninstalled and incompatible modules.
     if ($schema_version == SCHEMA_UNINSTALLED || update_check_incompatibility($module)) {
       continue;
@@ -743,7 +746,7 @@ function update_get_update_list() {
     // Otherwise, get the list of updates defined by this module.
     $updates = backdrop_get_schema_versions($module);
     if ($updates !== FALSE) {
-      // module_invoke returns NULL for nonexisting hooks, so if no updates
+      // module_invoke() returns NULL for non-existing hooks, so if no updates
       // are removed, it will == 0.
       $last_removed = module_invoke($module, 'update_last_removed');
       // A last removed schema version of "7xxx" should consider "1xxx" updates
@@ -754,9 +757,10 @@ function update_get_update_list() {
         $comparison_schema_version += 7000;
       }
       if ($comparison_schema_version < $last_removed) {
-        $warning = t('The @module module has a schema version of @version. Updates up to and including @removed are missing. First, <a href="https://backdropcms.org/upgrade">update</a> to the most recent version of @module module where update @removed is available. Then, try this update again.');
-        $ret[$module]['warning'] = t($warning, array(
-          '@module' => $module,
+        $updates_list[$module]['name'] = $module_name;
+        $warning = t('The %module module has a schema version of @version. Updates up to and including @removed are missing. First, <a href="https://backdropcms.org/upgrade">update</a> to the most recent version of the %module module where update @removed is available. Then, try this update again.');
+        $updates_list[$module]['warning'] = t($warning, array(
+          '%module' => $module_name,
           '@version' => $schema_version,
           '@removed' => $last_removed,
         ));
@@ -780,22 +784,24 @@ function update_get_update_list() {
           $func = new ReflectionFunction($module . '_update_' . $update);
           // The order of the items in the replace array is important.
           $description = preg_replace(array('#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'), '', $func->getDocComment());
-          $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
-          if (!isset($ret[$module]['start'])) {
-            $ret[$module]['start'] = $update;
+          $updates_list[$module]['pending'][$update] = $update . ' - ' . trim($description);
+          $updates_list[$module]['name'] = $module_name;
+          if (!isset($updates_list[$module]['start'])) {
+            $updates_list[$module]['start'] = $update;
           }
         }
       }
-      if (!isset($ret[$module]['start']) && isset($ret[$module]['pending'])) {
-        $ret[$module]['start'] = $schema_version;
+      if (!isset($updates_list[$module]['start']) && isset($updates_list[$module]['pending'])) {
+        $updates_list[$module]['start'] = $schema_version;
       }
     }
   }
 
-  if (empty($ret['system'])) {
-    unset($ret['system']);
+  if (empty($updates_list['system'])) {
+    unset($updates_list['system']);
   }
-  return $ret;
+
+  return $updates_list;
 }
 
 /**
