@@ -2901,6 +2901,7 @@ function l($text, $path, array $options = array()) {
   if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
       (empty($options['language']) || $options['language']->langcode == $language_url->langcode)) {
     $options['attributes']['class'][] = 'active';
+    $options['attributes']['aria-current'] = 'page';
   }
 
   // Remove all HTML and PHP tags from a tooltip, calling expensive strip_tags()
