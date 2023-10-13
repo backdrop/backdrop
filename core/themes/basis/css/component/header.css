@@ -152,7 +152,7 @@
   padding: .5rem 0;
 }
 .l-header .menu-toggle-button-text {
-  color: #bbbbbb;
+  color: #bcbbbb;
 }
 
 @media (min-width: 34em) {
@@ -189,6 +189,6 @@
 
 .header-menu .links li:before,
 .header-menu .links li:after {
-  /* Hides arrows intented for action links in body */
+  /* Hides arrows intended for action links in body */
   display: none;
 }

@@ -17,10 +17,11 @@
  * attached).
  *
  * @return
- *   An array whose keys are entity type names and whose values identify
- *   properties of those types that the system needs to know about:
+ *   An array of information about one or more entity types
+ *   Keys are entity type names; values identify properties of those types that
+ *   the system needs to know about:
  *   - label: The human-readable name of the type.
- *   - entity class: A class that the controller will use for instantiating 
+ *   - entity class: A class that the controller will use for instantiating
  *     entities. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
@@ -29,10 +30,13 @@
  *     entity type's base table.
  *   - static cache: (used by DefaultEntityController) FALSE to disable
  *     static caching of entities during a page request. Defaults to TRUE.
+ *   - entity cache: (used by DefaultEntityController) Set to TRUE to enable
+ *     persistent caching of fully loaded entities. This will be considered to
+ *     be FALSE if there is not a cache table for the entity. Defaults to FALSE.
  *   - field cache: (used by Field API loading and saving of field data) FALSE
- *     to disable Field API's persistent cache of field data. Only recommended
- *     if a higher level persistent cache is available for the entity type.
- *     Defaults to TRUE.
+ *     to disable Field API's persistent cache of field data. Setting this to
+ *     FALSE is recommended if a higher level persistent cache is available for
+ *     the entity type. Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
  *     DefaultEntityController:attachLoad(), for example 'node_load'.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.
@@ -66,7 +70,7 @@
  *     - bundle: The name of the property that contains the name of the bundle
  *       object.
  *   - bundles: An array describing all bundles for this object type. Keys are
- *     bundles machine names, as found in the objects' 'bundle' property
+ *     bundles' machine names, as found in the objects' 'bundle' property
  *     (defined in the 'entity keys' entry above). This entry can be omitted if
  *     this entity type exposes a single bundle (all entities have the same
  *     collection of fields). The name of this single bundle will be the same as
@@ -85,6 +89,9 @@
  *       - access callback: As in hook_menu(). 'user_access' will be assumed if
  *         no value is provided.
  *       - access arguments: As in hook_menu().
+ *     - bundle cache: (used by DefaultEntityController) Set to FALSE to disable
+ *       persistent caching of fully loaded entities for this bundle. Defaults
+ *       to TRUE. Has no effect if 'entity cache' for the entity is FALSE.
  *   - view modes: An array describing the display modes for the entity type.
  *     Display modes let entities be displayed differently depending on the
  *     context. For instance, a node can be displayed differently on its own
@@ -422,7 +429,7 @@ function hook_entity_view_alter(&$build, $type) {
  *   The type of entities being loaded (i.e. node, user, comment).
  */
 function hook_entity_prepare_view($entities, $type) {
-  // Load a specific node into the user object for later theming.
+  // Load a specific node into the user object to theme later.
   if ($type == 'user') {
     $nodes = mymodule_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {

@@ -36,6 +36,10 @@ function taxonomy_token_info() {
     'name' => t('Node count'),
     'description' => t('The number of nodes tagged with the taxonomy term.'),
   );
+  $term['langcode'] = array(
+    'name' => t('Language code'),
+    'description' => t('The language code of the language the term is written in.'),
+  );
   $term['url'] = array(
     'name' => t('URL'),
     'description' => t('The URL of the taxonomy term.'),
@@ -51,10 +55,20 @@ function taxonomy_token_info() {
     'description' => t("An array of all the term's parents, starting with the root."),
     'type' => 'array',
   );
+  $term['parent'] = array(
+    'name' => t('Parent term'),
+    'description' => t('The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent.'),
+    'type' => 'term',
+  );
   $term['root'] = array(
     'name' => t('Root term'),
     'description' => t('The root term of the taxonomy term.'),
     'type' => 'term',
+  );
+  $term['vocabulary'] = array(
+    'name' => t('Vocabulary'),
+    'description' => t('The vocabulary the taxonomy term belongs to.'),
+    'type' => 'vocabulary',
   );
 
   // Taxonomy vocabulary related variables.
@@ -84,18 +98,6 @@ function taxonomy_token_info() {
     'type' => 'url',
   );
 
-  // Chained tokens for taxonomies
-  $term['parent'] = array(
-    'name' => t('Parent term'),
-    'description' => t('The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent.'),
-    'type' => 'term',
-  );
-  $term['vocabulary'] = array(
-    'name' => t('Vocabulary'),
-    'description' => t('The vocabulary the taxonomy term belongs to.'),
-    'type' => 'vocabulary',
-  );
-
   return array(
     'types' => $types,
     'tokens' => array(
@@ -112,6 +114,13 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
   $replacements = array();
   $sanitize = !empty($options['sanitize']);
   $url_options = array('absolute' => TRUE);
+  if (isset($options['language'])) {
+    $url_options['language'] = $options['language'];
+    $language_code = $options['language']->langcode;
+  }
+  else {
+    $language_code = NULL;
+  }
 
   if ($type == 'term' && !empty($data['term'])) {
     $term = $data['term'];
@@ -128,6 +137,10 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
 
         case 'description':
           $replacements[$original] = $sanitize ? check_markup($term->description, $term->format, '', TRUE) : $term->description;
+          break;
+
+        case 'langcode':
+          $replacements[$original] = $sanitize ? check_plain($term->langcode) : $term->langcode;
           break;
 
         case 'url':
@@ -172,6 +185,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
             $replacements[$original] = $sanitize ? check_plain($root_term->name) : $root_term->name;
           }
           break;
+
       }
     }
 

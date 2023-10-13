@@ -24,6 +24,7 @@ function _date_views_fields($base = 'node') {
 
   // We use fields that provide filter handlers as our universe of possible
   // fields of interest.
+  module_load_include('inc', 'views_ui', 'views_ui.admin');
   $all_fields = views_fetch_fields($base, 'filter');
 
   // Iterate over all the fields that Views knows about.
@@ -82,7 +83,6 @@ function _date_views_fields($base = 'node') {
 
         default:
           // If this is not a date field, nothing more to do.
-          continue;
       }
 
       $revision = in_array($base, array('node_revision')) ? FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;

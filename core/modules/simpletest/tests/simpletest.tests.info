@@ -1,4 +1,4 @@
-; This info file contains an enourmous number of tests. They are ordered by:
+; This info file contains an enormous number of tests. They are ordered by:
 ; 1) The main SimpleTest tests from the simpletest.test file.
 ; 2) The list of all *.test files in the /tests directory, alphabetically.
 ; 3) Within each *.test file, matching the declaration order of each class.
@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -49,14 +49,20 @@ file = simpletest.test
 [SimpleTestInstallationProfileModuleTestsTestCase]
 name = Installation profile module tests
 description = Verifies that tests bundled with installation profile modules are found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
 
 [SimpleTestOtherInstallationProfileModuleTestsTestCase]
 name = Other Installation profiles
 description = Verifies that tests in other installation profiles are not found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
+
+[StandardInstallTestCase]
+name = Standard Installation Tests
+description = Verifies configuration added by the Standard install profile.
+group = Installation profiles
+file = standard.test
 
 [ActionLoopTestCase]
 name = Actions executing in a potentially infinite loop
@@ -355,6 +361,12 @@ file = common.test
 [CommonFormatDateTestCase]
 name = Format date
 description = Test the format_date() function.
+group = Common
+file = common.test
+
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
 group = Common
 file = common.test
 
@@ -820,7 +832,7 @@ description = Tests stream wrapper functions.
 group = File API
 file = file.test
 
-[FileTranferTest]
+[FileTransferTest]
 name = FileTransfer unit tests
 description = Test that the jail is respected and that protocols using recursive file move operations work.
 group = System
@@ -886,6 +898,12 @@ description  = Tests a form using form storage and makes sure validation and cac
 group = Form API
 file = form.test
 
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
+group = Form API
+file = form.test
+
 [FormsFormWrapperTestCase]
 name = Form wrapper callback
 description = Tests form wrapper callbacks to pass a prebuilt form to form builder functions.
@@ -943,6 +961,12 @@ file = form.test
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
+group = Form API
+file = form.test
+
+[FormH5datetimeTestCase]
+name = Form API html5 datetime
+description = Tests the form API html5 date and time elements.
 group = Form API
 file = form.test
 
@@ -1060,6 +1084,12 @@ description = Tests active menu trails and alteration functionality.
 group = Menu
 file = menu.test
 
+[MenuChangeTestCase]
+name = Menu changes
+description = Tests that menu links are updated on menu rebuild.
+group = Menu
+file = menu.test
+
 [ModuleUnitTest]
 name = Module API
 description = Test low-level module functions.
@@ -1083,6 +1113,12 @@ name = Module implements alter
 description = Tests the hook_module_implements_alter.
 group = Module
 file = module.test
+
+[PagerFunctionalWebTestCase]
+name = Pager functionality
+description = Tests pager functionality.
+group = Pager
+file = pager.test
 
 [PasswordHashingTest]
 name = Password hashing

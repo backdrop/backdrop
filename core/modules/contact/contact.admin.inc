@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the Contact module.
@@ -21,6 +20,17 @@ function contact_settings_form($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#title' => t("Fields"),
+  );
+  $form['fields']['phone'] = array(
+    '#type' => 'select',
+    '#title' => t('Phone number'),
+    '#description' => t('Allow users to enter their phone number.'),
+    '#options' => array(
+      'optional' => t('Optional'),
+      'required' => t('Required'),
+    ),
+    '#empty_value' => '',
+    '#default_value' => $config->get('phone'),
   );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
@@ -122,7 +132,7 @@ function contact_form_permissions() {
     $perm_item += array(
       'description' => '',
       'restrict access' => FALSE,
-      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+      'warning' => '',
     );
     $options[$perm] = '';
     $form['permission'][$perm] = array(
@@ -131,9 +141,8 @@ function contact_form_permissions() {
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. Always select the Admin
-      // role on new forms.
-      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
+      // Builds arrays for checked boxes for each role.
+      if (in_array($perm, $role->permissions)) {
         $status[$role_name][] = $perm;
       }
     }
@@ -149,6 +158,7 @@ function contact_form_permissions() {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -166,7 +176,7 @@ function contact_form_permissions() {
 function contact_category_list($form, $form_state) {
   $form['help'] = array(
     '#type' => 'markup',
-    '#markup' => t('Configure the categories shown in the <a href="!url">site-wide contact form</a> here. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#markup' => t('Configure the categories shown in the site-wide contact form available at <a href="!url">!url</a>. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
     '#weight' => -20,
   );
 
@@ -304,8 +314,8 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     // Recipients are stored comma-separated, but display with new lines for
     // better human readability.
     '#default_value' => implode("\n", explode(',', $category['recipients'])),
-    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
-    '#placeholder' => t("webmaster@example.com\nsales@example.com"),
+    '#description' => t("To specify multiple recipients, separate each email address with a new line, comma, semicolon or space."),
+    '#placeholder' => t("admin@example.com\nsales@example.com"),
     '#required' => TRUE,
     '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
   );
@@ -389,7 +399,7 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
   if (!empty($invalid_recipients)) {
-    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid e-mail address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
+    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid email address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
     form_set_error('recipients', $message);
   }
 
@@ -497,7 +507,7 @@ function contact_category_delete_form_submit($form, &$form_state) {
 
   // Get Categories Data.
   $config_data = contact_config_data();
-  $default_catageory = $config_data['contact_default_category'];
+  $default_category = $config_data['contact_default_category'];
   $categories = $config_data['categories'];
 
   foreach ($categories as $key => $cat) {
@@ -505,7 +515,7 @@ function contact_category_delete_form_submit($form, &$form_state) {
 
       unset($categories[$key]);
 
-      if ($cat['cid'] == $default_catageory) {
+      if ($cat['cid'] == $default_category) {
         $config_data['contact_default_category'] = 0;
       }
 

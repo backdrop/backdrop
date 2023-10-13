@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * A PHP diff engine for phpwiki. (Taken from phpwiki-1.3.3)
  *
  * Copyright © 2000, 2001 Geoffrey T. Dairiki <dairiki@dairiki.org>
@@ -24,16 +25,13 @@
  * https://git.wikimedia.org/raw/mediawiki%2fcore.git/HEAD/includes%2fdiff%2fDairikiDiff.php
  * Code has been reformatted to match Backdrop standards, and MediaWiki-specific
  * profiling code has been removed.
- *
- * @file
- * @ingroup DifferenceEngine
- * @defgroup DifferenceEngine DifferenceEngine
  */
 
 /**
- * @private
- * @ingroup DifferenceEngine
+ * @defgroup DifferenceEngine
+ * @{
  */
+
 abstract class DiffOp {
   public $type;
   public $orig;
@@ -56,10 +54,6 @@ abstract class DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpCopy extends DiffOp {
   public $type = 'copy';
 
@@ -79,10 +73,6 @@ class DiffOpCopy extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpDelete extends DiffOp {
   public $type = 'delete';
 
@@ -99,10 +89,6 @@ class DiffOpDelete extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpAdd extends DiffOp {
   public $type = 'add';
 
@@ -119,10 +105,6 @@ class DiffOpAdd extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpChange extends DiffOp {
   public $type = 'change';
 
@@ -144,24 +126,22 @@ class DiffOpChange extends DiffOp {
  *
  * The algorithm used here is mostly lifted from the perl module
  * Algorithm::Diff (version 1.06) by Ned Konz, which is available at:
- *     http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
+ * http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
  *
  * More ideas are taken from:
- *     http://www.ics.uci.edu/~eppstein/161/960229.html
+ * http://www.ics.uci.edu/~eppstein/161/960229.html
  *
- * Some ideas are (and a bit of code) are from from analyze.c, from GNU
- * diffutils-2.7, which can be found at:
- *     ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
+ * Some ideas (and a bit of code) are from analyze.c, from GNU diffutils-2.7,
+ * which can be found at:
+ * ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
  *
- * closingly, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
+ * Finally, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
  * are my own.
  *
  * Line length limits for robustness added by Tim Starling, 2005-08-31
  * Alternative implementation added by Guy Van den Broeck, 2008-07-30
  *
  * @author Geoffrey T. Dairiki, Tim Starling, Guy Van den Broeck
- * @private
- * @ingroup DifferenceEngine
  */
 class DiffEngine {
   const MAX_XREF_LENGTH = 10000;
@@ -196,8 +176,8 @@ class DiffEngine {
     $edits = array();
     $xi = $yi = 0;
     while ($xi < $n_from || $yi < $n_to) {
-      assert('$yi < $n_to || $this->xchanged[$xi]');
-      assert('$xi < $n_from || $this->ychanged[$yi]');
+      assert($yi < $n_to || $this->xchanged[$xi]);
+      assert($xi < $n_from || $this->ychanged[$yi]);
 
       // Skip matching "snake".
       $copy = array();
@@ -380,18 +360,20 @@ class DiffEngine {
         $k = 0;
         $matches = $ymatches[$line];
         reset($matches);
-        while (list(, $y) = each($matches)) {
+        while ($y = current($matches)) {
+          next($matches);
           if (empty($this->in_seq[$y])) {
             $k = $this->lcsPos($y);
-            assert('$k > 0');
+            assert($k > 0);
             $ymids[$k] = $ymids[$k - 1];
             break;
           }
         }
 
-        while (list(, $y) = each($matches)) {
+        while ($y = current($matches)) {
+          next($matches);
           if ($y > $this->seq[$k - 1]) {
-            assert('$y < $this->seq[$k]');
+            assert($y < $this->seq[$k]);
             // Optimization: this is a common case:
             //	next match is just replacing previous match.
             $this->in_seq[$this->seq[$k]] = FALSE;
@@ -400,7 +382,7 @@ class DiffEngine {
           }
           elseif (empty($this->in_seq[$y])) {
             $k = $this->lcsPos($y);
-            assert('$k > 0');
+            assert($k > 0);
             $ymids[$k] = $ymids[$k - 1];
           }
         }
@@ -444,7 +426,7 @@ class DiffEngine {
       }
     }
 
-    assert('$ypos != $this->seq[$end]');
+    assert($ypos != $this->seq[$end]);
 
     $this->in_seq[$this->seq[$end]] = FALSE;
     $this->seq[$end] = $ypos;
@@ -505,7 +487,7 @@ class DiffEngine {
       }
     }
     else {
-      // Use the partitions to split this problem into subproblems.
+      // Use the partitions to split this problem into sub-problems.
       reset($seps);
       $pt1 = $seps[0];
       while ($pt2 = next($seps)) {
@@ -532,7 +514,7 @@ class DiffEngine {
     $i = 0;
     $j = 0;
 
-    assert('count($lines) == count($changed)');
+    assert(count($lines) == count($changed));
     $len = count($lines);
     $other_len = count($other_changed);
 
@@ -553,7 +535,7 @@ class DiffEngine {
       }
 
       while ($i < $len && !$changed[$i]) {
-        assert('$j < $other_len && ! $other_changed[$j]');
+        assert($j < $other_len && !$other_changed[$j]);
         $i++;
         $j++;
         while ($j < $other_len && $other_changed[$j]) {
@@ -590,11 +572,11 @@ class DiffEngine {
           while ($start > 0 && $changed[$start - 1]) {
             $start--;
           }
-          assert('$j > 0');
+          assert($j > 0);
           while ($other_changed[--$j]) {
             continue;
           }
-          assert('$j >= 0 && !$other_changed[$j]');
+          assert($j >= 0 && !$other_changed[$j]);
         }
 
         /*
@@ -618,7 +600,7 @@ class DiffEngine {
             $i++;
           }
 
-          assert('$j < $other_len && ! $other_changed[$j]');
+          assert($j < $other_len && !$other_changed[$j]);
           $j++;
           if ($j < $other_len && $other_changed[$j]) {
             $corresponding = $i;
@@ -636,11 +618,11 @@ class DiffEngine {
       while ($corresponding < $i) {
         $changed[--$start] = 1;
         $changed[--$i] = 0;
-        assert('$j > 0');
+        assert($j > 0);
         while ($other_changed[--$j]) {
           continue;
         }
-        assert('$j >= 0 && !$other_changed[$j]');
+        assert($j >= 0 && !$other_changed[$j]);
       }
     }
   }
@@ -648,8 +630,6 @@ class DiffEngine {
 
 /**
  * Class representing a 'diff' between two sequences of strings.
- * @private
- * @ingroup DifferenceEngine
  */
 class Diff {
   public $edits;
@@ -762,19 +742,14 @@ class Diff {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class MappedDiff extends Diff {
   /**
    * Constructor.
    *
    * Computes diff between sequences of strings.
    *
-   * This can be used to compute things like
-   * case-insensitve diffs, or diffs which ignore
-   * changes in white-space.
+   * This can be used to compute things like case-insensitive diffs, or diffs
+   * which ignore changes in white-space.
    *
    * @param $from_lines array An array of strings.
    *   Typically these are lines from a file.
@@ -791,8 +766,8 @@ class MappedDiff extends Diff {
    *   have the same number of elements as $to_lines.
    */
   function __construct($from_lines, $to_lines, $mapped_from_lines, $mapped_to_lines) {
-    assert('count( $from_lines ) == count( $mapped_from_lines )');
-    assert('count( $to_lines ) == count( $mapped_to_lines )');
+    assert(count($from_lines) == count($mapped_from_lines));
+    assert(count($to_lines) == count($mapped_to_lines));
 
     parent::__construct($mapped_from_lines, $mapped_to_lines);
 
@@ -818,10 +793,6 @@ class MappedDiff extends Diff {
  * Additions by Axel Boldt follow, partly taken from diff.php, phpwiki-1.3.3
  */
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class HWLDFWordAccumulator {
   private $lines = array();
   private $line = '';
@@ -880,7 +851,7 @@ class HWLDFWordAccumulator {
         $this->flushLine($tag);
         $word = substr($word, 1);
       }
-      assert('!strstr( $word, "\n" )');
+      assert(!strstr($word, "\n"));
       $this->group .= $word;
     }
   }
@@ -895,10 +866,6 @@ class HWLDFWordAccumulator {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class WordLevelDiff extends MappedDiff {
   const MAX_LINE_LENGTH = 10000;
 
@@ -996,8 +963,6 @@ class WordLevelDiff extends MappedDiff {
  * This class formats the diff in classic diff format.
  * It is intended that this class be customized via inheritance,
  * to obtain fancier outputs.
- *
- * @ingroup DifferenceEngine
  */
 abstract class DiffFormatter {
   /** @var int Number of leading context "lines" to preserve.
@@ -1199,8 +1164,6 @@ abstract class DiffFormatter {
 
 /**
  * Backdrop diff formatter which returns diffs as an array.
- *
- * @ingroup DifferenceEngine
  */
 class BackdropDiffFormatter extends DiffFormatter {
 
@@ -1323,3 +1286,7 @@ class BackdropDiffFormatter extends DiffFormatter {
     }
   }
 }
+
+/**
+ * @} End of "defgroup DifferenceEngine".
+ */

@@ -251,6 +251,13 @@ input.form-radio {
   box-sizing: border-box;
 }
 
+#edit-page-style .views-ui-ajax-wrapper,
+#edit-page-style .views-ui-ajax-wrapper div,
+#edit-block-style .views-ui-ajax-wrapper,
+#edit-block-style .views-ui-ajax-wrapper div {
+  display: block;
+}
+
 @media (max-width: 600px) {
   .edit-page-style-wrapper div,
   .edit-page-style-wrapper label,
@@ -290,10 +297,6 @@ input.form-radio {
 .horizontal > * + * {
   margin-left: 9px; /* LTR */
   padding-left: 9px; /* LTR */
-}
-
-.views-ui-view-title {
-  font-weight: bold;
 }
 
 @media (max-width: 768px) {
@@ -376,15 +379,28 @@ th.views-ui-name {
 }
 
 th.views-ui-description {
-  width: 40%;
+  width: 30%;
 }
 
-th.views-ui-path {
-  width: auto;
+th.views-ui-displays {
+  width: 25%;
+}
+
+th.views-ui-storage {
+  width: 15%;
 }
 
 th.views-ui-operations {
   width: 15%;
+}
+
+td.views-ui-displays ul {
+  margin: 0.25em 0 0.25em 0;
+}
+
+.views-ui-view-tag,
+.views-ui-view-storage {
+  margin-top: 3px;
 }
 
 /* @end */
@@ -480,6 +496,30 @@ td.group-title {
   float: left;
   padding-top: 3px;
   padding-right: 10px;
+}
+
+#views-rearrange-filters {
+  border-top: 1px solid #ccc;
+}
+#views-rearrange-filters tr.even,
+#views-rearrange-filters tr.odd {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+#views-rearrange-filters tr.filter-group-operator-row {
+  border-bottom: 1px solid #ccc;
+}
+#views-rearrange-filters tr.views-group-title {
+  border-bottom: none;
+}
+#views-rearrange-filters td.group-operator {
+  border-right: 1px solid #ccc; /* LTR */
+  vertical-align: middle;
+}
+[dir="rtl"] #views-rearrange-filters td.group-operator {
+  border-left: 1px solid #ccc;
 }
 
 /* This keeps the collapsible fieldsets of options from crashing into the bottom
@@ -736,11 +776,11 @@ td.group-title {
 
 /* @group Attachment bucket overridden
  *
- * Applies a overriden(italics) font style to overridden buckets.
+ * Applies an overridden font style (italics) to overridden buckets.
  * The better way to implement this would be to add the overridden class
  * to the bucket header when the bucket is overridden and style it as a
  * generic icon classed element. For the moment, we'll style the bucket
- * header specifically with the overriden font style.
+ * header specifically with the overridden font style.
  */
 
 .views-ui-display-tab-setting.overridden,

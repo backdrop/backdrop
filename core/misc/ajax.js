@@ -21,7 +21,7 @@ Backdrop.settings.urlIsAjaxTrusted = Backdrop.settings.urlIsAjaxTrusted || {};
  */
 Backdrop.behaviors.AJAX = {
   attach: function (context, settings) {
-    
+
      function loadAjaxBehaviour(base) {
       if (!$('#' + base + '.ajax-processed').length) {
         var element_settings = settings.ajax[base];
@@ -195,7 +195,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   var currentAjaxRequestNumber = 0;
   var ajax = this;
   ajax.options = {
-    url: ajax.url,
+    url: Backdrop.sanitizeAjaxUrl(ajax.url),
     data: ajax.submit,
     beforeSerialize: function (element_settings, options) {
       return ajax.beforeSerialize(element_settings, options);
@@ -247,6 +247,7 @@ Backdrop.ajax = function (base, element, element_settings) {
       }
     },
     dataType: 'json',
+    jsonp: false,
     accepts: {
       json: element_settings.accepts || 'application/vnd.backdrop-ajax'
     },
@@ -257,7 +258,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   }
 
   // Bind the ajaxSubmit function to the element event.
-  $(ajax.element).bind(element_settings.event, function (event) {
+  $(ajax.element).on(element_settings.event, function (event) {
     if (!Backdrop.settings.urlIsAjaxTrusted[ajax.url] && !Backdrop.urlIsLocal(ajax.url)) {
       throw new Error(Backdrop.t('The callback URL is not local and not trusted: !url', {'!url': ajax.url}));
     }
@@ -268,7 +269,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   // can be triggered through keyboard input as well as e.g. a mousedown
   // action.
   if (element_settings.keypress) {
-    $(ajax.element).keypress(function (event) {
+    $(ajax.element).on('keypress', function (event) {
       return ajax.keypressResponse(this, event);
     });
   }
@@ -277,7 +278,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   // For example, prevent the browser default action of a click, even if the
   // AJAX behavior binds to mousedown.
   if (element_settings.prevent) {
-    $(ajax.element).bind(element_settings.prevent, false);
+    $(ajax.element).on(element_settings.prevent, false);
   }
 };
 
@@ -597,7 +598,7 @@ Backdrop.ajax.prototype.commands = {
     var settings;
 
     // We don't know what response.data contains: it might be a string of text
-    // without HTML, so don't rely on jQuery correctly iterpreting
+    // without HTML, so don't rely on jQuery correctly interpreting
     // $(response.data) as new HTML rather than a CSS selector. Also, if
     // response.data contains top-level text nodes, they get lost with either
     // $(response.data) or $('<div></div>').replaceWith(response.data).

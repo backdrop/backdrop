@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_cache.
@@ -192,28 +191,23 @@ class views_plugin_cache extends views_plugin {
    * Gather out of band data, compare it to what we started with and store the difference.
    */
   function gather_headers() {
-    // Simple replacement for head
-    if (isset($this->storage['head'])) {
-      $this->storage['head'] = str_replace($this->storage['head'], '', backdrop_add_html_head());
-    }
-    else {
-      $this->storage['head'] = '';
-    }
-
     // Check if the advanced mapping function of D 7.23 is available.
     $array_mapping_func = function_exists('backdrop_array_diff_assoc_recursive') ? 'backdrop_array_diff_assoc_recursive' : 'array_diff_assoc';
+
+    // Get difference for head.
+    $this->storage['head'] = $array_mapping_func(backdrop_add_html_head(), $this->storage['head']);
 
     // Slightly less simple for CSS:
     $css = backdrop_add_css();
     $css_start = isset($this->storage['css']) ? $this->storage['css'] : array();
-    $this->storage['css'] = $array_mapping_func($css, $css_start);
+    $this->storage['css'] = $this->assetDiff($css, $css_start, $array_mapping_func);
 
     // Get javascript after/before views renders.
     $js = backdrop_add_js();
     $js_start = isset($this->storage['js']) ? $this->storage['js'] : array();
     // If there are any differences between the old and the new javascript then
     // store them to be added later.
-    $this->storage['js'] = $array_mapping_func($js, $js_start);
+    $this->storage['js'] = $this->assetDiff($js, $js_start, $array_mapping_func);
 
     // Special case the settings key and get the difference of the data.
     $settings = isset($js['settings']['data']) ? $js['settings']['data'] : array();
@@ -225,11 +219,45 @@ class views_plugin_cache extends views_plugin {
   }
 
   /**
+   * Computes the differences between two JS/CSS asset arrays.
+   *
+   * @param array $assets
+   *   The current asset array.
+   * @param array $start_assets
+   *   The original asset array.
+   * @param string $diff_function
+   *   The function that should be used for computing the diff.
+   *
+   * @return array
+   *   A CSS or JS asset array that contains all entries that are new/different
+   *   in $assets.
+   */
+  protected function assetDiff(array $assets, array $start_assets, $diff_function) {
+    $diff = $diff_function($assets, $start_assets);
+
+    // Clean the resulting array up, since backdrop_array_diff_assoc_recursive()
+    // can leave half-populated arrays behind.
+    foreach ($diff as $key => $entry) {
+      // If only the weight was different, we can remove this entry.
+      if (count($entry) == 1 && isset($entry['weight'])) {
+        unset($diff[$key]);
+      }
+      // If there are other differences, we override with the latest entry.
+      elseif ($entry != $assets[$key]) {
+        $diff[$key] = $assets[$key];
+      }
+    }
+    return $diff;
+  }
+
+  /**
    * Restore out of band data saved to cache. Copied from Panels.
    */
   function restore_headers() {
     if (!empty($this->storage['head'])) {
-      backdrop_add_html_head($this->storage['head']);
+      foreach ($this->storage['head'] as $key => $data) {
+        backdrop_add_html_head($this->storage['head']);
+      }
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
@@ -255,59 +283,77 @@ class views_plugin_cache extends views_plugin {
     }
   }
 
-  function get_results_key() {
-    global $user;
-
+  public function get_results_key() {
     if (!isset($this->_results_key)) {
-
-      $build_info = $this->view->build_info;
-
-      $query_plugin = $this->view->display_handler->get_plugin('query');
-
-      foreach (array('query','count_query') as $index) {
-        // If the default query back-end is used generate SQL query strings from
-        // the query objects.
-        if ($build_info[$index] instanceof SelectQueryInterface) {
-          $query = clone $build_info[$index];
-          $query->preExecute();
-          $build_info[$index] = (string) $query;
-        }
-      }
-      $key_data = array(
-        'build_info' => $build_info,
-        'roles' => array_keys($user->roles),
-        'super-user' => $user->uid == 1, // special caching for super user.
-        'language' => $GLOBALS['language']->langcode,
-        'base_url' => $GLOBALS['base_url'],
-      );
+      $key_data = array();
       foreach (array('exposed_info', 'page', 'sort', 'order', 'items_per_page', 'offset') as $key) {
         if (isset($_GET[$key])) {
           $key_data[$key] = $_GET[$key];
         }
       }
 
-      $this->_results_key = $this->view->name . ':' . $this->display->id . ':results:' . md5(serialize($key_data));
+      $this->_results_key = $this->view->name . ':' . $this->display->id . ':results:' . $this->get_cache_key($key_data);
     }
 
     return $this->_results_key;
   }
 
-  function get_output_key() {
-    global $user;
+  public function get_output_key() {
     if (!isset($this->_output_key)) {
       $key_data = array(
         'result' => $this->view->result,
-        'roles' => array_keys($user->roles),
-        'super-user' => $user->uid == 1, // special caching for super user.
         'theme' => $GLOBALS['theme'],
-        'language' => $GLOBALS['language']->langcode,
-        'base_url' => $GLOBALS['base_url'],
       );
-
-      $this->_output_key = $this->view->name . ':' . $this->display->id . ':output:' . md5(serialize($key_data));
+      $this->_output_key = $this->view->name . ':' . $this->display->id . ':output:' . $this->get_cache_key($key_data);
     }
 
     return $this->_output_key;
+  }
+
+  /**
+   * Returns cache key.
+   *
+   * @param array $key_data
+   *   Additional data for cache segmentation and/or overrides for default
+   *   segmentation.
+   *
+   * @return string
+   */
+  public function get_cache_key($key_data = array()) {
+    global $user;
+
+    $key_data += array(
+      'roles' => array_keys($user->roles),
+      'super-user' => $user->uid == 1, // Special caching for super user.
+      'language' => $GLOBALS['language']->langcode,
+      'language_content' => $GLOBALS['language_content']->langcode,
+      'base_url' => $GLOBALS['base_url'],
+      'display_options' => $this->display->display_options,
+    );
+
+    if (empty($key_data['build_info'])) {
+      $build_info = $this->view->build_info;
+      foreach (array('query', 'count_query') as $index) {
+        // If the default query back-end is used generate SQL query strings from
+        // the query objects.
+        if ($build_info[$index] instanceof SelectQueryInterface) {
+          $query = $build_info[$index];
+
+          // If the query was not yet prepared, work on a clone and run
+          // preExecute().
+          if (!$query->isPrepared()) {
+            $query = clone $build_info[$index];
+            $query->preExecute();
+          }
+
+          $key_data['build_info'][$index] = array(
+            'sql' => (string) $query,
+            'arguments' => $query->getArguments(),
+          );
+        }
+      }
+    }
+    return md5(serialize($key_data));
   }
 }
 

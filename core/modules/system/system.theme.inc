@@ -165,25 +165,27 @@ function theme_system_modules_fieldset($variables) {
     // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
 
-    // Add the second column: module label and expand/collapse functionalty.
+    // Add the second column: module label and expand/collapse functionality.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
 
-    if ($requires || $required_by) {
-      $requirements .= ' <div class="requirements">';
-      if ($requires) {
-        $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
-      }
-      if ($required_by) {
-        $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
-      }
-      $requirements .= '</div>';
-
-      // Build a requirements toggle.
-      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+    $requirements .= '<div class="requirements">';
+    if ($requires) {
+      $requirements .= '<div class="admin-requirements">' . t('Requires:') . ' ' . implode(', ', $module['#requires']) . '</div>';
     }
+    if ($required_by) {
+      $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    if (isset($module['#project']) && $module['#project'] != 'backdrop') {
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $module['#project']) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $module['#project']) . '</div>';
+    }
+    $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
+    $requirements .= '</div>';
+
+    // Build a requirements toggle.
+    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
 
     // Add the description, along with any modules it requires.
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
@@ -228,7 +230,7 @@ function theme_system_modules_incompatible($variables) {
 function theme_system_modules_uninstall($variables) {
   $form = $variables['form'];
 
-  // No theming for the confirm form.
+  // No special theme override for the confirm form.
   if (isset($form['confirm'])) {
     return backdrop_render($form);
   }
@@ -268,9 +270,21 @@ function theme_system_modules_uninstall($variables) {
 /**
  * Returns HTML for the status report.
  *
+ * This theme function is dependent on install.inc being loaded, because
+ * that's where the constants are defined.
+ *
  * @param $variables
  *   An associative array containing:
- *   - requirements: An array of requirements.
+ *   - requirements: An array of requirements/status items. Each requirement
+ *     is an associative array containing the following elements:
+ *     - title: The name of the requirement.
+ *     - value: (optional) The current value (version, time, level, etc).
+ *     - description: (optional) The description of the requirement.
+ *     - severity: (optional) The requirement's result/severity level, one of:
+ *       - REQUIREMENT_INFO: Status information.
+ *       - REQUIREMENT_OK: The requirement is satisfied.
+ *       - REQUIREMENT_WARNING: The requirement failed with a warning.
+ *       - REQUIREMENT_ERROR: The requirement failed with an error.
  *
  * @ingroup themeable
  */
@@ -379,39 +393,30 @@ function theme_status_report($variables) {
  * @param $variables
  *   An associative array containing:
  *   - blocks: An array of blocks to display. Each array should include a
- *     'title', a 'description', a formatted 'content' and a 'position' which
- *     will control which container it will be in. This is usually 'left' or
- *     'right'.
+ *     'title', a 'description' and a formatted 'content'.
  *
  * @ingroup themeable
  */
 function theme_admin_page($variables) {
   $blocks = $variables['blocks'];
-
-  $stripe = 0;
   $container = array();
 
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (empty($block['position'])) {
-        // perform automatic striping.
-        $block['position'] = ++$stripe % 2 ? 'left' : 'right';
-      }
-      if (!isset($container[$block['position']])) {
-        $container[$block['position']] = '';
-      }
-      $container[$block['position']] .= $block_output;
+      $container[] = $block_output;
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
+  if (!empty($container)) {
+    $output = '<div class="admin clearfix">';
+    foreach ($container as $data) {
+      $output .= $data;
+    }
     $output .= '</div>';
   }
-  $output .= '</div>';
+  else {
+    $output = t('You do not have any administrative items.');
+  }
   return $output;
 }
 
@@ -501,11 +506,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
+  $blocks = array();
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -520,21 +521,14 @@ function theme_system_admin_index($variables) {
       $block['show'] = TRUE;
 
       if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
+        $blocks[] = $block_output;
       }
     }
   }
 
   $output = '<div class="admin clearfix">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
+  foreach ($blocks as $block) {
+    $output .= $block;
   }
   $output .= '</div>';
 
@@ -782,4 +776,25 @@ function system_preprocess_page_components(&$variables) {
   $variables['theme_hook_suggestions'] = array(
     'page_components__' . $child_delta,
   );
+}
+
+/**
+ * Returns HTML for the display of a label and its machine name.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - label: The human-readable label.
+ *   - machine_name: (optional) The machine-safe name.
+ *
+ * @ingroup themeable
+ */
+function theme_label_machine_name($variables) {
+  $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
+
+  if (!empty($variables['machine_name'])) {
+    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
+  }
+
+  return $output;
 }

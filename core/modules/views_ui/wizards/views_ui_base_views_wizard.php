@@ -98,7 +98,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a page'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
-      '#default_value' => TRUE,
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.page'),
       '#id' => 'edit-page-create',
     );
 
@@ -153,7 +153,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#min' => 0,
       '#step' => 1,
     );
-    $form['displays']['page']['options']['pagerz'] = array(
+    $form['displays']['page']['options']['pager'] = array(
       '#title' => t('Use a pager'),
       '#type' => 'checkbox',
       '#default_value' => TRUE,
@@ -249,6 +249,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
       '#title' => t('Create a block'),
       '#type' => 'checkbox',
       '#attributes' => array('class' => array('strong')),
+      '#default_value' => (bool) config_get('views_ui.settings', 'wizard_default_display.block'),
       '#id' => 'edit-block-create',
     );
 
@@ -488,7 +489,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
     $view->description = $form_state['values']['description'];
-    $view->tag = 'default';
+    $view->tag = '';
     $view->core = BACKDROP_VERSION;
     $view->base_table = $this->base_table;
 
@@ -513,7 +514,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    *   arrays of options for that display.
    */
   protected function build_display_options($form, $form_state) {
-    // Display: Master
+    // Display: Default
     $display_options['default'] = $this->default_display_options($form, $form_state);
     $display_options['default'] += array(
       'filters' => array(),
@@ -594,8 +595,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Add the array of display options to the view, with appropriate overrides.
    */
   protected function add_displays($view, $display_options, $form, $form_state) {
-    // Display: Master
-    $default_display = $view->new_display('default', 'Master', 'default');
+    // Display: Default
+    $default_display = $view->new_display('default', 'Default', 'default');
     foreach ($display_options['default'] as $option => $value) {
       $default_display->set_option($option, $value);
     }
@@ -686,26 +687,23 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $filters = array();
 
     if (!empty($form_state['values']['show']['type']) && $form_state['values']['show']['type'] != 'all') {
-      $bundle_key = $this->entity_info['bundle keys']['bundle'];
-      // Figure out the table where $bundle_key lives. It may not be the same as
-      // the base table for the view; the taxonomy vocabulary machine_name, for
-      // example, is stored in taxonomy_vocabulary, not taxonomy_term_data.
+      $entity_key = $this->entity_info['entity keys']['bundle'];
       $fields = views_fetch_fields($this->base_table, 'filter');
-      if (isset($fields[$this->base_table . '.' . $bundle_key])) {
+      if (isset($fields[$this->base_table . '.' . $entity_key])) {
         $table = $this->base_table;
       }
       else {
         foreach ($fields as $field_name => $value) {
-          if ($pos = strpos($field_name, '.' . $bundle_key)) {
+          if ($pos = strpos($field_name, '.' . $entity_key)) {
             $table = substr($field_name, 0, $pos);
             break;
           }
         }
       }
       $table_data = views_fetch_data($table);
-      // Check whether the bundle key filter handler is or an child of it views_handler_filter_in_operator
+      // Check whether the entity key filter handler is or an child of it views_handler_filter_in_operator
       // If it's not just use a single value instead of an array.
-      $handler = $table_data[$bundle_key]['filter']['handler'];
+      $handler = $table_data[$entity_key]['filter']['handler'];
       if ($handler == 'views_handler_filter_in_operator' || is_subclass_of($handler, 'views_handler_filter_in_operator')) {
         $value = backdrop_map_assoc(array($form_state['values']['show']['type']));
       }
@@ -713,10 +711,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $value = $form_state['values']['show']['type'];
       }
 
-      $filters[$bundle_key] = array(
-        'id' => $bundle_key,
+      $filters[$entity_key] = array(
+        'id' => $entity_key,
         'table' => $table,
-        'field' => $bundle_key,
+        'field' => $entity_key,
         'value' => $value,
       );
     }
@@ -765,7 +763,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Don't add a sort if there is no form value or the user selected none as sort.
     if (!empty($form_state['values']['show']['sort']) && $form_state['values']['show']['sort'] != 'none') {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
-      // Column either be a column-name or the table-columnn-ame.
+      // $column is either [column name] or [table]-[column name].
       $column = explode('-', $column);
       if (count($column) > 1) {
         $table = $column[0];
