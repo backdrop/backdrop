@@ -36,6 +36,7 @@ jobs:
           files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
           standard: ../phpcs/Backdrop
           fail_on_warnings: false
+          ignore_errors_on_exit: false
 
   spellcheck:
     name: Check spelling
