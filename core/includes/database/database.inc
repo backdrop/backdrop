@@ -3175,8 +3175,8 @@ function db_ignore_slave() {
  *   TRUE if a replica, FALSE otherwise.
  */
 function _db_is_replica($db_options) {
-  // @todo Remove deprecated terminology "slave" in Backdrop 2.0.
   // cspell:disable
+  // @todo Remove deprecated terminology "slave" in Backdrop 2.0.
   return empty($db_options['target']) || $db_options['target'] == 'slave' || $options['target'] == 'replica';
   // cspell:enable
 }
