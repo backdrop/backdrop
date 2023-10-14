@@ -474,7 +474,7 @@ details.open-close-toggle:not([open]) summary .open-close-button::before {
 /* The open/close icons next to the open/close toggle label. */
 details.open-close-toggle summary .open-close-button::after,
 [dir="rtl"] details.open-close-toggle summary .open-close-button::before {
-  content: '...';
+  content: '…';
   display: inline-block;
 }
 details.open-close-toggle[open] summary .open-close-button::after,
