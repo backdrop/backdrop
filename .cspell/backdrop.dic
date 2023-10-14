@@ -203,6 +203,8 @@ Harnhammar
 Hartl
 hdir
 HEADERFUNCTION
+heure
+heures
 hilite
 Hilite
 hitem
@@ -283,9 +285,11 @@ moscone
 Moscone
 mousebutton
 mousedown
+mouton
 msgbox
 multibundle
 multisites
+Műveletek
 myclass
 mydata
 myeditor
@@ -369,6 +373,7 @@ phptemplate
 phpwiki
 plids
 pneum
+Ponedjeljak
 portseparators
 precompute
 precomputes
@@ -451,6 +456,7 @@ superglobal
 supprimer
 sutro
 Sutro
+Svibanj
 sysconfig
 tablealias
 tabledragging

@@ -3726,7 +3726,7 @@ function form_process_details($element, &$form_state) {
  * such as classes or an HTML id.
  *
  * Since version 1.26.2 the optional #open_label and #close_label properties
- * have been introduced. When both of these properties are specified, the 
+ * have been introduced. When both of these properties are specified, the
  * <details> element is styled with a "more"/"less" toggle following the
  * #summary text (instead of the triangle toggle placed before the #summary
  * text, which is how browsers style <details> elements by default). Example
