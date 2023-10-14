@@ -158,7 +158,7 @@ function system_themes_page() {
       // Create the operations links.
       $query['theme'] = $theme->name;
       if (backdrop_theme_access($theme) && theme_has_settings($theme->name)) {
-        $theme->operations[] = array(
+        $theme->operations['settings'] = array(
           'title' => t('Settings'),
           'href' => 'admin/appearance/settings/' . $theme->name,
           'attributes' => array('title' => t('Settings for !theme theme', array('!theme' => $theme->info['name']))),
@@ -166,13 +166,13 @@ function system_themes_page() {
       }
       if (!empty($theme->status)) {
         if (!$theme->is_default) {
-          $theme->operations[] = array(
+          $theme->operations['disable'] = array(
             'title' => t('Disable'),
             'href' => 'admin/appearance/disable',
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          $theme->operations[] = array(
+          $theme->operations['default'] = array(
             'title' => t('Set default'),
             'href' => 'admin/appearance/default',
             'query' => $query,
@@ -181,13 +181,13 @@ function system_themes_page() {
         }
       }
       else {
-        $theme->operations[] = array(
+        $theme->operations['enable'] = array(
           'title' => t('Enable'),
           'href' => 'admin/appearance/enable',
           'query' => $query,
           'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
         );
-        $theme->operations[] = array(
+        $theme->operations['enable-default'] = array(
           'title' => t('Enable and set default'),
           'href' => 'admin/appearance/default',
           'query' => $query,
@@ -1775,6 +1775,36 @@ function system_performance_settings($form, &$form_state) {
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $options = array(
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
+  );
+  $form['jquery_version'] = array(
+    '#type' => 'radios',
+    '#title' => t('jQuery version'),
+    '#default_value' => $config->get('jquery_version'),
+    '#options' => $options,
+  );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
 
   return system_settings_form($form);
 }

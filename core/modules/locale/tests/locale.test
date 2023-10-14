@@ -1221,10 +1221,11 @@ class LocaleInstallTest extends BackdropWebTestCase {
  * Locale uninstall with English UI functional test.
  */
 class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
+
   /**
-   * The default language set for the UI before uninstall.
+   * @var string
    */
-  protected $language;
+  protected $langcode;
 
   function setUp() {
     parent::setUp('locale');
@@ -2364,6 +2365,12 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
  * Test that URL rewriting works as expected.
  */
 class LocaleUrlRewritingTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('locale');
 
