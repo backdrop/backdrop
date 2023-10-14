@@ -1389,7 +1389,7 @@ function image_preprocess_image_style(&$variables) {
 /**
  * Implements hook_file_presave().
  *
- * Set the dimensions in the "metadata" property used by File Entity module.
+ * Set the dimensions in the "metadata" property used by the File Entity module.
  */
 function image_file_presave($file) {
   if (image_is_svg($file->uri) && isset($file->metadata)) {
@@ -1405,8 +1405,8 @@ function image_file_presave($file) {
 /**
  * Implements hook_field_attach_presave().
  *
- * When saving a entity, this hook is called to make any adjustments to the
- * entire entity's fields before attempting to write to the database. When
+ * When saving an entity, this hook is called to make any adjustments to the
+ * entire entity's fields before attempting to write to the database. When the
  * Image module encounters an SVG image, it sets the height and width values
  * to be empty strings, which would cause a database constraint error when
  * a string is inserted into an integer column.
@@ -1414,7 +1414,7 @@ function image_file_presave($file) {
  * This implementation loops through all fields attached to an entity, finds
  * those that are an image field, then sets the width and height values within
  * that field. These changes are made by reference, so they are in the $entity
- * object when Field module saves to the database.
+ * object when the Field module saves to the database.
  */
 function image_field_attach_presave($entity_type, $entity) {
   // Get information about which fields are on this type of entity.
@@ -1492,7 +1492,7 @@ function image_get_svg_dimensions($uri) {
   }
 
   // Return cached dimensions if already retrieved once this request.
-  $cached_images = &drupal_static(__FUNCTION__, array());
+  $cached_images = &backdrop_static(__FUNCTION__, array());
   if (isset($cached_images[$uri])) {
     return $cached_images[$uri];
   }

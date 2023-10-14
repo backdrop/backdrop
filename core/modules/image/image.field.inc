@@ -711,7 +711,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
 
   $element['image_svg_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('SVG Images dimensions (attributes)'),
+    '#title' => t('SVG images dimensions (attributes)'),
     '#tree' => TRUE,
   );
 
