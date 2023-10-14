@@ -230,7 +230,7 @@ details summary {
   cursor: pointer;
 }
 
-details summary span {
+details:not(.open-close-toggle) summary span {
   color: #0073bd;
   font-size: 1.1875em;
 }
