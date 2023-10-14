@@ -3725,10 +3725,15 @@ function form_process_details($element, &$form_state) {
  * renderable element, to surround it with a <details> tag and add attributes
  * such as classes or an HTML id.
  *
- * Since version 1.26.0, you can specify the optional #open_label and
- * #close_label properties, which then style the details element with a
- * "more"/"less" toggle (or whatever you called the open/close labels), like the
- * ones being used in the modules listing and the site status report page.
+ * Since version 1.26.2 the optional #open_label and #close_label properties
+ * have been introduced. When both of these properties are specified, the 
+ * <details> element is styled with a "more"/"less" toggle following the
+ * #summary text (instead of the triangle toggle placed before the #summary
+ * text, which is how browsers style <details> elements by default). Example
+ * implementations of such toggles can be found in the following pages in the
+ * Backdrop core admin UI:
+ * - the modules listing page (admin/modules).
+ * - the site status report page (admin/reports/status).
  *
  * @param array $variables
  *   An associative array containing:
@@ -3741,16 +3746,18 @@ function form_process_details($element, &$form_state) {
  *     - #attributes
  *     - #summary_attributes
  *     - #open
- *     - #open_label
- *     - #close_label
+ *     - #open_label (optional): Renders the #summary text with a more/less
+ *       toggle. Requires the #close_label to also be specified.
+ *     - #close_label (optional): Renders the #summary text with a more/less
+ *       toggle. Requires the #open_label to also be specified.
  *
  * @return string
  *   The rendered HTML output.
  *
- * @since 1.26.0:
+ * @since 1.26.2:
  *   - Support for a #summary_attributes property added.
- *   - #open_label and #close_label properties added to support the special
- *     "more"/"less" toggle type of details element.
+ *   - #open_label and #close_label properties added to allow styling the
+ *     element with a "more"/"less" toggle.
  * @ingroup themeable
  */
 function theme_details($variables) {
