@@ -230,6 +230,15 @@ details summary {
   cursor: pointer;
 }
 
+/**
+ * Explicitly exclude the "special" more/less details elements from this
+ * selector, so that we don't have to specifically override this font color/size
+ * each time we use more/less <details> in:
+ * - help text (which needs to be light gray).
+ * - the modules listing (which needs to be black).
+ * - the status page (needs to be black).
+ * - any other place where blue text for the details summary is not appropriate.
+ */
 details:not(.open-close-toggle) summary span {
   color: #0073bd;
   font-size: 1.1875em;

@@ -806,7 +806,7 @@ details {
  * - help text (which needs to be light gray).
  * - the modules listing (which needs to be black).
  * - the status page (needs to be black).
- * - ...any other place where blue text for the details summary is not required.
+ * - any other place where blue text for the details summary is not appropriate.
  */
 details:not(.open-close-toggle) summary span {
   color: #0074bd;

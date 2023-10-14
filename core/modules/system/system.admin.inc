@@ -2282,7 +2282,8 @@ function system_urls_settings($form, &$form_state) {
 }
 
 /**
- * Menu callback: displays the site status report. Can also be used as a pure check.
+ * Menu callback: displays the site status report. Can also be used as a pure
+ * check.
  *
  * @param $check
  *   If true, only returns a boolean whether there are system status errors.
