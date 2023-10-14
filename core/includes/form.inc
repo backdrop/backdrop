@@ -3767,13 +3767,13 @@ function theme_details($variables) {
     '#attributes' => array(),
     '#summary_attributes' => array(),
   );
+  // Assign an HTML ID if one has been specified.
+  if (!array_key_exists('id', $element['#attributes']) && isset($element['#id'])) {
+    $element['#attributes']['id'] = $element['#id'];
+  }
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an HTML ID.
-    if (!array_key_exists('id', $element['#attributes'])) {
-      $element['#attributes']['id'] = $element['#id'];
-    }
     // Add the form-wrapper class.
     if (empty($element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
