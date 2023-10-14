@@ -300,6 +300,8 @@ function modelFileIdToDataAttribute() {
 }
 
 /**
+ * A mapping between the CKEditor model names and the data-align attribute.
+ *
  * @type {Array.<{dataValue: string, modelValue: string}>}
  */
 const alignmentMapping = [
@@ -599,10 +601,10 @@ function viewImageToModelImage(editor) {
       });
     }
 
-    // The way that image styles are handled here is naive - it assumes that the
-    // image styles are configured exactly as expected by this plugin.
-    // @todo Add support for custom image style configurations
-    //   https://www.drupal.org/i/3270693.
+    // If the view element has a `data-align` attribute, convert that to a
+    // CKEditor 5 Image Style. Note these are not related to Backdrop Image
+    // Styles provided by Image module.
+    // See https://ckeditor.com/docs/ckeditor5/latest/features/images/images-styles.html
     if (
       editor.plugins.has('ImageStyleEditing') &&
       consumable.test(viewItem, { name: true, attributes: 'data-align' })
@@ -671,7 +673,7 @@ function viewImageToModelImage(editor) {
       attributes: attributesToConsume,
     });
 
-    // Make sure `modelRange` and `modelCursor` is up to date after inserting
+    // Make sure `modelRange` and `modelCursor` is up-to-date after inserting
     // new nodes into the model.
     updateConversionResult(image, data);
   }

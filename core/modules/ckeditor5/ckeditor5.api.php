@@ -13,27 +13,23 @@
  * Provides a list of CKEditor plugins.
  *
  * Each plugin for CKEditor must provide an array of properties containing
- * information about the plugin. At minimum, plugins must provide a path and
- * file location so that CKEditor may add the plugin. Available properties for
- * each plugin include:
+ * information about the plugin. Available properties for each plugin include:
  *
- * - path: Required for all external plugins. String path to the plugin
- *   directory relative to the Backdrop installation root. Do not include a
- *   trailing slash.
- * - file: Required for all external plugins. String file name of the plugin in
- *   the "path" directory.
- * - internal: Boolean value indicating if the plugin is part of the compressed
- *   CKEditor library package and already loaded on all instances. If TRUE,
- *   the "path" and "file" properties are not needed.
- * - css: An array of CSS files that should be added by CKEditor. These files
- *   are used only when CKEditor is using an iframe wrapper around its content.
- *   If a plugin needs to include CSS for inline and iframe versions, it should
- *   add its CSS via CKEditor's JavaScript CKEDITOR.addCss() method.
- * - enabled callback: String containing a function name that can determine if
+ * - library: An array specifying the module and library key provided by
+ *   hook_library_info(). Each plugin should provide a library to define its JS
+ *   and CSS files.
+ * - enabled_callback: String containing a function name that can determine if
  *   this plugin should be enabled based on the current editor configuration.
  *   See the hook_ckeditor5_PLUGIN_plugin_check() function for an example.
+ *   This can also be set to the boolean TRUE to always enable a plugin.
+ * - pseudo_plugin: Optional. Boolean indicating this entry is not a real
+ *   plugin that needs to be loaded. This can be used to provide additional
+ *   default configuration with an enabled_callback.
+ * - plugin_dependencies: An array of other plugin names on which this button
+ *   depends. Note dependencies can also be specified on a per-button basis
+ *   within the "buttons" property.
  * - buttons: An array of buttons that are provided by this plugin. Each button
- *   should by keyed by its CKEditor button name, and should contain an array
+ *   should be keyed by its CKEditor button name, and should contain an array
  *   of button properties, including:
  *   - label: A human-readable, translated button name.
  *   - image: An image for the button to be used in the toolbar.
@@ -59,9 +55,10 @@
  *     @endcode
  *     Note this differs from the CKEditor 4 configuration, which used a nested
  *     array.
- *   - dependencies: An array of other plugin names on which this button
- *     depends. A common use is to add the "contextmenu" plugin, if the button
- *     makes options available only via contextual menu.
+ *   - plugin_dependencies: An array of other plugin names on which this button
+ *     depends. This can be useful if this plugin provides multiple buttons.
+ *     If this plugin always has a dependency regardless of the buttons used,
+ *     specify plugin_dependencies at the plugin level.
  *   - optional_html: If this button can work with or without certain tags or
  *     attributes in a reduced manner, then specify additional values that can
  *     be used to provide the full functionality. This should match the same
@@ -74,17 +71,17 @@
  * @see hook_ckeditor5_PLUGIN_plugin_check()
  */
 function hook_ckeditor5_plugins() {
-  $plugins['myplugin'] = array(
+  $plugins['myPlugin.MyPlugin'] = array(
     'library' => array('mymodule', 'mymodule.ckeditor5.myplugin'),
     'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
-    'enabled callback' => 'mymodule_myplugin_plugin_check',
+    'enabled_callback' => 'mymodule_myplugin_plugin_check',
     'buttons' => array(
-      'MyPlugin' => array(
+      'myButton' => array(
+        'library' => array('my_module', 'my-module-ckeditor5-plugin'),
         'label' => t('My custom button'),
         'required_html' => array(
           '<a href alt class="external internal">',
         ),
-        'plugins' => array('myPlugin.MyPlugin'),
       ),
     ),
   );
@@ -197,7 +194,7 @@ function hook_ckeditor5_settings_alter(array &$settings, $format) {
  */
 function hook_ckeditor5_PLUGIN_plugin_check($format, $plugin_name) {
   // Automatically enable this plugin if the Underline button is enabled.
-  foreach ($format->editor_settings['toolbar']['buttons'] as $row) {
+  foreach ($format->editor_settings['cketoolbar']['buttons'] as $row) {
     if (in_array('Underline', $row)) {
       return TRUE;
     }

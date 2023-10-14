@@ -273,7 +273,7 @@ function ckeditor5_ckeditor5_plugins() {
         'multiple' => TRUE,
       ),
     ),
-    'enabled callback' => TRUE,
+    'enabled_callback' => TRUE,
   );
 
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/text-alignment.html
@@ -424,7 +424,7 @@ function ckeditor5_ckeditor5_plugins() {
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/autoformat.html
   $plugins['autoformat.Autoformat'] = array(
     // @todo: Provide a configuration option to toggle.
-    'enabled callback' => TRUE,
+    'enabled_callback' => TRUE,
   );
 
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/tables/tables.html
@@ -501,7 +501,7 @@ function ckeditor5_ckeditor5_plugins() {
   // such as converting <s> to <del> or <i> to <em>.
   $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
-    'enabled callback' => TRUE,
+    'enabled_callback' => TRUE,
   );
 
   // The BackdropImage plugin extends the default CKEditor Image plugin.
@@ -555,17 +555,75 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
-  // The BackdropImageCaption plugin provides consistent behaviors for image
-  // captions.
-  // @todo: This plugin is now merged with the main backdrop-image plugin.
-  // Move the required_html to be added in ckeditor5_get_config()
-  // or elsewhere.
+  // The BackdropImageCaption plugin provides configuration only. It enables
+  // converting data-caption attributes on img tags to figure and figcaption
+  // elements.
   $plugins['backdropImageCaption.BackdropImageCaption'] = array(
-    'enabled callback' => 'ckeditor5_image_plugin_check',
+    'pseudo_plugin' => TRUE,
+    'enabled_callback' => 'ckeditor5_image_caption_plugin_check',
     'required_html' => array(
       '<img data-caption>',
       '<figure>',
       '<figcaption data-placeholder>',
+    ),
+    'config' => array(
+      'backdropImage' => array(
+        'captionFilterEnabled' => TRUE,
+        'captionPlaceholderText' => t('Enter caption text here.')
+      )
+    ),
+  );
+
+  // The BackdropImageAlignment plugin provides configuration only. It enables
+  // converting data-align attributes on img tags to classes.
+  $plugins['backdropImage.BackdropImageAlignment'] = array(
+    'pseudo_plugin' => TRUE,
+    'enabled_callback' => 'ckeditor5_image_alignment_plugin_check',
+    'required_html' => array(
+      '<img data-align>',
+    ),
+    // Not to be confused with Backdrop Image Styles (provided by Image module),
+    // CKEditor Image Styles are used to configure the presentation of images,
+    // including alignment options.
+    'plugin_dependencies' => array('image.ImageStyle'),
+    'config' => array(
+      'image' => array(
+        // Add buttons to the balloon toolbar shown when an image is selected.
+        // Note that each of these image styles are pre-defined by the
+        // ImageStyle plugin.
+        // See https://ckeditor.com/docs/ckeditor5/latest/features/images/images-styles.html#ready-to-use-styles
+        'toolbar' => array(
+          '|',
+          'imageStyle:block',
+          'imageStyle:alignLeft',
+          'imageStyle:alignCenter',
+          'imageStyle:alignRight',
+          'imageStyle:inline',
+        ),
+        // Configure the style buttons that were added above.
+        'styles' => array(
+          'options' => array(
+            'inline',
+            array(
+              'name' => 'block',
+              'icon' => 'left',
+              'title' => t('Break text'),
+            ),
+            array(
+              'name' => 'alignLeft',
+              'title' => t('Align left and wrap text'),
+            ),
+            array(
+              'name' => 'alignCenter',
+              'title' => t('Align center and break text'),
+            ),
+            array(
+              'name' => 'alignRight',
+              'title' => t('Align right and wrap text'),
+            ),
+          ),
+        ),
+      ),
     ),
   );
 
@@ -654,8 +712,8 @@ function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state
 /**
  * Enabled callback for hook_ckeditor5_plugins().
  *
- * Checks if our Caption plugin should be enabled based on the configuration of
- * a text format and editor.
+ * Checks if the data-caption support should be enabled based on the
+ * configuration of a text format and editor.
  *
  * @param object $format
  *   The filter format object for which CKEditor is checking settings.
@@ -665,13 +723,28 @@ function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state
  * @return bool
  *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
-function ckeditor5_image_plugin_check($format, $plugin_name) {
-  // Automatically enable caption support if the BackdropImage button is
-  // enabled.
-  if (in_array('backdropImage', $format->editor_settings['cketoolbar'])) {
-    return TRUE;
-  }
-  return FALSE;
+function ckeditor5_image_caption_plugin_check($format, $plugin_name) {
+  return !empty($format->filters['filter_image_caption']->status);
+}
+
+/**
+ * Enabled callback for hook_ckeditor5_plugins().
+ *
+ * Checks if the Image Alignment configuration should be loaded. Note that the
+ * alignment functionality is part of the backdropImage.BackdropImage plugin, so
+ * this does not actually enable an additional plugin, but rather only adds the
+ * configuration needed to enable image alignment.
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is checking settings.
+ * @param string $plugin_name
+ *   The plugin that is being checked.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
+ */
+function ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
+  return !empty($format->filters['filter_image_align']->status);
 }
 
 /**
@@ -698,18 +771,24 @@ function ckeditor5_get_config($format, array $existing_settings) {
   $external_css = array();
   $all_buttons = array();
   $plugins = array();
+  $pseudo_plugins = array();
   $libraries = array();
   foreach ($plugin_info as $plugin_name => $plugin) {
     // Check if this plugin should be enabled.
-    if (isset($plugin['enabled callback'])) {
-      if ($plugin['enabled callback'] === TRUE || $plugin['enabled callback']($format, $plugin_name)) {
+    if (isset($plugin['enabled_callback'])) {
+      if ($plugin['enabled_callback'] === TRUE || $plugin['enabled_callback']($format, $plugin_name)) {
         $plugins[] = $plugin_name;
+        if (!empty($plugin['pseudo_plugin'])) {
+          $pseudo_plugins[] = $plugin_name;
+        }
+        // Add the library from hook_library_info() for this plugin.
         if (isset($plugin['library'])) {
           $libraries[] = $plugin['library'];
         }
+        // Enable other plugins this plugin depends on.
         if (isset($plugin['plugin_dependencies'])) {
           // Add the plugin and its dependencies to the list of plugins.
-          $plugins = array_merge($plugins, $plugin['plugin_dependencies']);
+          $plugins = array_merge($plugin['plugin_dependencies'], $plugins);
         }
       }
     }
@@ -734,12 +813,12 @@ function ckeditor5_get_config($format, array $existing_settings) {
         $plugin_name = $all_buttons[$button_name]['plugin']['name'];
         $plugins[] = $plugin_name;
         if (isset($plugin_info[$plugin_name]['plugin_dependencies'])) {
-          $plugins = array_merge($plugins, $plugin_info[$plugin_name]['plugin_dependencies']);
+          $plugins = array_merge($plugin_info[$plugin_name]['plugin_dependencies'], $plugins);
         }
       }
       // Add in plugin dependencies for this specific button.
       if (isset($all_buttons[$button_name]['plugin_dependencies'])) {
-        $plugins = array_merge($plugins, $all_buttons[$button_name]['plugin_dependencies']);
+        $plugins = array_merge($all_buttons[$button_name]['plugin_dependencies'], $plugins);
       }
     }
     $toolbar[] = $button_name;
@@ -758,13 +837,12 @@ function ckeditor5_get_config($format, array $existing_settings) {
     $css[$key] = base_path() . $css_path;
   }
 
-  // Remove duplicates and ensure it is numerically ordered so it is an array
-  // when passed to the front-end JavaScript.
-  $plugin_list = array_values(array_unique($plugins));
+  // Remove duplicates from the plugin list (as happens with dependencies).
+  $plugins = array_unique($plugins);
 
   // We always load the GeneralHtmlSupport plugin.
-  if (!in_array('htmlSupport.GeneralHtmlSupport', $plugin_list)) {
-    $plugin_list[] = 'htmlSupport.GeneralHtmlSupport';
+  if (!in_array('htmlSupport.GeneralHtmlSupport', $plugins)) {
+    $plugins[] = 'htmlSupport.GeneralHtmlSupport';
   }
 
   // Initialize reasonable defaults that provide expected basic behavior.
@@ -776,15 +854,16 @@ function ckeditor5_get_config($format, array $existing_settings) {
     ),
     // Plugin list is not a "real" CKEditor configuration value. It is converted
     // from an array of strings to variables references in the ckeditor.js file.
-    'pluginList' => $plugin_list,
+    // Exclude the pseudo-plugins that are configuration-only.
+    'pluginList' => array_values(array_diff($plugins, $pseudo_plugins)),
 
     // 'contentsCss' => array_values($css),
   );
 
   // Add default settings from plugins.
-  foreach ($plugin_list as $plugin_name) {
+  foreach ($plugins as $plugin_name) {
     if (isset($plugin_info[$plugin_name]['config'])) {
-      $config = array_merge($config, $plugin_info[$plugin_name]['config']);
+      $config = backdrop_array_merge_deep($config, $plugin_info[$plugin_name]['config']);
     }
   }
 
@@ -795,7 +874,7 @@ function ckeditor5_get_config($format, array $existing_settings) {
   list($config['htmlSupport']['allow'], $config['htmlSupport']['disallow']) = ckeditor5_get_generic_html_settings($format);
 
   // Create a token for access to dialogs.
-  if (in_array('backdropLink.BackdropLink', $plugin_list)) {
+  if (in_array('backdropLink.BackdropLink', $plugins)) {
     $link_token = filter_editor_dialog_token($format, 'link');
     $config['backdropLink']['dialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array(
       'token' => $link_token,
@@ -803,7 +882,7 @@ function ckeditor5_get_config($format, array $existing_settings) {
     )));
     $config['backdropLink']['buttonLabel'] = t('Advanced');
   }
-  if (in_array('backdropImage.BackdropImage', $plugin_list)) {
+  if (in_array('backdropImage.BackdropImage', $plugins)) {
     $image_token = filter_editor_dialog_token($format, 'image');
     $config['backdropImage']['dialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array(
       'token' => $image_token,
@@ -814,13 +893,9 @@ function ckeditor5_get_config($format, array $existing_settings) {
       'calling_path' => $_GET['q'],
     )));
   }
-  if (in_array('backdropImageCaption.BackdropImageCaption', $plugin_list)) {
-    $config['backdropImageCaption']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
-    $config['backdropImageCaption']['alignFilterEnabled'] = !empty($format->filters['filter_image_align']->status);
-    $config['backdropImageCaption']['imageCaptionPlaceholderText'] = t('Enter caption text here.');
-  }
+
   // Add the style list if configured.
-  if (in_array('style.Style', $plugin_list)) {
+  if (in_array('style.Style', $plugins)) {
     if (!empty($format->editor_settings['style_list'])) {
       $style_list = $format->editor_settings['style_list'];
       $config['style']['definitions'] = $style_list;
@@ -828,7 +903,7 @@ function ckeditor5_get_config($format, array $existing_settings) {
   }
 
   // Add heading list if configured.
-  if (in_array('heading.Heading', $plugin_list)) {
+  if (in_array('heading.Heading', $plugins)) {
     $html_restrictions = filter_format_allowed_html($format);
     $heading_list = $format->editor_settings['heading_list'];
     $possible_headings = array(

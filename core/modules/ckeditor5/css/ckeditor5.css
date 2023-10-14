@@ -41,3 +41,22 @@
 .ckeditor5-dialog-loading-link .ajax-throbber {
   vertical-align: bottom;
 }
+
+/**
+ * Block img tags (with no wrapper) are forced to 100% width and centered by
+ * CKEditor 5. It uses inline styling so we have to override it with !important.
+*/
+.ck-content .image {
+  text-align: unset !important;
+}
+.ck-content .image img {
+  width: auto !important;
+  margin: unset !important;
+  min-width: unset !important;
+}
+.ck-content .image.image-style-align-center {
+  text-align: center !important;
+}
+.ck-content .image.image-style-align-center img {
+  margin: 0 auto !important;
+}
