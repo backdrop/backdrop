@@ -567,10 +567,19 @@ ul.tips {
   color: #333;
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+.l-header ul.menu a,
+.js .menu-dropdown a,
+.js .menu-dropdown a:hover,
+.js .menu-dropdown a:focus,
+.js .menu-dropdown a:active,
+/* Prevents 2+ level menu items with child items from "jumping" when their 
+   child items are hovered over. */
+.js .menu-dropdown .has-children a {
   height: 2.4em;
   line-height: 2.4em;
   padding: 0 0.8em;
-  text-decoration: none;
 }
 .l-header ul.menu li li a {
   background: rgba(255, 255, 255, 0.8);
@@ -668,6 +677,32 @@ ul.tips {
 .l-header .no-tabs ul.menu a.highlighted,
 .l-header .no-tabs ul.menu li a.active {
   background: none;
+}
+
+/* --------------- Hierarchical Tree Menu ------------ */
+
+.menu-tree > li > ul {
+  background: rgba(255, 255, 255, 0.8);
+}
+.menu-tree > li.has-children > ul li a,
+.menu-tree > li.has-children > ul li li a {
+  background: transparent;
+  display: block;
+}
+
+.menu-tree > li.has-children > ul li li a {
+  padding-left: 30px;
+}
+.menu-tree > li.has-children > ul li li li a {
+  padding-left: 45px;
+}
+.menu-tree > li.has-children > ul li a.active,
+.menu-tree > li.has-children > ul li li a.active {
+  background: #fff;
+}
+
+ul.menu-tree > li.has-children > a {
+  display: inline-block;
 }
 
 /* ------------------- Main ------------------- */
@@ -1331,6 +1366,7 @@ fieldset {
 }
 .filter-wrapper {
   padding: .5em 0;
+  margin: 0 0 32px 0;
 }
 .filter-wrapper legend,
 .filter-wrapper.collapsed legend {
@@ -1339,6 +1375,7 @@ fieldset {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-top: none;
+  box-sizing: content-box;
 }
 .filter-wrapper .form-item label {
   margin-right: 10px;

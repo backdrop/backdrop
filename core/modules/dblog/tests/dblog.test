@@ -52,10 +52,40 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->verifyCron($row_limit);
     $this->verifyEvents();
     $this->verifyReports();
+    $this->testDBLogCorrupted();
 
     // Login the regular user.
     $this->backdropLogin($this->any_user);
     $this->verifyReports(403);
+  }
+
+  /**
+   * Tests corrupted log entries can still display available data.
+   */
+  private function testDBLogCorrupted() {
+    global $base_root;
+
+    // Prepare the fields to be logged.
+    $log = array(
+      'type'        => 'custom',
+      'message'     => 'Log entry added to test the unserialize failure.',
+      'variables'   => 'BAD SERIALIZED DATA',
+      'severity'    => WATCHDOG_NOTICE,
+      'link'        => '',
+      'user'        => $this->big_user,
+      'uid'         => isset($this->big_user->uid) ? $this->big_user->uid : 0,
+      'request_uri' => $base_root . request_uri(),
+      'referer'     => $_SERVER['HTTP_REFERER'],
+      'ip'          => ip_address(),
+      'timestamp'   => REQUEST_TIME,
+    );
+    dblog_watchdog($log);
+
+    // View the database log report page.
+    $this->backdropGet('admin/reports/dblog');
+    $this->assertResponse(200);
+    $expected_output = truncate_utf8(filter_xss(t('Log data is corrupted and cannot be unserialized: Log entry added to test unserialize failure.'), array()), 56, TRUE, TRUE);
+    $this->assertText($expected_output, 'Log data is corrupted and cannot be unserialized.');
   }
 
   /**
@@ -83,13 +113,13 @@ class DBLogTestCase extends BackdropWebTestCase {
    *   The date format to display in the log.
    */
   private function verifyDateFormat($date_format) {
-    // Change the database log row limit.
+    // Change the log date format.
     $edit = array();
     $edit['dblog_date_format'] = $date_format;
     $this->backdropPost('admin/config/development/logging', $edit, t('Save configuration'));
     $this->assertResponse(200);
 
-    // Check row limit variable.
+    // Check date format config value.
     $current_format = config_get('system.core', 'log_date_format');
     $this->assertTrue($current_format == $date_format, format_string('[Cache] Date format of @current matches date format of @format', array('@current' => $current_format, '@format' => $date_format)));
   }
@@ -189,7 +219,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/reports/event/1');
     $this->assertResponse($response);
     if ($response == 200) {
-      $this->assertText(t('Details'), 'DBLog event node was displayed');
+      $this->assertText(t('Log message #'), 'DBLog event node was displayed');
     }
 
     // Check the date format on the database log report page.
@@ -225,6 +255,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $edit['mail'] = $name . '@example.com';
     $edit['pass'] = $pass;
     $edit['status'] = 1;
+    $edit['notify'] = FALSE;
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $new_user_time = time();
     $this->assertResponse(200);
@@ -257,18 +288,21 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/reports/dblog');
     $this->assertResponse(200);
 
+    // Timezone for all dates is from the logged in user.
+    $admin_timezone = $this->big_user->timezone;
+
     // Verify that the expected events were recorded.
     // Add user.
     // Default display includes name and email address; if too long, the email
     // address is replaced by three periods.
     $this->assertLogMessage(t('New user: %name (%email).', array('%name' => $name, '%email' => $user->mail)), 'DBLog event was recorded: [add user]');
-    $this->assertText(format_date($new_user_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($new_user_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Login user.
     $this->assertLogMessage(t('Session opened for %name.', array('%name' => $name)), 'DBLog event was recorded: [login user]');
-    $this->assertText(format_date($login_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($login_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Logout user.
     $this->assertLogMessage(t('Session closed for %name.', array('%name' => $name)), 'DBLog event was recorded: [logout user]');
-    $this->assertText(format_date($logout_time, 'custom', 'M d, Y - j:ia'));
+    $this->assertText(format_date($logout_time, 'custom', 'M d, Y - j:ia', $admin_timezone));
     // Delete user.
     $message = t('Deleted user: %name %email.', array('%name' => $name, '%email' => '<' . $user->mail . '>'));
     $message_text = truncate_utf8(filter_xss($message, array()), 56, TRUE, TRUE);

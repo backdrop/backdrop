@@ -38,6 +38,14 @@ $config_directories['active'] = 'files/config_' . md5($database) . '/active';
 $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 
 /**
+ * Skip the configuration staging directory cleanup
+ *
+ * When the configuration files are in version control, it may be preferable to
+ * not empty the staging directory after each sync.
+ */
+// $config['system.core']['config_sync_clear_staging'] = 0;
+
+/**
  * Access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
@@ -202,7 +210,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
  * 'maintenance_theme' key. The template file should also be copied into the
- * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
+ * theme. It is located inside
+ * 'core/modules/system/templates/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
 // $settings['maintenance_theme'] = 'bartik';
@@ -351,12 +360,12 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $settings['proxy_server'] = '';
-# $settings['proxy_port'] = 8080;
-# $settings['proxy_username'] = '';
-# $settings['proxy_password'] = '';
-# $settings['proxy_user_agent'] = '';
-# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+// $settings['proxy_server'] = '';
+// $settings['proxy_port'] = 8080;
+// $settings['proxy_username'] = '';
+// $settings['proxy_password'] = '';
+// $settings['proxy_user_agent'] = '';
+// $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
@@ -399,6 +408,82 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Suppress warnings of multiple versions of the same module being found.
+ *
+ * When scanning for module files, if Backdrop encounters multiple instances of
+ * the same module (for example, a version of a module in the /modules directory
+ * that has the same name as a module in /core), then only the last module will
+ * be loaded. In such cases, Backdrop will show a warning on the status report
+ * page.
+ *
+ * Having multiple versions of the same module may be intentional in certain use
+ * cases though, such as in some multisite configurations, when there is need to
+ * override a core or contrib module with a different version in the /sites
+ * folder. In such cases, you may want to disable the status report warnings.
+ *
+ * Uncomment the line below to disable the warnings.
+ */
+// $settings['disable_multiple_modules_warnings'] = TRUE;
+
+/**
+ * Configuration overrides.
+ *
+ * These settings allow you to specify values for anything stored in config
+ * within the files stored in the $config_directories variable above.
+ * This can be useful to store per-environment values or sensitive data that
+ * is undesirable to store in the config storage.
+ *
+ * There are particular configuration values that are risky to override. For
+ * example overriding field storage will create errors because associated
+ * database changes are necessary. Modifying values within complicated objects
+ * such as views, content types, vocabularies, etc. may not work as expected.
+ * Use any available API functions for complex systems instead.
+ */
+//$config['system.core']['site_name'] = 'My Backdrop site';
+//$config['system.core']['file_temporary_path'] = '/tmp';
+
+/**
+ * File schemes whose paths should not be normalized.
+ *
+ * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
+ * to prevent unintended file access. For example, 'private://css/../image.png'
+ * is normalized to 'private://image.png' before checking access to the file.
+ *
+ * On Windows, Backdrop also replaces '\' with '/' in file URIs.
+ *
+ * If file URIs with one or more scheme should not be normalized like this, then
+ * list the schemes here. For example, if 'example://path/./filename.png' should
+ * not be normalized to 'example://path/filename.png', then add 'example' to
+ * this array. In this case, make sure that the module providing the 'example'
+ * scheme does not allow unintended file access when using '/../' to move up the
+ * directory tree.
+ */
+//$config['system.core']['file_not_normalized_schemes'] = array('example');
+
+/**
+ * Additional public file schemes.
+ *
+ * Public schemes are URI schemes that allow download access to all users for
+ * all files within that scheme.
+ *
+ * The "public" scheme is always public, and the "private" scheme is always
+ * private, but other schemes, such as "https", "s3", "example", or others,
+ * can be either public or private depending on the site. By default, they're
+ * private, and access to individual files is controlled via
+ * hook_file_download().
+ *
+ * Typically, if a scheme should be public, a module makes it public by
+ * implementing hook_file_download(), and granting access to all users for all
+ * files. This could be either the same module that provides the stream wrapper
+ * for the scheme, or a different module that decides to make the scheme
+ * public. However, in cases where a site needs to make a scheme public, but
+ * is unable to add code in a module to do so, the scheme may be added to this
+ * variable, the result of which is that system_file_download() grants public
+ * access to all files within that scheme.
+ */
+//$config['system.core']['file_additional_public_schemes'] = array('example');
+
+/**
  * Include a local settings file, if available.
  *
  * To make local development easier, you can add a settings.local.php file that
@@ -406,7 +491,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * environment (staging, development, etc).
  *
  * Typically used to specify a different database connection information, to
- * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing emails,
  * Google Analytics, and other things that should not happen on development and
  * testing sites.
  *
