@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '38.0.1');
+define('CKEDITOR5_VERSION', '40.0.0');
 
 /**
  * Implements hook_menu().
@@ -120,7 +120,7 @@ function ckeditor5_library_info() {
     'version' => $info['version'],
     'js' => array(
       // CKEditor is a large library but already compressed. Do not aggregate.
-      $module_path . '/lib/ckeditor5/build/ckeditor.js' => array(
+      $module_path . '/lib/ckeditor5/build/ckeditor5-dll.js' => array(
         'preprocess' => FALSE,
         'group' => JS_LIBRARY,
       ),
@@ -162,11 +162,12 @@ function ckeditor5_js_alter(&$javascript) {
 
   $module_path = backdrop_get_path('module', 'ckeditor5');
   $build_path = $module_path . '/lib/ckeditor5/build';
-  $js_path = $build_path . '/ckeditor.js';
+  $js_path = $build_path . '/ckeditor5-dll.js';
   $translation_path = $build_path . '/translations/' . $language->langcode . '.js';
 
-  // If the ckeditor.js library is present AND a translation file exists for
-  // the current language, append the translation file to the JavaScript array.
+  // If the ckeditor5-dll.js library is present AND a translation file exists
+  // for the current language, append the translation file to the JavaScript
+  // array.
   if (isset($javascript[$js_path]) && file_exists($translation_path)) {
     // Copy the CKEditor library settings, which will be nearly identical the
     // translation settings (same preprocessing, scope, weight, version, etc.)
@@ -853,8 +854,8 @@ function ckeditor5_get_config($format, array $existing_settings) {
       'shouldNotGroupWhenFull' => TRUE,
     ),
     // Plugin list is not a "real" CKEditor configuration value. It is converted
-    // from an array of strings to variables references in the ckeditor.js file.
-    // Exclude the pseudo-plugins that are configuration-only.
+    // from an array of strings to variables references in the ckeditor5-dll.js
+    // file. Exclude the pseudo-plugins that are configuration-only.
     'pluginList' => array_values(array_diff($plugins, $pseudo_plugins)),
 
     // 'contentsCss' => array_values($css),

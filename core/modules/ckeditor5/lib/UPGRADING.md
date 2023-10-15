@@ -22,83 +22,20 @@ See https://ckeditor.com/docs/ckeditor5/latest/installation/advanced/alternative
    mkdir ~/ckeditor5-temp
    cd ~/ckeditor5-temp
    ```
-3. Install CKEditor and plugins through npm.
+3. Copy the script from lib/scripts there and make it executable
+4. Run the script. This will download the DLL build via npm and concat the core
+   and plugin builds into one file.
    ```
-   npm install --save ckeditor5 \
-     @ckeditor/ckeditor5-alignment \
-     @ckeditor/ckeditor5-autoformat \
-     @ckeditor/ckeditor5-basic-styles \
-     @ckeditor/ckeditor5-block-quote \
-     @ckeditor/ckeditor5-code-block \
-     @ckeditor/ckeditor5-editor-classic \
-     @ckeditor/ckeditor5-essentials \
-     @ckeditor/ckeditor5-heading \
-     @ckeditor/ckeditor5-horizontal-line \
-     @ckeditor/ckeditor5-html-support \
-     @ckeditor/ckeditor5-image \
-     @ckeditor/ckeditor5-indent \
-     @ckeditor/ckeditor5-language \
-     @ckeditor/ckeditor5-link \
-     @ckeditor/ckeditor5-list \
-     @ckeditor/ckeditor5-paste-from-office \
-     @ckeditor/ckeditor5-remove-format \
-     @ckeditor/ckeditor5-source-editing \
-     @ckeditor/ckeditor5-special-characters \
-     @ckeditor/ckeditor5-style \
-     @ckeditor/ckeditor5-table
+   ./concat-build.sh
    ```
-4. Pull out each package's build and concatenate.
+5. Copy the resulting ckeditor5-dll.js into the module directory
+   lib/ckeditor5/build/
+6. Update the CKEDITOR5_VERSION constant in ckeditor5.module
 
-   This step is tedious and needs to be scripted. See this CKEditor core issue:
-   https://github.com/ckeditor/ckeditor5/issues/10142
+## Determine version number
 
-   Open the node_modules directory. Inside are the downloaded packages. Many of
-   the CKEditor packages ship with a "build" directory. All these build
-   directories need to be pulled out and reorganized to be used by Backdrop.
-
-   For now, all the downloaded packages are concatenated together. Go through
-   the `node_modules/ckeditor5` and `node_modules/@ckeditor` directories and find
-   every `build` directory. Inside of it, copy the contents of the plugin .js
-   file into a single text file. Start with the
-   `node_modules/ckeditor5/build/ckeditor5-dll.js` file. Then add the rest of
-   the build files from `node_modules/@ckeditor` in alphabetical order.
-
-   Save the final file as `ckeditor.js`
-
-6. Run webpack
-   ```
-   ./node_modules/webpack-cli/bin/cli.js
-   ```
-
-## Plugin List
-
-Individual plugins must be selected when using the online builder. First, clear
-out the entire plugin list, and then search and select the following plugins:
-
-
-## Remaining Build Steps
-
-Ignore the configuration of the toolbar, that is controlled by Backdrop
-separately.
-
-Leave English as the default language. All other languages are included even
-when not selected.
-
-Download the final zip file containing the build.
-
-## Replacing files
-
-Extract the contents of the build zip file. Then copy it into the ckeditor5
-module `lib/ckeditor5` subdirectory.
-
-Delete the `sample` directory.
-
-## Update version number
-
-The downloaded archive from CKEditor.com includes the version number. For
-example the archive may be named "ckeditor-38.0.1-kq1nhgi33tr8". In this case,
-"38.0.1" is the version number. Edit ckeditor5.module and update the constant
-`CKEDITOR5_VERSION` at the top of the file.
+When downloading via npm, the directory you run concat-build.sh in, will then
+contain a package.json file, where you can find the version number.
 
 ## Testing
 
