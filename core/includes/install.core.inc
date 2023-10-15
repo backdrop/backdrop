@@ -782,6 +782,7 @@ function install_verify_requirements(&$install_state) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
       $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report .= '<br><br>';
       $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
       return $status_report;
     }

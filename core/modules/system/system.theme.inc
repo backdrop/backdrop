@@ -291,7 +291,7 @@ function theme_system_modules_uninstall($variables) {
  *     - runtime (the default, if nothing else specified).
  *
  * @ingroup themeable
- * @since 1.24.2 support for the "phase" variable added.
+ * @since 1.26.2 support for the "phase" variable added.
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
