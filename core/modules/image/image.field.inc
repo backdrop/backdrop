@@ -841,7 +841,6 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
         }
       }
     }
-        dpm($display['settings']['image_style']);
 
     $element[$delta] = array(
       '#theme' => 'image_formatter',
