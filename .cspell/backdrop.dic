@@ -136,6 +136,7 @@ evalmath
 evid
 expandtab
 exportables
+externa
 extname
 EXTR
 falias
@@ -203,6 +204,8 @@ Harnhammar
 Hartl
 hdir
 HEADERFUNCTION
+heure
+heures
 hilite
 Hilite
 hitem
@@ -283,9 +286,12 @@ moscone
 Moscone
 mousebutton
 mousedown
+mouton
+moutons
 msgbox
 multibundle
 multisites
+Műveletek
 myclass
 mydata
 myeditor
@@ -369,6 +375,7 @@ phptemplate
 phpwiki
 plids
 pneum
+Ponedjeljak
 portseparators
 precompute
 precomputes
@@ -406,6 +413,7 @@ runlength
 rxhtml
 samedi
 screenreader
+screenreaders
 scrscriptipt
 searchdir
 searchexpression
@@ -451,6 +459,7 @@ superglobal
 supprimer
 sutro
 Sutro
+Svibanj
 sysconfig
 tablealias
 tabledragging
