@@ -95,6 +95,13 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
       });
 
+
+    conversion
+      .for('downcast')
+      // Update the src attribute change if any.
+      .attributeToAttribute({ model: 'src', view: 'src' });
+
+
     // Downcast from the CKEditor model to an HTML <img> element.
     conversion
       .for('dataDowncast')
@@ -267,7 +274,7 @@ function isNumberString(value) {
 }
 
 /**
- * Generates a callback that saves the Filed ID to an attribute on downcast.
+ * Generates a callback that saves the File ID to an attribute on downcast.
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
@@ -346,7 +353,7 @@ function _getDataAttributeFromModelImageStyle(imageStyle) {
 }
 
 /**
- * Given a data-attribute, return the associated Backdrop data-align attribute.
+ * Given a data-attribute, return the associated CKEditor image style.
  *
  * @param string dataAttribute
  *   The data attribute value such as left, center, or right.
@@ -533,7 +540,7 @@ function modelImageWidthToAttribute() {
 
     writer.setAttribute(
       'width',
-      data.attributeNewValue.replace('px', ''),
+      data.attributeNewValue.toString().replace('px', ''),
       imageInFigure || viewElement,
     );
   }
@@ -578,7 +585,7 @@ function modelImageHeightToAttribute() {
 
     writer.setAttribute(
       'height',
-      data.attributeNewValue.replace('px', ''),
+      data.attributeNewValue.toString().replace('px', ''),
       imageInFigure || viewElement,
     );
   }
