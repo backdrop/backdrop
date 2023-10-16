@@ -18,7 +18,9 @@ Backdrop.behaviors.pathSpecificPatternFieldsetSummaries = {
       var summary = '';
       // Assume that no customized patterns have been provided for specific
       // items (so only default patterns are being used for each path type).
-      var empty = true;
+      var empty = 0;
+      var customized = 0;
+      var total = 0;
 
       // Find all specific pattern fields within each "URL alias patterns for
       // specific ..." fieldset.
@@ -27,16 +29,20 @@ Backdrop.behaviors.pathSpecificPatternFieldsetSummaries = {
       $specific_patterns.each(function() {
         // If at least one of them has a non-empty value, then flag the entire
         // fieldset as non-empty.
-        if ($(this).val().length !== 0) {
-          empty = false;
+        if ($(this).val().length === 0) {
+          empty++;
+        }
+        else {
+          customized++;
         }
       });
+      total = empty + customized;
 
-      if (empty) {
+      if (empty === total) {
         summary = Backdrop.t('default pattern used');
       }
       else {
-        summary = Backdrop.t('customized specific patterns');
+        summary = Backdrop.t('@customized of @total customized', {'@customized': customized, '@total': total});
       }
 
       return summary;
