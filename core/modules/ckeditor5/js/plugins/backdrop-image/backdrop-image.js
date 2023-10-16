@@ -95,13 +95,6 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
       });
 
-
-    conversion
-      .for('downcast')
-      // Update the src attribute change if any.
-      .attributeToAttribute({ model: 'src', view: 'src' });
-
-
     // Downcast from the CKEditor model to an HTML <img> element.
     conversion
       .for('dataDowncast')
