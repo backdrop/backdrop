@@ -60,7 +60,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
       });
     }
 
-    // Conversion.
+    // Upcast from the raw <img> element to the CKEditor model.
     conversion
       .for('upcast')
       .add(viewImageToModelImage(editor))
@@ -95,13 +95,13 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
       });
 
-    conversion
-      .for('downcast')
-      .add(modelFileIdToDataAttribute());
-
+    // Downcast from the CKEditor model to an HTML <img> element.
     conversion
       .for('dataDowncast')
+      // Pull out the caption if present. This needs to be done before other
+      // conversions because afterward the caption element is eleminated.
       .add(viewCaptionToCaptionAttribute(editor))
+      // Create a blank image element, removing any wrapping figure element.
       .elementToElement({
         model: 'imageBlock',
         view: (modelElement, { writer }) =>
@@ -114,9 +114,14 @@ class BackdropImage extends CKEditor5.core.Plugin {
           createImageViewElement(writer, 'imageInline'),
         converterPriority: 'high',
       })
+      // Convert the FileId to data-file-id attribute.
+      .add(modelFileIdToDataAttribute())
+      // Convert ImageStyle to data-align attribute.
       .add(modelImageStyleToDataAttribute())
+      // Convert height and width attributes.
       .add(modelImageWidthToAttribute())
       .add(modelImageHeightToAttribute())
+      // Convert any link to wrap the <img> tag.
       .add(downcastBlockImageLink());
 
     // Add the editBackdropImage command.
@@ -135,6 +140,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
 
       // When clicking the balloon button, execute the backdropImage command.
       buttonView.on('execute', () => {
+        // See BackdropImageCommand::execute().
         command.execute();
       });
 
@@ -166,6 +172,11 @@ class BackdropImage extends CKEditor5.core.Plugin {
 
       // When clicking the toolbar button, execute the backdropImage command.
       buttonView.on('execute', () => {
+        // Remove focus from the toolbar button when opening the dialog.
+        // Otherwise the button may receive focus again after closing the
+        // dialog.
+        buttonView.element.blur();
+        // See BackdropImageCommand::execute().
         command.execute();
       });
 
@@ -256,8 +267,7 @@ function isNumberString(value) {
 }
 
 /**
- * Generates a callback that saves the entity UUID to an attribute on data
- * downcast.
+ * Generates a callback that saves the Filed ID to an attribute on downcast.
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
@@ -318,6 +328,38 @@ const alignmentMapping = [
     dataValue: 'left',
   },
 ];
+
+/**
+ * Given an imageStyle, return the associated Backdrop data-align attribute.
+ *
+ * @param string imageStyle
+ *   The image style such as alignLeft, alignCenter, or alignRight.
+ * @returns {string|undefined}
+ *   The data attribute value such as left, center, or right.
+ * @private
+ */
+function _getDataAttributeFromModelImageStyle(imageStyle) {
+  const mappedAlignment = alignmentMapping.find(
+    (value) => value.modelValue === imageStyle,
+  );
+  return mappedAlignment ? mappedAlignment.dataValue : undefined;
+}
+
+/**
+ * Given a data-attribute, return the associated Backdrop data-align attribute.
+ *
+ * @param string dataAttribute
+ *   The data attribute value such as left, center, or right.
+ * @returns {string|undefined}
+ *   The image style such as alignLeft, alignCenter, or alignRight.
+ * @private
+ */
+function _getModelImageStyleFromDataAttribute(dataAttribute) {
+  const mappedAlignment = alignmentMapping.find(
+    (value) => value.dataValue === dataAttribute,
+  );
+  return mappedAlignment ? mappedAlignment.modelValue : undefined;
+}
 
 /**
  * Downcasts `caption` model to `data-caption` attribute with its content
@@ -437,12 +479,10 @@ function modelImageStyleToDataAttribute() {
     const { item } = data;
     const { consumable, writer } = conversionApi;
 
-    const mappedAlignment = alignmentMapping.find(
-      (value) => value.modelValue === data.attributeNewValue,
-    );
+    const alignAttribute = _getDataAttributeFromModelImageStyle(data.attributeNewValue);
 
     // Consume only for the values that can be converted into data-align.
-    if (!mappedAlignment || !consumable.consume(item, event.name)) {
+    if (!alignAttribute || !consumable.consume(item, event.name)) {
       return;
     }
 
@@ -453,7 +493,7 @@ function modelImageStyleToDataAttribute() {
 
     writer.setAttribute(
       'data-align',
-      mappedAlignment.dataValue,
+      alignAttribute,
       imageInFigure || viewElement,
     );
   }
@@ -610,12 +650,10 @@ function viewImageToModelImage(editor) {
       consumable.test(viewItem, { name: true, attributes: 'data-align' })
     ) {
       const dataAlign = viewItem.getAttribute('data-align');
-      const mappedAlignment = alignmentMapping.find(
-        (value) => value.dataValue === dataAlign,
-      );
+      const imageStyle = _getModelImageStyleFromDataAttribute(dataAlign);
 
-      if (mappedAlignment) {
-        writer.setAttribute('imageStyle', mappedAlignment.modelValue, image);
+      if (imageStyle) {
+        writer.setAttribute('imageStyle', imageStyle, image);
 
         // Make sure the attribute can be consumed after successful `safeInsert`
         // operation.
@@ -740,6 +778,9 @@ function downcastBlockImageLink() {
   };
 }
 
+/**
+ * CKEditor command that opens the Backdrop image editing dialog.
+ */
 class BackdropImageCommand extends CKEditor5.core.Command {
   /**
    * @inheritdoc
@@ -759,8 +800,9 @@ class BackdropImageCommand extends CKEditor5.core.Command {
     const editor = this.editor;
     const config = editor.config.get('backdropImage');
     const imageUtils = editor.plugins.get('ImageUtils');
+    const ImageCaptionUtils = editor.plugins.get('ImageCaptionUtils');
     const model = editor.model;
-    const imageElement = imageUtils.getClosestSelectedImageElement(model.document.selection );
+    const imageElement = imageUtils.getClosestSelectedImageElement(model.document.selection);
 
     // Convert attributes to map for easier looping.
     const extraAttributes = new Map(Object.entries(config.extraAttributes));
@@ -769,9 +811,24 @@ class BackdropImageCommand extends CKEditor5.core.Command {
     let existingValues = {};
 
     if (imageElement) {
+      // Most attributes can be directly mapped from the model.
       extraAttributes.forEach((attributeName, modelName) => {
-        existingValues[attributeName] = imageElement.getAttribute(attributeName);
+        existingValues[attributeName] = imageElement.getAttribute(modelName);
       });
+
+      // Alignment is stored as a CKEditor Image Style.
+      const imageStyle = imageElement.getAttribute('imageStyle');
+      const alignAttribute = _getDataAttributeFromModelImageStyle(imageStyle);
+      existingValues['data-align'] = alignAttribute;
+
+      // The image caption is stored outside the imageElement model and must
+      // be retrieved to get its value.
+      const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+      existingValues['data-has-caption'] = !!imageCaption;
+      if (imageCaption && imageCaption.childCount) {
+        const captionValue = editor.data.processor.toData(imageCaption.getChild(0));
+        existingValues['data-caption'] = captionValue;
+      }
     }
 
     const saveCallback = (dialogValues) => {
@@ -783,17 +840,46 @@ class BackdropImageCommand extends CKEditor5.core.Command {
         }
       });
 
+      // Set CKEditor Image Style from the data-align attribute as imageStyle.
+      const imageStyle = _getModelImageStyleFromDataAttribute(dialogValues.attributes['data-align']);
+      imageAttributes['imageStyle'] = imageStyle;
+      if (imageAttributes.hasOwnProperty('dataAlign')) {
+        delete imageAttributes['dataAlign'];
+      }
+
       // For updating an existing element:
       if (imageElement) {
         model.change(writer => {
           writer.setAttributes(imageAttributes, imageElement);
         });
+
+        const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+        // Remove an existing caption if disabled.
+        if (imageCaption && !dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption');
+        }
+        // Add a caption if enabled and none yet exists.
+        if (!imageCaption && dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption', { focusCaptionOnShow: true });
+        }
       }
       // Inserting a new element:
       else {
+        // An imageStyle key (even if undefined) on image insert will cause
+        // conflicts in the Image Style plugin, so remove the attribute entirely
+        // from the object.
+        if (imageAttributes.hasOwnProperty('imageStyle') && !imageAttributes['imageStyle']) {
+          delete imageAttributes['imageStyle'];
+        }
+
         // Inserting an image has an unusual way of passing the attributes.
         // See https://ckeditor.com/docs/ckeditor5/latest/api/module_image_image_insertimagecommand-InsertImageCommand.html
         editor.execute('insertImage', { source: [imageAttributes] });
+
+        // Toggle showing the caption after the image is inserted.
+        if (dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption', { focusCaptionOnShow: true });
+        }
       }
     };
 
