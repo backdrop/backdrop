@@ -32,9 +32,9 @@ function taxonomy_path_info() {
   $vocabularies = taxonomy_get_vocabularies();
   if (count($vocabularies)) {
     $info['taxonomy_term']['pattern items'] = array();
+    $info['taxonomy_term']['pattern items label'] = t('URL alias patterns for specific vocabularies');
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
       if (count($languages) && !empty($vocabulary->language)) {
-        // $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for %vocab-name (applies to all %vocab-name categories with blank URL alias patterns below)', array('%vocab-name' => $vocabulary->name));
         $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for all taxonomy terms in the vocabulary %vocab-name (any language)', array('%vocab-name' => $vocabulary->name));
         foreach ($languages as $langcode => $language) {
           $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('Taxonomy terms in the vocabulary %vocab-name in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));

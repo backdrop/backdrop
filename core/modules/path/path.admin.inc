@@ -347,6 +347,7 @@ function path_admin_filter_form_submit_reset($form, &$form_state) {
  * @ingroup forms
  */
 function path_patterns_form($form, $form_state) {
+  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path.admin.js');
   $config = config('path.settings');
 
   $form['help'] = array(
@@ -356,7 +357,12 @@ function path_patterns_form($form, $form_state) {
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
+    if (isset($path_info['pattern items'])) {
+      $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
+    }
+    else {
+      $group_header = t('!label URL alias pattern', array('!label' => $path_info['label']));
+    }
 
     $token_types = array();
     if (isset($path_info['entity type'])) {
@@ -369,15 +375,15 @@ function path_patterns_form($form, $form_state) {
     $form[$path_type] = array(
       '#type' => 'fieldset',
       '#title' => $group_header,
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+      '#collapsible' => FALSE,
     );
 
     // Set up the field for default URL alias pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
-      '#title' => $path_info['pattern label'],
+      '#title' => isset($path_info['pattern items']) ? $path_info['pattern label'] : $group_header,
+      '#title_display' => isset($path_info['pattern items']) ? 'before' : 'invisible',
       '#default_value' => $config->get($variable),
       '#size' => 65,
       '#maxlength' => 1280,
@@ -392,7 +398,7 @@ function path_patterns_form($form, $form_state) {
     }
 
     // Prepare the variables required for the "Browser available tokens" links.
-    $variables = array(
+    $browse_token_variables = array(
       'token_types' => $token_types,
       'text' => t('Browse available tokens for @type', array('@type' => $path_info['label'])),
     );
@@ -401,37 +407,45 @@ function path_patterns_form($form, $form_state) {
     if (isset($path_info['pattern items'])) {
       $form[$path_type]['specific_patterns'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Specific URL alias patterns'),
+        '#title' => isset($path_info['pattern items label']) ? $path_info['pattern items label'] : t('Specific URL alias patterns'),
         '#description' => t('If any of these specific patterns is left blank, the default above will be used.'),
-        '#collapsible' => FALSE,
+        '#collapsible' => TRUE,
+        '#attributes' => array('class' => array('specific-path-patterns')),
       );
 
+      $specific_patterns = 0;
       foreach ($path_info['pattern items'] as $item_name => $item_label) {
         $variable = $path_type . '_' . $item_name . '_pattern';
+        $default_value = $config->get($variable);
+        $specific_patterns += (int) isset($default_value);
         $form[$path_type]['specific_patterns'][$variable] = array(
           '#type' => 'textfield',
           '#title' => $item_label,
-          '#default_value' => $config->get($variable),
+          '#default_value' => $default_value,
           '#size' => 65,
           '#maxlength' => 1280,
           '#element_validate' => array('token_element_validate'),
           '#after_build' => array('token_element_validate'),
           '#token_types' => $token_types,
           '#min_tokens' => 1,
+          '#attributes' => array('class' => array('specific-pattern')),
           '#parents' => array($variable),
         );
       }
+      // In order to keep the form short, collapse the fieldset if no specific
+      // patterns have been previously configured for this path type.
+      $form[$path_type]['specific_patterns']['#collapsed'] = $specific_patterns === 0;
 
       // If this path type has specific alias pattern fields, then render the
       // token support help text as description of the entire fieldset (instead
       // of repeating it in each specific pattern field).
-      $form[$path_type]['#description'] = t('Each of the fields below supports tokens.') . ' ' . theme('token_tree_link', $variables) . '.';
+      $form[$path_type]['#description'] = t('Each of the fields below supports tokens.') . ' ' . theme('token_tree_link', $browse_token_variables) . '.';
     }
     else {
       // If the path type only has the default alias pattern field (one such
       // type is user accounts), then render the token support help text as
       // description in the default pattern field.
-      $form[$path_type][$variable]['#description'] = t('This field supports tokens.') . ' ' . theme('token_tree_link', $variables) . '.';
+      $form[$path_type][$variable]['#description'] = t('This field supports tokens.') . ' ' . theme('token_tree_link', $browse_token_variables) . '.';
     }
   }
 

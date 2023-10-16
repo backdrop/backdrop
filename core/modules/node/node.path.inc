@@ -32,9 +32,9 @@ function node_path_info() {
   $node_types = node_type_get_types();
   if (count($node_types)) {
     $info['node']['pattern items'] = array();
+    $info['node']['pattern items label'] = t('URL alias patterns for specific content types');
     foreach ($node_types as $node_type_name => $node_type) {
       if (count($languages) && !empty($node_type->settings['language'])) {
-        // $info['node']['pattern items'][$node_type_name] = t('Content of type %node_type (applies to all content of type %node_type with blank URL alias patterns below)', array('%node_type' => $node_type->name));
         $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for all content of type %node_type (any language)', array('%node_type' => $node_type->name));
         foreach ($languages as $langcode => $language) {
           $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('Content of type %node_type in %language', array('%node_type' => $node_type->name, '%language' => $language->name));
