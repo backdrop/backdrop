@@ -1527,3 +1527,51 @@ function image_is_svg($uri) {
   $mimetype = file_get_mimetype($uri);
   return $mimetype === 'image/svg+xml';
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function image_autoload_info() {
+  return array(
+    'enshrined\svgSanitize\data\AttributeInterface' => 'data/AttributeInterface.php',
+    'enshrined\svgSanitize\data\TagInterface' => 'data/TagInterface.php',
+    'enshrined\svgSanitize\Resolver' => 'ElementReference/Resolver.php',
+    'enshrined\svgSanitize\Subject' => 'ElementReference/Subject.php',
+    'enshrined\svgSanitize\Usage' => 'ElementReference/Usage.php',
+    'enshrined\svgSanitize\NestingException' => 'Exceptions/NestingException.php',
+    'enshrined\svgSanitize\Helper' => 'Helper.php',
+    'enshrined\svgSanitize\Sanitizer' => 'Sanitizer.php',
+    'enshrined\svgSanitize\data\AllowedAttributes' => 'data/AllowedAttributes.php',
+    'enshrined\svgSanitize\data\AllowedTags' => 'data/AllowedTags.php',
+    'enshrined\svgSanitize\data\XPath' => 'data/XPath.php',
+  );
+}
+
+/**
+ * Simple API function which will generate an XLS file and
+ * save it in $path.
+ *
+ * @param string $svg
+ *    The xml contents of an svg that you would like to sanitize.
+ *
+ * @return string
+ *    The xml contents of an svg that has been stripped of harmful
+ *    contents.
+ */
+function image_svg_sanitizer_sanitize($svg) {
+  // instantiate the sanitizer class.
+  $sanitizer = new enshrined\svgSanitize\Sanitizer();
+
+  // get newly defined tags
+  // $tags = new SvgSanitizerTags();
+  // $sanitizer->setAllowedTags($tags);
+
+  // get newly defined attributes
+  // $attributes = new SvgSanitizerAttributes();
+  // $sanitizer->setAllowedAttrs($attributes);
+
+  // run the svg through the sanitizer
+  $clean_svg = $sanitizer->sanitize($svg);
+
+  return $clean_svg;
+}

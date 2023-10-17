@@ -842,12 +842,27 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       }
     }
 
-    $element[$delta] = array(
-      '#theme' => 'image_formatter',
-      '#item' => $item,
-      '#image_style' => $display['settings']['image_style'],
-      '#path' => isset($uri) ? $uri : '',
-    );
+    if ($is_svg) {
+      $element[$delta] = array(
+        '#theme' => 'image_formatter',
+        '#item' => $item,
+        '#image_style' => $display['settings']['image_style'],
+        '#path' => isset($uri) ? $uri : '',
+      );
+    }
+    else {
+      // create the file path
+      $svg_path = file_create_url($item['uri']);
+      // get the contents of the svg
+      $svg = file_get_contents($svg_path);
+      // remove all of the bad stuff from the svg
+      $svg_clean = image_svg_sanitizer_sanitize($svg);
+
+      $element[$delta] = array(
+        '#type' => 'markup',
+        '#markup' => $svg_clean,
+      );
+    }
   }
 
   return $element;
