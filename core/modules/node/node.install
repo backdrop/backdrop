@@ -474,7 +474,7 @@ function node_update_1005() {
       'sticky_default' => in_array('sticky', $options),
       'promote_enabled' => TRUE,
       'promote_default' => in_array('promote', $options),
-      'revisions' => TRUE,
+      'revision_enabled' => TRUE,
       'revision_default' => in_array('revision', $options),
       'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
       'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
