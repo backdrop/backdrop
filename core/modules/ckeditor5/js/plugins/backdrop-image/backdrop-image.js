@@ -95,7 +95,16 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
       });
 
-    // Downcast from the CKEditor model to an HTML <img> element.
+    // Downcast from the CKEditor model to an HTML <img> element. This generic
+    // downcast runs both while editing and when saving the final HTML.
+    conversion
+      .for('downcast')
+      // Convert the FileId to data-file-id attribute.
+      .add(modelFileIdToDataAttribute());
+
+    // Downcast from the CKEditor model to an HTML <img> element. A dataDowncast
+    // conversion like this only runs on saving the final HTML, not while the
+    // editor is being used.
     conversion
       .for('dataDowncast')
       // Pull out the caption if present. This needs to be done before other
@@ -114,13 +123,10 @@ class BackdropImage extends CKEditor5.core.Plugin {
           createImageViewElement(writer, 'imageInline'),
         converterPriority: 'high',
       })
-      // Convert the FileId to data-file-id attribute.
-      .add(modelFileIdToDataAttribute())
       // Convert ImageStyle to data-align attribute.
-      .add(modelImageStyleToDataAttribute())
+      .add(modelImageStyleToDataAttribute(editor))
       // Convert height and width attributes.
-      .add(modelImageWidthToAttribute())
-      .add(modelImageHeightToAttribute())
+      .add(modelImageWidthAndHeightToAttributes(editor))
       // Convert any link to wrap the <img> tag.
       .add(downcastBlockImageLink());
 
@@ -461,15 +467,14 @@ function viewCaptionToCaptionAttribute(editor) {
 }
 
 /**
- * Generates a callback that saves the align value to an attribute on
- * data downcast.
+ * Generates a callback that saves data-align attribute on data downcast.
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
  *
  * @private
  */
-function modelImageStyleToDataAttribute() {
+function modelImageStyleToDataAttribute(editor) {
   /**
    * Callback for the attribute:imageStyle event.
    *
@@ -478,7 +483,6 @@ function modelImageStyleToDataAttribute() {
   function converter(event, data, conversionApi) {
     const { item } = data;
     const { consumable, writer } = conversionApi;
-
     const alignAttribute = _getDataAttributeFromModelImageStyle(data.attributeNewValue);
 
     // Consume only for the values that can be converted into data-align.
@@ -486,15 +490,14 @@ function modelImageStyleToDataAttribute() {
       return;
     }
 
+    const imageUtils = editor.plugins.get('ImageUtils');
     const viewElement = conversionApi.mapper.toViewElement(item);
-    const imageInFigure = Array.from(viewElement.getChildren()).find(
-      (child) => child.name === 'img',
-    );
+    const img = imageUtils.findViewImgElement(viewElement);
 
     writer.setAttribute(
       'data-align',
       alignAttribute,
-      imageInFigure || viewElement,
+      img,
     );
   }
 
@@ -504,19 +507,19 @@ function modelImageStyleToDataAttribute() {
 }
 
 /**
- * Generates a callback that saves the width value to an attribute on
- * data downcast.
+ * Generates a callback that handles the data downcast for img width and height.
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
  *
  * @private
  */
-function modelImageWidthToAttribute() {
+function modelImageWidthAndHeightToAttributes(editor) {
   /**
-   * Callback for the attribute:width event.
+   * Callback for the downcast event.
    *
-   * Saves the width value to the width attribute.
+   * This gets called once for every width, height, or resizedWidth attribute
+   * that needs to be saved.
    */
   function converter(event, data, conversionApi) {
     const { item } = data;
@@ -525,70 +528,70 @@ function modelImageWidthToAttribute() {
     if (!consumable.consume(item, event.name)) {
       return;
     }
-
+    const imageUtils = editor.plugins.get('ImageUtils');
     const viewElement = conversionApi.mapper.toViewElement(item);
-    const imageInFigure = Array.from(viewElement.getChildren()).find(
-      (child) => child.name === 'img',
-    );
+    const img = imageUtils.findViewImgElement(viewElement);
 
-    writer.setAttribute(
+    // For width and height, update the saved value, removing 'px' value.
+    if (data.attributeKey === 'width' || data.attributeKey === 'height') {
+      writer.setAttribute(
+        data.attributeKey,
+        data.attributeNewValue.toString().replace('px', ''),
+        img,
+      );
+    }
+
+    // For a resized image, only the width event fires and the height derives
+    // from the width.
+    if (data.attributeKey === 'resizedWidth') {
+      const newWidth = Number(data.attributeNewValue.toString().replace('px', ''));
+      writer.setAttribute(
+        'width',
+        newWidth.toString(),
+        img,
+      );
+
+      // Remove the resized image class added by the CKEditor ImageResizeEditing
+      // plugin. This disables CKEditor's special treatment on resized images.
+      writer.removeClass('image_resized', img);
+
+      // Calculate the height from the width and aspect ratio if possible.
+      const originalWidth = Number(item.getAttribute('width').toString().replace('px', ''));
+      const originalHeight = Number(item.getAttribute('height').toString().replace('px', ''));
+      if (originalWidth && originalHeight) {
+        const ratio = originalHeight/originalWidth;
+        const newHeight = Math.round(ratio * newWidth);
+        writer.setAttribute(
+          'height',
+          newHeight.toString(),
+          img,
+        );
+      }
+      else {
+        writer.removeAttribute(
+          'height',
+          img
+        );
+      }
+
+    }
+  }
+
+  return (dispatcher) => {
+    const listenerAttributes = [
       'width',
-      data.attributeNewValue.toString().replace('px', ''),
-      imageInFigure || viewElement,
-    );
-  }
-
-  return (dispatcher) => {
-    dispatcher.on('attribute:width:imageInline', converter, {
-      priority: 'high',
-    });
-    dispatcher.on('attribute:width:imageBlock', converter, {
-      priority: 'high',
-    });
-  };
-}
-
-/**
- * Generates a callback that saves the height value to an attribute on
- * data downcast.
- *
- * @return {function}
- *  Callback that binds an event to its parameter.
- *
- * @private
- */
-function modelImageHeightToAttribute() {
-  /**
-   * Callback for the attribute:height event.
-   *
-   * Saves the height value to the height attribute.
-   */
-  function converter(event, data, conversionApi) {
-    const { item } = data;
-    const { consumable, writer } = conversionApi;
-
-    if (!consumable.consume(item, event.name)) {
-      return;
-    }
-
-    const viewElement = conversionApi.mapper.toViewElement(item);
-    const imageInFigure = Array.from(viewElement.getChildren()).find(
-      (child) => child.name === 'img',
-    );
-
-    writer.setAttribute(
       'height',
-      data.attributeNewValue.toString().replace('px', ''),
-      imageInFigure || viewElement,
-    );
-  }
-
-  return (dispatcher) => {
-    dispatcher.on('attribute:height:imageInline', converter, {
-      priority: 'high',
-    });
-    dispatcher.on('attribute:height:imageBlock', converter, {
-      priority: 'high',
+      'resizedWidth',
+      // CKEditor only fires resizedWidth changes when using resizing handles.
+      //'resizedHeight',
+    ];
+    listenerAttributes.forEach((attributeName) => {
+      dispatcher.on('attribute:' + attributeName + ':imageInline', converter, {
+        priority: 'high',
+      });
+      dispatcher.on('attribute:' + attributeName + ':imageBlock', converter, {
+        priority: 'high',
+      });
     });
   };
 }
