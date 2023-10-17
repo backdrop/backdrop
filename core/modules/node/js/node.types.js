@@ -44,14 +44,21 @@ Backdrop.behaviors.contentTypes = {
 
     // Revision settings.
     $context.find('#edit-revision').backdropSetSummary(function() {
-      var vals = [];
-      if ($context.find('input[name="revision_enabled"]:checked').length) {
-        vals.push(Backdrop.t('Revisions enabled'));
+      var revision_summary = '';
+      var revisions = $context.find('input[name="revisions"]:checked').val();
+      var revision_default = $context.find('input[name="revision_default"]:checked').length ? true : false;
+      switch (revisions) {
+        case 'disabled':
+          revision_summary = Backdrop.t('Disabled');
+          break;
+        case 'automatic':
+          revision_summary = Backdrop.t('Enforced');
+          break;
+        case 'optional':
+          revision_summary = revision_default ? Backdrop.t('Optional, created by default') : Backdrop.t('Optional');
+          break;
       }
-      else {
-        vals.push(Backdrop.t('Revisions disabled'));
-      }
-      return vals.join(', ');
+      return revision_summary;
     });
 
     // Display settings.

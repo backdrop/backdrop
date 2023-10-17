@@ -365,6 +365,16 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['permissions']['permissions'] = $content_type_permissions;
 
   // Revision settings.
+  if (user_access('administer permissions')) {
+    $revisions_help = t('Revisions allow content editors with <a href="@permissions-url">appropriate permissions</a> to view changes made to content over time, and revert them if needed.',
+      array('@permissions-url' => url('admin/config/people/permissions', array(
+        'query' => array('search' => 'revision'),
+      ))),
+    );
+  }
+  else {
+    $revisions_help = t('Revisions allow content editors with appropriate permissions to view changes made to content over time, and revert them if needed.');
+  }
   $form['revision'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision settings'),
@@ -372,19 +382,35 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#weight' => 10,
+    '#description' => $revisions_help,
+    // https://6103.lndo.site/admin/config/people/permissions?search=revision
   );
-  $form['revision']['revision']['revision_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show option to create new revisions'),
-    '#default_value' => $type->settings['revision_enabled'],
-    '#parents' => array('revision_enabled'),
-    '#description' => t('Revisions allow content editors to view changes over time and revert changes if needed.'),
+  $form['revision']['revision']['revisions'] = array(
+    '#type' => 'radios',
+    '#title' => t('Revision options'),
+    '#options' => array(
+      'disabled' => t('Never create revisions'),
+      'automatic' => t('Always create revisions'),
+      'optional' => t('Show option to create revisions'),
+    ),
+    '#default_value' => isset($type->settings['revisions']) ? $type->settings['revisions'] : 'optional',
+    '#parents' => array('revisions'),
   );
+  $form['revision']['revision']['revisions']['disabled']['#description'] = t('There will be no option provided to create revisions.');
+  $form['revision']['revision']['revisions']['automatic']['#description'] = t('A new revision will be created automatically every time the content is updated. The content editor cannot control this.');
+  $form['revision']['revision']['revisions']['optional']['#description'] = t('The content editor may select whether to create a revision or not.');
   $form['revision']['revision']['revision_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision by default'),
-    '#default_value' => $type->settings['revision_default'],
+    '#default_value' => isset($type->settings['revision_default']) ? $type->settings['revision_default'] : FALSE,
     '#parents' => array('revision_default'),
+    '#indentation' => 1,
+    // This option is only applicable when revisions are optional.
+    '#states' => array(
+      'visible' => array(
+        ':radio[name="revisions"]' => array('value' => 'optional'),
+      ),
+    ),
   );
 
   // Menu settings.

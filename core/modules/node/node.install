@@ -474,7 +474,7 @@ function node_update_1005() {
       'sticky_default' => in_array('sticky', $options),
       'promote_enabled' => TRUE,
       'promote_default' => in_array('promote', $options),
-      'revision_enabled' => TRUE,
+      'revisions' => TRUE,
       'revision_default' => in_array('revision', $options),
       'node_preview' => update_variable_get('node_preview_' . $node_type->type, BACKDROP_OPTIONAL),
       'node_submitted' => update_variable_get('node_submitted_' . $node_type->type, TRUE),
@@ -2105,6 +2105,28 @@ function node_update_1022() {
       'empty_column' => 0,
     ));
     $config->save();
+  }
+}
+
+/**
+ * Update the 'revision_enabled' setting for all content types to the new
+ * 'revisions' setting.
+ */
+function node_update_1023() {
+  $types = config_get_names_with_prefix('node.type');
+  foreach ($types as $config_name) {
+    $config = config($config_name);
+    $settings = $config->get('settings');
+    if (isset($settings['revision_enabled'])) {
+      if ($settings['revision_enabled']) {
+        $config->set('settings.revisions', 'optional');
+      }
+      else {
+        $config->set('settings.revisions', 'disabled');
+      }
+      $config->clear('settings.revision_enabled');
+      $config->save();
+    }
   }
 }
 

@@ -934,7 +934,7 @@ function node_object_prepare(Node $node) {
     $node->log = NULL;
   }
   // Always use the default revision setting.
-  $node->revision = $node_type->settings['revision_enabled'] ? $node_type->settings['revision_default'] : FALSE;
+  $node->revision = ($node_type->settings['revisions'] == 'optional' && $node_type->settings['revision_default']) || $node_type->settings['revisions'] == 'automatic' ? TRUE : FALSE;
 
   node_invoke($node, 'prepare');
   module_invoke_all('node_prepare', $node);

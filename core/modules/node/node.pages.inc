@@ -232,30 +232,32 @@ function node_form($form, &$form_state, Node $node) {
       'js' => array(backdrop_get_path('module', 'node') . '/js/node.js'),
     ),
     '#weight' => 20,
-    '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
+    // Show the fieldset only when the following conditions are met:
+    // - The user has appropriate permission.
+    // - The content being edited is existing (i.e. not when creating new
+    //   content).
+    // - Revisions have not been explicitly disabled for this content type.
+    '#access' => user_access('administer nodes') && $node->nid && $node_type->settings['revisions'] != 'disabled',
   );
   $form['revision_information']['revision'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision'),
     '#default_value' => $node->revision,
-    '#access' => user_access('administer nodes'),
+    // Prevent access to the checkbox if revisions are being enforced.
+    '#access' => user_access('administer nodes') && $node_type->settings['revisions'] != 'automatic',
   );
-  // Check the revision log checkbox when the log textarea is filled in.
-  // This must not happen if "Create new revision" is enabled by default, since
-  // the state would auto-disable the checkbox otherwise.
-  if (!$node->revision) {
-    $form['revision_information']['revision']['#states'] = array(
-      'checked' => array(
-        'textarea[name="log"]' => array('empty' => FALSE),
-      ),
-    );
-  }
+  // The revision log textbox should be shown even if revisions are enforced.
   $form['revision_information']['log'] = array(
     '#type' => 'textarea',
     '#title' => t('Revision log message'),
     '#rows' => 4,
     '#default_value' => !empty($node->log) ? $node->log : '',
     '#description' => t('Briefly describe the changes you have made.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="revision"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Node author information for administrators
