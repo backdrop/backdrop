@@ -860,11 +860,25 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       $svg_path = file_create_url($item['uri']);
       $svg = file_get_contents($svg_path);
       $svg_clean = image_svg_sanitizer_sanitize($svg);
+      $svg_clean = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg_clean);
+      $svg_clean = trim($svg_clean);
 
-      $element[$delta] = array(
-        '#type' => 'markup',
-        '#markup' => $svg_clean,
-      );
+      if (isset($uri)) {
+        $element[$delta] = array(
+          '#type' => 'link',
+          '#href' => $uri['path'],
+          '#title' => $svg_clean,
+          '#options' => array(
+            'html' => TRUE,
+          ),
+        );
+      }
+      else {
+        $element[$delta] = array(
+          '#type' => 'markup',
+          '#markup' => $svg_clean,
+        );
+      }
     }
   }
 
