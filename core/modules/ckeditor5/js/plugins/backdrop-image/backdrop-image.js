@@ -63,37 +63,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // Upcast from the raw <img> element to the CKEditor model.
     conversion
       .for('upcast')
-      .add(viewImageToModelImage(editor))
-      .attributeToAttribute({
-        view: {
-          name: 'img',
-          key: 'width',
-        },
-        model: {
-          key: 'width',
-          value: (viewElement) => {
-            if (isNumberString(viewElement.getAttribute('width'))) {
-              return `${viewElement.getAttribute('width')}px`;
-            }
-            return `${viewElement.getAttribute('width')}`;
-          },
-        },
-      })
-      .attributeToAttribute({
-        view: {
-          name: 'img',
-          key: 'height',
-        },
-        model: {
-          key: 'height',
-          value: (viewElement) => {
-            if (isNumberString(viewElement.getAttribute('height'))) {
-              return `${viewElement.getAttribute('height')}px`;
-            }
-            return `${viewElement.getAttribute('height')}`;
-          },
-        },
-      });
+      .add(viewImageToModelImage(editor));
 
     // Downcast from the CKEditor model to an HTML <img> element. This generic
     // downcast runs both while editing and when saving the final HTML.
@@ -253,23 +223,6 @@ function setViewAttributes(writer, viewAttributes, viewElement) {
  */
 function createImageViewElement(writer) {
   return writer.createEmptyElement('img');
-}
-
-/**
- * A simple helper method to detect number strings.
- *
- * @param {*} value
- *  The value to test.
- *
- * @return {boolean}
- *  True if the value is a string containing a number.
- *
- * @private
- */
-function isNumberString(value) {
-  const parsedValue = parseFloat(value);
-
-  return !Number.isNaN(parsedValue) && value === String(parsedValue);
 }
 
 /**
@@ -597,7 +550,7 @@ function modelImageWidthAndHeightToAttributes(editor) {
 }
 
 /**
- * Generates a callback that handles the data downcast for the img element.
+ * Generates a callback that handles the data upcast for the img element.
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
@@ -691,6 +644,7 @@ function viewImageToModelImage(editor) {
       attributesToConsume.push('data-caption');
     }
 
+    // Save the file ID to the model.
     if (
       consumable.test(viewItem, { name: true, attributes: 'data-file-id' })
     ) {
@@ -700,6 +654,16 @@ function viewImageToModelImage(editor) {
         image,
       );
       attributesToConsume.push('data-file-id');
+    }
+
+    // If the view src is updated, also update the model.
+    if (consumable.test(viewItem, { name: true, attributes: 'src' })) {
+      writer.setAttribute(
+        'src',
+        viewItem.getAttribute('src'),
+        image,
+      );
+      attributesToConsume.push('src');
     }
 
     // Try to place the image in the allowed position.
