@@ -632,6 +632,7 @@ function image_field_formatter_info() {
       'image_link' => '',
       'image_float' => '',
       'image_load' => 'auto',
+      'image_svg_display' => TRUE,
       'image_svg_settings' => array(),
     ),
     'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
@@ -702,6 +703,11 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
+  $element['image_svg_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Render SVG images in an &lt;img&gt; tag'),
+    '#default_value' => $settings['image_svg_display'],
+  );
   $element['image_svg_settings'] = array(
     '#type' => 'item',
     '#title' => t('Maximum SVG image dimensions'),
@@ -842,7 +848,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       }
     }
 
-    if ($is_svg) {
+    if (!$is_svg || $display['settings']['image_svg_display']) {
       $element[$delta] = array(
         '#theme' => 'image_formatter',
         '#item' => $item,
@@ -851,11 +857,8 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       );
     }
     else {
-      // create the file path
       $svg_path = file_create_url($item['uri']);
-      // get the contents of the svg
       $svg = file_get_contents($svg_path);
-      // remove all of the bad stuff from the svg
       $svg_clean = image_svg_sanitizer_sanitize($svg);
 
       $element[$delta] = array(

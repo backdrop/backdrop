@@ -1533,17 +1533,17 @@ function image_is_svg($uri) {
  */
 function image_autoload_info() {
   return array(
-    'enshrined\svgSanitize\data\AttributeInterface' => 'data/AttributeInterface.php',
-    'enshrined\svgSanitize\data\TagInterface' => 'data/TagInterface.php',
-    'enshrined\svgSanitize\Resolver' => 'ElementReference/Resolver.php',
-    'enshrined\svgSanitize\Subject' => 'ElementReference/Subject.php',
-    'enshrined\svgSanitize\Usage' => 'ElementReference/Usage.php',
-    'enshrined\svgSanitize\NestingException' => 'Exceptions/NestingException.php',
-    'enshrined\svgSanitize\Helper' => 'Helper.php',
-    'enshrined\svgSanitize\Sanitizer' => 'Sanitizer.php',
-    'enshrined\svgSanitize\data\AllowedAttributes' => 'data/AllowedAttributes.php',
-    'enshrined\svgSanitize\data\AllowedTags' => 'data/AllowedTags.php',
-    'enshrined\svgSanitize\data\XPath' => 'data/XPath.php',
+    'enshrined\svgSanitize\data\AttributeInterface' => 'libraries/svg_sanitizer/data/AttributeInterface.php',
+    'enshrined\svgSanitize\data\TagInterface' => 'libraries/svg_sanitizer/data/TagInterface.php',
+    'enshrined\svgSanitize\ElementReference\Resolver' => 'libraries/svg_sanitizer/ElementReference/Resolver.php',
+    'enshrined\svgSanitize\ElementReference\Subject' => 'libraries/svg_sanitizer/ElementReference/Subject.php',
+    'enshrined\svgSanitize\ElementReference\Usage' => 'libraries/svg_sanitizer/ElementReference/Usage.php',
+    'enshrined\svgSanitize\Exceptions\NestingException' => 'libraries/svg_sanitizer/Exceptions/NestingException.php',
+    'enshrined\svgSanitize\Helper' => 'libraries/svg_sanitizer/Helper.php',
+    'enshrined\svgSanitize\Sanitizer' => 'libraries/svg_sanitizer/Sanitizer.php',
+    'enshrined\svgSanitize\data\AllowedAttributes' => 'libraries/svg_sanitizer/data/AllowedAttributes.php',
+    'enshrined\svgSanitize\data\AllowedTags' => 'libraries/svg_sanitizer/data/AllowedTags.php',
+    'enshrined\svgSanitize\data\XPath' => 'libraries/svg_sanitizer/data/XPath.php',
   );
 }
 
