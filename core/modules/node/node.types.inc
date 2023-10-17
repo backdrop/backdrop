@@ -383,7 +383,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#group' => 'additional_settings',
     '#weight' => 10,
     '#description' => $revisions_help,
-    // https://6103.lndo.site/admin/config/people/permissions?search=revision
   );
   $form['revision']['revision']['revisions'] = array(
     '#type' => 'radios',
