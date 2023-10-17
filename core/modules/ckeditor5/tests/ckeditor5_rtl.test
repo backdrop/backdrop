@@ -7,7 +7,7 @@
 /**
  * CKEditor testing class specific for right-to-left languages.
  */
-class CKEditorRtlTestCase extends BackdropWebTestCase {
+class CKEditor5RtlTestCase extends BackdropWebTestCase {
   /**
    * User object.
    *
@@ -25,7 +25,7 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
    * Set up environment.
    */
   public function setUp() {
-    parent::setUp('ckeditor', 'language', 'locale');
+    parent::setUp('ckeditor5', 'language', 'locale');
     // Add RTL language.
     $arabic = (object) array(
       'langcode' => 'ar',

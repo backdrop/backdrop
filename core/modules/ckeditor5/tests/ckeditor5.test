@@ -7,7 +7,7 @@
 /**
  * Functional tests for CKEditor5 module.
  */
-class CKEditorTestCase extends BackdropWebTestCase {
+class CKEditor5TestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
@@ -15,7 +15,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
    * {@inheritdoc}
    */
   protected function setUp() {
-    parent::setUp('ckeditor');
+    parent::setUp('ckeditor5');
 
     // Create Article node type.
     $content_type = $this->backdropCreateContentType(array(
@@ -47,78 +47,87 @@ class CKEditorTestCase extends BackdropWebTestCase {
 
     // Select CKEditor and refresh the page.
     $this->backdropPost(NULL, array(
-      'name' => 'CKEditor',
-      'format' => 'ckeditor',
-      'editor' => 'ckeditor',
+      'name' => 'CKEditor5',
+      'format' => 'ckeditor5',
+      'editor' => 'ckeditor5',
       'roles[authenticated]' => TRUE,
     ), t('Configure editor'));
 
     $toolbar = array(
-      // First row.
-      array(
-        array(
-          'name' => 'Formatting',
-          'items' => array('Bold', 'Italic', 'Underline', 'Strike'),
-        ),
-        array(
-          'name' => 'Alignment',
-          'items' => array('JustifyLeft', 'JustifyCenter', 'JustifyRight'),
-        ),
-        array(
-          'name' => 'Lists',
-          'items' => array('BulletedList', 'NumberedList'),
-        ),
-        array(
-          'name' => 'Media',
-          'items' => array('Blockquote', 'BackdropImage', 'Styles'),
-        ),
-      ),
+      'bold',
+      'italic',
+      '|',
+      'alignment:left',
+      'alignment:center',
+      'alignment:right',
+      '|',
+      'bulletedList',
+      'numberedList',
+      '|',
+      'blockQuote',
+      'backdropImage',
     );
 
     $this->backdropPost(NULL, array(
-      'editor_settings[toolbar]' => json_encode($toolbar),
-      'editor_settings[plugins][style][style_list]' => "h1.title|Title\np.custom-class|Custom class\n",
+      'editor_settings[cketoolbar]' => json_encode($toolbar),
       'filters[filter_autop][status]' => TRUE,
       'filters[filter_image_align][status]' => TRUE,
       'filters[filter_image_caption][status]' => TRUE,
     ), t('Save configuration'));
 
     $this->backdropGet('node/add/article');
-    $this->assertRaw('ckeditor/css/ckeditor.css');
-    $this->assertRaw('misc/ckeditor/ckeditor.js');
-    $this->assertRaw('ckeditor/js/ckeditor.js');
+    $this->assertRaw('modules/ckeditor5/css/ckeditor5.css');
+    $this->assertRaw('modules/ckeditor5/js/ckeditor5.js');
+    $this->assertRaw('modules/ckeditor5/lib/ckeditor5/build/ckeditor5-dll.js');
     $settings = $this->backdropGetSettings();
-    $format_settings = $settings['filter']['formats']['ckeditor'];
-    $this->assertEqual($format_settings['editorSettings']['toolbar'], $toolbar[0], 'CKEditor toolbar settings saved and added correctly.');
-    $this->assertEqual($format_settings['editorSettings']['extraPlugins'], 'backdropimagecaption,backdropimage', 'Added custom plugins include custom image caption support.');
-    $this->assertEqual($format_settings['editorSettings']['removePlugins'], 'image,tabletools,tableresize,contextmenu');
-    $style_list = array(
-      array(
-        'name' => 'Title',
-        'element' => 'h1',
-        'attributes' => array('class' => 'title'),
-      ),
-      array(
-        'name' => 'Custom class',
-        'element' => 'p',
-        'attributes' => array('class' => 'custom-class'),
-      ),
+    $format_settings = $settings['filter']['formats']['ckeditor5'];
+    $this->assertEqual($format_settings['editorSettings']['toolbar']['items'], $toolbar, 'CKEditor toolbar settings saved and added correctly.');
+    $expected_plugins = array(
+      'image.Image',
+      'image.ImageToolbar',
+      'image.ImageInsertUI',
+      'image.ImageUpload',
+      'image.ImageResize',
+      'list.DocumentListProperties',
+      'alignment.Alignment',
+      'basicStyles.Italic',
+      'backdropBasicStyles.BackdropBasicStyles',
+      'basicStyles.Bold',
+      'image.ImageStyle',
+      'image.ImageCaption',
+      'essentials.Essentials',
+      'autoformat.Autoformat',
+      'list.DocumentList',
+      'blockQuote.BlockQuote',
+      'backdropImage.BackdropImage',
+      'htmlSupport.GeneralHtmlSupport',
     );
-    $this->assertEqual($format_settings['editorSettings']['stylesSet'], $style_list, 'Style list settings correct');
+    $this->assertEqual($format_settings['editorSettings']['pluginList'], $expected_plugins, 'CKEditor5 plugin list saved correctly');
 
     // Turn on the table plugin and check that the JavaScript is adjusted.
-    $toolbar[0][] = array(
-      'name' => 'Table',
-      'items' => array('Table'),
-    );
-    $this->backdropPost('admin/config/content/formats/ckeditor', array(
-      'editor_settings[toolbar]' => json_encode($toolbar),
+    $toolbar = array('insertTable');
+    $this->backdropPost('admin/config/content/formats/ckeditor5', array(
+      'editor_settings[cketoolbar]' => json_encode($toolbar),
       'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption> <table> <thead> <tbody> <tr> <td> <th>',
     ), t('Save configuration'));
     $this->backdropGet('node/add/article');
     $settings = $this->backdropGetSettings();
-    $format_settings = $settings['filter']['formats']['ckeditor'];
-    $this->assertEqual($format_settings['editorSettings']['extraPlugins'], 'backdropimagecaption,backdropimage,contextmenu,tabletools,tableresize');
-    $this->assertEqual($format_settings['editorSettings']['removePlugins'], 'image');
+    $format_settings = $settings['filter']['formats']['ckeditor5'];
+    $expected_plugins = array(
+      'table.TableToolbar',
+      'table.TableCaption',
+      'table.PlainTableOutput',
+      'table.TableCellProperties',
+      'table.TableColumnResize',
+      'table.TableProperties',
+      'image.ImageStyle',
+      'image.ImageCaption',
+      'essentials.Essentials',
+      'autoformat.Autoformat',
+      'backdropBasicStyles.BackdropBasicStyles',
+      'table.Table',
+      'htmlSupport.GeneralHtmlSupport',
+    );
+    $this->assertEqual($format_settings['editorSettings']['pluginList'], $expected_plugins, 'CKEditor5 plugin list saved correctly');
   }
 }
