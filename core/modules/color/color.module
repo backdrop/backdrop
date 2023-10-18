@@ -382,7 +382,7 @@ function color_get_info($theme) {
     $config_names = config_get_names_with_prefix($theme . '.color.');
     if (!empty($config_names)) {
       // Check for a default color config for this theme.
-      if (($key = array_search($theme . '.color.default', $config_names)) !== false) {
+      if (($key = array_search($theme . '.color.default', $config_names)) !== FALSE) {
         unset($config_names[$key]);
         $default_name = $theme . '.color.default';
         $info = config_get($default_name);
