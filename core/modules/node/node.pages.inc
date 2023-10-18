@@ -223,6 +223,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['revision_information'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision information'),
+    '#description' => t('Revisions allow retaining copies of previous versions of the content, in case changes need to be reverted.'),
     '#collapsible' => TRUE,
     // Collapsed by default when "Create new revision" is unchecked
     '#collapsed' => !$node->revision,
