@@ -281,7 +281,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $variables = array();
     $variables['title'] = 'Some title';
     $variables['attributes'] = array(
-      'id' => 'parentlist',
+      'id' => 'parent-list',
     );
     $variables['items'] = array(
       'a',
@@ -295,7 +295,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
             'class' => array('dee'),
           ),
           // Any string key is treated as child list attribute.
-          'id' => 'childlist',
+          'id' => 'child-list',
         ),
         // Any other keys are treated as item attributes.
         'id' => 'bee',
@@ -305,14 +305,14 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'id' => 'E',
       ),
     );
-    $inner = '<div class="item-list"><ul id="childlist">';
+    $inner = '<div class="item-list"><ul id="child-list">';
     $inner .= '<li class="odd first">c</li>';
     $inner .= '<li class="dee even last">d</li>';
     $inner .= '</ul></div>';
 
     $expected = '<div class="item-list">';
     $expected .= '<h3>Some title</h3>';
-    $expected .= '<ul id="parentlist">';
+    $expected .= '<ul id="parent-list">';
     $expected .= '<li class="odd first">a</li>';
     $expected .= '<li id="bee" class="even">b' . $inner . '</li>';
     $expected .= '<li id="E" class="odd last">e</li>';

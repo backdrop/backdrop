@@ -1207,8 +1207,8 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     backdrop_get_messages();
     form_clear_error();
 
-    // Return the processed form together with form_state and errors
-    // to allow the caller lowlevel access to the form.
+    // Return the processed form together with form_state and errors, to allow
+    // the caller low-level access to the form.
     return array($form, $form_state, $errors);
   }
 
