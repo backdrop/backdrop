@@ -1548,8 +1548,7 @@ function image_autoload_info() {
 }
 
 /**
- * Simple API function which will generate an XLS file and
- * save it in $path.
+ * API function which will generate a sanitized SVG file.
  *
  * @param string $svg
  *    The xml contents of an svg that you would like to sanitize.
@@ -1560,18 +1559,42 @@ function image_autoload_info() {
  */
 function image_svg_sanitizer_sanitize($svg) {
   // instantiate the sanitizer class.
-  $sanitizer = new enshrined\svgSanitize\Sanitizer();
+  $svg_sanitizer_class = image_get_svg_sanitizer_class();
+  if ($svg_sanitizer_class) {
+    $sanitizer = new $svg_sanitizer_class();
 
-  // get newly defined tags
-  // $tags = new SvgSanitizerTags();
-  // $sanitizer->setAllowedTags($tags);
+    // run the svg through the sanitizer.
+    $clean_svg = $sanitizer->sanitize($svg);
 
-  // get newly defined attributes
-  // $attributes = new SvgSanitizerAttributes();
-  // $sanitizer->setAllowedAttrs($attributes);
+    return $clean_svg;
+  }
 
-  // run the svg through the sanitizer
-  $clean_svg = $sanitizer->sanitize($svg);
+  return $svg;
+}
 
-  return $clean_svg;
+/**
+ * Get the class name of the preferred SVG sanitizer.
+ *
+ * This class must return a method called sanitize() which initiates the
+ * sanitizing process. If a custom sanitizer is used, the class (and any Other
+ * associated classes) must also be declared in a hook_autoload_info()
+ * implementation.
+ *
+ * @return string
+ *    The class name of the preferred SVG sanitizer.
+ */
+function image_get_svg_sanitizer_class() {
+  // Use the advanced backdrop_static() pattern, since may be called very often
+  // in sites with many SVG images.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['svg_sanitizer_class'] = &backdrop_static(__FUNCTION__);
+  }
+  $svg_sanitizer_class = &$backdrop_static_fast['svg_sanitizer_class'];
+  
+  if (empty($svg_sanitizer_class)) {
+    $svg_sanitizer_class = config_get('image.settings', 'svg_sanitizer_class');
+  }
+
+  return $svg_sanitizer_class;
 }
