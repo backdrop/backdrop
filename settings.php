@@ -443,19 +443,6 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 //$config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
- * Add Permissions-Policy header to disable Google FLoC.
- *
- * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
- * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
- * which was introduced in Chrome v89. For more information about FLoC, see:
- * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
- *
- * If you don't wish to disable FLoC in Chrome, you can uncomment the following
- * setting, and make sure its value is set to "FALSE".
- */
-//$config['system.core']['block_interest_cohort'] = FALSE;
-
-/**
  * File schemes whose paths should not be normalized.
  *
  * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
