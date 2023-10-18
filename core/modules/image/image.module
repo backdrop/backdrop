@@ -250,17 +250,6 @@ function image_permission() {
 }
 
 /**
- * Implements hook_config_info()
- */
-function image_config_info() {
-  $prefixes['image.settings'] = array(
-    'label' => t('Image settings'),
-    'group' => t('Configuration'),
-  );
-  return $prefixes;
-}
-
-/**
  * Implements hook_views_api().
  */
 function image_views_api() {
@@ -279,6 +268,12 @@ function image_config_info() {
     'label_key' => 'name',
     'group' => t('Image styles'),
   );
+
+  $prefixes['image.settings'] = array(
+    'label' => t('Image settings'),
+    'group' => t('Configuration'),
+  );
+
   return $prefixes;
 }
 
