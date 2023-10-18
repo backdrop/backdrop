@@ -287,7 +287,7 @@ class FileTestHelper extends BackdropWebTestCase {
   function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
     $langcode = LANGUAGE_NONE;
     $edit = array(
-      "title" => $this->randomName(),
+      'title' => $this->randomName(),
       'revision' => (string) (int) $new_revision,
     );
 

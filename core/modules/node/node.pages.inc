@@ -235,18 +235,17 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => 20,
     // Show the fieldset only when the following conditions are met:
+    // - Editing existing content (i.e. don't show when creating new content).
     // - The user has appropriate permission.
-    // - The content being edited is existing (i.e. not when creating new
-    //   content).
     // - Revisions have not been explicitly disabled for this content type.
-    '#access' => $node->nid && user_access('administer nodes') && $revisions_disabled,
+    '#access' => $node->nid && user_access('administer nodes') && !$revisions_disabled,
   );
   $form['revision_information']['revision'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision'),
     '#default_value' => $node->revision,
     // Prevent access to the checkbox if revisions are being enforced.
-    '#access' => user_access('administer nodes') && $revisions_automatic,
+    '#access' => user_access('administer nodes') && !$revisions_automatic,
   );
   // The revision log textbox should be shown even if revisions are enforced.
   $form['revision_information']['log'] = array(
