@@ -633,7 +633,10 @@ function image_field_formatter_info() {
       'image_float' => '',
       'image_load' => 'auto',
       'image_svg_display' => TRUE,
-      'image_svg_settings' => array(),
+      'image_svg_settings' => array(
+        'width' => IMAGE_SVG_DEFAULT_WIDTH,
+        'height' => IMAGE_SVG_DEFAULT_HEIGHT,
+      ),
     ),
     'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
     'file formatter' => array(
@@ -713,7 +716,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#title' => t('Maximum SVG image dimensions'),
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array('@svg_default_width' => SVG_IMAGE_DEFAULT_WIDTH, '@svg_default_height' => SVG_IMAGE_DEFAULT_HEIGHT)),
+    '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array('@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH, '@svg_default_height' => IMAGE_SVG_DEFAULT_HEIGHT)),
     '#states' => array(
       'visible' => array(
         ':input[name="fields[field_image][settings_edit_form][settings][image_style]"]' => array('value' => ''),
