@@ -414,7 +414,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
   // Revision settings.
   if (user_access('administer permissions')) {
-    $revisions_help = t('Revisions allow content editors with <a href="@permissions-url">appropriate permissions</a> to view changes made to content over time, and revert them if needed.',
+    $revisions_help = t('Revisions allow content editors with <a href="@permissions-url" target="_blank">appropriate permissions</a> to view changes made to content over time, and revert them if needed.',
       array('@permissions-url' => url('admin/config/people/permissions', array('query' => array('search' => 'revision')))));
   }
   else {
