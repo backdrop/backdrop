@@ -1,10 +1,13 @@
 <?php
+/**
+ * @file
+ * A list of classes used by Backdrop core.
+ */
 
 /**
  * Lists all the classes used by Backdrop core.
  */
 function backdrop_class_list() {
-
   $path = BACKDROP_ROOT . '/core/includes/';
 
   // Classes in /core/includes.
