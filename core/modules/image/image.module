@@ -242,6 +242,10 @@ function image_permission() {
       'title' => t('Administer image styles'),
       'description' => t('Create and modify styles for generating image modifications such as thumbnails.'),
     ),
+    'upload svg images' => array(
+      'title' => t('Upload SVG images'),
+      'description' => t('Allowed to upload SVG images.'),
+    ),
   );
 }
 

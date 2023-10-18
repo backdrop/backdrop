@@ -458,7 +458,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
-    if ($svg_allowed) {
+    if ($svg_allowed && user_access('upload svg images')) {
       $extensions[] = 'svg';
     }
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
