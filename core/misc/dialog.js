@@ -79,17 +79,19 @@ Backdrop.dialog = function (element, options) {
       // Because of Chromium's behavior, we must wait until the ajax-loaded
       // jquery.ui.dialog.css is applied.
       var computedStyle = getComputedStyle($element[0]);
-      var waitForCss = function() {
+      var waitForCss = function(counter) {
         var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
-        // If the overflow is not 'auto' yet, schedule this function again.
-        if (cssOverflowProperty != 'auto') {
-          setTimeout(waitForCss, 10);
+        // If the overflow is not 'auto' or 'hidden' yet, schedule this function
+        // again, but prevent infinite loops for dialogs that use a different
+        // overflow. 
+        if (cssOverflowProperty != 'auto' && cssOverflowProperty != 'hidden' && counter < 10) {
+          setTimeout(waitForCss, 10, ++counter);
         }
         else {
           resetPosition();
         }
       }
-      setTimeout(waitForCss, 0);
+      setTimeout(waitForCss, 0, 0);
     }
     dialog.open = true;
     $(window).trigger('dialog:aftercreate', [dialog, $element, settings]);

@@ -7,6 +7,11 @@ class FileTransferTest extends BackdropWebTestCase {
   protected $password = 'password';
   protected $port = '42';
 
+  /**
+   * @var TestFileTransfer
+   */
+  protected $testConnection;
+
   function setUp() {
     parent::setUp();
     $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
@@ -83,6 +88,7 @@ class FileTransferTest extends BackdropWebTestCase {
 /**
  * Mock FileTransfer object for test case.
  */
+#[\AllowDynamicProperties]
 class TestFileTransfer extends FileTransfer {
   protected $host = NULL;
   protected $username = NULL;
@@ -103,10 +109,9 @@ class TestFileTransfer extends FileTransfer {
   }
 
   function connect() {
-    $parts = explode(':', $this->hostname);
-    $port = (count($parts) == 2) ? $parts[1] : $this->port;
-    $this->connection = new MockTestConnection();
-    $this->connection->connectionString = 'test://' . urlencode((string) $this->username) . ':' . urlencode((string) $this->password) . "@$this->host:$this->port/";
+    $connection = new MockTestConnection();
+    $connection->connectionString = 'test://' . urlencode((string) $this->username) . ':' . urlencode((string) $this->password) . "@$this->host:$this->port/";
+    $this->connection = $connection;
   }
 
   function copyFileJailed($source, $destination) {

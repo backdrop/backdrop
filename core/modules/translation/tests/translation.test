@@ -10,6 +10,16 @@
 class TranslationTestCase extends BackdropWebTestCase {
   protected $book;
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $translator;
+
   function setUp() {
     parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
 

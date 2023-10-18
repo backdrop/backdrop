@@ -962,7 +962,7 @@ function _views_ui_get_paths($view) {
  *   An array of displays and their respective paths.
  */
 function _views_ui_get_displays($view) {
-  $show_master_display = config_get('views_ui.settings', 'show_master_display');
+  $show_default_display = config_get('views_ui.settings', 'show_default_display');
   $all_displays = array();
 
   if (empty($view->display)) {
@@ -974,9 +974,9 @@ function _views_ui_get_displays($view) {
     // Start compiling a list of displays for each view.
     foreach ($view->display as $display) {
       if (!empty($display->handler)) {
-        // Add the Master (default) display to the list only if the "Always show
-        // the Master display" setting is enabled in the Views UI settings.
-        if ($display->display_plugin != 'default' || $show_master_display) {
+        // Add the Default display to the list only if the "Always show
+        // the Default display" setting is enabled in the Views UI settings.
+        if ($display->display_plugin != 'default' || $show_default_display) {
           $display_item = $display->display_title;
           if (!empty($display->handler->options['block_description'])) {
             $display_item .= ': <em>' . $display->handler->options['block_description'] . '</em>';

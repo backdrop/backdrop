@@ -3448,6 +3448,28 @@ function system_update_1090() {
 }
 
 /**
+ * Set jQuery to the backwards-compatible, legacy version for existing sites.
+ */
+function system_update_1091() {
+  if (config_get('system.core', 'jquery_version') === NULL) {
+    config_set('system.core', 'jquery_version', 'legacy');
+  }
+}
+
+/**
+ * Removes the block_interest_cohort configuration added by
+ * system_update_1075().
+ *
+ * see https://github.com/backdrop/backdrop-issues/issues/6199
+ *
+ * For more information, see the change record at:
+ * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
+ */
+function system_update_1092() {
+  config_clear('system.core', 'block_interest_cohort');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

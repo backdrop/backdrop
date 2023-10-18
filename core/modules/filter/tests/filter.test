@@ -143,6 +143,17 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
  * Tests the administrative functionality of the Filter module.
  */
 class FilterAdminTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -915,6 +926,12 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
@@ -1542,7 +1559,7 @@ Unknown tag <x>containing x and www.example.com</x>? And a tag <pooh>beginning w
       '
 <p>Test &lt;br/&gt;: This is a www.example17.com example <strong>with</strong> various http://www.example18.com tags. *<br/>
  It is important www.example19.com to *<br/>test different URLs and http://www.example20.com in the same paragraph. *<br>
-HTML www.example21.com soup by person@example22.com can litererally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
+HTML www.example21.com soup by person@example22.com can literally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
 ' => array(
         'href="http://www.example17.com"' => TRUE,
         'href="http://www.example18.com"' => TRUE,
