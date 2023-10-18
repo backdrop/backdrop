@@ -783,7 +783,9 @@ function node_type_set_defaults($info = array()) {
     'disabled' => FALSE,
     'has_title' => TRUE,
     'title_label' => 'Title',
-    'settings' => array(),
+    'settings' => array(
+      'revisions' => 'optional',
+    ),
   );
   $new_type = (object) $new_type;
 
