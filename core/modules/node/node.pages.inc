@@ -218,6 +218,8 @@ function node_form($form, &$form_state, Node $node) {
 
   // Add a log field if the "Create new revision" option is checked, or if the
   // current user has the ability to check that option.
+  $revisions_disabled = isset($node_type->settings['revisions']) && $node_type->settings['revisions'] == 'disabled';
+  $revisions_automatic = isset($node_type->settings['revisions']) && $node_type->settings['revisions'] == 'automatic';
   $form['revision_information'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision information'),
@@ -237,14 +239,14 @@ function node_form($form, &$form_state, Node $node) {
     // - The content being edited is existing (i.e. not when creating new
     //   content).
     // - Revisions have not been explicitly disabled for this content type.
-    '#access' => user_access('administer nodes') && $node->nid && $node_type->settings['revisions'] != 'disabled',
+    '#access' => $node->nid && user_access('administer nodes') && $revisions_disabled,
   );
   $form['revision_information']['revision'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision'),
     '#default_value' => $node->revision,
     // Prevent access to the checkbox if revisions are being enforced.
-    '#access' => user_access('administer nodes') && $node_type->settings['revisions'] != 'automatic',
+    '#access' => user_access('administer nodes') && $revisions_automatic,
   );
   // The revision log textbox should be shown even if revisions are enforced.
   $form['revision_information']['log'] = array(
