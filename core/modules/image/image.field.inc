@@ -633,7 +633,7 @@ function image_field_formatter_info() {
       'image_float' => '',
       'image_load' => 'auto',
       'image_svg_display' => TRUE,
-      'image_svg_settings' => array(
+      'image_svg_dimensions' => array(
         'width' => IMAGE_SVG_DEFAULT_WIDTH,
         'height' => IMAGE_SVG_DEFAULT_HEIGHT,
       ),
@@ -713,7 +713,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#title' => t('Render SVG images in an &lt;img&gt; tag'),
     '#default_value' => $settings['image_svg_display'],
   );
-  $element['image_svg_settings'] = array(
+  $element['image_svg_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum SVG image dimensions'),
     '#access' => $svg_allowed,
@@ -726,20 +726,20 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
       ),
     ),
   );
-  $element['image_svg_settings']['width'] = array(
+  $element['image_svg_dimensions']['width'] = array(
     '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
-    '#default_value' => $settings['image_svg_settings']['width'],
+    '#default_value' => $settings['image_svg_dimensions']['width'],
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
-  $element['image_svg_settings']['height'] = array(
+  $element['image_svg_dimensions']['height'] = array(
     '#type' => 'number',
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
-    '#default_value' => $settings['image_svg_settings']['height'],
+    '#default_value' => $settings['image_svg_dimensions']['height'],
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
@@ -790,13 +790,13 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $formatter_settings = $instance['display'][$view_mode]['settings'];
 
-  if ($svg_allowed && (!empty($formatter_settings['image_svg_settings']['width'])
-    || !empty($formatter_settings['image_svg_settings']['width']))) {
+  if ($svg_allowed && (!empty($formatter_settings['image_svg_dimensions']['width'])
+    || !empty($formatter_settings['image_svg_dimensions']['width']))) {
     $summary[] = t(
       'SVG image attributes: @width x @height pixels',
       array(
-        '@width' => $formatter_settings['image_svg_settings']['width'],
-        '@height' => $formatter_settings['image_svg_settings']['height'],
+        '@width' => $formatter_settings['image_svg_dimensions']['width'],
+        '@height' => $formatter_settings['image_svg_dimensions']['height'],
       )
     );
   }
@@ -845,9 +845,9 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
       // Add custom attributes only for SVG images.
       if ($is_svg) {
-        $image_svg_settings = $display['settings']['image_svg_settings'];
+        $image_svg_dimensions = $display['settings']['image_svg_dimensions'];
 
-        foreach ($image_svg_settings as $attribute => $attribute_value) {
+        foreach ($image_svg_dimensions as $attribute => $attribute_value) {
           if (!empty($attribute)) {
             $item[$attribute] = $attribute_value;
           }
