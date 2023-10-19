@@ -99,6 +99,7 @@ class SchemaTestCase extends BackdropWebTestCase {
       'not null' => TRUE,
       'description' => 'Changed column description.'
     );
+    db_drop_index('test_table', 'primary key');
     db_change_field('test_table', 'test_serial', 'test_serial', $spec);
     // While It is possible to do add indexes in a single step with
     // db_change_field(), we are doing it separately to avoid issues with older
