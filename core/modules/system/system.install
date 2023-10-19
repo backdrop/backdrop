@@ -2505,7 +2505,28 @@ function system_update_1026() {
   $config->set('file_temporary_path', update_variable_get('file_temporary_path', ''));
   $config->set('file_private_path', update_variable_get('file_private_path', ''));
   $config->set('image_jpeg_quality', update_variable_get('image_jpeg_quality', 75));
-  $config->set('install_profile', update_variable_get('install_profile', 'standard'));
+
+  // Get the Drupal installation profile, and switch it to "standard" if not
+  // available in Backdrop.
+  $current_profile = update_variable_get('install_profile', 'standard');
+  $available_profiles = backdrop_system_listing('/\.profile$/', 'profiles');
+  if (!array_key_exists($current_profile, $available_profiles)) {
+    $old_profile = $current_profile;
+    $current_profile = 'standard';
+
+    // Enable the "standard" profile.
+    db_update('system')
+      ->fields(array('status' => 1, 'schema_version' => 0))
+      ->condition('name', $current_profile)
+      ->execute();
+    // Disable the old, unavailable/missing profile.
+    db_update('system')
+      ->fields(array('status' => 0))
+      ->condition('name', $old_profile)
+      ->execute();
+  }
+  $config->set('install_profile', $current_profile);
+
   $config->set('clean_url', update_variable_get('clean_url', 0));
   $config->set('theme_default', update_variable_get('theme_default', 'stark'));
   $config->set('admin_theme', update_variable_get('admin_theme', ''));
@@ -3389,6 +3410,63 @@ function system_update_1087() {
   if (config_get('system.core', 'log_max_length') === NULL) {
     config_set('system.core', 'log_max_length', 56);
   }
+}
+
+/**
+ * Set the file schemes whose paths should not be normalized.
+ */
+function system_update_1088() {
+  if (config_get('system.core', 'file_not_normalized_schemes') === NULL) {
+    config_set('system.core', 'file_not_normalized_schemes', array());
+  }
+}
+
+/**
+ * Enable Admin Bar's Language Switcher component if this is a multilingual
+ * site.
+ */
+function system_update_1089() {
+  if (!(module_exists('locale') && language_multilingual())) {
+    return;
+  }
+  $config = config('admin_bar.settings');
+  $components = $config->get('components');
+  $components[] = 'admin_bar.locale';
+  $config->set('components', array_unique($components));
+  $config->save();
+}
+
+/**
+ * Set a default value for the new user_editor_role setting on existing sites.
+ */
+function system_update_1090() {
+  $config = config('system.core');
+  if ($config->get('user_editor_role') === NULL) {
+    $config->set('user_editor_role', '');
+    $config->save();
+  }
+}
+
+/**
+ * Set jQuery to the backwards-compatible, legacy version for existing sites.
+ */
+function system_update_1091() {
+  if (config_get('system.core', 'jquery_version') === NULL) {
+    config_set('system.core', 'jquery_version', 'legacy');
+  }
+}
+
+/**
+ * Removes the block_interest_cohort configuration added by
+ * system_update_1075().
+ *
+ * see https://github.com/backdrop/backdrop-issues/issues/6199
+ *
+ * For more information, see the change record at:
+ * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
+ */
+function system_update_1092() {
+  config_clear('system.core', 'block_interest_cohort');
 }
 
 /**

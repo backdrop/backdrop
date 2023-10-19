@@ -163,7 +163,7 @@ function hook_cron_queue_info() {
  * Alter cron queue information before cron runs.
  *
  * Called by backdrop_cron_run() to allow modules to alter cron queue settings
- * before any jobs are processesed.
+ * before any jobs are processed.
  *
  * @param array $queues
  *   An array of cron queue information.
@@ -535,8 +535,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * mymodule_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
  * arguments, in that order.
  *
- * Special care should be taken for the page callback backdrop_get_form(), because
- * your specific form callback function will always receive $form and
+ * Special care should be taken for the page callback backdrop_get_form(),
+ * because your specific form callback function will always receive $form and
  * &$form_state as the first function arguments:
  * @code
  *   function mymodule_abc_form($form, &$form_state) {
@@ -649,55 +649,56 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * );
  * @endcode
  *
- * @return
+ * @return array
  *   An array of menu items. Each menu item has a key corresponding to the
  *   Backdrop path being registered. The corresponding array value is an
  *   associative array that may contain the following key-value pairs:
- *   - "title": Required. The untranslated title of the menu item.
- *   - "title callback": Function to generate the title; defaults to t().
- *     If you require only the raw string to be output, set this to FALSE.
- *   - "title arguments": Arguments to send to t() or your custom callback,
- *     with path component substitution as described above.
- *   - "description": The untranslated description of the menu item.
- *   - "page callback": The function to call to display a web page when the user
- *     visits the path. If omitted, the parent menu item's callback will be used
- *     instead.
- *   - "page arguments": An array of arguments to pass to the page callback
- *     function, with path component substitution as described above.
- *   - "delivery callback": The function to call to package the result of the
- *     page callback function and send it to the browser. Defaults to
- *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
- *     item. Note that this function is called even if the access checks fail,
- *     so any custom delivery callback function should take that into account.
- *     Backdrop includes the following delivery callbacks in core:
- *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
+ *   - title: The untranslated title of the menu item.
+ *   - title callback: (optional) Function to generate the title; defaults to
+ *     t(). If you require only the raw string to be output, set this to FALSE.
+ *   - title arguments: (optional) Arguments to send to t() or your custom
+ *     callback, with path component substitution as described above.
+ *   - description: (optional) The untranslated description of the menu item.
+ *   - page callback: (optional) The function to call to display a web page when
+ *     the user visits the path. If omitted, the parent menu item's callback
+ *     will be used instead.
+ *   - page arguments: (optional) An array of arguments to pass to the page
+ *     callback function, with path component substitution as described above.
+ *   - delivery callback: (optional) The function to call to package the result
+ *     of the page callback function and send it to the browser. Defaults to
+ *     backdrop_deliver_html_page() unless a value is inherited from a parent
+ *     menu item. Note that this function is called even if the access checks
+ *     fail, so any custom delivery callback function should take that into
+ *     account. Backdrop includes the following delivery callbacks in core:
+ *     - "backdrop_deliver_html_page": The default used for printing HTML pages.
  *       Menu items with this callback may be wrapped in a layout template by
  *       Layout module. See layout_route_handler().
- *     - backdrop_json_deliver: The value of the menu callback will be rendered
- *       as JSON without any further processing. This delivery callback should
- *       be used on any path that should return a JSON response at all times,
- *       even on access denied or 404 pages.
- *     - ajax_deliver: This delivery callback is used when returning AJAX
+ *     - "backdrop_json_deliver": The value of the menu callback will be
+ *       rendered as JSON without any further processing. This delivery callback
+ *       should be used on any path that should return a JSON response at all
+ *       times, even on access denied or 404 pages.
+ *     - "ajax_deliver": This delivery callback is used when returning AJAX
  *       commands that will be interpreted by Backdrop core's ajax.js file. This
  *       delivery callback is set automatically if the menu callback returns a
  *       renderable element with the #type property "ajax_commands".
- *     - ajax_deliver_dialog: This delivery callback is used when the contents
+ *     - "ajax_deliver_dialog": This delivery callback is used when the contents
  *       of a menu callback should be returned as AJAX commands to open as a
  *       dialog. This delivery callback is set automatically if the requesting
- *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
- *   - "access callback": A function returning TRUE if the user has access
- *     rights to this menu item, and FALSE if not. It can also be a boolean
- *     constant instead of a function, and you can also use numeric values
- *     (will be cast to boolean). Defaults to user_access() unless a value is
- *     inherited from the parent menu item; only MENU_DEFAULT_LOCAL_TASK items
- *     can inherit access callbacks. To use the user_access() default callback,
- *     you must specify the permission to check as 'access arguments' (see
- *     below).
- *   - "access arguments": An array of arguments to pass to the access callback
- *     function, with path component substitution as described above. If the
- *     access callback is inherited (see above), the access arguments will be
- *     inherited with it, unless overridden in the child menu item.
- *   - "theme callback": (optional) A function returning the machine-readable
+ *       AJAX call requested a dialog. See
+ *       system_page_delivery_callback_alter().
+ *   - access callback: (optional) A function returning TRUE if the user has
+ *     access rights to this menu item, and FALSE if not. It can also be a
+ *     boolean constant instead of a function, and you can also use numeric
+ *     values (will be cast to boolean). Defaults to user_access() unless a
+ *     value is inherited from the parent menu item; only
+ *     MENU_DEFAULT_LOCAL_TASK items can inherit access callbacks. To use the
+ *     user_access() default callback, you must specify the permission to check
+ *     as 'access arguments' (see below).
+ *   - access arguments: (optional) An array of arguments to pass to the access
+ *     callback function, with path component substitution as described above.
+ *     If the access callback is inherited (see above), the access arguments
+ *     will be inherited with it, unless overridden in the child menu item.
+ *   - theme callback: (optional) A function returning the machine-readable
  *     name of the theme that will be used to render the page. If not provided,
  *     the value will be inherited from a parent menu item. If there is no
  *     theme callback, or if the function does not return the name of a current
@@ -710,18 +711,18 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     switching functionality (for example, a module which allows the theme to
  *     be set dynamically based on the current user's role) should use
  *     hook_custom_theme() instead.
- *   - "theme arguments": An array of arguments to pass to the theme callback
- *     function, with path component substitution as described above.
- *   - "file": A file that will be included before the page callback is called;
- *     this allows page callback functions to be in separate files. The file
- *     should be relative to the implementing module's directory unless
+ *   - theme arguments: (optional) An array of arguments to pass to the theme
+ *     callback function, with path component substitution as described above.
+ *   - file: (optional) A file that will be included before the page callback is
+ *     called; this allows page callback functions to be in separate files. The
+ *     file should be relative to the implementing module's directory unless
  *     otherwise specified by the "file path" option. Does not apply to other
  *     callbacks (only page callback).
- *   - "file path": The path to the directory containing the file specified in
- *     "file". This defaults to the path to the module implementing the hook.
- *   - "load arguments": An array of arguments to be passed to each of the
- *     wildcard object loaders in the path, after the path argument itself.
- *
+ *   - file path: (optional) The path to the directory containing the file
+ *     specified in "file". This defaults to the path to the module implementing
+ *     the hook.
+ *   - load arguments: (optional) An array of arguments to be passed to each of
+ *     the wildcard object loaders in the path, after the path argument itself.
  *     For example, if a module registers path node/%node/revisions/%/view
  *     with load arguments set to array(3), the '%node' in the path indicates
  *     that the loader function node_load() will be called with the second
@@ -729,7 +730,6 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     indicates that the fourth path component will also be passed to
  *     node_load() (numbering of path components starts at zero). So, if path
  *     node/12/revisions/29/view is requested, node_load(12, 29) will be called.
- *
  *     There are also two "magic" values that can be used in load arguments.
  *     "%index" indicates the index of the wildcard path component. "%map"
  *     indicates the path components as an array. For example, if a module
@@ -743,59 +743,60 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     component and numbering starts at zero). user_category_load() can then
  *     use these values to extract the information that 'foo' is the category
  *     being requested.
- *   - "weight": An integer that determines the relative position of items in
- *     the menu; higher-weighted items sink. Defaults to 0. Menu items with the
- *     same weight are ordered alphabetically.
- *   - "menu_name": Optional. Set this to a custom menu if you don't want your
- *     item to be placed in the Main menu.
- *   - "expanded": Optional. If set to TRUE, and if a menu link is provided for
+ *   - weight: (optional) An integer that determines the relative position of
+ *     items in the menu; higher-weighted items sink. Defaults to 0. Menu items
+ *     with the same weight are ordered alphabetically.
+ *   - menu_name: (optional) Set this to a custom menu (e.g. "main-menu") if you
+ *     want your item to be placed in a menu. Defaults to a hidden "internal"
+ *     menu.
+ *   - expanded: (optional) If set to TRUE, and if a menu link is provided for
  *     this menu item (as a result of other properties), then the menu link is
  *     always expanded, equivalent to its 'always expanded' checkbox being set
  *     in the UI.
- *   - "context": (optional) Defines the context a tab may appear in. By
- *     default, all tabs are only displayed as local tasks when being rendered
- *     in a page context. All tabs that should be accessible as contextual links
- *     in page region containers outside of the parent menu item's primary page
- *     context should be registered using one of the following contexts:
- *     - MENU_CONTEXT_PAGE: (default) The tab is displayed as local task for the
- *       page context only.
- *     - MENU_CONTEXT_INLINE: The tab is displayed as contextual link outside of
- *       the primary page context only.
+ *   - context: (optional) Defines the context a tab may appear in. By default,
+ *     all tabs are only displayed as local tasks when being rendered in a page
+ *     context. All tabs that should be accessible as contextual links in page
+ *     region containers outside of the parent menu item's primary page context
+ *     should be registered using one of the following contexts:
+ *     - "MENU_CONTEXT_PAGE": (default) The tab is displayed as local task for
+ *       the page context only.
+ *     - "MENU_CONTEXT_INLINE": The tab is displayed as contextual link outside
+ *       of the primary page context only.
  *     Contexts can be combined. For example, to display a tab both on a page
  *     and inline, a menu router item may specify:
  *     @code
  *       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
  *     @endcode
- *   - "tab_parent": For local task menu items, the path of the task's parent
- *     item; defaults to the same path without the last component (e.g., the
- *     default parent for 'admin/people/create' is 'admin/people').
- *   - "tab_root": For local task menu items, the path of the closest non-tab
- *     item; same default as "tab_parent".
- *   - "position": Position of the block ('left' or 'right') on the system
- *     administration page for this item.
- *   - "type": A bitmask of flags describing properties of the menu item.
- *     Many shortcut bitmasks are provided as constants in menu.inc:
- *     - MENU_NORMAL_ITEM: Normal menu items show up in the menu tree and can be
- *       moved/hidden by the administrator.
- *     - MENU_CALLBACK: Callbacks register a path so that the correct
+ *   - tab_parent: (optional) For local task menu items, the path of the task's
+ *     parent item; defaults to the same path without the last component (e.g.,
+ *     the default parent for 'admin/people/create' is 'admin/people').
+ *   - tab_root: (optional) For local task menu items, the path of the closest
+ *     non-tab item; same default as "tab_parent".
+ *   - type: (optional) A bitmask of flags describing properties of the menu
+ *     item. Many shortcut bitmasks are provided as constants in menu.inc:
+ *     - "MENU_NORMAL_ITEM": (default) Normal menu items show up in the menu
+ *       tree and can be moved/hidden by the administrator.
+ *     - "MENU_CALLBACK": Callbacks register a path so that the correct
  *       information is generated when the path is accessed.
- *     - MENU_SUGGESTED_ITEM: Modules may "suggest" menu items that the
+ *     - "MENU_SUGGESTED_ITEM": Modules may "suggest" menu items that the
  *       administrator may enable.
- *     - MENU_LOCAL_ACTION: Local actions are menu items that describe actions
+ *     - "MENU_LOCAL_ACTION": Local actions are menu items that describe actions
  *       on the parent item such as adding a new user or block, and are
  *       rendered in the action-links list in your theme.
- *     - MENU_LOCAL_TASK: Local tasks are menu items that describe different
+ *     - "MENU_LOCAL_TASK": Local tasks are menu items that describe different
  *       displays of data, and are generally rendered as tabs.
- *     - MENU_DEFAULT_LOCAL_TASK: Every set of local tasks should provide one
+ *     - "MENU_DEFAULT_LOCAL_TASK": Every set of local tasks should provide one
  *       "default" task, which should display the same page as the parent item.
- *     If the "type" element is omitted, MENU_NORMAL_ITEM is assumed.
- *   - "options": An array of options to be passed to l() when generating a link
- *     from this menu item. Note that the "options" parameter has no effect on
- *     MENU_LOCAL_TASK, MENU_DEFAULT_LOCAL_TASK, and MENU_LOCAL_ACTION items.
+ *   - options: (optional) An array of options to be passed to l() when
+ *     generating a link from this menu item. Note that the "options" parameter
+ *     has no effect on MENU_LOCAL_TASK, MENU_DEFAULT_LOCAL_TASK, and
+ *     MENU_LOCAL_ACTION items.
  *
  * For a detailed usage example, see page_example.module.
  * For comprehensive documentation on the menu system, see
  * http://drupal.org/node/102338.
+ *
+ * @since 1.24.2 Support for the "position" key removed.
  */
 function hook_menu() {
   $items['example'] = array(
@@ -1587,7 +1588,7 @@ function hook_system_info_alter(&$info, $file, $type) {
  */
 function hook_permission() {
   return array(
-    'configure my module' =>  array(
+    'configure my module' => array(
       'title' => t('Configure my module'),
       'description' => t('Configure settings for my module.'),
     ),
@@ -2877,9 +2878,16 @@ function hook_install() {
  * name, you should never renumber update functions. It may result in updates
  * being either skipped or run twice.
  *
- * Not all module functions are available from within a hook_update_N() function.
- * In order to call a function from your mymodule.module or an include file,
- * you need to explicitly load that file first.
+ * Module functions not in the install file cannot be counted on to be available
+ * from within a hook_update_N() function. In order to call a function from your
+ * mymodule.module or an include file, you need to explicitly load that file
+ * first.
+ *
+ * This is because if a module was previously enabled but is now disabled (and
+ * has not been uninstalled), update hooks will still be called for that module
+ * during system updates, but the mymodule.module file (and any other files
+ * loaded by that one, including, for example, autoload information) will not
+ * have been loaded.
  *
  * During database updates the schema of any module could be out of date. For
  * this reason, caution is needed when using any API function within an update
@@ -2901,9 +2909,9 @@ function hook_install() {
  *   Stores information for multipass updates. See above for more information.
  *
  * @throws BackdropUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of BackdropUpdateException
- *   with a meaningful message for the user. If a database query fails for whatever
- *   reason, it will throw a PDOException.
+ *   In case of error, update hooks should throw an instance of
+ *   BackdropUpdateException with a meaningful message for the user. If a
+ *   database query fails for whatever reason, it will throw a PDOException.
  *
  * @return
  *   Optionally, update hooks may return a translated string that will be
@@ -2937,7 +2945,6 @@ function hook_update_N(&$sandbox) {
 
   // However, for more complex operations that may take a long time, you may
   // hook into Batch API as in the following example.
-
   // Update 3 users at a time to have an exclamation point after their names.
   // (They're really happy that we can do batch API in this hook!)
   if (!isset($sandbox['progress'])) {

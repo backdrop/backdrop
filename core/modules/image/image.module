@@ -296,6 +296,7 @@ function image_file_download($uri) {
 
     // Then the remaining parts are the path to the image.
     $original_uri = file_uri_scheme($uri) . '://' . implode('/', $args);
+    $original_uri = file_uri_normalize_dot_segments($original_uri);
 
     // Check that the file exists and is an image.
     if ($info = image_get_info($uri)) {
@@ -699,8 +700,9 @@ function image_style_deliver($style, $scheme) {
   array_shift($args);
   array_shift($args);
   $target = implode('/', $args);
-
   $image_uri = $scheme . '://' . $target;
+  $image_uri = file_uri_normalize_dot_segments($image_uri);
+
   $derivative_uri = image_style_path($style['name'], $image_uri);
   $derivative_scheme = file_uri_scheme($derivative_uri);
 
@@ -961,6 +963,7 @@ function image_style_flush($style) {
  */
 function image_style_url($style_name, $uri) {
   $uri = image_style_path($style_name, $uri);
+  $uri = file_uri_normalize_dot_segments($uri);
 
   $derivative_exists = file_exists($uri);
   if (!$derivative_exists) {
@@ -1329,7 +1332,7 @@ function image_effect_apply($image, $effect) {
  * @param $current_pixels
  * @param $new_pixels
  *
- * return int
+ * @return int
  */
 function image_filter_keyword($value, $current_pixels, $new_pixels) {
   switch ($value) {
