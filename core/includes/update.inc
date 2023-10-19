@@ -166,6 +166,9 @@ function update_prepare_bootstrap() {
         // db_change_field(), however we are doing it separately to avoid issues
         // with older versions of MariaDB.
         // @see https://github.com/backdrop/backdrop-issues/issues/5496
+        // @todo: revert this workaround once the minimum version of
+        // MySQL/MariaDB in the Backdrop official system requirements is bumped
+        // to a version that doesn't exhibit this problem.
         db_add_index('url_alias', 'alias_langcode_pid', array(
           'alias', 'langcode', 'pid'));
         db_add_index('url_alias', 'source_langcode_pid', array(
