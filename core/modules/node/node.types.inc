@@ -783,7 +783,7 @@ function node_node_type_load(&$types) {
       'promote_default' => FALSE,
       'sticky_enabled' => TRUE,
       'sticky_default' => FALSE,
-      'revision_enabled' => TRUE,
+      'revisions' => 'optional',
       'revision_default' => FALSE,
       'node_preview' => TRUE,
 
