@@ -27,7 +27,7 @@ function system_menu_block_defaults($menu_name) {
     'expand_all' => FALSE,
     'clickdown' => FALSE,
     'collapse' => 'default',
-    'toggle_text' => t('Menu'),
+    'toggle_text' => 'Menu',
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;

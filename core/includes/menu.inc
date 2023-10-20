@@ -1905,7 +1905,7 @@ function theme_menu_local_actions($variables) {
 function theme_menu_toggle($variables) {
   $output = '';
   if ($variables['enabled']) {
-    $toggle_text = ($variables['text'] == 'Menu') ? t('Menu') : check_plain($variables['text']);
+    $toggle_text = t(check_plain($variables['text']));
     $id = $variables['id'];
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
