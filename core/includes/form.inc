@@ -3762,7 +3762,8 @@ function form_process_details($element, &$form_state) {
  *   The rendered HTML output.
  *
  * @since 1.26.2:
- *   - Support for a #summary_attributes property added.
+ *   - Added support for separate #summary_attributes and #details_attributes
+ *     properties.
  *   - #open_label and #close_label properties added to allow styling the
  *     element with a "more"/"less" toggle.
  * @ingroup themeable
