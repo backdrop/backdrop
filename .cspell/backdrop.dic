@@ -157,11 +157,13 @@ fieldlabel
 fieldsql
 fileapi
 filefield
+filelist
 filelisting
 fileurl
 filterlabel
 firstcolumn
 firstsegment
+fixnull
 floo
 foaf
 FOLLOWLOCATION
@@ -257,6 +259,7 @@ linktitle
 linktype
 lished
 litespeed
+localpath
 localzone
 luckenbusser
 Lückenbüßer
@@ -312,6 +315,7 @@ mytype
 myusername
 myverylongurlexample
 myverylongurl
+nalias
 natu
 nccc
 NCHUNKS
