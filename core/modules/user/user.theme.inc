@@ -190,7 +190,7 @@ function theme_user_admin_permissions($variables) {
 function theme_user_permission_description($variables) {
   $description = array();
   $permission_item = $variables['permission_item'];
-dpm($permission_item);
+
   if (!empty($permission_item['description'])) {
     $description[] = '<div class="permission-description description table-filter-text-source">' . $permission_item['description'] . '</div>';
   }
