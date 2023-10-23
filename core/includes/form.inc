@@ -3734,6 +3734,7 @@ function form_process_details($element, &$form_state) {
  * Backdrop core admin UI:
  * - the modules listing page (admin/modules).
  * - the site status report page (admin/reports/status).
+ * - the permissions configuration page (admin/config/people/permissions).
  *
  * @param array $variables
  *   An associative array containing:
