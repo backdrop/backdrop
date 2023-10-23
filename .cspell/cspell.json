@@ -23,6 +23,13 @@
     "php",
     "sql"
   ],
+  "flagWords": [
+    "blacklist",
+    "master",
+    "slave",
+    "webmaster",
+    "whitelist"
+  ],
   "globRoot": "../",
   "ignorePaths": [
     "*.svg",
