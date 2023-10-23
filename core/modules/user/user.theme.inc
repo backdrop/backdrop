@@ -177,26 +177,46 @@ function theme_user_admin_permissions($variables) {
  * @param $variables
  *   An associative array containing:
  *   - permission_item: An associative array representing the permission whose
- *     description is being themed. Useful keys include:
+ *     description is being themed. Keys include:
+ *     - title: The human-readable label of the permission.
  *     - description: The text of the permission description.
- *     - warning: A security-related warning message about the permission (if
- *       there is one).
+ *     - restrict access: (bool) TRUE if the permission has security
+ *       implications, otherwise FALSE.
+ *     - warning (optional): The description of the security implications of the
+ *       permission.
  *
  * @ingroup themeable
  */
 function theme_user_permission_description($variables) {
   $description = array();
   $permission_item = $variables['permission_item'];
+dpm($permission_item);
   if (!empty($permission_item['description'])) {
     $description[] = '<div class="permission-description description table-filter-text-source">' . $permission_item['description'] . '</div>';
   }
-  if (!empty($permission_item['restrict access'])) {
-    $description[] = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+  if ($permission_item['restrict access']) {
+    // Default warning for all restricted permissions.
+    $permission_warning = '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+    // If no specific details have been provided with regards to the reason of
+    // the restriction, show only the default warning text.
+    if (empty($permission_item['warning'])) {
+      $description[] = $permission_warning;
+    }
+    else {
+      // If details have been provided, show them in a <details> element with
+      // a "more"/"less" toggle.
+      $warning = array(
+        '#summary' => $permission_warning,
+        '#details' => $permission_item['warning'],
+        '#open' => FALSE,
+        '#open_label' => t('more'),
+        '#close_label' => t('less'),
+        '#details_attributes' => array('class' => array('permission-warning-description', 'description')),
+      );
+      $description[] = theme('details', array('element' => $warning));
+    }
   }
-  if (!empty($permission_item['warning'])) {
-    $description[] = '<a class="warning-toggle" href="#">more</a>';
-    $description[] = '<div class="permission-warning-description">' . $permission_item['warning'] . '</div>';
-  }
+
   if (!empty($description)) {
     return implode(' ', $description);
   }

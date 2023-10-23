@@ -3743,9 +3743,16 @@ function form_process_details($element, &$form_state) {
  *     - #details
  *     - #children
  *     - #id
- *     - #attributes
- *     - #summary_attributes
- *     - #open
+ *     - #attributes: Any attributes to be added to the overall <details> HTML
+ *       tag.
+ *     - #summary_attributes: Any attributes to be added to the <summary> HTML
+ *       tag.
+ *     - #details_attributes: Any attributes to be added to the wrapper <div>
+ *       HTML tag around the content specified via the #details property. A
+ *       "details-content-wrapper" class attribute is added to this <div> by
+ *       default.
+ *     - #open: (bool) Set to TRUE to have the details element be expanded, or
+ *       FALSE to have it be collapsed by default.
  *     - #open_label (optional): Renders the #summary text with a more/less
  *       toggle. Requires the #close_label to also be specified.
  *     - #close_label (optional): Renders the #summary text with a more/less
@@ -3762,10 +3769,11 @@ function form_process_details($element, &$form_state) {
  */
 function theme_details($variables) {
   $element = $variables['element'];
-  // Ensure #attributes and #summary_attributes are set.
+  // Ensure #attributes, #summary_attributes and #details_attributes are set.
   $element += array(
     '#attributes' => array(),
     '#summary_attributes' => array(),
+    '#details_attributes' => array(),
   );
   // Assign an HTML ID if one has been specified.
   if (!array_key_exists('id', $element['#attributes']) && isset($element['#id'])) {
@@ -3809,7 +3817,8 @@ function theme_details($variables) {
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
   $output .= '<summary' . backdrop_attributes($element['#summary_attributes']) . '>' . $summary_content . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
-    $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
+    $element['#details_attributes']['class'][] = 'details-content-wrapper';
+    $output .= '<div' . backdrop_attributes($element['#details_attributes']) . '>' . $element['#details'] . '</div>';
   }
   if (isset($element['#children']) && !empty($element['#children'])) {
     $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';
