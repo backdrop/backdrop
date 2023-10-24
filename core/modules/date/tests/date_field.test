@@ -426,7 +426,7 @@ class DateFieldTokenTestCase extends DateFieldBasic {
           '@token' => $token,
         )));
       } else {
-        $this->assertIdentical($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", array(
+        $this->assertIdentical($replacements[$token], $expected, format_string('Token value for @token was \'@actual\', expected value \'@expected\'.', array(
           '@token' => $token,
           '@actual' => $replacements[$token],
           '@expected' => $expected,

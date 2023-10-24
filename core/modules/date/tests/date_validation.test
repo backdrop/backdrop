@@ -67,7 +67,7 @@ class DateValidationTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value][time]'] = '10:30';
     }
     $this->backdropPost('node/add/story', $edit, t('Save'));
-    $should_not_be = $edit['title'] . "has been created";
+    $should_not_be = $edit['title'] . ' has been created';
     $this->assertNoText($should_not_be, "Correctly blocked creation of node with invalid month and day for a $field_type field using the $widget_type widget.");
     $this->assertText('The month is invalid.', "Correctly blocked invalid month for a $field_type field using the $widget_type widget.");
     $this->assertText('The day is invalid.', "Correctly blocked invalid day for a $field_type field using the $widget_type widget.");
@@ -202,9 +202,13 @@ class DateValidationTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value2][time]'] = '10:00';
     }
     $this->backdropPost('node/add/story', $edit, t('Save'));
-    $should_not_be = $edit['title'] . " has been created";
-    $this->assertNoText($should_not_be, "Correctly blocked creation of node with end date after start date for a $field_type field using the $widget_type widget.");
-    $this->assertText('must be greater', "Marked form with wrong end date as invalid for a $field_type field using the $widget_type widget.");
+    $should_not_be = $edit['title'] . ' has been created';
+    $args = array(
+      '@field_type' => $field_type,
+      '@widget_type' => $widget_type,
+    );
+    $this->assertNoText($should_not_be, format_string('Correctly blocked creation of node with end date after start date for a @field_type field using the @widget_type widget.', $args));
+    $this->assertText('must be greater', format_string('Marked form with wrong end date as invalid for a @field_type field using the @widget_type widget.', $args));
 
     // Create a node with missing start date.
     // date_select doesn't allow empty dates when required.
@@ -246,9 +250,13 @@ class DateValidationTestCase extends DateFieldBasic {
         $edit[$field_name . '[und][0][value2][time]'] = '10:00';
       }
       $this->backdropPost('node/add/story', $edit, t('Save'));
-      $should_not_be = $edit['title'] . " has been created";
-      $this->assertNoText($should_not_be, "Correctly blocked creation of node with missing start date for a $field_type field using the $widget_type widget.");
-      $this->assertText('A start date is required', "Marked form with missing start date as invalid for a $field_type field using the $widget_type widget.");
+      $should_not_be = $edit['title'] . ' has been created';
+      $args = array(
+        '@field_type' => $field_type,
+        '@widget_type' => $widget_type,
+      );
+      $this->assertNoText($should_not_be, format_string('Correctly blocked creation of node with missing start date for a @field_type field using the @widget_type widget.', $args));
+      $this->assertText('A start date is required', 'Marked form with missing start date as invalid for a @field_type field using the @widget_type widget.', $args);
     }
   }
 }
