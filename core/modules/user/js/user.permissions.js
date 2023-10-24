@@ -97,13 +97,6 @@ Backdrop.behaviors.permissions = {
       // submitted form. If we'd automatically check existing checkboxes, the
       // permission table would be polluted with redundant entries. This
       // is deliberate, but desirable when we automatically check them.
-      var $dummy = $('<input type="checkbox" class="form-checkbox dummy-checkbox" disabled="disabled" checked="checked" />')
-        .attr('title', Backdrop.t("This permission is inherited from the authenticated user role."))
-        .hide();
-
-      $('input[type=checkbox]', this).not('.role-authenticated, .role-anonymous').addClass('real-checkbox').each(function () {
-        $dummy.clone().insertAfter(this);
-      });
 
       // Initialize the authenticated user checkbox.
       $table.on('click.permissions', 'input[type=checkbox].role-authenticated', function(e) {
@@ -117,21 +110,36 @@ Backdrop.behaviors.permissions = {
   },
 
   /**
-   * Toggles all dummy checkboxes based on the checkboxes' state.
+   * Toggles visibility of all dummy/real checkboxes.
    *
-   * If the "authenticated user" checkbox is checked, the checked and disabled
-   * checkboxes are shown, the real checkboxes otherwise.
+   * If the "authenticated user" checkbox is checked for a specific permission,
+   * the respective (checked and disabled) dummy checkboxes in the same row are
+   * shown, and the respective real checkboxes are hidden.
+   *
+   * If the "authenticated user" checkbox is unchecked, the dummy checkboxes are
+   * hidden, and the real checkboxes are shown.
    */
   toggle: function () {
     var authCheckbox = this, $row = $(this).closest('tr');
     // jQuery performs too many layout calculations for .hide() and .show(),
     // leading to a major page rendering lag on sites with many roles and
-    // permissions. Therefore, we toggle visibility directly.
+    // permissions. Therefore, we toggle visibility directly by adding/removing
+    // the 'element-hidden' CSS class.
     $row.find('.real-checkbox').each(function () {
-      this.style.display = (authCheckbox.checked ? 'none' : '');
+      if (authCheckbox.checked) {
+        $(this).addClass('element-hidden');
+      }
+      else {
+        $(this).removeClass('element-hidden');
+      }
     });
     $row.find('.dummy-checkbox').each(function () {
-      this.style.display = (authCheckbox.checked ? '' : 'none');
+      if (authCheckbox.checked) {
+        $(this).removeClass('element-hidden');
+      }
+      else {
+        $(this).addClass('element-hidden');
+      }
     });
   }
 };
