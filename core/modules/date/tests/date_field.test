@@ -57,6 +57,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
     $default_format = !empty($default_format) ? $default_format : 'long';
     $cache_enabled = !empty($cache_enabled);
     $cache_count = !empty($cache_count) ? $cache_count : 4;
+    $required = !empty($required) ? $required : FALSE;
 
     $field = array(
       'field_name' => $field_name,
@@ -79,6 +80,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'bundle' => $bundle,
       // Move the date right below the title.
       'weight' => -5,
+      'required' => $required,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -189,6 +191,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'bundle' => $bundle,
       // Move the date right below the title.
       'weight' => -5,
+      'required' => $required,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.

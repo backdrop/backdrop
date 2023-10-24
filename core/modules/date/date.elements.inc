@@ -1645,13 +1645,19 @@ function date_combo_validate($element, &$form_state) {
   // An 'End' date without a 'Start' date is a validation error.
   if ($empty && !empty($item[$to_field])) {
     if (!is_array($item[$to_field])) {
-      form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+      form_error($element, t("A start date is required if an end date is supplied for field %field #@delta.", array(
+        '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
+        '%field' => $instance['label'],
+      )));
       $empty = FALSE;
     }
     else {
       foreach ($item[$to_field] as $key => $value) {
         if (!empty($value)) {
-          form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+          form_error($element, t("A start date is required if an end date is supplied for field %field #@delta.", array(
+            '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
+            '%field' => $instance['label'],
+          )));
           $empty = FALSE;
           break;
         }
@@ -1672,79 +1678,82 @@ function date_combo_validate($element, &$form_state) {
       return;
     }
   }
-
-  $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
-  $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
-  $element[$from_field]['#date_timezone'] = $timezone;
-  $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
-
-  if (!empty($field['settings']['todate'])) {
-    $element[$to_field]['#date_timezone'] = $timezone;
-    $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
-  }
   else {
-    $to_date = $from_date;
-  }
+    $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
+    $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
+    $element[$from_field]['#date_timezone'] = $timezone;
+    $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
+  
+    if (!empty($field['settings']['todate'])) {
+      $element[$to_field]['#date_timezone'] = $timezone;
+      $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
+    }
+    else {
+      $to_date = $from_date;
+    }
 
-  // Neither the start date nor the end date should be empty at this point
-  // unless they held values that couldn't be evaluated.
-
-  if (!$instance['required'] && (!date_is_date($from_date) || !date_is_date($to_date))) {
-    date_element_empty($element, $form_state);
-    $errors[] = t('The dates are invalid.');
-  }
-  elseif (!empty($field['settings']['todate']) && $from_date > $to_date) {
-    form_set_value($element[$to_field], $to_date, $form_state);
-    $errors[] = t('The end date must be greater than the start date.');
-  }
-  else {
-    // Convert input dates back to their UTC values and re-format to ISO
-    // or UNIX instead of the DATETIME format used in element processing.
-    $item[$tz_field] = $timezone;
-
-    // Update the context for changes in the $item, and allow other modules to
-    // alter the computed local dates.
-    $context['item'] = $item;
-    // We can only pass two additional values to backdrop_alter, so $element
-    // needs to be included in $context.
-    $context['element'] = $element;
-    backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
-    backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
-
-    $item[$offset_field] = date_offset_get($from_date);
-
-    $test_from = date_format($from_date, 'r');
-    $test_to = date_format($to_date, 'r');
-
-    $item[$offset_field2] = date_offset_get($to_date);
-    date_timezone_set($from_date, timezone_open($timezone_db));
-    date_timezone_set($to_date, timezone_open($timezone_db));
-    $item[$from_field] = date_format($from_date, date_type_format($field['type']));
-    $item[$to_field] = date_format($to_date, date_type_format($field['type']));
-
-    // If the db timezone is not the same as the display timezone
-    // and we are using a date with time granularity,
-    // test a roundtrip back to the original timezone to catch
-    // invalid dates, like 2AM on the day that spring daylight savings
-    // time begins in the US.
-    $granularity = date_format_order($element[$from_field]['#date_format']);
-    if ($timezone != $timezone_db && date_has_time($granularity)) {
-      date_timezone_set($from_date, timezone_open($timezone));
-      date_timezone_set($to_date, timezone_open($timezone));
-
-      if ($test_from != date_format($from_date, 'r')) {
-        $errors[] = t('The start date is invalid.');
-      }
-      if ($test_to != date_format($to_date, 'r')) {
-        $errors[] = t('The end date is invalid.');
+    if (!date_is_date($from_date) || !date_is_date($to_date)) {
+      if (!$instance['required']) {
+        $errors[] = t('The dates are invalid.');
       }
     }
-    if (empty($errors)) {
-      form_set_value($element, $item, $form_state);
+    else {
+      if (!empty($field['settings']['todate']) && $from_date > $to_date) {
+        form_set_value($element[$to_field], $to_date, $form_state);
+        $errors[] = t('The end date must be greater than the start date.');
+      }
+      else {
+        // Convert input dates back to their UTC values and re-format to ISO
+        // or UNIX instead of the DATETIME format used in element processing.
+        $item[$tz_field] = $timezone;
+    
+        // Update the context for changes in the $item, and allow other modules to
+        // alter the computed local dates.
+        $context['item'] = $item;
+        // We can only pass two additional values to backdrop_alter, so $element
+        // needs to be included in $context.
+        $context['element'] = $element;
+        backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
+        backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
+    
+        $item[$offset_field] = date_offset_get($from_date);
+    
+        $test_from = date_format($from_date, 'r');
+        $test_to = date_format($to_date, 'r');
+    
+        $item[$offset_field2] = date_offset_get($to_date);
+        date_timezone_set($from_date, timezone_open($timezone_db));
+        date_timezone_set($to_date, timezone_open($timezone_db));
+        $item[$from_field] = date_format($from_date, date_type_format($field['type']));
+        $item[$to_field] = date_format($to_date, date_type_format($field['type']));
+
+        // If the db timezone is not the same as the display timezone
+        // and we are using a date with time granularity,
+        // test a roundtrip back to the original timezone to catch
+        // invalid dates, like 2AM on the day that spring daylight savings
+        // time begins in the US.
+        $granularity = date_format_order($element[$from_field]['#date_format']);
+        if ($timezone != $timezone_db && date_has_time($granularity)) {
+          date_timezone_set($from_date, timezone_open($timezone));
+          date_timezone_set($to_date, timezone_open($timezone));
+    
+          if ($test_from != date_format($from_date, 'r')) {
+            $errors[] = t('The start date is invalid.');
+          }
+          if ($test_to != date_format($to_date, 'r')) {
+            $errors[] = t('The end date is invalid.');
+          }
+        }
+        if (empty($errors)) {
+          form_set_value($element, $item, $form_state);
+        }
+      }
     }
   }
-
-  if (!empty($errors)) {
+  // Don't show further errors if errors are already flagged
+  // because otherwise we'll show errors on the nested elements
+  // more than once.
+  if (!form_get_errors() && !empty($errors)) {
     if (count($errors) === 1) {
       $error_list = ' ' . reset($errors);
     }
@@ -1752,10 +1761,15 @@ function date_combo_validate($element, &$form_state) {
       $error_list = theme('item_list', array('items' => $errors));
     }
     if ($field['cardinality']) {
-      form_error($element, t('There are errors in @field_name value #@delta:', array('@field_name' => $instance['label'], '@delta' => $delta + 1)) . $error_list);
+      form_error($element, t('There are errors in %field_name value #@delta:', array(
+        '%field_name' => $instance['label'],
+        '@delta' => $delta + 1,
+      )) . $error_list);
     }
     else {
-      form_error($element, t('There are errors in @field_name:', array('@field_name' => $instance['label'])) . $error_list);
+      form_error($element, t('There are errors in %field_name:', array(
+        '%field_name' => $instance['label'],
+      )) . $error_list);
     }
   }
 }
