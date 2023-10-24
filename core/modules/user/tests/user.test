@@ -1426,7 +1426,10 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     // assigned on new content types.
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.'));
-    $this->assertNoFieldByXPath("//table[@id='permissions']//input[@checked]");
+    // We are only looking for checked permission checkboxes that aren't dummy.
+    // Dummy permission checkboxes are always checked (but visually hidden by
+    // default), but we can exclude them by their 'dummy-checkbox' class.
+    $this->assertNoFieldByXPath("//table[@id='permissions']//input[not(contains(@class, 'dummy-checkbox')) and @checked]");
 
     // Set both an admin role and editor role.
     $edit = array();
