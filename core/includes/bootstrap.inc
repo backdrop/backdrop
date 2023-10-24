@@ -3249,7 +3249,9 @@ function _backdrop_bootstrap_sanitize_request() {
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
     // Backwards compatible setting support. @todo Remove in 2.x.
+    // cspell:disable
     $allowlist = settings_get('sanitize_input_whitelist', array());
+    // cspell:enable
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
 
