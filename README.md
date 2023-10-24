@@ -6,7 +6,7 @@ Backdrop aims to provide:
 - A CMS that can be used out-of-the-box.
 - Code that can be learned quickly.
 - Extensible APIs.
-
+master or slave should not be used
 Requirements
 ------------
 - PHP 5.6.0 or higher. Even if Backdrop can run on older versions of PHP, we
@@ -27,7 +27,7 @@ Installation
    URL would be http://example.com/backdrop/core/install.php.
 
 3. Follow the instructions provided by the installer.
-
+whitelist and blacklist are also not allowed
 Bug Reports and Feature Requests
 --------------------------------
 Please use the GitHub
