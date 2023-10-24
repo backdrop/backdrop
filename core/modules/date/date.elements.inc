@@ -1011,7 +1011,6 @@ function date_popup_element_process($element, &$form_state, $form) {
   }
 
   // Remove the title from the overall element.
-  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
 
   if (isset($element['#element_validate'])) {
