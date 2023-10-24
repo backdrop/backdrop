@@ -69,7 +69,36 @@ Backdrop.behaviors.permissionsFilter = {
 };
 
 /**
- * Shows checked and disabled checkboxes for inherited permissions.
+ * Shows dummy (checked and disabled) checkboxes for inherited permissions.
+ *
+ * When the checkbox for a specific permission for the "Authenticated" role is
+ * checked, the rest of the non-anonymous user roles inherit the same
+ * permission. We are indicating that visually by checking and "locking" the
+ * checkboxes for the same permission for the other roles in the same row on
+ * the permissions table (with the exception of the respective checkbox for the
+ * "Anonymous" role).
+ *
+ * When a permission is inherited that way, instead of checking/unchecking the
+ * real checkboxes of the same permission for other user roles, we are visually
+ * toggling between real and "dummy" checkboxes. The dummy checkboxes:
+ * - always have their 'checked' attribute set.
+ * - are always locked via the 'disabled' attribute, so that they cannot be
+ *   manually checked/unchecked.
+ * - do not have a 'name' attribute set, so their values are not being submitted
+ *   with the form.
+ *
+ * If we'd automatically check the actual/real checkboxes, the respective
+ * permissions would be saved in the configuration files of the user roles,
+ * which is not desired (inheritance of a permission is done by checking whether
+ * that permission has been granted to the "Authenticated" role - not by
+ * checking whether the permission has been explicitly granted).
+ *
+ * Because we are not altering the value of the actual checkboxes during form
+ * submission (we are simply visually showing/hiding them on the table), we are
+ * not "polluting" configuration files of user roles with any permissions that
+ * have not been explicitly granted to them. That way, permissions are only
+ * retained in configuration if they have been previously explicitly granted (as
+ * opposed to being inherited by the "Authenticated" role).
  */
 Backdrop.behaviors.permissions = {
   attach: function (context) {
@@ -91,12 +120,6 @@ Backdrop.behaviors.permissions = {
         method = 'append';
       }
       $table.detach();
-
-      // Create dummy checkboxes. We use dummy checkboxes instead of reusing
-      // the existing checkboxes here because new checkboxes don't alter the
-      // submitted form. If we'd automatically check existing checkboxes, the
-      // permission table would be polluted with redundant entries. This
-      // is deliberate, but desirable when we automatically check them.
 
       // Initialize the authenticated user checkbox.
       $table.on('click.permissions', 'input[type=checkbox].role-authenticated', function(e) {
