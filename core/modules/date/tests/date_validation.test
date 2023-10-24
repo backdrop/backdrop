@@ -256,7 +256,7 @@ class DateValidationTestCase extends DateFieldBasic {
         '@widget_type' => $widget_type,
       );
       $this->assertNoText($should_not_be, format_string('Correctly blocked creation of node with missing start date for a @field_type field using the @widget_type widget.', $args));
-      $this->assertText('A start date is required', 'Marked form with missing start date as invalid for a @field_type field using the @widget_type widget.', $args);
+      $this->assertText('A start date is required', format_string('Marked form with missing start date as invalid for a @field_type field using the @widget_type widget.', $args));
     }
   }
 }
