@@ -1683,7 +1683,7 @@ function date_combo_validate($element, &$form_state) {
     $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
     $element[$from_field]['#date_timezone'] = $timezone;
     $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
-  
+
     if (!empty($field['settings']['todate'])) {
       $element[$to_field]['#date_timezone'] = $timezone;
       $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
@@ -1706,21 +1706,21 @@ function date_combo_validate($element, &$form_state) {
         // Convert input dates back to their UTC values and re-format to ISO
         // or UNIX instead of the DATETIME format used in element processing.
         $item[$tz_field] = $timezone;
-    
-        // Update the context for changes in the $item, and allow other modules to
-        // alter the computed local dates.
+
+        // Update the context for changes in the $item, and allow other modules
+        // to alter the computed local dates.
         $context['item'] = $item;
         // We can only pass two additional values to backdrop_alter, so $element
         // needs to be included in $context.
         $context['element'] = $element;
         backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
         backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
-    
+
         $item[$offset_field] = date_offset_get($from_date);
-    
+
         $test_from = date_format($from_date, 'r');
         $test_to = date_format($to_date, 'r');
-    
+
         $item[$offset_field2] = date_offset_get($to_date);
         date_timezone_set($from_date, timezone_open($timezone_db));
         date_timezone_set($to_date, timezone_open($timezone_db));
@@ -1736,7 +1736,7 @@ function date_combo_validate($element, &$form_state) {
         if ($timezone != $timezone_db && date_has_time($granularity)) {
           date_timezone_set($from_date, timezone_open($timezone));
           date_timezone_set($to_date, timezone_open($timezone));
-    
+
           if ($test_from != date_format($from_date, 'r')) {
             $errors[] = t('The start date is invalid.');
           }
