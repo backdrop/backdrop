@@ -111,13 +111,6 @@ Backdrop.behaviors.permissions = {
 
   /**
    * Toggles visibility of all dummy/real checkboxes.
-   *
-   * If the "authenticated user" checkbox is checked for a specific permission,
-   * the respective (checked and disabled) dummy checkboxes in the same row are
-   * shown, and the respective real checkboxes are hidden.
-   *
-   * If the "authenticated user" checkbox is unchecked, the dummy checkboxes are
-   * hidden, and the real checkboxes are shown.
    */
   toggle: function () {
     var authCheckbox = this, $row = $(this).closest('tr');
@@ -125,22 +118,28 @@ Backdrop.behaviors.permissions = {
     // leading to a major page rendering lag on sites with many roles and
     // permissions. Therefore, we toggle visibility directly by adding/removing
     // the 'element-hidden' CSS class.
-    $row.find('.real-checkbox').each(function () {
-      if (authCheckbox.checked) {
+    if (authCheckbox.checked) {
+      // If the "authenticated user" checkbox is checked for a specific
+      // permission, hide the respective real checkboxes in the same row...
+      $row.find('.real-checkbox').each(function () {
         $(this).addClass('element-hidden');
-      }
-      else {
+      });
+      // ...and show the respective (checked and disabled) dummy checkboxes.
+      $row.find('.dummy-checkbox').each(function () {
         $(this).removeClass('element-hidden');
-      }
-    });
-    $row.find('.dummy-checkbox').each(function () {
-      if (authCheckbox.checked) {
+      });
+    }
+    else {
+      // If the "authenticated user" checkbox is unchecked, show the real
+      // checkboxes in the same row...
+      $row.find('.real-checkbox').each(function () {
         $(this).removeClass('element-hidden');
-      }
-      else {
+      });
+      // ...and hide the dummy checkboxes.
+      $row.find('.dummy-checkbox').each(function () {
         $(this).addClass('element-hidden');
-      }
-    });
+      });
+    }
   }
 };
 
