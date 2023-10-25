@@ -701,17 +701,22 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         // module within a project needs to be hidden, and submodules enabled
         // instead. See https://github.com/backdrop/backdrop-issues/issues/5054.
         if (empty($modules[$project['name']]->info['hidden'])) {
+          $module_label = $modules[$project['name']]->info['name'];
+          $module_version = $modules[$project['name']]->info['version'];
           if ($dependency_check) {
+            $label_for_attribute = backdrop_html_class('edit-modules-' . $modules[$project['name']]->name);
+            $module_label = '<label for="' . $label_for_attribute . '">' . $module_label . '</label>';
+
             $options[$project['name']] = array(
-              array('data' => $modules[$project['name']]->info['name']),
-              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => $module_label),
+              array('data' => $module_version),
               array('data' => implode(', ', $dependencies)),
             );
           }
           else {
             $missing[$project['name']] = array(
-              array('data' => $modules[$project['name']]->info['name']),
-              array('data' => $modules[$project['name']]->info['version']),
+              array('data' => $module_label),
+              array('data' => $module_version),
               array('data' => implode(', ', $dependencies)),
             );
           }
@@ -735,7 +740,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
 
   if (!empty($all_options)) {
     $form['module_instructions'] = array(
-      '#type' => 'item',
+      '#type' => 'help',
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     $form['modules'] = array(
@@ -745,8 +750,6 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       '#header' => $headers,
       '#options' => $all_options,
       '#empty' => t('No new modules installed.'),
-      '#multiple' => TRUE,
-      '#js_select' => TRUE,
       '#weight' => 1,
     );
 
@@ -787,6 +790,17 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       backdrop_set_message(t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'), 'warning');
     }
   }
+
+$form['table'] = array(
+  '#type' => 'tableselect',
+  '#header' => $headers,
+  '#options' => $all_options,
+  // '#js_select' => FALSE,
+);
+foreach ($all_options as $key => $value) {
+  $form['table'][$key]['#disabled'] = TRUE;
+}
+
 
   return $form;
 }
