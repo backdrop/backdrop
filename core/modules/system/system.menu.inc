@@ -152,6 +152,7 @@ function system_menu_block_form($config) {
     '#title' => t('Toggle button text'),
     '#default_value' => $config['toggle_text'],
     '#description' => t('Text to display beside the toggle button. Default: <em>Menu</em>.'),
+    '#indentation' => 1,
     '#states' => array(
       'visible' => array(
         'input[name="block_settings[toggle]"]' => array('checked' => TRUE),
