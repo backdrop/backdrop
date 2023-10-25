@@ -41,3 +41,7 @@
 .ckeditor5-dialog-loading-link .ajax-throbber {
   vertical-align: bottom;
 }
+
+.ck-content .image:not([class*="image-style-"]) {
+  margin: .9em 0 !important;
+}

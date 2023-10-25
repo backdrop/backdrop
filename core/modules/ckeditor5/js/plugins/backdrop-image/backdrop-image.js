@@ -65,6 +65,14 @@ class BackdropImage extends CKEditor5.core.Plugin {
       .for('upcast')
       .add(viewImageToModelImage(editor));
 
+    // Upcast any wrapping <a> element to be part of the CKEditor model.
+    if (editor.plugins.has('DataFilter')) {
+      const dataFilter = editor.plugins.get('DataFilter');
+      conversion
+        .for('upcast')
+        .add(upcastImageBlockLinkGhsAttributes(dataFilter));
+    }
+
     // Downcast from the CKEditor model to an HTML <img> element. This generic
     // downcast runs both while editing and when saving the final HTML.
     conversion
@@ -689,7 +697,62 @@ function viewImageToModelImage(editor) {
 }
 
 /**
- * Modified alternative implementation of linkimageediting.js' downcastImageLink.
+ * General HTML Support integration for attributes on links wrapping images.
+ *
+ * This plugin needs to integrate with GHS manually because upstream image link
+ * plugin GHS integration assumes that the `<a>` element is inside the
+ * `<imageBlock>` which is not true in the case of Backdrop.
+ *
+ * @param {module:html-support/datafilter~DataFilter} dataFilter
+ *   The General HTML support data filter.
+ *
+ * @return {function}
+ *   Callback that binds an event to its parameter.
+ */
+function upcastImageBlockLinkGhsAttributes(dataFilter) {
+  /**
+   * Callback for the element:img upcast event.
+   *
+   * @type {converterHandler}
+   */
+  function converter(event, data, conversionApi) {
+    if (!data.modelRange) {
+      return;
+    }
+
+    const viewImageElement = data.viewItem;
+    const viewContainerElement = viewImageElement.parent;
+
+    if (!viewContainerElement.is('element', 'a')) {
+      return;
+    }
+    if (!data.modelRange.getContainedElement().is('element', 'imageBlock')) {
+      return;
+    }
+
+    const viewAttributes = dataFilter.processViewAttributes(
+      viewContainerElement,
+      conversionApi,
+    );
+
+    if (viewAttributes) {
+      conversionApi.writer.setAttribute(
+        'htmlLinkAttributes',
+        viewAttributes,
+        data.modelRange,
+      );
+    }
+  }
+
+  return (dispatcher) => {
+    dispatcher.on('element:img', converter, {
+      priority: 'high',
+    });
+  };
+}
+
+/**
+ * Modified implementation of the linkimageediting.js downcastImageLink().
  *
  * @return {function}
  *  Callback that binds an event to its parameter.
@@ -721,15 +784,10 @@ function downcastBlockImageLink() {
       writer.createPositionAt(linkElement, 0),
     );
 
-    // Modified alternative implementation of GHS' addBlockImageLinkAttributeConversion().
-    // This is happening here as well to avoid a race condition with the link
-    // element not yet existing.
-    if (
-      conversionApi.consumable.consume(
-        data.item,
-        'attribute:htmlLinkAttributes:imageBlock',
-      )
-    ) {
+    // Modified alternative implementation of Generic HTML Support's
+    // addBlockImageLinkAttributeConversion(). This is happening here as well to
+    // avoid a race condition with the link element not yet existing.
+    if (conversionApi.consumable.consume(data.item, 'attribute:htmlLinkAttributes:imageBlock')) {
       setViewAttributes(
         conversionApi.writer,
         data.item.getAttribute('htmlLinkAttributes'),
@@ -740,7 +798,8 @@ function downcastBlockImageLink() {
 
   return (dispatcher) => {
     dispatcher.on('attribute:linkHref:imageBlock', converter, {
-      priority: 'high',
+      // downcastImageLink specifies 'high', so we need to go higher.
+      priority: 'highest',
     });
   };
 }

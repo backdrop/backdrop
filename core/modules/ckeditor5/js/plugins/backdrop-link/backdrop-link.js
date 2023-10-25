@@ -59,8 +59,8 @@ class BackdropLink extends CKEditor5.core.Plugin {
           [ viewName ]: value
         }, { priority: 5 });
 
-        // Without it the isLinkElement() will not recognize the link and the UI will not show up
-        // when the user clicks a link.
+        // Without it the isLinkElement() will not recognize the link and the UI
+        // will not show up when the user clicks a link.
         writer.setCustomProperty('link', true, linkViewElement);
 
         return linkViewElement;
@@ -109,28 +109,32 @@ class BackdropLink extends CKEditor5.core.Plugin {
       const extraAttributeValues = args[args.length - 1];
       const model = this.editor.model;
       const selection = model.document.selection;
+      const imageUtils = editor.plugins.get('ImageUtils');
+      const closestImage = imageUtils.getClosestSelectedImageElement(selection);
 
-      // Wrapping the original command execution in a model.change() block to make sure there's a single undo step
-      // when the extra attribute is added.
-      model.change(writer => {
+      // Wrapping the original command execution in a model.change() block to
+      // make sure there's a single undo step when the extra attribute is added.
+      model.change((writer) => {
         editor.execute('link', ...args);
 
-        const firstPosition = selection.getFirstPosition();
-
-        extraAttributes.forEach((attributeName, modelName) => {
-          if (selection.isCollapsed) {
-            const node = firstPosition.textNode || firstPosition.nodeBefore;
-
-            if (extraAttributeValues[attributeName]) {
-              writer.setAttribute(modelName, extraAttributeValues[attributeName], writer.createRangeOn(node));
-            } else {
-              writer.removeAttribute(modelName, writer.createRangeOn(node));
+        // If there is an image within this link, apply the link attributes to
+        // the image model's htmlLinkAttributes attribute.
+        if (closestImage) {
+          const htmlLinkAttributes = { attributes: extraAttributeValues };
+          writer.setAttribute('htmlLinkAttributes', htmlLinkAttributes, closestImage);
+        }
+        // Otherwise find the selected link and apply each attribute.
+        else {
+          extraAttributes.forEach((attributeName, modelName) => {
+            let ranges = [];
+            if (selection.isCollapsed) {
+              const firstPosition = selection.getFirstPosition();
+              const node = firstPosition.textNode || firstPosition.nodeBefore;
+              ranges = [ writer.createRangeOn(node) ];
             }
-
-            writer.removeSelectionAttribute(modelName);
-          }
-          else {
-            const ranges = model.schema.getValidRanges(selection.getRanges(), modelName);
+            else {
+              ranges = model.schema.getValidRanges(selection.getRanges(), modelName);
+            }
 
             for (const range of ranges) {
               if (extraAttributeValues[attributeName]) {
@@ -139,10 +143,11 @@ class BackdropLink extends CKEditor5.core.Plugin {
                 writer.removeAttribute(modelName, range);
               }
             }
-          }
-        });
+            writer.removeSelectionAttribute(modelName);
+          });
+        }
       });
-    }, { priority: 'high' } );
+    }, { priority: 'highest' } );
   }
 
   _removeExtraAttributeOnUnlinkCommandExecute(modelName) {
@@ -264,14 +269,25 @@ class BackdropLink extends CKEditor5.core.Plugin {
       const dialogSettings = {
         dialogClass: 'editor-link-dialog'
       };
+      const selection = editor.model.document.selection;
+      const imageUtils = editor.plugins.get('ImageUtils');
+      const closestImage = imageUtils.getClosestSelectedImageElement(selection);
 
       // Pull in existing values from the model to be sent to the dialog.
       let existingValues = {
         'href': linkUI.formView.urlInputView.fieldView.value,
       };
-      extraAttributes.forEach((attributeName, modelName) => {
-        existingValues[attributeName] = linkCommand[modelName];
-      })
+      if (closestImage) {
+        const htmlLinkAttributes = closestImage.getAttribute('htmlLinkAttributes');
+        if (htmlLinkAttributes && htmlLinkAttributes.attributes) {
+          existingValues = Object.assign(existingValues, htmlLinkAttributes.attributes);
+        }
+      }
+      else {
+        extraAttributes.forEach((attributeName, modelName) => {
+          existingValues[attributeName] = linkCommand[modelName];
+        });
+      }
 
       // Prepare a save callback to be used upon saving the dialog.
       const saveCallback = function(returnValues) {
@@ -285,6 +301,10 @@ class BackdropLink extends CKEditor5.core.Plugin {
         // Remove empty file IDs.
         if (!returnValues.attributes['data-file-id']) {
           delete returnValues.attributes['data-file-id'];
+        }
+        // Remove "text" key intended to update the link text (not supported).
+        if (returnValues.attributes.hasOwnProperty('text')) {
+          delete returnValues.attributes['text'];
         }
 
         // The normal link command does not support a 3rd argument natively.

@@ -559,7 +559,7 @@ function ckeditor5_ckeditor5_plugins() {
   // elements.
   $plugins['backdropImageCaption.BackdropImageCaption'] = array(
     'pseudo_plugin' => TRUE,
-    'enabled_callback' => 'ckeditor5_image_caption_plugin_check',
+    'enabled_callback' => '_ckeditor5_image_caption_plugin_check',
     'required_html' => array(
       '<img data-caption>',
       '<figure>',
@@ -587,7 +587,7 @@ function ckeditor5_ckeditor5_plugins() {
   // converting data-align attributes on img tags to classes.
   $plugins['backdropImage.BackdropImageAlignment'] = array(
     'pseudo_plugin' => TRUE,
-    'enabled_callback' => 'ckeditor5_image_alignment_plugin_check',
+    'enabled_callback' => '_ckeditor5_image_alignment_plugin_check',
     'required_html' => array(
       '<img data-align>',
     ),
@@ -656,9 +656,6 @@ function ckeditor5_ckeditor5_plugins() {
     ),
     // Append the "Link" button to the image balloon toolbar.
     'config' => array(
-      'image' => array(
-        'toolbar' => array('|', 'linkImage'),
-      ),
       'backdropLink' => array(
         // Specify an array of CKEditor model name => attribute name values.
         // These attributes are then allowed to be changed via the Backdrop
@@ -678,6 +675,16 @@ function ckeditor5_ckeditor5_plugins() {
 
   $plugins['backdropLink.BackdropLink'] = array(
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
+  );
+
+  $plugins['link.LinkImage'] = array(
+    'enabled_callback' => '_ckeditor5_link_image_plugin_check',
+    'plugin_dependencies' => array('link.Link', 'image.Image'),
+    'config' => array(
+      'image' => array(
+        'toolbar' => array('|', 'linkImage', '|'),
+      ),
+    ),
   );
 
   // See https://ckeditor.com/docs/ckeditor5/latest/features/undo-redo.html
@@ -738,7 +745,7 @@ function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state
  * @return bool
  *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
-function ckeditor5_image_caption_plugin_check($format, $plugin_name) {
+function _ckeditor5_image_caption_plugin_check($format, $plugin_name) {
   return !empty($format->filters['filter_image_caption']->status);
 }
 
@@ -758,8 +765,29 @@ function ckeditor5_image_caption_plugin_check($format, $plugin_name) {
  * @return bool
  *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
-function ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
+function _ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
   return !empty($format->filters['filter_image_align']->status);
+}
+
+
+/**
+ * Enabled callback for hook_ckeditor5_plugins().
+ *
+ * Checks if the Link Image configuration should be loaded. This plugin's
+ * functionality is extended by the backdropImage.BackdropImage plugin.
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is checking settings.
+ * @param string $plugin_name
+ *   The plugin that is being checked.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
+ */
+function _ckeditor5_link_image_plugin_check($format, $plugin_name) {
+  $link_enabled = in_array('link', $format->editor_settings['cketoolbar']);
+  $image_enabled = in_array('backdropImage', $format->editor_settings['cketoolbar']);
+  return $link_enabled && $image_enabled;
 }
 
 /**
