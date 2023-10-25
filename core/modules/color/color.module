@@ -406,7 +406,7 @@ function color_get_info($theme) {
       $module_color_info['schemes']['default']['colors'] = $module_color_info['default_colors'];
       unset($module_color_info['default_colors']);
       foreach ($module_color_info['css'] as $key => $file) {
-        $module_color_info['css'][$key] = $module . '__' . $file;
+        $module_color_info['css'][$key] = $module . '_css_path_' . $file;
       }
       $info = backdrop_array_merge_deep($info, $module_color_info);
     }
@@ -772,7 +772,7 @@ function _color_save_stylesheet($file, $style, &$paths) {
 function _color_get_file_path($filename, $theme_name) {
   static $basenames = array();
 
-  $file_data = explode('__', $filename);
+  $file_data = explode('_css_path_', $filename);
   if (isset($file_data[1])) {
     $module_css = backdrop_get_path('module', $file_data[0]) . '/' . $file_data[1];
     if (file_exists($module_css)) {
