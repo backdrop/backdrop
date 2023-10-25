@@ -771,14 +771,24 @@ function _color_save_stylesheet($file, $style, &$paths) {
  */
 function _color_get_file_path($filename, $theme_name) {
   static $basenames = array();
+  static $module_filenames = array();
 
-  $file_data = explode('_css_path_', $filename);
-  if (isset($file_data[1])) {
-    $module_css = backdrop_get_path('module', $file_data[0]) . '/' . $file_data[1];
-    if (file_exists($module_css)) {
-      return $module_css;
+  // Get paths from modules CSS files. These are stored in the format:
+  // MODULE_NAME_css_path_PATH_TO_CSS_FILE.
+  if (isset($module_filenames[$filename])) {
+    return $module_filenames[$filename];
+  }
+  else {
+    $file_data = explode('_css_path_', $filename);
+    if (isset($file_data[1])) {
+      $module_css = backdrop_get_path('module', $file_data[0]) . '/' . $file_data[1];
+      if (file_exists($module_css)) {
+        $module_filenames[$filename] = $module_css;
+        return $module_css;
+      }
     }
   }
+
   $themes = list_themes();
   $theme = $themes[$theme_name];
 
