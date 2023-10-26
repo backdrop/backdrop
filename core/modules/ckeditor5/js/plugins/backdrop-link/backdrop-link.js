@@ -68,13 +68,18 @@ class BackdropLink extends CKEditor5.core.Plugin {
     });
 
     // View (DOM/DATA) -> Model
+    // The class attribute should be passed using the special selector 'classes'
+    // rather than attributes['class'].
+    // See https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#error-matcher-pattern-deprecated-attributes-class-key
+    const upcastView = { name: 'a' };
+    if (viewName === 'class') {
+      upcastView['classes'] = true;
+    }
+    else {
+      upcastView['attributes'] = { [ viewName ]: true }
+    }
     editor.conversion.for('upcast').elementToAttribute({
-      view: {
-        name: 'a',
-        attributes: {
-          [ viewName ]: true
-        }
-      },
+      view: upcastView,
       model: {
         key: modelName,
         value: viewElement => viewElement.getAttribute(viewName)
