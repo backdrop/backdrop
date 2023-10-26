@@ -373,7 +373,7 @@ function ckeditor5_ckeditor5_plugins() {
   $plugins['codeBlock.CodeBlock'] = array(
     'buttons' => array(
       'codeBlock' => array(
-        'label' => t('Code'),
+        'label' => t('Code block'),
         'image' => $image_prefix . '/code-block.svg',
         'required_html' => array('<code>', '<pre>'),
       ),
