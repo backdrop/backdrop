@@ -7,6 +7,13 @@
  *
  * See https://ckeditor.com/docs/ckeditor4/latest/guide/dev_inline.html
  */
-if (CKEDITOR) {
+if (CKEDITOR && CKEDITOR.config) {
+  // Disable looking for the default config.js file.
+  CKEDITOR.config.customConfig = false;
+  // Disable looking for the default styles.css file.
+  CKEDITOR.config.contentsCss = false;
+  // Disable looking for the default styles.js file.
+  CKEDITOR.config.stylesSet = false;
+  // Disable automatic attachment to contenteditable elements.
   CKEDITOR.disableAutoInline = false;
 }
