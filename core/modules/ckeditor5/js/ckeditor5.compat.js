@@ -1,14 +1,12 @@
 /**
  * @file
- * Prevent ckeditor.js conflict.
+ * Prevent conflicts with CKEditor 4.
  *
- * When both libraries are loaded, the basePath determination of CKEditor4
- * fails regularly. This variable is only used by v4 and prevents breaking init,
- * when the attached method has not run yet. For example, when both editor
- * versions are available in "Formatting options" and v5 is the default.
+ * Disable automatically attaching to all contenteditable elements. This
+ * option can conflict with CKEditor 5, which also uses contenteditable.
  *
- * This workaround does not prevent all problems with CKEDITOR's
- * resourceManager.load, but the editor will successfully initialize after
- * getting its settings.
+ * See https://ckeditor.com/docs/ckeditor4/latest/guide/dev_inline.html
  */
-var CKEDITOR_BASEPATH = Backdrop.settings.basePath + 'core/misc/ckeditor/';
+if (CKEDITOR) {
+  CKEDITOR.disableAutoInline = false;
+}

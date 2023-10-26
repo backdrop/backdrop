@@ -130,7 +130,7 @@ function ckeditor5_library_info() {
     $libraries['ckeditor5']['js'][$module_path . '/js/ckeditor5.compat.js'] = array(
       'preprocess' => FALSE,
       'group' => JS_LIBRARY,
-      'weight' => -1,
+      'weight' => 1,
     );
   }
 
