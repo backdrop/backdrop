@@ -270,19 +270,27 @@ function config_load_multiple($names, $type = 'active') {
 }
 
 /**
- * Moves the default config supplied by a module to the live config directory.
+ * Moves the default config supplied by a project to the live config directory.
  *
- * @param string $module
- *   The name of the module we are installing.
+ * @param string $project
+ *   The name of the project we are installing.
  * @param string|NULL $config_name
  *   (optional) If wanting to copy just a single configuration file from the
- *   module, specify the configuration file name without the extension.
+ *   project, specify the configuration file name without the extension.
+ *
+ * @since 1.26.0 First parameter changed from $module to $project.
  */
-function config_install_default_config($module, $config_name = NULL) {
-  $module_config_dir = backdrop_get_path('module', $module) . '/config';
-  if (is_dir($module_config_dir)) {
-    $storage = new ConfigFileStorage($module_config_dir);
-    $files = glob($module_config_dir . '/*.json');
+function config_install_default_config($project, $config_name = NULL) {
+  $project_path = NULL;
+  foreach (array('module', 'theme') as $project_type) {
+    if ($project_path = backdrop_get_path($project_type, $project)) {
+      break;
+    }
+  }
+  $project_config_dir = $project_path . '/config';
+  if (is_dir($project_config_dir)) {
+    $storage = new ConfigFileStorage($project_config_dir);
+    $files = glob($project_config_dir . '/*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
       // file system in the Backdrop config directory. Note the config name
@@ -305,11 +313,25 @@ function config_install_default_config($module, $config_name = NULL) {
 }
 
 /**
- * Uninstall all the configuration provided by a module.
+ * Uninstall all the configuration provided by a project.
+ *
+ * @param string $project
+ *   The name of the project we are uninstalling.
+ * @param string|NULL $config_name
+ *   (optional) If wanting to remove just a single configuration file from the
+ *   project, specify the configuration file name without the extension.
+ *
+ * @since 1.26.0 First parameter changed from $module to $project.
  */
-function config_uninstall_config($module, $config_name = NULL) {
-  backdrop_load('module', $module);
-  if ($configs = module_invoke($module, 'config_info')) {
+function config_uninstall_config($project, $config_name = NULL) {
+  // If this is a theme key, load the matching template.php file.
+  if (!backdrop_load('module', $project) && $theme_path = backdrop_get_path('theme', $project)) {
+    if (file_exists($theme_path . '/template.php')) {
+      include_once $theme_path . '/template.php';
+    }
+  }
+
+  if ($configs = module_invoke($project, 'config_info')) {
     foreach ($configs as $config_name => $config_info) {
       if (isset($config_info['name_key'])) {
         $sub_names = config_get_names_with_prefix($config_name . '.');

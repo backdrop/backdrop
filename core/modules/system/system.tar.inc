@@ -1655,6 +1655,8 @@ class Archive_Tar
         $v_mtime = sprintf("%011s", 0);
         $v_typeflag = ($is_link ? 'K' : 'L');
         $v_linkname = '';
+        $v_magic = 'ustar ';
+        $v_version = ' ';
         $v_uname = '';
         $v_gname = '';
         $v_devmajor = '';

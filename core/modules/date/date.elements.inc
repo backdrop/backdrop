@@ -2234,9 +2234,17 @@ function _date_default_field_widget_form($field, $instance, $langcode, $items, $
   // @see http://drupal.org/node/1478848.
 
   $is_default = FALSE;
-  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
-    $items = date_default_value($field, $instance, $langcode);
-    $is_default = TRUE;
+  if (!isset($items[$delta]['value'])) {
+    if (!empty($instance['widget']['is_new'])) {
+      // New entity; use default values defined on instance.
+      $items = date_default_value($field, $instance, $langcode);
+      $is_default = TRUE;
+    }
+    else {
+      // Date is empty; create array structure for value keys.
+      $keys = date_process_values($field);
+      $items[$delta] = array_fill_keys($keys, '');
+    }
   }
 
   $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());

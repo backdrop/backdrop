@@ -679,6 +679,32 @@ ul.tips {
   background: none;
 }
 
+/* --------------- Hierarchical Tree Menu ------------ */
+
+.menu-tree > li > ul {
+  background: rgba(255, 255, 255, 0.8);
+}
+.menu-tree > li.has-children > ul li a,
+.menu-tree > li.has-children > ul li li a {
+  background: transparent;
+  display: block;
+}
+
+.menu-tree > li.has-children > ul li li a {
+  padding-left: 30px;
+}
+.menu-tree > li.has-children > ul li li li a {
+  padding-left: 45px;
+}
+.menu-tree > li.has-children > ul li a.active,
+.menu-tree > li.has-children > ul li li a.active {
+  background: #fff;
+}
+
+ul.menu-tree > li.has-children > a {
+  display: inline-block;
+}
+
 /* ------------------- Main ------------------- */
 
 .l-container {
@@ -1340,6 +1366,7 @@ fieldset {
 }
 .filter-wrapper {
   padding: .5em 0;
+  margin: 0 0 32px 0;
 }
 .filter-wrapper legend,
 .filter-wrapper.collapsed legend {
@@ -1348,6 +1375,7 @@ fieldset {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   border-top: none;
+  box-sizing: content-box;
 }
 .filter-wrapper .form-item label {
   margin-right: 10px;

@@ -22,7 +22,7 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
 Backdrop.behaviors.menuChangeParentItems = {
   attach: function (context, settings) {
     $('fieldset#edit-menu input').each(function () {
-      $(this).change(function () {
+      $(this).on('change', function () {
         // Update list of available parent menu items.
         Backdrop.menu_update_parent_list();
       });
@@ -38,7 +38,7 @@ Backdrop.menu_update_parent_list = function () {
 
   $('input:checked', $('fieldset#edit-menu')).each(function () {
     // Get the names of all checked menus.
-    values.push(Backdrop.checkPlain($.trim($(this).val())));
+    values.push(Backdrop.checkPlain($(this).val().trim()));
   });
 
   var url = Backdrop.settings.basePath + 'admin/structure/menu/parents';

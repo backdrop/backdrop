@@ -821,6 +821,11 @@ class BackdropUnitTestCase extends BackdropTestCase {
   protected $originalModuleList;
 
   /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
    * Constructor for BackdropUnitTestCase.
    */
   function __construct($test_id = NULL) {
@@ -1068,6 +1073,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   public $public_files_directory;
   public $private_files_directory;
   public $temp_files_directory;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguageUrl;
 
   /**
    * Constructor for BackdropWebTestCase.
