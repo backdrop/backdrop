@@ -679,6 +679,32 @@ ul.tips {
   background: none;
 }
 
+/* --------------- Hierarchical Tree Menu ------------ */
+
+.menu-tree > li > ul {
+  background: rgba(255, 255, 255, 0.8);
+}
+.menu-tree > li.has-children > ul li a,
+.menu-tree > li.has-children > ul li li a {
+  background: transparent;
+  display: block;
+}
+
+.menu-tree > li.has-children > ul li li a {
+  padding-left: 30px;
+}
+.menu-tree > li.has-children > ul li li li a {
+  padding-left: 45px;
+}
+.menu-tree > li.has-children > ul li a.active,
+.menu-tree > li.has-children > ul li li a.active {
+  background: #fff;
+}
+
+ul.menu-tree > li.has-children > a {
+  display: inline-block;
+}
+
 /* ------------------- Main ------------------- */
 
 .l-container {
