@@ -1905,6 +1905,7 @@ function theme_menu_local_actions($variables) {
 function theme_menu_toggle($variables) {
   $output = '';
   if ($variables['enabled']) {
+    // We are allowing the user-entered menu toggle text to be translated.
     $toggle_text = t(check_plain($variables['text']));
     $id = $variables['id'];
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
