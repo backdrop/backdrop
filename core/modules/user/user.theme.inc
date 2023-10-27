@@ -209,8 +209,7 @@ function theme_user_permission_description($variables) {
         '#summary' => $permission_warning,
         '#details' => $permission_item['warning'],
         '#open' => FALSE,
-        '#open_label' => t('more'),
-        '#close_label' => t('less'),
+        '#toggle' => TRUE,
         '#details_attributes' => array('class' => array('permission-warning-description', 'description')),
       );
       $description[] = theme('details', array('element' => $warning));

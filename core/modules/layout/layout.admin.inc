@@ -465,6 +465,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#summary' => t('Use the percent symbol ("%") to indicate a placeholder in the path.'),
     '#details' => $placeholder_examples,
     '#open' => FALSE,
+    '#toggle' => TRUE,
     '#open_label' => t('Show examples'),
     '#close_label' => t('Hide examples'),
     '#attributes' => array('class' => array('layout-placeholder-examples')),
