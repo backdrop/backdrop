@@ -15,5 +15,5 @@ if (CKEDITOR && CKEDITOR.config) {
   // Disable looking for the default styles.js file.
   CKEDITOR.config.stylesSet = false;
   // Disable automatic attachment to contenteditable elements.
-  CKEDITOR.disableAutoInline = false;
+  CKEDITOR.disableAutoInline = true;
 }
