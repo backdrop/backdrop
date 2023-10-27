@@ -203,8 +203,6 @@ Harnhammar
 Hartl
 hdir
 HEADERFUNCTION
-heure
-heures
 hilite
 Hilite
 hitem
@@ -285,12 +283,9 @@ moscone
 Moscone
 mousebutton
 mousedown
-mouton
-moutons
 msgbox
 multibundle
 multisites
-Műveletek
 myclass
 mydata
 myeditor
@@ -309,8 +304,8 @@ mytable
 mytokens
 mytype
 myusername
-myverylongurl
 myverylongurlexample
+myverylongurl
 natu
 nccc
 NCHUNKS
@@ -374,7 +369,6 @@ phptemplate
 phpwiki
 plids
 pneum
-Ponedjeljak
 portseparators
 precompute
 precomputes
@@ -457,7 +451,6 @@ superglobal
 supprimer
 sutro
 Sutro
-Svibanj
 sysconfig
 tablealias
 tabledragging
@@ -542,7 +535,6 @@ withslash
 Wonderwoman
 wõrd
 wordlength
-wordsafe
 workkeys
 wordsafe
 WQKCY
