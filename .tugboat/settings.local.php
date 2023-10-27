@@ -17,3 +17,6 @@ $settings['telemetry_enabled'] = FALSE;
 $config['system.core']['error_level'] = 'all';
 
 // Miscellaneous.
+if (function_exists('runkit7_constant_redefine')) {
+  runkit7_constant_redefine('BACKDROP_VERSION', '2.x');
+}
