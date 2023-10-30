@@ -41,8 +41,8 @@ class BackdropImage extends CKEditor5.core.Plugin {
     const { conversion } = editor;
     const { schema } = editor.model;
     const config = editor.config.get('backdropImage');
-    const insertLabel = config.insertLabel || 'Insert Image';
     const editLabel = config.editLabel || 'Edit Image';
+    const insertLabel = config.insertLabel || 'Insert Image';
 
     if (!config.extraAttributes) {
       return;
@@ -108,7 +108,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
       // Convert any link to wrap the <img> tag.
       .add(downcastBlockImageLink());
 
-    // Add the editBackdropImage command.
+    // Add the backdropImage command.
     editor.commands.add('backdropImage', new BackdropImageCommand(editor));
 
     // Add the editBackdropImage button, for use in the balloon toolbar.
@@ -157,7 +157,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
       // When clicking the toolbar button, execute the backdropImage command.
       buttonView.on('execute', () => {
         // Remove focus from the toolbar button when opening the dialog.
-        // Otherwise the button may receive focus again after closing the
+        // Otherwise, the button may receive focus again after closing the
         // dialog.
         buttonView.element.blur();
         // See BackdropImageCommand::execute().

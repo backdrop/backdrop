@@ -643,20 +643,22 @@ function ckeditor5_ckeditor5_plugins() {
   );
 
   // The BackdropLink plugin extends the build in link button.
-  $plugins['link.Link'] = array(
+  $plugins['backdropLink.BackdropLink'] = array(
     'buttons' => array(
-      'link' => array(
+      'backdropLink' => array(
         'label' => t('Link'),
         'image' => $image_prefix . '/link.svg',
         // @todo: The id attribute is being flagged as disallowed by core's
         // blocking of on* attributes. It should be included here.
         'required_html' => array('<a href target class title rel data-file-id>'),
-        'plugin_dependencies' => array('backdropLink.BackdropLink'),
+        'plugin_dependencies' => array('link.Link', 'link.LinkUI'),
       ),
     ),
-    // Append the "Link" button to the image balloon toolbar.
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
     'config' => array(
       'backdropLink' => array(
+        'editLabel' => t('Edit Link'),
+        'insertLabel' => t('Insert Link'),
         // Specify an array of CKEditor model name => attribute name values.
         // These attributes are then allowed to be changed via the Backdrop
         // link dialog. Additional attributes can be added here to prevent
@@ -673,16 +675,16 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
-  $plugins['backdropLink.BackdropLink'] = array(
-    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
-  );
-
-  $plugins['link.LinkImage'] = array(
+  // The BackdropLinkImage plugin provides configuration only. It enables
+  // adds the "Link Image" button to the image balloon toolbar if both the
+  // Link and Image plugins are enabled.
+  $plugins['backdropLink.BackdropLinkImage'] = array(
+    'pseudo_plugin' => TRUE,
     'enabled_callback' => '_ckeditor5_link_image_plugin_check',
-    'plugin_dependencies' => array('link.Link', 'image.Image'),
+    'plugin_dependencies' => array('link.Link', 'image.Image', 'link.LinkImage'),
     'config' => array(
       'image' => array(
-        'toolbar' => array('|', 'linkImage', '|'),
+        'toolbar' => array('|', 'backdropLinkImage', '|'),
       ),
     ),
   );
@@ -785,7 +787,7 @@ function _ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
  *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
 function _ckeditor5_link_image_plugin_check($format, $plugin_name) {
-  $link_enabled = in_array('link', $format->editor_settings['cketoolbar']);
+  $link_enabled = in_array('backdropLink', $format->editor_settings['cketoolbar']);
   $image_enabled = in_array('backdropImage', $format->editor_settings['cketoolbar']);
   return $link_enabled && $image_enabled;
 }
