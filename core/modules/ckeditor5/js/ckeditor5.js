@@ -28,17 +28,17 @@
 
       editorSettings.licenseKey = '';
 
-      // If filter_html is turned on, and the htmlSupport plugin's available, we
-      // prevent on* attributes.
+      // If filter_html is turned on, and the htmlSupport plugin is available,
+      // we prevent on* attributes.
       if (editorSettings.pluginList.includes('htmlSupport.GeneralHtmlSupport')) {
         if (editorSettings.htmlSupport.allow.length) {
-          let patternOnEvents = {
+          let onEventsPattern = {
             'name': /.*/,
             'attributes': /^on.*/
           }
-          editorSettings.htmlSupport.disallow.push(patternOnEvents);
+          editorSettings.htmlSupport.disallow.push(onEventsPattern);
         }
-        // Restore CKEditor4 behavior to allow anything if filter_html isn't set.
+        // If filter_html if off, allow all elements and attributes to be used.
         else {
           let patternAllowAll = {
             name: /.*/,
@@ -64,12 +64,17 @@
       // Hide the resizable grippie while CKEditor is active.
       $(element).siblings('.grippie').hide();
 
+      const beforeAttachValue = element.value;
       CKEditor5.editorClassic.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
-          element.ckeditorAttachedEditor = editor;
+          element.ckeditor5AttachedEditor = editor;
+          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
+          if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
+            Backdrop.ckeditor5.detachWithWarning(element, format, beforeAttachValue);
+          }
           return true;
         })
         .catch(error => {
@@ -80,23 +85,29 @@
     },
 
     detach: function (element, format, trigger) {
-      // CKEditor's getEditor() method takes a single parameter for "optimized"
-      // that defaults to true. This makes it so that only unmodified DOM
-      // textarea elements will qualify for locating the CKEditor instance.
-      // During detachment, other behaviors may also modify the source textarea,
-      // causing CKEditor to lose track of the editor. Therefore pass "false"
-      // to use the more aggressive attempt to find the editor instance.
-      var editor = element.ckeditorAttachedEditor;
+      // Remove any content modification warning.
+      if (element.ckeditor5AttachedWarning) {
+        element.ckeditor5AttachedWarning.remove();
+        delete element.ckeditor5AttachedWarning;
+      }
+
+      // Save content and remove any CKEditor 5 instances.
+      const editor = element.ckeditor5AttachedEditor;
       if (!editor) {
         return false;
       }
 
       if (trigger === 'serialize') {
-        editor.updateSourceElement();
+        // CKEditor 5 does not pretty-print HTML source. Format the source
+        // before saving it into the source field.
+        let newData = editor.getData();
+        newData = Backdrop.ckeditor5.formatHtml(newData);
+        editor.updateSourceElement(newData);
       }
       else {
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
+        delete element.ckeditor5AttachedEditor;
       }
 
       // Restore the resize grippie.
@@ -105,7 +116,7 @@
     },
 
     onChange: function (element, callback) {
-      var editor = element.ckeditorAttachedEditor;
+      const editor = element.ckeditor5AttachedEditor;
       if (editor) {
         editor.model.document.on('change:data', function() {
           Backdrop.debounce(callback, 400)(editor.getData());
@@ -125,6 +136,12 @@
      * Key-value map of all active instances of CKEditor 5.
      */
     instances: new Map(),
+
+    /**
+     * Boolean indicating if CKEditor instances should be attached even if they
+     * modify content by the act of initializing the editor.
+     */
+    bypassContentWarning: false,
 
     /**
      * Open a dialog for a Backdrop-based plugin.
@@ -187,6 +204,15 @@
       Backdrop.ckeditor5.saveCallback = saveCallback;
     },
 
+    /**
+     * Calculates the top of window offset.
+     *
+     * The "data-offset-top" attribute is used on the admin toolbar and sticky
+     * table headers. Add up the offsets to determine the editor toolbar offset.
+     *
+     * @returns
+     *   The vertical offset in pixels.
+     */
     computeOffsetTop: function () {
       var $offsets = $('[data-offset-top]');
       var value, sum = 0;
@@ -198,6 +224,15 @@
       return sum;
     },
 
+    /**
+     * Sets the CKEditor 5 toolbar offset.
+     *
+     * Setting the offset makes the editor toolbar floats below the admin
+     * toolbar and any sticky table headers.
+     *
+     * @param editor
+     *   The CKEditor 5 instance.
+     */
     setEditorOffset: function (editor) {
       editor.ui.viewportOffset = {
         'bottom': 0,
@@ -205,6 +240,63 @@
         'right': 0,
         'top': Backdrop.ckeditor5.computeOffsetTop()
       };
+    },
+
+    /**
+     * Compare the data before CKEditor 5 is attached and after attachment.
+     *
+     * This comparison reformats both the before and after values to the same
+     * consistent format before doing a string comparison.
+     *
+     * @param beforeAttachValue
+     *   The element value before CKEditor was attached.
+     * @param afterAttachValue
+     *   The element value after CKEditor was attached.
+     *
+     * @return {boolean}
+     *   Returns true if values have been modified, false if unchanged.
+     */
+    checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      const formattedBeforeValue = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
+      const formattedAfterValue = Backdrop.ckeditor5.formatHtml(afterAttachValue);
+      return formattedBeforeValue !== formattedAfterValue;
+    },
+
+    /**
+     * Attach an alert to the editor if the value has been modified.
+     *
+     * This disables the editor and restores the plain textarea element. The
+     * warning can be dismissed to load the editor anyway.
+     *
+     * @param element
+     *   The DOM element to which the editor was attached.
+     * @param format
+     *   The text format configuration with which the editor was attached.
+     * @param beforeAttachValue
+     *   The element value before CKEditor was attached.
+     *
+     * @return {boolean}
+     *   Returns true if values have been modified, false if unchanged.
+     */
+    detachWithWarning: function (element, format, beforeAttachValues) {
+      const editor = element.ckeditor5AttachedEditor;
+      // Detach the editor.
+      Backdrop.filterEditorDetach(element, format);
+      // Restore the value to what it was previously.
+      element.value = beforeAttachValues;
+      // Attach a warning before the field.
+      const $warning = $($.parseHTML(Backdrop.theme('ckeditor5ContentModifiedWarning')));
+      $warning.insertBefore(element);
+      // On click of the link within the warning, attach the editor anyway and
+      // remove the warning.
+      $warning.find('a').on('click', function(e) {
+        // Setting this bypass flag prevents the warning from being re-added.
+        Backdrop.ckeditor5.bypassContentWarning = true;
+        Backdrop.filterEditorAttach(element, format);
+        $warning.remove();
+        e.preventDefault();
+      });
+      element.ckeditor5AttachedWarning = $warning[0];
     }
   };
 
@@ -233,5 +325,17 @@
       Backdrop.ckeditor5.setEditorOffset(instance);
     });
   });
+
+  /**
+   * Display a warning message that loading the editor may modify content.
+   */
+  Backdrop.theme.prototype.ckeditor5ContentModifiedWarning = function (settings) {
+    let warningMessage = '';
+    warningMessage += '<div class="ckeditor5-content-modified-warning messages warning">';
+    warningMessage += '<span class="ckeditor5-content-modified-message">' + Backdrop.t('Activating CKEditor 5 will reformat the content of this field. Review content carefully after activating.') + '</span> ';
+    warningMessage += '<a class="ckeditor5-content-modified-activate" href="#">' + Backdrop.t('Click to activate editor') + '</a>.';
+    warningMessage += '</div>';
+    return warningMessage;
+  }
 
 })(Backdrop, CKEditor5, jQuery);

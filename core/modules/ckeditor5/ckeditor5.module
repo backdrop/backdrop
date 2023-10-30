@@ -76,6 +76,7 @@ function ckeditor5_library_info() {
     'version' => $info['version'],
     'js' => array(
       $module_path . '/js/ckeditor5.js' => array(),
+      $module_path . '/js/ckeditor5.formatter.js' => array(),
     ),
     'css' => array(
       $module_path . '/css/ckeditor5.css' => array(),
