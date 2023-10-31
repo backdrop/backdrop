@@ -86,7 +86,7 @@
 
     detach: function (element, format, trigger) {
       // Remove any content modification warning.
-      if (element.ckeditor5AttachedWarning) {
+      if (element.ckeditor5AttachedWarning && trigger !== 'serialize') {
         element.ckeditor5AttachedWarning.remove();
         delete element.ckeditor5AttachedWarning;
       }
@@ -97,18 +97,21 @@
         return false;
       }
 
-      if (trigger === 'serialize') {
-        // CKEditor 5 does not pretty-print HTML source. Format the source
-        // before saving it into the source field.
-        let newData = editor.getData();
-        newData = Backdrop.ckeditor5.formatHtml(newData);
-        editor.updateSourceElement(newData);
-      }
-      else {
+      // CKEditor 5 does not pretty-print HTML source. Format the source
+      // before saving it into the source field.
+      let newData = editor.getData();
+      newData = Backdrop.ckeditor5.formatHtml(newData);
+
+      // Destroy the instance if fully detaching.
+      if (trigger !== 'serialize') {
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
       }
+
+      // Save formatted value after destroying the editor, which can also
+      // update the element value.
+      element.value = newData;
 
       // Restore the resize grippie.
       $(element).siblings('.grippie').show();
@@ -279,7 +282,6 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     detachWithWarning: function (element, format, beforeAttachValues) {
-      const editor = element.ckeditor5AttachedEditor;
       // Detach the editor.
       Backdrop.filterEditorDetach(element, format);
       // Restore the value to what it was previously.

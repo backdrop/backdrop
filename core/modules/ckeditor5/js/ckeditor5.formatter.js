@@ -105,7 +105,7 @@
         }
 
         if (isClosingTag(line, elementsToFormat)) {
-          return indentLine(line, --indentCount);
+          return indentLine(line, --indentCount) + '\n';
         }
 
         return indentLine(line, indentCount);
@@ -125,7 +125,7 @@
         return false;
       }
 
-      if (!new RegExp(`<${ element.name }( .*?)?>`).test(line)) {
+      if (!new RegExp('<' + element.name  + '( .*?)?>').test(line)) {
         return false;
       }
 
@@ -141,7 +141,7 @@
    */
   function isClosingTag( line, elementsToFormat) {
     return elementsToFormat.some((element) => {
-      return new RegExp( `</${ element.name }>` ).test( line );
+      return new RegExp( '</' + element.name + '>').test(line);
     });
   }
 
@@ -154,7 +154,7 @@
    */
   function indentLine(line, indentCount, indentChar = '    ' ) {
     // More about Math.max() here in https://github.com/ckeditor/ckeditor5/issues/10698.
-    return `${ indentChar.repeat(Math.max(0, indentCount))}${ line }`;
+    return indentChar.repeat(Math.max(0, indentCount)) + line.trim();
   }
 
 })(Backdrop);
