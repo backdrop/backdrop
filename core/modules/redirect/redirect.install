@@ -172,3 +172,16 @@ function redirect_update_1003() {
 
   db_query("UPDATE {redirect} SET status_code = :default_status WHERE status_code = 0", array(':default_status' => $default_status));
 }
+
+/**
+ * Fix redirect table schema of upgraded sites.
+ */
+function redirect_update_1004() {
+  if (db_field_exists('redirect', 'status')) {
+    db_delete('redirect')->condition('status', 0)->execute();
+    if (db_index_exists('redirect', 'status_source_language')) {
+      db_drop_index('redirect', 'status_source_language');
+    }
+    db_drop_field('redirect', 'status');
+  }
+}
