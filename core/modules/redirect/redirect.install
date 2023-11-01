@@ -130,7 +130,7 @@ function redirect_update_1000() {
 }
 
 /**
- * Rename the language column to langcode.
+ * Rename the language column to langcode, drop inactive redirects.
  */
 function redirect_update_1001() {
   if (db_index_exists('redirect', 'source_language')) {
@@ -146,6 +146,9 @@ function redirect_update_1001() {
     );
     db_change_field('redirect', 'language', 'langcode', $spec);
     db_add_index('redirect', 'source_langcode', array('source', 'langcode'));
+  }
+  if (db_field_exists('redirect', 'status')) {
+    db_delete('redirect')->condition('status', 0)->execute();
   }
 }
 
@@ -178,7 +181,6 @@ function redirect_update_1003() {
  */
 function redirect_update_1004() {
   if (db_field_exists('redirect', 'status')) {
-    db_delete('redirect')->condition('status', 0)->execute();
     if (db_index_exists('redirect', 'status_source_language')) {
       db_drop_index('redirect', 'status_source_language');
     }
