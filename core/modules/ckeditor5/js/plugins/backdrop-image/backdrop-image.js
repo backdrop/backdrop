@@ -91,14 +91,16 @@ class BackdropImage extends CKEditor5.core.Plugin {
       // Create a blank image element, removing any wrapping figure element.
       .elementToElement({
         model: 'imageBlock',
-        view: (modelElement, { writer }) =>
-          createImageViewElement(writer, 'imageBlock'),
+        view: (modelElement, { writer }) => {
+          return writer.createEmptyElement('img');
+        },
         converterPriority: 'high',
       })
       .elementToElement({
         model: 'imageInline',
-        view: (modelElement, { writer }) =>
-          createImageViewElement(writer, 'imageInline'),
+        view: (modelElement, { writer }) => {
+          return writer.createEmptyElement('img');
+        },
         converterPriority: 'high',
       })
       // Convert ImageStyle to data-align attribute.
@@ -219,21 +221,6 @@ function setViewAttributes(writer, viewAttributes, viewElement) {
 }
 
 /**
- * Provides an empty image element.
- *
- * @param {writer} writer
- *  The CKEditor 5 writer object.
- *
- * @return {module:engine/view/emptyelement~EmptyElement}
- *  The empty image element.
- *
- * @private
- */
-function createImageViewElement(writer) {
-  return writer.createEmptyElement('img');
-}
-
-/**
  * Generates a callback that saves the File ID to an attribute on downcast.
  *
  * @return {function}
@@ -346,84 +333,84 @@ function _getModelImageStyleFromDataAttribute(dataAttribute) {
  * @private
  */
 function viewCaptionToCaptionAttribute(editor) {
+  /**
+   * Callback for the insert:caption event.
+   */
+  function converter(event, data, conversionApi) {
+    const { consumable, writer, mapper } = conversionApi;
+    const imageUtils = editor.plugins.get('ImageUtils');
+
+    if (
+      !imageUtils.isImage(data.item.parent) ||
+      !consumable.consume(data.item, 'insert')
+    ) {
+      return;
+    }
+
+    const range = editor.model.createRangeIn(data.item);
+    const viewDocumentFragment = writer.createDocumentFragment();
+
+    // Bind caption model element to the detached view document fragment so
+    // all content of the caption will be downcasted into that document
+    // fragment.
+    mapper.bindElements(data.item, viewDocumentFragment);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const { item } of Array.from(range)) {
+      const itemData = {
+        item,
+        range: editor.model.createRangeOn(item),
+      };
+
+      // The following lines are extracted from
+      // DowncastDispatcher._convertInsertWithAttributes().
+      const eventName = `insert:${item.name || '$text'}`;
+
+      editor.data.downcastDispatcher.fire(
+        eventName,
+        itemData,
+        conversionApi,
+      );
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key of item.getAttributeKeys()) {
+        Object.assign(itemData, {
+          attributeKey: key,
+          attributeOldValue: null,
+          attributeNewValue: itemData.item.getAttribute(key),
+        });
+
+        editor.data.downcastDispatcher.fire(
+          `attribute:${key}`,
+          itemData,
+          conversionApi,
+        );
+      }
+    }
+
+    // Unbind all the view elements that were downcasted to the document
+    // fragment.
+    // eslint-disable-next-line no-restricted-syntax
+    for (const child of writer
+      .createRangeIn(viewDocumentFragment)
+      .getItems()) {
+      mapper.unbindViewElement(child);
+    }
+
+    mapper.unbindViewElement(viewDocumentFragment);
+
+    // Stringify view document fragment to HTML string.
+    const captionText = editor.data.processor.toData(viewDocumentFragment);
+
+    if (captionText) {
+      const imageViewElement = mapper.toViewElement(data.item.parent);
+
+      writer.setAttribute('data-caption', captionText, imageViewElement);
+    }
+  }
+
   return (dispatcher) => {
-    dispatcher.on(
-      'insert:caption',
-      (event, data, conversionApi) => {
-        const { consumable, writer, mapper } = conversionApi;
-        const imageUtils = editor.plugins.get('ImageUtils');
-
-        if (
-          !imageUtils.isImage(data.item.parent) ||
-          !consumable.consume(data.item, 'insert')
-        ) {
-          return;
-        }
-
-        const range = editor.model.createRangeIn(data.item);
-        const viewDocumentFragment = writer.createDocumentFragment();
-
-        // Bind caption model element to the detached view document fragment so
-        // all content of the caption will be downcasted into that document
-        // fragment.
-        mapper.bindElements(data.item, viewDocumentFragment);
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (const { item } of Array.from(range)) {
-          const itemData = {
-            item,
-            range: editor.model.createRangeOn(item),
-          };
-
-          // The following lines are extracted from
-          // DowncastDispatcher._convertInsertWithAttributes().
-          const eventName = `insert:${item.name || '$text'}`;
-
-          editor.data.downcastDispatcher.fire(
-            eventName,
-            itemData,
-            conversionApi,
-          );
-
-          // eslint-disable-next-line no-restricted-syntax
-          for (const key of item.getAttributeKeys()) {
-            Object.assign(itemData, {
-              attributeKey: key,
-              attributeOldValue: null,
-              attributeNewValue: itemData.item.getAttribute(key),
-            });
-
-            editor.data.downcastDispatcher.fire(
-              `attribute:${key}`,
-              itemData,
-              conversionApi,
-            );
-          }
-        }
-
-        // Unbind all the view elements that were downcasted to the document
-        // fragment.
-        // eslint-disable-next-line no-restricted-syntax
-        for (const child of writer
-          .createRangeIn(viewDocumentFragment)
-          .getItems()) {
-          mapper.unbindViewElement(child);
-        }
-
-        mapper.unbindViewElement(viewDocumentFragment);
-
-        // Stringify view document fragment to HTML string.
-        const captionText = editor.data.processor.toData(viewDocumentFragment);
-
-        if (captionText) {
-          const imageViewElement = mapper.toViewElement(data.item.parent);
-
-          writer.setAttribute('data-caption', captionText, imageViewElement);
-        }
-      },
-      // Override default caption converter.
-      { priority: 'high' },
-    );
+    dispatcher.on('insert:caption', converter, { priority: 'high' });
   };
 }
 
