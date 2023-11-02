@@ -60,7 +60,7 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#title' => t('File uploading'),
     '#attributes' => array(
       'class' => array('ckeditor5-plugin-link'),
-      'data-ckeditor5-feature-dependency' => 'link',
+      'data-ckeditor5-feature-dependency' => 'backdropLink',
     ),
     '#parents' => array('editor_settings', 'file_upload'),
   );
