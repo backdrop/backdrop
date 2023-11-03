@@ -197,15 +197,11 @@ function system_requirements($phase) {
     }
   }
   else {
-    // Database information.
-    $class = 'DatabaseTasks_' . Database::getConnection()->driver();
-    /* @var DatabaseTasks $tasks */
-    $tasks = new $class();
-    $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
+    $db_info = _system_get_database_version();
     $requirements['database_system'] = array(
-      'title' => $t('MySQL Database'),
+      'title' => $t('Database server'),
       'severity' => REQUIREMENT_INFO,
-      'value' => $dbinfo,
+      'value' => implode(' ', $db_info),
     );
   }
 

@@ -10,12 +10,12 @@
 function telemetry_telemetry_info() {
   $info['php_version'] = array(
     'label' => t('PHP version'),
-    'description' => t('The current version of PHP running on your server.'),
+    'description' => t('The version of PHP running on your server.'),
     'project' => 'backdrop',
   );
   $info['mysql_version'] = array(
-    'label' => t('MySQL version'),
-    'description' => t('The version number of your database (either MySQL or MariaDB).'),
+    'label' => t('Database version'),
+    'description' => t('The version of your database server (either MySQL or MariaDB).'),
     'project' => 'backdrop',
   );
   $info['server_os'] = array(
@@ -49,7 +49,13 @@ function telemetry_telemetry_data($key) {
     case 'php_version':
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
-      return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
+      // Trim the version number to only major + minor, otherwise we'd flood the
+      // table with dozens of bug fix versions.
+      $db_info = _system_get_database_version();
+      $version = explode('.', $db_info['version']);
+      $version = array_slice($version, 0, 2);
+      $version = implode('.', $version);
+      return $db_info['type'] . ' ' . $version;
     case 'server_os':
       return PHP_OS;
     case 'web_server':
