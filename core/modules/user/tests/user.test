@@ -1351,7 +1351,14 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer content types', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer permissions',
+      'access user profiles',
+      'administer site configuration',
+      'administer account settings',
+      'administer content types',
+      'administer modules',
+    ));
     $this->editor_user = $this->backdropCreateUser(array('access content'));
 
     // Find the new role names.
@@ -1426,7 +1433,10 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     // assigned on new content types.
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.'));
-    $this->assertNoFieldByXPath("//table[@id='permissions']//input[@checked]");
+    // We are only looking for checked permission checkboxes that aren't dummy.
+    // Dummy permission checkboxes are always checked (but visually hidden by
+    // default), but we can exclude them by their 'dummy-checkbox' class.
+    $this->assertNoFieldByXPath("//table[@id='permissions']//input[not(contains(@class, 'dummy-checkbox')) and @checked]");
 
     // Set both an admin role and editor role.
     $edit = array();
@@ -1438,7 +1448,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/types/add');
     $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.', array(
       '%admin' => $this->admin_role_name,
-      '%editor' => $this->editor_role_name
+      '%editor' => $this->editor_role_name,
     )));
     // Opposite of the above assertNoFieldByXPath(), confirm that there are at
     // least some permission checkboxes checked.
@@ -1551,7 +1561,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertNoText($user_b->name, 'User B not on filtered by role on admin users page');
     $this->assertText($user_c->name, 'User C on filtered by role on admin users page');
 
-    // Test blocking of a user.
+    // Test blocking a user account.
     $user_c = user_load($user_c->uid, TRUE);
     $this->assertEqual($user_c->status, 1, 'User C not blocked');
 
@@ -1566,16 +1576,18 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
-    // Test unblocking of a user from /admin/people page and sending of activation mail
-    $editunblock = array();
-    $editunblock['action'] = 'user_unblock_user_action';
-    $editunblock[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    // Test unblocking a user account via the /admin/people page and sending the
+    // activation mail.
+    $edit_unblock = array();
+    $edit_unblock['action'] = 'user_unblock_user_action';
+    $edit_unblock[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $edit_unblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
 
-    // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail
+    // Test blocking and unblocking another user account via the
+    // /user/[uid]/edit form and sending the activation mail.
     $user_d = $this->backdropCreateUser(array());
     $account1 = user_load($user_d->uid, TRUE);
     $this->backdropPost('user/' . $account1->uid . '/edit', array('status' => 0), t('Save'));
@@ -2309,7 +2321,11 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users', 'assign roles'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer permissions',
+      'administer users',
+      'assign roles',
+    ));
   }
 
   /**

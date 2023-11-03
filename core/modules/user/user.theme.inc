@@ -132,6 +132,7 @@ function theme_user_admin_permissions($variables) {
       $permission_text = '<div class="permission-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
       $permission_text .= $form['permission'][$key]['#description'];
 
+      $row['class'] = array('permission-row');
       $row['data'][] = array(
         'data' => $permission_text,
         'class' => array('permission', 'table-filter-text'),
@@ -140,6 +141,27 @@ function theme_user_admin_permissions($variables) {
       foreach (element_children($form['checkboxes']) as $role_name) {
         $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
+        if (!in_array($role_name, array('anonymous', 'authenticated'))) {
+          $form['checkboxes'][$role_name][$key]['#attributes']['class'][] = 'real-checkbox';
+
+          $dummy_checkbox = array(
+            '#type' => 'checkbox',
+            '#title' => t('This permission is inherited from the authenticated user role.'),
+            '#title_display' => 'attribute',
+            '#disabled' => TRUE,
+            // '#post_render' => ???,
+            // Remove the entire wrapper <div> around the dummy checkbox.
+            '#theme_wrappers' => array(),
+            '#attributes' => array(
+              // Dummy checkboxes are hidden by default.
+              'class' => array('dummy-checkbox', 'element-hidden'),
+              'disabled' => TRUE,
+              'checked' => TRUE,
+            ),
+          );
+          $form['checkboxes'][$role_name][$key]['#field_suffix'] = backdrop_render($dummy_checkbox);
+        }
+
         $row['data'][] = array(
           'data' => backdrop_render($form['checkboxes'][$role_name][$key]),
           'class' => array('checkbox'),
@@ -148,11 +170,16 @@ function theme_user_admin_permissions($variables) {
     }
     $rows[] = $row;
   }
-  $header[] = (t('Permission'));
+
+  $header = array();
+  $header[] = array(
+    'data' => t('Permission'),
+    'class' => array('permission-module-column'),
+  );
   foreach (element_children($form['role_names']) as $role_name) {
     $header_cell = array(
       'data' => backdrop_render($form['role_names'][$role_name]),
-      'class' => array('checkbox'),
+      'class' => array('role-checkboxes-column'),
     );
     // Output a role description if present as a title attribute on the cell.
     if (isset($form['role_names'][$role_name]['#description'])) {
