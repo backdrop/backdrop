@@ -5,6 +5,8 @@
 
 (function (Backdrop, CKEditor5) {
 
+"use strict";
+
 /**
  * The BackdropLink plugin replaces and extends the CKEditor core Link plugin.
  *

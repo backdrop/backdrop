@@ -4,6 +4,8 @@
  */
 (function (CKEditor5) {
 
+"use strict";
+
 /**
  * BackdropImage CKEditor 5 plugin.
  *
@@ -388,8 +390,7 @@ function viewCaptionToCaptionAttribute(editor) {
       }
     }
 
-    // Unbind all the view elements that were downcasted to the document
-    // fragment.
+    // Unbind all the view elements that were downcast to the document fragment.
     // eslint-disable-next-line no-restricted-syntax
     for (const child of writer
       .createRangeIn(viewDocumentFragment)

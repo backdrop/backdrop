@@ -97,10 +97,11 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageCaption',
       'essentials.Essentials',
       'autoformat.Autoformat',
+      'htmlSupport.GeneralHtmlSupport',
+      'backdropHtmlEngine.BackdropHtmlEngine',
       'list.DocumentList',
       'blockQuote.BlockQuote',
       'backdropImage.BackdropImage',
-      'htmlSupport.GeneralHtmlSupport',
     );
     $this->assertEqual($format_settings['editorSettings']['pluginList'], $expected_plugins, 'CKEditor5 plugin list saved correctly');
 
@@ -124,9 +125,10 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageCaption',
       'essentials.Essentials',
       'autoformat.Autoformat',
-      'backdropBasicStyles.BackdropBasicStyles',
-      'table.Table',
       'htmlSupport.GeneralHtmlSupport',
+      'backdropBasicStyles.BackdropBasicStyles',
+      'backdropHtmlEngine.BackdropHtmlEngine',
+      'table.Table',
     );
     $this->assertEqual($format_settings['editorSettings']['pluginList'], $expected_plugins, 'CKEditor5 plugin list saved correctly');
   }

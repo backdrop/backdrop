@@ -103,6 +103,13 @@ function ckeditor5_library_info() {
       $module_path . '/js/plugins/backdrop-basic-styles/backdrop-basic-styles.js' => array(),
     ),
   );
+  $libraries['backdrop.ckeditor5.backdrop-html-engine'] = array(
+    'title' => 'CKEditor plugin that writes the HTML source from the editor.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-html-engine/backdrop-html-engine.js' => array(),
+    ),
+  );
   $libraries['backdrop.ckeditor5.backdrop-image'] = array(
     'title' => 'Integrates uploading images with CKEditor 5.',
     'version' => $info['version'],
@@ -500,6 +507,12 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // General HTML support is always enabled in Backdrop to provide compatibility
+  // with existing content and to preserve otherwise unsupported HTML tags.
+  $plugins['htmlSupport.GeneralHtmlSupport'] = array(
+    'enabled_callback' => TRUE,
+  );
+
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/special-characters.html
   $plugins['specialCharacters.SpecialCharacters'] = array(
     'buttons' => array(
@@ -515,6 +528,13 @@ function ckeditor5_ckeditor5_plugins() {
   // such as converting <s> to <del> or <i> to <em>.
   $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
+    'enabled_callback' => TRUE,
+  );
+
+  // Plugin that writes the HTML source when saving the editor contents. This
+  // properly escapes HTML attributes and formats the HTML source.
+  $plugins['backdropHtmlEngine.BackdropHtmlEngine'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-html-engine'),
     'enabled_callback' => TRUE,
   );
 
@@ -898,11 +918,6 @@ function ckeditor5_get_config($format) {
 
   // Remove duplicates from the plugin list (as happens with dependencies).
   $plugins = array_unique($plugins);
-
-  // We always load the GeneralHtmlSupport plugin.
-  if (!in_array('htmlSupport.GeneralHtmlSupport', $plugins)) {
-    $plugins[] = 'htmlSupport.GeneralHtmlSupport';
-  }
 
   // Initialize reasonable defaults that provide expected basic behavior.
   $config = array(

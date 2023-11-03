@@ -1,5 +1,7 @@
 (function (CKEditor5) {
 
+"use strict";
+
 /**
  * Backdrop-specific plugin to alter the CKEditor 5 basic tags.
  */
