@@ -21,10 +21,9 @@
  *
  * @return Config
  *   A Config object containing the specified configuration settings.
- *
  */
 function config($config_file, $type = 'active') {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['loaded_configs'] = &backdrop_static(__FUNCTION__);
@@ -107,7 +106,7 @@ function config_is_overridden($config_file, $option) {
  *   may contain periods to indicate levels within the config file. If NULL is
  *   passed in, the entire contents of the config file will be returned.
  *
- * @return mixed
+ * @return mixed|null
  *   The contents of the requested config option. Returns NULL if the specified
  *   option was not found in the file at all.
  *
@@ -120,7 +119,8 @@ function config_get($config_file, $option = NULL) {
 }
 
 /**
- * A shortcut function to load and retrieve a single translated value from a config file.
+ * A shortcut function to load and retrieve a single translated value from a
+ * config file.
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
@@ -140,10 +140,10 @@ function config_get($config_file, $option = NULL) {
  *   - 'context' (defaults to the empty context): The context the source string
  *     belongs to.
  *
- * @return string
- *   The translated contents of the requested config option. Returns default if no
- *   translation is found. Returns NULL if the specified option was not found in
- *   the file at all or if not a string.
+ * @return string|null
+ *   The translated contents of the requested config option. Returns default if
+ *   no translation is found. Returns NULL if the specified option was not found
+ *   in the file at all or if not a string.
  *
  * @see t()
  * @see config_get()
@@ -256,7 +256,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
 /**
  * Loads configuration objects by name.
  *
- * @param array $names
+ * @param string $names
  *   The list of configuration names to load.
  * @param string $type
  *   The configuration type, either "staging" or "active".
@@ -274,7 +274,7 @@ function config_load_multiple($names, $type = 'active') {
  *
  * @param string $project
  *   The name of the project we are installing.
- * @param string|NULL $config_name
+ * @param string|null $config_name
  *   (optional) If wanting to copy just a single configuration file from the
  *   project, specify the configuration file name without the extension.
  *
@@ -317,7 +317,7 @@ function config_install_default_config($project, $config_name = NULL) {
  *
  * @param string $project
  *   The name of the project we are uninstalling.
- * @param string|NULL $config_name
+ * @param string|null $config_name
  *   (optional) If wanting to remove just a single configuration file from the
  *   project, specify the configuration file name without the extension.
  *
@@ -521,7 +521,7 @@ class Config {
    * Sets the name of this configuration object.
    *
    * @param string $name
-   *  The name of the configuration object.
+   *   The name of the configuration object.
    *
    * @return Config
    *   The configuration object.
@@ -535,7 +535,7 @@ class Config {
    * Validates the configuration object name.
    *
    * @param string $name
-   *  The name of the configuration object.
+   *   The name of the configuration object.
    *
    * @throws ConfigNameException
    *
@@ -599,7 +599,7 @@ class Config {
   /**
    * Check if a particular config key is overridden.
    *
-   * @param $key
+   * @param string $key
    *   A string that maps to a key within the configuration data.
    *
    * @return bool
@@ -708,9 +708,9 @@ class Config {
    *   The string that maps to a key with the configuration data.
    *
    *   A key may be overridden at any level, for example if
-   *   $key === 'foo.bar.key1', the matched value could be provided by an override
-   *   from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of the
-   *   following would provide an overridden value for 'foo.bar.key1'.
+   *   $key === 'foo.bar.key1', the matched value could be provided by an
+   *   override from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of
+   *   the following would provide an overridden value for 'foo.bar.key1'.
    *
    *   @code
    *   // Exact match.
@@ -778,7 +778,7 @@ class Config {
    *   A key of 'foo.bar' would return the string 'baz'. However, a key of 'foo'
    *   would return array('bar' => 'baz').
    *   If no key is specified, then an empty string is returned.
-   *   If the key is not 'translatable' key then the original string is returned.
+   *   If the key is not 'translatable' then the original string is returned.
    *   If the key's value is not a string then an empty string is returned.
    *
    * @param array $args
@@ -788,10 +788,10 @@ class Config {
    *   An associative array of additional options, with the following elements:
    *   - 'langcode' (defaults to the current language): The language code to
    *     translate to a language other than what is used to display the page.
-   *   - 'context' (defaults to the empty context): The context the source string
-   *     belongs to.
+   *   - 'context' (defaults to the empty context): The context the source
+   *     string belongs to.
    *
-   * @return string|NULL
+   * @return string|null
    *   The translated data that was requested.
    *
    * @see t()
@@ -991,7 +991,7 @@ class Config {
   /**
    * Saves the configuration object.
    *
-   * @return Config
+   * @return object Config
    *   The configuration object.
    */
   public function save() {
@@ -1099,7 +1099,7 @@ interface ConfigStorageInterface {
   /**
    * Reads configuration data from the storage.
    *
-   * @param array $name
+   * @param array $names
    *   List of names of the configuration objects to load.
    *
    * @throws ConfigStorageException
@@ -1147,7 +1147,6 @@ interface ConfigStorageInterface {
    */
   public function rename($name, $new_name);
 
-
   /**
    * Returns a timestamp indicating the last time a configuration was modified.
    *
@@ -1162,30 +1161,30 @@ interface ConfigStorageInterface {
   /**
    * Encodes configuration data into the storage-specific format.
    *
+   * This is a publicly accessible static method to allow for alternative
+   * usages in data conversion scripts and also tests.
+   *
    * @param array $data
    *   The configuration data to encode.
    *
    * @return string
    *   The encoded configuration data.
-   *
-   * This is a publicly accessible static method to allow for alternative
-   * usages in data conversion scripts and also tests.
    */
-  public function encode($data);
+  public static function encode($data);
 
   /**
    * Decodes configuration data from the storage-specific format.
+   *
+   * This is a publicly accessible static method to allow for alternative
+   * usages in data conversion scripts and also tests.
    *
    * @param string $raw
    *   The raw configuration data string to decode.
    *
    * @return array
    *   The decoded configuration data as an associative array.
-   *
-   * This is a publicly accessible static method to allow for alternative
-   * usages in data conversion scripts and also tests.
    */
-  public function decode($raw);
+  public static function decode($raw);
 
   /**
    * Gets configuration object names starting with a given prefix.
@@ -1409,7 +1408,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function encode($data) {
+  public static function encode($data) {
     $contents = backdrop_json_encode($data, TRUE);
     if ($contents === FALSE) {
       throw new ConfigStorageException(t('The configuration string could not be parsed.'));
@@ -1476,7 +1475,8 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
     }
     catch (\Exception $e) {
-      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog('config', 'Could not extract the archive @uri: @error',
+      array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;

@@ -189,7 +189,8 @@ function backdrop_get_profile() {
     try {
       $profile = config_get('system.core', 'install_profile');
     }
-    catch (ConfigException $e) {}
+    catch (ConfigException $e) {
+    }
   }
   if (empty($profile)) {
     $profile = 'standard';
@@ -351,14 +352,14 @@ function backdrop_get_favicon() {
  * This function can be called as long as the headers aren't sent. Pass no
  * arguments (or NULL for both) to retrieve the currently stored elements.
  *
- * @param $data
+ * @param array $data
  *   A renderable array. If the '#type' key is not set then 'head_tag' will be
  *   added as the default '#type'.
- * @param $key
+ * @param string $key
  *   A unique string key to allow implementations of hook_html_head_alter() to
  *   identify the element in $data. Required if $data is not NULL.
  *
- * @return
+ * @return array
  *   An array of all stored HEAD elements.
  *
  * @see theme_head_tag()
@@ -437,9 +438,9 @@ function backdrop_get_html_head() {
  *
  * This function can be called as long the HTML header hasn't been sent.
  *
- * @param $url
+ * @param string $url
  *   An internal system path or a fully qualified external URL of the feed.
- * @param $title
+ * @param string $title
  *   The title of the feed.
  */
 function backdrop_add_feed($url = NULL, $title = '') {
@@ -483,15 +484,15 @@ function backdrop_get_feeds($delimiter = "\n") {
 /**
  * Processes a URL query parameter array to remove unwanted elements.
  *
- * @param $query
+ * @param array $query
  *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
+ * @param array $exclude
  *   (optional) A list of $query array keys to remove. Use "parent[child]" to
  *   exclude nested items. Defaults to array('q').
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return array
  *   An array containing query parameters, which can be used for url().
  */
 function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
@@ -528,10 +529,10 @@ function backdrop_get_query_parameters(array $query = NULL, array $exclude = arr
 /**
  * Splits a URL-encoded query string into an array.
  *
- * @param $query
+ * @param string $query
  *   The query string to split.
  *
- * @return
+ * @return array
  *   An array of URL decoded couples $param_name => $value.
  */
 function backdrop_get_query_array($query) {
@@ -603,12 +604,12 @@ function backdrop_get_bare_domain($url) {
  * This differs from http_build_query() as we need to rawurlencode() (instead of
  * urlencode()) all query parameters.
  *
- * @param $query
+ * @param array $query
  *   The query parameter array to be processed, e.g. $_GET.
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return string
  *   A rawurlencoded string which can be used as or appended to the URL query
  *   string.
  *
@@ -692,10 +693,10 @@ function backdrop_get_destination() {
  * needs to be parsed into an associative query parameter array in
  * $options['query'] and the fragment into $options['fragment'].
  *
- * @param $url
+ * @param string $url
  *   The URL string to parse, f.e. $_GET['destination'].
  *
- * @return
+ * @return array
  *   An associative array containing the keys:
  *   - 'path': The path of the URL. If the given $url is external, this includes
  *     the scheme and host.
@@ -814,20 +815,21 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  * This function ends the request; use it instead of a return in your menu
  * callback.
  *
- * @param $path
+ * @param string $path
  *   (optional) A Backdrop path or a full URL, which will be passed to url() to
  *   compute the redirect for the URL.
- * @param $options
+ * @param array $options
  *   (optional) An associative array of additional URL options to pass to url().
- * @param $http_response_code
+ * @param int $http_response_code
  *   (optional) The HTTP status code to use for the redirection, defaults to
  *   302. The valid values for 3xx redirection status codes are defined in
- *   @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3 RFC 2616 @endlink
- *   and the
- *   @link http://tools.ietf.org/html/draft-reschke-http-status-308-07 draft for the new HTTP status codes: @endlink
+ *   @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3
+ *   RFC 2616 @endlink and the
+ *   @link http://tools.ietf.org/html/draft-reschke-http-status-308-07 draft
+ *   for the new HTTP status codes: @endlink
  *   - 301: Moved Permanently (the recommended value for most redirects).
- *   - 302: Found (default in Backdrop and PHP, sometimes used for spamming search
- *     engines).
+ *   - 302: Found (default in Backdrop and PHP, sometimes used for spamming
+ *     search engines).
  *   - 303: See Other.
  *   - 304: Not Modified.
  *   - 305: Use Proxy.
@@ -916,7 +918,7 @@ function backdrop_access_denied() {
  * This is a flexible and powerful HTTP client implementation. Correctly
  * handles GET, POST, PUT or any other HTTP requests. Handles redirects.
  *
- * @param $url
+ * @param string $url
  *   A string containing a fully qualified URI.
  * @param array $options
  *   (optional) An array that can have one or more of the following elements:
@@ -1241,18 +1243,18 @@ function backdrop_http_request($url, array $options = array()) {
   $result->code = $code;
 
   switch ($code) {
-    case 200: // OK
-    case 201: // Created
-    case 202: // Accepted
-    case 203: // Non-Authoritative Information
-    case 204: // No Content
-    case 205: // Reset Content
-    case 206: // Partial Content
-    case 304: // Not modified
+    case 200: // OK.
+    case 201: // Created.
+    case 202: // Accepted.
+    case 203: // Non-Authoritative Information.
+    case 204: // No Content.
+    case 205: // Reset Content.
+    case 206: // Partial Content.
+    case 304: // Not modified.
       break;
-    case 301: // Moved permanently
-    case 302: // Moved temporarily
-    case 307: // Moved temporarily
+    case 301: // Moved permanently.
+    case 302: // Moved temporarily.
+    case 307: // Moved temporarily.
       $location = $result->headers['location'];
       $options['timeout'] -= timer_read(__FUNCTION__) / 1000;
       if ($options['timeout'] <= 0) {
@@ -1289,7 +1291,7 @@ function backdrop_http_request($url, array $options = array()) {
  * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
  *
  * @param string $response
- *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
+ *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'.
  *
  * @return array
  *   Keyed array containing the component parts. If the response is malformed,
@@ -1316,7 +1318,7 @@ function _backdrop_parse_response_status($response) {
 /**
  * Helper function for determining hosts excluded from needing a proxy.
  *
- * @return
+ * @return bool
  *   TRUE if a proxy should be used for this host.
  */
 function _backdrop_http_use_proxy($host) {
@@ -1333,7 +1335,7 @@ function _backdrop_http_use_proxy($host) {
  *
  * Callback for array_walk() within fix_gpx_magic().
  *
- * @param $item
+ * @param string $item
  *   An individual string or array of strings from superglobals.
  */
 function _fix_gpc_magic(&$item) {
@@ -1353,9 +1355,9 @@ function _fix_gpc_magic(&$item) {
  * The tmp_name key is skipped keys since PHP generates single backslashes for
  * file paths on Windows systems.
  *
- * @param $item
+ * @param string $item
  *   An item from $_FILES.
- * @param $key
+ * @param string $key
  *   The key for the item within $_FILES.
  *
  * @see http://php.net/manual/features.file-upload.php#42280
@@ -1400,14 +1402,14 @@ function fix_gpc_magic() {
  *
  * See @link http://tools.ietf.org/html/rfc5321 RFC 5321 @endlink for details.
  *
- * @param $mail
+ * @param string $mail
  *   A string containing an email address.
  *
- * @return
+ * @return bool
  *   TRUE if the address is in a valid format.
  */
 function valid_email_address($mail) {
-  return (bool)filter_var($mail, FILTER_VALIDATE_EMAIL);
+  return (bool) filter_var($mail, FILTER_VALIDATE_EMAIL);
 }
 
 /**
@@ -1416,17 +1418,17 @@ function valid_email_address($mail) {
  * This function should only be used on actual URLs. It should not be used for
  * Backdrop menu paths, which can contain arbitrary characters.
  * Valid values per RFC 3986.
- * @param $url
+ * @param string $url
  *   The URL to verify.
- * @param $absolute
+ * @param bool $absolute
  *   Whether the URL is absolute (beginning with a scheme such as "http:").
  *
- * @return
+ * @return bool
  *   TRUE if the URL is in a valid format.
  */
 function valid_url($url, $absolute = FALSE) {
   if ($absolute) {
-    return (bool)preg_match("
+    return (bool) preg_match("
       /^                                                      # Start at the beginning of the text
       (?:ftp|https?|feed):\/\/                                # Look for ftp, http, https or feed schemes
       (?:                                                     # Userinfo (optional) which is typically
@@ -1444,7 +1446,7 @@ function valid_url($url, $absolute = FALSE) {
     $/xi", $url);
   }
   else {
-    return (bool)preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
+    return (bool) preg_match("/^(?:[\w#!:\.\?\+=&@$'~*,;\/\(\)\[\]\-]|%[0-9a-f]{2})+$/i", $url);
   }
 }
 
@@ -1528,14 +1530,14 @@ function valid_number_step($value, $step, $offset = 0.0) {
 /**
  * Registers an event for the current visitor to the flood control mechanism.
  *
- * @param $name
+ * @param string $name
  *   The name of an event.
- * @param $window
+ * @param int $window
  *   Optional number of seconds before this event expires. Defaults to 3600 (1
  *   hour). Typically uses the same value as the flood_is_allowed() $window
  *   parameter. Expired events are purged on cron run to prevent the flood table
  *   from growing indefinitely.
- * @param $identifier
+ * @param string $identifier
  *   Optional identifier (defaults to the current user's IP address).
  */
 function flood_register_event($name, $window = 3600, $identifier = NULL) {
@@ -1555,9 +1557,9 @@ function flood_register_event($name, $window = 3600, $identifier = NULL) {
 /**
  * Makes the flood control mechanism forget an event for the current visitor.
  *
- * @param $name
+ * @param string $name
  *   The name of an event.
- * @param $identifier
+ * @param string $identifier
  *   Optional identifier (defaults to the current user's IP address).
  */
 function flood_clear_event($name, $identifier = NULL) {
@@ -1577,17 +1579,17 @@ function flood_clear_event($name, $identifier = NULL) {
  * a certain number of times in a time window. This function verifies that the
  * current user has not exceeded this threshold.
  *
- * @param $name
+ * @param string $name
  *   The unique name of the event.
- * @param $threshold
+ * @param int $threshold
  *   The maximum number of times each user can do this event per time window.
- * @param $window
+ * @param int $window
  *   Number of seconds in the time window for this event (default is 3600
  *   seconds, or 1 hour).
- * @param $identifier
+ * @param string $identifier
  *   Unique identifier of the current user. Defaults to their IP address.
  *
- * @return
+ * @return bool
  *   TRUE if the user is allowed to proceed. FALSE if they have exceeded the
  *   threshold and should not be allowed to proceed.
  */
@@ -1628,7 +1630,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  * @param string $name
  *   The name of the object being stored. Must be less than 128 characters.
  *
- * @return
+ * @return array
  *   The data that was stored.
  */
 function tempstore_get($collection, $name) {
@@ -1714,10 +1716,10 @@ function tempstore_clear_all($collection) {
  * be a plain-text string for passing to t(), l(), backdrop_attributes(), or
  * another function that will call check_plain() separately.
  *
- * @param $uri
+ * @param string $uri
  *   A plain-text URI that might contain dangerous protocols.
  *
- * @return
+ * @return string
  *   A plain-text URI stripped of dangerous protocols. As with all plain-text
  *   strings, this return value must not be output to an HTML page without
  *   check_plain() being called on it. However, it can be passed to functions
@@ -1759,10 +1761,10 @@ function backdrop_strip_dangerous_protocols($uri) {
 /**
  * Strips dangerous protocols from a URI and encodes it for output to HTML.
  *
- * @param $uri
+ * @param string $uri
  *   A plain-text URI that might contain dangerous protocols.
  *
- * @return
+ * @return string
  *   A URI stripped of dangerous protocols and encoded for output to an HTML
  *   attribute value. Because it is already encoded, it should not be set as a
  *   value within a $attributes array passed to backdrop_attributes(), because
@@ -1803,14 +1805,14 @@ function filter_xss_admin($string) {
  * - Makes sure no HTML tags contain URLs with a disallowed protocol (e.g.
  *   javascript:).
  *
- * @param $string
+ * @param string $string
  *   The string with raw HTML in it. It will be stripped of everything that can
  *   cause an XSS attack.
- * @param $allowed_tags
+ * @param array $allowed_tags
  *   An array of allowed tags. Defaults to the array returned by
  *   _filter_xss_allowed_tags().
  *
- * @return
+ * @return string
  *   An XSS safe version of $string, or an empty string if $string is not
  *   valid UTF-8.
  *
@@ -1873,11 +1875,11 @@ function _filter_xss_display_allowed_tags() {
 /**
  * Processes an HTML tag.
  *
- * @param $m
+ * @param array $m
  *   An array with various meaning depending on the value of $store.
  *   If $store is TRUE then the array contains the allowed tags.
  *   If $store is FALSE then the array has one element, the HTML tag to process.
- * @param $store
+ * @param bool $store
  *   Whether to store $m.
  *
  * @return string
@@ -1945,7 +1947,7 @@ function _filter_xss_split($m, $store = FALSE) {
 /**
  * Processes a string of HTML attributes.
  *
- * @return
+ * @return string
  *   Cleaned up version of the HTML attributes.
  */
 function _filter_xss_attributes($attr) {
@@ -2064,15 +2066,15 @@ function _filter_xss_attributes($attr) {
 /**
  * Processes an HTML attribute value and strips dangerous protocols from URLs.
  *
- * @param $string
+ * @param string $string
  *   The string with the attribute value.
- * @param $decode
+ * @param bool $decode
  *   (deprecated) Whether to decode entities in the $string. Set to FALSE if the
  *   $string is in plain text, TRUE otherwise. Defaults to TRUE. This parameter
  *   is deprecated and will be removed. To process a plain-text URI,
  *   call backdrop_strip_dangerous_protocols() or check_url() instead.
  *
- * @return
+ * @return string
  *   Cleaned up and HTML-escaped version of $string.
  */
 function filter_xss_bad_protocol($string, $decode = TRUE) {
