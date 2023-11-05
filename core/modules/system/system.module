@@ -3917,6 +3917,16 @@ function system_image_toolkits() {
 }
 
 /**
+ * Get core SVG support.
+ */
+function system_get_svg_support() {
+  // @todo: static? Check how often this would be called.
+  // @todo: Maybe this should be in image module.
+  $image_svg_support = config_get('system.core', 'image_svg_support');
+  return $image_svg_support;
+}
+
+/**
  * Attempts to get a file using backdrop_http_request and to store it locally.
  *
  * @param string $url

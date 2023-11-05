@@ -36,6 +36,7 @@
     "filter_fallback_format": "plain_text",
     "form_cache_expiration": 21600,
     "image_toolkit": "gd",
+    "image_svg_support": true,
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
     "install_profile": "",

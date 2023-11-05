@@ -112,7 +112,11 @@ function image_get_supported_extensions() {
   $toolkit = image_get_toolkit();
   $function = 'image_' . $toolkit . '_supported_extensions';
   if (function_exists($function)) {
-    return $function();
+    $extensions = $function();
+    if (system_get_svg_support()) {
+      $extensions[] = 'svg';
+    }
+    return $extensions;
   }
   watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
     array(
