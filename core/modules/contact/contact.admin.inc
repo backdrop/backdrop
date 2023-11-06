@@ -110,11 +110,6 @@ function contact_form_permissions() {
 
   $form = user_build_form_permissions_grid($permissions, FALSE);
 
-  // Note that in contact_theme(), the 'contact_form_permissions' theme callback
-  // reuses theme_user_admin_permissions(), to make it identical to the user
-  // module permissions page.
-  $form['#theme'] = array('contact_form_permissions');
-
   return $form;
 }
 

@@ -299,10 +299,6 @@ function taxonomy_theme() {
       'render element' => 'elements',
       'template' => 'templates/taxonomy-term',
     ) + $base,
-    'taxonomy_vocabulary_form_permissions' => array(
-      'render element' => 'form',
-      'function' => 'theme_user_admin_permissions',
-    ),
   );
 }
 

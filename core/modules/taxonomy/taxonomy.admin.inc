@@ -278,11 +278,6 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
 
   $form = user_build_form_permissions_grid($permissions, $is_new);
 
-  // Note that in taxonomy_theme() the 'taxonomy_vocabulary_form_permissions'
-  // theme callback reuses theme_user_admin_permissions(), to make it identical
-  // to the user module permissions page.
-  $form['#theme'] = array('taxonomy_vocabulary_form_permissions');
-
   return $form;
 }
 

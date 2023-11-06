@@ -2791,6 +2791,9 @@ function user_build_form_permissions_grid($permissions = NULL, $is_new = FALSE, 
   // Wrap the table in a form element, to make margins match other form
   // elements.
   $form['#theme_wrappers'] = array('form_element');
+  // Ensure that all permissions grids are styled consistently, regardless of
+  // where the form is being injected.
+  $form['#theme'] = array('user_admin_permissions');
 
   $form['roles'] = array(
     '#type' => 'value',

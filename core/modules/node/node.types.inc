@@ -692,11 +692,6 @@ function node_type_form_permissions($type) {
 
   $form = user_build_form_permissions_grid($permissions, $is_new);
 
-  // Note that in node_theme(), the 'node_type_form_permissions' theme callback
-  // reuses theme_user_admin_permissions(), to make it identical to the user
-  // module permissions page.
-  $form['#theme'] = array('node_type_form_permissions');
-
   return $form;
 }
 
