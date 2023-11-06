@@ -686,7 +686,6 @@ function node_type_form_permissions($type) {
   // permissions if creating a new content type).
   $permissions = !empty($type) ? node_list_permissions($type) : $placeholder_permissions;
 
-  module_load_include('inc', 'user', 'user.admin');
   $form = user_generate_form_permissions($permissions, $is_new);
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback

@@ -276,7 +276,6 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   // creating a new vocabulary).
   $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $placeholder_permissions;
 
-  module_load_include('inc', 'user', 'user.admin');
   $form = user_generate_form_permissions($permissions, $is_new);
 
   // Note that in taxonomy_theme() the 'taxonomy_vocabulary_form_permissions'

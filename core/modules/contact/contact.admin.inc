@@ -108,7 +108,6 @@ function contact_form_permissions() {
   // Retrieve contact-related permissions.
   $permissions = contact_permission();
 
-  module_load_include('inc', 'user', 'user.admin');
   $form = user_generate_form_permissions($permissions, FALSE);
 
   // Note that in contact_theme(), the 'contact_form_permissions' theme callback
