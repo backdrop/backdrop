@@ -539,6 +539,53 @@ function _node_characters($length) {
 }
 
 /**
+ * Builds a matrix of content-related permissions for this content type.
+ *
+ * @param $type
+ *   Machine name for node type.
+ *
+ * @see node_type_form()
+ * @see user_build_form_permissions_grid()
+ */
+function node_type_form_permissions($type) {
+  // Flag used to set the checkboxes for the Admin role to always be ticked when
+  // creating a new content type. See user_build_form_permissions_grid().
+  $is_new = empty($type);
+
+  // When creating a new content type, the content type name is not known before
+  // the form is saved. In that case, node_list_permissions() cannot be used to
+  // retrieve content-related permission names. We provide placeholders for
+  // these permissions here instead, and later in node_type_form_submit() we
+  // recreate the proper permission strings (which include the content type
+  // name).
+  $placeholder_permissions = array(
+    'create PLACEHOLDER content' => array(
+      'title' => t('Create new content'),
+    ),
+    'edit own PLACEHOLDER content' => array(
+      'title' => t('Edit own content'),
+    ),
+    'edit any PLACEHOLDER content' => array(
+      'title' => t('Edit any content'),
+    ),
+    'delete own PLACEHOLDER content' => array(
+      'title' => t('Delete own content'),
+    ),
+    'delete any PLACEHOLDER content' => array(
+      'title' => t('Delete any content'),
+    ),
+  );
+
+  // Retrieve permissions for this content type (or use placeholder
+  // permissions if creating a new content type).
+  $permissions = $is_new ? $placeholder_permissions : node_list_permissions($type);
+
+  $form = user_build_form_permissions_grid($permissions, $is_new);
+
+  return $form;
+}
+
+/**
  * Form validation handler for node_type_form().
  *
  * @see node_type_form_submit()
@@ -613,19 +660,17 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/types/manage' . $type->type . '/configure'));
 
     foreach ($form_state['values']['roles'] as $role_name => $role) {
-      $valid_perms = array();
+      $proper_permissions = array();
       // Before saving the permissions, the temporary permission placeholders
       // need to be replaced by the proper permission strings (for example, the
-      // placeholder 'create content' needs to be converted to 'create %type
-      // content').
-      foreach ($form_state['values'][$role->name] as $string => $perm) {
-        if ($perm) {
-          $parts = explode('content', $string);
-          $valid_string = $parts[0] . $type->type . ' content';
-          $valid_perms[] = $valid_string;
+      // placeholder 'create PLACEHOLDER content' needs to be converted to
+      // 'create page content').
+      foreach ($form_state['values'][$role->name] as $placeholder_permission => $granted) {
+        if ($granted) {
+          $proper_permissions[] = str_replace('PLACEHOLDER', $type->type, $placeholder_permission);
         }
       }
-      user_role_grant_permissions($role->name, $valid_perms);
+      user_role_grant_permissions($role->name, $proper_permissions);
     }
     if ($form_state['values']['body']) {
       node_add_body_field($type);
@@ -646,53 +691,6 @@ function node_type_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = 'admin/structure/types';
   return;
-}
-
-/**
- * Builds a matrix of content-related permissions for this content type.
- *
- * @param $type
- *   Machine name for node type.
- *
- * @see node_type_form()
- * @see user_build_form_permissions_grid()
- */
-function node_type_form_permissions($type) {
-  // Set the checkboxes for the Admin role to always be ticked when creating a
-  // new content type. See user_build_form_permissions_grid().
-  $is_new = !$type;
-
-  // When creating a new content type, the content type name is not known before
-  // the form is saved. In that case, node_list_permissions() cannot be used to
-  // retrieve content-related permission names. We provide placeholders for
-  // these permissions here instead, and later in node_type_form_submit() we
-  // recreate the proper permission strings (which include the content type
-  // name).
-  $placeholder_permissions = array(
-    "create content" => array(
-      'title' => t('Create new content'),
-    ),
-    "edit own content" => array(
-      'title' => t('Edit own content'),
-    ),
-    "edit any content" => array(
-      'title' => t('Edit any content'),
-    ),
-    "delete own content" => array(
-      'title' => t('Delete own content'),
-    ),
-    "delete any content" => array(
-      'title' => t('Delete any content'),
-    ),
-  );
-
-  // Retrieve permissions for this content type (or use placeholder
-  // permissions if creating a new content type).
-  $permissions = !empty($type) ? node_list_permissions($type) : $placeholder_permissions;
-
-  $form = user_build_form_permissions_grid($permissions, $is_new);
-
-  return $form;
 }
 
 /**

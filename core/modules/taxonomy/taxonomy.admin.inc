@@ -253,8 +253,8 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
  * @see user_build_form_permissions_grid()
  */
 function taxonomy_vocabulary_form_permissions($vocabulary) {
-  // Set the checkboxes for the Admin role to always be ticked when creating a
-  // new vocabulary. See user_build_form_permissions_grid().
+  // Flag used to set the checkboxes for the Admin role to always be ticked when
+  // creating a new vocabulary. See user_build_form_permissions_grid().
   $is_new = !$vocabulary->machine_name;
 
   // When creating a new vocabulary, the vocabulary name is not known before the
@@ -264,17 +264,20 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   // taxonomy_form_vocabulary_submit() we recreate the proper permission strings
   // (which include the vocabulary name).
   $placeholder_permissions = array(
-    "edit terms" => array(
+    'create terms' => array(
+      'title' => t('Create terms'),
+    ),
+    'edit terms' => array(
       'title' => t('Edit terms'),
     ),
-    "delete terms" => array(
+    'delete terms' => array(
       'title' => t('Delete terms'),
     ),
   );
 
   // Retrieve permissions for this vocabulary (or use placeholder permissions if
   // creating a new vocabulary).
-  $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $placeholder_permissions;
+  $permissions = $is_new ? $placeholder_permissions : taxonomy_vocabulary_list_permissions($vocabulary);
 
   $form = user_build_form_permissions_grid($permissions, $is_new);
 
@@ -346,18 +349,17 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
 
     foreach ($form_state['values']['roles'] as $role_name => $role) {
-      $valid_perms = array();
+      $proper_permissions = array();
       // Before saving the permissions, the temporary permission placeholders
       // need to be replaced by the proper permission strings (for example, the
       // placeholder 'edit terms' needs to be converted to 'edit terms in
       // %vocabulary').
-      foreach ($form_state['values'][$role->name] as $string => $perm) {
-        if ($perm) {
-          $parts = explode(' terms in ', $string);
-          $valid_perms[] = $parts[0] . ' terms in ' . $vocabulary->machine_name;
+      foreach ($form_state['values'][$role->name] as $placeholder_permission => $granted) {
+        if ($granted) {
+          $proper_permissions[] = $placeholder_permission . ' in ' . $vocabulary->machine_name;
         }
       }
-      user_role_grant_permissions($role->name, $valid_perms);
+      user_role_grant_permissions($role->name, $proper_permissions);
     }
   }
 }

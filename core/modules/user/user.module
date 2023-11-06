@@ -2787,6 +2787,7 @@ function user_build_form_permissions_grid($permissions = NULL, $is_new = FALSE, 
   }
   // Retrieve the admin role name.
   $admin_role = config_get('system.core', 'user_admin_role');
+  $editor_role = config_get('system.core', 'user_editor_role');
 
   // Wrap the table in a form element, to make margins match other form
   // elements.
@@ -2839,6 +2840,7 @@ function user_build_form_permissions_grid($permissions = NULL, $is_new = FALSE, 
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }

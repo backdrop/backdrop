@@ -55,7 +55,7 @@ function taxonomy_permission() {
 }
 
 /**
- * Helper function to generate standard permission list for a vocabulary.
+ * Helper function to generate the standard permissions list for a vocabulary.
  *
  * @param $vocabulary
  *   Fully loaded TaxonomyVocabulary object.
@@ -64,6 +64,9 @@ function taxonomy_permission() {
  *   An array of permission names and descriptions.
  */
 function taxonomy_vocabulary_list_permissions($vocabulary) {
+  // Note: If these permissions ever need to be changed, then the respective
+  // placeholder permissions in taxonomy_vocabulary_form_permissions() will need
+  // to be updated as well (and the logic in taxonomy_form_vocabulary_submit()).
   $permissions = array(
     'create terms in ' . $vocabulary->machine_name => array(
       'title' => t('%vocabulary: Create terms', array('%vocabulary' => $vocabulary->name)),
