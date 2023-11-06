@@ -144,7 +144,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'item',
     // Fields of #type 'item' do not support #attributes - use
     // #wrapper_attributes instead.
-    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#wrapper_attributes' => array(
+      'class' => array('description', 'form-item-description'),
+    ),
     '#markup' => t('This text will be shown on the <a href="@url"><em>Add content</em></a> page.', array('@url' => url('node/add'))),
   );
 
@@ -289,7 +291,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'item',
     // Fields of #type 'item' do not support #attributes - use
     // #wrapper_attributes instead.
-    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#wrapper_attributes' => array(
+      'class' => array('description', 'form-item-description'),
+    ),
     '#markup' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
 
