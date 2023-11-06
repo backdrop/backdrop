@@ -487,7 +487,9 @@ class FormsTestCase extends BackdropWebTestCase {
 
     // All the elements should be marked as disabled, including the ones below
     // the disabled container.
-    $this->assertEqual(count($disabled_elements), 39, 'The correct elements have the disabled property in the HTML code.');
+    $actual_count = count($disabled_elements);
+    $expected_count = 41;
+    $this->assertEqual($expected_count, $actual_count, format_string('Found @actual elements with disabled property (expected @expected).', array('@actual' => $actual_count, '@expected' => $expected_count)));
 
     $this->backdropPost(NULL, $edit, t('Submit'));
     $returned_values['hijacked'] = backdrop_json_decode($this->content);
@@ -500,7 +502,8 @@ class FormsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Assert that the values submitted to a form matches the default values of the elements.
+   * Assert that the values submitted to a form matches the default values of
+   * the elements.
    */
   function assertFormValuesDefault($values, $form) {
     foreach (element_children($form) as $key) {
@@ -512,7 +515,7 @@ class FormsTestCase extends BackdropWebTestCase {
           $expected_value = $form[$key]['#default_value'];
         }
 
-        if ($key == 'checkboxes_multiple') {
+        if (in_array($key, array('checkboxes_multiple', 'checkboxes_single_select', 'checkboxes_single_unselect'))) {
           // Checkboxes values are not filtered out.
           $values[$key] = array_filter($values[$key]);
         }
