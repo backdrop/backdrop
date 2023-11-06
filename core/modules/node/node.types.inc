@@ -656,7 +656,7 @@ function node_type_form_submit($form, &$form_state) {
 function node_type_form_permissions($type) {
   // Set the checkboxes for the Admin role to always be ticked when creating a
   // new content type. See user_generate_form_permissions().
-  $form_is_new = !$type;
+  $is_new = !$type;
 
   // When creating a new content type, the content type name is not known before
   // the form is saved. In that case, node_list_permissions() cannot be used to
@@ -687,7 +687,7 @@ function node_type_form_permissions($type) {
   $permissions = !empty($type) ? node_list_permissions($type) : $placeholder_permissions;
 
   module_load_include('inc', 'user', 'user.admin');
-  $form = user_generate_form_permissions($permissions, $form_is_new);
+  $form = user_generate_form_permissions($permissions, $is_new);
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user

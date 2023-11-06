@@ -481,7 +481,7 @@ function user_admin_permissions_submit($form, &$form_state) {
  * 
  * @param (array) $permissions
  *   An array of permissions, usually as provided by hook_permission().
- * @param (boolean) $form_is_new
+ * @param (boolean) $is_new
  *   Set this to:
  *   - TRUE: if the form where the permission matrix is to be added is creating
  *     a new item. For example, in the "Add vocabulary" and "Add content type"
@@ -506,7 +506,7 @@ function user_admin_permissions_submit($form, &$form_state) {
  * @see taxonomy_vocabulary_form_permissions()
  * @see node_type_form_permissions()
  */
-function user_generate_form_permissions($permissions = NULL, $form_is_new = FALSE, $role_name = NULL) {
+function user_generate_form_permissions($permissions = NULL, $is_new = FALSE, $role_name = NULL) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   if (isset($roles[$role_name])) {
@@ -547,7 +547,7 @@ function user_generate_form_permissions($permissions = NULL, $form_is_new = FALS
       // - If the permission has been previously granted to the role.
       // - For the Admin role column, if the form is creating a new item (i.e.
       //   when creating a new vocabulary or a new content type).
-      if (in_array($perm, $role->permissions) || ($form_is_new && $role->name == $admin_role)) {
+      if (in_array($perm, $role->permissions) || ($is_new && $role->name == $admin_role)) {
         $status[$role_name][] = $perm;
       }
     }

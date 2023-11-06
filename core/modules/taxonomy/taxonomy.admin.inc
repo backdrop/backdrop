@@ -255,7 +255,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
 function taxonomy_vocabulary_form_permissions($vocabulary) {
   // Set the checkboxes for the Admin role to always be ticked when creating a
   // new vocabulary. See user_generate_form_permissions().
-  $form_is_new = !$vocabulary->machine_name;
+  $is_new = !$vocabulary->machine_name;
 
   // When creating a new vocabulary, the vocabulary name is not known before the
   // form is saved. In that case, taxonomy_vocabulary_list_permissions() cannot
@@ -277,7 +277,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $placeholder_permissions;
 
   module_load_include('inc', 'user', 'user.admin');
-  $form = user_generate_form_permissions($permissions, $form_is_new);
+  $form = user_generate_form_permissions($permissions, $is_new);
 
   // Note that in taxonomy_theme() the 'taxonomy_vocabulary_form_permissions'
   // theme callback reuses theme_user_admin_permissions(), to make it identical
