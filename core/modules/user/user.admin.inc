@@ -410,6 +410,36 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
+  // JS-only table filters.
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('table-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the permission name, module name, or description to filter.'),
+    ),
+    '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
+  );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => $_GET['q'],
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
+  );
+
   // Get a list of all the modules implementing a hook_permission().
   $modules = array();
   $module_info = system_get_info('module');
