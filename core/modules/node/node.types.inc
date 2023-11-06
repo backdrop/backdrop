@@ -651,11 +651,11 @@ function node_type_form_submit($form, &$form_state) {
  *   Machine name for node type.
  *
  * @see node_type_form()
- * @see user_generate_form_permissions()
+ * @see user_build_form_permissions_grid()
  */
 function node_type_form_permissions($type) {
   // Set the checkboxes for the Admin role to always be ticked when creating a
-  // new content type. See user_generate_form_permissions().
+  // new content type. See user_build_form_permissions_grid().
   $is_new = !$type;
 
   // When creating a new content type, the content type name is not known before
@@ -686,7 +686,7 @@ function node_type_form_permissions($type) {
   // permissions if creating a new content type).
   $permissions = !empty($type) ? node_list_permissions($type) : $placeholder_permissions;
 
-  $form = user_generate_form_permissions($permissions, $is_new);
+  $form = user_build_form_permissions_grid($permissions, $is_new);
 
   // Note that in node_theme(), the 'node_type_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user

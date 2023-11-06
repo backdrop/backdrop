@@ -2779,7 +2779,7 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
  * @see taxonomy_vocabulary_form_permissions()
  * @see node_type_form_permissions()
  */
-function user_generate_form_permissions($permissions = NULL, $is_new = FALSE, $role_name = NULL) {
+function user_build_form_permissions_grid($permissions = NULL, $is_new = FALSE, $role_name = NULL) {
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   if (isset($roles[$role_name])) {

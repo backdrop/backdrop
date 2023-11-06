@@ -419,7 +419,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   // Sort modules by their display name.
   asort($modules);
 
-  // Collect all permissions, to be passed to user_generate_form_permissions().
+  // Collect all permissions to be passed to user_build_form_permissions_grid().
   $all_permissions = array();
 
   // Create a list of all permissions, grouped by the modules that provide them.
@@ -440,7 +440,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
 
   // Replace the permission placeholders in the form array with actual
   // permission checkboxes.
-  $form = array_replace_recursive($form, user_generate_form_permissions($all_permissions, FALSE, $role_name));
+  $form = array_replace_recursive($form, user_build_form_permissions_grid($all_permissions, FALSE, $role_name));
 
   $form['#theme_wrappers'] = array('form');
 

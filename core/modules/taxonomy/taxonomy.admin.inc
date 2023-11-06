@@ -250,11 +250,11 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
  *   Fully loaded TaxonomyVocabulary object.
  *
  * @see taxonomy_form_vocabulary()
- * @see user_generate_form_permissions()
+ * @see user_build_form_permissions_grid()
  */
 function taxonomy_vocabulary_form_permissions($vocabulary) {
   // Set the checkboxes for the Admin role to always be ticked when creating a
-  // new vocabulary. See user_generate_form_permissions().
+  // new vocabulary. See user_build_form_permissions_grid().
   $is_new = !$vocabulary->machine_name;
 
   // When creating a new vocabulary, the vocabulary name is not known before the
@@ -276,7 +276,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   // creating a new vocabulary).
   $permissions = !empty($vocabulary->machine_name) ? taxonomy_vocabulary_list_permissions($vocabulary) : $placeholder_permissions;
 
-  $form = user_generate_form_permissions($permissions, $is_new);
+  $form = user_build_form_permissions_grid($permissions, $is_new);
 
   // Note that in taxonomy_theme() the 'taxonomy_vocabulary_form_permissions'
   // theme callback reuses theme_user_admin_permissions(), to make it identical

@@ -102,13 +102,13 @@ function contact_settings_form_submit($form, &$form_state) {
  * Builds a matrix of contact-related permissions.
  *
  * @see contact_settings_form()
- * @see user_generate_form_permissions()
+ * @see user_build_form_permissions_grid()
  */
 function contact_form_permissions() {
   // Retrieve contact-related permissions.
   $permissions = contact_permission();
 
-  $form = user_generate_form_permissions($permissions, FALSE);
+  $form = user_build_form_permissions_grid($permissions, FALSE);
 
   // Note that in contact_theme(), the 'contact_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
