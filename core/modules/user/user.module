@@ -454,6 +454,25 @@ function user_password($length = 10) {
 }
 
 /**
+ * Checks if a user role has a permission.
+ *
+ * @param string $role_name
+ *   The role machine name.
+ * @param string $permission_name
+ *   The permission to check.
+ *
+ * @return bool
+ *   TRUE if the role has the permission, FALSE if it does not have the
+ *   permission.
+ *
+ * @since 1.26.0 Function added
+ */
+function user_role_has_permission($role_name, $permission_name) {
+  $role = user_role_load($role_name);
+  return $role ? in_array($permission_name, $role->permissions) : FALSE;
+}
+
+/**
  * Determine the permissions for one or more roles.
  *
  * @param $role_names
@@ -789,7 +808,14 @@ function user_account_form(&$form, &$form_state) {
     '#maxlength' => USERNAME_MAX_LENGTH,
     '#description' => t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
     '#required' => TRUE,
-    '#attributes' => array('class' => array('username')),
+    '#attributes' => array(
+      'class' => array('username'),
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
     '#default_value' => (!$register ? $account->name : ''),
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
@@ -805,6 +831,13 @@ function user_account_form(&$form, &$form_state) {
     '#description' => t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
     '#required' => TRUE,
     '#default_value' => (!$register ? $account->mail : ''),
+    '#attributes' => array(
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
   );
 
   // Display password field only for existing users or when user is allowed to
@@ -1162,7 +1195,15 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
+    '#attributes' => array(
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
   );
+
   $form['pass'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
@@ -1744,6 +1785,11 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
 

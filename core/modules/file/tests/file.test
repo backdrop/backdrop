@@ -563,6 +563,29 @@ class FileTaxonomyTermTestCase extends BackdropWebTestCase {
  *   that aren't related to fields into it.
  */
 class FileManagedFileElementTestCase extends FileTestHelper {
+
+  protected $originalDisplayErrorsValue;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // Disable the displaying of errors, so that the AJAX responses are not
+    // contaminated with error messages about exceeding the maximum POST size.
+    $this->originalDisplayErrorsValue = ini_set('display_errors', '0');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tearDown() {
+    ini_set('display_errors', $this->originalDisplayErrorsValue);
+
+    parent::tearDown();
+  }
+
   /**
    * Tests the managed_file element type.
    */
@@ -686,6 +709,43 @@ class FileManagedFileElementTestCase extends FileTestHelper {
         $this->assertEqual($last_fid, $last_fid_prior, 'No new file got uploaded.');
       }
     }
+  }
+
+  /**
+   * Tests uploading a file that exceeds the maximum file size.
+   */
+  public function testManagedFileExceedMaximumFileSize() {
+    $path = 'file/test/0/0';
+    $this->backdropGet($path);
+
+    // Create a test file that exceeds the maximum POST size with 1 kilobyte.
+    $post_max_size = $this->_postMaxSizeToInteger(ini_get('post_max_size'));
+    $filename = 'text-exceeded';
+    simpletest_generate_file($filename, ceil(($post_max_size + 1024) / 1024), 1024, 'text');
+    $uri = 'public://' . $filename . '.txt';
+    $input_base_name = 'file';
+    $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($uri));
+    $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+    $this->assertFieldByXpath('//input[@type="submit"]', t('Upload'), 'After uploading a file that exceeds the maximum file size, the "Upload" button is displayed.');
+    $this->backdropPost($path, array(), t('Save'));
+    $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submitted without a file.');
+  }
+
+  /**
+   * Converts php.ini post_max_size value to integer.
+   *
+   * @param string $string
+   *   The value from php.ini.
+   *
+   * @return int
+   *   Converted value.
+   */
+  protected function _postMaxSizeToInteger($string) {
+    sscanf($string, '%u%c', $number, $suffix);
+    if (isset($suffix)) {
+      $number = $number * pow(1024, strpos(' KMG', strtoupper($suffix)));
+    }
+    return $number;
   }
 }
 
@@ -2510,6 +2570,21 @@ class FileUploadWizardTestCase extends FileTestHelper {
  */
 class FileAdminTestCase extends FileTestHelper {
   protected $profile = 'minimal';
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
 
   function setUp() {
     parent::setUp();

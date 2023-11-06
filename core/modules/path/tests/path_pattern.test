@@ -97,7 +97,6 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     $vocabulary += array(
       'name' => $name,
       'machine_name' => $name,
-      'nodes' => array('post' => 'post'),
     );
     $vocabulary = new TaxonomyVocabulary($vocabulary);
     taxonomy_vocabulary_save($vocabulary);
