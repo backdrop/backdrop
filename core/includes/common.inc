@@ -5723,8 +5723,7 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
     }
   }
 
-  $flags = implode(' | ', $encode_flags);
-  return json_encode($var, $flags);
+  return json_encode($var, array_sum($encode_flags));
 }
 
 /**
