@@ -5707,12 +5707,23 @@ function backdrop_clear_js_cache() {
  */
 function backdrop_json_encode($var, $pretty_print = FALSE) {
   if ($pretty_print) {
-    return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
+    $encode_flags = array(JSON_PRETTY_PRINT, JSON_UNESCAPED_UNICODE, JSON_UNESCAPED_SLASHES);
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
   else {
-    return json_encode($var, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_NUMERIC_CHECK);
+    $encode_flags = array(JSON_HEX_TAG, JSON_HEX_APOS, JSON_HEX_AMP, JSON_HEX_QUOT);
   }
+
+  // Only add the JSON_NUMERIC_CHECK flag if the variable is a number or a
+  // numeric string.
+  if (is_numeric($var)) {
+    // Do not add the flag if the variable starts with 0 or +.
+    if (mb_substr($var, 0, 1) != 0 && mb_substr($var, 0, 1) != '+') {
+      $encode_flags[] = JSON_NUMERIC_CHECK;
+    }
+  }
+
+  return json_encode($var, implode(' | ', $encode_flags));
 }
 
 /**
