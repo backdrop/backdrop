@@ -439,7 +439,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#parents' => array('override'),
   );
 
-  if (!empty($form_state['storage']['override_messages']) && !count(form_get_errors())) {
+  if (!empty($form_state['storage']['override_messages']) && !form_get_errors()) {
     $form['override']['#access'] = TRUE;
     if (count($form_state['storage']['override_messages']) > 1) {
       $message_output = theme('item_list', array('items' => $form_state['storage']['override_messages']));
@@ -578,7 +578,11 @@ function _redirect_extract_url_options(&$element, &$form_state) {
  */
 function redirect_edit_form_validate($form, &$form_state) {
   form_state_values_clean($form_state);
-  $redirect = new Redirect($form_state['values']);
+  $values = $form_state['values'];
+  // Get rid of form values not appropriate for Redirect creation.
+  unset($values['override']);
+  unset($values['delete']);
+  $redirect = new Redirect($values);
 
   if (empty($form_state['values']['override'])) {
     if ($existing = redirect_load_by_source($redirect->source, $redirect->langcode)) {

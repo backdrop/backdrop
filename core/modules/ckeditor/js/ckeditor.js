@@ -2,6 +2,9 @@
 
   "use strict";
 
+  /**
+   * Backdrop editor behaviors for CKEditor 4.
+   */
   Backdrop.editors.ckeditor = {
 
     attach: function (element, format) {

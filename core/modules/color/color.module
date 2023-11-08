@@ -411,7 +411,9 @@ function color_get_palette($theme, $default = FALSE) {
   // Fetch and expand default palette.
   $info = color_get_info($theme);
   $palette = $info['schemes']['default']['colors'];
-
+  foreach ($palette as $item => $color) {
+    $palette[$item] = backdrop_strtolower($color);
+  }
   // Load config.
   if (!$default && ($theme_palette = theme_get_setting('color.palette', $theme))) {
     foreach ($theme_palette as $color_name => $color_code) {

@@ -42,7 +42,7 @@ console.log(Backdrop.settings.tokenFocusedField);
     });
 
     $(context).find('.token-click-insert .token-key').once('token-click-insert', function() {
-      var tokenLink = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').click(function(){
+      var tokenLink = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').on('click', function(){
         var focusField = Backdrop.settings.tokenFocusedField;
         var focusFieldType = Object.prototype.toString.call(focusField).match(/^\[object\s(.*)\]$/)[1];
         var tokenValue = $(this).text();
@@ -60,7 +60,7 @@ console.log('CKEditor iframe');
 console.log('textarea or input text fields');
             // IE support.
             if (document.selection) {
-              focusField.focus();
+              focusField.trigger('focus');
               var sel = document.selection.createRange();
               sel.text = tokenValue;
             }
@@ -100,7 +100,7 @@ console.log('textarea or input text fields');
     }
     $(context).find('.token-description').each(function() {
       var $moreLink = $link.clone();
-      $moreLink.click(toggleDescription);
+      $moreLink.on('click', toggleDescription);
       $(this).css('display', 'none').before(' ').before($moreLink);
     });
   }
