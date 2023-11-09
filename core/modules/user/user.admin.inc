@@ -140,13 +140,13 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Require email verification when a visitor creates an account.'),
+    '#title' => t('Require email verification when a visitor creates an account'),
     '#default_value' => $config->get('user_email_verification'),
     '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
   );
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
-    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#title' => t('When an email address is used as username, require a matching email address'),
     '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
@@ -193,7 +193,7 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable signatures.'),
+    '#title' => t('Enable signatures'),
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
@@ -208,7 +208,7 @@ function user_admin_settings($form, &$form_state) {
   $picture_support = $config->get('user_pictures');
   $form['personalization']['user_pictures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable user pictures.'),
+    '#title' => t('Enable user pictures'),
     '#default_value' => $picture_support,
   );
   backdrop_add_js(backdrop_get_path('module', 'user') . '/js/user.js');
@@ -380,15 +380,15 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      '0' => t('User ID and IP address combination'),
       '1' => t('User ID only'),
+      '0' => t('User ID and IP address combination'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
-    FALSE => array(
-      '#description' => ' Less secure, less likely to lock out users.',
+    '1' => array(
+      '#description' => t('More secure, more likely to lock out users.'),
     ),
-    TRUE => array(
-      '#description' => 'More secure, more likely to lock out users.',
+    '0' => array(
+      '#description' => t('Less secure, less likely to lock out users.'),
     ),
   );
 
@@ -550,29 +550,37 @@ function user_admin_roles($form, $form_state) {
     '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
   );
 
-  // Administrative role option.
-  $form['admin_role'] = array(
+  // Default administrator role and content editor role options.
+  $form['default_roles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Administrator role'),
+    '#title' => t('Default roles'),
+    '#description' => t('Changing these settings will not affect existing permissions.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
   $roles = user_roles();
-  // Do not allow the anonymous or authenticated roles to be set as the
-  // administrator.
+  // Do not allow the anonymous or authenticated roles to be set as the default
+  // administrator or content editor roles.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   // Add the "disabled" option to the top of the roles list (makes sure that
-  // this is the selected option if the role that was previously set as admin is
-  // deleted).
-  $roles = array(0 => t('disabled')) + $roles;
-  $form['admin_role']['user_admin_role'] = array(
+  // this is the selected option if the role that was previously set as admin or
+  // content editor is deleted).
+  $roles = array(0 => t('- None -')) + $roles;
+  $form['default_roles']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Changing this setting will not affect existing permissions.'),
+    '#description' => t('This role will be automatically given any permission introduced by newly enabled modules.'),
+  );
+  $form['default_roles']['user_editor_role'] = array(
+    '#type' => 'select',
+    '#title' => t('Default content editor role'),
+    '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
+    '#options' => $roles,
+    '#description' => t('This role will be automatically given permission to create, edit, and delete content for any newly created content types.'),
   );
 
   // Settings for anonymous users.
@@ -645,7 +653,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -660,6 +673,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->set('user_editor_role', $form_state['values']['user_editor_role']);
   $config->save();
 
   // Save roles.

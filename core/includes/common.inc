@@ -2901,6 +2901,7 @@ function l($text, $path, array $options = array()) {
   if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
       (empty($options['language']) || $options['language']->langcode == $language_url->langcode)) {
     $options['attributes']['class'][] = 'active';
+    $options['attributes']['aria-current'] = 'page';
   }
 
   // Remove all HTML and PHP tags from a tooltip, calling expensive strip_tags()
@@ -2913,7 +2914,16 @@ function l($text, $path, array $options = array()) {
   $attributes = backdrop_attributes($options['attributes']);
   unset($options['attributes']);
 
-  $url = check_plain(url($path, $options));
+  $url = url($path, $options);
+  $skip_js_paths = array(
+    'javascript:void()',
+    'javascript:void();',
+    'javascript:void(0)',
+    'javascript:void(0);',
+  );
+  if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
+    $url = check_url($url);
+  }
 
   // Sanitize the link text if necessary.
   if (!$options['html']) {
@@ -3042,19 +3052,6 @@ function backdrop_deliver_html_page($page_callback_result) {
   $frame_options = $site_config->get('x_frame_options');
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
-  }
-
-  if ($site_config->get('block_interest_cohort')) {
-    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
-    if (is_null($permissions_policy)) {
-      backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
-    }
-    else {
-      // Only add interest-cohort if the header does not contain it already.
-      if (strpos($permissions_policy, 'interest-cohort') === FALSE) {
-        backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()', TRUE);
-      }
-    }
   }
 
   // Menu status constants are integers; page content is a string or array.

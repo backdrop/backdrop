@@ -39,7 +39,7 @@ Backdrop.behaviors.autosubmit = {
     // 'this' references the form element
     function triggerSubmit (e) {
       var $this = $(this);
-      $this.find('.autosubmit-click').click();
+      $this.find('.autosubmit-click').trigger('click');
     }
 
     // the change event bubbles so we only need to bind it to the outer form
@@ -47,7 +47,7 @@ Backdrop.behaviors.autosubmit = {
       .add('.autosubmit', context)
       .filter('form, select, input:not(:text, :submit)')
       .once('autosubmit')
-      .change(function (e) {
+      .on('change', function (e) {
         // don't trigger on text change for full-form
         if ($(e.target).is(':not(:text, :submit, .autosubmit-exclude)')) {
           triggerSubmit.call(e.target.form);
@@ -79,17 +79,17 @@ Backdrop.behaviors.autosubmit = {
         // each textinput element has his own timeout
         var timeoutID = 0;
         $(this)
-          .bind('keydown keyup', function (e) {
+          .on('keydown keyup', function (e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
               timeoutID && clearTimeout(timeoutID);
             }
           })
-          .keyup(function(e) {
+          .on('keyup', function(e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
               timeoutID = setTimeout($.proxy(triggerSubmit, this.form), 500);
             }
           })
-          .bind('change', function (e) {
+          .on('change', function (e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
               timeoutID = setTimeout($.proxy(triggerSubmit, this.form), 500);
             }
