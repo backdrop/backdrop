@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for CKEditor module.
+ * Install, update and uninstall functions for CKEditor 4 module.
  */
 
 /**
@@ -16,13 +16,13 @@ function ckeditor_requirements($phase) {
     // @todo: Update the description and severity when CKEditor 5 is part of core.
     $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
     $requirements['ckeditor_version'] = array(
-      'title' => $t('CKEditor'),
+      'title' => $t('CKEditor 4'),
       'value' => $ckeditor_version,
       'description' => $t('CKEditor 4 reached its official end-of-life in June 2023. It will continue to be supported for Open Source projects like Backdrop and Drupal until November 2023. Backdrop core will include CKEditor 5 in the future. To switch to CKEditor 5 earlier, please use the !module.', array('!module' => l(t('CKEditor 5 contrib module'), 'https://backdropcms.org/project/ckeditor5'))),
       'severity' => REQUIREMENT_INFO,
     );
 
-    // Check if CKEditor is not enabled on any formats.
+    // Check if CKEditor 4 is not enabled on any formats.
     $ckeditor_found = FALSE;
     $formats = filter_formats();
     foreach ($formats as $format) {
@@ -32,8 +32,8 @@ function ckeditor_requirements($phase) {
     }
     if (!$ckeditor_found) {
       $requirements['ckeditor_not_enabled'] = array(
-        'title' => $t('CKEditor'),
-        'value' => $t('CKEditor is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
+        'title' => $t('CKEditor 4'),
+        'value' => $t('CKEditor 4 is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
         'severity' => REQUIREMENT_WARNING,
       );
     }
