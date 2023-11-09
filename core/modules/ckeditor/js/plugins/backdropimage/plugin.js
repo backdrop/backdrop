@@ -1,6 +1,6 @@
 /**
  * @file
- * Backdrop Image plugin.
+ * Backdrop CKEditor 4 Image plugin.
  *
  * This alters the existing CKEditor image2 widget plugin to:
  * - require a data-file-id attribute (which Backdrop uses to track where images

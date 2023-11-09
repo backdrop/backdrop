@@ -489,7 +489,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
     $view->description = $form_state['values']['description'];
-    $view->tag = 'default';
+    $view->tag = '';
     $view->core = BACKDROP_VERSION;
     $view->base_table = $this->base_table;
 
@@ -514,7 +514,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    *   arrays of options for that display.
    */
   protected function build_display_options($form, $form_state) {
-    // Display: Master
+    // Display: Default
     $display_options['default'] = $this->default_display_options($form, $form_state);
     $display_options['default'] += array(
       'filters' => array(),
@@ -595,8 +595,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Add the array of display options to the view, with appropriate overrides.
    */
   protected function add_displays($view, $display_options, $form, $form_state) {
-    // Display: Master
-    $default_display = $view->new_display('default', 'Master', 'default');
+    // Display: Default
+    $default_display = $view->new_display('default', 'Default', 'default');
     foreach ($display_options['default'] as $option => $value) {
       $default_display->set_option($option, $value);
     }
