@@ -740,16 +740,10 @@ function system_sort_modules_by_info_name($a, $b) {
  * Array sorting callback; sorts modules or themes by their name.
  */
 function system_sort_themes($a, $b) {
-  if ($a->is_default) {
+  if ($a->is_default || $a->is_admin) {
     return -1;
   }
-  if ($b->is_default) {
-    return 1;
-  }
-  if ($a->is_admin) {
-    return -1;
-  }
-  if ($b->is_admin) {
+  if ($b->is_default || $b->is_admin) {
     return 1;
   }
   return strcasecmp($a->info['name'], $b->info['name']);
