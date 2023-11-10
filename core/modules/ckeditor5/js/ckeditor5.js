@@ -260,6 +260,17 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      // Pass the before value through elementGetHtml() to standardize
+      // attribute order and self-closing tags. For example, two <img> tags with
+      // src, width, and height attributes should be equal, even if one uses the
+      // order height, src, width. Similarly, <hr /> and <hr> should be
+      // considered the same. Passing in an out of the DOM makes these two
+      // values use the same order and tag closing.
+      const beforeElement = document.createElement('template');
+      beforeElement.innerHTML = beforeAttachValue;
+      beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
+
+      // Then run both strings through the same whitespace formatting.
       const formattedBeforeValue = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
       const formattedAfterValue = Backdrop.ckeditor5.formatHtml(afterAttachValue);
       return formattedBeforeValue !== formattedAfterValue;
