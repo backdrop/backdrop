@@ -3231,7 +3231,7 @@ function user_register_form($form, &$form_state) {
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = $_SERVER['HTTP_REFERER'];
   }
-  elseif (user_access('administer users')) {
+  elseif ($admin) {
     $path = 'admin/people';
   }
   else {
