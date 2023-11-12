@@ -16,6 +16,9 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 
 /**
  * Minimum supported version of PHP.
+ *
+ * When changing this version here, there's a check in update.php that also
+ * needs to be updated to match it.
  */
 define('BACKDROP_MINIMUM_PHP', '5.6.0');
 
