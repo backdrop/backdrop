@@ -3019,7 +3019,7 @@ function hook_update_dependencies() {
   // the 'yet_another_module' module. (Note that declaring dependencies in this
   // direction should be done only in rare situations, since it can lead to the
   // following problem: If a site has already run the yet_another_module
-  // module's database updates before it updates its codebase to pick up the
+  // module's system updates before it updates its codebase to pick up the
   // newest mymodule code, then the dependency declared here will be ignored.)
   $dependencies['yet_another_module'][1004] = array(
     'mymodule' => 1001,
@@ -3050,7 +3050,7 @@ function hook_update_dependencies() {
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 1.x-1.x version of mymodule, including database updates.
+  // We've removed the 1.x-1.x version of mymodule, including system updates.
   // For the 1.x-2.x version of the module, the next update function would be
   // mymodule_update_1200().
   return 1103;
