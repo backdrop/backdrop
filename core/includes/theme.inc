@@ -442,6 +442,13 @@ class ThemeRegistry Extends BackdropCacheArray {
     return array_fill_keys(array_keys($this->completeRegistry), NULL);
   }
 
+  /**
+   * Implements ArrayAccess::offsetExists().
+   *
+   * PHP 9 will require: "public function offsetExists($offset) : bool {", but
+   * that's not supported PHP 5.
+   */
+  #[\ReturnTypeWillChange]
   public function offsetExists($offset) {
     // Since the theme registry allows for theme hooks to be requested that
     // are not registered, just check the existence of the key in the registry.
@@ -450,6 +457,13 @@ class ThemeRegistry Extends BackdropCacheArray {
     return array_key_exists($offset, $this->storage);
   }
 
+  /**
+   * Implements ArrayAccess::offsetGet().
+   *
+   * PHP 9 will require: "public function offsetGet($offset) : mixed {", but
+   * that's not supported PHP 5.
+   */
+  #[\ReturnTypeWillChange]
   public function offsetGet($offset) {
     // If the offset is set but empty, it is a registered theme hook that has
     // not yet been requested. Offsets that do not exist at all were not

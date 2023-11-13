@@ -1,0 +1,96 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot unset offset 'options' on array\\{url\\: mixed\\}\\.$#"
+			count: 1
+			path: ../../core/includes/ajax.inc
+
+		-
+			message: "#^Cannot unset offset 'path' on array\\{url\\: mixed\\}\\.$#"
+			count: 1
+			path: ../../core/includes/ajax.inc
+
+		-
+			message: "#^Undefined variable\\: \\$database_charset$#"
+			count: 1
+			path: ../../core/includes/bootstrap.inc
+
+		-
+			message: "#^Method ConfigFileStorage\\:\\:exportArchive\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/config.inc
+
+		-
+			message: "#^Method ConfigFileStorage\\:\\:initializeStorage\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/config.inc
+
+		-
+			message: "#^Call to an undefined method DatabaseConnection_mysql\\:\\:exec\\(\\)\\.$#"
+			count: 2
+			path: ../../core/includes/database/mysql/database.inc
+
+		-
+			message: "#^Access to an undefined property MergeQuery\\:\\:\\$condition\\.$#"
+			count: 15
+			path: ../../core/includes/database/query.inc
+
+		-
+			message: "#^Method MergeQuery\\:\\:__toString\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/database/query.inc
+
+		-
+			message: "#^Access to an undefined property BackdropDateTime\\:\\:\\$dateOnly\\.$#"
+			count: 2
+			path: ../../core/includes/date.class.inc
+
+		-
+			message: "#^Access to an undefined property BackdropDateTime\\:\\:\\$originalTime\\.$#"
+			count: 1
+			path: ../../core/includes/date.class.inc
+
+		-
+			message: "#^Access to an undefined property BackdropDateTime\\:\\:\\$timeOnly\\.$#"
+			count: 2
+			path: ../../core/includes/date.class.inc
+
+		-
+			message: "#^Call to an undefined method FileTransfer\\:\\:chmodJailed\\(\\)\\.$#"
+			count: 1
+			path: ../../core/includes/filetransfer/filetransfer.inc
+
+		-
+			message: "#^Function _batch_queue\\(\\) should return BatchQueue but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/form.inc
+
+		-
+			message: "#^Function form_type_textarea_value\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/form.inc
+
+		-
+			message: "#^Function install_select_profile\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/install.core.inc
+
+		-
+			message: "#^Function backdrop_rewrite_settings\\(\\) should return bool but return statement is missing\\.$#"
+			count: 1
+			path: ../../core/includes/install.inc
+
+		-
+			message: "#^Undefined variable\\: \\$overrides$#"
+			count: 1
+			path: ../../core/includes/transliteration.inc
+
+		-
+			message: "#^Access to an undefined property Updater\\:\\:\\$name\\.$#"
+			count: 3
+			path: ../../core/includes/updater.inc
+
+		-
+			message: "#^Access to an undefined property Updater\\:\\:\\$title\\.$#"
+			count: 1
+			path: ../../core/includes/updater.inc

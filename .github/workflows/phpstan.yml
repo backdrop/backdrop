@@ -1,0 +1,23 @@
+name: PHPStan
+on:
+  pull_request:
+    branches: [1.*]
+jobs:
+  phpstan:
+    name: Static code analysis
+    runs-on: ubuntu-20.04
+    # Skip this job if the PR title contains "[skip tests]".
+    if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: phpstan:1.8
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run PHPStan
+        run: |
+          phpstan analyze -c .github/phpstan/phpstan.neon --error-format=github --no-progress
