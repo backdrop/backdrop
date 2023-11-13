@@ -84,39 +84,6 @@ function seven_admin_block_content($variables) {
 }
 
 /**
- * Overrides theme_admin_page().
- *
- * Sorts the admin panels alphabetically and uses the bootstrap grid.
- */
-function seven_admin_page($variables) {
-  $blocks = array_values($variables['blocks']);
-  $container = array(
-    'left' => '',
-    'right' => '',
-  );
-  foreach ($blocks as $key => $block) {
-    if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (($key+1) < count($blocks)/2) {
-        $container['left'] .= $block_output;
-      }
-      else {
-        $container['right'] .= $block_output;
-      }
-    }
-  }
-
-  backdrop_add_library('layout', 'bootstrap4-gs');
-  $output = '<div class="row">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="col-md-6">';
-    $output .= $data;
-    $output .= '</div>';
-  }
-  $output .= '</div>';
-  return $output;
-}
-
-/**
  * Overrides theme_tablesort_indicator().
  *
  * Use our own image versions, so they show up as black and not gray on gray.
@@ -125,10 +92,10 @@ function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
   $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
-    return theme('image', array('path' => $theme_path . '/images/caret-down--gray--32.png', 'alt' => t('sort ascending'), 'width' => 13, 'height' => 13, 'title' => t('sort ascending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/caret-up--gray--32.png', 'alt' => t('sort descending'), 'width' => 13, 'height' => 13, 'title' => t('sort descending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
   }
 }
 
@@ -156,10 +123,7 @@ function seven_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
-    $output .= '<nav role="navigation" class="breadcrumb">';
-    // Provide a navigational heading to give context for breadcrumb links to
-    // screen-reader users. Make the heading invisible with .element-invisible.
-    $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
+    $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
     $output .= '<ol>';
     // IE8 does not support :first-child and :last-child selectors, so we need
     // to add classes.

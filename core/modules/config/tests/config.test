@@ -87,11 +87,13 @@ class ConfigurationTest extends BackdropWebTestCase {
       'favorite_animal' => 'cats',
       'favorite_color' => 'blue',
     );
-    $this->assertEqual($config->get(), $expected_config, 'The configuration file contained the expected configuration.');
+    // Test both paths.
+    $this->assertEqual($config->get(), $expected_config, 'The configuration file via Config::get() contained the expected configuration.');
+    $this->assertEqual($config->getData(), $expected_config, 'The configuration file via Config::getData() contained the expected configuration.');
   }
 
   /**
-   * Tests that a config setting can be overidden.
+   * Tests that a config setting can be overridden.
    */
   public function testOverrideConfig() {
     $original_data = array(
@@ -256,6 +258,12 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
  * Tests the UI for syncing, importing, and exporting.
  */
 class ConfigurationUITest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
   function setUp() {
     parent::setUp(array('config_test'));
 
@@ -457,7 +465,16 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $files = file_scan_directory($directory, '/.*\.json/');
     foreach ($files as $filepath => $file) {
       $config_data = json_decode(file_get_contents($filepath), TRUE);
-      $config_data['config_test_addition'] = 'test';
+      // The Layout and TaxonomyVocabulary class don't allow dynamic properties.
+      if (strpos($file->name, 'layout.layout.') === 0) {
+        $config_data['layout_template'] = 'simmons';
+      }
+      elseif (strpos($file->name, 'taxonomy.vocabulary.') === 0) {
+        $config_data['description'] = 'config_test_addition';
+      }
+      else {
+        $config_data['config_test_addition'] = 'test';
+      }
       file_put_contents($filepath, backdrop_json_encode($config_data, TRUE));
     }
 
@@ -537,5 +554,63 @@ class ConfigurationUITest extends BackdropWebTestCase {
     foreach ($source_storage->listAll() as $name) {
       $target_storage->write($name, $source_storage->read($name));
     }
+  }
+}
+
+/**
+ * Tests that hook_config_create() is run during config sync.
+ */
+class ConfigurationSyncTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  protected function setUp() {
+    parent::setUp(array('config_test_hooks'));
+
+    // Create a blank content type into which our new config-based field will be
+    // added.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'bypass node access',
+      'administer nodes',
+      'create post content',
+      'edit any post content',
+    ));
+  }
+
+  /**
+   * Tests that hook_config_create() is run during config sync.
+   */
+  public function testSync() {
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('brie', $config_data['favorite_cheese'], 'Config variable is set to brie.');
+    $this->assertFalse(field_info_field('field_config_test'), 'The test field does not exist.');
+
+    module_enable(array('config_test'));
+    // Test that config value is altered when default config is synced from
+    // another module.
+    $config_data = config_get('config_test_hooks.data');
+    $this->assertEqual('cheddar', $config_data['favorite_cheese'], 'Config variable is set to cheddar.');
+    $this->assertTrue(field_info_field('field_config_test'), 'The test field has been installed.');
+
+    // Test that content can actually be saved into the new field that was
+    // created.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('node/add/post', array(
+      'title' => 'Test post',
+      'field_config_test[und][0][value]' => 'Test value in the new field',
+    ), t('Save'));
+
+    $this->assertText('Post Test post has been created.');
+    $this->assertText('Test value in the new field');
   }
 }

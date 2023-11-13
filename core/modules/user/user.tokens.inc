@@ -63,6 +63,11 @@ function user_token_info() {
     'description' => t('The date the user account was created.'),
     'type' => 'date',
   );
+  $user['changed'] = array(
+    'name' => t('Changed'),
+    'description' => t('The date the user account was changed.'),
+    'type' => 'date',
+  );
   $user['url'] = array(
     'name' => t('URL'),
     'description' => t('The URL of the account profile page.'),
@@ -73,15 +78,21 @@ function user_token_info() {
     'description' => t('The URL of the account edit page.'),
     'type' => 'url',
   );
+
+  // This token is replaced only when an Account Cancellation email is sent.
+  // @see user_mail_tokens()
   $user['cancel-url'] = array(
     'name' => t('Account cancellation URL'),
-    'description' => t('The URL of the confirm delete page for the user account.'),
+    'description' => t('The URL of the confirm delete page for the user account. This token is only available when an Account Cancellation email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
   );
+
+  // This token is replaced only when a Password Recovery email is sent.
+  // @see user_mail_tokens()
   $user['one-time-login-url'] = array(
     'name' => t('One-time login URL'),
-    'description' => t('The URL of the one-time login page for the user account.'),
+    'description' => t('The URL of the one-time login page for the user account. This token is only available when a Password Recovery email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
   );
@@ -96,6 +107,7 @@ function user_token_info() {
  * Implements hook_tokens().
  */
 function user_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $user_pictures = config_get('system.core', 'user_pictures');
   $url_options = array('absolute' => TRUE);
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
@@ -136,13 +148,18 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           $replacements[$original] = !empty($account->created) ? format_date($account->created, 'medium', '', NULL, $language_code) : t('not yet created');
           break;
 
+        case 'changed':
+          // In the case of user_presave the changed date may not yet be set.
+          $replacements[$original] = !empty($account->changed) ? format_date($account->changed, 'medium', '', NULL, $language_code) : t('not yet created');
+          break;
+
         // These tokens are default variations on the chained tokens handled below.
         case 'last-login':
           $replacements[$original] = !empty($account->login) ? format_date($account->login, 'medium', '', NULL, $language_code) : t('never');
           break;
 
         case 'picture':
-          if (config_get('system.core', 'user_pictures')) {
+          if ($user_pictures) {
             $replacements[$original] = theme('user_picture', array('account' => $account));
           }
           break;
@@ -174,7 +191,11 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
       $replacements += token_generate('date', $registered_tokens, array('date' => $account->created), $options);
     }
 
-    if (!empty($account->picture) && config_get('system.core', 'user_pictures') && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
+    if ($changed_tokens = token_find_with_prefix($tokens, 'changed')) {
+      $replacements += token_generate('date', $changed_tokens, array('date' => $account->changed), $options);
+    }
+
+    if (!empty($account->picture) && $user_pictures && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
       $replacements += token_generate('file', $picture_tokens, array('file' => $account->picture), $options);
     }
 

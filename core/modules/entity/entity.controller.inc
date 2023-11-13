@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity API controller classes and interface.
@@ -50,6 +49,45 @@ interface EntityControllerInterface {
    *   An array of entity objects indexed by their ids.
    */
   public function load($ids = array(), $conditions = array());
+
+  /**
+   * Builds a structured array representing the entity's content.
+   *
+   * The content built for the entity will vary depending on the $view_mode
+   * parameter.
+   *
+   * @param EntityInterface $entity
+   *   An entity object.
+   * @param string $view_mode
+   *   View mode, e.g. 'full', 'teaser'...
+   * @param string|NULL $langcode
+   *   (optional) A language code to use for rendering. Defaults to the global
+   *   content language of the current request.
+   *
+   * @return
+   *   The renderable array.
+   */
+  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL);
+
+  /**
+   * Creates a rendered entity.
+   *
+   * @param array $entities
+   *   An array of entity objects.
+   * @param string $view_mode
+   * @param string|NULL $langcode
+   * @param bool|NULL $page
+   *   (optional) If set will control if the entity is rendered: if TRUE
+   *   the entity will be rendered without its title, so that it can be embedded
+   *   in another context. If FALSE the entity will be displayed with its title
+   *   in a mode suitable for lists.
+   *   If unset, the page mode will be enabled if the current path is the URI
+   *   of the entity, as returned by entity_uri().
+   *
+   * @return array
+   *   The renderable array, keyed by entity type and entity ID.
+   */
+  public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL);
 }
 
 /**
@@ -326,7 +364,11 @@ class DefaultEntityController implements EntityControllerInterface {
         $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
         if (!empty($queried_entities_by_id)) {
           foreach ($queried_entities_by_id as $id => $item) {
-            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            $bundle_name = !empty($item->bundle()) ? $item->bundle() : $this->entityType;
+            $bundle_cache = isset($this->entityInfo['bundles'][$bundle_name]['bundle cache']) ? $this->entityInfo['bundles'][$bundle_name]['bundle cache'] : TRUE;
+            if ($bundle_cache) {
+              cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            }
           }
         }
       }
@@ -530,6 +572,77 @@ class DefaultEntityController implements EntityControllerInterface {
   protected function cacheSet($entities) {
     $this->entityCache += $entities;
   }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    // Remove previously built content, if exists.
+    $entity->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare($entity->entityType(), array($entity->id() => $entity), $view_mode, $langcode));
+
+    // Make sure the used view-mode gets stored.
+    $entity->content += array('#view_mode' => $view_mode);
+
+    // Add in fields.
+    if (!empty($this->entityInfo['fieldable'])) {
+      // Perform the preparation tasks if they have not been performed yet.
+      // An internal flag prevents the operation from running twice.
+      $key = isset($entity->{$this->idKey}) ? $entity->{$this->idKey} : NULL;
+      field_attach_prepare_view($this->entityType, array($key => $entity), $view_mode);
+      $entity->content += field_attach_view($this->entityType, $entity, $view_mode, $langcode);
+    }
+    // Invoke hook_ENTITY_view() to allow modules to add their additions.
+    module_invoke_all($this->entityType . '_view', $entity, $view_mode, $langcode);
+
+    module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
+
+    return $entity->content;
+  }
+
+  /**
+   * Implements EntityControllerInterface::view().
+   */
+  public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+    // @todo ensure entities are keyed by entity id.
+    if (!empty($this->entityInfo['fieldable'])) {
+      field_attach_prepare_view($this->entityType, $entities, $view_mode);
+    }
+    entity_prepare_view($this->entityType, $entities);
+
+    $view = array();
+    foreach ($entities as $entity) {
+      /* @var EntityInterface $entity */
+      $this->buildContent($entity, $view_mode, $langcode);
+
+      $build = $entity->content;
+      // We don't need duplicate rendering info in entity->content.
+      unset($entity->content);
+
+      $build += array(
+        // @see template_preprocess_entity()
+        '#theme' => 'entity',
+        '#entity_type' => $this->entityType,
+        '#entity' => $entity,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+      // Allow modules to modify the structured entity.
+      backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
+
+      $view[$this->entityType][$entity->id()] = $build;
+    }
+
+    return $view;
+  }
 }
 
 /**
@@ -625,8 +738,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       foreach ($entities as $id => $entity) {
         $this->invokeHook('delete', $entity);
       }
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -663,8 +776,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
         $this->invokeHook('insert', $entity);
       }
 
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
       unset($entity->is_new);
       unset($entity->original);
 

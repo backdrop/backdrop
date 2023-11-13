@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Search query extender and helper functions.
@@ -184,7 +183,7 @@ class SearchQuery extends SelectQueryExtender {
    * We build two queries that match the dataset bodies.
    */
   protected function parseSearchExpression() {
-    // Matchs words optionally prefixed by a dash. A word in this case is
+    // Matches words optionally prefixed by a dash. A word in this case is
     // something between two spaces, optionally quoted.
     preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' .  $this->searchExpression , $keywords, PREG_SET_ORDER);
 
@@ -342,13 +341,14 @@ class SearchQuery extends SelectQueryExtender {
    */
   public function executeFirstPass() {
     $this->parseSearchExpression();
+    $search_settings_config = config('search.settings');
 
     if (count($this->words) == 0) {
-      form_set_error('keys', format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one keyword to match in the content. Keyword must be at least 1 character, and punctuation is ignored.', 'You must include at least one keyword to match in the content. Keywords must be at least @count characters, and punctuation is ignored.'));
+      form_set_error('keys', format_plural($search_settings_config->get('search_minimum_word_size'), 'You must include at least one keyword to match in the content. Keyword must be at least 1 character, and punctuation is ignored.', 'You must include at least one keyword to match in the content. Keywords must be at least @count characters, and punctuation is ignored.'));
       return FALSE;
     }
     if ($this->expressionsIgnored) {
-      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => config_get('search.settings', 'search_and_or_limit'))), 'warning');
+      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => $search_settings_config->get('search_and_or_limit'))), 'warning');
     }
     $this->executedFirstPass = TRUE;
 
@@ -526,7 +526,7 @@ class SearchQuery extends SelectQueryExtender {
     $expressions = array();
 
     // Add the sid as the only field and count them as a subquery.
-    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'slave'));
+    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'replica'));
 
     // Add the COUNT() expression.
     $count->addExpression('COUNT(*)');

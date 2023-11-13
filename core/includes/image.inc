@@ -22,10 +22,8 @@
  * software.
  *
  * Image toolkits are discovered based on the associated module's
- * hook_image_toolkits. Additionally the image toolkit include file
- * must be identified in the files array in the module.info file. The
- * toolkit must then be enabled using the admin/config/media/image-toolkit
- * form.
+ * hook_image_toolkits. The toolkit must then be enabled using the
+ * admin/config/media/image-toolkit form.
  *
  * Only one toolkit may be selected at a time. If a module author wishes to call
  * a specific toolkit they can check that it is installed by calling
@@ -100,6 +98,33 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
 }
 
 /**
+ * Gets supported image extensions.
+ *
+ * Backdrop supports GIF, JPG, PNG, and WEBP file formats when supported by the
+ * GD toolkit, and may support others, depending on the currently used toolkit.
+ *
+ * @return array
+ *   Array of supported extensions.
+ *
+ * @since 1.25.0 Function added.
+ */
+function image_get_supported_extensions() {
+  $toolkit = image_get_toolkit();
+  $function = 'image_' . $toolkit . '_supported_extensions';
+  if (function_exists($function)) {
+    return $function();
+  }
+  watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
+    array(
+      '%toolkit' => $toolkit,
+      '%function' => $function),
+    WATCHDOG_ERROR
+  );
+  // Provide a fallback list of extensions.
+  return array('jpg', 'jpeg', 'gif', 'png');
+}
+
+/**
  * Gets details about an image.
  *
  * Backdrop supports GIF, JPG and PNG file formats when used with the GD
@@ -146,8 +171,7 @@ function image_get_info($filepath, $toolkit = FALSE) {
  * Scales an image to the exact width and height given.
  *
  * This function achieves the target aspect ratio by cropping the original image
- * equally on both sides, or equally on the top and bottom. This function is
- * useful to create uniform sized avatars from larger images.
+ * according to the selected anchor type.
  *
  * The resulting image always has the exact target dimensions.
  *
@@ -157,18 +181,26 @@ function image_get_info($filepath, $toolkit = FALSE) {
  *   The target width, in pixels.
  * @param $height
  *   The target height, in pixels.
+ * @param $anchor
+ *   The anchor to use when cropping.
  *
  * @return
  *   TRUE on success, FALSE on failure.
  *
+ * @since 1.21.0 $anchor parameter added.
+ *
  * @see image_load()
  * @see image_resize()
  * @see image_crop()
+ * @see image_scale_and_crop_effect()
  */
-function image_scale_and_crop(stdClass $image, $width, $height) {
+function image_scale_and_crop(stdClass $image, $width, $height, $anchor = 'center-center') {
   $scale = max($width / $image->info['width'], $height / $image->info['height']);
-  $x = ($image->info['width'] * $scale - $width) / 2;
-  $y = ($image->info['height'] * $scale - $height) / 2;
+
+  // Set the top left coordinates of the crop area, based on the anchor.
+  list($x, $y) = explode('-', $anchor);
+  $x = image_filter_keyword($x, $image->info['width'] * $scale, $width);
+  $y = image_filter_keyword($y, $image->info['height'] * $scale, $height);
 
   if (image_resize($image, $image->info['width'] * $scale, $image->info['height'] * $scale)) {
     return image_crop($image, $x, $y, $width, $height);

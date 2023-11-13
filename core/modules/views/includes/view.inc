@@ -15,6 +15,7 @@
  * An object to contain all of the data to generate a view, plus the member
  * functions to build the view query, execute the query and render the output.
  */
+#[\AllowDynamicProperties]
 class view {
   var $base_table = 'node';
   var $base_field = 'nid';
@@ -144,7 +145,7 @@ class view {
   // To avoid recursion in views embedded into areas.
   var $parent_views = array();
 
-  // Is the current stored view runned as an attachment to another view.
+  // Whether or not the current stored view is an attachment to another view.
   var $is_attachment = NULL;
 
   // Stores the next steps of form items to handle.
@@ -1224,6 +1225,7 @@ class view {
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
+    $show_additional_queries = config_get('views.settings', 'show_additional_queries');
 
     // Check to see if the build failed.
     if (!empty($this->build_info['fail'])) {
@@ -1236,7 +1238,7 @@ class view {
     backdrop_theme_initialize();
 
     $start = microtime(TRUE);
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->start_query_capture();
     }
 
@@ -1326,7 +1328,7 @@ class view {
       $function($this, $this->display_handler->output, $cache);
     }
 
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->end_query_capture();
     }
 
@@ -1514,7 +1516,7 @@ class view {
    * this sets the display handler if it hasn't been.
    */
   function access($displays = NULL, $account = NULL) {
-    // Noone should have access to disabled views.
+    // No one should have access to disabled views.
     if (!empty($this->disabled)) {
       return FALSE;
     }
@@ -2303,6 +2305,7 @@ class view {
 /**
  * A display type in a view.
  */
+#[\AllowDynamicProperties]
 class views_display {
 
   /**

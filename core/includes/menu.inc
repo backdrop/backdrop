@@ -511,6 +511,8 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  *   it will be printed directly to the page.
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
+  $site_config = config('system.core');
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -521,7 +523,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
         // In most cases, Layout module will provide the route handler if
         // it is enabled. See layout_route_handler().
         if (empty($route_handler)) {
-          $route_handler = config_get('system.core', 'menu_route_handler');
+          $route_handler = $site_config->get('menu_route_handler');
         }
         if (empty($route_handler) || !function_exists($route_handler)) {
           $route_handler = 'menu_default_route_handler';
@@ -539,8 +541,8 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
   // Offline pages are not cached in the database but have a Cache-Control
   // header to allow reverse proxies to serve offline hits instead of Backdrop.
   elseif ($site_status == MENU_SITE_OFFLINE) {
-    $page_cache_enabled = (bool) config_get('system.core', 'page_cache_maximum_age');
-    $maintenance_max_age = config_get('system.core', 'maintenance_page_maximum_age');
+    $page_cache_enabled = (bool) $site_config->get('page_cache_maximum_age');
+    $maintenance_max_age = $site_config->get('maintenance_page_maximum_age');
     if ($page_cache_enabled && $maintenance_max_age) {
       backdrop_add_http_header('Cache-Control', 'public; max-age: ' . $maintenance_max_age);
     }
@@ -1936,16 +1938,17 @@ function theme_menu_toggle($variables) {
  */
 function menu_get_custom_theme($initialize = FALSE) {
   $custom_theme = &backdrop_static(__FUNCTION__);
+  $site_config = config('system.core');
 
   // Offline mode checking does not allow for module overrides of the theme.
   $offline_mode = (_menu_site_status() === MENU_SITE_OFFLINE || defined('MAINTENANCE_MODE'));
   if ($offline_mode) {
     $custom_theme = settings_get('maintenance_theme');
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'maintenance_theme');
+      $custom_theme = $site_config->get('maintenance_theme');
     }
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'theme_default');
+      $custom_theme = $site_config->get('theme_default');
     }
   }
   elseif ($initialize) {
@@ -2502,7 +2505,7 @@ function menu_get_active_menu_names() {
  * menu_execute_active_handler() to generate your page output.
  *
  * @param $path
- *   A Backdrop path - not a path alias.
+ *   A Backdrop path - not a URL alias.
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
@@ -3434,7 +3437,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   $parent = FALSE;
 
-  // This item is explicitely top-level, skip the rest of the parenting.
+  // This item is explicitly top-level, skip the rest of the parenting.
   if (isset($menu_link['plid']) && empty($menu_link['plid'])) {
     return $parent;
   }
@@ -3564,7 +3567,7 @@ function _menu_find_router_path($link_path) {
 }
 
 /**
- * Inserts, updates, or deletes an uncustomized menu link related to a module.
+ * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
  * @param $module
  *   The name of the module.
@@ -3889,11 +3892,11 @@ function _menu_router_build($callbacks) {
             $item['theme arguments'] = $parent['theme arguments'];
           }
         }
-        // Same for load arguments: if a loader doesn't have any explict
+        // Same for load arguments: if a loader doesn't have any explicit
         // arguments, try to find arguments in the parent.
         if (!isset($item['load arguments'])) {
           foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
+            // This loader doesn't have any explicit arguments...
             if (!is_array($function)) {
               // ... check the parent for a loader at the same position
               // using the same function name and defining arguments...
