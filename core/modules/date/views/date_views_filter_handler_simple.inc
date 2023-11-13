@@ -92,7 +92,6 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
       // The format for our filter is in ISO format, but the widget will need it in datetime format.
       $default_date = str_replace('T', ' ', $default_date);
     }
-    // This is either a fixed date, or not set.
     else {
       $default_date = isset($options['value'][$prefix]) ? $options['value'][$prefix] : '';
     }
