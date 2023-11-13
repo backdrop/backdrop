@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -1250,7 +1250,7 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's resizable textarea.
+  // Backdrop's deprecated resizable textarea.
   $libraries['backdrop.textarea'] = array(
     'title' => 'Backdrop resizable textarea',
     'version' => BACKDROP_VERSION,

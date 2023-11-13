@@ -2263,6 +2263,34 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test transition from old JS-based textarea resize to new CSS approach.
+ */
+class FormResizableTextareaTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp('form_test');
+    return TRUE;
+  }
+
+  /**
+   * Test that using old values results in proper textarea display.
+   */
+  protected function testResizableTextarea() {
+    $this->backdropGet('form-test/textarea-resize');
+    $textarea = $this->xpath("//textarea[contains(@class, 'resize-vertical')]");
+    $this->assertTrue(!empty($textarea), 'Textarea has resize-vertical class set');
+    $script = $this->xpath("//script[contains(@src, 'core/misc/textarea.js')]");
+    $this->assertTrue(!empty($script), 'Deprecated textarea library attached without problems');
+  }
+
+}
+
+/**
  * Tests email element.
  */
 class FormEmailTestCase extends BackdropWebTestCase {
