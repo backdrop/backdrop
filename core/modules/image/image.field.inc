@@ -724,6 +724,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#states' => array(
       'visible' => array(
         ':input[name="fields[field_image][settings_edit_form][settings][image_style]"]' => array('value' => ''),
+        ':input[name="fields[field_image][settings_edit_form][settings][image_svg_display]"]' => array('checked' => TRUE),
       ),
     ),
   );
@@ -791,7 +792,7 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $formatter_settings = $instance['display'][$view_mode]['settings'];
 
-  if ($svg_allowed && (!empty($formatter_settings['image_svg_dimensions']['width'])
+  if ($svg_allowed && $formatter_settings['image_svg_display'] && (!empty($formatter_settings['image_svg_dimensions']['width'])
     || !empty($formatter_settings['image_svg_dimensions']['width']))) {
     $summary[] = t(
       'SVG image attributes: @width x @height pixels',
