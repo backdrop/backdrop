@@ -4736,6 +4736,9 @@ function theme_textarea($variables) {
     }
     if (in_array($element['#resizable'], $valid_values)) {
       $element['#attributes']['class'][] = 'resize-' . $element['#resizable'];
+      if ($element['#resizable'] != 'none') {
+        $element['#attributes']['class'][] = 'resizable';
+      }
     }
   }
 
