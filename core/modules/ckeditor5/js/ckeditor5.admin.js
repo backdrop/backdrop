@@ -36,18 +36,45 @@ Backdrop.behaviors.ckeditor5Admin = {
         helper: 'clone'
       });
 
-      // Disable clicking on the individual buttons.
-      $toolbarAdmin.find('.ckeditor5-button a').click(function(event) {
-        return false;
+      // Add keyboard support for toolbar buttons.
+      $toolbarAdmin.on('keydown', '.ckeditor5-buttons .ckeditor5-button', function(event) {
+        const $element = $(event.target);
+        const dir = document.documentElement.dir;
+        switch (event.key) {
+          case 'ArrowLeft':
+            adminToolbarButtonMoveLeftRight($element, dir === 'ltr' ? 'previous' : 'next');
+            event.preventDefault();
+            break;
+          case 'ArrowRight':
+            adminToolbarButtonMoveLeftRight($element, dir === 'ltr' ? 'next' : 'previous');
+            event.preventDefault();
+            break;
+          case 'ArrowDown':
+            adminToolbarButtonMoveUpDown($element, 'next');
+            event.preventDefault();
+            break;
+          case 'ArrowUp':
+            adminToolbarButtonMoveUpDown($element, 'previous');
+            event.preventDefault();
+            break;
+        }
+      });
+
+      // Special case for adding a multiple-instance button.
+      $toolbarAdmin.on('keyup', '.ckeditor5-multiple-buttons .ckeditor5-multiple-button', function(event) {
+        if (event.key === 'ArrowUp') {
+          adminToolbarButtonClone($(event.target));
+          event.preventDefault();
+        }
       });
 
       // Add the handler for adding/removing row buttons.
-      $toolbarAdmin.bind('click.ckeditor5AddRow', function(event) {
+      $toolbarAdmin.on('click.ckeditor5AddRow', function(event) {
         if ($(event.target).is('a.ckeditor5-row-add')) {
           adminToolbarAddRow.apply(event.target, [event]);
         }
       });
-      $toolbarAdmin.bind('click.ckeditor5AddRow', function(event) {
+      $toolbarAdmin.on('click.ckeditor5AddRow', function(event) {
         if ($(event.target).is('a.ckeditor5-row-remove')) {
           adminToolbarRemoveRow.apply(event.target, [event]);
         }
@@ -76,12 +103,12 @@ Backdrop.behaviors.ckeditor5Admin = {
           $(this).hide();
         }
         if ($rows.length > 1) {
-          var $lastRow = $rows.last();
-          var $disabledButtons = $wrapper.find('.ckeditor5-toolbar-disabled .ckeditor5-buttons');
-          var $buttonsToDisable = $lastRow.find().children(':not(.ckeditor5-multiple-button)');
-          $buttonsToDisable.prependTo($disabledButtons);
+          const $lastRow = $rows.last();
+          const $buttonsToDisable = $lastRow.find('.ckeditor5-button:not(.ckeditor-multiple-button)');
           $buttonsToDisable.each(function(n) {
-            adminToolbarButtonMoved($buttonsToDisable.eq(n));
+            const $button = $buttonsToDisable.eq(n);
+            const feature = adminToolbarButtonCreateFeature($button);
+            adminToolbarRemoveButton($button, feature);
           });
           $lastRow.find('.ckeditor5-buttons').sortable('destroy');
           $lastRow.remove();
@@ -96,12 +123,67 @@ Backdrop.behaviors.ckeditor5Admin = {
       function adminToolbarStopDrag(event, ui) {
         var $element = ui.item;
         // Remove separators when dragged out.
-        if ($element.is('.ckeditor5-button-separator') && $element.closest('.ckeditor5-active-toolbar-configuration').length === 0) {
+        if ($element.is('.ckeditor5-multiple-button') && $element.closest('.ckeditor5-active-toolbar-configuration').length === 0) {
           $element.remove();
         }
         // Notify the filter system of updated or removed features.
         adminToolbarButtonMoved($element);
-        adminToolbarUpdateValue();
+      }
+
+      /**
+       * Keyup handler for left/right arrow keys.
+       */
+      function adminToolbarButtonMoveLeftRight($element, direction) {
+        if (direction === 'previous') {
+          $element.prev('.ckeditor5-button').before($element);
+        }
+        else {
+          $element.next('.ckeditor5-button').after($element);
+        }
+        $element.focus();
+        adminToolbarButtonMoved($element);
+      }
+
+      /**
+       * Keydown handler for up/down arrow keys.
+       */
+      function adminToolbarButtonMoveUpDown($element, direction) {
+        const $currentRow = $element.closest('.ckeditor5-buttons');
+        const $allRows = $element.closest('.ckeditor5-toolbar-configuration').find('.ckeditor5-buttons');
+        let currentRowIndex = $allRows.index($currentRow);
+        let $targetRow;
+
+        // If there is a previous row, set that as the target.
+        if (direction === 'previous' && currentRowIndex > 0) {
+          $targetRow = $allRows.eq(currentRowIndex - 1);
+        }
+        // If there is a next row (including disabled row) set that as target.
+        else if (direction === 'next' && currentRowIndex < $allRows.length - 1) {
+          $targetRow = $allRows.eq(currentRowIndex + 1);
+        }
+
+        // Now actually move the button into the target row.
+        if ($targetRow) {
+          if ($element.is('.ckeditor5-multiple-button') && $targetRow.closest('.ckeditor5-toolbar-disabled').length) {
+            $element.remove();
+          }
+          else {
+            $targetRow.prepend($element);
+          }
+          $element.focus();
+          adminToolbarButtonMoved($element);
+        }
+      }
+
+      /**
+       * Keyup handler for a multiple instance button being added.
+       */
+      function adminToolbarButtonClone($element) {
+        const $targetRow = $element.closest('.ckeditor5-toolbar-configuration').find('.ckeditor5-active-toolbar-configuration .ckeditor5-buttons').last();
+        const $newElement = $element.clone();
+        $targetRow.prepend($newElement);
+        $newElement.focus()
+        adminToolbarButtonMoved($newElement);
       }
 
       /**
@@ -118,6 +200,9 @@ Backdrop.behaviors.ckeditor5Admin = {
             Backdrop.editorConfiguration.removedFeature(buttonFeature);
           }
         }
+
+        // Update the underlying text field.
+        adminToolbarUpdateValue();
       }
 
       /**
@@ -210,10 +295,11 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Remove a single button from the toolbar.
        */
       function adminToolbarRemoveButton($button, feature) {
-        $button.remove();
-
         // Put the button back into the disabled list if it's not a separator.
-        if ($button.is('.ckeditor5-button')) {
+        if ($button.is('.ckeditor5-multiple-button')) {
+          $button.remove();
+        }
+        else {
           $wrapper.find('.ckeditor5-toolbar-disabled .ckeditor5-buttons').prepend($button);
         }
 
@@ -241,6 +327,7 @@ Backdrop.behaviors.ckeditor5Admin = {
             adminToolbarRemoveButton($button, feature);
           }
         });
+        adminToolbarUpdateValue();
       }
 
       /**

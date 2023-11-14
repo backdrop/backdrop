@@ -59,7 +59,7 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
         $src = file_create_url($button['image']);
       }
       $value = '<img src="'. $src . '" title="' . check_plain($button['label']) . '" />';
-      $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '">' . $value . '</a>';
+      $value = '<span title="' . $button['label'] . '" aria-label="' . $button['label'] . '">' . $value . '</span>';
     }
     else {
       $value = '?';
@@ -69,7 +69,12 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     $attributes = array(
       'data-button-name' => $button['name'],
       'class' => array('ckeditor5-button'),
+      // Setting a tabindex makes the item receive keyboard focus.
+      'tabindex' => '0',
     );
+    if (!empty($button['multiple'])) {
+      $attributes['class'][] = 'ckeditor5-multiple-button';
+    }
     if (!empty($button['attributes'])) {
       $attributes = backdrop_array_merge_deep($attributes, $button['attributes']);
     }
@@ -153,8 +158,8 @@ function theme_ckeditor5_settings_toolbar($variables) {
   $output = '';
 
   // Active toolbar buttons.
-  $output .= '<strong>' . t('Active toolbar') . '</strong>';
-  $output .= '<div class="ckeditor5-toolbar-active clearfix">';
+  $output .= '<label id="ckeditor5-toolbar-active-label">' . t('Active toolbar') . '</label>';
+  $output .= '<div class="ckeditor5-toolbar-active clearfix" aria-labelledby="ckeditor5-toolbar-active-label">';
   $output .= '<ul class="ckeditor5-active-toolbar-configuration">';
   foreach ($button_rows as $button_row) {
     $output .= '<li class="ckeditor5-row">' . $button_row . '</li>';
@@ -163,8 +168,8 @@ function theme_ckeditor5_settings_toolbar($variables) {
   $output .= '</div>';
 
   // Disabled/available buttons.
-  $output .= '<strong>' . t('Available buttons') . '</strong>';
-  $output .= '<div class="ckeditor5-toolbar-disabled clearfix">';
+  $output .= '<label id="ckeditor5-toolbar-disabled-label">' . t('Available buttons') . '</label>';
+  $output .= '<div class="ckeditor5-toolbar-disabled clearfix" aria-labelledby="ckeditor5-toolbar-disabled-label">';
   $output .= '<ul class="ckeditor5-buttons">';
   foreach ($variables['disabled_buttons'] as $button) {
     $output .= '<li' . backdrop_attributes($button['attributes']) . '>' . $button['contents'] . '</li>';

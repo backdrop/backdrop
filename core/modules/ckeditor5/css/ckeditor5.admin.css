@@ -12,9 +12,7 @@
   padding: 0;
 }
 .ckeditor5-toolbar-active {
-  border: 1px solid #d1d1d1;
-  padding: 6px 4px 2px;
-  background: #f8f8f8;
+  background: white;
   margin: 5px 0;
   line-height: 1;
   font: 12px Arial, Helvetica, Tahoma, Verdana, sans-serif;
@@ -26,10 +24,9 @@
 }
 
 .ckeditor5-buttons,
-.ckeditor5-multiple-buttons,
-.ckeditor5-group-add-wrapper {
-  min-height: 26px;
-  min-width: 28px;
+.ckeditor5-multiple-buttons {
+  min-height: 32px;
+  min-width: 36px;
   list-style: none;
   display: inline-block;
   padding: 0;
@@ -42,29 +39,28 @@
   margin: 0;
 }
 .ckeditor5-button,
-.ckeditor5-button-placeholder,
-.ckeditor5-group-add {
+.ckeditor5-button-placeholder {
   display: inline-block;
-  height: 18px;
-  padding: 4px 6px;
+  height: 20px;
+  padding: 6px 8px;
   outline: none;
   cursor: move;
   border: 0;
   vertical-align: middle;
   line-height: 1.6;
-  background: #f8f8f8;
+  background: white;
+  position: relative;
+}
+/* Draggable buttons are able to receive keyboard focus. */
+.ckeditor5-button:focus {
+  /* See https://css-tricks.com/copy-the-browsers-native-focus-styles */
+  outline: 5px auto Highlight;
+  outline: 5px auto -webkit-focus-ring-color;
+  z-index: 1;
 }
 .ckeditor5-button img {
-  width: 18px;
-  height: 18px;
-}
-.ckeditor5-buttons .ckeditor5-button:first-child {
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
-.ckeditor5-buttons .ckeditor5-button:last-child {
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+  width: 20px;
+  height: 20px;
 }
 .ckeditor5-buttons .ckeditor5-button-placeholder {
   background: #333;
@@ -73,20 +69,6 @@
 .ckeditor5-buttons a {
   cursor: move;
 }
-.ckeditor5-group-add-wrapper {
-  float: left; /* LTR */
-  margin: 0px 0.3333em;
-}
-[dir="rtl"] .ckeditor5-group-add-wrapper {
-  float: right;
-}
-.ckeditor5-group-add {
-  cursor: pointer;
-  border-radius: 2px;
-}
-.ckeditor5-group-add::before {
-  content: "+ ";
-}
 .ckeditor5-multiple-buttons {
   min-width: auto;
   margin: 0 1em;
@@ -94,14 +76,6 @@
   display: inline-block;
   vertical-align: middle;
   text-align: center;
-}
-.ckeditor5-multiple-buttons .ckeditor5-button {
-  padding: 2px 0;
-  margin: 0;
-  display: inline-block;
-  height: 18px;
-  min-width: 16px;
-  cursor: move;
 }
 .ckeditor5-row-controls {
   float: right; /* LTR */
@@ -132,24 +106,18 @@
 }
 .ckeditor5-buttons .ckeditor5-button-separator {
   width: 4px;
-  padding: 0 4px;
-  height: 26px;
+  height: 22px;
   text-align: center;
-
-  background: #f8f8f8;
 }
 .ckeditor5-multiple-buttons .ckeditor5-button-separator {
   width: 10px;
   min-width: auto;
-  padding: 0;
-  height: 26px;
   text-align: center;
 }
 .ckeditor5-separator {
   background-color: silver;
   background-color: rgba(0, 0, 0, .2);
-  margin: 5px 0;
-  height: 18px;
+  height: 22px;
   width: 1px;
   display: inline-block;
   -webkit-box-shadow: 1px 0 1px rgba(255, 255, 255, .5);
@@ -165,70 +133,10 @@
   display: inline-block;
   margin: 0 4px 2px;
 }
-.ckeditor5-toolbar-disabled {
-  margin-bottom: 0.5em;
-}
 .ckeditor5-row {
   padding: 2px 0 3px;
-  border-radius: 3px;
 }
 .ckeditor5-row + .ckeditor5-row {
   margin-top: 0.25em;
   clear: both;
-}
-.ckeditor5-toolbar-groups {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  min-height: 2em;
-  min-width: 4px;
-  float: left; /* LTR */
-}
-[dir="rtl"] .ckeditor5-toolbar-groups {
-  margin: 0;
-  padding: 0;
-  float: right;
-}
-.ckeditor5-toolbar-group {
-  display: inline-block;
-  margin: 0 0.3333em;
-  cursor: move;
-}
-.ckeditor5-group-names-are-visible .ckeditor5-toolbar-group {
-  border: 1px dotted #a6a6a6;
-  border-radius: 3px;
-  padding: 0.2em 0.4em;
-}
-.ckeditor5-toolbar-group-name {
-  display: none;
-  font-size: 1em;
-  font-weight: normal;
-  margin: -1.5em 0 .25em;
-  background: white;
-  padding: 0 4px;
-  border: 1px solid #B6B6B6;
-  border-radius: 3px;
-  vertical-align: top;
-}
-.ckeditor5-group-names-are-visible .ckeditor5-toolbar-group-name {
-  display: block;
-  cursor: pointer;
-}
-.ckeditor5-toolbar-group-buttons {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  float: left; /* LTR */
-}
-[dir="rtl"] .ckeditor5-toolbar-group-buttons {
-  padding: 0;
-  margin: 0;
-  float: right;
-}
-.ckeditor5-groupnames-toggle {
-  cursor: pointer;
-  float: right; /* LTR */
-}
-[dir="rtl"] .ckeditor5-groupnames-toggle {
-  float: left;
 }
