@@ -2278,12 +2278,30 @@ class FormResizableTextareaTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test that using old values results in proper textarea display.
+   * Test that setting #resizable on form item results in correct CSS classes.
    */
   protected function testResizableTextarea() {
     $this->backdropGet('form-test/textarea-resize');
-    $textarea = $this->xpath("//textarea[contains(@class, 'resize-vertical')]");
-    $this->assertTrue(!empty($textarea), 'Textarea has resize-vertical class set');
+    // @see form_test_resizable_textarea().
+    $name_classes = array(
+      'text-true' => 'form-textarea resize-vertical resizable',
+      'text-false' => 'form-textarea resize-none',
+      'text-vertical' => 'form-textarea resize-vertical resizable',
+      'text-horizontal' => 'form-textarea resize-horizontal resizable',
+      'text-none' => 'form-textarea resize-none',
+      'text-wrong' => 'form-textarea',
+    );
+
+    foreach ($name_classes as $name => $classes) {
+      $textarea = $this->xpath('//textarea[@name=:name]', array(
+        ':name' => $name,
+      ));
+      $class_attrib = (string) $textarea[0]->attributes()->class;
+      $this->assertEqual($class_attrib, $classes, format_string('Classes for item with name %name set to %classes', array(
+        '%name' => $name,
+        '%classes' => $classes,
+      )));
+    }
   }
 
 }
