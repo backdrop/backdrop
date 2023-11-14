@@ -1626,70 +1626,89 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
-ol.task-list {
-  margin: 0;
-  padding-left: 0; /* LTR */
-  padding-right: 17px;
-  padding-bottom: 1em;
-  font-size: .9em;
-  text-align: left; /* LTR */
-  list-style-type: none;
-  list-style-image: none;
 
+ol.task-list {
+  box-sizing: border-box;
+  counter-reset: steps;
+  overflow: hidden;
+  padding: 0;
+  margin: 0 0 1em 0;
 }
-[dir="rtl"] ol.task-list {
-  text-align: right;
-  padding-left: 17px;
-  padding-right: 0;
+ol.task-list li:before,
+ol.task-list li:after {
+  box-sizing: inherit;
 }
-body.maintenance-page ol.task-list {
-  margin-top: 50px;
-}
+
+/**
+ * Unfortunately, the CSS3 attr() only allows data-* attributes to be used to
+ * set the 'content' property of elements - not things like width/height. So we
+ * can't do something like this:
+ *
+ * ol.task-list li { width: attr(data-task-width) }
+ *
+ * (where data-task-width can be set in PHP based on the number of steps).
+ */
+ol.task-list[data-tasks-count="1"] li { width: 100%; }
+ol.task-list[data-tasks-count="2"] li { width: 50%; }
+ol.task-list[data-tasks-count="3"] li { width: 33.3%; }
+ol.task-list[data-tasks-count="4"] li { width: 24.9%; }
+ol.task-list[data-tasks-count="5"] li { width: 19.5%; }
+ol.task-list[data-tasks-count="6"] li { width: 16.6%; }
+ol.task-list[data-tasks-count="7"] li { width: 14.28571%; }
+ol.task-list[data-tasks-count="8"] li { width: 12.5%; }
+ol.task-list[data-tasks-count="9"] li { width: 11.11111%; }
+ol.task-list[data-tasks-count="10"] li { width: 10%; }
+
 ol.task-list li {
-  padding: .75em;
-  color: #1a1a1a;
-  line-height: 20px;
+  float: left;
+  position: relative;
+  counter-increment: steps;
+  border-top: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;
+/*  white-space: nowrap;*/
+  white-space: normal;
+  background: #f7f7f7;
+  margin: 0;
 }
 ol.task-list li.active {
-  padding: .75em;
-  font-weight: normal;
-  color: #000;
-  background: #E8E6E5;
-  position: relative;
+  font-weight: bold;
+  background: #e8e6e5;
 }
-ol.task-list li.active:after {
-  left: 100%; /* LTR */
-  border: solid transparent;
-  border-color: rgba(255, 255, 255, 0);
-  border-left-color: #E8E6E5; /* LTR */
-  border-width: 21px;
-  content: " ";
-  height: 0;
-  width: 0;
+ol.task-list li:after {
+  content: '';
+  width: 1.856em;
+  height: 1.856em;
   position: absolute;
-  pointer-events: none;
-  top: 50%;
-  margin-top: -21px;
-  font-size: 0;
-  line-height: 0;
+  left: 100%;
+  margin-left: -1em;
+  top: 0.3536em;
+  transform: rotate(45deg);
+  z-index: 2;
+  background: inherit;
+  border-right: 1px solid #CCC;
+  border-top: 1px solid #CCC;
 }
-[dir="rtl"] ol.task-list li.active:after {
-  left: auto;
-  right: 100%;
-  border-left-color: transparent;
-  border-right-color: #E8E6E5;
+
+ol.task-list li.first {
+  border-left: 1px solid #CCC;
 }
-ol.task-list .task-item {
-  display: inline-block;
-  position: relative;
-  vertical-align: middle;
-  margin: 0 0 0 2.5em; /* LTR */
+ol.task-list li.last {
+  border-right: 1px solid #CCC;
 }
-[dir="rtl"] ol.task-list .task-item {
-  margin-right: 2.5em;
-  margin-left: 0;
+/* No arrow on the last task. */
+ol.task-list li.last:after {
+  content: none;
 }
-ol.task-list .done:before {
+
+ol.task-list li .task-item {
+  display: block;
+  text-align: center;
+  padding: .5em 0;
+}
+ol.task-list li.pending .task-item {
+    color: #999;
+}
+ol.task-list li.done .task-item:before {
   content: ' ';
   display: inline-block;
   position: absolute;
@@ -1698,10 +1717,7 @@ ol.task-list .done:before {
   border-radius: 15px;
   background: #CFDE56 url(../../../misc/icon-ok.png) no-repeat center center;
   background-size: 60%;
-}
-
-.step-indicator {
-  display: none;
+  margin: 0 -2em;
 }
 
 /* Shortcut styles */
@@ -1882,20 +1898,6 @@ div.add-or-remove-shortcuts {
   [dir="rtl"] body.maintenance-page #content {
     margin: 0;
     padding: 0;
-  }
-  body.maintenance-page ol.task-list {
-    display: none;
-  }
-  body.maintenance-page .step-indicator {
-    display: block;
-    font-size: 1em;
-    position: absolute;
-    top: .5em;
-    right: 0;
-  }
-  [dir="rtl"] body.maintenance-page .step-indicator {
-    left: 0;
-    right: auto;
   }
 }
 

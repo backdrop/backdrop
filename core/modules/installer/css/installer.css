@@ -231,33 +231,6 @@
   color: green;
 }
 
-/* Installer sidebar only shown on larger screens. */
-.installer-browser-install-sidebar {
-  display: none;
-}
-/* Larger screens show the progress steps when installing. */
-@media only screen and (min-width: 768px) {
-  .installer-browser-install-sidebar {
-    display: block;
-    float: left; /* LTR */
-    width: 220px;
-    box-sizing: border-box;
-  }
-  [dir="rtl"] .installer-browser-install-sidebar {
-    float: right;
-  }
-
-  .installer-browser-install-main {
-    padding: 0 20px;
-    margin-left: 240px; /* LTR */
-    box-sizing: border-box;
-  }
-  [dir="rtl"] .installer-browser-install-main {
-    margin-left: 0;
-    margin-right: 240px;
-  }
-}
-
 #installer-browser-manual-install-link {
   text-align: center;
 }

@@ -740,12 +740,12 @@ function install_display_output($output, $install_state) {
     // Let the theme function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
-    $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
+    $task_list = theme('task_list', array('title' => t('Installation tasks'), 'items' => install_tasks_to_display($install_state), 'active' => $active_task));
   }
   else {
     $task_list = NULL;
   }
-  print theme('install_page', array('content' => $output, 'sidebar' => $task_list));
+  print theme('install_page', array('content' => $output, 'tasks' => $task_list));
   exit;
 }
 

@@ -455,3 +455,17 @@ table.screenshot {
   margin-left: 1em;
   margin-right: 0;
 }
+
+/**
+ * Task lists (used in install.php, update.php, the project installer etc.).
+ */
+ol.task-list {
+  list-style: none;
+}
+ol.task-list li {
+  display: inline-block;
+}
+
+
+
+

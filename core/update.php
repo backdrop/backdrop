@@ -407,11 +407,11 @@ function update_task_list($set_active = NULL) {
     'finished' => 'Review log',
   );
 
-  // Only show the task list on the left sidebar if the logged-in user is has
-  // permission to perform updates, or if the update_free_access' setting in
-  // settings.php has been set to TRUE.
+  // Only show the task list if the logged-in user is has permission to perform
+  // updates, or if the update_free_access' setting in settings.php has been set
+  // to TRUE.
   if (settings_get('update_free_access') || user_access('administer software updates')) {
-    return theme('task_list', array('items' => $tasks, 'active' => $active));
+    return theme('task_list', array('title' => t('Database and configuration update tasks'), 'items' => $tasks, 'active' => $active));
   }
 }
 
@@ -447,7 +447,7 @@ function update_check_requirements($skip_warnings = FALSE) {
     $task_list = update_task_list('requirements');
     $status_report = theme('status_report', array('requirements' => $requirements));
     $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
-    print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
+    print theme('update_page', array('content' => $status_report, 'tasks' => $task_list));
     exit();
   }
 }
@@ -584,5 +584,5 @@ if (isset($output) && $output) {
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);
   $task_list = update_task_list();
-  print theme('update_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page));
+  print theme('update_page', array('content' => $output, 'tasks' => $task_list, 'show_messages' => !$progress_page));
 }
