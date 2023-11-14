@@ -10,10 +10,32 @@
  * Most sites can configure their database by entering the connection string
  * below. If using master/slave databases or multiple connections, see the
  * advanced database documentation at
- * https://api.backdropcms.org/database-configuration
+ * https://docs.backdropcms.org/database-configuration
+ *
+ * If your server uses a different port for the database from the default of
+ * '3306', you can add the 'port' attribute to the array.
+ *
+ * Example including port setting
+ * @code
+ * $database = array(
+ *   'driver' => 'mysql',
+ *   'database' => 'database_name',
+ *   'username' => 'user',
+ *   'password' => 'pass',
+ *   'host' => 'localhost',
+ *   'port' => '3307',
+ *   'prefix' => '',
+ * );
+ * @endcode
  */
-$database = 'mysql://user:pass@localhost/database_name';
-$database_prefix = '';
+$database = array(
+  'driver' => 'mysql',
+  'database' => 'database_name',
+  'username' => 'user',
+  'password' => 'pass',
+  'host' => 'localhost',
+  'prefix' => '',
+);
 
 /**
  * Site configuration files location.

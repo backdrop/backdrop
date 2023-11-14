@@ -854,21 +854,42 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Convert simplified database settings into the full databases array.
-  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
-    $database_parts = parse_url($database);
-    if (!$database_parts) {
-      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+  // Define default database setting values.
+  $default_db_string = 'mysql://user:pass@localhost/database_name';
+  $default_db_array = array(
+    'driver' => 'mysql',
+    'database' => 'database_name',
+    'username' => 'user',
+    'password' => 'pass',
+    'host' => 'localhost',
+    'prefix' => '',
+  );
+
+  // If database settings have been changed from default add to the full
+  // databases array.
+  if (!empty($database) && $database !== $default_db_string && $database !== $default_db_array) {
+    // If database is defined in simplified array then populate the databases
+    // array with that array.
+    if (is_array($database)) {
+      $databases['default']['default'] = $database;
     }
-    $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
-      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
-      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
-      'host' => $database_parts['host'],
-      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
-      'prefix' => !empty($database_prefix) ? $database_prefix : '',
-    );
+    else {
+      // Convert simplified database settings into the full databases array.
+      $database_parts = parse_url($database);
+      if (!$database_parts) {
+        trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+      $databases['default']['default'] = array(
+        'driver' => $database_parts['scheme'],
+        'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
+        'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+        'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
+        'host' => $database_parts['host'],
+        'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+        'prefix' => !empty($database_prefix) ? $database_prefix : '',
+      );
+    }
+    // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');
     foreach ($required_parts as $key) {
       if (!$databases['default']['default'][$key]) {
