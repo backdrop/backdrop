@@ -5,7 +5,7 @@
  */
 
 /**
- * CKEditor testing class specific for right-to-left languages.
+ * CKEditor 4 testing class specific for right-to-left languages.
  */
 class CKEditorRtlTestCase extends BackdropWebTestCase {
   /**
@@ -38,17 +38,17 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
     config_set('system.core', 'error_level', 'all');
 
     // Create and log in as the admin user.
-    $this->admin_user = $this->backdropCreateUser(array(
+    $this->adminUser = $this->backdropCreateUser(array(
       'administer filters',
       'access administration pages',
       'access content',
       'administer nodes',
     ));
-    $this->backdropLogin($this->admin_user);
+    $this->backdropLogin($this->adminUser);
   }
 
   /**
-   * Test that the CKEditor admin form works correctly with RTL languages.
+   * Test that the CKEditor 4 admin form works correctly with RTL languages.
    */
   public function testRtlAdminIcons() {
     $arabic = language_load('ar');

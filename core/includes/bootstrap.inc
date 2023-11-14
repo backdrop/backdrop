@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.26.x-dev');
+define('BACKDROP_VERSION', '1.27.x-dev');
 
 /**
  * Core API compatibility.
@@ -1665,7 +1665,7 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * refers to the time of the request. If the user accesses Backdrop via a proxy
  * server, and the proxy already has a cached copy of the anonymous page with an
  * older Last-Modified date, the proxy may respond with 304 Not Modified, making
- * the client think that the anonymous and authenticated pageviews are
+ * the client think that the anonymous and authenticated page views are
  * identical.
  *
  * @return bool
@@ -3566,12 +3566,12 @@ function language_multilingual() {
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
-  // Initialize master language list.
+  // Initialize primary language list.
   if (!isset($languages)) {
     // Initialize local language list caches.
     $languages = array('all' => array(), 'enabled' => array());
 
-    // Fill in master language list based on current configuration. This may be
+    // Fill in primary language list based on current configuration. This may be
     // in the event of an early bootstrap error, so fallback to defaults.
     try {
       $default_langcode = config_get('system.core', 'language_default');

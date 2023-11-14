@@ -1143,6 +1143,9 @@ function file_ajax_upload() {
     $commands = array();
     $commands[] = ajax_command_remove('.file-ajax-messages');
     $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
+    $field_name = (string) reset($form_parents);
+    $wrapper_id = backdrop_html_id('edit-' . $field_name);
+    $commands[] = ajax_command_invoke('#' . $wrapper_id . ' .form-type-managed-file input[type="file"]', 'val', array(''));
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
@@ -1407,6 +1410,10 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#theme_wrappers' => array(),
     '#weight' => -10,
   );
+
+  // Indicate that $element['#title'] should be used as the HTML label for the
+  // file upload field.
+  $element['#label_for'] = backdrop_html_id('edit-' . implode('-', array_merge($element['#parents'], array('upload'))));
 
   if ($fid && $element['#file']) {
     $element['filename'] = array(
@@ -1723,6 +1730,7 @@ function file_managed_file_browser_open($form, $form_state) {
   $options = array(
     'dialogClass' => 'file-browser-container',
     'width' => '90%',
+    'modal' => TRUE,
   );
   $html = '';
   $html .= theme('status_messages');
@@ -1744,7 +1752,7 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $commands = array();
   $commands[] = ajax_command_settings($settings, TRUE);
-  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+  $commands[] = ajax_command_open_dialog('#file-browser-modal', $title, $html, $options);
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
@@ -1805,7 +1813,7 @@ function file_managed_file_browser_submit($form, &$form_state) {
     );
     $commands[] = ajax_command_settings($settings, TRUE);
   }
-  $commands[] = ajax_command_close_modal_dialog();
+  $commands[] = ajax_command_close_dialog('#file-browser-modal');
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
@@ -3340,13 +3348,13 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
  * That form will trigger the type classification of managed files that do not
  * currently have a type. This is often the case after upgrading from Drupal 7.
  *
- * @param $classify
+ * @param bool|NULL $rebuild
  *   (optional) The boolean value to be written.
  *
  * @return bool|NULL
  *   The current value of the flag if no value was provided for $rebuild.
  *
- * @see 
+ * @see file_type_classify_batch()
  */
 function file_needs_type_classification($rebuild = NULL) {
   if (!isset($rebuild)) {
@@ -3363,8 +3371,8 @@ function file_needs_type_classification($rebuild = NULL) {
 /**
  * Batch operation callback to classify the types of managed files.
  *
- * Unlike Drupal 7, the file_managed table in Backdrop contains a type column. 
- * This process classifies the file types when upgrading from a D7 site.  
+ * Unlike Drupal 7, the file_managed table in Backdrop contains a type column.
+ * This process classifies the file types when upgrading from a D7 site.
  *
  * @see file_needs_type_classification()
  */
@@ -3388,7 +3396,7 @@ function file_type_classify_batch($fids, &$context) {
 
 /**
  * Batch 'finished' callback.
- * 
+ *
  * @see file_type_classify_batch()
  * @see file_needs_type_classification()
  */

@@ -3023,7 +3023,7 @@ function form_process_password_confirm($element) {
     '#title' => t('New password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-field')),
+    '#attributes' => $element['#attributes'] + array('class' => array('password-field')),
     '#password_strength' => TRUE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
@@ -3033,7 +3033,7 @@ function form_process_password_confirm($element) {
     '#title' => t('Confirm new password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-confirm')),
+    '#attributes' => $element['#attributes'] + array('class' => array('password-confirm')),
     '#password_strength' => FALSE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
@@ -4750,6 +4750,8 @@ function theme_textarea($variables) {
 function theme_password($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'password';
+  $element['#attributes']['spellcheck'] = !empty($element['#attributes']['spellcheck']) ? $element['#attributes']['spellcheck'] : 'false';
+
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
   _form_set_class($element, array('form-text'));
 
@@ -4962,7 +4964,8 @@ function theme_form_required_marker($variables) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #required, #title, #id, #value, #description.
+ *     Properties used: #required, #title, #id, #value, #description,
+ *     #label_for.
  *
  * @ingroup themeable
  */
@@ -4991,7 +4994,14 @@ function theme_form_element_label($variables) {
     $attributes['class'] = 'element-invisible';
   }
 
-  if (!empty($element['#id'])) {
+  // Use the element's ID as the default value of the "for" attribute (to
+  // associate the label with this form element), but allow this to be
+  // overridden in order to associate the label with a different form element
+  // instead.
+  if (!empty($element['#label_for'])) {
+    $attributes['for'] = $element['#label_for'];
+  }
+  elseif (!empty($element['#id'])) {
     $attributes['for'] = $element['#id'];
   }
 

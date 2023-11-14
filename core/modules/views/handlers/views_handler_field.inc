@@ -1195,7 +1195,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
       $value = $this->render_altered($alter, $tokens);
     }
 
-    if (!empty($this->options['alter']['trim_whitespace'])) {
+    if (!is_null($value) && !empty($this->options['alter']['trim_whitespace'])) {
       $value = trim($value);
     }
 

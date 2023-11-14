@@ -267,7 +267,7 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   });
 
   // Close all menus if clicking outside the menu.
-  $(document).bind('click', function (e) {
+  $(document).on('click', function (e) {
     if ($(e.target).closest($adminBar).length === 0) {
       $adminBar.find('ul').removeClass('expanded');
     }
@@ -490,7 +490,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   $adminBar.on('beforeResize', resetSearchDisplay);
   $adminBar.on('afterResize searchChanged', updateSearchDisplay);
   // Attach the search input event handler.
-  $input.bind('focus keyup search', keyupHandler);
+  $input.on('focus keyup search', keyupHandler);
 
   // Close search if clicking outside the menu.
   $(document).on('click', function (e) {
