@@ -2284,10 +2284,10 @@ class FormResizableTextareaTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/textarea-resize');
     // @see form_test_resizable_textarea().
     $name_classes = array(
-      'text-true' => 'form-textarea resize-vertical resizable',
+      'text-true' => 'form-textarea resize-vertical',
       'text-false' => 'form-textarea resize-none',
-      'text-vertical' => 'form-textarea resize-vertical resizable',
-      'text-horizontal' => 'form-textarea resize-horizontal resizable',
+      'text-vertical' => 'form-textarea resize-vertical',
+      'text-horizontal' => 'form-textarea resize-horizontal',
       'text-none' => 'form-textarea resize-none',
       'text-wrong' => 'form-textarea',
     );
