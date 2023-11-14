@@ -2284,8 +2284,6 @@ class FormResizableTextareaTestCase extends BackdropWebTestCase {
     $this->backdropGet('form-test/textarea-resize');
     $textarea = $this->xpath("//textarea[contains(@class, 'resize-vertical')]");
     $this->assertTrue(!empty($textarea), 'Textarea has resize-vertical class set');
-    $script = $this->xpath("//script[contains(@src, 'core/misc/textarea.js')]");
-    $this->assertTrue(!empty($script), 'Deprecated textarea library attached without problems');
   }
 
 }

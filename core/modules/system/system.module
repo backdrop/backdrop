@@ -1250,15 +1250,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's deprecated resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
-    ),
-  );
-
   // Backdrop's autocomplete widget.
   $libraries['backdrop.autocomplete'] = array(
     'title' => 'Backdrop autocomplete',

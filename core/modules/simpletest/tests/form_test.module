@@ -2502,8 +2502,6 @@ function form_test_resizable_textarea($form, &$form_state) {
     '#title' => 'Test',
     '#resizable' => TRUE,
   );
-  // Additionally attach old library.
-  $form['#attached']['library'][] = array('system', 'backdrop.textarea');
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Save',
