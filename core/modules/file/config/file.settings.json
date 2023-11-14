@@ -3,7 +3,7 @@
     "_module": "file",
     "max_filesize": "",
     "default_file_directory": "",
-    "default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm",
+    "default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm svg",
     "upload_wizard_skip_fields": false,
     "upload_wizard_skip_scheme": false,
     "upload_wizard_skip_file_type": false,
