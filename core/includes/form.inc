@@ -4725,11 +4725,14 @@ function theme_textarea($variables) {
   );
 
   // Add resizable behavior.
-  if (!empty($element['#resizable'])) {
+  if (isset($element['#resizable'])) {
     $valid_values = array('none', 'both', 'horizontal', 'vertical');
     // Transform previously used boolean value to new string value.
     if ($element['#resizable'] === TRUE) {
       $element['#resizable'] = 'vertical';
+    }
+    if ($element['#resizable'] === FALSE) {
+      $element['#resizable'] = 'none';
     }
     if (in_array($element['#resizable'], $valid_values)) {
       $element['#attributes']['class'][] = 'resize-' . $element['#resizable'];
