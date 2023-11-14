@@ -85,6 +85,7 @@ Backdrop.behaviors.filterEditors = {
       var $this = $(this);
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
+      $this.removeOnce('filterEditors');
       if (field && Backdrop.settings.filter.formats[activeEditor]) {
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], trigger);
       }
@@ -346,5 +347,5 @@ $(window).on('dialog:aftercreate', function () {
     $('[data-editor-image-toggle]').first().trigger('editor-image-show');
   }
 });
-  
+
 })(jQuery);
