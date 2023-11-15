@@ -858,7 +858,7 @@ function backdrop_settings_initialize() {
   // string.
   if (!empty($database) && is_string($database)) {
     $default_db_string = 'mysql://user:pass@localhost/database_name';
-    if ($database !== $default_db_string) { 
+    if ($database !== $default_db_string) {
       // Convert simplified database settings string into the full databases
       // array.
       $database_parts = parse_url($database);

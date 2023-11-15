@@ -724,7 +724,7 @@ function backdrop_rewrite_settings($settings = array()) {
         $variable_name = $variable[1];
         if (array_key_exists($variable_name, $settings)) {
           // If variable_name is 'database', we need to remove the next 7
-          // lines as they are part of the default database array. 
+          // lines as they are part of the default database array.
           if ($variable_name == 'database') {
             $database_line_count = 7;
           }
