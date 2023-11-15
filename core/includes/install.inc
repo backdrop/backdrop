@@ -709,6 +709,7 @@ function backdrop_rewrite_settings($settings = array()) {
 
   $buffer = NULL;
   $first = TRUE;
+  $database_line_count = 0;
   if ($fp = fopen($settings_file, 'r')) {
     // Step line by line through settings.php.
     while (!feof($fp)) {
@@ -722,6 +723,11 @@ function backdrop_rewrite_settings($settings = array()) {
         preg_match('/\$([^ =]*) /', $line, $variable);
         $variable_name = $variable[1];
         if (array_key_exists($variable_name, $settings)) {
+          // If variable_name is 'database', we need to remove the next 7
+          // lines as they are part of the default database array. 
+          if ($variable_name == 'database') {
+            $database_line_count = 7;
+          }
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable_name];
@@ -736,7 +742,14 @@ function backdrop_rewrite_settings($settings = array()) {
         }
       }
       else {
-        $buffer .= $line;
+        if ($database_line_count) {
+          // If this is part of the default database array, decrement the
+          // counter and don't include the line.
+          --$database_line_count;
+        }
+        else {
+          $buffer .= $line;
+        }
       }
     }
     fclose($fp);
