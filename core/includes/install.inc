@@ -472,12 +472,19 @@ abstract class DatabaseTasks {
           // Connection was successful, but settings.php needs to be updated.
           $db_settings = $modified_connection_info['default'];
           $settings['database'] = array(
-            'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+            'value' => array(
+              'driver' => $db_settings['driver'],
+              'database' => $db_settings['database'],
+              'username' => $db_settings['username'],
+              'password' => $db_settings['password'],
+              'host' => $db_settings['host'],
+              'prefix' => $db_settings['prefix'],
+            ),
             'required' => TRUE,
           );
-          $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix']['default'],
-          );
+          if ($db_settings['port']) {
+            $settings['database']['port'] = $db_settings['port'];
+          }
           backdrop_rewrite_settings($settings);
         }
         catch (Exception $e) {
