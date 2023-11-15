@@ -965,40 +965,41 @@ function layout_block_info() {
  */
 function layout_autoload_info() {
   return array(
-    'LayoutHandler' => 'includes/layout_handler.class.inc',
-    'LayoutHandlerBroken' => 'includes/layout_handler.class.inc',
-    'Layout' => 'includes/layout.class.inc',
-    'LayoutFlexibleTemplate' => 'includes/layout_flexible.class.inc',
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
+    'BlockHero' => 'includes/block.hero.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
     'BlockText' => 'includes/block.text.inc',
-    'BlockHero' => 'includes/block.hero.inc',
+    'Layout' => 'includes/layout.class.inc',
+    'LayoutFlexibleTemplate' => 'includes/layout_flexible.class.inc',
+    'LayoutHandler' => 'includes/layout_handler.class.inc',
+    'LayoutHandlerBroken' => 'includes/layout_handler.class.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
     'LayoutException' => 'includes/layout.exceptions.inc',
-    'LayoutSaveException' => 'includes/layout.exceptions.inc',
     'LayoutMissingException' => 'includes/layout.exceptions.inc',
+    'LayoutSaveException' => 'includes/layout.exceptions.inc',
 
     // Context handlers.
+    'EntityLayoutContext' => 'plugins/context/entity_layout_context_handler.inc',
     'LayoutContext' => 'plugins/context/layout_context.inc',
     'LayoutContextBroken' => 'plugins/context/layout_context.inc',
     'LayoutOverridesPathContext' => 'plugins/context/layout_context.inc',
     'LayoutStringContext' => 'plugins/context/layout_context.inc',
-    'EntityLayoutContext' => 'plugins/context/entity_layout_context_handler.inc',
 
     // Access handlers.
     'EntityBundleLayoutAccess' => 'plugins/access/entity_bundle_layout_access.inc',
+    'EntityIDLayoutAccess' => 'plugins/access/entity_id_layout_access.inc',
+    'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
+    'HttpResponseCodeLayoutAccess' => 'plugins/access/http_response_code_layout_access.inc',
+    'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
     'LayoutAccess' => 'plugins/access/layout_access.inc',
     'LayoutAccessBroken' => 'plugins/access/layout_access.inc',
     'LayoutAccessNegatable' => 'plugins/access/layout_access.inc',
-    'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
-    'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
-    'EntityIDLayoutAccess' => 'plugins/access/entity_id_layout_access.inc',
     'PathLayoutAccess' => 'plugins/access/path_layout_access.inc',
-    'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
     'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
+    'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
 
     // Renderer handlers.
     'LayoutRendererEditor' => 'plugins/renderers/layout_renderer_editor.inc',
@@ -1010,8 +1011,8 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Relationships.
-    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
+    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
     'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
 }
