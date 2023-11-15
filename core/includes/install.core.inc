@@ -1074,7 +1074,7 @@ function install_settings_form_submit($form, &$form_state) {
   // Update global settings array and save.
   $db_settings = $form_state['storage']['database'];
   $settings['database'] = array(
-    'value' => $array(
+    'value' => array(
       'driver' => $db_settings['driver'],
       'database' => $db_settings['database'],
       'username' => $db_settings['username'],
