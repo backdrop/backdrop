@@ -1036,7 +1036,6 @@ ul.secondary li a:active {
 
 .responsive-tabs-mobile ul.primary,
 .expand-dropdown-tabs.responsive-tabs-mobile ul.primary {
-  -webkit-border-radius: 0 0 4px 4px;
   border-radius: 4px;
 }
 
