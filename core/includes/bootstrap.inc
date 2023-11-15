@@ -854,26 +854,11 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Define default database setting values.
-  $default_db_string = 'mysql://user:pass@localhost/database_name';
-  $default_db_array = array(
-    'driver' => 'mysql',
-    'database' => 'database_name',
-    'username' => 'user',
-    'password' => 'pass',
-    'host' => 'localhost',
-    'prefix' => '',
-  );
-
-  // If database settings have been changed from default add to the full
-  // databases array.
-  if (!empty($database) && $database !== $default_db_string && $database !== $default_db_array) {
-    // If database is defined in simplified array then populate the databases
-    // array with that array.
-    if (is_array($database)) {
-      $databases['default']['default'] = $database;
-    }
-    else {
+  // Database connection settings have been provided in the form of a connection
+  // string.
+  if (!empty($database) && is_string($database)) {
+    $default_db_string = 'mysql://user:pass@localhost/database_name';
+    if ($database !== $default_db_string) { 
       // Convert simplified database settings string into the full databases
       // array.
       $database_parts = parse_url($database);
@@ -891,13 +876,28 @@ function backdrop_settings_initialize() {
         'prefix' => !empty($database_prefix) ? $database_prefix : '',
       );
     }
-    // Check that all required parts are included.
-    $required_parts = array('driver', 'database', 'username', 'host');
-    foreach ($required_parts as $key) {
-      if (!$databases['default']['default'][$key]) {
-        $missing_field = ($key == 'database') ? 'name' : $key;
-        trigger_error('Could not find a value for the database "' . $missing_field . '" setting. Please check the $database setting in settings.php.', E_USER_ERROR);
-      }
+  }
+  // Database connection settings have been provided in the form of a simplified
+  // array.
+  if (!empty($database) && is_array($database)) {
+    $default_db_array = array(
+      'driver' => 'mysql',
+      'database' => 'database_name',
+      'username' => 'user',
+      'password' => 'pass',
+      'host' => 'localhost',
+      'prefix' => '',
+    );
+    if ($database != $default_db_array) {
+      $databases['default']['default'] = $database;
+    }
+  }
+  // Check that all required parts are included.
+  $required_parts = array('driver', 'database', 'username', 'host');
+  foreach ($required_parts as $key) {
+    if (!$databases['default']['default'][$key]) {
+      $missing_field = ($key == 'database') ? 'name' : $key;
+      trigger_error('Could not find a value for the database "' . $missing_field . '" setting. Please check the $database setting in settings.php.', E_USER_ERROR);
     }
   }
 

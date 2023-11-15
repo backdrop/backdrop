@@ -13,7 +13,7 @@
  * https://docs.backdropcms.org/database-configuration
  *
  * If your server uses a different port for the database from the default of
- * '3306', you can add the 'port' attribute to the array.
+ * '3306', you can add the 'port' key to the array.
  *
  * Example including port setting
  * @code
