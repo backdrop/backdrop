@@ -2260,7 +2260,7 @@ function theme_table(array $variables) {
     $sections['tfoot'] = $variables['footer'];
   }
 
-  // The <tbody> and <tfoot> HTML tags have the same structure, and are built
+  // The TBODY and TFOOT HTML tags have the same structure, and are built
   // using the same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
@@ -2396,13 +2396,13 @@ function theme_mark($variables) {
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
  *   - wrapper_attributes: Any additional attributes that should be applied to
- *       the wrapper div around the list element (the "item-list" CSS class is
+ *       the wrapper DIV around the list element (the "item-list" CSS class is
  *       added by default).
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
- * @since 1.??.?: added the "wrapper_attributes" variable.
+ * @since 1.26.2: added the "wrapper_attributes" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
