@@ -7,15 +7,15 @@
 /**
  * Database configuration:
  *
- * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * Most sites can configure their database by entering the connection details
+ * below. If using primary/secondary databases or multiple connections, see the
  * advanced database documentation at
  * https://docs.backdropcms.org/database-configuration
  *
  * If your server uses a different port for the database from the default of
  * '3306', you can add the 'port' key to the array.
  *
- * Example including port setting
+ * Example including port setting:
  * @code
  * $database = array(
  *   'driver' => 'mysql',
