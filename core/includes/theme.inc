@@ -2476,9 +2476,6 @@ function theme_item_list($variables) {
     }
     // Add any attributes specified for the wrapper div tag. Include a default
     // CSS class "item-list".
-    if (!isset($wrapper_attributes['class'])) {
-      $wrapper_attributes['class'] = array();
-    }
     $wrapper_attributes['class'][] = 'item-list';
     $output = '<div' . backdrop_attributes($wrapper_attributes) . '>' . $title . $output . '</div>';
   }
