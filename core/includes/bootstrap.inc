@@ -882,7 +882,8 @@ function backdrop_settings_initialize() {
       }
       $databases['default']['default'] = array(
         'driver' => $database_parts['scheme'],
-        'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
+        // Remove leading slash.
+        'database' => rawurldecode(substr($database_parts['path'], 1)),
         'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
         'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
         'host' => $database_parts['host'],
