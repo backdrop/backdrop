@@ -1074,12 +1074,19 @@ function install_settings_form_submit($form, &$form_state) {
   // Update global settings array and save.
   $db_settings = $form_state['storage']['database'];
   $settings['database'] = array(
-    'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+    'value' => $array(
+      'driver' => $db_settings['driver'],
+      'database' => $db_settings['database'],
+      'username' => $db_settings['username'],
+      'password' => $db_settings['password'],
+      'host' => $db_settings['host'],
+      'prefix' => $db_settings['prefix'],
+    ),
     'required' => TRUE,
   );
-  $settings['database_prefix'] = array(
-    'value' => $db_settings['prefix'],
-  );
+  if ($db_settings['port']) {
+    $settings['database']['port'] = $db_settings['port'];
+  }
   backdrop_rewrite_settings($settings);
 
   // Check if UTF-8 MB4 support exists in the database and add to settings.php.

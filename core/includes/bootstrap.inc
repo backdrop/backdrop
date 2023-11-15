@@ -874,7 +874,8 @@ function backdrop_settings_initialize() {
       $databases['default']['default'] = $database;
     }
     else {
-      // Convert simplified database settings into the full databases array.
+      // Convert simplified database settings string into the full databases
+      // array.
       $database_parts = parse_url($database);
       if (!$database_parts) {
         trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
