@@ -2474,9 +2474,21 @@ function theme_item_list($variables) {
     if (isset($title) && $title !== '') {
       $title = '<h3>' . $title . '</h3>';
     }
-    // Add any attributes specified for the wrapper div tag. Include a default
-    // CSS class "item-list".
+
+    // Add any attributes specified for the wrapper div tag.
+    if (!isset($wrapper_attributes['class'])) {
+      // Make sure that the 'class' key exists in the array.
+      $wrapper_attributes['class'] = array();
+    }
+    elseif (is_string($wrapper_attributes['class'])) {
+      // Do not choke if 'class' was provided as a string which may include
+      // commas, spaces, or semicolons. Convert sub-strings into array items.
+      $wrapper_class_items = array_map('trim', preg_split("/[;,]/", $wrapper_attributes['class']));
+      $wrapper_attributes['class'] = $wrapper_class_items;
+    }
+    // Finally, include a default CSS class "item-list".
     $wrapper_attributes['class'][] = 'item-list';
+
     $output = '<div' . backdrop_attributes($wrapper_attributes) . '>' . $title . $output . '</div>';
   }
 

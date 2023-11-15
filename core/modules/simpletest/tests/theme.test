@@ -281,10 +281,9 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $attribute_name = $this->randomName();
     $attribute_value = $this->randomName();
     $another_css_class = $this->randomName();
-    $wrapper_attributes = array($attribute_name => $attribute_value, 'class' => $another_css_class);
     $variables = array();
     $variables['empty'] = 'No items found.';
-    $variables['wrapper_attributes'] = backdrop_attributes($wrapper_attributes);
+    $variables['wrapper_attributes'] = array($attribute_name => $attribute_value, 'class' => array($another_css_class));
     $expected = '<div ' . $attribute_name . '="' . $attribute_value . '" class="' . $another_css_class . ' item-list">No items found.</div>';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Additional attributes added to the wrapper div.');
 
