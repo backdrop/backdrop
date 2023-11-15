@@ -3363,7 +3363,6 @@ function backdrop_css_defaults($data = NULL) {
     'media' => 'all',
     'preprocess' => TRUE,
     'data' => $data,
-    'browsers' => array(),
     'attributes' => array(),
   );
 }
@@ -3473,9 +3472,6 @@ function backdrop_css_defaults($data = NULL) {
  *     option was set to FALSE.
  *   - 'preprocess': If TRUE and CSS aggregation/compression is enabled, the
  *     styles will be aggregated and compressed. Defaults to TRUE.
- *   - 'browsers': An array containing information specifying which browsers
- *     should load the CSS item. See backdrop_pre_render_conditional_comments()
- *     for details.
  *
  * @return
  *   An array of queued cascading stylesheets.
@@ -3511,11 +3507,6 @@ function backdrop_add_css($data = NULL, $options = NULL) {
   // Create an array of CSS files for each media type first, since each type needs to be served
   // to the browser differently.
   if (isset($data)) {
-    $options['browsers'] += array(
-      'IE' => TRUE,
-      '!IE' => TRUE,
-    );
-
     // Files with a query string cannot be preprocessed.
     if ($options['type'] === 'file' && $options['preprocess'] && strpos($options['data'], '?') !== FALSE) {
       $options['preprocess'] = FALSE;
@@ -3629,7 +3620,7 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
 }
 
 /**
- * Grouping callback: Groups CSS items by their types, media, and browsers.
+ * Grouping callback: Groups CSS items by their types and media.
  *
  * This function arranges the CSS items that are in the #items property of the
  * styles element into groups. Arranging the CSS items into groups serves two
@@ -3641,10 +3632,10 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
  * 31 CSS inclusion tag limit: http://drupal.org/node/228818.
  *
  * This function puts multiple items into the same group if they are groupable
- * and if they are for the same 'media' and 'browsers'. Items of the 'file' type
- * are groupable if their 'preprocess' flag is TRUE, items of the 'inline' type
- * are always groupable, and items of the 'external' type are never groupable.
- * This function also ensures that the process of grouping items does not change
+ * and if they have the same 'media' value. Items of the 'file' type are
+ * groupable if their 'preprocess' flag is TRUE, items of the 'inline' type are
+ * always groupable, and items of the 'external' type are never groupable. This
+ * function also ensures that the process of grouping items does not change
  * their relative order. This requirement may result in multiple groups for the
  * same type, media, and browsers, if needed to accommodate other items in
  * between.
@@ -3673,12 +3664,6 @@ function backdrop_group_css($css) {
   // -1, the first group will have index 0.
   $i = -1;
   foreach ($css as $item) {
-    // The browsers for which the CSS item needs to be loaded is part of the
-    // information that determines when a new group is needed, but the order of
-    // keys in the array doesn't matter, and we don't want a new group if all
-    // that's different is that order.
-    ksort($item['browsers']);
-
     // If the item can be grouped with other items, set $group_keys to an array
     // of information that must be the same for all items in its group. If the
     // item can't be grouped with other items, set $group_keys to FALSE. We
@@ -3696,11 +3681,11 @@ function backdrop_group_css($css) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_css() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media']) : FALSE;
         break;
       case 'inline':
         // Always group inline items.
-        $group_keys = array($item['type'], $item['media'], $item['browsers']);
+        $group_keys = array($item['type'], $item['media']);
         break;
       case 'external':
         // Do not group external items.
@@ -3880,7 +3865,6 @@ function backdrop_pre_render_styles($elements) {
           $element = $link_element_defaults;
           $element['#attributes']['href'] = file_create_url($group['data']);
           $element['#attributes']['media'] = $group['media'];
-          $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
         }
         // The group can be aggregated, but hasn't been: combine multiple items
@@ -3919,7 +3903,6 @@ function backdrop_pre_render_styles($elements) {
             // worry about style tags since they'll never match the regex.
             $element['#value'] = "\n" . implode("\n", $import_batch) . "\n";
             $element['#attributes']['media'] = $group['media'];
-            $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
           }
         }
@@ -3944,7 +3927,6 @@ function backdrop_pre_render_styles($elements) {
             }
             $element['#attributes']['href'] = file_create_url($item['data']) . $query_string_separator . $query_string;
             $element['#attributes']['media'] = $item['media'];
-            $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
           }
         }
@@ -3957,7 +3939,6 @@ function backdrop_pre_render_styles($elements) {
           $element = $style_element_defaults;
           $element['#value'] = $group['data'];
           $element['#attributes']['media'] = $group['media'];
-          $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
         }
         else {
@@ -3968,7 +3949,6 @@ function backdrop_pre_render_styles($elements) {
               $element['#attributes'] += $item['attributes'];
             }
             $element['#attributes']['media'] = $item['media'];
-            $element['#browsers'] = $group['browsers'];
             $elements[] = $element;
           }
         }
@@ -3983,7 +3963,6 @@ function backdrop_pre_render_styles($elements) {
           }
           $element['#attributes']['href'] = $item['data'];
           $element['#attributes']['media'] = $item['media'];
-          $element['#browsers'] = $group['browsers'];
           $elements[] = $element;
         }
         break;
@@ -4616,9 +4595,6 @@ function backdrop_region_class($region) {
  *     a JavaScript file. Defaults to TRUE.
  *   - preprocess: If TRUE and JavaScript aggregation is enabled, the script
  *     file will be aggregated. Defaults to TRUE.
- *   - browsers: An array containing information specifying which browsers
- *     should load the JavaScript item. See
- *     backdrop_pre_render_conditional_comments() for details.
  *
  * @return
  *   The current array of JavaScript files, settings, and in-line code,
@@ -4672,7 +4648,6 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'group' => JS_SETTING,
           'every_page' => TRUE,
           'weight' => 0,
-          'browsers' => array(),
         ),
         'core/misc/backdrop.js' => array(
           'data' => 'core/misc/backdrop.js',
@@ -4685,7 +4660,6 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'cache' => TRUE,
           'defer' => FALSE,
           'attributes' => array(),
-          'browsers' => array(),
           'version' => BACKDROP_VERSION,
         ),
       );
@@ -4755,7 +4729,6 @@ function backdrop_js_defaults($data = NULL) {
     'version' => NULL,
     'data' => $data,
     'attributes' => array(),
-    'browsers' => array(),
   );
 }
 
@@ -4904,7 +4877,6 @@ function backdrop_pre_render_scripts($elements) {
     if ($group['type'] == 'file' && isset($group['data'])) {
       $element = $element_defaults;
       $element['#attributes']['src'] = file_create_url($group['data']);
-      $element['#browsers'] = $group['browsers'];
       $elements[] = $element;
     }
     // For non-file types, and non-aggregated files, add a script element per
@@ -4916,7 +4888,6 @@ function backdrop_pre_render_scripts($elements) {
         if (!empty($item['defer'])) {
           $element['#attributes']['defer'] = 'defer';
         }
-        $element['#browsers'] = $item['browsers'];
 
         // Element properties that depend on item type.
         switch ($item['type']) {
@@ -4993,19 +4964,13 @@ function backdrop_group_js($javascript) {
   $current_group_keys = NULL;
   $index = -1;
   foreach ($javascript as $item) {
-    // The browsers for which the JavaScript item needs to be loaded is part of
-    // the information that determines when a new group is needed, but the order
-    // of keys in the array doesn't matter, and we don't want a new group if all
-    // that's different is that order.
-    ksort($item['browsers']);
-
     switch ($item['type']) {
       case 'file':
         // Group file items if their 'preprocess' flag is TRUE.
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_js() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page']) : FALSE;
         break;
 
       case 'external':
@@ -6376,82 +6341,6 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   }
 
   return $files;
-}
-
-/**
- * Pre-render callback: Renders #browsers into #prefix and #suffix.
- *
- * @param $elements
- *   A render array with a '#browsers' property. The '#browsers' property can
- *   contain any or all of the following keys:
- *   - 'IE': If FALSE, the element is not rendered by Internet Explorer. If
- *     TRUE, the element is rendered by Internet Explorer. Can also be a string
- *     containing an expression for Internet Explorer to evaluate as part of a
- *     conditional comment. For example, this can be set to 'lt IE 7' for the
- *     element to be rendered in Internet Explorer 6, but not in Internet
- *     Explorer 7 or higher. Defaults to TRUE.
- *   - '!IE': If FALSE, the element is not rendered by browsers other than
- *     Internet Explorer. If TRUE, the element is rendered by those browsers.
- *     Defaults to TRUE.
- *   Examples:
- *   - To render an element in all browsers, '#browsers' can be left out or set
- *     to array('IE' => TRUE, '!IE' => TRUE).
- *   - To render an element in Internet Explorer only, '#browsers' can be set
- *     to array('!IE' => FALSE).
- *   - To render an element in Internet Explorer 6 only, '#browsers' can be set
- *     to array('IE' => 'lt IE 7', '!IE' => FALSE).
- *   - To render an element in Internet Explorer 8 and higher and in all other
- *     browsers, '#browsers' can be set to array('IE' => 'gte IE 8').
- *
- * @return
- *   The passed-in element with markup for conditional comments potentially
- *   added to '#prefix' and '#suffix'.
- */
-function backdrop_pre_render_conditional_comments($elements) {
-  $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : array();
-  $browsers += array(
-    'IE' => TRUE,
-    '!IE' => TRUE,
-  );
-
-  // If rendering in all browsers, no need for conditional comments.
-  if ($browsers['IE'] === TRUE && $browsers['!IE']) {
-    return $elements;
-  }
-
-  // Determine the conditional comment expression for Internet Explorer to
-  // evaluate.
-  if ($browsers['IE'] === TRUE) {
-    $expression = 'IE';
-  }
-  elseif ($browsers['IE'] === FALSE) {
-    $expression = '!IE';
-  }
-  else {
-    $expression = $browsers['IE'];
-  }
-
-  // Wrap the element's potentially existing #prefix and #suffix properties with
-  // conditional comment markup. The conditional comment expression is evaluated
-  // by Internet Explorer only. To control the rendering by other browsers,
-  // either the "downlevel-hidden" or "downlevel-revealed" technique must be
-  // used. See http://en.wikipedia.org/wiki/Conditional_comment for details.
-  $elements += array(
-    '#prefix' => '',
-    '#suffix' => '',
-  );
-  if (!$browsers['!IE']) {
-    // "downlevel-hidden".
-    $elements['#prefix'] = "\n<!--[if $expression]>\n" . $elements['#prefix'];
-    $elements['#suffix'] .= "<![endif]-->\n";
-  }
-  else {
-    // "downlevel-revealed".
-    $elements['#prefix'] = "\n<!--[if $expression]><!-->\n" . $elements['#prefix'];
-    $elements['#suffix'] .= "<!--<![endif]-->\n";
-  }
-
-  return $elements;
 }
 
 /**

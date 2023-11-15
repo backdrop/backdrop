@@ -1183,16 +1183,6 @@ function drupal_system_listing($mask, $directory, $key = 'name', $min_depth = 1)
 }
 
 /**
- * Pre-render callback: Renders #browsers into #prefix and #suffix.
- *
- * @deprecated since 1.0.0
- * @see backdrop_pre_render_conditional_comments()
- */
-function drupal_pre_render_conditional_comments($elements) {
-  return backdrop_pre_render_conditional_comments($elements);
-}
-
-/**
  * Pre-render callback: Renders a link into #markup.
  *
  * @deprecated since 1.0.0

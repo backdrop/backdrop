@@ -1345,7 +1345,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $javascript = backdrop_add_js('core/misc/collapse.js');
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when a file is added.');
     $this->assertTrue(array_key_exists('core/misc/backdrop.js', $javascript), 'Backdrop.js is added when file is added.');
-    $this->assertTrue(array_key_exists('core/misc/html5.js', $javascript), 'html5.js is added when file is added.');
     $this->assertTrue(array_key_exists('core/misc/collapse.js', $javascript), 'JavaScript files are correctly added.');
     $this->assertEqual(base_path(), $javascript['settings']['data'][0]['basePath'], 'Base path JavaScript setting is correctly set.');
     url('', array('prefix' => &$prefix));
@@ -1468,25 +1467,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   function testDifferentWeight() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('weight' => 2));
     $this->assertEqual($javascript['core/misc/collapse.js']['weight'], 2, 'Adding a JavaScript file with a different weight caches the given weight.');
-  }
-
-  /**
-   * Test adding JavaScript within conditional comments.
-   *
-   * @see backdrop_pre_render_conditional_comments()
-   */
-  function testBrowserConditionalComments() {
-    $default_query_string = state_get('css_js_query_string', '0');
-
-    backdrop_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
-    backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
-    $javascript = backdrop_get_js();
-
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>jQuery(function () { });</script>' . "\n<!--<![endif]-->";
-
-    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
-    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
   }
 
   /**
