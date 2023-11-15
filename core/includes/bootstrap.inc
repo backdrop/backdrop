@@ -854,6 +854,7 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
+  $database_is_set = FALSE;
   // Database connection settings have been provided in the form of a connection
   // string.
   if (!empty($database) && is_string($database)) {
@@ -867,14 +868,14 @@ function backdrop_settings_initialize() {
       }
       $databases['default']['default'] = array(
         'driver' => $database_parts['scheme'],
-        // Remove leading slash.
-        'database' => rawurldecode(substr($database_parts['path'], 1)),
+        'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
         'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
         'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
         'host' => $database_parts['host'],
         'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
         'prefix' => !empty($database_prefix) ? $database_prefix : '',
       );
+      $database_is_set = TRUE;
     }
   }
   // Database connection settings have been provided in the form of a simplified
@@ -890,14 +891,17 @@ function backdrop_settings_initialize() {
     );
     if ($database != $default_db_array) {
       $databases['default']['default'] = $database;
+      $database_is_set = TRUE;
     }
   }
-  // Check that all required parts are included.
-  $required_parts = array('driver', 'database', 'username', 'host');
-  foreach ($required_parts as $key) {
-    if (!$databases['default']['default'][$key]) {
-      $missing_field = ($key == 'database') ? 'name' : $key;
-      trigger_error('Could not find a value for the database "' . $missing_field . '" setting. Please check the $database setting in settings.php.', E_USER_ERROR);
+  if ($database_is_set) {
+    // Check that all required parts are included.
+    $required_parts = array('driver', 'database', 'username', 'host');
+    foreach ($required_parts as $key) {
+      if (!$databases['default']['default'][$key]) {
+        $missing_field = ($key == 'database') ? 'name' : $key;
+        trigger_error('Could not find a value for the database "' . $missing_field . '" setting. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
     }
   }
 

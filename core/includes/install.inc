@@ -813,7 +813,7 @@ function backdrop_install_config_directories() {
   include $settings_file;
 
   $is_empty = empty($config_directories['active']);
-  $is_default = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
+  $is_default = $config_directories['active'] === 'files/config_' . md5(implode(',', $database)) . '/active';
 
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.
