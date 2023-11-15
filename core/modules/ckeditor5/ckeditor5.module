@@ -160,6 +160,28 @@ function ckeditor5_theme() {
 }
 
 /**
+ * Implements hook_telemetry_info().
+ */
+function ckeditor5_telemetry_info() {
+  $info['ckeditor5_version'] = array(
+    'label' => t('CKEditor 5 Version'),
+    'description' => t('The current version of CKEditor 5 in use.'),
+    'project' => 'backdrop',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_telemetry_data().
+ */
+function ckeditor5_telemetry_data($telemetry_key) {
+  switch ($telemetry_key) {
+    case 'ckeditor5_version':
+      return CKEDITOR5_VERSION;
+  }
+}
+
+/**
  * Implements hook_js_alter().
  *
  * Adds a matching CKEditor 5 translation file if the UI is non-English.
