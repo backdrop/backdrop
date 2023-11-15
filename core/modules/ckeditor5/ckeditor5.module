@@ -36,7 +36,7 @@ function ckeditor5_editor_info() {
         'bold', 'italic', 'blockQuote', 'heading', '|',
         'bulletedList', 'numberedList', '|',
         'alignment:left', 'alignment:center', 'alignment:right', '|',
-        'link', 'backdropImage', '|',
+        'backdropLink', 'backdropImage', '|',
         'sourceEditing', 'removeFormat',
       ),
       'heading_list' => array('p', 'h3', 'h4', 'h5'),

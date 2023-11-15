@@ -4,15 +4,15 @@
 
 Backdrop.behaviors.ckeditor5Admin = {
   attach: function (context, settings) {
-    var $context = $(context);
+    const $context = $(context);
 
     // Set up toolbar drag-and-drop interface and add/remove allowed HTML tags.
     $context.find('.ckeditor5-toolbar-configuration').once('ckeditor5-toolbar', function() {
-      var $wrapper = $(this);
-      var $textareaWrapper = $wrapper.find('.form-item-editor-settings-cketoolbar').hide();
-      var $textarea = $textareaWrapper.find('textarea');
-      var $toolbarAdmin = $(settings.ckeditor5.toolbarAdmin);
-      var sortableSettings = {
+      const $wrapper = $(this);
+      const $textareaWrapper = $wrapper.find('.form-item-editor-settings-cketoolbar').hide();
+      const $textarea = $textareaWrapper.find('textarea');
+      const $toolbarAdmin = $(settings.ckeditor5.toolbarAdmin);
+      const sortableSettings = {
         connectWith: '.ckeditor5-buttons',
         placeholder: 'ckeditor5-button-placeholder',
         forcePlaceholderSize: true,
@@ -85,8 +85,8 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Add a new row of buttons.
        */
       function adminToolbarAddRow(event) {
-        var $rows = $(this).closest('.ckeditor5-toolbar-active').find('.ckeditor5-row');
-        var $newRow = $rows.last().clone();
+        const $rows = $(this).closest('.ckeditor5-toolbar-active').find('.ckeditor5-row');
+        const $newRow = $rows.last().clone();
         $newRow.find('li').remove();
         $newRow.insertAfter($rows.last());
         $newRow.find('.ckeditor5-buttons').sortable(sortableSettings);
@@ -98,7 +98,7 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Remove a row of buttons.
        */
       function adminToolbarRemoveRow(event) {
-        var $rows = $(this).closest('.ckeditor5-toolbar-active').find('.ckeditor5-row');
+        const $rows = $(this).closest('.ckeditor5-toolbar-active').find('.ckeditor5-row');
         if ($rows.length === 1) {
           $(this).hide();
         }
@@ -121,7 +121,7 @@ Backdrop.behaviors.ckeditor5Admin = {
        * jQuery Sortable stop event. Save updated toolbar positions to the textarea.
        */
       function adminToolbarStopDrag(event, ui) {
-        var $element = ui.item;
+        const $element = ui.item;
         // Remove separators when dragged out.
         if ($element.is('.ckeditor5-multiple-button') && $element.closest('.ckeditor5-active-toolbar-configuration').length === 0) {
           $element.remove();
@@ -190,8 +190,8 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Notify the filter system of any button changes.
        */
       function adminToolbarButtonMoved($element) {
-        var buttonFeature = adminToolbarButtonCreateFeature($element);
-        var buttonAdded = $element.closest('.ckeditor5-active-toolbar-configuration').length !== 0;
+        const buttonFeature = adminToolbarButtonCreateFeature($element);
+        const buttonAdded = $element.closest('.ckeditor5-active-toolbar-configuration').length !== 0;
         if (buttonFeature) {
           if (buttonAdded) {
             Backdrop.editorConfiguration.addedFeature(buttonFeature);
@@ -208,9 +208,9 @@ Backdrop.behaviors.ckeditor5Admin = {
       /**
        * Convert a string of CKEditor tag syntax into an object.
        *
-       * @param string htmlTag
+       * @param {String} htmlTag
        *   An HTML string such as '<a href class="external internal">'.
-       * @return object
+       * @return {Object}
        *   An object with the following keys:
        *   - tags: An array of the tags passed in (only one is supported).
        *   - attributes: An array of attributes on the tags.
@@ -219,18 +219,18 @@ Backdrop.behaviors.ckeditor5Admin = {
        */
       function adminToolbarSplitTag(htmlTag) {
         // Match everything outside of quotes within the tag.
-        var attributes = htmlTag.match(/([a-z\-]+)(?:=?['"].*?['"])?/ig);
+        const attributes = htmlTag.match(/([a-z\-]+)(?:=?['"].*?['"])?/ig);
         // Pop off the first match, which is the tag name itself.
-        var tagName = attributes.shift();
-        var classList = [], styleList = [];
+        const tagName = attributes.shift();
+        let classList = [], styleList = [];
         if (attributes.indexOf('class') > -1) {
-          var classMatches = htmlTag.match(/class=\"([a-z_\- ]+)\"/);
+          const classMatches = htmlTag.match(/class="([a-z_\- ]+)"/);
           if (classMatches) {
             classList = classMatches[1].split(/\s/)
           }
         }
         if (attributes.indexOf('style') > -1) {
-          var styleMatches = htmlTag.match(/style=\"([a-z_\- ]+)\"/)[1].split(/\s/);
+          const styleMatches = htmlTag.match(/style="([a-z_\- ]+)"/)[1].split(/\s/);
           if (styleMatches) {
             styleList = styleMatches[1].split(/\s/)
           }
@@ -247,10 +247,10 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Create a Backdrop.EditorFeatureHTMLRule instance based on a button DOM element.
        */
       function adminToolbarButtonCreateFeature($element) {
-        var requiredHtml = $element.data('required-html') || [];
-        var optionalHtml = $element.data('optional-html') || [];
-        var buttonName = $element.data('button-name');
-        var buttonFeature, buttonRule, buttonRuleDefinition;
+        const requiredHtml = $element.data('required-html') || [];
+        const optionalHtml = $element.data('optional-html') || [];
+        const buttonName = $element.data('button-name');
+        let buttonFeature, buttonRule, buttonRuleDefinition;
         if (buttonName) {
           buttonFeature = new Backdrop.EditorFeature(buttonName);
           requiredHtml.forEach(htmlTag => {
@@ -278,7 +278,7 @@ Backdrop.behaviors.ckeditor5Admin = {
        */
       function adminToolbarUpdateValue() {
         // Update the toolbar config after updating a sortable.
-        var toolbarConfig = [];
+        const toolbarConfig = [];
         $wrapper.find('.ckeditor5-row').each(function() {
           $(this).find('.ckeditor5-button').each(function() {
             toolbarConfig.push($(this).data('button-name'));
@@ -319,10 +319,10 @@ Backdrop.behaviors.ckeditor5Admin = {
        * Ensure the configuration of the toolbar is allowed by the filters.
        */
       function adminToolbarRemoveInvalidButtons() {
-        var rules = Backdrop.filterConfiguration.getCombinedFilterRules();
+        const rules = Backdrop.filterConfiguration.getCombinedFilterRules();
         $wrapper.find('.ckeditor5-toolbar-active .ckeditor5-button').each(function () {
-          var $button = $(this);
-          var feature = adminToolbarButtonCreateFeature($button);
+          const $button = $(this);
+          const feature = adminToolbarButtonCreateFeature($button);
           if (feature && !Backdrop.editorConfiguration.featureIsAllowed(feature, rules)) {
             adminToolbarRemoveButton($button, feature);
           }
@@ -335,13 +335,13 @@ Backdrop.behaviors.ckeditor5Admin = {
        */
       function adminToolbarInitializeButtons() {
         $wrapper.find('.ckeditor5-toolbar-active .ckeditor5-button').each(function () {
-          var $button = $(this);
-          var feature = adminToolbarButtonCreateFeature($button);
+          const $button = $(this);
+          const feature = adminToolbarButtonCreateFeature($button);
           adminToolbarInitButton($button, feature, true);
         });
         $wrapper.find('.ckeditor5-toolbar-disabled .ckeditor5-button').each(function() {
-          var $button = $(this);
-          var feature = adminToolbarButtonCreateFeature($button);
+          const $button = $(this);
+          const feature = adminToolbarButtonCreateFeature($button);
           adminToolbarInitButton($button, feature, false);
         });
       }
@@ -349,12 +349,12 @@ Backdrop.behaviors.ckeditor5Admin = {
 
     // Adding or removing a heading option needs to add matching HTML tag.
     $context.find('.ckeditor5-heading-list').once('ckeditor5-heading-list', function() {
-      var $checkboxes = $(this).find('input:checkbox');
-      var headingFeatures = {};
+      const $checkboxes = $(this).find('input:checkbox');
+      const headingFeatures = {};
       $checkboxes.each(function() {
-        var headingLevel = this.value;
-        var headingFeature = new Backdrop.EditorFeature(headingLevel);
-        var headingRule = new Backdrop.EditorFeatureHTMLRule({
+        const headingLevel = this.value;
+        const headingFeature = new Backdrop.EditorFeature(headingLevel);
+        const headingRule = new Backdrop.EditorFeatureHTMLRule({
           'required': true,
           'tags': [headingLevel]
         });
@@ -364,8 +364,8 @@ Backdrop.behaviors.ckeditor5Admin = {
       });
 
       $checkboxes.on('change', function() {
-        var headingLevel = this.value;
-        var headingFeature = headingFeatures[headingLevel];
+        const headingLevel = this.value;
+        const headingFeature = headingFeatures[headingLevel];
         if (this.checked) {
           Backdrop.editorConfiguration.addedFeature(headingFeature);
         }
@@ -384,12 +384,12 @@ Backdrop.behaviors.ckeditor5Admin = {
  * initial state of buttons.
  */
 Backdrop.behaviors.ckeditor5AdminToggle = {
-  'attach': function(context, settings) {
-    var ckeditor5AdminToggleDependency = function(featureName, enabled) {
+  attach: function(context, settings) {
+    const ckeditor5AdminToggleDependency = function(featureName, enabled) {
       $('[data-ckeditor5-feature-dependency]').each(function() {
-        var $element = $(this);
-        var dependency = $element.data('ckeditor5-feature-dependency');
-        var tab = $element.data('verticalTab');
+        const $element = $(this);
+        const dependency = $element.data('ckeditor5-feature-dependency');
+        const tab = $element.data('verticalTab');
         if (dependency === featureName) {
           if (enabled) {
             $element.show();
@@ -403,7 +403,7 @@ Backdrop.behaviors.ckeditor5AdminToggle = {
       });
     };
 
-    $(context).find('#filter-admin-format-form').once('ckeditor5-settings-toggle', function() {
+    $(context).find('.ckeditor5-toolbar-configuration').once('ckeditor5-settings-toggle', function() {
       $(this).find('[data-ckeditor5-feature-dependency]').hide();
       $(document).on('backdropEditorFeatureInit.ckeditor5AdminToggle', function(e, feature, enabled) {
         ckeditor5AdminToggleDependency(feature.name, enabled);
@@ -416,7 +416,7 @@ Backdrop.behaviors.ckeditor5AdminToggle = {
       });
     });
   },
-  'detach': function(context, settings) {
+  detach: function(context, settings) {
     $(context).find('#filter-admin-format-form').each(function() {
       $(document).off('.ckeditor5AdminToggle');
     });
