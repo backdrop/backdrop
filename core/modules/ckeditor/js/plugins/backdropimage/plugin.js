@@ -393,7 +393,7 @@ function clipboardIntegration(editor) {
 
     // Handle images which are available in the dataTransfer.
     fileTools.addUploadWidget(editor, 'backdropimage', {
-      supportedTypes: /image\/(jpeg|png|gif)/,
+      supportedTypes: editor.config.uploadImage_supportedTypes,
       uploadUrl: uploadUrl,
       fileToElement: function() {
         var img = new CKEDITOR.dom.element('img');

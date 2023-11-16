@@ -28,6 +28,9 @@
       // Try to match the textarea height on which we're replacing.
       format.editorSettings.height = $(element).height();
 
+      // Allow image extensions supported by this install for paste uploads.
+      format.editorSettings.uploadImage_supportedTypes = new RegExp(format.editorSettings.backdrop.supportedTypesRegexp, 'i');
+
       // Hide the resizable grippie while CKEditor is active.
       $(element).siblings('.grippie').hide();
 

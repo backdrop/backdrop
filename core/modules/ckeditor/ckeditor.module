@@ -542,6 +542,8 @@ function ckeditor_get_settings($format, $existing_settings) {
     $image_token = filter_editor_dialog_token($format, 'image');
     $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
     $settings['imageUploadUrl'] = url('ckeditor/upload/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
+    $supported_extensions = image_get_supported_extensions();
+    $settings['backdrop']['supportedTypesRegexp'] = 'image/(' . implode('|', $supported_extensions) . ')';
   }
   if (isset($external_plugins['backdropimagecaption'])) {
     $settings['backdrop']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);
