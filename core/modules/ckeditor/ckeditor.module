@@ -520,6 +520,7 @@ function ckeditor_get_settings($format, $existing_settings) {
     'language' => $language->langcode,
     'resize_dir' => 'vertical',
     'disableNativeSpellChecker' => FALSE,
+    'versionCheck' => FALSE,
   );
 
   // Add the allowedContent setting, which ensures CKEditor only allows tags
